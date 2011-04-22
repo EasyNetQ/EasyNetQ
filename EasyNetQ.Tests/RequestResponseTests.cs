@@ -37,16 +37,19 @@ namespace EasyNetQ.Tests
             Thread.Sleep(500);
         }
 
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
         {
-            const int howManyTimes = 10;
-            for (int i = 0; i < howManyTimes; i++)
+            var makeRequest = bus.Request<TestRequestMessage, TestResponseMessage>(response =>
+                Console.WriteLine("Got response: '{0}'", response.Text));
+
+            for (int i = 0; i < 1000; i++)
             {
                 var request = new TestRequestMessage { Text = "Hello from the client! " + i.ToString() };
-                Console.WriteLine("Making request");
-                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                    Console.WriteLine("Got response: '{0}'", response.Text));
+                makeRequest(request);
             }
 
             Thread.Sleep(500);

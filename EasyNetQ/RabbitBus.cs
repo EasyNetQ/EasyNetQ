@@ -111,10 +111,12 @@ namespace EasyNetQ
             var requestBody = serializer.MessageToBytes(request);
 
             var requestTypeName = serializeType(typeof(TRequest));
+            
             var requestChannel = connection.CreateModel();
+            var responseChannel = connection.CreateModel();
 
             // respond queue is transient, only exists for the lifetime of the call.
-            var respondQueue = requestChannel.QueueDeclare();
+            var respondQueue = responseChannel.QueueDeclare();
 
             // tell the consumer to respond to the transient respondQueue
             var requestProperties = requestChannel.CreateBasicProperties();
@@ -128,7 +130,7 @@ namespace EasyNetQ
                 basicProperties: requestProperties, 
                 body: requestBody);
 
-            var consumer = new CallbackConsumer(requestChannel,
+            var consumer = new CallbackConsumer(responseChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                 {
                     var response = serializer.BytesToMessage<TResponse>(body);
@@ -136,7 +138,49 @@ namespace EasyNetQ
                     requestChannel.Dispose();
                 });
 
-            requestChannel.BasicConsume(queue: respondQueue, noAck: true, consumer: consumer);
+            responseChannel.BasicConsume(queue: respondQueue, noAck: true, consumer: consumer);
+        }
+
+        public Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
+        {
+            if (onResponse == null)
+            {
+                throw new ArgumentNullException("onResponse");
+            }
+
+            var requestTypeName = serializeType(typeof(TRequest));
+
+            var requestChannel = connection.CreateModel();
+            var responseChannel = connection.CreateModel();
+
+            // respond queue is transient, only exists for the lifetime of the call.
+            var respondQueue = responseChannel.QueueDeclare();
+
+            // tell the consumer to respond to the transient respondQueue
+            var requestProperties = requestChannel.CreateBasicProperties();
+            requestProperties.ReplyTo = respondQueue;
+
+            // should I declare the request queue here?
+
+            var consumer = new CallbackConsumer(responseChannel,
+                (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
+                {
+                    var response = serializer.BytesToMessage<TResponse>(body);
+                    onResponse(response);
+                });
+
+            responseChannel.BasicConsume(queue: respondQueue, noAck: true, consumer: consumer);
+
+            return request =>
+            {
+                var requestBody = serializer.MessageToBytes(request);
+                Console.WriteLine("Making request to queue: {0}", requestTypeName);
+                requestChannel.BasicPublish(
+                    exchange: rpcExchange,
+                    routingKey: requestTypeName,
+                    basicProperties: requestProperties,
+                    body: requestBody);
+            };
         }
 
         public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
