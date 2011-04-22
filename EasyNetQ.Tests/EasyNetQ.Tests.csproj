@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BinarySerializerTests.cs" />
-    <Compile Include="DelegateNameBuilderTests.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitHutchTests.cs" />

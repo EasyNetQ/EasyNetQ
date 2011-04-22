@@ -6,7 +6,6 @@ namespace EasyNetQ
     public class RabbitBus : IBus
     {
         private readonly SerializeType serializeType;
-        private readonly SubsriberNameFromDelegate subscriberNameFromDelegate;
         private readonly ISerializer serializer;
         private readonly IConnection connection;
 
@@ -14,17 +13,12 @@ namespace EasyNetQ
 
         public RabbitBus(
             SerializeType serializeType, 
-            SubsriberNameFromDelegate subscriberNameFromDelegate,
             ISerializer serializer,
             IConnection connection)
         {
             if(serializeType == null)
             {
                 throw new ArgumentNullException("serializeType");
-            }
-            if(subscriberNameFromDelegate == null)
-            {
-                throw new ArgumentNullException("subscriberNameFromDelegate");
             }
             if(serializer == null)
             {
@@ -36,7 +30,6 @@ namespace EasyNetQ
             }
 
             this.serializeType = serializeType;
-            this.subscriberNameFromDelegate = subscriberNameFromDelegate;
             this.serializer = serializer;
             this.connection = connection;
         }
@@ -68,7 +61,7 @@ namespace EasyNetQ
             }
         }
 
-        public void Subscribe<T>(Action<T> onMessage)
+        public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
             if(onMessage == null)
             {
@@ -76,8 +69,7 @@ namespace EasyNetQ
             }
 
             var typeName = serializeType(typeof(T));
-
-            var subscriberName = subscriberNameFromDelegate(onMessage);
+            var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
 
             var channel = connection.CreateModel();
             channel.ExchangeDeclare(
@@ -86,7 +78,7 @@ namespace EasyNetQ
                 durable: true);
 
             var queue = channel.QueueDeclare(
-                queue: subscriberName,
+                queue: subscriptionQueue,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
@@ -102,7 +94,7 @@ namespace EasyNetQ
                     onMessage(message);
                 });
 
-            channel.BasicConsume(subscriberName, true, consumer);
+            channel.BasicConsume(subscriptionQueue, true, consumer);
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)

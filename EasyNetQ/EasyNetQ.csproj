@@ -42,7 +42,6 @@
   <ItemGroup>
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="CallbackConsumer.cs" />
-    <Compile Include="DelegateNameBuilder.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="IBus.cs" />

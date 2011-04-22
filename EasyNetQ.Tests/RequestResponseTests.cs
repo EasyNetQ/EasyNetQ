@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateRabbitBus("testapp", "localhost");
+            bus = RabbitHutch.CreateRabbitBus("localhost");
         }
 
         [TearDown]
@@ -22,6 +22,9 @@ namespace EasyNetQ.Tests
             bus.Dispose();
         }
 
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response()
         {

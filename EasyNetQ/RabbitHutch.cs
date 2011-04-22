@@ -12,11 +12,6 @@ namespace EasyNetQ
         /// <summary>
         /// Creates a new instance of RabbitBus
         /// </summary>
-        /// <param name="applicationId">
-        /// Identifies the application. If two instances of an application share the same applicationId
-        /// messages for a subscribed type will be delivered to them by AMQP in turn (round-robin). If 
-        /// the applicationId is different each instance will get every message.
-        /// </param>
         /// <param name="hostName">
         /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
         /// To identify the Virtual Host use the following scheme: 'hostname/virtualhost' e.g. 'localhost/myvhost'
@@ -24,7 +19,7 @@ namespace EasyNetQ
         /// <returns>
         /// A new RabbitBus instance.
         /// </returns>
-        public static IBus CreateRabbitBus(string applicationId, string hostName)
+        public static IBus CreateRabbitBus(string hostName)
         {
             if(hostName == null)
             {
@@ -40,12 +35,8 @@ namespace EasyNetQ
             };
             var connection = connectionFactory.CreateConnection();
 
-            SubsriberNameFromDelegate subsriberNameFromDelegate = 
-                @delegate => applicationId + "_" + DelegateNameBuilder.CreateNameFrom(@delegate);
-
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
-                subsriberNameFromDelegate,
                 new BinarySerializer(),
                 connection);
         }
