@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -10,6 +11,8 @@ namespace EasyNetQ
         private readonly IConnection connection;
 
         private const string rpcExchange = "easy_net_q_rpc";
+
+        private readonly IDictionary<int, object> requestCallbacks = new Dictionary<int, object>();
 
         public RabbitBus(
             SerializeType serializeType, 
@@ -101,10 +104,21 @@ namespace EasyNetQ
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
-            Request<TRequest, TResponse>(onResponse)(request);
+            var key = onResponse.Method.GetHashCode();
+            Action<TRequest> makeRequest;
+            if (requestCallbacks.ContainsKey(key))
+            {
+                makeRequest = (Action<TRequest>) requestCallbacks[onResponse.Method.GetHashCode()];
+            }
+            else
+            {
+                makeRequest = Request<TRequest, TResponse>(onResponse);
+            }
+
+            makeRequest(request);
         }
 
-        public Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
+        private Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
         {
             if (onResponse == null)
             {

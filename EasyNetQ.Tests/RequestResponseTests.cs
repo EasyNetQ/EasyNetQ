@@ -43,13 +43,11 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
         {
-            var makeRequest = bus.Request<TestRequestMessage, TestResponseMessage>(response =>
-                Console.WriteLine("Got response: '{0}'", response.Text));
-
             for (int i = 0; i < 1000; i++)
             {
                 var request = new TestRequestMessage { Text = "Hello from the client! " + i.ToString() };
-                makeRequest(request);
+                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                    Console.WriteLine("Got response: '{0}'", response.Text));
             }
 
             Thread.Sleep(1000);
