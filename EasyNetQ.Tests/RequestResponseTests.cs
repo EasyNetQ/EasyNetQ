@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests
                 makeRequest(request);
             }
 
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
         }
     }
 }

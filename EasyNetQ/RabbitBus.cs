@@ -46,19 +46,24 @@ namespace EasyNetQ
 
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare(
-                    exchange: typeName,
-                    type: ExchangeType.Direct,
-                    durable: true);
+                DeclareSubscriberExchange(channel, typeName);
 
                 var defaultProperties = channel.CreateBasicProperties();
                 channel.BasicPublish(
-                    exchange: typeName, 
-                    routingKey: typeName, 
-                    basicProperties: defaultProperties,
-                    body: messageBody);
+                    typeName,                   // exchange
+                    typeName,                   // routingKey 
+                    defaultProperties,          // basicProperties
+                    messageBody);               // body
 
             }
+        }
+
+        private static void DeclareSubscriberExchange(IModel channel, string typeName)
+        {
+            channel.ExchangeDeclare(
+                typeName,               // exchange
+                ExchangeType.Direct,    // type
+                true);                  // durable
         }
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
@@ -72,17 +77,14 @@ namespace EasyNetQ
             var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
 
             var channel = connection.CreateModel();
-            channel.ExchangeDeclare(
-                exchange: typeName,
-                type: ExchangeType.Direct,
-                durable: true);
+            DeclareSubscriberExchange(channel, typeName);
 
             var queue = channel.QueueDeclare(
-                queue: subscriptionQueue,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
+                subscriptionQueue,  // queue
+                true,               // durable
+                false,              // exclusive
+                false,              // autoDelete
+                null);              // arguments
 
             channel.QueueBind(queue, typeName, typeName);  
 
@@ -125,10 +127,10 @@ namespace EasyNetQ
             // should I declare the request queue here?
             Console.WriteLine("Making request to queue: {0}", requestTypeName);
             requestChannel.BasicPublish(
-                exchange: rpcExchange, 
-                routingKey: requestTypeName, 
-                basicProperties: requestProperties, 
-                body: requestBody);
+                rpcExchange,            // exchange 
+                requestTypeName,        // routingKey 
+                requestProperties,      // basicProperties 
+                requestBody);           // body
 
             var consumer = new CallbackConsumer(responseChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -138,7 +140,10 @@ namespace EasyNetQ
                     requestChannel.Dispose();
                 });
 
-            responseChannel.BasicConsume(queue: respondQueue, noAck: true, consumer: consumer);
+            responseChannel.BasicConsume(
+                respondQueue,   // queue
+                true,           // noAck 
+                consumer);      // consumer
         }
 
         public Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
@@ -169,17 +174,20 @@ namespace EasyNetQ
                     onResponse(response);
                 });
 
-            responseChannel.BasicConsume(queue: respondQueue, noAck: true, consumer: consumer);
+            responseChannel.BasicConsume(
+                respondQueue,   // queue
+                true,           // noAck 
+                consumer);      // consumer
 
             return request =>
             {
                 var requestBody = serializer.MessageToBytes(request);
                 Console.WriteLine("Making request to queue: {0}", requestTypeName);
                 requestChannel.BasicPublish(
-                    exchange: rpcExchange,
-                    routingKey: requestTypeName,
-                    basicProperties: requestProperties,
-                    body: requestBody);
+                    rpcExchange,            // exchange 
+                    requestTypeName,        // routingKey 
+                    requestProperties,      // basicProperties 
+                    requestBody);           // body
             };
         }
 
@@ -193,23 +201,23 @@ namespace EasyNetQ
             var requestTypeName = serializeType(typeof(TRequest));
             var requestChannel = connection.CreateModel();
             requestChannel.ExchangeDeclare(
-                exchange: rpcExchange, 
-                type: ExchangeType.Direct, 
-                autoDelete: false, 
-                durable: true, 
-                arguments: null);
+                rpcExchange,            // exchange 
+                ExchangeType.Direct,    // type 
+                false,                  // autoDelete 
+                true,                   // durable 
+                null);                  // arguments
 
             requestChannel.QueueDeclare(
-                queue: requestTypeName, 
-                durable: true, 
-                exclusive: false, 
-                autoDelete: false, 
-                arguments: null);
+                requestTypeName,    // queue 
+                true,               // durable 
+                false,              // exclusive 
+                false,              // autoDelete 
+                null);              // arguments
 
             requestChannel.QueueBind(
-                queue: requestTypeName,
-                exchange: rpcExchange, 
-                routingKey: requestTypeName);
+                requestTypeName,    // queue
+                rpcExchange,        // exchange 
+                requestTypeName);   // routingKey
 
             var consumer = new CallbackConsumer(requestChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -219,14 +227,17 @@ namespace EasyNetQ
                     var responseProperties = requestChannel.CreateBasicProperties();
                     var responseBody = serializer.MessageToBytes(response);
                     requestChannel.BasicPublish(
-                        exchange: "", 
-                        routingKey: properties.ReplyTo, 
-                        basicProperties: responseProperties, 
-                        body: responseBody);
+                        "",                 // exchange 
+                        properties.ReplyTo, // routingKey
+                        responseProperties, // basicProperties 
+                        responseBody);      // body
                 });
 
             // TODO: dispose channel
-            requestChannel.BasicConsume(queue: requestTypeName, noAck: true, consumer: consumer);
+            requestChannel.BasicConsume(
+                requestTypeName,    // queue 
+                true,               // noAck 
+                consumer);          // consumer
         }
 
         private bool disposed = false;

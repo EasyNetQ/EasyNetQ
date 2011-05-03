@@ -27,17 +27,12 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe()
         {
-            bus.Subscribe<MyMessage>("test", HandleMessage);
+            bus.Subscribe<MyMessage>("test", message => Console.WriteLine(message.Text));
 
             // allow time for messages to be consumed
             Thread.Sleep(100);
 
             Console.WriteLine("Stopped consuming");
-        }
-
-        public void HandleMessage(MyMessage message)
-        {
-            Console.WriteLine(message.Text);
         }
 
         // 2. Run this a few times, should publish some messages
