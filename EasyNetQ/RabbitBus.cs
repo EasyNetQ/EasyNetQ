@@ -9,7 +9,7 @@ namespace EasyNetQ
         private readonly ISerializer serializer;
         private readonly IConnection connection;
 
-        private const string rpcExchange = "rpc";
+        private const string rpcExchange = "easy_net_q_rpc";
 
         public RabbitBus(
             SerializeType serializeType, 
@@ -101,49 +101,7 @@ namespace EasyNetQ
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
-            if(request == null)
-            {
-                throw new ArgumentNullException("request");
-            }
-            if(onResponse == null)
-            {
-                throw new ArgumentNullException("onResponse");
-            }
-
-            var requestBody = serializer.MessageToBytes(request);
-
-            var requestTypeName = serializeType(typeof(TRequest));
-            
-            var requestChannel = connection.CreateModel();
-            var responseChannel = connection.CreateModel();
-
-            // respond queue is transient, only exists for the lifetime of the call.
-            var respondQueue = responseChannel.QueueDeclare();
-
-            // tell the consumer to respond to the transient respondQueue
-            var requestProperties = requestChannel.CreateBasicProperties();
-            requestProperties.ReplyTo = respondQueue;
-
-            // should I declare the request queue here?
-            Console.WriteLine("Making request to queue: {0}", requestTypeName);
-            requestChannel.BasicPublish(
-                rpcExchange,            // exchange 
-                requestTypeName,        // routingKey 
-                requestProperties,      // basicProperties 
-                requestBody);           // body
-
-            var consumer = new CallbackConsumer(responseChannel,
-                (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
-                {
-                    var response = serializer.BytesToMessage<TResponse>(body);
-                    onResponse(response);
-                    requestChannel.Dispose();
-                });
-
-            responseChannel.BasicConsume(
-                respondQueue,   // queue
-                true,           // noAck 
-                consumer);      // consumer
+            Request<TRequest, TResponse>(onResponse)(request);
         }
 
         public Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
@@ -165,7 +123,7 @@ namespace EasyNetQ
             var requestProperties = requestChannel.CreateBasicProperties();
             requestProperties.ReplyTo = respondQueue;
 
-            // should I declare the request queue here?
+            DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
             var consumer = new CallbackConsumer(responseChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -181,6 +139,11 @@ namespace EasyNetQ
 
             return request =>
             {
+                if (request == null)
+                {
+                    throw new ArgumentNullException("request");
+                }
+
                 var requestBody = serializer.MessageToBytes(request);
                 Console.WriteLine("Making request to queue: {0}", requestTypeName);
                 requestChannel.BasicPublish(
@@ -200,24 +163,8 @@ namespace EasyNetQ
 
             var requestTypeName = serializeType(typeof(TRequest));
             var requestChannel = connection.CreateModel();
-            requestChannel.ExchangeDeclare(
-                rpcExchange,            // exchange 
-                ExchangeType.Direct,    // type 
-                false,                  // autoDelete 
-                true,                   // durable 
-                null);                  // arguments
 
-            requestChannel.QueueDeclare(
-                requestTypeName,    // queue 
-                true,               // durable 
-                false,              // exclusive 
-                false,              // autoDelete 
-                null);              // arguments
-
-            requestChannel.QueueBind(
-                requestTypeName,    // queue
-                rpcExchange,        // exchange 
-                requestTypeName);   // routingKey
+            DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
             var consumer = new CallbackConsumer(requestChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -238,6 +185,28 @@ namespace EasyNetQ
                 requestTypeName,    // queue 
                 true,               // noAck 
                 consumer);          // consumer
+        }
+
+        private static void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
+        {
+            channel.ExchangeDeclare(
+                rpcExchange,            // exchange 
+                ExchangeType.Direct,    // type 
+                false,                  // autoDelete 
+                true,                   // durable 
+                null);                  // arguments
+
+            channel.QueueDeclare(
+                requestTypeName,    // queue 
+                true,               // durable 
+                false,              // exclusive 
+                false,              // autoDelete 
+                null);              // arguments
+
+            channel.QueueBind(
+                requestTypeName,    // queue
+                rpcExchange,        // exchange 
+                requestTypeName);   // routingKey
         }
 
         private bool disposed = false;
