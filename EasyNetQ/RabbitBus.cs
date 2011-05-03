@@ -97,9 +97,14 @@ namespace EasyNetQ
                 {
                     var message = serializer.BytesToMessage<T>(body);
                     onMessage(message);
+                    channel.BasicAck(deliveryTag, false);
                 });
 
-            channel.BasicConsume(subscriptionQueue, true, consumer);
+            channel.BasicConsume(
+                subscriptionQueue,  // queue
+                true,               // noAck 
+                consumer);          // consumer
+
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
@@ -144,11 +149,12 @@ namespace EasyNetQ
                 {
                     var response = serializer.BytesToMessage<TResponse>(body);
                     onResponse(response);
+                    responseChannel.BasicAck(deliveryTag, false);
                 });
 
             responseChannel.BasicConsume(
                 respondQueue,   // queue
-                true,           // noAck 
+                false,          // noAck 
                 consumer);      // consumer
 
             return request =>
