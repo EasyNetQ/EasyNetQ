@@ -31,22 +31,13 @@ Goals:
         void Subscribe<T>(string subscriptionId, Action<T> onMessage);
 
         /// <summary>
-        /// Makes a single RPC style asynchronous request.
+        /// Makes an RPC style asynchronous request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
         /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="request">The request message.</param>
         /// <param name="onResponse">The action to run when the response is received.</param>
         void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse);
-
-        /// <summary>
-        /// Creates a requester that can be used to make multiple requests.
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="onResponse">The action to run when the response is received.</param>
-        /// <returns>An action to make the request.</returns>
-        Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse);
 
         /// <summary>
         /// Responds to an RPC request.
