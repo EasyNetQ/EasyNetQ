@@ -61,7 +61,6 @@ namespace EasyNetQ
                     typeName,                   // routingKey 
                     defaultProperties,          // basicProperties
                     messageBody);               // body
-
             }
         }
 
@@ -96,7 +95,7 @@ namespace EasyNetQ
             channel.QueueBind(queue, typeName, typeName);  
 
             // TODO: how does the channel (IModel) get disposed?  
-            var consumer = new CallbackConsumer(channel, 
+            var consumer = consumerFactory.CreateConsumer(channel, 
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                 {
                     var message = serializer.BytesToMessage<T>(body);
@@ -105,10 +104,10 @@ namespace EasyNetQ
                 });
 
             channel.BasicConsume(
-                subscriptionQueue,  // queue
-                true,               // noAck 
-                consumer);          // consumer
-
+                subscriptionQueue,      // queue
+                true,                   // noAck 
+                consumer.ConsumerTag,   // consumerTag
+                consumer);              // consumer
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
@@ -146,9 +145,10 @@ namespace EasyNetQ
                 });
 
             responseChannel.BasicConsume(
-                respondQueue,   // queue
-                false,          // noAck 
-                consumer);      // consumer
+                respondQueue,           // queue
+                false,                  // noAck 
+                consumer.ConsumerTag,   // consumerTag
+                consumer);              // consumer
 
             return request =>
             {
@@ -195,9 +195,10 @@ namespace EasyNetQ
 
             // TODO: dispose channel
             requestChannel.BasicConsume(
-                requestTypeName,    // queue 
-                true,               // noAck 
-                consumer);          // consumer
+                requestTypeName,        // queue 
+                true,                   // noAck 
+                consumer.ConsumerTag,   // consumerTag
+                consumer);              // consumer
         }
 
         private static void DeclareRequestResponseStructure(IModel channel, string requestTypeName)

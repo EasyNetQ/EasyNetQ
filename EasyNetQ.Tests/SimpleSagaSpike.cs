@@ -39,6 +39,7 @@ namespace EasyNetQ.Tests
                 Console.WriteLine("StartMessage: {0}", startMessage.Text);
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
                 var request = new TestRequestMessage { Text = firstProcessedMessage };
+
                 bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
                     Console.WriteLine("TestResponseMessage: {0}", response.Text);
@@ -46,6 +47,8 @@ namespace EasyNetQ.Tests
                     var endMessage = new EndMessage { Text = secondProcessedMessage };
                     bus.Publish(endMessage);
                 });
+
+                Console.WriteLine("Completed request");
             });
             
             // setup the RPC endpoint
@@ -61,14 +64,12 @@ namespace EasyNetQ.Tests
             bus.Subscribe<EndMessage>("inline_saga_spike", endMessage => 
                 Console.WriteLine("EndMessage: {0}", endMessage.Text));
 
+            Thread.Sleep(1000);
             // now kick it off
             Console.WriteLine("Publishing the message");
-
-            // TODO: DEADLOCK at publish!
-            bus.Publish(new StartMessage {Text = "Hello Saga!! "});
+            bus.Publish(new StartMessage { Text = "Hello Saga!! " });
 
             // give the message time to run through the process
-            Console.WriteLine("Waiting for a repsonse");
             Thread.Sleep(1000);
         }
     }

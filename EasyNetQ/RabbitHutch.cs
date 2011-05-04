@@ -39,7 +39,7 @@ namespace EasyNetQ
                 TypeNameSerializer.Serialize,
                 new BinarySerializer(),
                 connection,
-                new DefaultConsumerFactory());
+                new QueueingConsumerFactory());
         }
 
         public static RabbitHost GetRabbitHost(string hostName)

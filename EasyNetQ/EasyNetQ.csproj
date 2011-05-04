@@ -49,6 +49,7 @@
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueingConsumerFactory.cs" />
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="TypeNameSerializer.cs" />
