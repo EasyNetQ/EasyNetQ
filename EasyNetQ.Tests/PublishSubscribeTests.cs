@@ -62,10 +62,18 @@ namespace EasyNetQ.Tests
         public void Should_two_subscriptions_from_the_same_app_should_also_both_get_all_messages()
         {
             bus.Subscribe<MyMessage>("test_a", msg => Console.WriteLine(msg.Text));
-            bus.Subscribe<MyMessage>("test_b", msg => Console.WriteLine(msg.Text));
+            bus.Subscribe<MyOtherMessage>("test_b", msg => Console.WriteLine(msg.Text));
+            bus.Subscribe<MyMessage>("test_c", msg => Console.WriteLine(msg.Text));
+            bus.Subscribe<MyOtherMessage>("test_d", msg => Console.WriteLine(msg.Text));
+
+            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            
+            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
 
             // allow time for messages to be consumed
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             Console.WriteLine("Stopped consuming");
         }
@@ -73,6 +81,12 @@ namespace EasyNetQ.Tests
 
     [Serializable]
     public class MyMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
+    public class MyOtherMessage
     {
         public string Text { get; set; }
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -9,15 +8,15 @@ namespace EasyNetQ
         private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
         private readonly IConnection connection;
+        private readonly IConsumerFactory consumerFactory;
 
         private const string rpcExchange = "easy_net_q_rpc";
-
-        private readonly IDictionary<int, object> requestCallbacks = new Dictionary<int, object>();
 
         public RabbitBus(
             SerializeType serializeType, 
             ISerializer serializer,
-            IConnection connection)
+            IConnection connection, 
+            IConsumerFactory consumerFactory)
         {
             if(serializeType == null)
             {
@@ -31,8 +30,13 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("connection");
             }
+            if (consumerFactory == null)
+            {
+                throw new ArgumentNullException("consumerFactory");
+            }
 
             this.serializeType = serializeType;
+            this.consumerFactory = consumerFactory;
             this.serializer = serializer;
             this.connection = connection;
         }
@@ -109,18 +113,7 @@ namespace EasyNetQ
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
-            var key = onResponse.Method.GetHashCode();
-            Action<TRequest> makeRequest;
-            if (requestCallbacks.ContainsKey(key))
-            {
-                makeRequest = (Action<TRequest>) requestCallbacks[onResponse.Method.GetHashCode()];
-            }
-            else
-            {
-                makeRequest = Request<TRequest, TResponse>(onResponse);
-            }
-
-            makeRequest(request);
+            Request<TRequest, TResponse>(onResponse)(request);
         }
 
         private Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
@@ -144,7 +137,7 @@ namespace EasyNetQ
 
             DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
-            var consumer = new CallbackConsumer(responseChannel,
+            var consumer = consumerFactory.CreateConsumer(responseChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                 {
                     var response = serializer.BytesToMessage<TResponse>(body);
@@ -186,7 +179,7 @@ namespace EasyNetQ
 
             DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
-            var consumer = new CallbackConsumer(requestChannel,
+            var consumer = consumerFactory.CreateConsumer(requestChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                 {
                     var request = serializer.BytesToMessage<TRequest>(body);

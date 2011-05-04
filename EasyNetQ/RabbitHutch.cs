@@ -38,7 +38,8 @@ namespace EasyNetQ
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
                 new BinarySerializer(),
-                connection);
+                connection,
+                new DefaultConsumerFactory());
         }
 
         public static RabbitHost GetRabbitHost(string hostName)
