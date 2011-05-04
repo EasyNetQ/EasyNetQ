@@ -53,7 +53,7 @@ namespace EasyNetQ
 
             using (var channel = connection.CreateModel())
             {
-                DeclareSubscriberExchange(channel, typeName);
+                DeclarePublishExchange(channel, typeName);
 
                 var defaultProperties = channel.CreateBasicProperties();
                 channel.BasicPublish(
@@ -64,7 +64,7 @@ namespace EasyNetQ
             }
         }
 
-        private static void DeclareSubscriberExchange(IModel channel, string typeName)
+        private static void DeclarePublishExchange(IModel channel, string typeName)
         {
             channel.ExchangeDeclare(
                 typeName,               // exchange
@@ -83,7 +83,7 @@ namespace EasyNetQ
             var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
 
             var channel = connection.CreateModel();
-            DeclareSubscriberExchange(channel, typeName);
+            DeclarePublishExchange(channel, typeName);
 
             var queue = channel.QueueDeclare(
                 subscriptionQueue,  // queue
@@ -100,7 +100,7 @@ namespace EasyNetQ
                 {
                     var message = serializer.BytesToMessage<T>(body);
                     onMessage(message);
-                    channel.BasicAck(deliveryTag, false);
+                    //channel.BasicAck(deliveryTag, false);
                 });
 
             channel.BasicConsume(
@@ -141,12 +141,12 @@ namespace EasyNetQ
                 {
                     var response = serializer.BytesToMessage<TResponse>(body);
                     onResponse(response);
-                    responseChannel.BasicAck(deliveryTag, false);
+                    //responseChannel.BasicAck(deliveryTag, false);
                 });
 
             responseChannel.BasicConsume(
                 respondQueue,           // queue
-                false,                  // noAck 
+                true,                  // noAck 
                 consumer.ConsumerTag,   // consumerTag
                 consumer);              // consumer
 
@@ -158,7 +158,6 @@ namespace EasyNetQ
                 }
 
                 var requestBody = serializer.MessageToBytes(request);
-                Console.WriteLine("Making request to queue: {0}", requestTypeName);
                 requestChannel.BasicPublish(
                     rpcExchange,            // exchange 
                     requestTypeName,        // routingKey 

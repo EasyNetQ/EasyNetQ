@@ -36,37 +36,35 @@ namespace EasyNetQ.Tests
             Console.WriteLine("Setting up the Saga");
             bus.Subscribe<StartMessage>("simpleSaga", startMessage =>
             {
-                Console.WriteLine("StartMessage: {0}", startMessage.Text);
+                Console.WriteLine("Saga got StartMessage: {0}", startMessage.Text);
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
                 var request = new TestRequestMessage { Text = firstProcessedMessage };
 
                 bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
-                    Console.WriteLine("TestResponseMessage: {0}", response.Text);
+                    Console.WriteLine("Saga got Response: {0}", response.Text);
                     var secondProcessedMessage = response.Text + " - final process ";
                     var endMessage = new EndMessage { Text = secondProcessedMessage };
                     bus.Publish(endMessage);
                 });
-
-                Console.WriteLine("Completed request");
             });
             
             // setup the RPC endpoint
             Console.WriteLine("Setting up the RPC endpoint");
             bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
             {
-                Console.WriteLine("Responding");
+                Console.WriteLine("RPC got Request: {0}", request.Text);
                 return new TestResponseMessage {Text = request.Text + " Responded! "};
             });
 
             // setup the final subscription
             Console.WriteLine("Setting up the final subscription");
             bus.Subscribe<EndMessage>("inline_saga_spike", endMessage => 
-                Console.WriteLine("EndMessage: {0}", endMessage.Text));
+                Console.WriteLine("Test got EndMessage: {0}", endMessage.Text));
 
             Thread.Sleep(1000);
             // now kick it off
-            Console.WriteLine("Publishing the message");
+            Console.WriteLine("Test is publishing StartMessage");
             bus.Publish(new StartMessage { Text = "Hello Saga!! " });
 
             // give the message time to run through the process
