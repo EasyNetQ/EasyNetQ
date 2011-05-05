@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.SimpleServic
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6301F5B7-5B36-4EDA-8E37-6C970155F8B4}"
 	ProjectSection(SolutionItems) = preProject
+		licence.txt = licence.txt
 		README.txt = README.txt
 	EndProjectSection
 EndProject
