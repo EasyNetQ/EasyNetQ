@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateRabbitBus("localhost");
+            bus = RabbitHutch.CreateBus("localhost");
         }
 
         [TearDown]
@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_also_send_messages_to_second_subscriber()
         {
-            var messageQueue2 = RabbitHutch.CreateRabbitBus("localhost");
+            var messageQueue2 = RabbitHutch.CreateBus("localhost");
             messageQueue2.Subscribe<MyMessage>("test2", msg => Console.WriteLine(msg.Text));
 
             // allow time for messages to be consumed

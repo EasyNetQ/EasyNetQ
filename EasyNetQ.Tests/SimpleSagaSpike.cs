@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests
         /// </summary>
         public void RunSaga()
         {
-            var bus = RabbitHutch.CreateRabbitBus("localhost/myVirtualHost");
+            var bus = RabbitHutch.CreateBus("localhost");
 
             bus.Subscribe<EndMessage>("runSaga_spike", endMessage => 
                 Console.WriteLine("Got EndMessage: {0}", endMessage.Text));
@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
 
         public void Can_call_publish_inside_a_subscribe_handler()
         {
-            var bus = RabbitHutch.CreateRabbitBus("localhost");
+            var bus = RabbitHutch.CreateBus("localhost");
 
             // setup the Saga
             Console.WriteLine("Setting up the Saga");
@@ -70,17 +70,5 @@ namespace EasyNetQ.Tests
             // give the message time to run through the process
             Thread.Sleep(1000);
         }
-    }
-
-    [Serializable]
-    public class StartMessage
-    {
-        public string Text { get; set; }
-    }
-
-    [Serializable]
-    public class EndMessage
-    {
-        public string Text { get; set; }
     }
 }

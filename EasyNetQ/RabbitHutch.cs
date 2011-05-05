@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -19,7 +20,7 @@ namespace EasyNetQ
         /// <returns>
         /// A new RabbitBus instance.
         /// </returns>
-        public static IBus CreateRabbitBus(string hostName)
+        public static IBus CreateBus(string hostName)
         {
             if(hostName == null)
             {
@@ -62,6 +63,26 @@ namespace EasyNetQ
         {
             public string HostName;
             public string VirtualHost;
+        }
+
+        /// <summary>
+        /// Creates a new instance of RabbitBus
+        /// The RabbitMQ broker is defined in the connection string named 'rabbit'
+        /// </summary>
+        /// <returns></returns>
+        public static IBus CreateBus()
+        {
+            var rabbitConnectionString = ConfigurationManager.ConnectionStrings["rabbit"];
+            if (rabbitConnectionString == null)
+            {
+                throw new EasyNetQException(
+                    "Could not find a connection string for RabbitMQ. " +
+                    "Please add a connection string in the <ConnectionStrings> secion" +
+                    "of the application's configuration file. For example: " +
+                    "<add name=\"rabbit\" connectionString=\"localhost\" />");
+            }
+
+            return CreateBus(rabbitConnectionString.ConnectionString);
         }
     }
 }

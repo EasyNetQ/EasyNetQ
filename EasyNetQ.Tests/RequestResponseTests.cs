@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateRabbitBus("localhost");
+            bus = RabbitHutch.CreateBus("localhost");
         }
 
         [TearDown]

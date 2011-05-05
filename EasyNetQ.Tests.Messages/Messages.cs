@@ -13,4 +13,16 @@ namespace EasyNetQ.Tests
     {
         public string Text { get; set; }
     }
+
+    [Serializable]
+    public class StartMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
+    public class EndMessage
+    {
+        public string Text { get; set; }
+    }
 }

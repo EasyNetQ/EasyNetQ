@@ -6,7 +6,7 @@ namespace EasyNetQ.Tests.SimpleService
     {
         static void Main(string[] args)
         {
-            var messageQueue = RabbitHutch.CreateRabbitBus("localhost");
+            var messageQueue = RabbitHutch.CreateBus("localhost");
             messageQueue.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
 
             Console.WriteLine("Waiting to service requests");

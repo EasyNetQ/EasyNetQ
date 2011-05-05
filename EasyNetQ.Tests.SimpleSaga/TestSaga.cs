@@ -1,31 +1,26 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 
 namespace EasyNetQ.Tests.SimpleSaga
 {
-    class Program
+    [Export(typeof(ISaga))]
+    public class TestSaga : ISaga
     {
-        static void Main(string[] args)
+        public void Initialize(IBus bus)
         {
-            Console.WriteLine("Simple Saga starting");
-
-            var bus = RabbitHutch.CreateRabbitBus("localhost");
-
             bus.Subscribe<StartMessage>("simpleSaga", startMessage =>
             {
                 Console.WriteLine("StartMessage: {0}", startMessage.Text);
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
-                var request = new TestRequestMessage {Text = firstProcessedMessage};
+                var request = new TestRequestMessage { Text = firstProcessedMessage };
                 bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
                     Console.WriteLine("TestResponseMessage: {0}", response.Text);
                     var secondProcessedMessage = response.Text + " - final process ";
-                    var endMessage = new EndMessage {Text = secondProcessedMessage};
+                    var endMessage = new EndMessage { Text = secondProcessedMessage };
                     bus.Publish(endMessage);
                 });
             });
-
-            Console.WriteLine("Hit return to quit");
-            Console.ReadLine();
         }
     }
 }
