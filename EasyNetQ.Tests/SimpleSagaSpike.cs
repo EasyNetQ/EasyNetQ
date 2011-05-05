@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests
         /// </summary>
         public void RunSaga()
         {
-            var bus = RabbitHutch.CreateRabbitBus("localhost");
+            var bus = RabbitHutch.CreateRabbitBus("localhost/myVirtualHost");
 
             bus.Subscribe<EndMessage>("runSaga_spike", endMessage => 
                 Console.WriteLine("Got EndMessage: {0}", endMessage.Text));

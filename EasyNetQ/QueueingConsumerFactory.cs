@@ -28,7 +28,6 @@ namespace EasyNetQ
                     while(true)
                     {
                         HandleMessageDelivery((BasicDeliverEventArgs)sharedQueue.Dequeue());
-                        //Thread.Sleep(0);
                     }
                 }
                 catch (EndOfStreamException)
