@@ -6,10 +6,10 @@ namespace EasyNetQ.SagaHost
     /// </summary>
     public class SagaHostFactory
     {
-        public static ISagaHost CreateSagaHost()
+        public static ISagaHost CreateSagaHost(string sagaDirectory)
         {
             var bus = RabbitHutch.CreateBus();
-            return new DefaultSagaHost(bus, log4net.LogManager.GetLogger(typeof(DefaultSagaHost)));
+            return new DefaultSagaHost(bus, log4net.LogManager.GetLogger(typeof(DefaultSagaHost)), sagaDirectory);
         }
     }
 }

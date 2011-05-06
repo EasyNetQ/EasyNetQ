@@ -9,16 +9,16 @@ namespace EasyNetQ.SagaHost
 {
     public class DefaultSagaHost : ISagaHost
     {
-        private const string sagaDirectory = "Sagas";
-
+        private readonly string sagaDirectory;
         private readonly IBus bus;
         private readonly ILog log;
         private CompositionContainer container;
 
-        public DefaultSagaHost(IBus bus, ILog log)
+        public DefaultSagaHost(IBus bus, ILog log, string sagaDirectory)
         {
             this.bus = bus;
             this.log = log;
+            this.sagaDirectory = sagaDirectory;
         }
 
         public void Start()
