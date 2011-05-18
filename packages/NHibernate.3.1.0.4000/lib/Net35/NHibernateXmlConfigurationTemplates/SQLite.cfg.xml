@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+This template was written to work with NHibernate.Test.
+Copy the template to your NHibernate.Test project folder and rename it in hibernate.cfg.xml and change it 
+for your own use before compile tests in VisualStudio.
+-->
+<hibernate-configuration  xmlns="urn:nhibernate-configuration-2.2" >
+	<session-factory name="NHibernate.Test">
+		<property name="connection.driver_class">NHibernate.Driver.SQLite20Driver</property>
+		<property name="connection.connection_string">
+			Data Source=nhibernate.db;Version=3
+		</property>
+		<property name="dialect">NHibernate.Dialect.SQLiteDialect</property>
+		<property name="query.substitutions">true=1;false=0</property>
+		<property name="proxyfactory.factory_class">NHibernate.ByteCode.LinFu.ProxyFactoryFactory, NHibernate.ByteCode.LinFu</property>
+	</session-factory>
+</hibernate-configuration>

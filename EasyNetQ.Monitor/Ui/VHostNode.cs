@@ -1,18 +1,29 @@
+using System.Linq;
 using System.Windows.Forms;
+using EasyNetQ.Monitor.Controllers;
 using EasyNetQ.Monitor.Dialogue;
 using EasyNetQ.Monitor.Model;
 using EasyNetQ.Monitor.Services;
 
 namespace EasyNetQ.Monitor.Ui
 {
+    public interface IVHostNodeFactory
+    {
+        VHostNode Create(IVHostController vHostController);
+    }
+
     public class VHostNode : TreeNode
     {
-        private VHost vHost;
+        private readonly IVHostController vHostController;
+        private readonly IMessageTypeNodeFactory messageTypeNodeFactory;
 
-        public VHostNode(VHost vHost)
+        public VHostNode(
+            IVHostController vHostController, 
+            IMessageTypeNodeFactory messageTypeNodeFactory)
         {
-            this.vHost = vHost;
-            this.Text = vHost.Name;
+            this.vHostController = vHostController;
+            this.messageTypeNodeFactory = messageTypeNodeFactory;
+            this.Text = vHostController.GetVHostName();
             CreateContextMenu();
         }
 
@@ -32,12 +43,10 @@ namespace EasyNetQ.Monitor.Ui
                     var types = assemblyLoader.GetTypes(openFileDialogue.FileName);
                     var chosenTypes = TypeChooserForm.GetChosenTypes(types);
 
-                    foreach (var chosenType in chosenTypes)
-                    {
-                        var messageType = vHost.CreateMessageType(chosenType);
-                        var messageTypeNode = new MessageTypeNode(messageType);
-                        Nodes.Add(messageTypeNode);
-                    }
+                    var messageTypeNodes = vHostController.CreateMessageTypes(chosenTypes)
+                        .Select(x => messageTypeNodeFactory.Create(x)).ToArray();
+
+                    Nodes.AddRange(messageTypeNodes);
                 }
             });
         }

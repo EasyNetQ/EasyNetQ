@@ -1,18 +1,21 @@
+using System;
 using System.Windows.Forms;
+using EasyNetQ.Monitor.Controllers;
 using EasyNetQ.Monitor.Dialogue;
-using EasyNetQ.Monitor.Model;
 
 namespace EasyNetQ.Monitor.Ui
 {
     public class RigNode : TreeNode
     {
-        private Rig rig;
+        private readonly IRigController rigController;
+        private readonly IVHostNodeFactory vHostNodeFactory;
 
-        public RigNode(Rig rig)
+        public RigNode(IRigController rigController, IVHostNodeFactory vHostNodeFactory)
         {
-            this.rig = rig;
             this.Text = "Root";
             CreateContextMenu();
+            this.rigController = rigController;
+            this.vHostNodeFactory = vHostNodeFactory;
         }
 
         private void CreateContextMenu()
@@ -23,10 +26,15 @@ namespace EasyNetQ.Monitor.Ui
                 var vHostName = NewVHostForm.GetVHostName();
                 if (vHostName.WasCancelled) return;
 
-                var vHost = rig.AddVHost(vHostName.Value);
-                var vHostNode = new VHostNode(vHost);
+                var vHostController = rigController.CreateNewVHost(vHostName.Value);
+                var vHostNode = vHostNodeFactory.Create(vHostController);
                 this.Nodes.Add(vHostNode);
             });
+        }
+
+        public void SaveRig()
+        {
+            rigController.SaveRig();
         }
     }
 }

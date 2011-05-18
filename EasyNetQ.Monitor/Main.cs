@@ -1,23 +1,29 @@
 ﻿using System;
 using System.Windows.Forms;
-using EasyNetQ.Monitor.Model;
 using EasyNetQ.Monitor.Ui;
 
 namespace EasyNetQ.Monitor
 {
     public partial class Main : Form
     {
-        public Main(Rig rig)
+        private readonly RigNode rigNode;
+
+        public Main(RigNode rigNode)
         {
+            this.rigNode = rigNode;
             InitializeComponent();
 
-            var rigNode = new RigNode(rig);
             treeView.Nodes.Add(rigNode);
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rigNode.SaveRig();
         }
     }
 }

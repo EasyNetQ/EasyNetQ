@@ -1,16 +1,22 @@
+using System;
 using System.Windows.Forms;
-using EasyNetQ.Monitor.Model;
+using EasyNetQ.Monitor.Controllers;
 
 namespace EasyNetQ.Monitor.Ui
 {
+    public interface IMessageTypeNodeFactory
+    {
+        MessageTypeNode Create(IMessageTypeController messageTypeController);
+    }
+
     public class MessageTypeNode : TreeNode
     {
-        private MessageType messageType;
+        private readonly IMessageTypeController messageTypeController;
 
-        public MessageTypeNode(MessageType messageType)
+        public MessageTypeNode(IMessageTypeController messageTypeController)
         {
-            this.messageType = messageType;
-            this.Text = messageType.TypeName;
+            this.messageTypeController = messageTypeController;
+            this.Text = messageTypeController.GetMessageTypeName();
         }
     }
 }

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace EasyNetQ.Monitor.Model
 {
+    [Serializable]
     public class MessageType
     {
         public virtual IList<Message> Messages { get; protected set; }

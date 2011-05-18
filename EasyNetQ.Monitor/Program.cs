@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Castle.Windsor;
+using Castle.Windsor.Installer;
 using EasyNetQ.Monitor.Services;
 
 namespace EasyNetQ.Monitor
@@ -19,7 +21,15 @@ namespace EasyNetQ.Monitor
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Main(rig));
+
+            using(var container = new WindsorContainer())
+            {
+                container.Install(FromAssembly.This());
+
+                var mainForm = container.Resolve<Main>();
+
+                Application.Run(mainForm);
+            }
         }
     }
 }

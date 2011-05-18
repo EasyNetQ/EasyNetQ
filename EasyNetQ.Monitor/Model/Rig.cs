@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace EasyNetQ.Monitor.Model
 {
+    [Serializable]
     public class Rig
     {
         public IList<VHost> VHosts { get; protected set; }
@@ -11,7 +13,7 @@ namespace EasyNetQ.Monitor.Model
             VHosts = new List<VHost>();
         }
 
-        public VHost AddVHost(string name)
+        public VHost CreateVHost(string name)
         {
             var vHost = new VHost(name);
             VHosts.Add(vHost);
