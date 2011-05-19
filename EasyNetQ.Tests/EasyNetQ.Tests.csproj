@@ -71,7 +71,9 @@
     <Compile Include="RabbitHutchTests.cs" />
     <Compile Include="PublishSubscribeTests.cs" />
     <Compile Include="RequestResponseTests.cs" />
+    <Compile Include="SchedulingTests.cs" />
     <Compile Include="SimpleSagaSpike.cs" />
+    <Compile Include="SubscribeSpike.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>

@@ -1,9 +1,10 @@
 using System;
+using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
-    public class RabbitBus : IBus
+    public class RabbitBus : IBus, IRawByteBus
     {
         private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
@@ -51,6 +52,11 @@ namespace EasyNetQ
             var typeName = serializeType(typeof (T));
             var messageBody = serializer.MessageToBytes(message);
 
+            RawPublish(typeName, messageBody);
+        }
+
+        public void RawPublish(string typeName, byte[] messageBody)
+        {
             using (var channel = connection.CreateModel())
             {
                 DeclarePublishExchange(channel, typeName);
@@ -198,6 +204,24 @@ namespace EasyNetQ
                 true,                   // noAck 
                 consumer.ConsumerTag,   // consumerTag
                 consumer);              // consumer
+        }
+
+        public void Schedule<T>(DateTime timeToRespond, T message)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException("message");
+            }
+
+            var typeName = serializeType(typeof(T));
+            var messageBody = serializer.MessageToBytes(message);
+
+            Publish(new ScheduleMe
+            {
+                WakeTime = timeToRespond,
+                BindingKey = typeName,
+                InnerMessage = messageBody
+            });
         }
 
         private static void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
