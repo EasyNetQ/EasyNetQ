@@ -206,7 +206,7 @@ namespace EasyNetQ
                 consumer);              // consumer
         }
 
-        public void Schedule<T>(DateTime timeToRespond, T message)
+        public void FuturePublish<T>(DateTime timeToRespond, T message)
         {
             if (message == null)
             {

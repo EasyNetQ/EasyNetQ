@@ -20,19 +20,26 @@ namespace EasyNetQ.Tests
         [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
         public void Should_be_able_to_schedule_a_message()
         {
-            bus.Subscribe<MessageToBeScheduled>("schedulingTest1", message => 
+            bus.Subscribe<PartyInvitation>("schedulingTest1", message => 
                 Console.WriteLine("Got scheduled message: {0}", message.Text));
 
-            bus.Schedule(DateTime.Now.AddSeconds(3), new MessageToBeScheduled { Text = "Hi!"});
+            var invitation = new PartyInvitation
+            {
+                Text = "Please come to my party",
+                Date = new DateTime(2011, 5, 24)
+            };
+
+            bus.FuturePublish(DateTime.Now.AddSeconds(3), invitation);
 
             Thread.Sleep(6000);
         }
     }
 
     [Serializable]
-    public class MessageToBeScheduled
+    public class PartyInvitation
     {
         public string Text { get; set; }
+        public DateTime Date { get; set; }
     }
 }
 
