@@ -8,5 +8,10 @@ namespace EasyNetQ
         {
             return new CallbackConsumer(model, callback);
         }
+
+        public void ClearConsumers()
+        {
+            // nothing to do
+        }
     }
 }

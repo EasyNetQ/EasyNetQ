@@ -5,5 +5,6 @@ namespace EasyNetQ
     public interface IConsumerFactory
     {
         DefaultBasicConsumer CreateConsumer(IModel model, MessageCallback callback);
+        void ClearConsumers();
     }
 }

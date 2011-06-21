@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
         [TearDown]
         public void TearDown()
         {
-            bus.Dispose();
+            if(bus != null) bus.Dispose();
         }
 
         // 1. Run this first, should see no messages consumed

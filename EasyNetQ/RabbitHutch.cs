@@ -34,13 +34,12 @@ namespace EasyNetQ
                 HostName = rabbitHost.HostName,
                 VirtualHost = rabbitHost.VirtualHost
             };
-            var connection = connectionFactory.CreateConnection();
 
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
                 new BinarySerializer(),
-                connection,
-                new QueueingConsumerFactory());
+                new QueueingConsumerFactory(),
+                connectionFactory);
         }
 
         public static RabbitHost GetRabbitHost(string hostName)

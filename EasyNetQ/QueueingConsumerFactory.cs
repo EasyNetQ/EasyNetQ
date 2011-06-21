@@ -15,24 +15,35 @@ namespace EasyNetQ
     /// </summary>
     public class QueueingConsumerFactory : IConsumerFactory
     {
-        private readonly SharedQueue sharedQueue = new SharedQueue();
+        private SharedQueue sharedQueue = new SharedQueue();
         private readonly IDictionary<string, MessageCallback> callbacks = 
             new Dictionary<string, MessageCallback>();
+        private readonly object sharedQueueLock = new object();
 
         public QueueingConsumerFactory()
         {
             ThreadPool.QueueUserWorkItem(_ =>
             {
-                try
+                while(true)
                 {
-                    while(true)
+                    try
                     {
-                        HandleMessageDelivery((BasicDeliverEventArgs)sharedQueue.Dequeue());
+                        BasicDeliverEventArgs deliverEventArgs;
+                        lock (sharedQueueLock)
+                        {
+                            deliverEventArgs = (BasicDeliverEventArgs)sharedQueue.DequeueNoWait(null);
+                        }
+                        if(deliverEventArgs != null)
+                        {
+                            HandleMessageDelivery(deliverEventArgs);
+                        }
                     }
-                }
-                catch (EndOfStreamException)
-                {
-                    // do nothing here, EOS fired when queue is closed
+                    catch (EndOfStreamException)
+                    {
+                        Console.WriteLine("QueueingConsumerFactory -> EndOfStreamException");
+                        // do nothing here, EOS fired when queue is closed
+                    }
+                    Thread.Sleep(0);
                 }
             });
         }
@@ -63,6 +74,17 @@ namespace EasyNetQ
             consumer.ConsumerTag = consumerTag;
             callbacks.Add(consumerTag, callback);
             return consumer;
+        }
+
+        public void ClearConsumers()
+        {
+            callbacks.Clear();
+            Console.WriteLine("Waiting for ClearConsumers lock");
+            lock (sharedQueueLock)
+            {
+                Console.WriteLine("Got ClearConsumers lock");
+                sharedQueue = new SharedQueue();
+            }
         }
     }
 }

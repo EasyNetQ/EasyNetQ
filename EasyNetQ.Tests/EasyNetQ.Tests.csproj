@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="BinarySerializerTests.cs" />
     <Compile Include="DelegateHashCodeSpike.cs" />
+    <Compile Include="ExceptionConditionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitHutchTests.cs" />
     <Compile Include="PublishSubscribeTests.cs" />

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 
@@ -8,16 +10,18 @@ namespace EasyNetQ
     {
         private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
-        private readonly IConnection connection;
+        private IConnection connection;
         private readonly IConsumerFactory consumerFactory;
+        private readonly ConnectionFactory connectionFactory;
+        private readonly IList<Action> subscribeActions;
 
         private const string rpcExchange = "easy_net_q_rpc";
 
         public RabbitBus(
             SerializeType serializeType, 
             ISerializer serializer,
-            IConnection connection, 
-            IConsumerFactory consumerFactory)
+            IConsumerFactory consumerFactory, 
+            ConnectionFactory connectionFactory)
         {
             if(serializeType == null)
             {
@@ -27,19 +31,56 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("serializer");
             }
-            if(connection == null)
-            {
-                throw new ArgumentNullException("connection");
-            }
-            if (consumerFactory == null)
+            if(consumerFactory == null)
             {
                 throw new ArgumentNullException("consumerFactory");
             }
+            if(connectionFactory == null)
+            {
+                throw new ArgumentNullException("connectionFactory");
+            }
 
             this.serializeType = serializeType;
+            this.connectionFactory = connectionFactory;
             this.consumerFactory = consumerFactory;
             this.serializer = serializer;
-            this.connection = connection;
+
+            subscribeActions = new List<Action>();
+            ConnectIfNotConnected();
+        }
+
+        void ConnectIfNotConnected()
+        {
+            consumerFactory.ClearConsumers();
+            while (connection == null || !connection.IsOpen)
+            {
+                try
+                {
+                    Console.WriteLine("Creating connection");
+                    connection = connectionFactory.CreateConnection();
+                    connection.ConnectionShutdown += OnConnectionShutdown;
+                }
+                catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException)
+                {
+                    // try again a little later
+                    Console.WriteLine("OnConnectionShutdown -> BrokerUnreachableException");
+                    Thread.Sleep(100);
+                }
+            }
+            Console.WriteLine("Re-creating subscribers");
+            foreach (var subscribeAction in subscribeActions)
+            {
+                subscribeAction();
+            }
+        }
+
+        void OnConnectionShutdown(IConnection _, ShutdownEventArgs reason)
+        {
+            // try to reconnect and re-subscribe
+            Console.WriteLine("OnConnectionShutdown -> Event fired");
+
+            Thread.Sleep(100);
+            ConnectIfNotConnected();
         }
 
         public void Publish<T>(T message)
@@ -57,16 +98,23 @@ namespace EasyNetQ
 
         public void RawPublish(string typeName, byte[] messageBody)
         {
-            using (var channel = connection.CreateModel())
+            try
             {
-                DeclarePublishExchange(channel, typeName);
+                using (var channel = connection.CreateModel())
+                {
+                    DeclarePublishExchange(channel, typeName);
 
-                var defaultProperties = channel.CreateBasicProperties();
-                channel.BasicPublish(
-                    typeName,                   // exchange
-                    typeName,                   // routingKey 
-                    defaultProperties,          // basicProperties
-                    messageBody);               // body
+                    var defaultProperties = channel.CreateBasicProperties();
+                    channel.BasicPublish(
+                        typeName,                   // exchange
+                        typeName,                   // routingKey 
+                        defaultProperties,          // basicProperties
+                        messageBody);               // body
+                }
+            }
+            catch (RabbitMQ.Client.Exceptions.OperationInterruptedException exception)
+            {
+                throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
             }
         }
 
@@ -80,40 +128,46 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
-            if(onMessage == null)
+            Action subscribeAction = () =>
             {
-                throw new ArgumentNullException("onMessage");
-            }
-
-            var typeName = serializeType(typeof(T));
-            var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
-
-            var channel = connection.CreateModel();
-            DeclarePublishExchange(channel, typeName);
-
-            var queue = channel.QueueDeclare(
-                subscriptionQueue,  // queue
-                true,               // durable
-                false,              // exclusive
-                false,              // autoDelete
-                null);              // arguments
-
-            channel.QueueBind(queue, typeName, typeName);  
-
-            // TODO: how does the channel (IModel) get disposed?  
-            var consumer = consumerFactory.CreateConsumer(channel, 
-                (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
+                if(onMessage == null)
                 {
-                    var message = serializer.BytesToMessage<T>(body);
-                    onMessage(message);
-                    //channel.BasicAck(deliveryTag, false);
-                });
+                    throw new ArgumentNullException("onMessage");
+                }
 
-            channel.BasicConsume(
-                subscriptionQueue,      // queue
-                true,                   // noAck 
-                consumer.ConsumerTag,   // consumerTag
-                consumer);              // consumer
+                var typeName = serializeType(typeof(T));
+                var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
+
+                var channel = connection.CreateModel();
+                DeclarePublishExchange(channel, typeName);
+
+                var queue = channel.QueueDeclare(
+                    subscriptionQueue,  // queue
+                    true,               // durable
+                    false,              // exclusive
+                    false,              // autoDelete
+                    null);              // arguments
+
+                channel.QueueBind(queue, typeName, typeName);  
+
+                // TODO: how does the channel (IModel) get disposed?  
+                var consumer = consumerFactory.CreateConsumer(channel, 
+                    (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
+                    {
+                        var message = serializer.BytesToMessage<T>(body);
+                        onMessage(message);
+                        //channel.BasicAck(deliveryTag, false);
+                    });
+
+                channel.BasicConsume(
+                    subscriptionQueue,      // queue
+                    true,                   // noAck 
+                    consumer.ConsumerTag,   // consumerTag
+                    consumer);              // consumer
+            };
+
+            subscribeAction();
+            subscribeActions.Add(subscribeAction);
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
