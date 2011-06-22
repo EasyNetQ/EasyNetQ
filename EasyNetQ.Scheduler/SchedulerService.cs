@@ -60,6 +60,7 @@ namespace EasyNetQ.Scheduler
 
         public void OnTimerTick(object source, ElapsedEventArgs args)
         {
+            if (!bus.IsConnected) return;
             using(var scope = new TransactionScope())
             {
                 var scheduledMessages = scheduleRepository.GetPending(DateTime.Now);
