@@ -166,7 +166,10 @@ namespace EasyNetQ
                     consumer);              // consumer
             };
 
-            subscribeAction();
+            if(connection != null && connection.IsOpen)
+            {
+                subscribeAction();
+            }
             subscribeActions.Add(subscribeAction);
         }
 

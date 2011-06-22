@@ -31,7 +31,7 @@ namespace EasyNetQ
                         BasicDeliverEventArgs deliverEventArgs;
                         lock (sharedQueueLock)
                         {
-                            deliverEventArgs = (BasicDeliverEventArgs)sharedQueue.DequeueNoWait(null);
+                            deliverEventArgs = (BasicDeliverEventArgs)sharedQueue.Dequeue();
                         }
                         if(deliverEventArgs != null)
                         {
@@ -79,12 +79,15 @@ namespace EasyNetQ
         public void ClearConsumers()
         {
             callbacks.Clear();
+            sharedQueue.Close(); // Dequeue will stop blocking and throw an EndOfStreamException
+
             Console.WriteLine("Waiting for ClearConsumers lock");
             lock (sharedQueueLock)
             {
                 Console.WriteLine("Got ClearConsumers lock");
                 sharedQueue = new SharedQueue();
             }
+            //Console.WriteLine("Cleared ClearConsumers lock");
         }
     }
 }
