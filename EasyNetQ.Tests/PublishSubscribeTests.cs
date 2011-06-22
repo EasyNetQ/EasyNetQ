@@ -14,6 +14,7 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("localhost");
+            while(!bus.IsConnected) Thread.Sleep(10);
         }
 
         [TearDown]
@@ -30,7 +31,7 @@ namespace EasyNetQ.Tests
             bus.Subscribe<MyMessage>("test", message => Console.WriteLine(message.Text));
 
             // allow time for messages to be consumed
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             Console.WriteLine("Stopped consuming");
         }

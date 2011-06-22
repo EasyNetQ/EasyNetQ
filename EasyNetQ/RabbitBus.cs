@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 
@@ -10,10 +8,8 @@ namespace EasyNetQ
     {
         private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
-        private IConnection connection;
+        private readonly IPersistentConnection connection;
         private readonly IConsumerFactory consumerFactory;
-        private readonly ConnectionFactory connectionFactory;
-        private readonly IList<Action> subscribeActions;
 
         private const string rpcExchange = "easy_net_q_rpc";
 
@@ -41,46 +37,13 @@ namespace EasyNetQ
             }
 
             this.serializeType = serializeType;
-            this.connectionFactory = connectionFactory;
             this.consumerFactory = consumerFactory;
             this.serializer = serializer;
 
-            subscribeActions = new List<Action>();
-            ConnectIfNotConnected();
-        }
-
-        void ConnectIfNotConnected()
-        {
-            consumerFactory.ClearConsumers();
-            while (connection == null || !connection.IsOpen)
-            {
-                try
-                {
-                    Console.WriteLine("Creating connection");
-                    connection = connectionFactory.CreateConnection();
-                    connection.ConnectionShutdown += OnConnectionShutdown;
-                }
-                catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException)
-                {
-                    // try again a little later
-                    Console.WriteLine("OnConnectionShutdown -> BrokerUnreachableException");
-                    Thread.Sleep(100);
-                }
-            }
-            Console.WriteLine("Re-creating subscribers");
-            foreach (var subscribeAction in subscribeActions)
-            {
-                subscribeAction();
-            }
-        }
-
-        void OnConnectionShutdown(IConnection _, ShutdownEventArgs reason)
-        {
-            // try to reconnect and re-subscribe
-            Console.WriteLine("OnConnectionShutdown -> Event fired");
-
-            Thread.Sleep(100);
-            ConnectIfNotConnected();
+            connection = new PersistentConnection(connectionFactory);
+            connection.Connected += OnConnected;
+            connection.Disconnected += consumerFactory.ClearConsumers;
+            connection.Disconnected += OnDisconnected;
         }
 
         public void Publish<T>(T message)
@@ -128,16 +91,16 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
+            if (onMessage == null)
+            {
+                throw new ArgumentNullException("onMessage");
+            }
+
+            var typeName = serializeType(typeof(T));
+            var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
+
             Action subscribeAction = () =>
             {
-                if(onMessage == null)
-                {
-                    throw new ArgumentNullException("onMessage");
-                }
-
-                var typeName = serializeType(typeof(T));
-                var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
-
                 var channel = connection.CreateModel();
                 DeclarePublishExchange(channel, typeName);
 
@@ -166,23 +129,18 @@ namespace EasyNetQ
                     consumer);              // consumer
             };
 
-            if(connection != null && connection.IsOpen)
-            {
-                subscribeAction();
-            }
-            subscribeActions.Add(subscribeAction);
+            connection.AddSubscriptionAction(subscribeAction);
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
-            Request<TRequest, TResponse>(onResponse)(request);
-        }
-
-        private Action<TRequest> Request<TRequest, TResponse>(Action<TResponse> onResponse)
-        {
             if (onResponse == null)
             {
                 throw new ArgumentNullException("onResponse");
+            }
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
             }
 
             var requestTypeName = serializeType(typeof(TRequest));
@@ -213,20 +171,12 @@ namespace EasyNetQ
                 consumer.ConsumerTag,   // consumerTag
                 consumer);              // consumer
 
-            return request =>
-            {
-                if (request == null)
-                {
-                    throw new ArgumentNullException("request");
-                }
-
-                var requestBody = serializer.MessageToBytes(request);
-                requestChannel.BasicPublish(
-                    rpcExchange,            // exchange 
-                    requestTypeName,        // routingKey 
-                    requestProperties,      // basicProperties 
-                    requestBody);           // body
-            };
+            var requestBody = serializer.MessageToBytes(request);
+            requestChannel.BasicPublish(
+                rpcExchange,            // exchange 
+                requestTypeName,        // routingKey 
+                requestProperties,      // basicProperties 
+                requestBody);           // body
         }
 
         public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
@@ -237,30 +187,35 @@ namespace EasyNetQ
             }
 
             var requestTypeName = serializeType(typeof(TRequest));
-            var requestChannel = connection.CreateModel();
 
-            DeclareRequestResponseStructure(requestChannel, requestTypeName);
+            Action subscribeAction = () =>
+            {
+                var requestChannel = connection.CreateModel();
+                DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
-            var consumer = consumerFactory.CreateConsumer(requestChannel,
-                (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
-                {
-                    var request = serializer.BytesToMessage<TRequest>(body);
-                    var response = responder(request);
-                    var responseProperties = requestChannel.CreateBasicProperties();
-                    var responseBody = serializer.MessageToBytes(response);
-                    requestChannel.BasicPublish(
-                        "",                 // exchange 
-                        properties.ReplyTo, // routingKey
-                        responseProperties, // basicProperties 
-                        responseBody);      // body
-                });
+                var consumer = consumerFactory.CreateConsumer(requestChannel,
+                    (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
+                    {
+                        var request = serializer.BytesToMessage<TRequest>(body);
+                        var response = responder(request);
+                        var responseProperties = requestChannel.CreateBasicProperties();
+                        var responseBody = serializer.MessageToBytes(response);
+                        requestChannel.BasicPublish(
+                            "",                 // exchange 
+                            properties.ReplyTo, // routingKey
+                            responseProperties, // basicProperties 
+                            responseBody);      // body
+                    });
 
-            // TODO: dispose channel
-            requestChannel.BasicConsume(
-                requestTypeName,        // queue 
-                true,                   // noAck 
-                consumer.ConsumerTag,   // consumerTag
-                consumer);              // consumer
+                // TODO: dispose channel
+                requestChannel.BasicConsume(
+                    requestTypeName,        // queue 
+                    true,                   // noAck 
+                    consumer.ConsumerTag,   // consumerTag
+                    consumer);              // consumer
+            };
+
+            connection.AddSubscriptionAction(subscribeAction);
         }
 
         public void FuturePublish<T>(DateTime timeToRespond, T message)
@@ -279,6 +234,25 @@ namespace EasyNetQ
                 BindingKey = typeName,
                 InnerMessage = messageBody
             });
+        }
+
+        public event Action Connected;
+
+        protected void OnConnected()
+        {
+            if (Connected != null) Connected();
+        }
+
+        public event Action Disconnected;
+
+        protected void OnDisconnected()
+        {
+            if (Disconnected != null) Disconnected();
+        }
+
+        public bool IsConnected
+        {
+            get { return connection.IsConnected; }
         }
 
         private static void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
@@ -308,7 +282,6 @@ namespace EasyNetQ
         {
             if (disposed) return;
             
-            connection.Close();
             connection.Dispose();
             disposed = true;
         }

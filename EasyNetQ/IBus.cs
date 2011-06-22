@@ -55,5 +55,20 @@ namespace EasyNetQ
         /// <param name="timeToRespond">The time at which the message should be sent</param>
         /// <param name="message">The message to response with</param>
         void FuturePublish<T>(DateTime timeToRespond, T message);
+
+        /// <summary>
+        /// Fires once the bus has connected to a RabbitMQ server.
+        /// </summary>
+        event Action Connected;
+
+        /// <summary>
+        /// Fires when the bus disconnects from a RabbitMQ server.
+        /// </summary>
+        event Action Disconnected;
+
+        /// <summary>
+        /// True if the bus is connected, False if it is not.
+        /// </summary>
+        bool IsConnected { get; }
     }
 }

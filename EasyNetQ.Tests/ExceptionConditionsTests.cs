@@ -30,6 +30,15 @@ namespace EasyNetQ.Tests
             }
         }
 
+        private static void Reply<T>(ErrorTestBaseMessage message, IBus bus, string name)
+            where T : ErrorTestBaseMessage, new()
+        {
+            Console.WriteLine("Subscriber {0} got: {1} {2}", name, message.Text, message.Id);
+            Thread.Sleep(2000);
+            while (!bus.IsConnected) Thread.Sleep(100);
+            bus.Publish(new T { Text = "Hello From " + name, Id = ++message.Id });
+        }
+
         public void Server_goes_away_and_comes_back_during_subscription()
         {
             Console.WriteLine("Creating busses");
@@ -37,27 +46,19 @@ namespace EasyNetQ.Tests
             using(var busB = RabbitHutch.CreateBus("localhost"))
             {
                 Console.WriteLine("About to subscribe");
-                busB.Subscribe<FromA>("restarted", message => 
-                    Console.WriteLine("Subscriber B got: {0}", message.Text));
-                busA.Subscribe<FromB>("restarted", message => 
-                    Console.WriteLine("Subscriber A got: {0}", message.Text));
+
+                // ping pong between busA and busB
+                busB.Subscribe<FromA>("restarted", message => Reply<FromB>(message, busB, "B"));
+                busA.Subscribe<FromB>("restarted", message => Reply<FromA>(message, busA, "A"));
+
                 Console.WriteLine("Subscribed");
 
-                var count = 0;
+                while(!busB.IsConnected) Thread.Sleep(100);
+                busA.Publish(new FromA {Text = "Initial From A ", Id = 0});
+
                 while (true)
                 {
                     Thread.Sleep(2000);
-                    try
-                    {
-                        count++;
-                        busA.Publish(new FromA { Text = "Hello" + (count) });
-                        busB.Publish(new FromB { Text = "Hello" + (count) });
-                        Console.WriteLine("Published {0} OK", count);
-                    }
-                    catch (EasyNetQException exception)
-                    {
-                        Console.WriteLine("No Publish '{0}'", exception.Message);
-                    }
                 }
             }
         }
@@ -66,6 +67,7 @@ namespace EasyNetQ.Tests
         public abstract class ErrorTestBaseMessage
         {
             public string Text { get; set; }
+            public int Id { get; set; }
         }
 
         [Serializable]

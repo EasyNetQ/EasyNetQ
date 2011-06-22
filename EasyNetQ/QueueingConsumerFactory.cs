@@ -40,10 +40,11 @@ namespace EasyNetQ
                     }
                     catch (EndOfStreamException)
                     {
-                        Console.WriteLine("QueueingConsumerFactory -> EndOfStreamException");
                         // do nothing here, EOS fired when queue is closed
+                        // Looks like the connection has gone away, so wait a little while
+                        // before continuing to poll the queue
+                        Thread.Sleep(100);
                     }
-                    Thread.Sleep(0);
                 }
             });
         }

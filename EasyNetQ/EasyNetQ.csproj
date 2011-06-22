@@ -51,6 +51,7 @@
     <Compile Include="IRawByteBus.cs" />
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />
+    <Compile Include="PersistentConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueingConsumerFactory.cs" />
     <Compile Include="RabbitBus.cs" />
