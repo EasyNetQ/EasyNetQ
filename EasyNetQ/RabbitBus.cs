@@ -61,6 +61,11 @@ namespace EasyNetQ
 
         public void RawPublish(string typeName, byte[] messageBody)
         {
+            if (!connection.IsConnected)
+            {
+                throw new EasyNetQException("Publish failed. No rabbit server connected.");
+            }
+
             try
             {
                 using (var channel = connection.CreateModel())
@@ -223,6 +228,11 @@ namespace EasyNetQ
             if (message == null)
             {
                 throw new ArgumentNullException("message");
+            }
+
+            if (!connection.IsConnected)
+            {
+                throw new EasyNetQException("FuturePublish failed. No rabbit server connected.");
             }
 
             var typeName = serializeType(typeof(T));

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EasyNetQ")]
+[assembly: AssemblyTitle("EasyNetQ.LogReader")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("EasyNetQ")]
-[assembly: AssemblyProduct("EasyNetQ")]
-[assembly: AssemblyCopyright("Copyright © EasyNetQ 2011")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("EasyNetQ.LogReader")]
+[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("a306e985-0fcf-4cc6-a1a3-d57214d1ea40")]
+[assembly: Guid("959b928e-e0eb-4df6-b830-4dc1b0fe71f7")]
 
 // Version information for an assembly consists of the following four values:
 //
