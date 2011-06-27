@@ -28,7 +28,7 @@ namespace EasyNetQ
             this.connectionFactory = connectionFactory;
             this.subscribeActions = new List<Action>();
 
-            ConnectIfNotConnected();
+            TryToConnect();
         }
 
         public event Action Connected;
@@ -54,7 +54,7 @@ namespace EasyNetQ
             get { return connection != null && connection.IsOpen && !disposed; }
         }
 
-        void ConnectIfNotConnected()
+        void TryToConnect()
         {
             ThreadPool.QueueUserWorkItem(state =>
             {
@@ -90,7 +90,7 @@ namespace EasyNetQ
             Console.WriteLine("OnConnectionShutdown -> Event fired");
 
             Thread.Sleep(100);
-            ConnectIfNotConnected();
+            TryToConnect();
         }
 
         private bool disposed = false;

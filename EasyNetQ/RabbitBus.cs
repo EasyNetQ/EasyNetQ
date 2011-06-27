@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 
@@ -118,13 +119,11 @@ namespace EasyNetQ
 
                 channel.QueueBind(queue, typeName, typeName);  
 
-                // TODO: how does the channel (IModel) get disposed?  
                 var consumer = consumerFactory.CreateConsumer(channel, 
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
                         var message = serializer.BytesToMessage<T>(body);
                         onMessage(message);
-                        //channel.BasicAck(deliveryTag, false);
                     });
 
                 channel.BasicConsume(
@@ -147,27 +146,35 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("request");
             }
+            if (!connection.IsConnected)
+            {
+                throw new EasyNetQException("Publish failed. No rabbit server connected.");
+            }
 
-            var requestTypeName = serializeType(typeof(TRequest));
+            var returnQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
 
-            var requestChannel = connection.CreateModel();
+            SubscribeToResponse(onResponse, returnQueueName);
+            RequestPublish(request, returnQueueName);
+        }
+
+        private void SubscribeToResponse<TResponse>(Action<TResponse> onResponse, string returnQueueName)
+        {
             var responseChannel = connection.CreateModel();
 
             // respond queue is transient, only exists for the lifetime of the call.
-            var respondQueue = responseChannel.QueueDeclare();
-
-            // tell the consumer to respond to the transient respondQueue
-            var requestProperties = requestChannel.CreateBasicProperties();
-            requestProperties.ReplyTo = respondQueue;
-
-            DeclareRequestResponseStructure(requestChannel, requestTypeName);
+            var respondQueue = responseChannel.QueueDeclare(
+                returnQueueName,
+                false,              // durable
+                true,               // exclusive
+                true,               // autoDelete
+                null                // arguments
+                );
 
             var consumer = consumerFactory.CreateConsumer(responseChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                 {
                     var response = serializer.BytesToMessage<TResponse>(body);
                     onResponse(response);
-                    //responseChannel.BasicAck(deliveryTag, false);
                 });
 
             responseChannel.BasicConsume(
@@ -175,6 +182,18 @@ namespace EasyNetQ
                 true,                  // noAck 
                 consumer.ConsumerTag,   // consumerTag
                 consumer);              // consumer
+        }
+
+        private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
+        {
+            var requestTypeName = serializeType(typeof(TRequest));
+            var requestChannel = connection.CreateModel();
+
+            DeclareRequestResponseStructure(requestChannel, requestTypeName);
+
+            // tell the consumer to respond to the transient respondQueue
+            var requestProperties = requestChannel.CreateBasicProperties();
+            requestProperties.ReplyTo = returnQueueName;
 
             var requestBody = serializer.MessageToBytes(request);
             requestChannel.BasicPublish(
@@ -203,9 +222,15 @@ namespace EasyNetQ
                     {
                         var request = serializer.BytesToMessage<TRequest>(body);
                         var response = responder(request);
-                        var responseProperties = requestChannel.CreateBasicProperties();
+
+                        // wait for the connection to come back
+                        if (!connection.IsConnected) Thread.Sleep(100);
+
+                        var responseChannel = connection.CreateModel();
+                        var responseProperties = responseChannel.CreateBasicProperties();
                         var responseBody = serializer.MessageToBytes(response);
-                        requestChannel.BasicPublish(
+
+                        responseChannel.BasicPublish(
                             "",                 // exchange 
                             properties.ReplyTo, // routingKey
                             responseProperties, // basicProperties 

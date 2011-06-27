@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests
             bus.Request<TestRequestMessage, TestResponseMessage>(request, response => 
                 Console.WriteLine("Got response: '{0}'", response.Text));
 
-            Thread.Sleep(500);
+            while(true) Thread.Sleep(100);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
