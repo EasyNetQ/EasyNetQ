@@ -175,6 +175,10 @@ namespace EasyNetQ
                 {
                     var response = serializer.BytesToMessage<TResponse>(body);
                     onResponse(response);
+
+                    // close the response channel once we've consumed the message.
+                    // this will also remove the queue.
+                    responseChannel.Close();
                 });
 
             responseChannel.BasicConsume(
