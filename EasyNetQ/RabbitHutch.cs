@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using EasyNetQ.Loggers;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -35,11 +36,14 @@ namespace EasyNetQ
                 VirtualHost = rabbitHost.VirtualHost
             };
 
+            var logger = new ConsoleLogger();
+
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
                 new BinarySerializer(),
-                new QueueingConsumerFactory(),
-                connectionFactory);
+                new QueueingConsumerFactory(logger),
+                connectionFactory,
+                logger);
         }
 
         public static RabbitHost GetRabbitHost(string hostName)

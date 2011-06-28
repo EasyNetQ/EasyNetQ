@@ -18,7 +18,8 @@ namespace EasyNetQ
             SerializeType serializeType, 
             ISerializer serializer,
             IConsumerFactory consumerFactory, 
-            ConnectionFactory connectionFactory)
+            ConnectionFactory connectionFactory,
+            IEasyNetQLogger logger)
         {
             if(serializeType == null)
             {
@@ -41,7 +42,7 @@ namespace EasyNetQ
             this.consumerFactory = consumerFactory;
             this.serializer = serializer;
 
-            connection = new PersistentConnection(connectionFactory);
+            connection = new PersistentConnection(connectionFactory, logger);
             connection.Connected += OnConnected;
             connection.Disconnected += consumerFactory.ClearConsumers;
             connection.Disconnected += OnDisconnected;
@@ -321,7 +322,9 @@ namespace EasyNetQ
         {
             if (disposed) return;
             
+            consumerFactory.Dispose();
             connection.Dispose();
+
             disposed = true;
         }
     }

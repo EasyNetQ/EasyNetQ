@@ -23,7 +23,7 @@ namespace EasyNetQ.Scheduler
         private readonly ILog log;
         private readonly IScheduleRepository scheduleRepository;
 
-        private System.Timers.Timer timer;
+        private System.Threading.Timer timer;
 
         public SchedulerService(IBus bus, IRawByteBus rawByteBus, ILog log, IScheduleRepository scheduleRepository)
         {
@@ -38,39 +38,56 @@ namespace EasyNetQ.Scheduler
             log.Debug("Starting SchedulerService");
             bus.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
 
-            timer = new System.Timers.Timer(intervalMilliseconds);
-            timer.Elapsed += OnTimerTick;
-
-            timer.Enabled = true;
+            timer = new System.Threading.Timer(OnTimerTick, null, 0, intervalMilliseconds);
         }
 
         public void Stop()
         {
+            log.Debug("Stopping SchedulerService");
             if (timer != null)
             {
-                timer.Enabled = false;
+                timer.Dispose();
+            }
+            if (bus != null)
+            {
+                bus.Dispose();
             }
         }
 
         public void OnMessage(ScheduleMe scheduleMe)
         {
-            Console.WriteLine("Got Schedule Message");
-            scheduleRepository.Store(scheduleMe);
+            try
+            {
+                log.Debug("Got Schedule Message");
+                scheduleRepository.Store(scheduleMe);
+            }
+            catch (Exception exception)
+            {
+                log.Error("Error receiving message from queue", exception);
+            }
         }
 
-        public void OnTimerTick(object source, ElapsedEventArgs args)
+        public void OnTimerTick(object state)
         {
             if (!bus.IsConnected) return;
-            using(var scope = new TransactionScope())
+            try
             {
-                var scheduledMessages = scheduleRepository.GetPending(DateTime.Now);
-                foreach (var scheduledMessage in scheduledMessages)
+                using(var scope = new TransactionScope())
                 {
-                    Console.WriteLine("Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey);
-                    rawByteBus.RawPublish(scheduledMessage.BindingKey, scheduledMessage.InnerMessage);
-                }
+                    var scheduledMessages = scheduleRepository.GetPending(DateTime.Now);
+                    foreach (var scheduledMessage in scheduledMessages)
+                    {
+                        log.Debug(string.Format(
+                            "Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey));
+                        rawByteBus.RawPublish(scheduledMessage.BindingKey, scheduledMessage.InnerMessage);
+                    }
 
-                scope.Complete();
+                    scope.Complete();
+                }
+            }
+            catch (Exception exception)
+            {
+                log.Error("Error in schedule pol", exception);
             }
         }
     }

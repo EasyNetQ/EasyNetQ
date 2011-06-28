@@ -39,6 +39,10 @@ namespace EasyNetQ.Tests
             bus.Publish(new T { Text = "Hello From " + name, Id = ++message.Id });
         }
 
+        /// <summary>
+        /// Ping-pong between two EasyNetQ instances. Try stopping and starting RabbitMQ
+        /// while this test is running.
+        /// </summary>
         public void Server_goes_away_and_comes_back_during_subscription()
         {
             Console.WriteLine("Creating busses");

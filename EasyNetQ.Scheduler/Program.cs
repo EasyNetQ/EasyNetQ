@@ -9,7 +9,7 @@ namespace EasyNetQ.Scheduler
     {
         static void Main()
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo(".\\log4net.config"));
+            XmlConfigurator.Configure();
 
             HostFactory.Run(hostConfiguration =>
             {

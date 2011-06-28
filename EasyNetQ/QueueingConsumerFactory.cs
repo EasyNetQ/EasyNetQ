@@ -15,17 +15,22 @@ namespace EasyNetQ
     /// </summary>
     public class QueueingConsumerFactory : IConsumerFactory
     {
+        private readonly IEasyNetQLogger logger;
         private SharedQueue sharedQueue = new SharedQueue();
         private readonly IDictionary<string, MessageCallback> callbacks = 
             new Dictionary<string, MessageCallback>();
         private readonly object sharedQueueLock = new object();
+        private readonly Thread subscriptionCallbackThread;
 
-        public QueueingConsumerFactory()
+        public QueueingConsumerFactory(IEasyNetQLogger logger)
         {
-            ThreadPool.QueueUserWorkItem(_ =>
+            this.logger = logger;
+            subscriptionCallbackThread = new Thread(_ =>
             {
                 while(true)
                 {
+                    if (disposed) break;                    
+
                     try
                     {
                         BasicDeliverEventArgs deliverEventArgs;
@@ -43,10 +48,11 @@ namespace EasyNetQ
                         // do nothing here, EOS fired when queue is closed
                         // Looks like the connection has gone away, so wait a little while
                         // before continuing to poll the queue
-                        Thread.Sleep(100);
+                        Thread.Sleep(10);
                     }
                 }
             });
+            subscriptionCallbackThread.Start();
         }
 
         private void HandleMessageDelivery(BasicDeliverEventArgs basicDeliverEventArgs)
@@ -82,13 +88,19 @@ namespace EasyNetQ
             callbacks.Clear();
             sharedQueue.Close(); // Dequeue will stop blocking and throw an EndOfStreamException
 
-            Console.WriteLine("Waiting for ClearConsumers lock");
             lock (sharedQueueLock)
             {
-                Console.WriteLine("Got ClearConsumers lock");
+                logger.DebugWrite("Clearing consumer callbacks");
                 sharedQueue = new SharedQueue();
             }
             //Console.WriteLine("Cleared ClearConsumers lock");
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
         }
     }
 }

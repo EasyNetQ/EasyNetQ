@@ -1,3 +1,4 @@
+using System;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -10,6 +11,11 @@ namespace EasyNetQ
         }
 
         public void ClearConsumers()
+        {
+            // nothing to do
+        }
+
+        public void Dispose()
         {
             // nothing to do
         }
