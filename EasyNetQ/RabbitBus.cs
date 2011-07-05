@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 
@@ -218,6 +219,19 @@ namespace EasyNetQ
                 throw new ArgumentNullException("responder");
             }
 
+            Func<TRequest, Task<TResponse>> taskResponder = 
+                request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
+
+            RespondAsync(taskResponder);
+        }
+
+        public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
+        {
+            if (responder == null)
+            {
+                throw new ArgumentNullException("responder");
+            }
+
             var requestTypeName = serializeType(typeof(TRequest));
 
             Action subscribeAction = () =>
@@ -229,20 +243,25 @@ namespace EasyNetQ
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
                         var request = serializer.BytesToMessage<TRequest>(body);
-                        var response = responder(request);
+                        var responseTask = responder(request);
 
-                        // wait for the connection to come back
-                        if (!connection.IsConnected) Thread.Sleep(100);
+                        responseTask.ContinueWith(task =>
+                        {
+                            // wait for the connection to come back
+                            while (!connection.IsConnected) Thread.Sleep(100);
 
-                        var responseChannel = connection.CreateModel();
-                        var responseProperties = responseChannel.CreateBasicProperties();
-                        var responseBody = serializer.MessageToBytes(response);
+                            using(var responseChannel = connection.CreateModel())
+                            {
+                                var responseProperties = responseChannel.CreateBasicProperties();
+                                var responseBody = serializer.MessageToBytes(task.Result);
 
-                        responseChannel.BasicPublish(
-                            "",                 // exchange 
-                            properties.ReplyTo, // routingKey
-                            responseProperties, // basicProperties 
-                            responseBody);      // body
+                                responseChannel.BasicPublish(
+                                    "",                 // exchange 
+                                    properties.ReplyTo, // routingKey
+                                    responseProperties, // basicProperties 
+                                    responseBody);      // body
+                            }
+                        });
                     });
 
                 // TODO: dispose channel

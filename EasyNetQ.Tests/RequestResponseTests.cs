@@ -53,6 +53,18 @@ namespace EasyNetQ.Tests
 
             Thread.Sleep(1000);
         }
+
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_make_a_request_that_runs_async_on_the_server()
+        {
+            var request = new TestAsyncRequestMessage {Text = "Hello async from the client!"};
+
+            Console.Out.WriteLine("Making request");
+            bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request, 
+                response => Console.Out.WriteLine("response = {0}", response.Text));
+
+            Thread.Sleep(2000);
+        }
     }
 }
 

@@ -48,6 +48,40 @@ Goals:
         /// A function to run when the request is received. It should return the response.
         /// </param>
         void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder);
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder);
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future.
+        /// This required the EasyNetQ.Scheduler service to be running.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="timeToRespond">The time at which the message should be sent</param>
+        /// <param name="message">The message to response with</param>
+        void FuturePublish<T>(DateTime timeToRespond, T message);
+
+        /// <summary>
+        /// Fires once the bus has connected to a RabbitMQ server.
+        /// </summary>
+        event Action Connected;
+
+        /// <summary>
+        /// Fires when the bus disconnects from a RabbitMQ server.
+        /// </summary>
+        event Action Disconnected;
+
+        /// <summary>
+        /// True if the bus is connected, False if it is not.
+        /// </summary>
+        bool IsConnected { get; }
     }
 
 Some blog posts about EasyNetQ ...

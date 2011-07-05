@@ -15,6 +15,18 @@ namespace EasyNetQ.Tests
     }
 
     [Serializable]
+    public class TestAsyncRequestMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
+    public class TestAsyncResponseMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
     public class StartMessage
     {
         public string Text { get; set; }
