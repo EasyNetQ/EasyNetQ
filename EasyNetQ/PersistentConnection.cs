@@ -49,8 +49,10 @@ namespace EasyNetQ
 
         public void AddSubscriptionAction(Action subscriptionAction)
         {
-            if (IsConnected) subscriptionAction();
             subscribeActions.Add(subscriptionAction);
+
+            // TODO: catch amqp connection exception
+            if (IsConnected) subscriptionAction();
         }
 
         public bool IsConnected

@@ -118,7 +118,10 @@ namespace EasyNetQ
                     false,              // autoDelete
                     null);              // arguments
 
-                channel.QueueBind(queue, typeName, typeName);  
+                channel.QueueBind(
+                    queue,              // queue
+                    typeName,           // exchange
+                    typeName);          // routingKey
 
                 var consumer = consumerFactory.CreateConsumer(channel, 
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
