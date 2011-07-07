@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Util;
 
 namespace Mike.AmqpSpike
 {
@@ -37,15 +38,15 @@ namespace Mike.AmqpSpike
 
         public void SubscribeAck()
         {
-            const int prefetchCount = 0;
+            const int prefetchCount = 1;
             const bool noAck = false;
-            const int numberOfMessagesToConsume = 10;
+            const int numberOfMessagesToConsume = 1;
 
             WithChannel.Do(channel =>
             {
                 channel.BasicQos(0, prefetchCount, false);
 
-                var consumer = new QueueingBasicConsumer(channel);
+                var consumer = new LocalQueueingBasicConsumer(channel);
                 channel.BasicConsume(ackNackQueue, noAck, consumer);
 
                 var running = true;
@@ -81,4 +82,55 @@ namespace Mike.AmqpSpike
             });
         }
     }
+
+    public class LocalQueueingBasicConsumer : DefaultBasicConsumer
+    {
+        protected SharedQueue m_queue;
+
+        public SharedQueue Queue
+        {
+            get
+            {
+                return this.m_queue;
+            }
+        }
+
+        public LocalQueueingBasicConsumer()
+            : this((IModel)null)
+        {
+        }
+
+        public LocalQueueingBasicConsumer(IModel model)
+            : this(model, new SharedQueue())
+        {
+        }
+
+        public LocalQueueingBasicConsumer(IModel model, SharedQueue queue)
+            : base(model)
+        {
+            this.m_queue = queue;
+        }
+
+        public override void OnCancel()
+        {
+            this.m_queue.Close();
+            base.OnCancel();
+        }
+
+        public override void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
+        {
+            Console.Out.WriteLine("HandleBasicDeliver");
+            this.m_queue.Enqueue((object)new BasicDeliverEventArgs()
+            {
+                ConsumerTag = consumerTag,
+                DeliveryTag = deliveryTag,
+                Redelivered = redelivered,
+                Exchange = exchange,
+                RoutingKey = routingKey,
+                BasicProperties = properties,
+                Body = body
+            });
+        }
+    }
+
 }
