@@ -39,8 +39,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AckNackSpike.cs" />
     <Compile Include="CallbackConsumer.cs" />
     <Compile Include="LambdaSpike.cs" />
+    <Compile Include="PingPongSpike.cs" />
     <Compile Include="PointToPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishSubscribe.cs" />

@@ -78,5 +78,25 @@ namespace Mike.AmqpSpike
 
             return taskCompletionSource.Task;
         }
+
+
+        public void Foo()
+        {
+            var batch = new[] {1, 2, 3, 4, 5};
+
+            foreach (var item in batch)
+            {
+                var itemToProcess = item;
+                var thread = new Thread(_ => ProcessItem(itemToProcess));
+                thread.Start();
+            }
+            Thread.Sleep(10);
+        }
+
+        public void ProcessItem(int item)
+        {
+            Console.WriteLine(item);
+        }
     }
+
 }
