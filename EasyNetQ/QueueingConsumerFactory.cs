@@ -17,8 +17,10 @@ namespace EasyNetQ
     {
         private readonly IEasyNetQLogger logger;
         private SharedQueue sharedQueue = new SharedQueue();
-        private readonly IDictionary<string, MessageCallback> callbacks = 
-            new Dictionary<string, MessageCallback>();
+
+        private readonly IDictionary<string, SubscriptionInfo> subscriptions = 
+            new Dictionary<string, SubscriptionInfo>();
+        
         private readonly object sharedQueueLock = new object();
         private readonly Thread subscriptionCallbackThread;
 
@@ -58,13 +60,13 @@ namespace EasyNetQ
         private void HandleMessageDelivery(BasicDeliverEventArgs basicDeliverEventArgs)
         {
             var consumerTag = basicDeliverEventArgs.ConsumerTag;
-            if (!callbacks.ContainsKey(consumerTag))
+            if (!subscriptions.ContainsKey(consumerTag))
             {
                 throw new EasyNetQException("No callback found for ConsumerTag {0}", consumerTag);
             }
 
-            var callback = callbacks[consumerTag];
-            callback(
+            var subscriptionInfo = subscriptions[consumerTag];
+            subscriptionInfo.Callback(
                 consumerTag, 
                 basicDeliverEventArgs.DeliveryTag, 
                 basicDeliverEventArgs.Redelivered,
@@ -72,6 +74,8 @@ namespace EasyNetQ
                 basicDeliverEventArgs.RoutingKey,
                 basicDeliverEventArgs.BasicProperties, 
                 basicDeliverEventArgs.Body);
+
+            subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
         }
 
         public DefaultBasicConsumer CreateConsumer(IModel model, MessageCallback callback)
@@ -79,18 +83,18 @@ namespace EasyNetQ
             var consumer = new QueueingBasicConsumer(model, sharedQueue);
             var consumerTag = Guid.NewGuid().ToString();
             consumer.ConsumerTag = consumerTag;
-            callbacks.Add(consumerTag, callback);
+            subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback));
             return consumer;
         }
 
         public void ClearConsumers()
         {
-            callbacks.Clear();
+            subscriptions.Clear();
             sharedQueue.Close(); // Dequeue will stop blocking and throw an EndOfStreamException
 
             lock (sharedQueueLock)
             {
-                logger.DebugWrite("Clearing consumer callbacks");
+                logger.DebugWrite("Clearing consumer subscriptions");
                 sharedQueue = new SharedQueue();
             }
             //Console.WriteLine("Cleared ClearConsumers lock");
@@ -101,6 +105,18 @@ namespace EasyNetQ
         {
             if (disposed) return;
             disposed = true;
+        }
+    }
+
+    public class SubscriptionInfo
+    {
+        public IBasicConsumer Consumer { get; private set; }
+        public MessageCallback Callback { get; private set; }
+
+        public SubscriptionInfo(IBasicConsumer consumer, MessageCallback callback)
+        {
+            Consumer = consumer;
+            Callback = callback;
         }
     }
 }

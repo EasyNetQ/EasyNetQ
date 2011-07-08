@@ -15,6 +15,10 @@ namespace EasyNetQ
 
         private const string rpcExchange = "easy_net_q_rpc";
 
+        // prefetchCount determines how many messages will be allowed in the local in-memory queue
+        // setting to zero makes this infinite, but risks an out-of-memory exception.
+        private const int prefetchCount = 1000; 
+
         public RabbitBus(
             SerializeType serializeType, 
             ISerializer serializer,
@@ -112,6 +116,8 @@ namespace EasyNetQ
                 var channel = connection.CreateModel();
                 DeclarePublishExchange(channel, typeName);
 
+                channel.BasicQos(0, prefetchCount, false);
+
                 var queue = channel.QueueDeclare(
                     subscriptionQueue,  // queue
                     true,               // durable
@@ -133,7 +139,7 @@ namespace EasyNetQ
 
                 channel.BasicConsume(
                     subscriptionQueue,      // queue
-                    true,                   // noAck 
+                    false,                  // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
             };
