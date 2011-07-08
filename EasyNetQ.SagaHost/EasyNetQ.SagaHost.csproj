@@ -58,9 +58,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="log4net.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
