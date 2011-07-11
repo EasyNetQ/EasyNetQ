@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.MessagePatterns;
 using RabbitMQ.Util;
 
 namespace Mike.AmqpSpike
@@ -81,7 +82,23 @@ namespace Mike.AmqpSpike
                 running = false;
             });
         }
+
+        public void SubscribeWithSubscriber()
+        {
+            WithChannel.Do(channel =>
+            {
+                var subscription = new Subscription(channel, ackNackQueue);
+                foreach (BasicDeliverEventArgs deliverEventArgs in subscription)
+                {
+                    var message = Encoding.UTF8.GetString(deliverEventArgs.Body);
+                    Console.Out.WriteLine("message = {0}", message);
+                    subscription.Ack(deliverEventArgs);
+                }
+            });
+        }
+
     }
+
 
     public class LocalQueueingBasicConsumer : DefaultBasicConsumer
     {

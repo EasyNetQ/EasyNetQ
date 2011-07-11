@@ -12,7 +12,7 @@ namespace EasyNetQ
     public static class RabbitHutch
     {
         /// <summary>
-        /// Creates a new instance of RabbitBus
+        /// Creates a new instance of RabbitBus with default credentials.
         /// </summary>
         /// <param name="hostName">
         /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
@@ -23,9 +23,38 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string hostName)
         {
+            return CreateBus(hostName, "guest", "guest");
+        }
+
+        /// <summary>
+        /// Creates a new instance of RabbitBus
+        /// </summary>
+        /// <param name="hostName">
+        /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
+        /// To identify the Virtual Host use the following scheme: 'hostname/virtualhost' e.g. 'localhost/myvhost'
+        /// </param>
+        /// <param name="username">
+        /// The username to use to connect to the RabbitMQ broker.
+        /// </param>
+        /// <param name="password">
+        /// The password to use to connect to the RabbitMQ broker.
+        /// </param>
+        /// <returns>
+        /// A new RabbitBus instance.
+        /// </returns>
+        public static IBus CreateBus(string hostName, string username, string password)
+        {
             if(hostName == null)
             {
                 throw new ArgumentNullException("hostName");
+            }
+            if(username == null)
+            {
+                throw new ArgumentNullException("username");
+            }
+            if(password == null)
+            {
+                throw new ArgumentNullException("password");
             }
 
             var rabbitHost = GetRabbitHost(hostName);
@@ -33,7 +62,9 @@ namespace EasyNetQ
             var connectionFactory = new ConnectionFactory
             {
                 HostName = rabbitHost.HostName,
-                VirtualHost = rabbitHost.VirtualHost
+                VirtualHost = rabbitHost.VirtualHost,
+                UserName = username,
+                Password = password
             };
 
             var logger = new ConsoleLogger();

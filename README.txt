@@ -88,6 +88,7 @@ Some blog posts about EasyNetQ ...
 http://mikehadlow.blogspot.com/2011/05/easynetq-simple-net-api-for-rabbitmq.html
 http://mikehadlow.blogspot.com/2011/05/futurepublish-with-easynetq-rabbitmq.html
 http://mikehadlow.blogspot.com/2011/06/rabbitmq-subscription-and-bouncing.html
+http://mikehadlow.blogspot.com/2011/07/rabbitmq-subscriptions-with-dotnet.html
 
 Getting started
 
