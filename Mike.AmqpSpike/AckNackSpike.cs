@@ -69,7 +69,7 @@ namespace Mike.AmqpSpike
                                 //consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, requeue:true);
                             }
                         }
-                        catch (EndOfStreamException exception)
+                        catch (EndOfStreamException)
                         {
                             break;
                         }

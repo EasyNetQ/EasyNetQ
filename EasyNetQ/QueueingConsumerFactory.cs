@@ -104,6 +104,7 @@ namespace EasyNetQ
         public void Dispose()
         {
             if (disposed) return;
+            sharedQueue.Close();
             disposed = true;
         }
     }

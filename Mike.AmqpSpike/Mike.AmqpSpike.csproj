@@ -41,11 +41,20 @@
   <ItemGroup>
     <Compile Include="AckNackSpike.cs" />
     <Compile Include="CallbackConsumer.cs" />
+    <Compile Include="IO.Ntfs\AlternateDataStreamInfo.cs" />
+    <Compile Include="IO.Ntfs\FileStreamAttributes.cs" />
+    <Compile Include="IO.Ntfs\FileStreamType.cs" />
+    <Compile Include="IO.Ntfs\FileSystem.cs" />
+    <Compile Include="IO.Ntfs\Resources.cs" />
+    <Compile Include="IO.Ntfs\SafeHGlobalHandle.cs" />
+    <Compile Include="IO.Ntfs\SafeNativeMethods.cs" />
+    <Compile Include="IO.Ntfs\StreamName.cs" />
     <Compile Include="LambdaSpike.cs" />
     <Compile Include="PingPongSpike.cs" />
     <Compile Include="PointToPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishSubscribe.cs" />
+    <Compile Include="SecurityZoneSpike.cs" />
     <Compile Include="SharedQueueSpike.cs" />
     <Compile Include="TaskCompletionSourceSpike.cs" />
     <Compile Include="UniquelyIdentifyDelegate.cs" />

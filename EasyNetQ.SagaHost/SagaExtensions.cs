@@ -15,11 +15,15 @@ namespace EasyNetQ.SagaHost
 
         public static IEnumerable<ISaga> LogWith(this IEnumerable<ISaga> sagas, ILog log)
         {
+            var sagaCount = 0;
+
             foreach (var saga in sagas)
             {
+                sagaCount++;
                 log.Debug(string.Format("Loading Saga: {0}", saga.GetType().FullName));
                 yield return saga;
             }
+            log.Debug(string.Format("Loaded {0} Sagas", sagaCount));
         }
     }
 }

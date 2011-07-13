@@ -118,7 +118,7 @@ namespace Mike.AmqpSpike
                 var body = Encoding.UTF8.GetBytes(message);
                 channel.BasicPublish("", queue, properties, body);
             }
-            catch (OperationInterruptedException exception)
+            catch (OperationInterruptedException)
             {
                 // just end without doing anything
             }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using log4net.Config;
+﻿using log4net.Config;
 using Topshelf;
 
 namespace EasyNetQ.SagaHost
@@ -17,9 +15,6 @@ namespace EasyNetQ.SagaHost
 
             HostFactory.Run(hostConfiguration =>
             {
-                hostConfiguration.AfterStartingServices(() => Console.WriteLine("Started EasyNetQ.SagaHost"));
-                hostConfiguration.AfterStoppingServices(() => Console.WriteLine("Stopped EasyNetQ.SagaHost"));
-                // hostConfiguration.EnableDashboard();
                 hostConfiguration.RunAsLocalSystem();
                 hostConfiguration.SetDescription("EasyNetQ.SagaHost");
                 hostConfiguration.SetDisplayName("EasyNetQ.SagaHost");
