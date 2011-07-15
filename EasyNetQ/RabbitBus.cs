@@ -80,6 +80,8 @@ namespace EasyNetQ
                     DeclarePublishExchange(channel, typeName);
 
                     var defaultProperties = channel.CreateBasicProperties();
+                    defaultProperties.SetPersistent(true);
+
                     channel.BasicPublish(
                         typeName,                   // exchange
                         typeName,                   // routingKey 
@@ -204,6 +206,9 @@ namespace EasyNetQ
             var requestTypeName = serializeType(typeof(TRequest));
             var requestChannel = connection.CreateModel();
 
+            // declare the exchange, binding and queue here. No need to set the mandatory flag, the recieving queue
+            // will already have been declared, so in the case of no responder being present, message will collect
+            // there.
             DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
             // tell the consumer to respond to the transient respondQueue

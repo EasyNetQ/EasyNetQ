@@ -107,8 +107,7 @@ namespace EasyNetQ
         {
             if (disposed) return;
             disposed = true;
-            if (IsConnected) connection.Close();
-            if(connection != null) connection.Dispose();
+            if (IsConnected && connection != null) connection.Dispose();
         }
     }
 }

@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests
             bus.Subscribe<MyMessage>("test", message => Console.WriteLine(message.Text));
 
             // allow time for messages to be consumed
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
 
             Console.WriteLine("Stopped consuming");
         }
@@ -40,7 +40,9 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_publish()
         {
-            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            var message = new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) };
+            bus.Publish(message);
+            Console.Out.WriteLine("message.Text = {0}", message.Text);
         }
 
         // 4. Run this once to setup subscription, publish a few times using '2' above, run again to
@@ -75,6 +77,25 @@ namespace EasyNetQ.Tests
 
             // allow time for messages to be consumed
             Thread.Sleep(1000);
+
+            Console.WriteLine("Stopped consuming");
+        }
+
+        // 6. Run publish first using '2' above.
+        // 7. Run this test, while it's running, restart the RabbitMQ service.
+        // 
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Long_running_subscriber_should_survive_a_rabbit_restart()
+        {
+            bus.Subscribe<MyMessage>("test", message =>
+            {
+                Console.Out.WriteLine("Restart RabbitMQ now.");
+                Thread.Sleep(5000);
+                Console.WriteLine(message.Text);
+            });
+
+            // allow time for messages to be consumed
+            Thread.Sleep(7000);
 
             Console.WriteLine("Stopped consuming");
         }

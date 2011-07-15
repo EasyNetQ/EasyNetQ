@@ -65,8 +65,10 @@ namespace Mike.AmqpSpike
                                 var message = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
                                 Console.Out.WriteLine("message = {0}", message);
 
+                                Console.WriteLine("Redelivered: {0}", basicDeliverEventArgs.Redelivered);
+                                
                                 consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
-                                //consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, requeue:true);
+                                // consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, requeue:true);
                             }
                         }
                         catch (EndOfStreamException)
@@ -80,6 +82,8 @@ namespace Mike.AmqpSpike
 
                 Thread.Sleep(1000);
                 running = false;
+                channel.Close();
+                consumer.Queue.Close();
             });
         }
 
@@ -92,6 +96,7 @@ namespace Mike.AmqpSpike
                 {
                     var message = Encoding.UTF8.GetString(deliverEventArgs.Body);
                     Console.Out.WriteLine("message = {0}", message);
+
                     subscription.Ack(deliverEventArgs);
                 }
             });

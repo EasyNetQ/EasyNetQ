@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using RabbitMQ.Util;
 
 namespace EasyNetQ
@@ -75,7 +76,15 @@ namespace EasyNetQ
                 basicDeliverEventArgs.BasicProperties, 
                 basicDeliverEventArgs.Body);
 
-            subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+            try
+            {
+                subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+            }
+            catch (AlreadyClosedException exception)
+            {
+                logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." + 
+                    " Message remains on RabbitMQ and will be retried.", exception.Message);
+            }
         }
 
         public DefaultBasicConsumer CreateConsumer(IModel model, MessageCallback callback)
