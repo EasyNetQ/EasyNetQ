@@ -39,8 +39,10 @@ namespace EasyNetQ.Tests.SimpleService
         public static TestResponseMessage HandleRequest(TestRequestMessage request)
         {
             Console.WriteLine("Handling request: {0}", request.Text);
-            Console.WriteLine("Hit return to return response");
-            Console.ReadLine();
+//            Console.WriteLine("Hit return to return response");
+//            Console.ReadLine();
+
+            Thread.Sleep(1000);
 
             Console.WriteLine("Returning response");
             return new TestResponseMessage{ Text = request.Text + " all done!" };

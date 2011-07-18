@@ -14,6 +14,7 @@ namespace EasyNetQ
         private readonly IConsumerFactory consumerFactory;
 
         private const string rpcExchange = "easy_net_q_rpc";
+        private const bool noAck = false;
 
         // prefetchCount determines how many messages will be allowed in the local in-memory queue
         // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -141,7 +142,7 @@ namespace EasyNetQ
 
                 channel.BasicConsume(
                     subscriptionQueue,      // queue
-                    false,                  // noAck 
+                    noAck,                  // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
             };
@@ -191,12 +192,12 @@ namespace EasyNetQ
 
                     // close the response channel once we've consumed the message.
                     // this will also remove the queue.
-                    responseChannel.Close();
+                    // responseChannel.Close();
                 });
 
             responseChannel.BasicConsume(
                 respondQueue,           // queue
-                true,                  // noAck 
+                noAck,                  // noAck 
                 consumer.ConsumerTag,   // consumerTag
                 consumer);              // consumer
         }
@@ -278,7 +279,7 @@ namespace EasyNetQ
                 // TODO: dispose channel
                 requestChannel.BasicConsume(
                     requestTypeName,        // queue 
-                    true,                   // noAck 
+                    noAck,                   // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
             };
