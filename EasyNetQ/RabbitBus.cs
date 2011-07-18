@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.SystemMessages;
@@ -12,6 +14,8 @@ namespace EasyNetQ
         private readonly ISerializer serializer;
         private readonly IPersistentConnection connection;
         private readonly IConsumerFactory consumerFactory;
+
+        private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
@@ -165,9 +169,15 @@ namespace EasyNetQ
                 throw new EasyNetQException("Publish failed. No rabbit server connected.");
             }
 
-            var returnQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
+            if (!responseQueueNameCache.ContainsKey(onResponse.Method.GetHashCode()))
+            {
+                var uniqueResponseQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
+                responseQueueNameCache.Add(onResponse.Method.GetHashCode(), uniqueResponseQueueName);
+                SubscribeToResponse(onResponse, uniqueResponseQueueName);
+            }
 
-            SubscribeToResponse(onResponse, returnQueueName);
+            var returnQueueName = responseQueueNameCache[onResponse.Method.GetHashCode()];
+
             RequestPublish(request, returnQueueName);
         }
 
@@ -175,7 +185,7 @@ namespace EasyNetQ
         {
             var responseChannel = connection.CreateModel();
 
-            // respond queue is transient, only exists for the lifetime of the call.
+            // respond queue is transient, only exists for the lifetime of the service.
             var respondQueue = responseChannel.QueueDeclare(
                 returnQueueName,
                 false,              // durable
@@ -321,6 +331,7 @@ namespace EasyNetQ
 
         protected void OnDisconnected()
         {
+            responseQueueNameCache.Clear();
             if (Disconnected != null) Disconnected();
         }
 

@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
 
         // First start the EasyNetQ.Tests.SimpleService console app.
         // Run this test. You should see the SimpleService report that it's
-        // responding and the response should appear here.
+        // responding to 1000 messages and you should see the messages return here.
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
         {
@@ -54,6 +54,9 @@ namespace EasyNetQ.Tests
             Thread.Sleep(1000);
         }
 
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_make_a_request_that_runs_async_on_the_server()
         {
@@ -63,6 +66,23 @@ namespace EasyNetQ.Tests
             bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request, 
                 response => Console.Out.WriteLine("response = {0}", response.Text));
 
+            Thread.Sleep(2000);
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see 1000 response messages on the SimpleService
+        // and then 1000 messages appear back here.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_make_many_async_requests()
+        {
+            for (int i = 0; i < 1000; i++)
+            {
+                var request = new TestAsyncRequestMessage { Text = "Hello async from the client! " + i };
+
+                bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
+                    response =>
+                    Console.Out.WriteLine("response = {0}", response.Text));
+            }
             Thread.Sleep(2000);
         }
     }
