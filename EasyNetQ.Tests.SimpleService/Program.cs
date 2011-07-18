@@ -8,14 +8,21 @@ namespace EasyNetQ.Tests.SimpleService
     {
         static void Main(string[] args)
         {
-            var messageQueue = RabbitHutch.CreateBus("localhost");
-            messageQueue.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
-            messageQueue.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
+            var bus = RabbitHutch.CreateBus("localhost");
+            bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
+            bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
 
             Console.WriteLine("Waiting to service requests");
             Console.WriteLine("Ctrl-C to exit");
-            
+
+            Console.CancelKeyPress += (source, cancelKeyPressArgs) =>
+            {
+                bus.Dispose();
+                Console.WriteLine("Shut down complete");
+            };
+
             while(true) Thread.Sleep(1000);
+            
         }
 
         private static Task<TestAsyncResponseMessage> HandleAsyncRequest(TestAsyncRequestMessage request)
