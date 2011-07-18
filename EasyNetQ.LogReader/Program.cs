@@ -38,7 +38,7 @@ namespace EasyNetQ.LogReader
                 channel.QueueBind(logReaderQueue, amqpLogExchange, "*");
 
                 var consumer = new QueueingBasicConsumer(channel);
-                var consumerTag = channel.BasicConsume(logReaderQueue, false, consumer);
+                channel.BasicConsume(logReaderQueue, false, consumer);
 
                 Console.WriteLine("EasyNetQ.LogReader");
                 Console.WriteLine("Listening to log");
@@ -48,19 +48,20 @@ namespace EasyNetQ.LogReader
                     try
                     {
                         var e = (RabbitMQ.Client.Events.BasicDeliverEventArgs) consumer.Queue.Dequeue();
-                        var props = e.BasicProperties;
                         var logMessage = Encoding.UTF8.GetString(e.Body);
 
                         Console.WriteLine(logMessage);
 
                         channel.BasicAck(e.DeliveryTag, false);
                     }
-                    catch (Exception ex)
+                    catch (Exception exception)
                     {
                         // The consumer was removed, either through
                         // channel or connection closure, or through the
                         // action of IModel.BasicCancel().
 
+                        Console.WriteLine(exception);
+                        Console.WriteLine();
                         Console.WriteLine("Connection closed.");
 
                         break;

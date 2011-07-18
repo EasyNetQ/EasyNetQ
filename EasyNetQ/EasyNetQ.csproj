@@ -41,6 +41,9 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="CallbackConsumer.cs" />
     <Compile Include="DefaultConsumerFactory.cs" />

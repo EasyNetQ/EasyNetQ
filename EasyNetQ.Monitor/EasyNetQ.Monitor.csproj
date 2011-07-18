@@ -65,6 +65,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Version.cs">
+      <Link>Version.cs</Link>
+    </Compile>
     <Compile Include="Controllers\MessageTypeController.cs" />
     <Compile Include="Controllers\RigController.cs" />
     <Compile Include="Controllers\VHostController.cs" />

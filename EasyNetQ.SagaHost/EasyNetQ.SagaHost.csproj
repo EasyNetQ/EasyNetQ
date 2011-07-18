@@ -47,6 +47,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
     <Compile Include="IO.Ntfs\AlternateDataStreamInfo.cs" />
     <Compile Include="IO.Ntfs\FileStreamAttributes.cs" />
     <Compile Include="IO.Ntfs\FileStreamType.cs" />
