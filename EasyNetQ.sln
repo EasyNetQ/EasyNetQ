@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.LogReader", "EasyNetQ.LogReader\EasyNetQ.LogReader.csproj", "{AA7F9D04-085B-4B71-8541-B838F5CAF9F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Hosepipe", "EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj", "{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -150,6 +152,16 @@ Global
 		{AA7F9D04-085B-4B71-8541-B838F5CAF9F2}.Release|Mixed Platforms.Build.0 = Release|x86
 		{AA7F9D04-085B-4B71-8541-B838F5CAF9F2}.Release|x86.ActiveCfg = Release|x86
 		{AA7F9D04-085B-4B71-8541-B838F5CAF9F2}.Release|x86.Build.0 = Release|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Debug|x86.ActiveCfg = Debug|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Debug|x86.Build.0 = Debug|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|Any CPU.ActiveCfg = Release|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|Mixed Platforms.Build.0 = Release|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|x86.ActiveCfg = Release|x86
+		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
