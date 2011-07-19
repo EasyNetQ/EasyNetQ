@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\References\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="RabbitMQ.Client">
       <HintPath>..\References\RabbitMQ.Client.dll</HintPath>
     </Reference>
@@ -55,6 +58,7 @@
     <Compile Include="IRawByteBus.cs" />
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />
+    <Compile Include="JsonSerializer.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="PersistentConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

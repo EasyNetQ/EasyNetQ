@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="RabbitMQ.Client">
       <HintPath>..\References\RabbitMQ.Client.dll</HintPath>
     </Reference>
@@ -52,6 +55,7 @@
     <Compile Include="IO.Ntfs\SafeHGlobalHandle.cs" />
     <Compile Include="IO.Ntfs\SafeNativeMethods.cs" />
     <Compile Include="IO.Ntfs\StreamName.cs" />
+    <Compile Include="JsonNetSpike.cs" />
     <Compile Include="LambdaSpike.cs" />
     <Compile Include="PingPongSpike.cs" />
     <Compile Include="PointToPoint.cs" />
@@ -62,6 +66,9 @@
     <Compile Include="TaskCompletionSourceSpike.cs" />
     <Compile Include="UniquelyIdentifyDelegate.cs" />
     <Compile Include="WithChannel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

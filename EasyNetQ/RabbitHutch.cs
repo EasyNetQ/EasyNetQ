@@ -71,7 +71,7 @@ namespace EasyNetQ
 
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
-                new BinarySerializer(),
+                new JsonSerializer(), 
                 new QueueingConsumerFactory(logger),
                 connectionFactory,
                 logger);
