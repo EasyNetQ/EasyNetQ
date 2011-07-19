@@ -16,6 +16,8 @@ namespace EasyNetQ
         private readonly IConsumerFactory consumerFactory;
 
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
+        private readonly ISet<string> publishExchanges = new HashSet<string>(); 
+        private readonly ISet<string> requestExchanges = new HashSet<string>(); 
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
@@ -100,12 +102,18 @@ namespace EasyNetQ
             }
         }
 
-        private static void DeclarePublishExchange(IModel channel, string typeName)
+        private void DeclarePublishExchange(IModel channel, string typeName)
         {
-            channel.ExchangeDeclare(
-                typeName,               // exchange
-                ExchangeType.Direct,    // type
-                true);                  // durable
+            // no need to declare on every publish
+            if (!publishExchanges.Contains(typeName))
+            {
+                channel.ExchangeDeclare(
+                    typeName,               // exchange
+                    ExchangeType.Direct,    // type
+                    true);                  // durable
+
+                publishExchanges.Add(typeName);
+            }
         }
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
@@ -331,6 +339,7 @@ namespace EasyNetQ
 
         protected void OnDisconnected()
         {
+            publishExchanges.Clear();
             responseQueueNameCache.Clear();
             if (Disconnected != null) Disconnected();
         }
@@ -340,26 +349,31 @@ namespace EasyNetQ
             get { return connection.IsConnected; }
         }
 
-        private static void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
+        private void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
         {
-            channel.ExchangeDeclare(
-                rpcExchange,            // exchange 
-                ExchangeType.Direct,    // type 
-                false,                  // autoDelete 
-                true,                   // durable 
-                null);                  // arguments
+            if (!requestExchanges.Contains(requestTypeName))
+            {
+                channel.ExchangeDeclare(
+                    rpcExchange, // exchange 
+                    ExchangeType.Direct, // type 
+                    false, // autoDelete 
+                    true, // durable 
+                    null); // arguments
 
-            channel.QueueDeclare(
-                requestTypeName,    // queue 
-                true,               // durable 
-                false,              // exclusive 
-                false,              // autoDelete 
-                null);              // arguments
+                channel.QueueDeclare(
+                    requestTypeName, // queue 
+                    true, // durable 
+                    false, // exclusive 
+                    false, // autoDelete 
+                    null); // arguments
 
-            channel.QueueBind(
-                requestTypeName,    // queue
-                rpcExchange,        // exchange 
-                requestTypeName);   // routingKey
+                channel.QueueBind(
+                    requestTypeName, // queue
+                    rpcExchange, // exchange 
+                    requestTypeName); // routingKey
+
+                requestExchanges.Add(requestTypeName);
+            }
         }
 
         private bool disposed = false;
