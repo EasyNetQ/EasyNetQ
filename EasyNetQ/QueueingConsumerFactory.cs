@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -69,14 +70,21 @@ namespace EasyNetQ
             logger.DebugWrite("HandleMessageDelivery '{0}'", basicDeliverEventArgs.RoutingKey);
 
             var subscriptionInfo = subscriptions[consumerTag];
-            subscriptionInfo.Callback(
-                consumerTag, 
-                basicDeliverEventArgs.DeliveryTag, 
-                basicDeliverEventArgs.Redelivered,
-                basicDeliverEventArgs.Exchange, 
-                basicDeliverEventArgs.RoutingKey,
-                basicDeliverEventArgs.BasicProperties, 
-                basicDeliverEventArgs.Body);
+            try
+            {
+                subscriptionInfo.Callback(
+                    consumerTag, 
+                    basicDeliverEventArgs.DeliveryTag, 
+                    basicDeliverEventArgs.Redelivered,
+                    basicDeliverEventArgs.Exchange, 
+                    basicDeliverEventArgs.RoutingKey,
+                    basicDeliverEventArgs.BasicProperties, 
+                    basicDeliverEventArgs.Body);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));  
+            }
 
             try
             {
@@ -87,6 +95,18 @@ namespace EasyNetQ
                 logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." + 
                     " Message remains on RabbitMQ and will be retried.", exception.Message);
             }
+        }
+
+        private string BuildErrorMessage(BasicDeliverEventArgs basicDeliverEventArgs, Exception exception)
+        {
+            var message = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
+
+            return "Exception thrown by subscription calback.\n" +
+                   string.Format("\tExchange:    '{0}'\n", basicDeliverEventArgs.Exchange) +
+                   string.Format("\tRouting Key: '{0}'\n", basicDeliverEventArgs.RoutingKey) +
+                   string.Format("\tRedelivered: '{0}'\n", basicDeliverEventArgs.Redelivered) +
+                   string.Format("Message:\n{0}\n", message) +
+                   string.Format("Exception:\n{0}\n", exception);
         }
 
         public DefaultBasicConsumer CreateConsumer(IModel model, MessageCallback callback)
