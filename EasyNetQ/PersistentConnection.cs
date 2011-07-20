@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
 {
@@ -24,13 +26,13 @@ namespace EasyNetQ
         private readonly ConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
         private IConnection connection;
-        private readonly IList<Action> subscribeActions;
+        private readonly ConcurrentBag<Action> subscribeActions;
 
         public PersistentConnection(ConnectionFactory connectionFactory, IEasyNetQLogger logger)
         {
             this.connectionFactory = connectionFactory;
             this.logger = logger;
-            this.subscribeActions = new List<Action>();
+            this.subscribeActions = new ConcurrentBag<Action>();
 
             TryToConnect(null);
         }
@@ -51,8 +53,16 @@ namespace EasyNetQ
         {
             subscribeActions.Add(subscriptionAction);
 
-            // TODO: catch amqp connection exception
-            if (IsConnected) subscriptionAction();
+            try
+            {
+                subscriptionAction();
+            }
+            catch (OperationInterruptedException)
+            {
+                // Looks like the channel closed between our IsConnected check
+                // and the subscription action. Do nothing here, when the 
+                // connection comes back, the subcription action will be run then.
+            }
         }
 
         public bool IsConnected
@@ -66,9 +76,9 @@ namespace EasyNetQ
             timer.Change(connectAttemptIntervalMilliseconds, Timeout.Infinite);
         }
 
-        void TryToConnect(object state)
+        void TryToConnect(object timer)
         {
-            if(state != null) ((Timer) state).Dispose();
+            if(timer != null) ((Timer) timer).Dispose();
 
             logger.DebugWrite("Trying to connect");
             if (disposed) return;
