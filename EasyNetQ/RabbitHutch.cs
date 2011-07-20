@@ -95,10 +95,14 @@ namespace EasyNetQ
                 Password = password
             };
 
+            var serializer = new JsonSerializer();
+
+            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer);
+
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
-                new JsonSerializer(), 
-                new QueueingConsumerFactory(logger),
+                serializer,
+                new QueueingConsumerFactory(logger, consumerErrorStrategy),
                 connectionFactory,
                 logger);
         }

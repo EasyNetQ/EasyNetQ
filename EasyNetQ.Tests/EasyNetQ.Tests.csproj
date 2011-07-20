@@ -70,6 +70,7 @@
     </Compile>
     <Compile Include="BinarySerializerTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
+    <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="MockLogger.cs" />

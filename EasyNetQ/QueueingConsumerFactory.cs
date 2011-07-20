@@ -6,6 +6,7 @@ using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
+using RabbitMQ.Client.Framing.v0_9_1;
 using RabbitMQ.Util;
 
 namespace EasyNetQ
@@ -18,6 +19,7 @@ namespace EasyNetQ
     public class QueueingConsumerFactory : IConsumerFactory
     {
         private readonly IEasyNetQLogger logger;
+        private readonly IConsumerErrorStrategy consumerErrorStrategy;
         private SharedQueue sharedQueue = new SharedQueue();
 
         private readonly IDictionary<string, SubscriptionInfo> subscriptions = 
@@ -26,9 +28,10 @@ namespace EasyNetQ
         private readonly object sharedQueueLock = new object();
         private readonly Thread subscriptionCallbackThread;
 
-        public QueueingConsumerFactory(IEasyNetQLogger logger)
+        public QueueingConsumerFactory(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy)
         {
             this.logger = logger;
+            this.consumerErrorStrategy = consumerErrorStrategy;
             subscriptionCallbackThread = new Thread(_ =>
             {
                 while(true)
@@ -83,7 +86,8 @@ namespace EasyNetQ
             }
             catch (Exception exception)
             {
-                logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));  
+                logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception)); 
+                consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
             }
 
             try
@@ -101,11 +105,19 @@ namespace EasyNetQ
         {
             var message = Encoding.UTF8.GetString(basicDeliverEventArgs.Body);
 
+            var properties = basicDeliverEventArgs.BasicProperties as BasicProperties;
+            var propertiesMessage = new StringBuilder();
+            if (properties != null)
+            {
+                properties.AppendPropertyDebugStringTo(propertiesMessage);
+            }
+
             return "Exception thrown by subscription calback.\n" +
                    string.Format("\tExchange:    '{0}'\n", basicDeliverEventArgs.Exchange) +
                    string.Format("\tRouting Key: '{0}'\n", basicDeliverEventArgs.RoutingKey) +
                    string.Format("\tRedelivered: '{0}'\n", basicDeliverEventArgs.Redelivered) +
                    string.Format("Message:\n{0}\n", message) +
+                   string.Format("BasicProperties:\n{0}\n", propertiesMessage) +
                    string.Format("Exception:\n{0}\n", exception);
         }
 
@@ -135,6 +147,7 @@ namespace EasyNetQ
         public void Dispose()
         {
             if (disposed) return;
+            consumerErrorStrategy.Dispose();
             sharedQueue.Close();
             disposed = true;
         }

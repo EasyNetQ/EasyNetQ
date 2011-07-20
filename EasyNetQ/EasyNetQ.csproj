@@ -49,10 +49,12 @@
     </Compile>
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="CallbackConsumer.cs" />
+    <Compile Include="DefaultConsumerErrorStrategy.cs" />
     <Compile Include="DefaultConsumerFactory.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="IBus.cs" />
+    <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
     <Compile Include="IRawByteBus.cs" />
@@ -65,6 +67,8 @@
     <Compile Include="QueueingConsumerFactory.cs" />
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
+    <Compile Include="SystemMessages\Error.cs" />
+    <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="TypeNameSerializer.cs" />
   </ItemGroup>
