@@ -44,6 +44,30 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string hostName, string username, string password)
         {
+            return CreateBus(hostName, username, password, new ConsoleLogger());
+        }
+
+        /// <summary>
+        /// Creates a new instance of RabbitBus
+        /// </summary>
+        /// <param name="hostName">
+        /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
+        /// To identify the Virtual Host use the following scheme: 'hostname/virtualhost' e.g. 'localhost/myvhost'
+        /// </param>
+        /// <param name="username">
+        /// The username to use to connect to the RabbitMQ broker.
+        /// </param>
+        /// <param name="password">
+        /// The password to use to connect to the RabbitMQ broker.
+        /// </param>
+        /// <param name="logger">
+        /// The logger to use.
+        /// </param>
+        /// <returns>
+        /// A new RabbitBus instance.
+        /// </returns>
+        public static IBus CreateBus(string hostName, string username, string password, IEasyNetQLogger logger)
+        {
             if(hostName == null)
             {
                 throw new ArgumentNullException("hostName");
@@ -56,6 +80,10 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("password");
             }
+            if(logger == null)
+            {
+                throw new ArgumentNullException("logger");
+            }
 
             var rabbitHost = GetRabbitHost(hostName);
 
@@ -66,8 +94,6 @@ namespace EasyNetQ
                 UserName = username,
                 Password = password
             };
-
-            var logger = new ConsoleLogger();
 
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
