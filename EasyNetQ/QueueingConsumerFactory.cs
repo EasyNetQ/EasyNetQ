@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -23,7 +24,7 @@ namespace EasyNetQ
         private SharedQueue sharedQueue = new SharedQueue();
 
         private readonly IDictionary<string, SubscriptionInfo> subscriptions = 
-            new Dictionary<string, SubscriptionInfo>();
+            new ConcurrentDictionary<string, SubscriptionInfo>();
         
         private readonly object sharedQueueLock = new object();
         private readonly Thread subscriptionCallbackThread;
@@ -32,6 +33,10 @@ namespace EasyNetQ
         {
             this.logger = logger;
             this.consumerErrorStrategy = consumerErrorStrategy;
+
+            // start the subscription callback thread
+            // all subscription actions registered with Subscribe or Request
+            // run here.
             subscriptionCallbackThread = new Thread(_ =>
             {
                 while(true)
@@ -140,7 +145,6 @@ namespace EasyNetQ
                 logger.DebugWrite("Clearing consumer subscriptions");
                 sharedQueue = new SharedQueue();
             }
-            //Console.WriteLine("Cleared ClearConsumers lock");
         }
 
         private bool disposed = false;
