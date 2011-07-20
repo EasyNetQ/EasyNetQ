@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests
                     response =>
                     Console.Out.WriteLine("response = {0}", response.Text));
             }
-            Thread.Sleep(2000);
+            Thread.Sleep(5000);
         }
     }
 }

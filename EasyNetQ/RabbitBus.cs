@@ -14,6 +14,7 @@ namespace EasyNetQ
         private readonly ISerializer serializer;
         private readonly IPersistentConnection connection;
         private readonly IConsumerFactory consumerFactory;
+        private readonly IEasyNetQLogger logger;
 
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
@@ -52,6 +53,7 @@ namespace EasyNetQ
 
             this.serializeType = serializeType;
             this.consumerFactory = consumerFactory;
+            this.logger = logger;
             this.serializer = serializer;
 
             connection = new PersistentConnection(connectionFactory, logger);
@@ -179,6 +181,10 @@ namespace EasyNetQ
 
             if (!responseQueueNameCache.ContainsKey(onResponse.Method.GetHashCode()))
             {
+                logger.DebugWrite("Setting up return subscription for req/resp {0} {1}", 
+                    typeof(TRequest).Name,
+                    typeof(TResponse).Name);
+
                 var uniqueResponseQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
                 responseQueueNameCache.Add(onResponse.Method.GetHashCode(), uniqueResponseQueueName);
                 SubscribeToResponse(onResponse, uniqueResponseQueueName);
@@ -353,6 +359,8 @@ namespace EasyNetQ
         {
             if (!requestExchanges.Contains(requestTypeName))
             {
+                logger.DebugWrite("Declaring Request/Response structure for request: {0}", requestTypeName);
+
                 channel.ExchangeDeclare(
                     rpcExchange, // exchange 
                     ExchangeType.Direct, // type 
