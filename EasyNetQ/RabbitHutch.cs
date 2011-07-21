@@ -97,7 +97,7 @@ namespace EasyNetQ
 
             var serializer = new JsonSerializer();
 
-            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer);
+            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger);
 
             return new RabbitBus(
                 TypeNameSerializer.Serialize,

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
 {
@@ -26,14 +28,19 @@ namespace EasyNetQ
 
         private readonly ConnectionFactory connectionFactory;
         private readonly ISerializer serializer;
+        private readonly IEasyNetQLogger logger;
         private IConnection connection;
         private bool errorQueueDeclared = false;
         private readonly IDictionary<string, string> errorExchanges = new Dictionary<string, string>();
 
-        public DefaultConsumerErrorStrategy(ConnectionFactory connectionFactory, ISerializer serializer)
+        public DefaultConsumerErrorStrategy(
+            ConnectionFactory connectionFactory, 
+            ISerializer serializer,
+            IEasyNetQLogger logger)
         {
             this.connectionFactory = connectionFactory;
             this.serializer = serializer;
+            this.logger = logger;
         }
 
         private void Connect()
@@ -80,17 +87,39 @@ namespace EasyNetQ
 
         public void HandleConsumerError(BasicDeliverEventArgs devliverArgs, Exception exception)
         {
-            Connect();
-
-            using (var model = connection.CreateModel())
+            try
             {
-                var errorExchange = DeclareErrorExchangeQueueStructure(model, devliverArgs.RoutingKey);
+                Connect();
 
-                var messageBody = CreateErrorMessage(devliverArgs, exception);
-                var properties = model.CreateBasicProperties();
-                properties.SetPersistent(true);
+                using (var model = connection.CreateModel())
+                {
+                    var errorExchange = DeclareErrorExchangeQueueStructure(model, devliverArgs.RoutingKey);
 
-                model.BasicPublish(errorExchange, devliverArgs.RoutingKey, properties, messageBody);
+                    var messageBody = CreateErrorMessage(devliverArgs, exception);
+                    var properties = model.CreateBasicProperties();
+                    properties.SetPersistent(true);
+
+                    model.BasicPublish(errorExchange, devliverArgs.RoutingKey, properties, messageBody);
+                }
+            }
+            catch (BrokerUnreachableException)
+            {
+                // thrown if the broker is unreachable during initial creation.
+                logger.ErrorWrite("EasyNetQ Consumer Error Handler cannot connect to Broker\n" +
+                    CreateConnectionCheckMessage());
+            }
+            catch (OperationInterruptedException interruptedException)
+            {
+                // thrown if the broker connection is broken during declare or publish.
+                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Broker connection was closed while attempting to publish Error message.\n" +
+                    string.Format("Message was: '{0}'\n", interruptedException.Message) +
+                    CreateConnectionCheckMessage());                
+            }
+            catch (Exception unexpecctedException)
+            {
+                // Something else unexpected has gone wrong :(
+                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n"
+                    + unexpecctedException);
             }
         }
 
@@ -108,6 +137,16 @@ namespace EasyNetQ
             };
 
             return serializer.MessageToBytes(error);
+        }
+
+        private string CreateConnectionCheckMessage()
+        {
+            return
+                "Please check EasyNetQ connection information and that the RabbitMQ Service is running at the specified endpoint.\n" +
+                string.Format("\tHostname: '{0}'\n", connectionFactory.HostName) +
+                string.Format("\tVirtualHost: '{0}'\n", connectionFactory.VirtualHost) +
+                string.Format("\tUserName: '{0}'\n", connectionFactory.UserName) +
+                "Failed to write error message to error queue";
         }
 
         private bool disposed = false;

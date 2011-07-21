@@ -3,6 +3,7 @@
 using System;
 using System.Text;
 using System.Threading;
+using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -28,7 +29,7 @@ namespace EasyNetQ.Tests
                 Password = "guest"
             };
             serializer = new JsonSerializer();
-            consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer);
+            consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger());
         }
 
         /// <summary>
