@@ -35,7 +35,7 @@ namespace EasyNetQ.Hosepipe
                 while (++count < queueParameters.NumberOfMessagesToRetrieve)
                 {
                     var basicGetResult = channel.BasicGet(queueParameters.QueueName, noAck: queueParameters.Purge);
-                    if (basicGetResult == null) break;
+                    if (basicGetResult == null) break; // no more messages on the queue
 
                     yield return Encoding.UTF8.GetString(basicGetResult.Body);
                 }
@@ -64,25 +64,4 @@ namespace EasyNetQ.Hosepipe
             NumberOfMessagesToRetrieve = 1000;
         }
     }
-
-    public class Play
-    {
-        public void TryGetMessagesFromQueue()
-        {
-            const string queue = "test_EasyNetQ_Tests_MyMessage:EasyNetQ_Tests";
-
-            var queueRetrieval = new QueueRetreival();
-            var parameters = new QueueParameters
-            {
-                QueueName = queue,
-                Purge = true
-            };
-
-            foreach (var message in queueRetrieval.GetMessagesFromQueue(parameters))
-            {
-                Console.Out.WriteLine("message = {0}", message);
-            }
-        }
-    }
-
 }
