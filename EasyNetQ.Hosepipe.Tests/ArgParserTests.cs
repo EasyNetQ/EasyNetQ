@@ -68,6 +68,28 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         [Test]
+        public void Should_be_able_to_retrieve_args_by_position_and_key()
+        {
+            var args = new string[]
+            {
+                "command",
+                "abc"
+            };
+
+            var arguments = argParser.Parse(args);
+            var commandDetected = false;
+            var abcDetected = false;
+
+            arguments.At(0, "command", () => commandDetected = true).FailWith(() => Assert.Fail("should succeed"));
+            arguments.At(0, "notCommand", () => Assert.Fail("should not succeed"));
+            arguments.At(1, "command", () => Assert.Fail("should not succeed"));
+            arguments.At(1, "abc", () => abcDetected = true).FailWith(() => Assert.Fail("should succeed"));
+
+            commandDetected.ShouldBeTrue();
+            abcDetected.ShouldBeTrue();
+        }
+
+        [Test]
         public void Should_regex_spike()
         {
             var regex = new Regex(@"([a-z])\:(.*)");

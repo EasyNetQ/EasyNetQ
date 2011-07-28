@@ -58,6 +58,15 @@ namespace EasyNetQ.Hosepipe
             argumentAction(argument);
             return TryResult.Pass();
         }
+
+        public TryResult At(int position, string command, Action argumentAction)
+        {
+            if (position < 0 || position >= arguments.Count) return TryResult.Fail();
+            var argument = arguments[position];
+            if (argument.Value != command) return TryResult.Fail();
+            argumentAction();
+            return TryResult.Pass();
+        }
     }
 
     public class Argument
