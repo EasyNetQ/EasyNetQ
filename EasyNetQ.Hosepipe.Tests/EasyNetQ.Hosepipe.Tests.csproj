@@ -44,8 +44,10 @@
     </Compile>
     <Compile Include="ArgParserTests.cs" />
     <Compile Include="FileMessageWriterTests.cs" />
+    <Compile Include="MessageReaderTests.cs" />
     <Compile Include="ProgramTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueInsertionTests.cs" />
     <Compile Include="QueueRetrievalTests.cs" />
     <Compile Include="TestExtensions.cs" />
   </ItemGroup>

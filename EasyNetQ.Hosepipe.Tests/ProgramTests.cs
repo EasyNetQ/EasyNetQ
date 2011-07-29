@@ -14,15 +14,23 @@ namespace EasyNetQ.Hosepipe.Tests
         private Program program;
         private MockMessageWriter messageWriter;
         private MockQueueRetrieval queueRetrieval;
+        private MockMessageReader messageReader;
+        private MockQueueInsertion queueInsertion;
 
         [SetUp]
         public void SetUp()
         {
             messageWriter = new MockMessageWriter();
             queueRetrieval = new MockQueueRetrieval();
+            messageReader = new MockMessageReader();
+            queueInsertion = new MockQueueInsertion();
 
             program = new Program(
-                new ArgParser(), queueRetrieval, messageWriter);
+                new ArgParser(), 
+                queueRetrieval, 
+                messageWriter,
+                messageReader,
+                queueInsertion);
         }
 
         private const string expectedDumpOutput =
@@ -49,7 +57,20 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
 
             messageWriter.Parameters.QueueName.ShouldEqual("EasyNetQ_Default_Error_Queue");
             messageWriter.Parameters.HostName.ShouldEqual("localhost");
-        } 
+        }
+
+        [Test]
+        public void Should_insert_messages_with_insert()
+        {
+            var args = new[]
+            {
+                "insert",
+                "s:localhost",
+                "q:test"
+            };
+
+            program.Start(args);
+        }
     }
 
     public class MockMessageWriter : IMessageWriter
@@ -64,9 +85,27 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
 
     public class MockQueueRetrieval : IQueueRetreival
     {
-        public IEnumerable<string> GetMessagesFromQueue(QueueParameters queueParameters)
+        public IEnumerable<string> GetMessagesFromQueue(QueueParameters parameters)
         {
-            return Enumerable.Empty<string>();
+            yield return "some message";
+            yield return "some message";
+        }
+    }
+
+    public class MockMessageReader : IMessageReader
+    {
+        public IEnumerable<string> ReadMessages(QueueParameters parameters)
+        {
+            yield return "some message";
+            yield return "some message";
+        }
+    }
+
+    public class MockQueueInsertion : IQueueInsertion
+    {
+        public void PublishMessagesToQueue(IEnumerable<string> messages, QueueParameters parameters)
+        {
+            
         }
     }
 }

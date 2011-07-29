@@ -4,7 +4,8 @@ Usage
 EasyNetQ.Hosepipe.exe <command> [<key:value> ..]
 
 Commands
-	dump
+	dump	Dump all the messages in a queue to the given directory
+	insert	Insert all the messages in a directory in the given queue
 
 Options
 	s	the RabbitMQ broker (server) to connect to. Default is 'localhost'

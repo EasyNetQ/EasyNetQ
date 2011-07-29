@@ -11,18 +11,33 @@ namespace EasyNetQ.Hosepipe
         private readonly ArgParser argParser;
         private readonly IQueueRetreival queueRetreival;
         private readonly IMessageWriter messageWriter;
+        private readonly IMessageReader messageReader;
+        private readonly IQueueInsertion queueInsertion;
 
-        public Program(ArgParser argParser, IQueueRetreival queueRetreival, IMessageWriter messageWriter)
+
+        public Program(
+            ArgParser argParser, 
+            IQueueRetreival queueRetreival, 
+            IMessageWriter messageWriter, 
+            IMessageReader messageReader, 
+            IQueueInsertion queueInsertion)
         {
             this.argParser = argParser;
             this.queueRetreival = queueRetreival;
             this.messageWriter = messageWriter;
+            this.messageReader = messageReader;
+            this.queueInsertion = queueInsertion;
         }
 
         public static void Main(string[] args)
         {
+            // poor man's dependency injection FTW ;)
             var program = new Program(
-                new ArgParser(), new QueueRetreival(), new FileMessageWriter());
+                new ArgParser(), 
+                new QueueRetreival(), 
+                new FileMessageWriter(),
+                new MessageReader(), 
+                new QueueInsertion());
             program.Start(args);
         }
 
@@ -46,7 +61,8 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
 
-            arguments.At(0, "dump", () => Dump(parameters)).FailWith(messsage("No command given"));
+            arguments.At(0, "dump", () => Dump(parameters));
+            arguments.At(0, "insert", () => Insert(parameters));
 
             if(!succeeded)
             {
@@ -63,6 +79,15 @@ namespace EasyNetQ.Hosepipe
             messageWriter.Write(WithEach(queueRetreival.GetMessagesFromQueue(parameters), () => count++), parameters);
             Console.WriteLine("{0} Messages from queue '{1}'\r\noutput to directory '{2}'", 
                 count, parameters.QueueName, parameters.MessageFilePath);
+        }
+
+        private void Insert(QueueParameters parameters)
+        {
+            var count = 0;
+            queueInsertion.PublishMessagesToQueue(
+                WithEach(messageReader.ReadMessages(parameters), () => count++), parameters);       
+            Console.WriteLine("{0} Messages from directory '{1}'\r\ninserted into queue '{2}'",
+                count, parameters.MessageFilePath, parameters.QueueName);
         }
 
         private IEnumerable<string> WithEach(IEnumerable<string> messages, Action action)

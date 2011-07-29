@@ -46,10 +46,15 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="ArgParser.cs" />
+    <Compile Include="HosepipeConnection.cs" />
     <Compile Include="FileMessageWriter.cs" />
+    <Compile Include="IMessageReader.cs" />
     <Compile Include="IMessageWriter.cs" />
+    <Compile Include="IQueueInsertion.cs" />
+    <Compile Include="MessageReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueInsertion.cs" />
     <Compile Include="QueueParameters.cs" />
     <Compile Include="QueueRetrieval.cs" />
   </ItemGroup>

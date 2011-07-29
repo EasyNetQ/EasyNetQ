@@ -1,33 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe
 {
     public interface IQueueRetreival {
-        IEnumerable<string> GetMessagesFromQueue(QueueParameters queueParameters);
+        IEnumerable<string> GetMessagesFromQueue(QueueParameters parameters);
     }
 
     public class QueueRetreival : IQueueRetreival
     {
-        public IEnumerable<string> GetMessagesFromQueue(QueueParameters queueParameters)
+        public IEnumerable<string> GetMessagesFromQueue(QueueParameters parameters)
         {
-            var connectionFactory = new ConnectionFactory
-            {
-                HostName = queueParameters.HostName,
-                VirtualHost = queueParameters.VHost,
-                UserName = queueParameters.Username,
-                Password = queueParameters.Password
-            };
-
-            using (var connection = connectionFactory.CreateConnection())
+            using (var connection = HosepipeConnection.FromParamters(parameters))
             using (var channel = connection.CreateModel())
             {
                 try
                 {
-                    channel.QueueDeclarePassive(queueParameters.QueueName);
+                    channel.QueueDeclarePassive(parameters.QueueName);
                 }
                 catch (OperationInterruptedException exception)
                 {
@@ -36,9 +27,9 @@ namespace EasyNetQ.Hosepipe
                 }
 
                 var count = 0;
-                while (++count < queueParameters.NumberOfMessagesToRetrieve)
+                while (++count < parameters.NumberOfMessagesToRetrieve)
                 {
-                    var basicGetResult = channel.BasicGet(queueParameters.QueueName, noAck: queueParameters.Purge);
+                    var basicGetResult = channel.BasicGet(parameters.QueueName, noAck: parameters.Purge);
                     if (basicGetResult == null) break; // no more messages on the queue
 
                     yield return Encoding.UTF8.GetString(basicGetResult.Body);
