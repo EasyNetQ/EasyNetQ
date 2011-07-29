@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -21,7 +22,7 @@ namespace EasyNetQ.Hosepipe
         public static void Main(string[] args)
         {
             var program = new Program(
-                new ArgParser(), new QueueRetreival(), new FileMessageWriter(@"C:\temp\MessageOutput"));
+                new ArgParser(), new QueueRetreival(), new FileMessageWriter());
             program.Start(args);
         }
 
@@ -43,6 +44,7 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
             arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
+            arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
 
             arguments.At(0, "dump", () => Dump(parameters)).FailWith(messsage("No command given"));
 
@@ -57,8 +59,19 @@ namespace EasyNetQ.Hosepipe
 
         private void Dump(QueueParameters parameters)
         {
-            messageWriter.Write(queueRetreival.GetMessagesFromQueue(parameters), parameters.QueueName);
-            Console.WriteLine("Messages from queue '{0}' output to directory");
+            var count = 0;
+            messageWriter.Write(WithEach(queueRetreival.GetMessagesFromQueue(parameters), () => count++), parameters);
+            Console.WriteLine("{0} Messages from queue '{1}'\r\noutput to directory '{2}'", 
+                count, parameters.QueueName, parameters.MessageFilePath);
+        }
+
+        private IEnumerable<string> WithEach(IEnumerable<string> messages, Action action)
+        {
+            foreach (var message in messages)
+            {
+                action();
+                yield return message;
+            }
         }
 
         public static void PrintUsage()

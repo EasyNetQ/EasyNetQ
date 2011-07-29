@@ -1,24 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace EasyNetQ.Hosepipe
 {
     public class FileMessageWriter : IMessageWriter
     {
-        private readonly string outputDirectoryPath;
-
-        public FileMessageWriter(string outputDirectoryPath)
-        {
-            this.outputDirectoryPath = outputDirectoryPath;
-        }
-
-        public void Write(IEnumerable<string> messages, string queueName)
+        public void Write(IEnumerable<string> messages, QueueParameters parameters)
         {
             var count = 0;
             foreach (string message in messages)
             {
-                var fileName = queueName + "." + count.ToString() + ".message.txt";
-                var path = Path.Combine(outputDirectoryPath, fileName);
+                var fileName = parameters.QueueName + "." + count.ToString() + ".message.txt";
+                var path = Path.Combine(parameters.MessageFilePath, fileName);
+                if(File.Exists(path))
+                {
+                    Console.WriteLine("Overwriting existing messsage file: {0}", path);
+                }
                 File.WriteAllText(path, message);
                 count++;
             }

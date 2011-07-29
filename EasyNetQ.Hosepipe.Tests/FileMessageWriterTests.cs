@@ -14,7 +14,7 @@ namespace EasyNetQ.Hosepipe.Tests
         [Test, Explicit("Writes files to the file system")]
         public void WriteSomeFiles()
         {
-            var writer = new FileMessageWriter(@"C:\temp\MessageOutput");
+            var writer = new FileMessageWriter();
             var messages = new List<string>
             {
                 "This is message one",
@@ -22,7 +22,13 @@ namespace EasyNetQ.Hosepipe.Tests
                 "This is message three"
             };
 
-            writer.Write(messages, "TheNameOfTheQueue");
+            var parameters = new QueueParameters
+            {
+                QueueName = "TheNameOfTheQueue",
+                MessageFilePath = @"C:\temp\MessageOutput"
+            };
+
+            writer.Write(messages, parameters);
         }
  
     }
