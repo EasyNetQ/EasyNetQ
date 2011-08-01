@@ -69,6 +69,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="BinarySerializerTests.cs" />
+    <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />

@@ -21,7 +21,7 @@ namespace EasyNetQ
     /// </summary>
     public class PersistentConnection : IPersistentConnection
     {
-        private const int connectAttemptIntervalMilliseconds = 200;
+        private const int connectAttemptIntervalMilliseconds = 5000;
 
         private readonly ConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
@@ -88,6 +88,7 @@ namespace EasyNetQ
                 connection.ConnectionShutdown += OnConnectionShutdown;
 
                 if (Connected != null) Connected();
+                logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', VHost: '{1}'", connectionFactory.HostName, connectionFactory.VirtualHost);
 
                 logger.DebugWrite("Re-creating subscribers");
                 foreach (var subscribeAction in subscribeActions)
@@ -95,8 +96,14 @@ namespace EasyNetQ
                     subscribeAction();
                 }
             }
-            catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException)
+            catch (BrokerUnreachableException brokerUnreachableException)
             {
+                logger.ErrorWrite("Failed to connect to Broker: '{0}', VHost: '{1}'. Retrying in {2} ms\n" + 
+                    "Check HostName, VirtualHost, Username and Password.", 
+                    connectionFactory.HostName,
+                    connectionFactory.VirtualHost,
+                    connectAttemptIntervalMilliseconds,
+                    brokerUnreachableException.Message);
                 StartTryToConnect();
             }
         }
@@ -107,7 +114,7 @@ namespace EasyNetQ
             if (Disconnected != null) Disconnected();
 
             // try to reconnect and re-subscribe
-            logger.DebugWrite("OnConnectionShutdown -> Event fired");
+            logger.InfoWrite("Disconnected from RabbitMQ Broker");
 
             StartTryToConnect();
         }
