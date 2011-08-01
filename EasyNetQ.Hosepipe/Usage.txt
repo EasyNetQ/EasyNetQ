@@ -12,12 +12,17 @@ Options
 	v	the virtual host. Default is '/'
 	u	the username to connect with. Default is 'guest'
 	p	the password to connect with. Default is 'guest'
-	q	the queue name to take messages from.
+	q	the queue name to take messages from. Mandatory
 	o	the directory to output messages to. Default is current directory.
 
 Examples
 	
-	1. To output all the messages in a given queue as text files to a directory:
+	1. To output all the messages in a queue called 'my_queue' as text files 
+	   to a directory 'C:\temp\messages':
 
-	EasyNetQ.Hosepipe.exe dump s:localhost q:EasyNetQ_Default_Error_Queue o:C:\temp\messages
+	EasyNetQ.Hosepipe.exe dump s:localhost u:guest p:guest q:my_queue o:C:\temp\messages
 
+	2. To insert all the messages in directory 'C:\temp\messages' into queue
+	   'my_queue':
+	
+	EasyNetQ.Hosepipe.exe insert s:localhost u:guest p:guest q:my_queue o:C:\temp\messages

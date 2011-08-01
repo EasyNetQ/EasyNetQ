@@ -58,11 +58,20 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("v", a => parameters.VHost = a.Value);
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
-            arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
+            
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
 
-            arguments.At(0, "dump", () => Dump(parameters));
-            arguments.At(0, "insert", () => Insert(parameters));
+            arguments.At(0, "dump", () =>
+            {
+                arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
+                Dump(parameters);
+            });
+            arguments.At(0, "insert", () =>
+            {
+                arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
+                Insert(parameters);
+            });
+            arguments.At(0, "?", PrintUsage);
 
             if(!succeeded)
             {

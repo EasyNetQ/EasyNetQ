@@ -34,7 +34,7 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         private const string expectedDumpOutput =
-@"0 Messages from queue 'EasyNetQ_Default_Error_Queue'
+@"2 Messages from queue 'EasyNetQ_Default_Error_Queue'
 output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
 ";
 
@@ -59,6 +59,11 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
             messageWriter.Parameters.HostName.ShouldEqual("localhost");
         }
 
+        private const string expectedInsertOutput =
+@"2 Messages from directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
+inserted into queue 'test'
+";
+
         [Test]
         public void Should_insert_messages_with_insert()
         {
@@ -69,7 +74,15 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
                 "q:test"
             };
 
+            var writer = new StringWriter();
+            Console.SetOut(writer);
+
             program.Start(args);
+
+            writer.GetStringBuilder().ToString().ShouldEqual(expectedInsertOutput);
+
+            messageReader.Parameters.QueueName.ShouldEqual("test");
+            messageReader.Parameters.HostName.ShouldEqual("localhost");
         }
     }
 
@@ -80,6 +93,10 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
         public void Write(IEnumerable<string> messages, QueueParameters queueParameters)
         {
             Parameters = queueParameters;
+            foreach (var message in messages)
+            {
+                // Console.Out.WriteLine("message = {0}", message);
+            }
         }
     }
 
@@ -94,8 +111,11 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
 
     public class MockMessageReader : IMessageReader
     {
+        public QueueParameters Parameters { get; set; }
+
         public IEnumerable<string> ReadMessages(QueueParameters parameters)
         {
+            Parameters = parameters;
             yield return "some message";
             yield return "some message";
         }
@@ -105,7 +125,10 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
     {
         public void PublishMessagesToQueue(IEnumerable<string> messages, QueueParameters parameters)
         {
-            
+            foreach (var message in messages)
+            {
+                // Console.Out.WriteLine("message = {0}", message);
+            }
         }
     }
 }
