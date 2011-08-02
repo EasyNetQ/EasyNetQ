@@ -22,8 +22,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.SimpleSaga",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Messages", "EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj", "{E7AF3836-8354-4CDE-A9E7-352569B65B1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Monitor", "EasyNetQ.Monitor\EasyNetQ.Monitor.csproj", "{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj", "{03B93AAD-6CAB-4726-826E-B05684AEC1B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Tests", "EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj", "{530A771C-B12E-48E4-AE10-11B8F6537F4F}"
@@ -114,16 +112,6 @@ Global
 		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Release|x86.ActiveCfg = Release|Any CPU
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Debug|x86.ActiveCfg = Debug|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Debug|x86.Build.0 = Debug|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Release|Any CPU.ActiveCfg = Release|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Release|Mixed Platforms.Build.0 = Release|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Release|x86.ActiveCfg = Release|x86
-		{AC2D30CD-0DBC-4C03-8F9E-49224A9CF709}.Release|x86.Build.0 = Release|x86
 		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Mixed Platforms.Build.0 = Debug|x86
