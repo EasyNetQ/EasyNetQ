@@ -75,6 +75,8 @@ namespace EasyNetQ.Hosepipe
                 Insert(parameters);
             }).FailWith(messsage("No Queue Name given")));
 
+            arguments.At(0, "err", () => ErrorDump(parameters));
+
             arguments.At(0, "retry", () => Retry(parameters));
 
             arguments.At(0, "?", PrintUsage);
@@ -108,6 +110,12 @@ namespace EasyNetQ.Hosepipe
             
             Console.WriteLine("{0} Messages from directory '{1}'\r\ninserted into queue '{2}'",
                 count, parameters.MessageFilePath, parameters.QueueName);
+        }
+
+        private void ErrorDump(QueueParameters parameters)
+        {
+            parameters.QueueName = DefaultConsumerErrorStrategy.EasyNetQErrorQueue;
+            Dump(parameters);
         }
 
         private void Retry(QueueParameters parameters)
