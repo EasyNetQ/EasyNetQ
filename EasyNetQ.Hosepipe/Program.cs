@@ -13,20 +13,22 @@ namespace EasyNetQ.Hosepipe
         private readonly IMessageWriter messageWriter;
         private readonly IMessageReader messageReader;
         private readonly IQueueInsertion queueInsertion;
-
+        private readonly IErrorRetry errorRetry;
 
         public Program(
             ArgParser argParser, 
             IQueueRetreival queueRetreival, 
             IMessageWriter messageWriter, 
             IMessageReader messageReader, 
-            IQueueInsertion queueInsertion)
+            IQueueInsertion queueInsertion, 
+            IErrorRetry errorRetry)
         {
             this.argParser = argParser;
             this.queueRetreival = queueRetreival;
             this.messageWriter = messageWriter;
             this.messageReader = messageReader;
             this.queueInsertion = queueInsertion;
+            this.errorRetry = errorRetry;
         }
 
         public static void Main(string[] args)
@@ -37,7 +39,8 @@ namespace EasyNetQ.Hosepipe
                 new QueueRetreival(), 
                 new FileMessageWriter(),
                 new MessageReader(), 
-                new QueueInsertion());
+                new QueueInsertion(),
+                new ErrorRetry(new JsonSerializer()));
             program.Start(args);
         }
 
@@ -58,20 +61,26 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("v", a => parameters.VHost = a.Value);
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
-            
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
 
-            arguments.At(0, "dump", () =>
+            arguments.At(0, "dump", () => arguments.WithKey("q", a => 
             {
-                arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
+                parameters.QueueName = a.Value;
                 Dump(parameters);
-            });
-            arguments.At(0, "insert", () =>
+            }).FailWith(messsage("No Queue Name given")));
+            
+            arguments.At(0, "insert", () => arguments.WithKey("q", a =>
             {
-                arguments.WithKey("q", a => parameters.QueueName = a.Value).FailWith(messsage("No Queue Name given"));
+                parameters.QueueName = a.Value;
                 Insert(parameters);
-            });
+            }).FailWith(messsage("No Queue Name given")));
+
+            arguments.At(0, "retry", () => Retry(parameters));
+
             arguments.At(0, "?", PrintUsage);
+
+            // print usage if there are no arguments
+            arguments.At(0, a => {}).FailWith(PrintUsage);
 
             if(!succeeded)
             {
@@ -86,6 +95,7 @@ namespace EasyNetQ.Hosepipe
         {
             var count = 0;
             messageWriter.Write(WithEach(queueRetreival.GetMessagesFromQueue(parameters), () => count++), parameters);
+            
             Console.WriteLine("{0} Messages from queue '{1}'\r\noutput to directory '{2}'", 
                 count, parameters.QueueName, parameters.MessageFilePath);
         }
@@ -95,8 +105,22 @@ namespace EasyNetQ.Hosepipe
             var count = 0;
             queueInsertion.PublishMessagesToQueue(
                 WithEach(messageReader.ReadMessages(parameters), () => count++), parameters);       
+            
             Console.WriteLine("{0} Messages from directory '{1}'\r\ninserted into queue '{2}'",
                 count, parameters.MessageFilePath, parameters.QueueName);
+        }
+
+        private void Retry(QueueParameters parameters)
+        {
+            var count = 0;
+            errorRetry.RetryErrors(
+                WithEach(
+                    messageReader.ReadMessages(parameters, DefaultConsumerErrorStrategy.EasyNetQErrorQueue), 
+                    () => count++), 
+                parameters);
+
+            Console.WriteLine("{0} Error messages from directory '{1}' republished",
+                count, parameters.MessageFilePath);
         }
 
         private IEnumerable<string> WithEach(IEnumerable<string> messages, Action action)

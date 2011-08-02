@@ -34,7 +34,22 @@ namespace EasyNetQ.Hosepipe.Tests
             {
                 Console.WriteLine(message);
             }
-        } 
+        }
+
+        [Test]
+        public void Should_be_able_to_read_only_error_messages()
+        {
+            var parameters = new QueueParameters
+            {
+                MessageFilePath = @"C:\temp\MessageOutput"
+            };
+
+            var messages = messageReader.ReadMessages(parameters, DefaultConsumerErrorStrategy.EasyNetQErrorQueue);
+            foreach (var message in messages)
+            {
+                Console.WriteLine(message);
+            }
+        }
     }
 }
 

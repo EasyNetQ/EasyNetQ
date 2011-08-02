@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\References\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="RabbitMQ.Client">
       <HintPath>..\References\RabbitMQ.Client.dll</HintPath>
     </Reference>
@@ -46,8 +49,10 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="ArgParser.cs" />
+    <Compile Include="ErrorRetry.cs" />
     <Compile Include="HosepipeConnection.cs" />
     <Compile Include="FileMessageWriter.cs" />
+    <Compile Include="IErrorRetry.cs" />
     <Compile Include="IMessageReader.cs" />
     <Compile Include="IMessageWriter.cs" />
     <Compile Include="IQueueInsertion.cs" />
@@ -60,6 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Usage.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj">
+      <Project>{B8DEF709-5168-48F1-B8D3-AD44E4A4A22B}</Project>
+      <Name>EasyNetQ</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

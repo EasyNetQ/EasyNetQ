@@ -8,13 +8,20 @@ namespace EasyNetQ.Hosepipe
     {
         public IEnumerable<string> ReadMessages(QueueParameters parameters)
         {
+            return ReadMessages(parameters, null);
+        }
+
+        public IEnumerable<string> ReadMessages(QueueParameters parameters, string messageName)
+        {
             if (!Directory.Exists(parameters.MessageFilePath))
             {
                 Console.WriteLine("Directory '{0}' does not exist", parameters.MessageFilePath);
                 yield break;
             }
 
-            foreach (var file in Directory.GetFiles(parameters.MessageFilePath, "*.message.txt"))
+            var pattern = (messageName ?? "*") + ".*.message.txt";
+
+            foreach (var file in Directory.GetFiles(parameters.MessageFilePath, pattern))
             {
                 yield return File.ReadAllText(file);
             }
