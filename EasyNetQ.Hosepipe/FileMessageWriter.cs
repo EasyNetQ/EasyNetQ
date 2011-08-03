@@ -17,7 +17,15 @@ namespace EasyNetQ.Hosepipe
                 {
                     Console.WriteLine("Overwriting existing messsage file: {0}", path);
                 }
-                File.WriteAllText(path, message);
+                try
+                {
+                    File.WriteAllText(path, message);
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    throw new EasyNetQHosepipeException(
+                        string.Format("Directory '{0}' does not exist", parameters.MessageFilePath));
+                }
                 count++;
             }
         }

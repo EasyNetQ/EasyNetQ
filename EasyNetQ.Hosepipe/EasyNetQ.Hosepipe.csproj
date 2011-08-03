@@ -49,6 +49,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="ArgParser.cs" />
+    <Compile Include="EasyNetQHosepipeException.cs" />
     <Compile Include="ErrorRetry.cs" />
     <Compile Include="HosepipeConnection.cs" />
     <Compile Include="FileMessageWriter.cs" />

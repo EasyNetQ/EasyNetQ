@@ -63,26 +63,34 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("p", a => parameters.Password = a.Value);
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
 
-            arguments.At(0, "dump", () => arguments.WithKey("q", a => 
+            try
             {
-                parameters.QueueName = a.Value;
-                Dump(parameters);
-            }).FailWith(messsage("No Queue Name given")));
+                arguments.At(0, "dump", () => arguments.WithKey("q", a => 
+                {
+                    parameters.QueueName = a.Value;
+                    Dump(parameters);
+                }).FailWith(messsage("No Queue Name given")));
             
-            arguments.At(0, "insert", () => arguments.WithKey("q", a =>
+                arguments.At(0, "insert", () => arguments.WithKey("q", a =>
+                {
+                    parameters.QueueName = a.Value;
+                    Insert(parameters);
+                }).FailWith(messsage("No Queue Name given")));
+
+                arguments.At(0, "err", () => ErrorDump(parameters));
+
+                arguments.At(0, "retry", () => Retry(parameters));
+
+                arguments.At(0, "?", PrintUsage);
+
+                // print usage if there are no arguments
+                arguments.At(0, a => {}).FailWith(PrintUsage);
+            }
+            catch (EasyNetQHosepipeException easyNetQHosepipeException)
             {
-                parameters.QueueName = a.Value;
-                Insert(parameters);
-            }).FailWith(messsage("No Queue Name given")));
-
-            arguments.At(0, "err", () => ErrorDump(parameters));
-
-            arguments.At(0, "retry", () => Retry(parameters));
-
-            arguments.At(0, "?", PrintUsage);
-
-            // print usage if there are no arguments
-            arguments.At(0, a => {}).FailWith(PrintUsage);
+                Console.WriteLine("Operation Failed:");    
+                Console.WriteLine(easyNetQHosepipeException.Message);
+            }
 
             if(!succeeded)
             {
