@@ -113,6 +113,20 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_15D7F1E3278D48A29EA40F3CDC5AE030"
+            {
+            "Name" = "8:Primary output from EasyNetQ.Hosepipe (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_17572011AB1F4D88BD330615E72993D4"
+            "FileType" = "3:2"
+            "InstallAction" = "3:2"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_26FDBF9E_AA86_45F1_B4DE_D539FD393C0E"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
         }
         "DefaultFeature"
         {
@@ -286,7 +300,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:EasyNetQ Hosepipe "
         "ProductCode" = "8:{2BF019E8-ED1B-4441-BB9F-0C75A428298C}"
-        "PackageCode" = "8:{45BE628E-5F4F-4FC6-9E95-1D21B0942CC7}"
+        "PackageCode" = "8:{9ADA6564-D7B9-4A5C-B1FC-0B86660FB4A2}"
         "UpgradeCode" = "8:{BA67A27E-ACCA-4889-9344-9ABB01AB9A92}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
