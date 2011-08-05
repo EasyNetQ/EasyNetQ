@@ -17,6 +17,12 @@ namespace EasyNetQ.Tests
             while(!bus.IsConnected) Thread.Sleep(10);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            bus.Dispose();
+        }
+
         [Test]
         [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
         public void Should_be_able_to_schedule_a_message()
@@ -30,7 +36,7 @@ namespace EasyNetQ.Tests
                 Date = new DateTime(2011, 5, 24)
             };
 
-            bus.FuturePublish(DateTime.Now.AddSeconds(3), invitation);
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
 
             Thread.Sleep(6000);
         }
