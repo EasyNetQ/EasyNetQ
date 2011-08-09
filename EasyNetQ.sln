@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Hosepipe.Tests", "
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "EasyNetQ.Hosepipe.Setup", "EasyNetQ.Hosepipe.Setup\EasyNetQ.Hosepipe.Setup.vdproj", "{A15F4EFD-3A09-45EF-9BE0-82A2765E52AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Hosepipe.SetupActions", "EasyNetQ.Hosepipe.SetupActions\EasyNetQ.Hosepipe.SetupActions.csproj", "{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -170,6 +172,16 @@ Global
 		{A15F4EFD-3A09-45EF-9BE0-82A2765E52AD}.Release|Any CPU.ActiveCfg = Release
 		{A15F4EFD-3A09-45EF-9BE0-82A2765E52AD}.Release|Mixed Platforms.ActiveCfg = Release
 		{A15F4EFD-3A09-45EF-9BE0-82A2765E52AD}.Release|x86.ActiveCfg = Release
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

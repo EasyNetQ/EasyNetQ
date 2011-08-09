@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_30E6491208AD4A56AEF529297E4D31A5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_7E15B1CC8FDC71D3D295F9F9076A8D06"
         "OwnerKey" = "8:_B1B32CA08165009266F9DC009B984495"
         "MsmSig" = "8:_UNDEFINED"
@@ -52,13 +58,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_7E15B1CC8FDC71D3D295F9F9076A8D06"
+        "OwnerKey" = "8:_17572011AB1F4D88BD330615E72993D4"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_17572011AB1F4D88BD330615E72993D4"
+        "OwnerKey" = "8:_30E6491208AD4A56AEF529297E4D31A5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -71,6 +77,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_8C09870AB9B6CD808565E8F1D0775768"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_7E15B1CC8FDC71D3D295F9F9076A8D06"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -91,6 +103,27 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0,Profile=Client"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4 Client Profile (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.0,Profile=Client"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -107,25 +140,33 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
     {
         "CustomAction"
         {
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_15D7F1E3278D48A29EA40F3CDC5AE030"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_B87AAC56005D486FA3C303D25596DAEA"
             {
-            "Name" = "8:Primary output from EasyNetQ.Hosepipe (Active)"
+            "Name" = "8:Primary output from EasyNetQ.Hosepipe.SetupActions (Active)"
             "Condition" = "8:"
-            "Object" = "8:_17572011AB1F4D88BD330615E72993D4"
-            "FileType" = "3:2"
-            "InstallAction" = "3:2"
+            "Object" = "8:_30E6491208AD4A56AEF529297E4D31A5"
+            "FileType" = "3:1"
+            "InstallAction" = "3:1"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_26FDBF9E_AA86_45F1_B4DE_D539FD393C0E"
+            "Identifier" = "8:_CA67F33F_508D_4F7C_BC41_5DD2E4DAE9AF"
             "InstallerClass" = "11:TRUE"
-            "CustomActionData" = "8:"
+            "CustomActionData" = "8:/targetdir=\"[TARGETDIR] \""
             }
         }
         "DefaultFeature"
@@ -300,7 +341,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:EasyNetQ Hosepipe "
         "ProductCode" = "8:{2BF019E8-ED1B-4441-BB9F-0C75A428298C}"
-        "PackageCode" = "8:{9ADA6564-D7B9-4A5C-B1FC-0B86660FB4A2}"
+        "PackageCode" = "8:{5F08C516-138F-49CB-9D03-CA15BB47ACC9}"
         "UpgradeCode" = "8:{BA67A27E-ACCA-4889-9344-9ABB01AB9A92}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -842,6 +883,34 @@
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_30E6491208AD4A56AEF529297E4D31A5"
+            {
+            "SourcePath" = "8:..\\EasyNetQ.Hosepipe.SetupActions\\obj\\Debug\\EasyNetQ.Hosepipe.SetupActions.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_47E5BFFF993246E18A66D9B26CACAFC7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
