@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests
                     Console.WriteLine("Got response: '{0}'", response.Text));
             }
 
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.

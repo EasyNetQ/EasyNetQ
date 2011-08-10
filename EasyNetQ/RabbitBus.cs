@@ -90,6 +90,7 @@ namespace EasyNetQ
 
                     var defaultProperties = channel.CreateBasicProperties();
                     defaultProperties.SetPersistent(true);
+                    defaultProperties.Type = typeName;
 
                     channel.BasicPublish(
                         typeName,                   // exchange
@@ -115,6 +116,16 @@ namespace EasyNetQ
                     true);                  // durable
 
                 publishExchanges.Add(typeName);
+            }
+        }
+
+        private void CheckMessageType<TMessage>(IBasicProperties properties)
+        {
+            var typeName = serializeType(typeof (TMessage));
+            if (properties.Type != typeName)
+            {
+                throw new EasyNetQException("Message type is incorrect. Expected '{0}', but was '{1}'",
+                    typeName, properties.Type);
             }
         }
 
@@ -150,6 +161,8 @@ namespace EasyNetQ
                 var consumer = consumerFactory.CreateConsumer(channel, 
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
+                        CheckMessageType<T>(properties);
+
                         var message = serializer.BytesToMessage<T>(body);
                         onMessage(message);
                     });
@@ -211,6 +224,7 @@ namespace EasyNetQ
             var consumer = consumerFactory.CreateConsumer(responseChannel,
                 (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                 {
+                    CheckMessageType<TResponse>(properties);
                     var response = serializer.BytesToMessage<TResponse>(body);
                     onResponse(response);
                 });
@@ -235,6 +249,7 @@ namespace EasyNetQ
             // tell the consumer to respond to the transient respondQueue
             var requestProperties = requestChannel.CreateBasicProperties();
             requestProperties.ReplyTo = returnQueueName;
+            requestProperties.Type = requestTypeName;
 
             var requestBody = serializer.MessageToBytes(request);
             requestChannel.BasicPublish(
@@ -274,6 +289,7 @@ namespace EasyNetQ
                 var consumer = consumerFactory.CreateConsumer(requestChannel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
+                        CheckMessageType<TRequest>(properties);
                         var request = serializer.BytesToMessage<TRequest>(body);
                         var responseTask = responder(request);
 
@@ -285,6 +301,7 @@ namespace EasyNetQ
                             using(var responseChannel = connection.CreateModel())
                             {
                                 var responseProperties = responseChannel.CreateBasicProperties();
+                                responseProperties.Type = serializeType(typeof (TResponse));
                                 var responseBody = serializer.MessageToBytes(task.Result);
 
                                 responseChannel.BasicPublish(
