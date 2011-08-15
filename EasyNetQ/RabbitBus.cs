@@ -131,6 +131,24 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
+            SubscribeAsync<T>(subscriptionId, msg =>
+            {
+                var tcs = new TaskCompletionSource<object>();
+                try
+                {
+                    onMessage(msg);
+                    tcs.SetResult(null);
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            });
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
+        {
             if (onMessage == null)
             {
                 throw new ArgumentNullException("onMessage");
@@ -158,13 +176,13 @@ namespace EasyNetQ
                     typeName,           // exchange
                     typeName);          // routingKey
 
-                var consumer = consumerFactory.CreateConsumer(channel, 
+                var consumer = consumerFactory.CreateConsumer(channel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
                         CheckMessageType<T>(properties);
 
                         var message = serializer.BytesToMessage<T>(body);
-                        onMessage(message);
+                        return onMessage(message);
                     });
 
                 channel.BasicConsume(
@@ -192,6 +210,14 @@ namespace EasyNetQ
                 throw new EasyNetQException("Publish failed. No rabbit server connected.");
             }
 
+            // rather than setting up a subscription on each call of Request, we cache a single
+            // subscription keyed on the hashcode of the onResponse action. This has a couple of
+            // consequences:
+            //  1.  Closures don't work as expected since the closed over variable is always the first
+            //      one that was called.
+            //  2.  Worries about the uniqueness of MethodInfo.GetHashCode. Looking at the CLR source
+            //      it seems that it's not overriden so it is the same as Object.GetHashCode(). This
+            //      is unique for an instance in an app-domain, so it _should_ be OK for this usage.
             if (!responseQueueNameCache.ContainsKey(onResponse.Method.GetHashCode()))
             {
                 logger.DebugWrite("Setting up return subscription for req/resp {0} {1}", 
@@ -226,7 +252,19 @@ namespace EasyNetQ
                 {
                     CheckMessageType<TResponse>(properties);
                     var response = serializer.BytesToMessage<TResponse>(body);
-                    onResponse(response);
+
+                    var tcs = new TaskCompletionSource<object>();
+
+                    try
+                    {
+                        onResponse(response);
+                        tcs.SetResult(null);
+                    }
+                    catch (Exception exception)
+                    {
+                        tcs.SetException(exception);
+                    }
+                    return tcs.Task;
                 });
 
             responseChannel.BasicConsume(
@@ -293,24 +331,37 @@ namespace EasyNetQ
                         var request = serializer.BytesToMessage<TRequest>(body);
                         var responseTask = responder(request);
 
+                        var tcs = new TaskCompletionSource<object>();
                         responseTask.ContinueWith(task =>
                         {
-                            // wait for the connection to come back
-                            while (!connection.IsConnected) Thread.Sleep(100);
-
-                            using(var responseChannel = connection.CreateModel())
+                            if (task.IsFaulted)
                             {
-                                var responseProperties = responseChannel.CreateBasicProperties();
-                                responseProperties.Type = serializeType(typeof (TResponse));
-                                var responseBody = serializer.MessageToBytes(task.Result);
+                                if (task.Exception != null)
+                                {
+                                    tcs.SetException(task.Exception);
+                                }
+                            }
+                            else
+                            {
+                                // wait for the connection to come back
+                                while (!connection.IsConnected) Thread.Sleep(100);
 
-                                responseChannel.BasicPublish(
-                                    "",                 // exchange 
-                                    properties.ReplyTo, // routingKey
-                                    responseProperties, // basicProperties 
-                                    responseBody);      // body
+                                using(var responseChannel = connection.CreateModel())
+                                {
+                                    var responseProperties = responseChannel.CreateBasicProperties();
+                                    responseProperties.Type = serializeType(typeof (TResponse));
+                                    var responseBody = serializer.MessageToBytes(task.Result);
+
+                                    responseChannel.BasicPublish(
+                                        "",                 // exchange 
+                                        properties.ReplyTo, // routingKey
+                                        responseProperties, // basicProperties 
+                                        responseBody);      // body
+                                }
+                                tcs.SetResult(null);
                             }
                         });
+                        return tcs.Task;
                     });
 
                 // TODO: dispose channel
@@ -359,6 +410,7 @@ namespace EasyNetQ
         protected void OnDisconnected()
         {
             publishExchanges.Clear();
+            requestExchanges.Clear();
             responseQueueNameCache.Clear();
             if (Disconnected != null) Disconnected();
         }
