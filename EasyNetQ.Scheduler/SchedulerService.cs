@@ -92,7 +92,7 @@ namespace EasyNetQ.Scheduler
             }
             catch (Exception exception)
             {
-                log.ErrorWrite("Error in schedule pol", exception);
+                log.ErrorWrite("Error in schedule pol\r\n{0}", exception);
             }
         }
     }

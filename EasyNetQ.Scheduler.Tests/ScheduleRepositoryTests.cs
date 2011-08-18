@@ -43,6 +43,11 @@ namespace EasyNetQ.Scheduler.Tests
                     Encoding.UTF8.GetString(scheduleMe.InnerMessage));
             }
         }
+
+        public DateTime GetCurrentUtcTime()
+        {
+            return DateTime.UtcNow;
+        }
     }
 }
 

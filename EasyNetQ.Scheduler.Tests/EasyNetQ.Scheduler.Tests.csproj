@@ -42,8 +42,13 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="MockBus.cs" />
+    <Compile Include="MockRawByteBus.cs" />
+    <Compile Include="MockScheduleRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScheduleRepositoryTests.cs" />
+    <Compile Include="SchedulerServiceTests.cs" />
+    <Compile Include="TestExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj">
