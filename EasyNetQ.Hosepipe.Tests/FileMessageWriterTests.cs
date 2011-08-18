@@ -24,13 +24,22 @@ namespace EasyNetQ.Hosepipe.Tests
 
             var parameters = new QueueParameters
             {
-                QueueName = "TheNameOfTheQueue",
+                QueueName = "Queue EasyNetQ_Tests_TestAsyncRequestMessage:EasyNetQ_Tests_Messages",
                 MessageFilePath = @"C:\temp\MessageOutput"
             };
 
             writer.Write(messages, parameters);
         }
- 
+
+        [Test]
+        public void Should_remove_invalid_file_chars()
+        {
+            const string originalQueueName = @"\A/B:C*D?E""F<G>H|I";
+            const string expectedSanitisedQueueName = @"_A_B_C_D_E_F_G_H_I";
+
+            var sanitisedQueueName = FileMessageWriter.SanitiseQueueName(originalQueueName);
+            sanitisedQueueName.ShouldEqual(expectedSanitisedQueueName);
+        }
     }
 }
 
