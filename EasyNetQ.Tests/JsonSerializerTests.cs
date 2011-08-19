@@ -6,7 +6,6 @@ using System.Text;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.v0_9_1;
 using BasicProperties = RabbitMQ.Client.Framing.v0_8.BasicProperties;
 
 namespace EasyNetQ.Tests

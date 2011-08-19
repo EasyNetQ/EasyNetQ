@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests
     {
         public void Server_goes_away_after_connection_but_before_publish()
         {
-            using(var bus = RabbitHutch.CreateBus("localhost"))
+            using(var bus = RabbitHutch.CreateBus("host=localhost"))
             {
                 Console.WriteLine("Now kill the server");
                 while(true)
@@ -46,8 +46,8 @@ namespace EasyNetQ.Tests
         public void Server_goes_away_and_comes_back_during_subscription()
         {
             Console.WriteLine("Creating busses");
-            using(var busA = RabbitHutch.CreateBus("localhost"))
-            using(var busB = RabbitHutch.CreateBus("localhost"))
+            using (var busA = RabbitHutch.CreateBus("host=localhost"))
+            using (var busB = RabbitHutch.CreateBus("host=localhost"))
             {
                 Console.WriteLine("About to subscribe");
 

@@ -14,45 +14,66 @@ namespace EasyNetQ
         /// <summary>
         /// Creates a new instance of RabbitBus with default credentials.
         /// </summary>
-        /// <param name="hostName">
-        /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
-        /// To identify the Virtual Host use the following scheme: 'hostname/virtualhost' e.g. 'localhost/myvhost'
+        /// <param name="connectionString">
+        /// The EasyNetQ connection string. Example:
+        /// host=192.168.1.1;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword
+        /// 
+        /// The following default values will be used if not specified:
+        /// host=localhost;virtualHost=/;username=guest;password=guest
         /// </param>
         /// <returns>
         /// A new RabbitBus instance.
         /// </returns>
-        public static IBus CreateBus(string hostName)
+        public static IBus CreateBus(string connectionString)
         {
-            return CreateBus(hostName, "guest", "guest");
+            return CreateBus(connectionString, new ConsoleLogger());
+        }
+
+        /// <summary>
+        /// Creates a new instance of RabbitBus with default credentials.
+        /// </summary>
+        /// <param name="connectionString">
+        /// The EasyNetQ connection string. Example:
+        /// host=192.168.1.1;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword
+        /// 
+        /// The following default values will be used if not specified:
+        /// host=localhost;virtualHost=/;username=guest;password=guest
+        /// </param>
+        /// <param name="logger">
+        /// An implementation of IEasyNetQLogger to send the log output to.
+        /// </param>
+        /// <returns>
+        /// A new RabbitBus instance.
+        /// </returns>
+        public static IBus CreateBus(string connectionString, IEasyNetQLogger logger)
+        {
+            if(connectionString == null)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+            if(logger == null)
+            {
+                throw new ArgumentNullException("logger");
+            }
+
+            var connectionValues = new ConnectionString(connectionString);
+
+            return CreateBus(
+                connectionValues.Host, 
+                connectionValues.VirtualHost,
+                connectionValues.UserName, 
+                connectionValues.Password, 
+                logger);
         }
 
         /// <summary>
         /// Creates a new instance of RabbitBus
         /// </summary>
         /// <param name="hostName">
-        /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
-        /// To identify the Virtual Host use the following scheme: 'hostname/virtualhost' e.g. 'localhost/myvhost'
+        /// The RabbitMQ broker.
         /// </param>
-        /// <param name="username">
-        /// The username to use to connect to the RabbitMQ broker.
-        /// </param>
-        /// <param name="password">
-        /// The password to use to connect to the RabbitMQ broker.
-        /// </param>
-        /// <returns>
-        /// A new RabbitBus instance.
-        /// </returns>
-        public static IBus CreateBus(string hostName, string username, string password)
-        {
-            return CreateBus(hostName, username, password, new ConsoleLogger());
-        }
-
-        /// <summary>
-        /// Creates a new instance of RabbitBus
-        /// </summary>
-        /// <param name="hostName">
-        /// The RabbitMQ broker. To use the default Virtual Host, simply use the server name, e.g. 'localhost'.
-        /// To identify the Virtual Host use the following scheme: 'hostname/virtualhost' e.g. 'localhost/myvhost'
+        /// <param name="virtualHost">
+        /// The RabbitMQ virtualHost.
         /// </param>
         /// <param name="username">
         /// The username to use to connect to the RabbitMQ broker.
@@ -66,11 +87,15 @@ namespace EasyNetQ
         /// <returns>
         /// A new RabbitBus instance.
         /// </returns>
-        public static IBus CreateBus(string hostName, string username, string password, IEasyNetQLogger logger)
+        public static IBus CreateBus(string hostName, string virtualHost, string username, string password, IEasyNetQLogger logger)
         {
             if(hostName == null)
             {
                 throw new ArgumentNullException("hostName");
+            }
+            if(virtualHost == null)
+            {
+                throw new ArgumentNullException("virtualHost");
             }
             if(username == null)
             {
@@ -85,12 +110,10 @@ namespace EasyNetQ
                 throw new ArgumentNullException("logger");
             }
 
-            var rabbitHost = GetRabbitHost(hostName);
-
             var connectionFactory = new ConnectionFactory
             {
-                HostName = rabbitHost.HostName,
-                VirtualHost = rabbitHost.VirtualHost,
+                HostName = hostName,
+                VirtualHost = virtualHost,
                 UserName = username,
                 Password = password
             };
@@ -105,28 +128,6 @@ namespace EasyNetQ
                 new QueueingConsumerFactory(logger, consumerErrorStrategy),
                 connectionFactory,
                 logger);
-        }
-
-        public static RabbitHost GetRabbitHost(string hostName)
-        {
-            var hostNameParts = hostName.Split('/');
-            if (hostNameParts.Length > 2)
-            {
-                throw new EasyNetQException(@"hostname has too many parts, expecting '<server>/<vhost>' but was: '{0}'", 
-                    hostName);
-            }
-
-            return new RabbitHost
-            {
-                HostName = hostNameParts[0],
-                VirtualHost = hostNameParts.Length==1 ? "/" : hostNameParts[1]
-            };
-        }
-
-        public struct RabbitHost
-        {
-            public string HostName;
-            public string VirtualHost;
         }
 
         /// <summary>

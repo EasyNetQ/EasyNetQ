@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests.SimpleService
     {
         static void Main(string[] args)
         {
-            var bus = RabbitHutch.CreateBus("localhost");
+            var bus = RabbitHutch.CreateBus("host=localhost");
             bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
             bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
 

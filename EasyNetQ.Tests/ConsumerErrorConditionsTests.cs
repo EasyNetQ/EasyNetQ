@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading;
-using EasyNetQ.Loggers;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -15,7 +14,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateBus("localhost", "guest", "guest", new ConsoleLogger());
+            bus = RabbitHutch.CreateBus("host=localhost");
 
             // wait for rabbit to connect
             while (!bus.IsConnected)

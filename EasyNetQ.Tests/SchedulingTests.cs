@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateBus("localhost");
+            bus = RabbitHutch.CreateBus("host=localhost");
             while(!bus.IsConnected) Thread.Sleep(10);
         }
 

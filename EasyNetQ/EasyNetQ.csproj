@@ -48,6 +48,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="BinarySerializer.cs" />
+    <Compile Include="ConnectionString.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
