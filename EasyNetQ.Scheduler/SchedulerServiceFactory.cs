@@ -15,7 +15,7 @@ namespace EasyNetQ.Scheduler
                 throw new EasyNetQException("Bus does not implement IRawByteBus");
             }
 
-            var logger = new Logger(LogManager.GetLogger(""));
+            var logger = new Logger(LogManager.GetLogger("EasyNetQ.Scheduler"));
 
             return new SchedulerService(
                 bus, 
