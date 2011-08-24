@@ -124,7 +124,10 @@ namespace EasyNetQ
             var typeName = serializeType(typeof (TMessage));
             if (properties.Type != typeName)
             {
-                throw new EasyNetQException("Message type is incorrect. Expected '{0}', but was '{1}'",
+                logger.ErrorWrite("Message type is incorrect. Expected '{0}', but was '{1}'",
+                    typeName, properties.Type);
+
+                throw new EasyNetQInvalidMessageTypeException("Message type is incorrect. Expected '{0}', but was '{1}'",
                     typeName, properties.Type);
             }
         }

@@ -6,13 +6,6 @@ namespace EasyNetQ
     [Serializable]
     public class EasyNetQException : Exception
     {
-        //
-        // For guidelines regarding the creation of new exception types, see
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
-        // and
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
-        //
-
         public EasyNetQException() {}
         public EasyNetQException(string message) : base(message) {}
         public EasyNetQException(string format, params string[] args) : base(string.Format(format, args)) {}
@@ -21,5 +14,15 @@ namespace EasyNetQ
         protected EasyNetQException(
             SerializationInfo info,
             StreamingContext context) : base(info, context) {}
+    }
+
+    [Serializable]
+    public class EasyNetQInvalidMessageTypeException : EasyNetQException
+    {
+        public EasyNetQInvalidMessageTypeException() {}
+        public EasyNetQInvalidMessageTypeException(string message) : base(message) {}
+        public EasyNetQInvalidMessageTypeException(string format, params string[] args) : base(format, args) {}
+        public EasyNetQInvalidMessageTypeException(string message, Exception inner) : base(message, inner) {}
+        protected EasyNetQInvalidMessageTypeException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 }

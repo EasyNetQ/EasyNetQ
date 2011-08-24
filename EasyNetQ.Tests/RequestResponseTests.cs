@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using NUnit.Framework;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
@@ -84,6 +85,43 @@ namespace EasyNetQ.Tests
                     Console.Out.WriteLine("response = {0}", response.Text));
             }
             Thread.Sleep(5000);
+        }
+
+        public void Service_should_handle_sychronous_message_of_the_wrong_type()
+        {
+            const string routingKey = "EasyNetQ_Tests_TestRequestMessage:EasyNetQ_Tests_Messages";
+            const string type = "not_the_type_you_are_expecting";
+
+            MakeRpcRequest(type, routingKey);
+        }
+
+        public void Service_should_handle_asychronous_message_of_the_wrong_type()
+        {
+            const string routingKey = "EasyNetQ_Tests_TestAsyncRequestMessage:EasyNetQ_Tests_Messages";
+            const string type = "not_the_type_you_are_expecting";
+
+            MakeRpcRequest(type, routingKey);
+        }
+
+        private static void MakeRpcRequest(string type, string routingKey)
+        {
+            var connectionFactory = new ConnectionFactory
+            {
+                HostName = "localhost"
+            };
+            using (var connection = connectionFactory.CreateConnection())
+            using (var model = connection.CreateModel())
+            {
+                var properties = model.CreateBasicProperties();
+                properties.Type = type;
+                model.BasicPublish(
+                    "easy_net_q_rpc", // exchange
+                    routingKey, // routing key
+                    false, // manditory
+                    false, // immediate
+                    properties,
+                    new byte[0]);
+            }
         }
     }
 }

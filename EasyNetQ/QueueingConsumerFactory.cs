@@ -78,33 +78,43 @@ namespace EasyNetQ
             logger.DebugWrite("HandleMessageDelivery '{0}'", basicDeliverEventArgs.RoutingKey);
 
             var subscriptionInfo = subscriptions[consumerTag];
-            var completionTask = subscriptionInfo.Callback(
-                consumerTag, 
-                basicDeliverEventArgs.DeliveryTag, 
-                basicDeliverEventArgs.Redelivered,
-                basicDeliverEventArgs.Exchange, 
-                basicDeliverEventArgs.RoutingKey,
-                basicDeliverEventArgs.BasicProperties, 
-                basicDeliverEventArgs.Body);
 
-            completionTask.ContinueWith(task =>
+
+            try
             {
-                if(task.IsFaulted)
+                var completionTask = subscriptionInfo.Callback(
+                    consumerTag, 
+                    basicDeliverEventArgs.DeliveryTag, 
+                    basicDeliverEventArgs.Redelivered,
+                    basicDeliverEventArgs.Exchange, 
+                    basicDeliverEventArgs.RoutingKey,
+                    basicDeliverEventArgs.BasicProperties, 
+                    basicDeliverEventArgs.Body);
+
+                completionTask.ContinueWith(task =>
                 {
-                    var exception = task.Exception;
-                    logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
-                    consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
-                }
-                try
-                {
-                    subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
-                }
-                catch (AlreadyClosedException exception)
-                {
-                    logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." +
-                        " Message remains on RabbitMQ and will be retried.", exception.Message);
-                }
-            });
+                    if(task.IsFaulted)
+                    {
+                        var exception = task.Exception;
+                        logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
+                        consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
+                    }
+                    try
+                    {
+                        subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+                    }
+                    catch (AlreadyClosedException exception)
+                    {
+                        logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." +
+                                         " Message remains on RabbitMQ and will be retried.", exception.Message);
+                    }
+                });
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
+                consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
+            }
         }
 
         private string BuildErrorMessage(BasicDeliverEventArgs basicDeliverEventArgs, Exception exception)
