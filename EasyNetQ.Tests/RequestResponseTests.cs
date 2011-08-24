@@ -87,6 +87,12 @@ namespace EasyNetQ.Tests
             Thread.Sleep(5000);
         }
 
+        /// <summary>
+        /// First start the EasyNetQ.Tests.SimpleService console app.
+        /// Run this test. You should see an error message written to the error queue
+        /// and an error logged
+        /// </summary>
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Service_should_handle_sychronous_message_of_the_wrong_type()
         {
             const string routingKey = "EasyNetQ_Tests_TestRequestMessage:EasyNetQ_Tests_Messages";
@@ -95,6 +101,12 @@ namespace EasyNetQ.Tests
             MakeRpcRequest(type, routingKey);
         }
 
+        /// <summary>
+        /// First start the EasyNetQ.Tests.SimpleService console app.
+        /// Run this test. You should see an error message written to the error queue
+        /// and an error logged
+        /// </summary>
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Service_should_handle_asychronous_message_of_the_wrong_type()
         {
             const string routingKey = "EasyNetQ_Tests_TestAsyncRequestMessage:EasyNetQ_Tests_Messages";

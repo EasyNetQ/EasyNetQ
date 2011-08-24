@@ -99,21 +99,28 @@ namespace EasyNetQ
                         logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
                         consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
                     }
-                    try
-                    {
-                        subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
-                    }
-                    catch (AlreadyClosedException exception)
-                    {
-                        logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." +
-                                         " Message remains on RabbitMQ and will be retried.", exception.Message);
-                    }
+                    DoAck(basicDeliverEventArgs, subscriptionInfo);
                 });
             }
             catch (Exception exception)
             {
                 logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
                 consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
+                DoAck(basicDeliverEventArgs, subscriptionInfo);
+            }
+        }
+
+        private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo)
+        {
+            try
+            {
+                subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+            }
+            catch (AlreadyClosedException alreadyClosedException)
+            {
+                logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." +
+                                 " Message remains on RabbitMQ and will be retried.",
+                                 alreadyClosedException.Message);
             }
         }
 
