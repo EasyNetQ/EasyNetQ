@@ -3,6 +3,12 @@ using System;
 namespace EasyNetQ.Tests
 {
     [Serializable]
+    public class TestPerformanceMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
     public class TestRequestMessage
     {
         public string Text { get; set; }

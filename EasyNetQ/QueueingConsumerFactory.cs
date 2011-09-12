@@ -112,15 +112,20 @@ namespace EasyNetQ
 
         private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo)
         {
+            const string failedToAckMessage = "Basic ack failed because chanel was closed with message {0}." +
+                                              " Message remains on RabbitMQ and will be retried.";
+
             try
             {
                 subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
             }
             catch (AlreadyClosedException alreadyClosedException)
             {
-                logger.InfoWrite("Basic ack failed because chanel was closed with message {0}." +
-                                 " Message remains on RabbitMQ and will be retried.",
-                                 alreadyClosedException.Message);
+                logger.InfoWrite(failedToAckMessage, alreadyClosedException.Message);
+            }
+            catch (IOException ioException)
+            {
+                logger.InfoWrite(failedToAckMessage, ioException.Message);
             }
         }
 
@@ -155,13 +160,13 @@ namespace EasyNetQ
 
         public void ClearConsumers()
         {
-            subscriptions.Clear();
             sharedQueue.Close(); // Dequeue will stop blocking and throw an EndOfStreamException
 
             lock (sharedQueueLock)
             {
                 logger.DebugWrite("Clearing consumer subscriptions");
                 sharedQueue = new SharedQueue();
+                subscriptions.Clear();
             }
         }
 

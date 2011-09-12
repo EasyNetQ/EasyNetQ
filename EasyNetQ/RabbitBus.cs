@@ -75,6 +75,9 @@ namespace EasyNetQ
             RawPublish(typeName, messageBody);
         }
 
+        // channels should not be shared between threads.
+        private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>(); 
+        
         public void RawPublish(string typeName, byte[] messageBody)
         {
             if (!connection.IsConnected)
@@ -84,22 +87,27 @@ namespace EasyNetQ
 
             try
             {
-                using (var channel = connection.CreateModel())
+                if (!threadLocalPublishChannel.IsValueCreated)
                 {
-                    DeclarePublishExchange(channel, typeName);
-
-                    var defaultProperties = channel.CreateBasicProperties();
-                    defaultProperties.SetPersistent(true);
-                    defaultProperties.Type = typeName;
-
-                    channel.BasicPublish(
-                        typeName,                   // exchange
-                        typeName,                   // routingKey 
-                        defaultProperties,          // basicProperties
-                        messageBody);               // body
+                    threadLocalPublishChannel.Value = connection.CreateModel();
                 }
+                DeclarePublishExchange(threadLocalPublishChannel.Value, typeName);
+
+                var defaultProperties = threadLocalPublishChannel.Value.CreateBasicProperties();
+                defaultProperties.SetPersistent(false);
+                defaultProperties.Type = typeName;
+
+                threadLocalPublishChannel.Value.BasicPublish(
+                    typeName, // exchange
+                    typeName, // routingKey 
+                    defaultProperties, // basicProperties
+                    messageBody); // body
             }
             catch (RabbitMQ.Client.Exceptions.OperationInterruptedException exception)
+            {
+                throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
+            }
+            catch (System.IO.IOException exception)
             {
                 throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
             }
@@ -412,6 +420,9 @@ namespace EasyNetQ
 
         protected void OnDisconnected()
         {
+            threadLocalPublishChannel.Dispose();
+            threadLocalPublishChannel = new ThreadLocal<IModel>();
+
             publishExchanges.Clear();
             requestExchanges.Clear();
             responseQueueNameCache.Clear();
@@ -457,6 +468,7 @@ namespace EasyNetQ
         {
             if (disposed) return;
             
+            threadLocalPublishChannel.Dispose();
             consumerFactory.Dispose();
             connection.Dispose();
 
