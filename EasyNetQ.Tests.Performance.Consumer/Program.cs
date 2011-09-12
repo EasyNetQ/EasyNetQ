@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading;
 
 namespace EasyNetQ.Tests.Performance.Consumer
@@ -9,8 +8,6 @@ namespace EasyNetQ.Tests.Performance.Consumer
         public static void Main(string[] args)
         {
             var bus = RabbitHutch.CreateBus("host=localhost", new NoDebugLogger());
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
 
             int messageCount = 0;
             var timer = new Timer(state =>
