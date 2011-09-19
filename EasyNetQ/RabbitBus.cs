@@ -31,7 +31,7 @@ namespace EasyNetQ
             SerializeType serializeType, 
             ISerializer serializer,
             IConsumerFactory consumerFactory, 
-            ConnectionFactory connectionFactory,
+            IConnectionFactory connectionFactory,
             IEasyNetQLogger logger)
         {
             if(serializeType == null)

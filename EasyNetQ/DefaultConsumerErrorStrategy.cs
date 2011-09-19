@@ -25,7 +25,7 @@ namespace EasyNetQ
         public const string EasyNetQErrorQueue = "EasyNetQ_Default_Error_Queue";
         public const string ErrorExchangePrefix = "ErrorExchange_";
 
-        private readonly ConnectionFactory connectionFactory;
+        private readonly IConnectionFactory connectionFactory;
         private readonly ISerializer serializer;
         private readonly IEasyNetQLogger logger;
         private IConnection connection;
@@ -33,7 +33,7 @@ namespace EasyNetQ
         private readonly IDictionary<string, string> errorExchanges = new Dictionary<string, string>();
 
         public DefaultConsumerErrorStrategy(
-            ConnectionFactory connectionFactory, 
+            IConnectionFactory connectionFactory, 
             ISerializer serializer,
             IEasyNetQLogger logger)
         {

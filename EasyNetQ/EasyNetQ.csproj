@@ -53,6 +53,7 @@
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="IBus.cs" />
+    <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />

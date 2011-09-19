@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,6 +40,10 @@ namespace EasyNetQ.Tests.SimpleService
         public static TestResponseMessage HandleRequest(TestRequestMessage request)
         {
             Console.WriteLine("Handling request: {0}", request.Text);
+            if (request.CausesExceptionInServer)
+            {
+                throw new SomeRandomException("Something terrible has just happened!");
+            }
             return new TestResponseMessage{ Text = request.Text + " all done!" };
         }
 
@@ -72,5 +77,24 @@ namespace EasyNetQ.Tests.SimpleService
 
             return taskCompletionSource.Task;
         }
+    }
+
+    [Serializable]
+    public class SomeRandomException : Exception
+    {
+        //
+        // For guidelines regarding the creation of new exception types, see
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
+        // and
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
+        //
+
+        public SomeRandomException() {}
+        public SomeRandomException(string message) : base(message) {}
+        public SomeRandomException(string message, Exception inner) : base(message, inner) {}
+
+        protected SomeRandomException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context) {}
     }
 }

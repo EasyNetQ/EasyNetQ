@@ -16,18 +16,18 @@ namespace EasyNetQ.Tests
     public class DefaultConsumerErrorStrategyTests
     {
         private DefaultConsumerErrorStrategy consumerErrorStrategy;
-        private ConnectionFactory connectionFactory;
+        private IConnectionFactory connectionFactory;
         private ISerializer serializer;
 
         [SetUp]
         public void SetUp()
         {
-            connectionFactory = new ConnectionFactory
+            connectionFactory = new ConnectionFactoryWrapper(new ConnectionFactory
             {
                 HostName = "localhost",
                 UserName = "guest",
                 Password = "guest"
-            };
+            });
             serializer = new JsonSerializer();
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger());
         }

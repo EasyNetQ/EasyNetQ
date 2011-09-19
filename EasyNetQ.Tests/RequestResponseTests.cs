@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 using System;
+using System.Runtime.Serialization;
 using System.Threading;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -135,6 +136,63 @@ namespace EasyNetQ.Tests
                     new byte[0]);
             }
         }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // Thrown and a new error message in the error queue.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_do_simple_request_response_that_throws_on_server()
+        {
+            var request = new TestRequestMessage
+            {
+                Text = "Hello from the client! ",
+                CausesExceptionInServer = true
+            };
+
+            Console.WriteLine("Making request");
+            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                Console.WriteLine("Got response: '{0}'", response.Text));
+
+            Thread.Sleep(2000);
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here with an exception report.
+        // you should also see a new error message in the error queue.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_do_simple_request_response_that_throws_on_response_consumer()
+        {
+            var request = new TestRequestMessage { Text = "Hello from the client! " };
+
+            Console.WriteLine("Making request");
+            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+            {
+                Console.WriteLine("Got response: '{0}'", response.Text);
+                throw new SomeRandomException("Something very bad just happened!");
+            });
+
+            Thread.Sleep(2000);
+        }
+    }
+
+    [Serializable]
+    public class SomeRandomException : Exception
+    {
+        //
+        // For guidelines regarding the creation of new exception types, see
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
+        // and
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
+        //
+
+        public SomeRandomException() {}
+        public SomeRandomException(string message) : base(message) {}
+        public SomeRandomException(string message, Exception inner) : base(message, inner) {}
+
+        protected SomeRandomException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context) {}
     }
 }
 

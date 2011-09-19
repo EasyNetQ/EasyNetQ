@@ -23,12 +23,12 @@ namespace EasyNetQ
     {
         private const int connectAttemptIntervalMilliseconds = 5000;
 
-        private readonly ConnectionFactory connectionFactory;
+        private readonly IConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
         private IConnection connection;
         private readonly ConcurrentBag<Action> subscribeActions;
 
-        public PersistentConnection(ConnectionFactory connectionFactory, IEasyNetQLogger logger)
+        public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger)
         {
             this.connectionFactory = connectionFactory;
             this.logger = logger;

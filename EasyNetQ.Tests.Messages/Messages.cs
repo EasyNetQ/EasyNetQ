@@ -12,6 +12,7 @@ namespace EasyNetQ.Tests
     public class TestRequestMessage
     {
         public string Text { get; set; }
+        public bool CausesExceptionInServer { get; set; }
     }
 
     [Serializable]

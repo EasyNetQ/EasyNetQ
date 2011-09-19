@@ -101,13 +101,11 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [Serializable]
     public class MyMessage
     {
         public string Text { get; set; }
     }
 
-    [Serializable]
     public class MyOtherMessage
     {
         public string Text { get; set; }

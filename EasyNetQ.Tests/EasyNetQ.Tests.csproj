@@ -72,16 +72,23 @@
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
+    <Compile Include="CorrelationIdTests.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
+    <Compile Include="MockBasicProperties.cs" />
+    <Compile Include="MockConnection.cs" />
+    <Compile Include="MockConnectionFactory.cs" />
     <Compile Include="MockLogger.cs" />
+    <Compile Include="MockModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishSubscribeTests.cs" />
     <Compile Include="RequestResponseTests.cs" />
     <Compile Include="SchedulingTests.cs" />
     <Compile Include="SimpleSagaSpike.cs" />
+    <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
+    <Compile Include="TestMessage.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>

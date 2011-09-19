@@ -110,13 +110,13 @@ namespace EasyNetQ
                 throw new ArgumentNullException("logger");
             }
 
-            var connectionFactory = new ConnectionFactory
+            var connectionFactory = new ConnectionFactoryWrapper(new ConnectionFactory
             {
                 HostName = hostName,
                 VirtualHost = virtualHost,
                 UserName = username,
                 Password = password
-            };
+            });
 
             var serializer = new JsonSerializer();
 
