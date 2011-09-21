@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.SimpleService
                 Console.WriteLine("Shut down complete");
             };
 
-            while(true) Thread.Sleep(1000);
+            Thread.Sleep(Timeout.Infinite);
             
         }
 
@@ -40,6 +40,12 @@ namespace EasyNetQ.Tests.SimpleService
         public static TestResponseMessage HandleRequest(TestRequestMessage request)
         {
             Console.WriteLine("Handling request: {0}", request.Text);
+            if (request.CausesServerToTakeALongTimeToRespond)
+            {
+                Console.Out.WriteLine("Taking a long time to respond...");
+                Thread.Sleep(5000);
+                Console.Out.WriteLine("... responding");
+            }
             if (request.CausesExceptionInServer)
             {
                 throw new SomeRandomException("Something terrible has just happened!");

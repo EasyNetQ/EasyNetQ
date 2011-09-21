@@ -13,6 +13,7 @@ namespace EasyNetQ.Tests
     {
         public string Text { get; set; }
         public bool CausesExceptionInServer { get; set; }
+        public bool CausesServerToTakeALongTimeToRespond { get; set; }
     }
 
     [Serializable]
