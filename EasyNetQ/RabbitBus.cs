@@ -18,7 +18,8 @@ namespace EasyNetQ
 
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
-        private readonly ISet<string> requestExchanges = new HashSet<string>(); 
+        private readonly ISet<string> requestExchanges = new HashSet<string>();
+        private List<IModel> modelList = new List<IModel>();
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
@@ -31,7 +32,7 @@ namespace EasyNetQ
             SerializeType serializeType, 
             ISerializer serializer,
             IConsumerFactory consumerFactory, 
-            ConnectionFactory connectionFactory,
+            IConnectionFactory connectionFactory,
             IEasyNetQLogger logger)
         {
             if(serializeType == null)
@@ -75,6 +76,9 @@ namespace EasyNetQ
             RawPublish(typeName, messageBody);
         }
 
+        // channels should not be shared between threads.
+        private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>(); 
+        
         public void RawPublish(string typeName, byte[] messageBody)
         {
             if (!connection.IsConnected)
@@ -84,22 +88,27 @@ namespace EasyNetQ
 
             try
             {
-                using (var channel = connection.CreateModel())
+                if (!threadLocalPublishChannel.IsValueCreated)
                 {
-                    DeclarePublishExchange(channel, typeName);
-
-                    var defaultProperties = channel.CreateBasicProperties();
-                    defaultProperties.SetPersistent(true);
-                    defaultProperties.Type = typeName;
-
-                    channel.BasicPublish(
-                        typeName,                   // exchange
-                        typeName,                   // routingKey 
-                        defaultProperties,          // basicProperties
-                        messageBody);               // body
+                    threadLocalPublishChannel.Value = connection.CreateModel();
                 }
+                DeclarePublishExchange(threadLocalPublishChannel.Value, typeName);
+
+                var defaultProperties = threadLocalPublishChannel.Value.CreateBasicProperties();
+                defaultProperties.SetPersistent(false);
+                defaultProperties.Type = typeName;
+
+                threadLocalPublishChannel.Value.BasicPublish(
+                    typeName, // exchange
+                    typeName, // routingKey 
+                    defaultProperties, // basicProperties
+                    messageBody); // body
             }
             catch (RabbitMQ.Client.Exceptions.OperationInterruptedException exception)
+            {
+                throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
+            }
+            catch (System.IO.IOException exception)
             {
                 throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
             }
@@ -124,7 +133,10 @@ namespace EasyNetQ
             var typeName = serializeType(typeof (TMessage));
             if (properties.Type != typeName)
             {
-                throw new EasyNetQException("Message type is incorrect. Expected '{0}', but was '{1}'",
+                logger.ErrorWrite("Message type is incorrect. Expected '{0}', but was '{1}'",
+                    typeName, properties.Type);
+
+                throw new EasyNetQInvalidMessageTypeException("Message type is incorrect. Expected '{0}', but was '{1}'",
                     typeName, properties.Type);
             }
         }
@@ -160,6 +172,7 @@ namespace EasyNetQ
             Action subscribeAction = () =>
             {
                 var channel = connection.CreateModel();
+                modelList.Add( channel );
                 DeclarePublishExchange(channel, typeName);
 
                 channel.BasicQos(0, prefetchCount, false);
@@ -237,6 +250,7 @@ namespace EasyNetQ
         private void SubscribeToResponse<TResponse>(Action<TResponse> onResponse, string returnQueueName)
         {
             var responseChannel = connection.CreateModel();
+            modelList.Add( responseChannel );
 
             // respond queue is transient, only exists for the lifetime of the service.
             var respondQueue = responseChannel.QueueDeclare(
@@ -322,7 +336,8 @@ namespace EasyNetQ
             Action subscribeAction = () =>
             {
                 var requestChannel = connection.CreateModel();
-                DeclareRequestResponseStructure(requestChannel, requestTypeName);
+                modelList.Add( requestChannel );
+                DeclareRequestResponseStructure( requestChannel, requestTypeName );
 
                 var consumer = consumerFactory.CreateConsumer(requestChannel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -364,7 +379,6 @@ namespace EasyNetQ
                         return tcs.Task;
                     });
 
-                // TODO: dispose channel
                 requestChannel.BasicConsume(
                     requestTypeName,        // queue 
                     noAck,                   // noAck 
@@ -409,6 +423,9 @@ namespace EasyNetQ
 
         protected void OnDisconnected()
         {
+            threadLocalPublishChannel.Dispose();
+            threadLocalPublishChannel = new ThreadLocal<IModel>();
+
             publishExchanges.Clear();
             requestExchanges.Clear();
             responseQueueNameCache.Clear();
@@ -453,9 +470,19 @@ namespace EasyNetQ
         public void Dispose()
         {
             if (disposed) return;
+
+            // Abort all Models
+            if ( modelList.Count > 0 ) {
+                foreach ( var model in modelList ) {
+                    if ( null != model )
+                        model.Abort();
+                }
+            }
             
+            threadLocalPublishChannel.Dispose();
             consumerFactory.Dispose();
             connection.Dispose();
+            threadLocalPublishChannel = null;
 
             disposed = true;
         }
