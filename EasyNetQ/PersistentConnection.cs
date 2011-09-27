@@ -124,7 +124,7 @@ namespace EasyNetQ
         {
             if (disposed) return;
             disposed = true;
-            if (IsConnected && connection != null) connection.Dispose();
+            if (connection != null) connection.Dispose();
         }
     }
 }
