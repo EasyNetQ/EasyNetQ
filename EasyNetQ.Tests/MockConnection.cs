@@ -6,6 +6,13 @@ namespace EasyNetQ.Tests
 {
     public class MockConnection : IConnection
     {
+        public IModel Model { get; set; }
+
+        public MockConnection(IModel model)
+        {
+            Model = model;
+        }
+
         public void Dispose()
         {
             throw new System.NotImplementedException();
@@ -13,7 +20,7 @@ namespace EasyNetQ.Tests
 
         public IModel CreateModel()
         {
-            return new MockModel();
+            return Model;
         }
 
         public void Close()

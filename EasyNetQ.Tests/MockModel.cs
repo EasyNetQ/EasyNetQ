@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -166,9 +167,16 @@ namespace EasyNetQ.Tests
             throw new System.NotImplementedException();
         }
 
+        public Action<string, string, IBasicProperties, byte[]> BasicPublishAction { get; set; }
+
         public void BasicPublish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body)
         {
-            
+            if(BasicPublishAction == null)
+            {
+                throw new NullReferenceException("BasicPublishAction is null");
+            }
+
+            BasicPublishAction(exchange, routingKey, basicProperties, body);
         }
 
         public void BasicPublish(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)

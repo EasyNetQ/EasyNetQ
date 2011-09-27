@@ -127,7 +127,8 @@ namespace EasyNetQ
                 serializer,
                 new QueueingConsumerFactory(logger, consumerErrorStrategy),
                 connectionFactory,
-                logger);
+                logger, 
+                CorrelationIdGenerator.GetCorrelationId);
         }
 
         /// <summary>

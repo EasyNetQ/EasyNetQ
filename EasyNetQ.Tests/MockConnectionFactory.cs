@@ -4,9 +4,16 @@ namespace EasyNetQ.Tests
 {
     public class MockConnectionFactory : IConnectionFactory
     {
+        public IConnection Connection { get; set; }
+
+        public MockConnectionFactory(IConnection connection)
+        {
+            Connection = connection;
+        }
+
         public IConnection CreateConnection()
         {
-            return new MockConnection();
+            return Connection;
         }
 
         public string HostName

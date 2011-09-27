@@ -75,7 +75,8 @@ namespace EasyNetQ
                 throw new EasyNetQException("No callback found for ConsumerTag {0}", consumerTag);
             }
 
-            logger.DebugWrite("HandleMessageDelivery '{0}'", basicDeliverEventArgs.RoutingKey);
+            logger.DebugWrite("Subscriber Recieved {0}, CorrelationId {1}", 
+                basicDeliverEventArgs.RoutingKey, basicDeliverEventArgs.BasicProperties.CorrelationId);
 
             var subscriptionInfo = subscriptions[consumerTag];
 

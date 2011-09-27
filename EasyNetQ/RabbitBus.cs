@@ -15,6 +15,7 @@ namespace EasyNetQ
         private readonly IPersistentConnection connection;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
+        private readonly Func<string> getCorrelationId; 
 
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
@@ -29,10 +30,11 @@ namespace EasyNetQ
 
         public RabbitBus(
             SerializeType serializeType, 
-            ISerializer serializer,
+            ISerializer serializer, 
             IConsumerFactory consumerFactory, 
-            IConnectionFactory connectionFactory,
-            IEasyNetQLogger logger)
+            IConnectionFactory connectionFactory, 
+            IEasyNetQLogger logger, 
+            Func<string> getCorrelationId)
         {
             if(serializeType == null)
             {
@@ -50,11 +52,16 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("connectionFactory");
             }
+            if(getCorrelationId == null)
+            {
+                throw new ArgumentNullException("getCorrelationId");
+            }
 
             this.serializeType = serializeType;
             this.consumerFactory = consumerFactory;
             this.logger = logger;
             this.serializer = serializer;
+            this.getCorrelationId = getCorrelationId;
 
             connection = new PersistentConnection(connectionFactory, logger);
             connection.Connected += OnConnected;
@@ -96,12 +103,15 @@ namespace EasyNetQ
                 var defaultProperties = threadLocalPublishChannel.Value.CreateBasicProperties();
                 defaultProperties.SetPersistent(false);
                 defaultProperties.Type = typeName;
+                defaultProperties.CorrelationId = getCorrelationId();
 
                 threadLocalPublishChannel.Value.BasicPublish(
                     typeName, // exchange
                     typeName, // routingKey 
                     defaultProperties, // basicProperties
                     messageBody); // body
+
+                logger.DebugWrite("Published {0}, CorrelationId {1}", typeName, defaultProperties.CorrelationId);
             }
             catch (RabbitMQ.Client.Exceptions.OperationInterruptedException exception)
             {
