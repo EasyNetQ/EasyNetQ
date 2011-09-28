@@ -19,7 +19,8 @@ namespace EasyNetQ
 
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
-        private readonly ISet<string> requestExchanges = new HashSet<string>(); 
+        private readonly ISet<string> requestExchanges = new HashSet<string>();
+        private List<IModel> modelList = new List<IModel>();
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
@@ -181,6 +182,7 @@ namespace EasyNetQ
             Action subscribeAction = () =>
             {
                 var channel = connection.CreateModel();
+                modelList.Add( channel );
                 DeclarePublishExchange(channel, typeName);
 
                 channel.BasicQos(0, prefetchCount, false);
@@ -258,6 +260,7 @@ namespace EasyNetQ
         private void SubscribeToResponse<TResponse>(Action<TResponse> onResponse, string returnQueueName)
         {
             var responseChannel = connection.CreateModel();
+            modelList.Add( responseChannel );
 
             // respond queue is transient, only exists for the lifetime of the service.
             var respondQueue = responseChannel.QueueDeclare(
@@ -299,6 +302,7 @@ namespace EasyNetQ
         {
             var requestTypeName = serializeType(typeof(TRequest));
             var requestChannel = connection.CreateModel();
+            modelList.Add( requestChannel );
 
             // declare the exchange, binding and queue here. No need to set the mandatory flag, the recieving queue
             // will already have been declared, so in the case of no responder being present, message will collect
@@ -343,6 +347,7 @@ namespace EasyNetQ
             Action subscribeAction = () =>
             {
                 var requestChannel = connection.CreateModel();
+                modelList.Add( requestChannel );
                 DeclareRequestResponseStructure(requestChannel, requestTypeName);
 
                 var consumer = consumerFactory.CreateConsumer(requestChannel,
@@ -477,7 +482,15 @@ namespace EasyNetQ
         public void Dispose()
         {
             if (disposed) return;
-            
+
+            // Abort all Models
+            if ( modelList.Count > 0 ) {
+                foreach ( var model in modelList ) {
+                    if ( null != model )
+                        model.Abort();
+                }
+            }
+
             threadLocalPublishChannel.Dispose();
             consumerFactory.Dispose();
             connection.Dispose();
