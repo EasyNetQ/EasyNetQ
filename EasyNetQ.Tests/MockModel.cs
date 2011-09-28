@@ -7,6 +7,27 @@ namespace EasyNetQ.Tests
 {
     public class MockModel : IModel
     {
+        public Action AbortAction { get; set; }
+        public Action<uint, ushort, bool> BasicQosAction { get; set; }
+        public Action<string, string, IBasicProperties, byte[]> BasicPublishAction { get; set; }
+        public Func<string, bool, bool, bool, IDictionary, string> QueueDeclareAction { get; set; }
+        public Action<string, string, string> QueueBindAction { get; set; }
+        public Func<string, bool, string, IBasicConsumer, string> BasicConsumeAction { get; set; }
+        public Action<string, string, bool, bool, IDictionary> ExchangeDeclareAction { get; set; }
+
+        public MockModel()
+        {
+            // create some innocent defaults
+
+            AbortAction = () => { };
+            BasicQosAction = (a, b, c) => { };
+            BasicPublishAction = (a, b, c, d) => { };
+            QueueDeclareAction = (a, b, c, d, e) => "some_queue_name";
+            QueueBindAction = (a, b, c) => { };
+            BasicConsumeAction = (a, b, c, d) => "";
+            ExchangeDeclareAction = (a, b, c, d, e) => { };
+        }
+
         public void Dispose()
         {
             throw new System.NotImplementedException();
@@ -34,7 +55,7 @@ namespace EasyNetQ.Tests
 
         public void ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary arguments)
         {
-            throw new System.NotImplementedException();
+            ExchangeDeclareAction(exchange, type, durable, autoDelete, arguments);
         }
 
         public void ExchangeDeclare(string exchange, string type, bool durable)
@@ -94,7 +115,7 @@ namespace EasyNetQ.Tests
 
         public string QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary arguments)
         {
-            throw new System.NotImplementedException();
+            return QueueDeclareAction(queue, durable, exclusive, autoDelete, arguments);
         }
 
         public void QueueBind(string queue, string exchange, string routingKey, IDictionary arguments)
@@ -104,7 +125,7 @@ namespace EasyNetQ.Tests
 
         public void QueueBind(string queue, string exchange, string routingKey)
         {
-            throw new System.NotImplementedException();
+            QueueBindAction(queue, exchange, routingKey);
         }
 
         public void QueueUnbind(string queue, string exchange, string routingKey, IDictionary arguments)
@@ -139,7 +160,7 @@ namespace EasyNetQ.Tests
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, IBasicConsumer consumer)
         {
-            throw new System.NotImplementedException();
+            return BasicConsumeAction(queue, noAck, consumerTag, consumer);
         }
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, IDictionary arguments, IBasicConsumer consumer)
@@ -159,15 +180,13 @@ namespace EasyNetQ.Tests
 
         public void BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
-            throw new System.NotImplementedException();
+            BasicQosAction(prefetchSize, prefetchCount, global);
         }
 
         public void BasicPublish(PublicationAddress addr, IBasicProperties basicProperties, byte[] body)
         {
             throw new System.NotImplementedException();
         }
-
-        public Action<string, string, IBasicProperties, byte[]> BasicPublishAction { get; set; }
 
         public void BasicPublish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body)
         {
@@ -251,7 +270,7 @@ namespace EasyNetQ.Tests
 
         public void Abort()
         {
-            throw new System.NotImplementedException();
+            AbortAction();
         }
 
         public void Abort(ushort replyCode, string replyText)

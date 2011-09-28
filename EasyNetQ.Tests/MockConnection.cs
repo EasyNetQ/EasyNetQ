@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -6,21 +7,23 @@ namespace EasyNetQ.Tests
 {
     public class MockConnection : IConnection
     {
-        public IModel Model { get; set; }
+        public Func<IModel> CreateModelAction { get; set; } 
+        public Action DisposeAction { get; set;  }
 
         public MockConnection(IModel model)
         {
-            Model = model;
+            CreateModelAction = () => model;
+            DisposeAction = () => { };
         }
 
         public void Dispose()
         {
-            throw new System.NotImplementedException();
+            DisposeAction();
         }
 
         public IModel CreateModel()
         {
-            return Model;
+            return CreateModelAction();
         }
 
         public void Close()

@@ -20,7 +20,7 @@ namespace EasyNetQ
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
         private readonly ISet<string> requestExchanges = new HashSet<string>();
-        private List<IModel> modelList = new List<IModel>();
+        private readonly List<IModel> modelList = new List<IModel>();
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
@@ -98,6 +98,7 @@ namespace EasyNetQ
                 if (!threadLocalPublishChannel.IsValueCreated)
                 {
                     threadLocalPublishChannel.Value = connection.CreateModel();
+                    modelList.Add(threadLocalPublishChannel.Value);
                 }
                 DeclarePublishExchange(threadLocalPublishChannel.Value, typeName);
 
