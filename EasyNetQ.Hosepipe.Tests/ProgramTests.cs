@@ -35,9 +35,9 @@ namespace EasyNetQ.Hosepipe.Tests
                 errorRetry);
         }
 
-        private const string expectedDumpOutput =
+        private string expectedDumpOutput =
 @"2 Messages from queue 'EasyNetQ_Default_Error_Queue'
-output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
+output to directory '" + Environment.CurrentDirectory + @"'
 ";
 
         [Test]
@@ -61,8 +61,8 @@ output to directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
             messageWriter.Parameters.HostName.ShouldEqual("localhost");
         }
 
-        private const string expectedInsertOutput =
-@"2 Messages from directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug'
+        private string expectedInsertOutput =
+@"2 Messages from directory '" + Environment.CurrentDirectory + @"'
 inserted into queue 'test'
 ";
 
@@ -87,8 +87,8 @@ inserted into queue 'test'
             messageReader.Parameters.HostName.ShouldEqual("localhost");
         }
 
-        private const string expectedRetryOutput =
-@"2 Error messages from directory 'C:\Source\Mike.AmqpSpike\EasyNetQ.Hosepipe.Tests\bin\Debug' republished
+        private string expectedRetryOutput =
+@"2 Error messages from directory '" + Environment.CurrentDirectory + @"' republished
 ";
 
         [Test]
