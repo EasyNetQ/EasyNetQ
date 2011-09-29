@@ -13,7 +13,6 @@ namespace EasyNetQ
         event Action Disconnected;
         bool IsConnected { get; }
         IModel CreateModel();
-        void AddSubscriptionAction(Action subscriptionAction);
     }
 
     /// <summary>
@@ -26,13 +25,11 @@ namespace EasyNetQ
         private readonly IConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
         private IConnection connection;
-        private readonly ConcurrentBag<Action> subscribeActions;
 
         public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger)
         {
             this.connectionFactory = connectionFactory;
             this.logger = logger;
-            this.subscribeActions = new ConcurrentBag<Action>();
 
             TryToConnect(null);
         }
@@ -47,22 +44,6 @@ namespace EasyNetQ
                 throw new EasyNetQException("Rabbit server is not connected.");
             }
             return connection.CreateModel();
-        }
-
-        public void AddSubscriptionAction(Action subscriptionAction)
-        {
-            subscribeActions.Add(subscriptionAction);
-
-            try
-            {
-                subscriptionAction();
-            }
-            catch (OperationInterruptedException)
-            {
-                // Looks like the channel closed between our IsConnected check
-                // and the subscription action. Do nothing here, when the 
-                // connection comes back, the subcription action will be run then.
-            }
         }
 
         public bool IsConnected
@@ -89,12 +70,6 @@ namespace EasyNetQ
 
                 if (Connected != null) Connected();
                 logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', VHost: '{1}'", connectionFactory.HostName, connectionFactory.VirtualHost);
-
-                logger.DebugWrite("Re-creating subscribers");
-                foreach (var subscribeAction in subscribeActions)
-                {
-                    subscribeAction();
-                }
             }
             catch (BrokerUnreachableException brokerUnreachableException)
             {
