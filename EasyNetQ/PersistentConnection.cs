@@ -99,7 +99,8 @@ namespace EasyNetQ
             catch (BrokerUnreachableException brokerUnreachableException)
             {
                 logger.ErrorWrite("Failed to connect to Broker: '{0}', VHost: '{1}'. Retrying in {2} ms\n" + 
-                    "Check HostName, VirtualHost, Username and Password.", 
+                    "Check HostName, VirtualHost, Username and Password.\n" +
+				    "ExceptionMessage: {3}", 
                     connectionFactory.HostName,
                     connectionFactory.VirtualHost,
                     connectAttemptIntervalMilliseconds,
