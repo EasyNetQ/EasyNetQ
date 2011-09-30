@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
+
 
 namespace EasyNetQ
 {
@@ -21,6 +23,8 @@ namespace EasyNetQ
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
         private readonly ISet<string> requestExchanges = new HashSet<string>();
         private readonly List<IModel> modelList = new List<IModel>();
+
+		private readonly ConcurrentBag<Action> subscribeActions;
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
@@ -68,6 +72,8 @@ namespace EasyNetQ
             connection.Connected += OnConnected;
             connection.Disconnected += consumerFactory.ClearConsumers;
             connection.Disconnected += OnDisconnected;
+
+			subscribeActions = new ConcurrentBag<Action>();
         }
 
         public void Publish<T>(T message)
@@ -216,7 +222,7 @@ namespace EasyNetQ
                     consumer);              // consumer
             };
 
-            connection.AddSubscriptionAction(subscribeAction);
+            AddSubscriptionAction(subscribeAction);
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
@@ -399,7 +405,7 @@ namespace EasyNetQ
                     consumer);              // consumer
             };
 
-            connection.AddSubscriptionAction(subscribeAction);
+            AddSubscriptionAction(subscribeAction);
         }
 
         public void FuturePublish<T>(DateTime timeToRespond, T message)
@@ -430,6 +436,12 @@ namespace EasyNetQ
         protected void OnConnected()
         {
             if (Connected != null) Connected();
+
+			logger.DebugWrite("Re-creating subscribers");
+			foreach (var subscribeAction in subscribeActions)
+			{
+				subscribeAction();
+			}
         }
 
         public event Action Disconnected;
@@ -478,6 +490,23 @@ namespace EasyNetQ
                 requestExchanges.Add(requestTypeName);
             }
         }
+
+
+    	private void AddSubscriptionAction(Action subscriptionAction)
+		{
+			subscribeActions.Add(subscriptionAction);
+
+			try
+			{
+				subscriptionAction();
+			}
+			catch (OperationInterruptedException)
+			{
+				// Looks like the channel closed between our IsConnected check
+				// and the subscription action. Do nothing here, when the 
+				// connection comes back, the subcription action will be run then.
+			}
+		}
 
         private bool disposed = false;
         public void Dispose()
