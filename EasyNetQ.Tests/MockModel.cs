@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests
 
         public void ExchangeDeclare(string exchange, string type, bool durable)
         {
-            
+        	ExchangeDeclareAction(exchange, type, durable, true, null);
         }
 
         public void ExchangeDeclare(string exchange, string type)

@@ -6,10 +6,10 @@ namespace EasyNetQ.Scheduler.Tests
     {
         public Action<string, byte[]> RawPublishDelegate { get; set; }
 
-        public void RawPublish(string typeName, byte[] messageBody)
+        public void RawPublish(string exchangeName, byte[] messageBody)
         {
             if (RawPublishDelegate != null)
-                RawPublishDelegate(typeName, messageBody);
+                RawPublishDelegate(exchangeName, messageBody);
         }
     }
 }
