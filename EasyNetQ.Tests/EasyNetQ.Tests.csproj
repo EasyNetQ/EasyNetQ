@@ -72,6 +72,7 @@
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
+    <Compile Include="ConventionsTests.cs" />
     <Compile Include="CorrelationIdTests.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="MockBasicProperties.cs" />
     <Compile Include="MockConnection.cs" />
     <Compile Include="MockConnectionFactory.cs" />
+    <Compile Include="MockConsumerFactory.cs" />
     <Compile Include="MockLogger.cs" />
     <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />

@@ -2,6 +2,6 @@ namespace EasyNetQ
 {
     public interface IRawByteBus
     {
-        void RawPublish(string typeName, byte[] messageBody);
+        void RawPublish(string exchangeName, byte[] messageBody);
     }
 }
