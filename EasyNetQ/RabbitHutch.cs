@@ -12,7 +12,7 @@ namespace EasyNetQ
     public static class RabbitHutch
     {
         /// <summary>
-        /// Creates a new instance of RabbitBus with default credentials.
+        /// Creates a new instance of RabbitBus.
         /// </summary>
         /// <param name="connectionString">
         /// The EasyNetQ connection string. Example:
@@ -30,7 +30,7 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        /// Creates a new instance of RabbitBus with default credentials.
+        /// Creates a new instance of RabbitBus.
         /// </summary>
         /// <param name="connectionString">
         /// The EasyNetQ connection string. Example:
@@ -145,7 +145,7 @@ namespace EasyNetQ
                     "Could not find a connection string for RabbitMQ. " +
                     "Please add a connection string in the <ConnectionStrings> secion" +
                     "of the application's configuration file. For example: " +
-                    "<add name=\"rabbit\" connectionString=\"localhost\" />");
+                    "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
 
             return CreateBus(rabbitConnectionString.ConnectionString);

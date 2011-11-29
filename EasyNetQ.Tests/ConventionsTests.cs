@@ -19,14 +19,14 @@ namespace EasyNetQ.Tests
 		[Test]
 		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
 		{
-			var result = conventions.ExchangeNamingConvention.Invoke(typeof (TestMessage));
+			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
 			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)));
 		}
 
 		[Test]
 		public void The_default_topic_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
 		{
-			var result = conventions.TopicNamingConvention.Invoke(typeof (TestMessage));
+			var result = conventions.TopicNamingConvention(typeof (TestMessage));
 			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)));
 		}
 
@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests
 		public void The_default_queue_naming_convention_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id()
 		{
 			const string subscriptionId = "test";
-			var result = conventions.QueueNamingConveition.Invoke(typeof (TestMessage), subscriptionId);
+			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
 			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)) + "_" + subscriptionId);
 		}
 	}
@@ -43,8 +43,7 @@ namespace EasyNetQ.Tests
 	public class When_publishing_a_message
 	{
 		private RabbitBus bus;
-		private MockModel mockModel;
-		private string createdExchangeName;
+	    private string createdExchangeName;
 		private string publishedToExchangeName;
 		private string publishedToTopic;
 
@@ -65,7 +64,7 @@ namespace EasyNetQ.Tests
 			var customConventions = new Conventions
 			                  	{
 			                  		ExchangeNamingConvention = x => "CustomExchangeNamingConvention",
-			                  		QueueNamingConveition = (x, y) => "CustomQueueNamingConvention",
+			                  		QueueNamingConvention = (x, y) => "CustomQueueNamingConvention",
 			                  		TopicNamingConvention = x => "CustomTopicNamingConvention"
 			                  	};
 			CreateBus(customConventions, mockModel);

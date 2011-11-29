@@ -12,7 +12,7 @@ namespace EasyNetQ
 
 		ExchangeNameConvention ExchangeNamingConvention { get; set; }
 		TopicNameConvention TopicNamingConvention { get; set; }
-		QueueNameConvention QueueNamingConveition { get; set; }
+		QueueNameConvention QueueNamingConvention { get; set; }
 	}
 
 
@@ -23,7 +23,7 @@ namespace EasyNetQ
 			// Establish default conventions.
 			ExchangeNamingConvention = TypeNameSerializer.Serialize;
 			TopicNamingConvention = TypeNameSerializer.Serialize;
-			QueueNamingConveition =
+			QueueNamingConvention =
 					(messageType, subscriptionId) =>
 					{
 						var typeName = TypeNameSerializer.Serialize(messageType);
@@ -34,6 +34,6 @@ namespace EasyNetQ
 
 		public ExchangeNameConvention ExchangeNamingConvention { get; set; }
 		public TopicNameConvention TopicNamingConvention { get; set; }
-		public QueueNameConvention QueueNamingConveition { get; set; }
+		public QueueNameConvention QueueNamingConvention { get; set; }
 	}
 }

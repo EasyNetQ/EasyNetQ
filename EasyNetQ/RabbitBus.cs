@@ -247,19 +247,19 @@ namespace EasyNetQ
 
 		private string GetTopic<T>()
 		{
-			return conventions.TopicNamingConvention.Invoke(typeof (T));
+			return conventions.TopicNamingConvention(typeof (T));
 		}
 
 
 		private string GetExchangeName<T>()
 		{
-			return conventions.ExchangeNamingConvention.Invoke(typeof(T));
+			return conventions.ExchangeNamingConvention(typeof(T));
 		}
 
 
 		private string GetQueueName<T>(string subscriptionId)
 		{
-			return conventions.QueueNamingConveition.Invoke(typeof (T), subscriptionId);
+			return conventions.QueueNamingConvention(typeof (T), subscriptionId);
 		}
 
 
