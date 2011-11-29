@@ -17,7 +17,8 @@ namespace EasyNetQ
         private readonly IPersistentConnection connection;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
-        private readonly Func<string> getCorrelationId; 
+		private readonly Func<string> getCorrelationId;
+		private readonly IConventions conventions;
 
         private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
         private readonly ISet<string> publishExchanges = new HashSet<string>(); 
@@ -38,8 +39,9 @@ namespace EasyNetQ
             ISerializer serializer, 
             IConsumerFactory consumerFactory, 
             IConnectionFactory connectionFactory, 
-            IEasyNetQLogger logger, 
-            Func<string> getCorrelationId)
+            IEasyNetQLogger logger,
+			Func<string> getCorrelationId,
+			IConventions conventions = null)
         {
             if(serializeType == null)
             {
@@ -62,11 +64,16 @@ namespace EasyNetQ
                 throw new ArgumentNullException("getCorrelationId");
             }
 
+			// Use default conventions if none were supplied.
+			if (conventions == null)
+				conventions = new Conventions();
+
             this.serializeType = serializeType;
             this.consumerFactory = consumerFactory;
             this.logger = logger;
             this.serializer = serializer;
-            this.getCorrelationId = getCorrelationId;
+			this.getCorrelationId = getCorrelationId;
+			this.conventions = conventions;
 
             connection = new PersistentConnection(connectionFactory, logger);
             connection.Connected += OnConnected;
@@ -83,16 +90,27 @@ namespace EasyNetQ
                 throw new ArgumentNullException("message");
             }
 
-            var typeName = serializeType(typeof (T));
+        	var typeName = serializeType(typeof (T));
+        	var exchangeName = GetExchangeName<T>();
+        	var topic = GetTopic<T>();
             var messageBody = serializer.MessageToBytes(message);
 
-            RawPublish(typeName, messageBody);
+            RawPublish(exchangeName, topic, typeName, messageBody);
         }
 
         // channels should not be shared between threads.
         private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>(); 
         
+
         public void RawPublish(string typeName, byte[] messageBody)
+        {
+        	var exchangeName = typeName;
+        	var topic = typeName;
+        	RawPublish(exchangeName, topic, typeName, messageBody);
+        }
+
+
+    	public void RawPublish(string exchangeName, string topic, string typeName, byte[] messageBody)
         {
             if (!connection.IsConnected)
             {
@@ -106,7 +124,7 @@ namespace EasyNetQ
                     threadLocalPublishChannel.Value = connection.CreateModel();
                     modelList.Add(threadLocalPublishChannel.Value);
                 }
-                DeclarePublishExchange(threadLocalPublishChannel.Value, typeName);
+                DeclarePublishExchange(threadLocalPublishChannel.Value, exchangeName);
 
                 var defaultProperties = threadLocalPublishChannel.Value.CreateBasicProperties();
                 defaultProperties.SetPersistent(false);
@@ -114,14 +132,14 @@ namespace EasyNetQ
                 defaultProperties.CorrelationId = getCorrelationId();
 
                 threadLocalPublishChannel.Value.BasicPublish(
-                    typeName, // exchange
-                    typeName, // routingKey 
+                    exchangeName, // exchange
+                    topic, // routingKey 
                     defaultProperties, // basicProperties
                     messageBody); // body
 
-                logger.DebugWrite("Published {0}, CorrelationId {1}", typeName, defaultProperties.CorrelationId);
+                logger.DebugWrite("Published {0}, CorrelationId {1}", exchangeName, defaultProperties.CorrelationId);
             }
-            catch (RabbitMQ.Client.Exceptions.OperationInterruptedException exception)
+            catch (OperationInterruptedException exception)
             {
                 throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
             }
@@ -131,17 +149,17 @@ namespace EasyNetQ
             }
         }
 
-        private void DeclarePublishExchange(IModel channel, string typeName)
+        private void DeclarePublishExchange(IModel channel, string exchangeName)
         {
             // no need to declare on every publish
-            if (!publishExchanges.Contains(typeName))
+            if (!publishExchanges.Contains(exchangeName))
             {
                 channel.ExchangeDeclare(
-                    typeName,               // exchange
+                    exchangeName,               // exchange
                     ExchangeType.Direct,    // type
                     true);                  // durable
 
-                publishExchanges.Add(typeName);
+                publishExchanges.Add(exchangeName);
             }
         }
 
@@ -183,19 +201,20 @@ namespace EasyNetQ
                 throw new ArgumentNullException("onMessage");
             }
 
-            var typeName = serializeType(typeof(T));
-            var subscriptionQueue = string.Format("{0}_{1}", subscriptionId, typeName);
+			string queueName = GetQueueName<T>(subscriptionId);
+			string exchangeName = GetExchangeName<T>();
+			string topic = GetTopic<T>();
 
             Action subscribeAction = () =>
             {
                 var channel = connection.CreateModel();
                 modelList.Add( channel );
-                DeclarePublishExchange(channel, typeName);
+                DeclarePublishExchange(channel, exchangeName);
 
                 channel.BasicQos(0, prefetchCount, false);
 
                 var queue = channel.QueueDeclare(
-                    subscriptionQueue,  // queue
+                    queueName,          // queue
                     true,               // durable
                     false,              // exclusive
                     false,              // autoDelete
@@ -203,8 +222,8 @@ namespace EasyNetQ
 
                 channel.QueueBind(
                     queue,              // queue
-                    typeName,           // exchange
-                    typeName);          // routingKey
+                    exchangeName,           // exchange
+                    topic);          // routingKey
 
                 var consumer = consumerFactory.CreateConsumer(channel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -216,7 +235,7 @@ namespace EasyNetQ
                     });
 
                 channel.BasicConsume(
-                    subscriptionQueue,      // queue
+                    queueName,              // queue
                     noAck,                  // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
@@ -224,6 +243,25 @@ namespace EasyNetQ
 
             AddSubscriptionAction(subscribeAction);
         }
+
+
+		private string GetTopic<T>()
+		{
+			return conventions.TopicNamingConvention.Invoke(typeof (T));
+		}
+
+
+		private string GetExchangeName<T>()
+		{
+			return conventions.ExchangeNamingConvention.Invoke(typeof(T));
+		}
+
+
+		private string GetQueueName<T>(string subscriptionId)
+		{
+			return conventions.QueueNamingConveition.Invoke(typeof (T), subscriptionId);
+		}
+
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
