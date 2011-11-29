@@ -1,5 +1,0 @@
-﻿Drop Saga assemblies in this folder.
-
-A Saga should reference the EasyNetQ.Saga assembly and implement the ISaga interface.
-
-Saga host will automatically install any sagas that dropped into this folder.
