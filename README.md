@@ -1,6 +1,6 @@
 A Nice .NET API for AMQP
 
-**[Documentation](wiki/Introduction)**
+**[Documentation](EasyNetQ/wiki/Introduction)**
 
 Goals:
 
