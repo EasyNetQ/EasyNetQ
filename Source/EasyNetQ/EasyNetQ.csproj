@@ -59,6 +59,7 @@
     <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
+    <Compile Include="InMemoryBus.cs" />
     <Compile Include="IRawByteBus.cs" />
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />

@@ -87,6 +87,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishSubscribeTests.cs" />
     <Compile Include="RequestResponseTests.cs" />
+    <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
+    <Compile Include="Sagas\RequestResponseSaga.cs" />
+    <Compile Include="Sagas\SubscribePublishSaga.cs" />
+    <Compile Include="InMemoryBusTests.cs" />
     <Compile Include="SchedulingTests.cs" />
     <Compile Include="SimpleSagaSpike.cs" />
     <Compile Include="TestBusFactory.cs" />
