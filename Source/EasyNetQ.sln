@@ -40,6 +40,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Performance.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Performance.Consumer", "EasyNetQ.Tests.Performance.Consumer\EasyNetQ.Tests.Performance.Consumer.csproj", "{F0B51B7C-F17F-41FE-9E14-7727AD697C97}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DatabaseScripts", "DatabaseScripts", "{896B72E7-50D5-49B9-987B-4250092E39BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler", "{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}"
+	ProjectSection(SolutionItems) = preProject
+		..\DatabaseScripts\EasyNetQ.Scheduler\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\CreateWorkTables.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\uspAddNewMessageToSchedule.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspAddNewMessageToSchedule.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\uspGetNextBatchOfMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspGetNextBatchOfMessages.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\uspMarkWorkItemForPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspMarkWorkItemForPurge.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspWorkItemsSelfPurge.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -209,5 +220,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2} = {896B72E7-50D5-49B9-987B-4250092E39BB}
 	EndGlobalSection
 EndGlobal

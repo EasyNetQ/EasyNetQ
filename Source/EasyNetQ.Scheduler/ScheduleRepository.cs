@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using EasyNetQ.SystemMessages;
 
@@ -16,16 +17,8 @@ namespace EasyNetQ.Scheduler
     {
         private const string connectionStringKey = "scheduleDb";
         private readonly string connectionString;
-        private const string insertSql = 
-@"
-insert into ScheduleMe (WakeTime, BindingKey, InnerMessage, IsComplete) 
-    values (@WakeTime, @BindingKey, @InnerMessage, 0)
-";
-        private const string selectSql =
-@"
-select WakeTime, BindingKey, InnerMessage from ScheduleMe where WakeTime <= @TimeNow and IsComplete = 0;
-update ScheduleMe set IsComplete = 1 where WakeTime <= @TimeNow and IsComplete = 0;
-";
+        private const string insertSql = "uspAddNewMessageToScheduler";
+        private const string selectSql = "uspGetNextBatchOfMessages";
 
         public ScheduleRepository()
         {
@@ -42,9 +35,10 @@ update ScheduleMe set IsComplete = 1 where WakeTime <= @TimeNow and IsComplete =
             using(var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(insertSql, connection))
             {
+                command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.AddWithValue("@WakeTime", scheduleMe.WakeTime);
                 command.Parameters.AddWithValue("@BindingKey", scheduleMe.BindingKey);
-                command.Parameters.AddWithValue("@InnerMessage", scheduleMe.InnerMessage);
+                command.Parameters.AddWithValue("@Message", scheduleMe.InnerMessage);
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -58,7 +52,8 @@ update ScheduleMe set IsComplete = 1 where WakeTime <= @TimeNow and IsComplete =
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(selectSql, connection))
             {
-                command.Parameters.AddWithValue("@TimeNow", timeNow);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@WakeTime", timeNow);
 
                 connection.Open();
                 var reader = command.ExecuteReader();
@@ -66,9 +61,9 @@ update ScheduleMe set IsComplete = 1 where WakeTime <= @TimeNow and IsComplete =
                 {
                     scheduledMessages.Add(new ScheduleMe
                     {
-                        WakeTime = reader.GetDateTime(0),
-                        BindingKey = reader.GetString(1),
-                        InnerMessage = reader.GetSqlBinary(2).Value
+                        WakeTime = reader.GetDateTime(2),
+                        BindingKey = reader.GetString(3),
+                        InnerMessage = reader.GetSqlBinary(4).Value
                     });
                 }
             }

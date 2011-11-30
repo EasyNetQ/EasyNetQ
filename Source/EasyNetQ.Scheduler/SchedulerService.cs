@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Transactions;
 using EasyNetQ.SystemMessages;
 
@@ -61,15 +62,8 @@ namespace EasyNetQ.Scheduler
 
         public void OnMessage(ScheduleMe scheduleMe)
         {
-            try
-            {
-                log.DebugWrite("Got Schedule Message");
-                scheduleRepository.Store(scheduleMe);
-            }
-            catch (Exception exception)
-            {
-                log.ErrorWrite("Error receiving message from queue", exception);
-            }
+            log.DebugWrite("Got Schedule Message");
+            scheduleRepository.Store(scheduleMe);
         }
 
         public void OnTimerTick(object state)
