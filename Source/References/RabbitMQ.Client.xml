@@ -364,7 +364,7 @@
         <member name="T:RabbitMQ.Client.IBasicProperties">
             <summary>Common AMQP Basic content-class headers interface,
             spanning the union of the functionality offered by versions
-            0-8, 0-8qpid and 0-9 (without WIP) of AMQP.</summary>
+            0-8, 0-8qpid, 0-9 and 0-9-1 of AMQP.</summary>
             <remarks>
             <para>
             The specification code generator provides
@@ -420,7 +420,9 @@
             <summary> Clear the AppId property. </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.ClearClusterId">
-            <summary> Clear the ClusterId property. </summary>
+            <summary> Clear the ClusterId property.
+             (cluster id is deprecated in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.IsContentTypePresent">
             <summary> Returns true iff the ContentType property is present. </summary>
@@ -462,7 +464,9 @@
             <summary> Returns true iff the AppId property is present. </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.IsClusterIdPresent">
-            <summary> Returns true iff the ClusterId property is present. </summary>
+            <summary> Returns true iff the ClusterId property is present.
+             (cluster id is deprecated in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.SetPersistent(System.Boolean)">
             <summary>Sets DeliveryMode to either persistent (2) or non-persistent (1).</summary>
@@ -520,7 +524,9 @@
             <summary> creating application id </summary>
         </member>
         <member name="P:RabbitMQ.Client.IBasicProperties.ClusterId">
-            <summary> intra-cluster routing identifier </summary>
+            <summary> intra-cluster routing identifier
+             (cluster id is deprecated in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="P:RabbitMQ.Client.IBasicProperties.ReplyToAddress">
             <summary>Convenience property; parses ReplyTo property
@@ -727,8 +733,8 @@
         </member>
         <member name="T:RabbitMQ.Client.IModel">
             <summary>Common AMQP model, spanning the union of the
-            functionality offered by versions 0-8, 0-8qpid, and 0-9
-            (without WIP) of AMQP.</summary>
+            functionality offered by versions 0-8, 0-8qpid, 0-9 and
+            0-9-1 of AMQP.</summary>
             <remarks>
              Extends the IDisposable interface, so that the "using"
              statement can be used to scope the lifetime of a channel when
@@ -741,11 +747,13 @@
         </member>
         <member name="M:RabbitMQ.Client.IModel.CreateFileProperties">
             <summary>Construct a completely empty content header for
-            use with the File content class.</summary>
+            use with the File content class.
+             (unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.CreateStreamProperties">
             <summary>Construct a completely empty content header for
-            use with the Stream content class.</summary>
+            use with the Stream content class.
+             (unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.ChannelFlow(System.Boolean)">
             <summary>(Spec method) Channel flow control functionality.</summary>
@@ -861,6 +869,26 @@
         <member name="M:RabbitMQ.Client.IModel.ConfirmSelect">
             <summary>Enable publisher acknowledgements.</summary>
         </member>
+        <member name="M:RabbitMQ.Client.IModel.WaitForConfirms">
+            <summary>Wait until all published messages have been confirmed.
+            </summary>
+            <remarks>
+            Waits until all messages published since the last call have
+            been either ack'd or nack'd by the broker.  Returns whether
+            all the messages were ack'd (and none were nack'd). Note,
+            when called on a non-Confirm channel, returns true
+            immediately.
+            </remarks>
+        </member>
+        <member name="M:RabbitMQ.Client.IModel.WaitForConfirmsOrDie">
+            <summary>Wait until all published messages have been confirmed.
+            </summary>
+            <remarks>
+            Waits until all messages published since the last call have
+            been ack'd by the broker.  If a nack is received, throws an
+            OperationInterrupedException exception immediately.
+            </remarks>
+        </member>
         <member name="M:RabbitMQ.Client.IModel.BasicConsume(System.String,System.Boolean,RabbitMQ.Client.IBasicConsumer)">
             <summary>Start a Basic content-class consumer.</summary>
             <remarks>
@@ -942,10 +970,11 @@
             transaction.</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.DtxSelect">
-            <summary>(Spec method) Enable DTX mode for this session.</summary>
+            <summary>(Spec method) Enable DTX mode for this session.
+             (unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.DtxStart(System.String)">
-            <summary>(Spec method)</summary>
+            <summary>(Spec method, unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.Close">
             <summary>Close this session.</summary>
@@ -1097,6 +1126,10 @@
             <summary>Used to send a Queue.Declare method. Called by the
             public declare method.</summary>
         </member>
+        <member name="M:RabbitMQ.Client.Impl.IFullModel.HandleQueueDeclareOk(System.String,System.UInt32,System.UInt32)">
+            <summary>Handle incoming Queue.DeclareOk methods. Routes the
+            information to a waiting Queue.DeclareOk continuation.</summary>
+        </member>
         <member name="M:RabbitMQ.Client.Impl.IFullModel._Private_QueueBind(System.String,System.String,System.String,System.Boolean,System.Collections.IDictionary)">
             <summary>Used to send a Queue.Bind method. Called by the
             public bind method.</summary>
@@ -1234,7 +1267,9 @@
             <summary>Handle an incoming Connection.OpenOk.</summary>
         </member>
         <member name="M:RabbitMQ.Client.Impl.IFullModel.HandleConnectionRedirect(System.String,System.String)">
-            <summary>Handle an incoming Connection.Redirect.</summary>
+            <summary>Handle an incoming Connection.Redirect.
+             (not available in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="M:RabbitMQ.Client.Impl.IFullModel._Private_ConnectionClose(System.UInt16,System.String,System.UInt16,System.UInt16)">
             <summary>Used to send a Connection.Close. Called during
@@ -1690,7 +1725,7 @@
         <member name="T:RabbitMQ.Client.IFileProperties">
             <summary>Common AMQP File content-class headers interface,
             spanning the union of the functionality offered by versions
-            0-8, 0-8qpid and 0-9 (without WIP) of AMQP.</summary>
+            0-8, 0-8qpid, 0-9 and 0-9-1 of AMQP.</summary>
             <remarks>
             <para>
             The specification code generator provides
@@ -1793,7 +1828,7 @@
         <member name="T:RabbitMQ.Client.IStreamProperties">
             <summary>Common AMQP Stream content-class headers interface,
             spanning the union of the functionality offered by versions
-            0-8, 0-8qpid and 0-9 (without WIP) of AMQP.</summary>
+            0-8, 0-8qpid, 0-9 and 0-9-1 of AMQP.</summary>
             <remarks>
             <para>
             The specification code generator provides
@@ -3697,16 +3732,16 @@
             <summary>The AMQP specification minor version number</summary>
         </member>
         <member name="T:RabbitMQ.Client.AuthMechanism">
-            A pluggable authentication mechanism.
+            <summary>A pluggable authentication mechanism.</summary>
         </member>
         <member name="M:RabbitMQ.Client.AuthMechanism.handleChallenge(System.Byte[],RabbitMQ.Client.ConnectionFactory)">
-            Handle one round of challenge-response
+            <summary>Handle one round of challenge-response</summary>
         </member>
         <member name="M:RabbitMQ.Client.AuthMechanismFactory.GetInstance">
-            Return a new authentication mechanism implementation
+            <summary>Return a new authentication mechanism implementation</summary>
         </member>
         <member name="P:RabbitMQ.Client.AuthMechanismFactory.Name">
-            The name of the authentication mechanism, as negotiated on the wire
+            <summary>The name of the authentication mechanism, as negotiated on the wire</summary>
         </member>
         <member name="T:RabbitMQ.Client.BinaryTableValue">
             <summary>Wrapper for a byte[]. May appear as values read from
@@ -3765,7 +3800,7 @@
                  factory.VirtualHost = ConnectionFactory.DefaultVHost;
                  factory.Protocol = Protocols.FromEnvironment();
                  factory.HostName = hostName;
-                 factory.PortNumber = AmqpTcpEndpoint.UseDefaultPort;
+                 factory.Port     = AmqpTcpEndpoint.UseDefaultPort;
                  //
                  IConnection conn = factory.CreateConnection();
                  //
@@ -3777,17 +3812,24 @@
                  conn.Close(Constants.ReplySuccess, "Closing the connection");
             </code></example>
             <para>
+            The same example, written more compactly with AMQP URIs:
+            </para>
+            <example><code>
+                 ConnectionFactory factory = new ConnectionFactory();
+                 factory.Uri = "amqp://localhost";
+                 IConnection conn = factory.CreateConnection();
+                 ...
+            </code></example>
+            <para>
              Please see also the API overview and tutorial in the User Guide.
             </para>
             <para>
-             Some of the static methods described below take, as a
-             convenience, a System.Uri instance representing an AMQP server
-             address. The use of Uri here is not standardised - Uri is
-             simply a convenient container for internet-address-like
-             components. In particular, the Uri "Scheme" property is
-             ignored: only the "Host" and "Port" properties are extracted.
-            </para>
-            </remarks>
+            Note that the Uri property takes a string representation of an
+            AMQP URI.  Omitted URI parts will take default values.  The
+            host part of the URI cannot be omitted and URIs of the form
+            "amqp://foo/" (note the trailling slash) also represent the
+            default virtual host.  The latter issue means that virtual
+            hosts with an empty name are not addressable. </para></remarks>
         </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.DefaultUser">
             <summary>Default user name (value: "guest")</summary>
@@ -3869,6 +3911,15 @@
             <summary>Given a list of mechanism names supported by the
             server, select a preferred mechanism, or null if we have
             none in common.</summary>
+        </member>
+        <member name="P:RabbitMQ.Client.ConnectionFactory.Endpoint">
+            <summary>The AMQP connection target</summary>
+        </member>
+        <member name="P:RabbitMQ.Client.ConnectionFactory.uri">
+            <summary>Set connection parameters using the amqp or amqps scheme</summary>
+        </member>
+        <member name="P:RabbitMQ.Client.ConnectionFactory.Uri">
+            <summary>Set connection parameters using the amqp or amqps scheme</summary>
         </member>
         <member name="T:RabbitMQ.Client.DefaultBasicConsumer">
             <summary>Useful default/base implementation of
@@ -3989,12 +4040,13 @@
         </member>
         <member name="T:RabbitMQ.Client.ExchangeType">
             <summary>
-             Convenience class providing compile-time names for various exchange types.
+             Convenience class providing compile-time names for standard exchange types.
             </summary>
             <remarks>
              Use the static members of this class as values for the
              "exchangeType" arguments for IModel methods such as
-             ExchangeDeclare.
+             ExchangeDeclare. The broker may be extended with additional
+             exchange types that do not appear in this class.
             </remarks>
         </member>
         <member name="F:RabbitMQ.Client.ExchangeType.Fanout">
@@ -4006,11 +4058,14 @@
         <member name="F:RabbitMQ.Client.ExchangeType.Topic">
             <summary>Exchange type used for AMQP topic exchanges.</summary>
         </member>
+        <member name="F:RabbitMQ.Client.ExchangeType.Headers">
+            <summary>Exchange type used for AMQP headers exchanges.</summary>
+        </member>
         <member name="M:RabbitMQ.Client.ExchangeType.#ctor">
             <summary>Private constructor - this class has no instances</summary>
         </member>
         <member name="M:RabbitMQ.Client.ExchangeType.All">
-            <summary>Retrieve a collection containing all defined exchange types.</summary>
+            <summary>Retrieve a collection containing all standard exchange types.</summary>
         </member>
         <member name="T:RabbitMQ.Client.IConnection">
             <summary>Main interface to an AMQP connection.</summary>
@@ -4476,9 +4531,12 @@
             sections marked "WIP", "work in progress", including in
             particular the Message class of operations).</summary>
         </member>
+        <member name="P:RabbitMQ.Client.Protocols.AMQP_0_9_1">
+            <summary>Protocol version 0-9-1 as modified by VMWare.</summary>
+        </member>
         <member name="P:RabbitMQ.Client.Protocols.DefaultProtocol">
             <summary>Retrieve the current default protocol variant
-            (currently AMQP_0_8)</summary>
+            (currently AMQP_0_9_1)</summary>
         </member>
         <member name="T:RabbitMQ.Client.PublicationAddress">
             <summary>Container for an exchange name, exchange type and
@@ -4729,8 +4787,10 @@
             </summary>
         </member>
         <member name="P:RabbitMQ.Client.SslOption.Certs">
-            <summary>Convenience read-only property to retrieve an X509CertificateCollection
-            containing the client certificate</summary>
+            <summary>Retrieve or set the X509CertificateCollection
+            containing the client certificate. If no collection is set,
+            the client will attempt to load one from the specified
+            CertPath.</summary>
         </member>
         <member name="P:RabbitMQ.Client.SslOption.ServerName">
             <summary>Retrieve or set server's Canonical Name. This MUST match the CN
@@ -5459,6 +5519,10 @@
             <summary>Whether this nack applies to one message or
             multiple messages.</summary>
         </member>
+        <member name="P:RabbitMQ.Client.Events.BasicNackEventArgs.Requeue">
+            <summary>Ignore</summary>
+            <remarks>Clients should ignore this field.</remarks>
+        </member>
         <member name="T:RabbitMQ.Client.Events.BasicNackEventHandler">
             <summary>Delegate used to process Basic.Nack events.</summary>
         </member>
@@ -5822,11 +5886,6 @@
         <member name="F:RabbitMQ.Client.Impl.ConnectionBase.HandshakeTimeout">
             <summary>Timeout used while waiting for AMQP handshaking to
             complete (milliseconds)</summary>
-        </member>
-        <member name="F:RabbitMQ.Client.Impl.ConnectionBase.ConnectionCloseTimeout">
-            <summary>Timeout used while waiting for a
-            connection.close-ok reply to a connection.close request
-            (milliseconds)</summary>
         </member>
         <member name="M:RabbitMQ.Client.Impl.ConnectionBase.Close">
             <summary>API-side invocation of connection.close.</summary>

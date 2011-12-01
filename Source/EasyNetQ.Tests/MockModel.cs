@@ -10,7 +10,7 @@ namespace EasyNetQ.Tests
         public Action AbortAction { get; set; }
         public Action<uint, ushort, bool> BasicQosAction { get; set; }
         public Action<string, string, IBasicProperties, byte[]> BasicPublishAction { get; set; }
-        public Func<string, bool, bool, bool, IDictionary, string> QueueDeclareAction { get; set; }
+        public Func<string, bool, bool, bool, IDictionary, QueueDeclareOk> QueueDeclareAction { get; set; }
         public Action<string, string, string> QueueBindAction { get; set; }
         public Func<string, bool, string, IBasicConsumer, string> BasicConsumeAction { get; set; }
         public Action<string, string, bool, bool, IDictionary> ExchangeDeclareAction { get; set; }
@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests
             AbortAction = () => { };
             BasicQosAction = (a, b, c) => { };
             BasicPublishAction = (a, b, c, d) => { };
-            QueueDeclareAction = (a, b, c, d, e) => "some_queue_name";
+            QueueDeclareAction = (a, b, c, d, e) => new QueueDeclareOk("some queue", 0, 0);
             QueueBindAction = (a, b, c) => { };
             BasicConsumeAction = (a, b, c, d) => "";
             ExchangeDeclareAction = (a, b, c, d, e) => { };
@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IBasicProperties CreateBasicProperties()
@@ -40,17 +40,17 @@ namespace EasyNetQ.Tests
 
         public IFileProperties CreateFileProperties()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IStreamProperties CreateStreamProperties()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ChannelFlow(bool active)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary arguments)
@@ -65,62 +65,62 @@ namespace EasyNetQ.Tests
 
         public void ExchangeDeclare(string exchange, string type)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeDeclarePassive(string exchange)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeDelete(string exchange, bool ifUnused)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeDelete(string exchange)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeBind(string destination, string source, string routingKey, IDictionary arguments)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeBind(string destination, string source, string routingKey)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeUnbind(string destination, string source, string routingKey, IDictionary arguments)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ExchangeUnbind(string destination, string source, string routingKey)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public string QueueDeclare()
+        public QueueDeclareOk QueueDeclare()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public string QueueDeclarePassive(string queue)
+        public QueueDeclareOk QueueDeclarePassive(string queue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public string QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary arguments)
+        public QueueDeclareOk QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary arguments)
         {
             return QueueDeclareAction(queue, durable, exclusive, autoDelete, arguments);
         }
 
         public void QueueBind(string queue, string exchange, string routingKey, IDictionary arguments)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void QueueBind(string queue, string exchange, string routingKey)
@@ -130,32 +130,42 @@ namespace EasyNetQ.Tests
 
         public void QueueUnbind(string queue, string exchange, string routingKey, IDictionary arguments)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public uint QueuePurge(string queue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public uint QueueDelete(string queue, bool ifUnused, bool ifEmpty)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public uint QueueDelete(string queue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void ConfirmSelect()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public bool WaitForConfirms()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WaitForConfirmsOrDie()
+        {
+            throw new NotImplementedException();
         }
 
         public string BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, IBasicConsumer consumer)
@@ -165,17 +175,17 @@ namespace EasyNetQ.Tests
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, IDictionary arguments, IBasicConsumer consumer)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, bool noLocal, bool exclusive, IDictionary arguments, IBasicConsumer consumer)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicCancel(string consumerTag)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
@@ -185,7 +195,7 @@ namespace EasyNetQ.Tests
 
         public void BasicPublish(PublicationAddress addr, IBasicProperties basicProperties, byte[] body)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicPublish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body)
@@ -200,72 +210,72 @@ namespace EasyNetQ.Tests
 
         public void BasicPublish(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicAck(ulong deliveryTag, bool multiple)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicReject(ulong deliveryTag, bool requeue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicRecover(bool requeue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void BasicRecoverAsync(bool requeue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public BasicGetResult BasicGet(string queue, bool noAck)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void TxSelect()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void TxCommit()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void TxRollback()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void DtxSelect()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void DtxStart(string dtxIdentifier)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Close()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Close(ushort replyCode, string replyText)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Abort()
@@ -275,28 +285,28 @@ namespace EasyNetQ.Tests
 
         public void Abort(ushort replyCode, string replyText)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IBasicConsumer DefaultConsumer
         {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public ShutdownEventArgs CloseReason
         {
-            get { throw new System.NotImplementedException(); }
+            get { throw new NotImplementedException(); }
         }
 
         public bool IsOpen
         {
-            get { throw new System.NotImplementedException(); }
+            get { throw new NotImplementedException(); }
         }
 
         public ulong NextPublishSeqNo
         {
-            get { throw new System.NotImplementedException(); }
+            get { throw new NotImplementedException(); }
         }
 
         public event ModelShutdownEventHandler ModelShutdown;
