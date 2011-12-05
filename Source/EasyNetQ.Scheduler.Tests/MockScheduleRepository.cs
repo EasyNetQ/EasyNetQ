@@ -6,18 +6,23 @@ namespace EasyNetQ.Scheduler.Tests
 {
     public class MockScheduleRepository : IScheduleRepository
     {
-        public Func<DateTime, IList<ScheduleMe>> GetPendingDelegate { get; set; } 
+        public Func<IList<ScheduleMe>> GetPendingDelegate { get; set; } 
 
         public void Store(ScheduleMe scheduleMe)
         {
             throw new NotImplementedException();
         }
 
-        public IList<ScheduleMe> GetPending(DateTime timeNow)
+        public IList<ScheduleMe> GetPending()
         {
             return (GetPendingDelegate != null)
-                       ? GetPendingDelegate(timeNow)
+                       ? GetPendingDelegate()
                        : null;
+        }
+
+        public void Purge()
+        {
+            throw new NotImplementedException();
         }
     }
 }

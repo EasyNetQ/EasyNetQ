@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
 using System.Collections.Generic;
 using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
@@ -15,7 +14,6 @@ namespace EasyNetQ.Scheduler.Tests
         private MockBus bus;
         private MockRawByteBus rawByteBus;
         private MockScheduleRepository scheduleRepository;
-        private readonly DateTime now = new DateTime(2010, 8, 18);
 
         [SetUp]
         public void SetUp()
@@ -28,8 +26,7 @@ namespace EasyNetQ.Scheduler.Tests
                 bus, 
                 rawByteBus, 
                 new ConsoleLogger(), 
-                scheduleRepository, 
-                () => now);
+                scheduleRepository);
         }
 
         [Test]
@@ -43,16 +40,12 @@ namespace EasyNetQ.Scheduler.Tests
 
             var published = new List<string>();
 
-            scheduleRepository.GetPendingDelegate = timeNow =>
-            {
-                timeNow.ShouldEqual(now);
-                return pendingSchedule;
-            };
+            scheduleRepository.GetPendingDelegate = () => pendingSchedule;
 
             rawByteBus.RawPublishDelegate = (typeName, messageBody) =>
                 published.Add(typeName);
 
-            schedulerService.OnTimerTick(null);
+            schedulerService.OnPublishTimerTick(null);
 
             published.Count.ShouldEqual(2);
             published[0].ShouldEqual("msg1");

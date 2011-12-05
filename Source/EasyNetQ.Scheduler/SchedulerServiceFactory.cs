@@ -20,9 +20,8 @@ namespace EasyNetQ.Scheduler
             return new SchedulerService(
                 bus, 
                 rawByteBus, 
-                logger, 
-                new ScheduleRepository(),
-                () => DateTime.UtcNow);
+                logger,
+                new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow));
         }
     }
 

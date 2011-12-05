@@ -7,6 +7,7 @@ using NUnit.Framework;
 namespace EasyNetQ.Scheduler.Tests
 {
     [TestFixture]
+    [Explicit("Required a database")]
     public class ScheduleRepositoryTests
     {
         private ScheduleRepository scheduleRepository;
@@ -14,8 +15,12 @@ namespace EasyNetQ.Scheduler.Tests
         [SetUp]
         public void SetUp()
         {
-            scheduleRepository = new ScheduleRepository(
-                "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;");
+            var configuration = new ScheduleRepositoryConfiguration
+            {
+                ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
+                PurgeBatchSize = 100
+            };
+            scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);
         }
 
         [Test]
@@ -34,7 +39,7 @@ namespace EasyNetQ.Scheduler.Tests
         [Explicit("Required a database")]
         public void Should_be_able_to_get_messages()
         {
-            var schedules = scheduleRepository.GetPending(new DateTime(2011, 5, 19));
+            var schedules = scheduleRepository.GetPending();
             foreach (var scheduleMe in schedules)
             {
                 Console.WriteLine("{0}, {1}, {2}", 
@@ -42,6 +47,13 @@ namespace EasyNetQ.Scheduler.Tests
                     scheduleMe.WakeTime,
                     Encoding.UTF8.GetString(scheduleMe.InnerMessage));
             }
+        }
+
+        [Test]
+        [Explicit("Required a database")]
+        public void Should_be_able_to_purge_messages()
+        {
+            scheduleRepository.Purge();
         }
 
         public DateTime GetCurrentUtcTime()
