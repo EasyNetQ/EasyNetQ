@@ -93,6 +93,7 @@
     <Compile Include="InMemoryBusTests.cs" />
     <Compile Include="SchedulingTests.cs" />
     <Compile Include="SimpleSagaSpike.cs" />
+    <Compile Include="SubscriberOfSpike.cs" />
     <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
