@@ -99,6 +99,21 @@ namespace EasyNetQ.Tests
 
             Console.WriteLine("Stopped consuming");
         }
+
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_subscribe_OK_before_connection_to_broker_is_complete()
+        {
+            var testLocalBus = RabbitHutch.CreateBus("host=localhost");
+            testLocalBus.Dispose();
+
+            testLocalBus.Subscribe<MyMessage>("test", message =>
+            {
+                Console.Out.WriteLine("message.Text = {0}", message.Text);
+            });
+
+            // allow time for bus to connect
+            Thread.Sleep(1000);
+        }
     }
 
     public class MyMessage

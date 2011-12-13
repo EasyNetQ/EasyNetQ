@@ -540,6 +540,10 @@ namespace EasyNetQ
 			}
 			catch (OperationInterruptedException)
 			{
+			    
+			}
+            catch (EasyNetQException)
+			{
 				// Looks like the channel closed between our IsConnected check
 				// and the subscription action. Do nothing here, when the 
 				// connection comes back, the subcription action will be run then.
