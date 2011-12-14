@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading;
 using EasyNetQ.SystemMessages;
 
 namespace EasyNetQ.Scheduler
@@ -18,6 +19,7 @@ namespace EasyNetQ.Scheduler
         private const string insertSql = "uspAddNewMessageToScheduler";
         private const string selectSql = "uspGetNextBatchOfMessages";
         private const string purgeSql = "uspWorkItemsSelfPurge";
+        private const string markForPurgeSql = "uspMarkWorkItemForPurge";
 
         private readonly ScheduleRepositoryConfiguration configuration;
         private readonly Func<DateTime> now; 
@@ -43,10 +45,12 @@ namespace EasyNetQ.Scheduler
         public IList<ScheduleMe> GetPending()
         {
             var scheduledMessages = new List<ScheduleMe>();
+            var scheuldeMessageIds = new List<int>();
 
             WithStoredProcedureCommand(selectSql, command =>
             {
                 command.Parameters.AddWithValue("@WakeTime", now());
+                command.Parameters.AddWithValue("@rows", configuration.MaximumScheduleMessagesToReturn);
 
                 using(var reader = command.ExecuteReader())
                 {
@@ -58,11 +62,35 @@ namespace EasyNetQ.Scheduler
                             BindingKey = reader.GetString(3),
                             InnerMessage = reader.GetSqlBinary(4).Value
                         });
+
+                        scheuldeMessageIds.Add(reader.GetInt32(0));
                     }
                 }
             });
 
+            MarkItemsForPurge(scheuldeMessageIds);
+
             return scheduledMessages;
+        }
+
+        public void MarkItemsForPurge(IEnumerable<int> scheuldeMessageIds)
+        {
+            // mark items for purge on a background thread.
+            ThreadPool.QueueUserWorkItem(state => 
+                WithStoredProcedureCommand(markForPurgeSql, command =>
+                {
+                    var purgeDate = now().AddDays(configuration.PurgeDelayDays);
+
+                    command.Parameters.AddWithValue("@purgeDate", purgeDate);
+                    var idParameter = command.Parameters.Add("@ID", SqlDbType.Int);
+
+                    foreach (var scheduleMessageId in scheuldeMessageIds)
+                    {
+                        idParameter.Value = scheduleMessageId;
+                        command.ExecuteNonQuery();
+                    }
+                })
+            );
         }
 
         public void Purge()

@@ -21,7 +21,8 @@ namespace EasyNetQ.Scheduler
                 bus, 
                 rawByteBus, 
                 logger,
-                new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow));
+                new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow),
+                SchedulerServiceConfiguration.FromConfigFile());
         }
     }
 

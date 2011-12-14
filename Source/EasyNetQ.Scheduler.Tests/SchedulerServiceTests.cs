@@ -26,7 +26,12 @@ namespace EasyNetQ.Scheduler.Tests
                 bus, 
                 rawByteBus, 
                 new ConsoleLogger(), 
-                scheduleRepository);
+                scheduleRepository,
+                new SchedulerServiceConfiguration
+                {
+                    PublishIntervalSeconds = 1,
+                    PurgeIntervalSeconds = 1
+                });
         }
 
         [Test]

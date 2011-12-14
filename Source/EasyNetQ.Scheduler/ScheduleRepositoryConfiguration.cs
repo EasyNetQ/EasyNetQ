@@ -1,34 +1,29 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 
 namespace EasyNetQ.Scheduler
 {
-    public class ScheduleRepositoryConfiguration
+    public class ScheduleRepositoryConfiguration : ConfigurationBase
     {
         private const string connectionStringKey = "scheduleDb";
 
         public string ConnectionString { get; set; }
         public int PurgeBatchSize { get; set; }
+        public int MaximumScheduleMessagesToReturn { get; set; }
+
+        /// <summary>
+        /// The number of days after a schedule item triggers before it is purged.
+        /// </summary>
+        public int PurgeDelayDays { get; set; }
 
         public static ScheduleRepositoryConfiguration FromConfigFile()
         {
             return new ScheduleRepositoryConfiguration
             {
                 ConnectionString = ConfigurationManager.ConnectionStrings[connectionStringKey].ConnectionString,
-                PurgeBatchSize = GetIntAppSetting("PurgeBatchSize")
+                PurgeBatchSize = GetIntAppSetting("PurgeBatchSize"),
+                PurgeDelayDays = GetIntAppSetting("PurgeDelayDays"),
+                MaximumScheduleMessagesToReturn = GetIntAppSetting("MaximumScheduleMessagesToReturn")
             };
-        }
-
-        public static int GetIntAppSetting(string settingKey)
-        {
-            var intAppSetting = ConfigurationManager.AppSettings[settingKey];
-            int value;
-            if (!int.TryParse(intAppSetting, out value))
-            {
-                throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid integer", 
-                    settingKey, intAppSetting));
-            }
-            return value;
         }
     }
 }

@@ -14,13 +14,12 @@ namespace EasyNetQ.Scheduler
     public class SchedulerService : ISchedulerService
     {
         private const string schedulerSubscriptionId = "schedulerSubscriptionId";
-        private const int publishInterval = 2000;
-        private const int purgeInterval = 2000;
 
         private readonly IBus bus;
         private readonly IRawByteBus rawByteBus;
         private readonly IEasyNetQLogger log;
         private readonly IScheduleRepository scheduleRepository;
+        private readonly SchedulerServiceConfiguration configuration;
 
         private System.Threading.Timer publishTimer;
         private System.Threading.Timer purgeTimer;
@@ -29,10 +28,12 @@ namespace EasyNetQ.Scheduler
             IBus bus, 
             IRawByteBus rawByteBus,
             IEasyNetQLogger log, 
-            IScheduleRepository scheduleRepository)
+            IScheduleRepository scheduleRepository, 
+            SchedulerServiceConfiguration configuration)
         {
             this.bus = bus;
             this.scheduleRepository = scheduleRepository;
+            this.configuration = configuration;
             this.rawByteBus = rawByteBus;
             this.log = log;
         }
@@ -42,8 +43,8 @@ namespace EasyNetQ.Scheduler
             log.DebugWrite("Starting SchedulerService");
             bus.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
 
-            publishTimer = new System.Threading.Timer(OnPublishTimerTick, null, 0, publishInterval);
-            purgeTimer = new System.Threading.Timer(OnPurgeTimerTick, null, 0, purgeInterval);
+            publishTimer = new System.Threading.Timer(OnPublishTimerTick, null, 0, configuration.PublishIntervalSeconds * 1000);
+            purgeTimer = new System.Threading.Timer(OnPurgeTimerTick, null, 0, configuration.PurgeIntervalSeconds * 1000);
         }
 
         public void Stop()
@@ -52,6 +53,10 @@ namespace EasyNetQ.Scheduler
             if (publishTimer != null)
             {
                 publishTimer.Dispose();
+            }
+            if (purgeTimer != null)
+            {
+                purgeTimer.Dispose();
             }
             if (bus != null)
             {
