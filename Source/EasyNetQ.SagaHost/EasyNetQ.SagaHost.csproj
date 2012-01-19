@@ -35,13 +35,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core">
+      <HintPath>..\packages\Castle.Core.3.0.0.4001\lib\net40-client\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor">
+      <HintPath>..\packages\Castle.Windsor.3.0.0.4001\lib\net40\Castle.Windsor.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
     <Reference Include="Topshelf">
       <HintPath>..\packages\Topshelf.2.2.1.1\lib\NET35\Topshelf.dll</HintPath>
     </Reference>
@@ -65,6 +73,7 @@
     <Compile Include="SagaHostFactory.cs" />
     <Compile Include="DefaultSagaHost.cs" />
     <Compile Include="UrlZoneService.cs" />
+    <Compile Include="WindsorSagaHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

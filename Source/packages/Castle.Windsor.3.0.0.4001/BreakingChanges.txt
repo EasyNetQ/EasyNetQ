@@ -1,0 +1,872 @@
+================================================================================================
+change - Typed factory using DefaultTypedFactoryComponentSelector when resolving component 
+	by name will not fallback to resolving by type if component with that name can not be found
+	and will throw an exception instead.
+
+id - typedFactoryFallbackToResolveByTypeIfNameNotFound
+impact - medium
+fixability - easy
+
+description - Original behavior from v2.5 could lead to bugs in cases when named component was
+	not registered or the name was misspelleed and a wrong component would be picked leading to
+	potentially severe issues in the application. New version adapts fail-fast approach in those
+	cases to give dvelopers immediate feedback the configuration is wrong.
+
+fix - Actual fix depends on which part of the behavior you want:
+	- If you do care about the fallback behavior, that is get the component by name and if
+	not present fallback to resolve by type, you can specify it explicitly when registering your
+	factory:
+	.AsFactory(
+		new DefaultTypedFactoryComponentSelector(fallbackToResolveByTypeIfNameNotFound: true));
+	- if you don't care about the fallback and what you really want is a 'GetSomeFoo' method
+	that resolves by type, either rename the method so that its name doesn't start with 'get'
+	or disable the "'get' methods resolve by name" behavior explicitly when registering your
+	factory:
+	.AsFactory(new DefaultTypedFactoryComponentSelector(getMethodsResolveByName: false))
+================================================================================================
+change - Referencing interceptors by type will not work if the interceptor has custom name.
+
+impact - medium
+fixability - easy
+
+description - We unified how referencing components by type works all across Windsor and that
+	introduced change for some areas like referencing interceptors. Now referencing component
+	by type means "component implemented by given type with default name". This is how it worked
+	for service overrides and is now adapted all across the framework.
+
+fix - Remove Name (id in XML registration) from the referenced components if you're not using it
+	or reference the component by its name.
+================================================================================================
+change - .Service method on mixing registration has been removed and replaced with .Component.
+
+impact - low
+fixability - easy
+
+description - The method had misleading name and behavior inconsistent with the rest of Windsor.
+	As such it's been replaced with .Component method which is more explicit about what argument
+	passed to it means
+
+fix - Replace with .Component method:
+Container.Register(Component.For<ICalcService>()
+			        .ImplementedBy<CalculatorService>()
+			        .Proxy.MixIns(m => m.Component<A>()));
+	Notice the new method is behaving consistently with how referencing interceptors and service
+	overrides works. So you may need to adjust generic argument to point to other component's
+	implementation type rather than its exposed service.
+================================================================================================
+change - Generic overloads of .Insert(this IDictionary dictionary, otherarguments) extension
+	method have been removed.
+
+impact - low
+fixability - easy
+
+description - The overload could cause unexpected behavior when the generic parameter was being
+	inferred, and as such it is removed to make the type always explicit. 
+
+fix - Use overload that specifies type explicitly:
+	d.Insert(typeof(IFoo), new MyFoo()) instead of d.Insert<IFoo>(new MyFoo()) or new, explicit
+	d.InsertTyped<IFoo>(new MyFoo())
+================================================================================================
+change - Method object Generate(IProxyBuilder, ProxyGenerationOptions, IInterceptor[]) on type
+	IProxyFactoryExtension changed signature.
+
+
+impact - low
+fixability - easy
+
+description - To handle new scenarios two additional arguments were introduced:
+	ComponentModel model and CreationContext context.
+
+fix - If you were implementing IProxyFactory and calling down to IProxyFactoryExtension pass your
+	own arguments down to IProxyFactoryExtension. If you're implementing IProxyFactoryExtension
+	adjust your signature and if that makes sense in your context use the arguments.
+================================================================================================
+change - ProxyUtil class was split and part moved to Castle.Core.dll and other was renamed
+
+impact - low
+fixability - easy
+
+description - ProxyUtil contained logic useful not just in the context of Windsor. As such
+	it was moved to be part of DynamicProxy and most methods are now part of the other assembly.
+	The only method specific to Windsor: ObtainProxyOptions was left and is now an extension
+	method in class ProxyOptionsUtil.
+
+fix - If you were using ObtainProxyOptions use it either as extension method or update its type
+	name to ProxyOptionsUtil. Remining methods are now part of ProxyUtil class which was moved
+	to Castle.DynamicProxy namespaces and lives in Castle.Core.dll
+================================================================================================
+change - CreateLifestyleManager method was moved from handlers to IKernelInternal
+
+impact - low
+fixability - easy
+
+description - That behavior belongs in the kernel.
+
+fix - You shouldn't be using this method unless you're implementing custom handlers. If you do
+	call back to the kernel instead of implementing it in yoru handler.
+================================================================================================
+change - Removed interface Castle.Core.ILifecycleConcern
+
+impact - low
+fixability - easy
+
+description - This change was made because with this base interface it was impossible to
+	implement Castle.Core.ICommisssionConcern and Castle.Core.IDecommissionConcers in single class
+	Additionaly ILifecycleConcern had no meaning, only the ICommisssionConcern and
+	IDecommissionConcers have
+
+fix - If you have code using directly ILifecycleConcern (but what for?) you need to
+	migrate to either ICommisssionConcern or IDecommissionConcers. For code that use
+	ICommisssionConcern and IDecommisssionConcern you can recompile it to be extra save, but it
+	is not required.
+================================================================================================
+change - Removed overloads of Configure and ConfigureFor<> methods of the fluent registration
+	API that had ConfigureDelegate parameter
+
+impact - high
+fixability - easy
+
+description - This change was made to simplify the API and remove ambiguity in cases where a 
+	private method is used to provide the configuration.
+
+fix - This change breaks scenarios where a property was being used as the last element of the
+	chain in the nested deledate, like:
+	Configure(c => c.LifeStyle.Transient)
+	This code will no longer compile. To fix it switch to the new methods exposing lifestyle:
+	Configure(c => c.LifestyleTransient()) or simply::
+	LifestyleTransient()
+================================================================================================
+change - ITypedFactoryComponentResolver interface was removed and ITypedFactoryComponentSelector
+	now returns Func<IKernelInternal, IReleasePolicy, object> from SelectComponent method
+
+impact - low
+fixability - easy
+
+description - This change was made to simplify coding of advanced custom selectors which means
+	now only one type needs to be created instead of two and change is much more localized.
+
+fix - If you were using DefaultTypedFactoryComponentSelector this change does not affect you.
+	otherwise return delegate pointing to Resolve method of your ITypedFactoryComponentResolver
+	class or inline it altogether.
+================================================================================================
+change - Add() methods on PropertySetCollection and ConstructorCandidateCollection are no longer
+	publicly accessible
+
+impact - low
+fixability - easy
+
+description - This change was made to ensure and encapsulate the fact that as constructor or
+	property dependency is added the dependency is also added to Dependencies collection on
+	ComponentModel.
+
+fix - Use new AddProperty or AddConstructor methods respectively.
+================================================================================================
+rename -  WithService.DefaultInterface() -> WithService.DefaultInterfaces()
+description - changed to plural to emphasize more than one interface may be matched.
+================================================================================================
+change - ResolveAll methods have now different bahaviour.
+
+impact - high
+fixability - medium
+
+description - Previously Windsor when ResolveAll was called would try to resolve all components
+	with implementation type assignable to the type requirested and silently ignore those it
+	could not resolve. This behavior was introduced before Windsor had ability to support multi
+	service components and at the time it was the only way to support certain scenarios.
+	Currently this behavior is no longer required and is indeed leading to issues when dealing
+	with code that doesn't strictly follow good OOP principles. Also by silently ignoring 
+	unresolvable components it may mask registration issues, that's why it was changed.
+
+fix - Now ResolveAll<Foo>() will only resolve components that explicitly expose Foo as their
+	service. If you were depending on the implicit behavior previously, make sure you add all
+	types you resolve via this method as service to the desired components.
+	Also Windsor now will throw exception if any of the components can't be resolved. If you
+	have a legitimate reason to have unresolvable component use IHandlersFilter to filter that
+	components out.
+================================================================================================
+change - The following methods were removed:
+	IHandler.AddCustomDependencyValue
+	IHandler.HasCustomParameter
+	IHandler.RemoveCustomDependencyValue
+	IHandler.OnHandlerStateChanged event
+	IKernelInternal.RaiseHandlerRegistered
+	IKernelInternal.RaiseHandlersChanged
+	IKernelInternal.RegisterCustomDependencies (all 4 overloads)
+
+impact - low
+fixability - easy
+
+description - Those members were remainings from the old era and there's no longer any point in
+	having them.
+
+fix - Pass the dependencies directly to the ComponentModel using DependsOn method on the fluent
+	registration API. The OnHandlerStateChanged event would no longer be raised so there was no
+	point in keeping it around either. Use HandlersChanged event on kernel instead.
+================================================================================================
+change - IReference<out T>.Attach and .Detach method have now ComponentModel as their parameter.
+
+impact - low
+fixability - easy
+
+description - To accomodate changes in DependencyModel and ParameterModel it was required to
+	have access to both of them hence ComponentModel is being passed as a more generic object
+	exposing access to all required elements.
+
+fix - Pass in full ComponentModel, not just it's .Dependencies property. In the reference
+	use component's properties to do all you require
+================================================================================================
+change - IDependencyAwareActivator has new method: bool IsManagedExternally(ComponentModel);
+
+impact - low
+fixability - easy
+
+description - To implement feature IOC-277 this new customization point was introduced which
+	allows custom activators to specify whether the instance they activate shoud be managed
+	by the container. If true is returned this signifies to the container that the component
+	should not be tracked by the release policy. The activator should in that case also not
+	invoke any lifecycle steps. Notice that lifestyle manager can override the choice and that
+	this method will not be called in all cases.
+
+fix - Implement the method however makes sense to you. By default you should just return false.
+================================================================================================
+change - IExposeDependencyInfo.ObtainDependencyDetails method signature has changed
+
+impact - low
+fixability - easy
+
+description - To move the code for constructing the exception when dependencies are missing
+	out of handlers and open way for different scenarios a new interface was introduced:
+	IDependencyInspector and it is now used by IExposeDependencyInfo to provide the same
+	functionality as before.
+
+fix - Adjust the calls to the new signature. If you have custom handler type take a look at
+	how built in handlers are now implemented.
+================================================================================================
+change - type attribute is now required and id is ignored in facility XML configuration
+
+impact - low
+fixability - easy
+
+description - Since type is uniquely identifying facilities there was no point in keeping the id
+	around anymore.
+
+fix - This change can affect you in two ways. If you were using facilities node in the XML and
+	not specifying the type it is now mandatory. Notice Windsor's ability to apply short type
+	names works here as well, so often just type name is enough - no need to specify assembly
+	qualified name. Also the assembly will now be instantiated by the container, so if you were
+	adding it in code later on, this is no longer required (in fact it will throw an exception
+	saying the assembly was already added).
+	The other thing that may affect you is if you were looking up facility config namnually via
+	IConfigurationStore.GetFacilityConfiguration method. It now expects full name of the type
+	as the key, so you should be calling it like this:
+	store.GetFacilityConfiguration(typeof(YourFacility).FullName);
+================================================================================================
+change - EventWiringFacility, FactorySupportFacility and RemotingFacility are extracted to their
+	own assemblies
+
+impact - low
+fixability - easy
+
+description - These facilities are rarely used and two of them (FactorySupportFacility and 
+	RemotingFacility) are mostly considered legacy. As such there's no point in keeping them
+	in Windsor's assembly, especially in Silverlight version.
+
+fix - Reference the new assemblies and update your references in XML if you use it.
+================================================================================================
+change - Component.For(ComponentModel) overload was removed.
+
+impact - low
+fixability - medium
+
+description - To simplify internal structure of fluent registration API and bring it more in 
+	line with standard registration the overload was removed.
+
+fix - If you really need this overload you can create custom IRegistration that exposes this
+	functionality. Or better rethink why you need it in the first place.
+================================================================================================
+change - Adding more than a single facility of any given type is not legal anymore
+
+impact - none (I hope)
+fixability - easy
+
+description - Doing so is a bug. Why would you do it in the first place?
+
+fix - Stop doing it.
+================================================================================================
+change - RegisterCustomDependencies methods were moved from IKernel to IKernelInternal.
+
+impact - low
+fixability - easy
+
+description - Those methods are hardly ever used these days so there was no point in polluting
+	the public API with them
+
+fix - Are you really using those methods? Perhaps you should be using the fluent API? If not
+	just cast the kernel to IKernelInternal and you can access them.
+================================================================================================
+change - IWindsorContainer.AddFacility and IKernel.AddFacility overloads that were taking
+	Func<TFacility,object> were removed.
+
+impact - low
+fixability - easy
+
+description - Those overloads were only cluttering the API and confusing users. There was no
+	point in keeping them
+
+fix - You should not have to fix that at all. C# compiler (in version 3 or higher) should be
+	smart enough to pick the Action<TFacility> overload automatically if you're using lambda
+	syntax. If you aren't, please do, or adjust the call to match the Action<TFacility> overload
+================================================================================================
+change - IComponentModelBuilder.BuildModel and ComponentModel constructor take ComponenName now
+	instead of string for 'name' parameter
+
+impact - low
+fixability - easy
+
+description - Most of the time name given to components is automatically generated and user does
+	not care what it is and never interacts with it. To be able to tell apart cases when user
+	did set the name manually, and when it was auto-generated a new type ComponenName has been
+	introduced which in addition to the name value keeps track of whether the name was provided
+	by user or autogenerated.
+
+fix - Update your calls accordingly, creating the ComponentName and passing right values in.
+	Also in the fluent API the method NamedAutomatically was introduced for use by facilities
+	and such to register their own components with some name that the user will not care about.
+================================================================================================
+change - IConfigurationInterpreter.ProcessResource now takes an additional argument: IKernel
+
+impact - low
+fixability - easy
+
+description - To accomodate ability not to specify id when configuring components or facilities
+	in XML config in conjunction with simple type name support in Windsor (this feature that
+	lets you specify just simple type name like Foo, instead of assembly qualified name like
+	Acme.Crm.Foo, Acme.Crm) access to conversion subsystem was required and it made sense to
+	grab entire kernel as some other things could be taken advantage of.
+
+fix - Pass the kernel in.
+================================================================================================
+change - Release policies have now slightly different semantics.
+
+impact - medium
+fixability - medium
+
+description - To limit unnecessary tracking of components, which unnecessarily consumes memory
+	and causes contention in multithreaded scenarios the following change was made to release
+	policy semantics:
+	- only objects whose decommission is managed by the policy (ie which are released by call to
+	policy.Release, or indirectly: container.Release) can now be Tracked. This is determined by
+	the 'RequiresPolicyRelease' flag on Burden. If the flag is not set the policy can throw.
+
+fix - The change is likely to affect code using custom lifetime managers. It is now up to the
+	manager to decide if it will release the object itself (then it should pass 'true' to
+	'public Burden CreateBurden(bool trackedExternally)' method on CreationContext). Tracking
+	happens also for objects that require it ('RequiresDecommission' on burden is 'true').
+	If lifestyle manager wants to make sure the object will be tracked it can set this flag.
+	Otherwise it is up to Windsor to decide if it needs to track the object or not.
+	Another side-effect of the change is that calling 'container.Kernel.ReleasePolicy.HasTrack'
+	may now return 'false', when it previously would return 'true', if the object does not meet
+	the criteria mentioned above. If you were using this method, make sure you review your code
+	that depends on it, and adjust it to the new requirements. The semantics of 'HasTrack' is 
+	'does the release policy track this object', not 'does anything in the container track it'
+	anymore.
+================================================================================================
+change - IReleasePolicy interface has a new method: IReleasePolicy CreateSubPolicy(); usage of
+	sub-policies changes how typed factories handle out-of-band-release of components (see
+	description)
+
+impact - medium
+fixability - easy
+
+description - This was added as an attempt to enable more fine grained lifetime scoping (mostly
+	for per-typed-factory right now, but in the future also say - per-window in client app).
+	As a side-effect of that (and change to release policy behavior described above) it is no
+	longer possible to release objects resolved via typed factories, using container.Release.
+	As the objects are now tracked only in the scope of the factory they will be released only
+	if a call to factory releasing method is made, or when the factory itself is released.
+
+fix - Method should return new object that exposes the same behavior as the 'parent' usually it
+	is just best to return object of the same type (as the built-in release policies do).
+================================================================================================
+change - IHandler.Release now takes Burden, not object as its parameter. Burden.Release now has
+	no arguments (used to take IReleasePolicy)
+
+impact - low
+fixability - easy
+
+description - The method used to take component instance to release. Now it takes Burden which
+	has some additional information and behavior. Also to decouple Burden from IReleasePolicy
+	it now uses callback (via Released event) as notification mechanism.
+
+fix - Adjust calls appropriately
+//TODO: expand this with better description once the rest of the changes is in place.
+================================================================================================
+change - AllComponentsReleasePolicy was removed, ILifestyleManager.Resolve has different
+	signature now, and additional responsibilities.
+
+impact - medium
+fixability - medium
+
+description - Handling of decision regarding tracking is now happening in two steps. First step
+	happens in the lifestyle manager, which gets to decide if the instance should be tracked
+	at all (which should be chosen when a new instance is created) and if IReleasePolicy should
+	own (trigger) the release process.
+
+fix - If you implement custom lifestyle consult the implementation of standard lifestyles for
+	examples how to handle each aspect of component lifestyle management. Broadly speaking the
+	behavior should be the following (*do* inherit from AbstractLifestyleManager for your own
+	convenience):
+	- if your lifestyle employs caching, it should cache Burdens, not the objects resolved
+	directly. Look up its cache, and if you find matching burden return object it manages 
+	(accessed via 'Instance' property)
+	- on cache miss call base.CreateInstance to obtain new instnace from activator. This method
+	will not return the managed object directly but rather a Burden instance. The 2nd argument
+	'trackedExternally' should be set to true if the lifestyle manager uses some external mecha-
+	nism to track end of life for components. If not, (when set to true) releasePolicy will take
+	the responsibility.
+	- inspect burden's RequiresDecommission property. If its value is true that means either
+	the intsance obtained or at least one of its dependencies can not be released out of band
+	and will require to be released explicitly. If the property is set to true you are required
+	to track the componetn obtained with releasePolicy provided (you can use base.Track method 
+	to acheave that). If the property is false, release policy will ignore the component when 
+	container's Release method is called, and rely on your out of band handling).
+	- cache your newly obtained instance if needed.
+	- return the intance, (burden.Instance)
+================================================================================================
+rename -  CreationContext.Empty -> CreationContext.CreateEmpty()
+description - readability change to make it obvious that new instance is created each time.
+================================================================================================
+change - IServiceProviderEx was removed as base interface for IWindsorContainer and IKernel
+
+impact - low
+fixability - easy
+
+description - To make the interface for the container more compact the functionality was 
+	extracted to external class - WindsorServiceProvider.
+
+fix - Use WindsorServiceProvider instead.
+================================================================================================
+rename -  INamingSubSystem.GetHandlers -> INamingSubSystem.GetAllHandlers
+description - readability change. No affect on behavior
+================================================================================================
+change - Removed the following methods:
+	GraphNode.RemoveDepender,
+	GraphNode.RemoveDependent,
+	IKernel.RemoveComponent,
+	IKernelEvents.ComponentUnregistered,
+	INamingSubSystem.this[Type service],
+	INamingSubSystem.GetHandler,
+	INamingSubSystem.GetService2Handler,
+	INamingSubSystem.GetKey2Handler,
+	INamingSubSystem.UnRegister(String key),
+	INamingSubSystem.UnRegister(Type service)
+Also INamingSubSystem.Register now takes only IHandler as its argument
+
+impact - low
+fixability - none
+
+description - The methods were implementation of "remove component from the container" feature
+	which was flawed and problematic, hecen was scraped.
+
+fix - Working around is quite dependant on your specific usage. Try utilizing IHandlerSelectors.
+	For changed Register method, just update your calling code not to pass the name.
+	handler.ComponentModel.Name is now used as the key, as it was happening in all places so far
+	anyway, so this change should have no real impact.
+================================================================================================
+change - Removed the following types: ContainerAdapter, ContainerWrapper, IContainerAdapter,
+	IContainerAdapterSite
+
+impact - low
+fixability - none
+
+description - These types require ability to remove components from a container. This ability
+	was removed and since these types are hardly ever used, they were removed as well.
+
+fix - No quick fix is possible. If you are depending on this functionality proaly your best shot
+	is to replicate it, espeicially catering for the removal of components which is no longer
+	available in Windsor.
+================================================================================================
+change - Removed ComponentRegistration.If and ComponentRegistration.Until methods, as well as
+	Component.ServiceAlreadyRegistered method, and replaced their most common usage with
+	ComponentRegistration.OnlyNewServices method
+
+impact - medium
+fixability - easy/hard
+
+description - To make the API simpler easier to discover as well as to allow changes in internal
+	architecture, the aforementioned changes were made.
+
+fix - Most of the time the removed methods were used in the following combination:
+	Component.For<Foo>().Unless(Component.ServiceAlreadyRegistered)
+	In this case the fix is simple. Just replace the .Unless(Component.ServiceAlreadyRegistered)
+	with .OnlyNewServices()
+	If you were using the method in some other way, the fix may be more complicated and depend
+	on your particular scenario. In those cases it's best to consult Castle users group for
+	advice on how to proceed.
+================================================================================================
+change - Rebuilt how components exposing multiple services are handled internally. This includes
+	several changes to the API:
+	ForwardingHandler class and IHandlerFactory.CreateForwarding method were removed.
+	ComponentModel.Service property was removed replaced with ClassService and InterfaceServices
+	properties. Also AddService method was added. Constructor's argument for service was changed
+	to be Type[] instead of single Type.
+	IHandler.Service property was removed, replaced by Services property.
+	IComponentModelBuilder.BuildModel method takes now ICollection<Type> isntead of single Type
+	as services.
+	ComponentRegistration.For(Type serviceType, params Type[] forwaredTypes) method was removed.
+	ComponentFilter delegate type was removed as no longer needed
+
+impact - low
+fixability - easy
+
+description - As part of improvement to internal architecture changed how components exposing 
+	more than one service are handled.
+
+fix - This change should not affect most users, unless extending internals of the container. If
+	that's the case, adjust your calls to the new signatures, and change code anticipating
+	ForwardedHandlers to use Services collection from the solve IHnadler for any given component
+================================================================================================
+change - Proxies no longer implicitly implement all interfaces of component implementation type.
+
+impact - medium
+fixability - medium
+
+description - This original behavior was actually a bug and would produce unpredictible behavior
+	for components exposing several services including their class.
+
+fix - if you were depending on the additional non-service intrfaces being forwarded to the proxy
+	specify them explicitly as addtional interfaces to proxy:
+	container.Register(Component.For<CountingInterceptor>()
+						.Named("a"),
+					Component.For<ICommon>()
+						.ImplementedBy<TwoInterfacesImpl>()
+						.Interceptors("a")
+						.Proxy.AdditionalInterfaces(typeof(ICommon2))
+						.LifeStyle.Transient);
+================================================================================================
+change - NamingPartsSubSystem, KeySearchNamingSubSystem, ComponentName, BinaryTreeComponentName
+	and TreeNode types were removed.
+
+impact - medium
+fixability - medium
+
+description - As part of internal cleanup these esoteric, alternative implementations of naming
+	subsystem were removed.
+
+fix - behavior of these implementations of naming subsystem can be easily emulated with default
+	naming subsystem and custom IHandlerSelectors, which is the recommended way to go.
+================================================================================================
+change - UseSingleInterfaceProxy option was removed
+
+impact - low
+fixability - easy
+
+description - As part of clean up of the obsolete API the option was removed to enable certain
+	internal changes for the release.
+
+fix - if you were using this option and you have to use it, use a IProxyGenerationHook impl
+	and choose to only proxy members of that single interface.
+
+
+================================================================================================
+release 2.5.2 ==================================================================================
+================================================================================================
+change - One of CreationContext constructors has now additional argument; parent CreationContext
+	Method public IDisposable ParentResolutionContext(...) on CreationContext was removed
+	Method protected CreationContext CreateCreationContext(...) has now additional argument;
+	parent CreationContext
+
+impact - low
+fixability - medium
+
+description - To fix issue with false positive cycle detection (see issue IOC-238) changes had
+	to be made to how parent creation context gets propagated in certain situation (when call
+	to kernel.Resolve/ResolveAll is performed as part of resolution process, for example when
+	CollectionResolver is being used).
+
+fix - If you override CreateCreationContext method on DefaultKernel pass the additional argument
+	as new constructor parameter to CreationContext.
+	If you were using ParentResolutionContext method it should be fairly safe to remove the call
+	if it was preceded by call to updated CreationContext constructor and the CreationContext is
+	not used outside of local scope. In other cases it's best to consult Castle users group for
+	advice on how to proceed.
+================================================================================================
+change - IReference<> interface has two new methods
+
+impact - low
+fixability - easy
+revision - 
+
+description - To make it possible to statically analyze dynamic dependencies provided by 
+	the IReference interface two new methods were added:
+			void Attach(DependencyModelCollection dependencies);
+			void Detach(DependencyModelCollection dependencies);
+
+fix - if you're providing dependencies on a component from the container call Attach so that 
+	reference gets a chance to create and add DependencyModel for that dependency so that
+	it can be statically analyzed by the container.
+================================================================================================
+change - Method IDependencyResolver.Initialize change signature
+
+impact - low
+fixability - easy
+revision - 
+
+description - To make it possible to use custom DependencyResolver inheriting from 
+	DefaultDependencyResolver initialization of DefaultDependencyResolver was moved out of its
+	constructor and to IDependencyResolver.Initialize method which now takes IKernel as its
+	additional parameter
+
+fix - if you're implementing the interface adjust signature of the overriding method to
+	public void Initialize(IKernel kernel, DependencyDelegate dependencyDelegate)
+	The method is called by the kernel at the end of its constructor.
+================================================================================================
+change - Changed visibility of members on AbstractFacility to protected and implementation of
+	interface members to explicit.
+
+impact - low
+fixability - easy
+revision - 
+
+description - To make it less confusing to users when fluently configuring facilities (via 
+	AddFacility<SomeFacility>(f => f.ConfigureSomething()) method) visibility of certain members
+	of AbstractFacility class was changed. Public properties FacilityConfig and Kernel are now
+	protected, and all methods from IFacility interface are implemented explicitly. Additionally
+	protected Dispose method was introduced to allow inheriting classes to still be disposed.
+
+fix - If you were using FacilityConfig and/or Kernel properties outside of inherited classes
+	refactor your code accordingly not to do so. If you were overriding Dispose method change
+	its signature from
+	public override void Dispose() to
+	protected override void Dispose()
+================================================================================================
+release 2.5.1 ==================================================================================
+================================================================================================
+change - ILazyComponentLoader.Load now accepts a third argument for additional arguments.
+
+impact - medium
+fixability - easy
+revision - 
+
+description - To allow maximum flexibility and usage with Resolve, any additional arguments
+   are now passed to the lazy loader.
+================================================================================================
+change - LifecycleStepCollection class was removed. Instaed LifecycleConcernsCollection class
+	was introduced. ILifecycleConcern has now two innerited interfaces for commission and
+	decommission. LifecycleSteps property of ComponentModel was renamed to Lifecycle.
+	LifecycleStepType type was removed.
+
+impact - medium
+fixability - easy
+revision - 
+
+description - To improve strongly typed nature and decrease probability of mistake and improve
+	general usability of the type LifecycleStepCollection was removed. In it place similar type
+	was introduced - LifecycleConcernsCollection. Instead of using untyped Objects and enums
+	it works with two new interfaces : ICommissionConcern and IDecommissionConcern.
+
+fix - have your lifecycle steps implement one of the new lifecycle interfaces. Use appropriate
+	overload of Add/AddFirst to add them.
+================================================================================================
+change - Typed Factories will not implicitly pick default ITypedFactoryComponentSelector 
+	registered in the container anymore
+
+impact - low
+fixability - easy
+revision - 
+
+description - In version 2.1 where ITypedFactoryComponentSelectors were introduced, when you had
+	a selector registered in the container that selector would be implicitly picked for every
+	factory you had. Since the behavior of a selector tends to be fine grained and targetet for
+	a specific factories, this behavior was removed. You have to explicitly associate the selector
+	with a factory (using .AsFactory(f => f.SelectUsing("MySelector")); or via xml configuration)
+	to override selection behavior.
+
+fix - using either fluent API .AsFactory(f => f.SelectUsing("MySelector")), or XML configuration
+	selector="${MySelector}" specify the selector explicitly for each of your factories.
+================================================================================================
+change - ServiceSelector delegate (used in WithService.Select calls) changed signature
+
+impact - low
+fixability - easy
+revision - 
+
+description - To fix a bug which would occur if type implemented multiple closed version of base
+	open generic interface the signature of the delegate was changed from
+	public delegate IEnumerable<Type> ServiceSelector(Type type, Type baseType);
+	to
+	public delegate IEnumerable<Type> ServiceSelector(Type type, Type[] baseTypes);
+	so that multiple base types are possible (they would be closed versions of the same open
+	generic interface)
+
+fix - depending on the scenario. You would either ignore it, or wrap your current method's body
+	in foreach(var baseType in baseTypes)
+================================================================================================
+change - moved IWindsorInstaller to Castle.MicroKernel.Registration namespace
+
+impact - very low
+fixability - easy
+revision - 
+
+description -In order to improve developer experience when writing installers the interface
+	was moved so that Component and AllTypes entry types for registration are already in scope.
+
+fix - add using Castle.MicroKernel.Registration directive.
+================================================================================================
+change - Added two new overloads to ITypeConverter.PerformConversion
+
+impact - very low
+fixability - easy
+revision - 
+
+description - To reduce casting in the most common scenario where converted value is casted to
+	the type it's been converted to, ITypeConverter.PerformConversion has now generic overloads
+	for handling this case.
+
+fix - If you're implementing ITypeConverter via AbstractTypeConverter you don't have to do
+	anything as the base class will handle the conversion for you. Otherwise implement it like
+	in AbstractTypeConverter.
+
+================================================================================================
+change - AddCustomComponent method were moved from IKernel to IKernelInternal interface
+
+impact - very low
+fixability - easy
+revision - 
+
+description - This method constitute internally used contract of kernel and is not intended
+	for external usage. As such it was moved to internal interface to declutter public
+	interface of IKernel.
+
+fix - You should not have been using this method so it should not affect you in any way. If
+	you did, cast the IKernel to IKernelInternal to invoke the method.
+
+================================================================================================
+change - IModelInterceptorsSelector.SelectInterceptors method changed its signature and how it
+	is used.
+
+impact - medium
+fixability - medium
+revision - 
+
+description - To accomodate additional scenarios that were impossible (or hard to achieve
+	with previous design the method now has additional parameter, an array of references to
+	interceptors, which contains either default interceptors for the component, or interceptors
+	selected by previous interceptors in line). Also, Windsor will now never call
+	IModelInterceptorsSelector.SelectInterceptors without calling 
+	IModelInterceptorsSelector.HasInterceptors before it, or when the latter returns false.
+
+fix - When adjusting your implementation remember that model's interceptors are the default value
+	passed as methods second parameter, so you don't need to merge them again manually (otherwise
+	they'll be invoked twice).
+
+================================================================================================
+change - CreateComponentActivator, RaiseHandlerRegistered, RaiseHandlersChanged and
+	 RegisterHandlerForwarding methods were moved from IKernel to IKernelInternal interface
+
+impact - very low
+fixability - easy
+revision - 
+
+description - These methods constitute internally used contract of kernel and are not intended
+	for external usage. As such they were moved to internal interface to declutter public
+	interface of IKernel.
+
+fix - You should not have been using these methods so it should not affect you in any way. If
+	you did, cast the IKernel to IKernelInternal to invoke the methods.
+
+================================================================================================
+change - IProxyHook interface was removed
+
+impact - very low
+fixability - easy
+revision - 
+
+description - Since MicroKernel was merged with Windsor and now depends on DynamicProxy directly
+	there's no need to provide additional abstraction on top of IProxyGenerationHook.
+
+fix - Make types that were implementing IProxyHook to implement IProxyGenerationHook. Change all
+	usages of IProxyHook to IProxyGenerationHook.
+
+================================================================================================
+change -  AddInstallerConfiguration and GetComponents methods were added to IConfigurationStore.
+
+impact - very low
+fixability - easy
+revision - 3bf716cc6fc218601dab92a6dd75fe269bcb63d0
+
+description - To enable installers to be exposed via configuration the interface has been 
+	extended by addition of the two methods.
+
+fix - Implement the methods accordingly to your situation.
+
+================================================================================================
+change - Multiple types were moved between namespaces
+
+impact - low
+fixability - trivial
+revision - 3bf716cc6fc218601dab92a6dd75fe269bcb63d0
+
+description - To improve the internal structure several types were moved to other namespaces.
+
+fix - When compilation error occurs adjust namespace imports as suggested by Visual Studio
+
+================================================================================================
+change - Assembly Castle.MicroKernel.dll was merged into Castle.Windsor.dll
+
+impact - high
+fixability - easy
+revision - 730b202b0ed23a6b42258a6ffd6a3e63f89501fc
+
+description - Since vast majority of users used Windsor, as opposed to bare MicroKernel it was
+	decided it didn't make sense to maintain two containers. As result of that their assemblies
+	were merged, as first step of integration between Windsor and MicroKernel.
+
+fix - In your projects remove reference to Castle.MicroKernel.dll. If you weren't using Windsor
+	add reference to Castle.Windsor.dll
+	In all places where your were referencing types from Castle.MicroKernel.dll via string
+	(like xml configuration when registering facilities, or <httpModules> section on your 
+	web.config) update references from Castle.MicroKernel to Castle.Windsor.
+
+================================================================================================
+change - ComponentRegistration<S>.Startable public method has been removed.
+	ComponentRegistration<S>.StartUsingMethod public method was moved to extension method.
+	ComponentRegistration<S>.StopUsingMethod public method was moved to extension method.
+
+impact - low
+fixability - trivial
+revision - 6710
+
+description - StartUsingMethod/StopUsingMethod belong to StartableFacility and do not make sense
+	as part of generic API. Startable method was superfluous.
+
+fix - Remove calls to Startable(). Import namespace Castle.Facilities.Startable to use
+	StartUsingMethod and StopUsingMethod as extension methods.
+
+================================================================================================
+change - DefaultProxyFactory.CreateProxyGenerationOptionsFrom protected method  and
+	DefaultProxyFactory.CustomizeProxy protected virtual method have changed signature
+
+impact - very low
+fixability - easy
+revision - 6691
+
+description - the methods now also takes IKernel and CreationContext, to be used by IReferences
+	to do resolution of components they reference
+
+fix - pass required parameters to the methods.
+
+================================================================================================
+change - ProxyOption's properties changed types: 
+	Selector, from IInterceptorSelector to IReference<IInterceptorSelector>
+	Hook from IProxyHook to IReference<IProxyHook>
+	MixIns from object[] to IEnumerable<IReference<object>>
+
+impact - very low
+fixability - easy
+revision - 6691
+
+description - the properties now use IReferences instead of live objects to allow for
+	resolution of their values from the container, as required in case of usage from xml.
+
+fix - wherever used, adjust types appropriately. To obtain actual objects, use Resolve method.
