@@ -60,8 +60,7 @@ namespace EasyNetQ.Tests.Performance.Producer
                 Console.Out.WriteLine("Shutting down");
                 
                 cancelled = true;
-                while(publishThread.IsAlive) Thread.Sleep(10);
-
+				publishThread.Join();
                 messageRateTimer.Dispose();
                 bus.Dispose();
                 Console.WriteLine("Shut down complete");
