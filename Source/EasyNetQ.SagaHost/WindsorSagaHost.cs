@@ -37,6 +37,7 @@ namespace EasyNetQ.SagaHost
         public void Start()
         {
             container = new WindsorContainer()
+                .Install(FromAssembly.InDirectory(new AssemblyFilter("")))
                 .Install(FromAssembly.InDirectory(new AssemblyFilter(sagaDirectory)));
 
             var sagas = container.ResolveAll<ISaga>();
