@@ -316,5 +316,16 @@ namespace EasyNetQ.Tests
         public event CallbackExceptionEventHandler CallbackException;
         public event FlowControlEventHandler FlowControl;
         public event BasicRecoverOkEventHandler BasicRecoverOk;
+
+
+        public bool WaitForConfirms(TimeSpan timeout, out bool timedOut)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WaitForConfirmsOrDie(TimeSpan timeout)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
