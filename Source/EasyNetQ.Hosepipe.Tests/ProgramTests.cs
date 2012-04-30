@@ -35,10 +35,8 @@ namespace EasyNetQ.Hosepipe.Tests
                 errorRetry);
         }
 
-        private string expectedDumpOutput =
-@"2 Messages from queue 'EasyNetQ_Default_Error_Queue'
-output to directory '" + Environment.CurrentDirectory + @"'
-";
+        private readonly string expectedDumpOutput = 
+            "2 Messages from queue 'EasyNetQ_Default_Error_Queue'\r\noutput to directory '" + Environment.CurrentDirectory + "'\r\n";
 
         [Test]
         public void Should_output_messages_to_directory_with_dump()
@@ -61,10 +59,8 @@ output to directory '" + Environment.CurrentDirectory + @"'
             messageWriter.Parameters.HostName.ShouldEqual("localhost");
         }
 
-        private string expectedInsertOutput =
-@"2 Messages from directory '" + Environment.CurrentDirectory + @"'
-inserted into queue 'test'
-";
+        private readonly string expectedInsertOutput = 
+            "2 Messages from directory '" + Environment.CurrentDirectory + "'\r\ninserted into queue 'test'\r\n";
 
         [Test]
         public void Should_insert_messages_with_insert()
@@ -87,9 +83,8 @@ inserted into queue 'test'
             messageReader.Parameters.HostName.ShouldEqual("localhost");
         }
 
-        private string expectedRetryOutput =
-@"2 Error messages from directory '" + Environment.CurrentDirectory + @"' republished
-";
+        private readonly string expectedRetryOutput = 
+            "2 Error messages from directory '" + Environment.CurrentDirectory + "' republished\r\n";
 
         [Test]
         public void Should_retry_errors_with_retry()
