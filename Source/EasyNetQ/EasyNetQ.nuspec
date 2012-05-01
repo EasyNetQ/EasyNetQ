@@ -10,12 +10,12 @@
     <projectUrl>https://github.com/mikehadlow/EasyNetQ/wiki/Introduction</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>EasyNetQ is a simple, opinionated .NET API for RabbitMQ</description>
-    <releaseNotes>Initial NuGet Package. With RabbitMQ.Client 2.7.0</releaseNotes>
-    <copyright>Copyright Mike Hadlow 2011</copyright>
+    <releaseNotes>Upgraded to RabbitMQ.Client to version 2.8.1</releaseNotes>
+    <copyright>Copyright Mike Hadlow 2012</copyright>
     <tags></tags>
     <dependencies>
-      <dependency id="RabbitMQ.Client" version="[2.7.0]" />
-      <dependency id="Newtonsoft.Json" version="[4.0.2]" />
-    </dependencies>    
+      <dependency id="RabbitMQ.Client" version="[2.8.1]" />
+      <dependency id="Newtonsoft.Json" version="[4.5.4]" />
+    </dependencies>
   </metadata>
 </package>

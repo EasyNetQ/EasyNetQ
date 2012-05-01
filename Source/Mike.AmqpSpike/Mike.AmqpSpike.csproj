@@ -67,6 +67,7 @@
     <Compile Include="SharedQueueSpike.cs" />
     <Compile Include="TaskCompletionSourceSpike.cs" />
     <Compile Include="ThreadLocalSpike.cs" />
+    <Compile Include="TopicSpike.cs" />
     <Compile Include="UniquelyIdentifyDelegate.cs" />
     <Compile Include="WithChannel.cs" />
   </ItemGroup>
