@@ -22,7 +22,7 @@ namespace EasyNetQ
 		{
 			// Establish default conventions.
 			ExchangeNamingConvention = TypeNameSerializer.Serialize;
-			TopicNamingConvention = TypeNameSerializer.Serialize;
+			TopicNamingConvention = messageType => "";
 			QueueNamingConvention =
 					(messageType, subscriptionId) =>
 					{

@@ -24,10 +24,10 @@ namespace EasyNetQ.Tests
 		}
 
 		[Test]
-		public void The_default_topic_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
+		public void The_default_topic_naming_convention_should_return_an_empty_string()
 		{
 			var result = conventions.TopicNamingConvention(typeof (TestMessage));
-			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)));
+			result.ShouldEqual("");
 		}
 
 		[Test]

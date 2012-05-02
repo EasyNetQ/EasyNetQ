@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests
             messageQueue2.Subscribe<MyMessage>("test2", msg => Console.WriteLine(msg.Text));
 
             // allow time for messages to be consumed
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Console.WriteLine("Stopped consuming");
         }

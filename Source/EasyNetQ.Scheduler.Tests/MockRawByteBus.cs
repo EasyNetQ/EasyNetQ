@@ -11,5 +11,10 @@ namespace EasyNetQ.Scheduler.Tests
             if (RawPublishDelegate != null)
                 RawPublishDelegate(exchangeName, messageBody);
         }
+
+        public void RawPublish(string exchangeName, string topic, byte[] messageBody)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

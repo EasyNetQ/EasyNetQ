@@ -85,32 +85,35 @@ namespace EasyNetQ
 
         public void Publish<T>(T message)
         {
-            if(message == null)
+            Publish(GetTopic<T>(), message);
+        }
+
+        public void Publish<T>(string topic, T message)
+        {
+            if (message == null)
             {
                 throw new ArgumentNullException("message");
             }
 
-        	var typeName = serializeType(typeof (T));
-        	var exchangeName = GetExchangeName<T>();
-        	var topic = GetTopic<T>();
+            var typeName = serializeType(typeof(T));
+            var exchangeName = GetExchangeName<T>();
             var messageBody = serializer.MessageToBytes(message);
 
             RawPublish(exchangeName, topic, typeName, messageBody);
         }
 
-        public void Publish<T>(string topic, T message)
+        // channels should not be shared between threads.
+        private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>();
+
+
+        public void RawPublish(string exchangeName, byte[] messageBody)
         {
-            throw new NotImplementedException();
+            RawPublish(exchangeName, "", messageBody);
         }
 
-        // channels should not be shared between threads.
-        private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>(); 
-        
-
-        public void RawPublish(string typeName, byte[] messageBody)
+        public void RawPublish(string typeName, string topic, byte[] messageBody)
         {
         	var exchangeName = typeName;
-        	var topic = typeName;
         	RawPublish(exchangeName, topic, typeName, messageBody);
         }
 
@@ -161,7 +164,7 @@ namespace EasyNetQ
             {
                 channel.ExchangeDeclare(
                     exchangeName,               // exchange
-                    ExchangeType.Direct,    // type
+                    ExchangeType.Topic,    // type
                     true);                  // durable
 
                 publishExchanges.Add(exchangeName);
@@ -183,7 +186,17 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
-            SubscribeAsync<T>(subscriptionId, msg =>
+            Subscribe(subscriptionId, "#", onMessage);
+        }
+
+        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
+        {
+            Subscribe(subscriptionId, topic.ToEnumerable(), onMessage);
+        }
+
+        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
+        {
+            SubscribeAsync<T>(subscriptionId, topics, msg =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
@@ -199,31 +212,30 @@ namespace EasyNetQ
             });
         }
 
-        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
+        {
+            SubscribeAsync(subscriptionId, "#", onMessage);
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
+        {
+            SubscribeAsync(subscriptionId, topic.ToEnumerable(), onMessage);
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
         {
             if (onMessage == null)
             {
                 throw new ArgumentNullException("onMessage");
             }
 
-			string queueName = GetQueueName<T>(subscriptionId);
-			string exchangeName = GetExchangeName<T>();
-			string topic = GetTopic<T>();
+            var queueName = GetQueueName<T>(subscriptionId);
+            var exchangeName = GetExchangeName<T>();
 
             Action subscribeAction = () =>
             {
                 var channel = connection.CreateModel();
-                modelList.Add( channel );
+                modelList.Add(channel);
                 DeclarePublishExchange(channel, exchangeName);
 
                 channel.BasicQos(0, prefetchCount, false);
@@ -235,10 +247,14 @@ namespace EasyNetQ
                     false,              // autoDelete
                     null);              // arguments
 
-                channel.QueueBind(
-                    queue,              // queue
-                    exchangeName,           // exchange
-                    topic);          // routingKey
+                foreach(var topic in topics)
+                {
+                    channel.QueueBind(
+                        queue,          // queue
+                        exchangeName,   // exchange
+                        topic);         // routingKey
+                    
+                }
 
                 var consumer = consumerFactory.CreateConsumer(channel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -257,16 +273,6 @@ namespace EasyNetQ
             };
 
             AddSubscriptionAction(subscribeAction);
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
-        {
-            throw new NotImplementedException();
         }
 
 

@@ -54,6 +54,7 @@
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
