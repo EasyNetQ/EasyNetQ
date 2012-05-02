@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EasyNetQ
@@ -14,6 +15,14 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message to publish</param>
         void Publish<T>(T message);
+
+        /// <summary>
+        /// Publishes a message with a topic
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="topic">The topic</param>
+        /// <param name="message">The message to publish</param>
+        void Publish<T>(string topic, T message);
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -32,6 +41,45 @@ namespace EasyNetQ
         void Subscribe<T>(string subscriptionId, Action<T> onMessage);
 
         /// <summary>
+        /// Subscribes to a stream of messages that match a .NET type and the given topic
+        /// </summary>
+        /// <typeparam name="T">The type to subscribe to</typeparam>
+        /// <param name="subscriptionId">
+        /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
+        /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
+        /// to load balance a subscription in a round-robin fashion.
+        /// </param>
+        /// <param name="topic">
+        /// The topic to match on
+        /// </param>
+        /// <param name="onMessage">
+        /// The action to run when a message arrives. When onMessage completes the message
+        /// recipt is Ack'd. All onMessage delegates are processed on a single thread so you should
+        /// avoid long running blocking IO operations. Consider using SubscribeAsync
+        /// </param>
+        void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage);
+
+        /// <summary>
+        /// Subscribes to a stream of messages that match a .NET type and the given topic
+        /// </summary>
+        /// <typeparam name="T">The type to subscribe to</typeparam>
+        /// <param name="subscriptionId">
+        /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
+        /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
+        /// to load balance a subscription in a round-robin fashion.
+        /// </param>
+        /// <param name="topics">
+        /// The topics to match on. Each topic string creates a new binding between the exchange and 
+        /// subscription queue.
+        /// </param>
+        /// <param name="onMessage">
+        /// The action to run when a message arrives. When onMessage completes the message
+        /// recipt is Ack'd. All onMessage delegates are processed on a single thread so you should
+        /// avoid long running blocking IO operations. Consider using SubscribeAsync
+        /// </param>
+        void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage);
+
+        /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
         /// Allows the subscriber to complete asynchronously.
         /// </summary>
@@ -47,6 +95,47 @@ namespace EasyNetQ
         /// Ack'd.
         /// </param>
         void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage);
+
+        /// <summary>
+        /// Subscribes to a stream of messages that match a .NET type.
+        /// Allows the subscriber to complete asynchronously.
+        /// </summary>
+        /// <typeparam name="T">The type to subscribe to</typeparam>
+        /// <param name="subscriptionId">
+        /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
+        /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
+        /// to load balance a subscription in a round-robin fashion.
+        /// </param>
+        /// <param name="topic">
+        /// The topic to match on
+        /// </param>
+        /// <param name="onMessage">
+        /// The action to run when a message arrives. onMessage can immediately return a Task and
+        /// then continue processing asynchronously. When the Task completes the message will be
+        /// Ack'd.
+        /// </param>
+        void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage);
+
+        /// <summary>
+        /// Subscribes to a stream of messages that match a .NET type.
+        /// Allows the subscriber to complete asynchronously.
+        /// </summary>
+        /// <typeparam name="T">The type to subscribe to</typeparam>
+        /// <param name="subscriptionId">
+        /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
+        /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
+        /// to load balance a subscription in a round-robin fashion.
+        /// </param>
+        /// <param name="topics">
+        /// The topics to match on. Each topic string creates a new binding between the queue and the
+        /// exchange.
+        /// </param>
+        /// <param name="onMessage">
+        /// The action to run when a message arrives. onMessage can immediately return a Task and
+        /// then continue processing asynchronously. When the Task completes the message will be
+        /// Ack'd.
+        /// </param>
+        void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage);
 
         /// <summary>
         /// Makes an RPC style asynchronous request.

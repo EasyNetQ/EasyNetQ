@@ -98,6 +98,11 @@ namespace EasyNetQ
             RawPublish(exchangeName, topic, typeName, messageBody);
         }
 
+        public void Publish<T>(string topic, T message)
+        {
+            throw new NotImplementedException();
+        }
+
         // channels should not be shared between threads.
         private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>(); 
         
@@ -194,6 +199,16 @@ namespace EasyNetQ
             });
         }
 
+        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
         {
             if (onMessage == null)
@@ -244,8 +259,18 @@ namespace EasyNetQ
             AddSubscriptionAction(subscribeAction);
         }
 
+        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
 
-		private string GetTopic<T>()
+        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        private string GetTopic<T>()
 		{
 			return conventions.TopicNamingConvention(typeof (T));
 		}

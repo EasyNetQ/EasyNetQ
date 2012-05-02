@@ -38,6 +38,11 @@ namespace EasyNetQ
             }
         }
 
+        public void Publish<T>(string topic, T message)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
             var messageType = typeof (T);
@@ -48,6 +53,16 @@ namespace EasyNetQ
             subscriptions[messageType].Add(onMessage);
         }
 
+        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
         {
             var messageType = typeof(T);
@@ -56,6 +71,16 @@ namespace EasyNetQ
                 asyncSubscriptions.Add(messageType, new List<object>());
             }
             asyncSubscriptions[messageType].Add(onMessage);
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)

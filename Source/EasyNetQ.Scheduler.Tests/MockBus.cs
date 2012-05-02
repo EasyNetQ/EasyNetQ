@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EasyNetQ.Scheduler.Tests
@@ -15,12 +16,37 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public void Publish<T>(string topic, T message)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
             throw new NotImplementedException();
         }
 
+        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
         {
             throw new NotImplementedException();
         }
