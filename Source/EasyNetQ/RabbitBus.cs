@@ -29,6 +29,7 @@ namespace EasyNetQ
 
         private const string rpcExchange = "easy_net_q_rpc";
         private const bool noAck = false;
+        public int OpenChannelCount { get { return modelList.Count; } }
 
         // prefetchCount determines how many messages will be allowed in the local in-memory queue
         // setting to zero makes this infinite, but risks an out-of-memory exception.
