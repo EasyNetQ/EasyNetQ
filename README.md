@@ -10,20 +10,25 @@ Goals:
 2. Simple API
 
 To connect to a RabbitMQ broker...
+
 	var bus = RabbitHutch.CreateBus("host=localhost");
 
 To publish a message...
+
 	bus.Publish(new MyMessage { Text = "Hello World!" });
 
 To subscribe to a message...
+
 	bus.Subscribe<MyMessage>("my_subscription_id", msg => Console.WriteLine(msg.Text));
 
 Remote procedure call...
+
     var request = new TestRequestMessage {Text = "Hello from the client! "};
     bus.Request<TestRequestMessage, TestResponseMessage>(request, response => 
 		Console.WriteLine("Got response: '{0}'", response.Text));
 
 RPC server...
+
 	bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
 		new TestResponseMessage{ Text = request.Text + " all done!" });
 	
