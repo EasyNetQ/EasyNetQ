@@ -25,21 +25,25 @@ namespace EasyNetQ.Tests
             bus.Dispose();
         }
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work"]
-        public void Should_be_able_to_create_large_number_of_channels()
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Large_number_of_request_calls_should_not_create_a_large_number_of_open_channels()
         {
             var pool = new Semaphore(0, 500);
             for (int i = 0; i < 500; i++)
             {
                 bus.Request<TestRequestMessage, TestResponseMessage>(
-                    new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) }, response =>
-                    pool.Release()
+                    new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) }, 
+                    response =>
+                    {
+                        pool.Release();
+                        Console.WriteLine(response.Text);
+                    }
                 );
             }
             var successfullyWaited = pool.WaitOne(TimeSpan.FromSeconds(40));
             Assert.True(successfullyWaited);
             var rbus = (RabbitBus)bus;
-            Assert.AreEqual(0, rbus.OpenChannelCount);
+            Assert.AreEqual(2, rbus.OpenChannelCount);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.

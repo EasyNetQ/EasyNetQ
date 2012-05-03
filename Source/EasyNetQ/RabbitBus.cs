@@ -380,21 +380,25 @@ namespace EasyNetQ
         private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
         {
             var requestTypeName = serializeType(typeof(TRequest));
-            var requestChannel = connection.CreateModel();
-            modelList.Add( requestChannel );
+
+            if (!threadLocalPublishChannel.IsValueCreated)
+            {
+                threadLocalPublishChannel.Value = connection.CreateModel();
+                modelList.Add(threadLocalPublishChannel.Value);
+            }
 
             // declare the exchange, binding and queue here. No need to set the mandatory flag, the recieving queue
             // will already have been declared, so in the case of no responder being present, message will collect
             // there.
-            DeclareRequestResponseStructure(requestChannel, requestTypeName);
+            DeclareRequestResponseStructure(threadLocalPublishChannel.Value, requestTypeName);
 
             // tell the consumer to respond to the transient respondQueue
-            var requestProperties = requestChannel.CreateBasicProperties();
+            var requestProperties = threadLocalPublishChannel.Value.CreateBasicProperties();
             requestProperties.ReplyTo = returnQueueName;
             requestProperties.Type = requestTypeName;
 
             var requestBody = serializer.MessageToBytes(request);
-            requestChannel.BasicPublish(
+            threadLocalPublishChannel.Value.BasicPublish(
                 rpcExchange,            // exchange 
                 requestTypeName,        // routingKey 
                 requestProperties,      // basicProperties 
@@ -469,7 +473,6 @@ namespace EasyNetQ
                         return tcs.Task;
                     });
 
-                // TODO: dispose channel
                 requestChannel.BasicConsume(
                     requestTypeName,        // queue 
                     noAck,                   // noAck 
