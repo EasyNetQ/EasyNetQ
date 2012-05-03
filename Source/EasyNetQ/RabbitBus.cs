@@ -32,7 +32,9 @@ namespace EasyNetQ
 
         // prefetchCount determines how many messages will be allowed in the local in-memory queue
         // setting to zero makes this infinite, but risks an out-of-memory exception.
-        private const int prefetchCount = 1000; 
+        // set to 50 based on this blog post:
+        // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
+        private const int prefetchCount = 50; 
 
         public RabbitBus(
             SerializeType serializeType, 
