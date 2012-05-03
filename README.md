@@ -1,4 +1,4 @@
-A Nice .NET API for AMQP
+A Nice .NET API for RabbitMQ
 
 **[Documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Introduction)**
 
