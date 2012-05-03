@@ -84,6 +84,7 @@
     <Compile Include="MockLogger.cs" />
     <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />
+    <Compile Include="MultiThreadedPublisherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishSubscribeTests.cs" />
     <Compile Include="PublishSubscribeWithTopicsTests.cs" />
