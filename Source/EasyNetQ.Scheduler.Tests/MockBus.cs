@@ -21,6 +21,11 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public IPublishChannel OpenPublishChannel()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
             throw new NotImplementedException();

@@ -25,6 +25,13 @@ namespace EasyNetQ
         void Publish<T>(string topic, T message);
 
         /// <summary>
+        /// Opens and returns a new IPublishChannel. Note that IPublishChannel implements IDisposable
+        /// and must be disposed.
+        /// </summary>
+        /// <returns>An IPublishChannel</returns>
+        IPublishChannel OpenPublishChannel();
+
+        /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
         /// </summary>
         /// <typeparam name="T">The type to subscribe to</typeparam>

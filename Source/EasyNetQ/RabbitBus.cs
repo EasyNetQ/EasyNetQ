@@ -106,6 +106,18 @@ namespace EasyNetQ
             RawPublish(exchangeName, topic, typeName, messageBody);
         }
 
+        public IPublishChannel OpenPublishChannel()
+        {
+            return new RabbitPublishChannel(
+                connection, 
+                logger, 
+                getCorrelationId, 
+                publishExchanges, 
+                serializeType, 
+                serializer, 
+                conventions);
+        }
+
         // channels should not be shared between threads.
         private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>();
 

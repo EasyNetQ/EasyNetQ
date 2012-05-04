@@ -36,7 +36,13 @@ namespace EasyNetQ.Tests
 
             for (int i = 0; i < 10; i++)
             {
-                var thread = new Thread(x => bus.Publish(new MyMessage()));
+                var thread = new Thread(x =>
+                {
+                    using(var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Publish(new MyMessage());
+                    }
+                });
                 threads.Add(thread);
                 thread.Start();
             }
