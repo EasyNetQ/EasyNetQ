@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.SystemMessages;
@@ -108,7 +109,6 @@ namespace EasyNetQ
         // channels should not be shared between threads.
         private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>();
 
-
         public void RawPublish(string exchangeName, byte[] messageBody)
         {
             RawPublish(exchangeName, "", messageBody);
@@ -119,7 +119,6 @@ namespace EasyNetQ
         	var exchangeName = typeName;
         	RawPublish(exchangeName, topic, typeName, messageBody);
         }
-
 
     	public void RawPublish(string exchangeName, string topic, string typeName, byte[] messageBody)
         {
@@ -194,7 +193,7 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
         {
-            Subscribe(subscriptionId, topic.ToEnumerable(), onMessage);
+            Subscribe(subscriptionId, Enumerable.Repeat(topic, 1), onMessage);
         }
 
         public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
@@ -222,7 +221,7 @@ namespace EasyNetQ
 
         public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
         {
-            SubscribeAsync(subscriptionId, topic.ToEnumerable(), onMessage);
+            SubscribeAsync(subscriptionId, Enumerable.Repeat(topic, 1), onMessage);
         }
 
         public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)

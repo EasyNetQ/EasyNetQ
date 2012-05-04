@@ -48,6 +48,7 @@
     </Compile>
     <Compile Include="AckNackSpike.cs" />
     <Compile Include="CallbackConsumer.cs" />
+    <Compile Include="DetectingThreadExitSpike.cs" />
     <Compile Include="IO.Ntfs\AlternateDataStreamInfo.cs" />
     <Compile Include="IO.Ntfs\FileStreamAttributes.cs" />
     <Compile Include="IO.Ntfs\FileStreamType.cs" />
