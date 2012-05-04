@@ -18,7 +18,10 @@ namespace EasyNetQ.Tests.SimpleSaga
                     Console.WriteLine("TestResponseMessage: {0}", response.Text);
                     var secondProcessedMessage = response.Text + " - final process ";
                     var endMessage = new EndMessage { Text = secondProcessedMessage };
-                    bus.Publish(endMessage);
+                    using (var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Publish(endMessage);
+                    }
                 });
             });
         }

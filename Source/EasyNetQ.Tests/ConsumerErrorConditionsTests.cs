@@ -56,7 +56,10 @@ namespace EasyNetQ.Tests
             // give the subscription a chance to complete
             Thread.Sleep(100);
 
-            bus.Publish(new MyErrorTestMessage { Id = 444, Name = "I cause an error. Naughty me!"});
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(new MyErrorTestMessage { Id = 444, Name = "I cause an error. Naughty me!" });
+            }
 
             // give the publish a chance to get to rabbit and back
             Thread.Sleep(100);

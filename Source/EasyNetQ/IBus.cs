@@ -10,21 +10,6 @@ namespace EasyNetQ
     public interface IBus : IDisposable
     {
         /// <summary>
-        /// Publishes a message.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="message">The message to publish</param>
-        void Publish<T>(T message);
-
-        /// <summary>
-        /// Publishes a message with a topic
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="topic">The topic</param>
-        /// <param name="message">The message to publish</param>
-        void Publish<T>(string topic, T message);
-
-        /// <summary>
         /// Opens and returns a new IPublishChannel. Note that IPublishChannel implements IDisposable
         /// and must be disposed.
         /// </summary>
@@ -172,15 +157,6 @@ namespace EasyNetQ
         /// A function to run when the request is received.
         /// </param>
         void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder);
-
-        /// <summary>
-        /// Schedule a message to be published at some time in the future.
-        /// This required the EasyNetQ.Scheduler service to be running.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="timeToRespond">The time at which the message should be sent</param>
-        /// <param name="message">The message to response with</param>
-        void FuturePublish<T>(DateTime timeToRespond, T message);
 
         /// <summary>
         /// Fires once the bus has connected to a RabbitMQ server.

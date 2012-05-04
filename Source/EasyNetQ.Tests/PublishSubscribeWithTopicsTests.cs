@@ -32,9 +32,12 @@ namespace EasyNetQ.Tests
         [Test]
         public void Publish_some_messages_with_topics()
         {
-            bus.Publish("X.A", CreateMessage());
-            bus.Publish("X.B", CreateMessage());
-            bus.Publish("Y.A", CreateMessage());
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish("X.A", CreateMessage());
+                publishChannel.Publish("X.B", CreateMessage());
+                publishChannel.Publish("Y.A", CreateMessage());
+            }
         }
 
         [Test]

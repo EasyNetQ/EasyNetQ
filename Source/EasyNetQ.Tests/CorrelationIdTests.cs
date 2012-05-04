@@ -34,7 +34,10 @@ namespace EasyNetQ.Tests
                 basicProperties = properties;
             };
 
-            bus.Publish(new TestMessage());
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(new TestMessage());
+            }
 
             basicProperties.ShouldNotBeNull();
             basicProperties.CorrelationId.ShouldNotBeNull();

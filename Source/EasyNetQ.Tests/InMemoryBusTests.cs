@@ -30,7 +30,10 @@ namespace EasyNetQ.Tests
                 responseMessage = response;
             });
 
-            bus.Publish(requestMessage);
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(requestMessage);
+            }
 
             Assert.IsNotNull(responseMessage);
             Assert.AreEqual(text, responseMessage.Text);
@@ -50,7 +53,10 @@ namespace EasyNetQ.Tests
                 responseMessage = response;
             });
 
-            bus.Publish(requestMessage);
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(requestMessage);
+            }
 
             Assert.IsNotNull(responseMessage);
             Assert.AreEqual(text, responseMessage.Text);
@@ -76,7 +82,10 @@ namespace EasyNetQ.Tests
             });
 
             // now publish the start message to kick the saga off
-            bus.Publish(startMessage);
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(startMessage);
+            }
 
             // assert that the end message was assigned and has the correct text
             Assert.IsNotNull(endMessage);

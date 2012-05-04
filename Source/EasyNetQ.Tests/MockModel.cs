@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            
         }
 
         public IBasicProperties CreateBasicProperties()

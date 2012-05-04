@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -109,13 +110,27 @@ namespace EasyNetQ
             }
         }
 
-        private bool disposed;
-
-        public void Dispose()
+        public void FuturePublish<T>(DateTime timeToRespond, T message)
         {
-            if (disposed) return;
-            channel.Dispose();
-            disposed = true;
+            if (message == null)
+            {
+                throw new ArgumentNullException("message");
+            }
+
+            if (!connection.IsConnected)
+            {
+                throw new EasyNetQException("FuturePublish failed. No rabbit server connected.");
+            }
+
+            var typeName = serializeType(typeof(T));
+            var messageBody = serializer.MessageToBytes(message);
+
+            Publish(new ScheduleMe
+            {
+                WakeTime = timeToRespond,
+                BindingKey = typeName,
+                InnerMessage = messageBody
+            });
         }
 
         public void RawPublish(string exchangeName, byte[] messageBody)
@@ -127,6 +142,16 @@ namespace EasyNetQ
         {
             var exchangeName = typeName;
             RawPublish(exchangeName, topic, typeName, messageBody);
+        }
+
+        private bool disposed;
+
+        public void Dispose()
+        {
+            if (disposed) return;
+            channel.Abort();
+            channel.Dispose();
+            disposed = true;
         }
     }
 }

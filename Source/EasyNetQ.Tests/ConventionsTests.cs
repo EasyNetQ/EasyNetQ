@@ -68,7 +68,10 @@ namespace EasyNetQ.Tests
 			                  		TopicNamingConvention = x => "CustomTopicNamingConvention"
 			                  	};
 			CreateBus(customConventions, mockModel);
-			bus.Publish(new TestMessage());
+		    using (var publishChannel = bus.OpenPublishChannel())
+		    {
+                publishChannel.Publish(new TestMessage());
+		    }
 		}
 
 		private void CreateBus(Conventions conventions, IModel model)

@@ -17,8 +17,11 @@ namespace EasyNetQ.Tests
             // wait for the bus to come online
             while(!bus.IsConnected) Thread.Sleep(10);
 
-            bus.Publish(new MyAutoSubscribedMessage{ Text = "Hello Message!"});
-            bus.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(new MyAutoSubscribedMessage{ Text = "Hello Message!"});
+                publishChannel.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
+            }
 
             Thread.Sleep(100);
         }

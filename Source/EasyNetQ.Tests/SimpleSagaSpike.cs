@@ -22,7 +22,10 @@ namespace EasyNetQ.Tests
                 Text = "Hello Saga! "
             };
 
-            bus.Publish(startMessage);
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(startMessage);
+            }
 
             // give the message time to run through the process
             Thread.Sleep(1000);
@@ -45,7 +48,10 @@ namespace EasyNetQ.Tests
                     Console.WriteLine("Saga got Response: {0}", response.Text);
                     var secondProcessedMessage = response.Text + " - final process ";
                     var endMessage = new EndMessage { Text = secondProcessedMessage };
-                    bus.Publish(endMessage);
+                    using (var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Publish(endMessage);
+                    }
                 });
             });
             
@@ -65,7 +71,10 @@ namespace EasyNetQ.Tests
             Thread.Sleep(1000);
             // now kick it off
             Console.WriteLine("Test is publishing StartMessage");
-            bus.Publish(new StartMessage { Text = "Hello Saga!! " });
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(new StartMessage { Text = "Hello Saga!! " });
+            }
 
             // give the message time to run through the process
             Thread.Sleep(1000);

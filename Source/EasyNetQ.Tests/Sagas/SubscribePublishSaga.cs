@@ -10,7 +10,11 @@
                 {
                     Text = requestMessage.Text
                 };
-                bus.Publish(responseMessage);
+
+                using (var publishChannel = bus.OpenPublishChannel())
+                {
+                    publishChannel.Publish(responseMessage);
+                }
             });
         }
     }

@@ -4,14 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
-
 namespace EasyNetQ
 {
-    public class RabbitBus : IBus, IRawByteBus
+    public class RabbitBus : IBus
     {
         private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
@@ -87,25 +85,6 @@ namespace EasyNetQ
 			subscribeActions = new ConcurrentBag<Action>();
         }
 
-        public void Publish<T>(T message)
-        {
-            Publish(GetTopic<T>(), message);
-        }
-
-        public void Publish<T>(string topic, T message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException("message");
-            }
-
-            var typeName = serializeType(typeof(T));
-            var exchangeName = GetExchangeName<T>();
-            var messageBody = serializer.MessageToBytes(message);
-
-            RawPublish(exchangeName, topic, typeName, messageBody);
-        }
-
         public IPublishChannel OpenPublishChannel()
         {
             return new RabbitPublishChannel(
@@ -120,56 +99,6 @@ namespace EasyNetQ
 
         // channels should not be shared between threads.
         private ThreadLocal<IModel> threadLocalPublishChannel = new ThreadLocal<IModel>();
-
-        public void RawPublish(string exchangeName, byte[] messageBody)
-        {
-            RawPublish(exchangeName, "", messageBody);
-        }
-
-        public void RawPublish(string typeName, string topic, byte[] messageBody)
-        {
-        	var exchangeName = typeName;
-        	RawPublish(exchangeName, topic, typeName, messageBody);
-        }
-
-    	public void RawPublish(string exchangeName, string topic, string typeName, byte[] messageBody)
-        {
-            if (!connection.IsConnected)
-            {
-                throw new EasyNetQException("Publish failed. No rabbit server connected.");
-            }
-
-            try
-            {
-                if (!threadLocalPublishChannel.IsValueCreated)
-                {
-                    threadLocalPublishChannel.Value = connection.CreateModel();
-                    modelList.Add(threadLocalPublishChannel.Value);
-                }
-                DeclarePublishExchange(threadLocalPublishChannel.Value, exchangeName);
-
-                var defaultProperties = threadLocalPublishChannel.Value.CreateBasicProperties();
-                defaultProperties.SetPersistent(false);
-                defaultProperties.Type = typeName;
-                defaultProperties.CorrelationId = getCorrelationId();
-
-                threadLocalPublishChannel.Value.BasicPublish(
-                    exchangeName, // exchange
-                    topic, // routingKey 
-                    defaultProperties, // basicProperties
-                    messageBody); // body
-
-                logger.DebugWrite("Published {0}, CorrelationId {1}", exchangeName, defaultProperties.CorrelationId);
-            }
-            catch (OperationInterruptedException exception)
-            {
-                throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
-            }
-            catch (System.IO.IOException exception)
-            {
-                throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
-            }
-        }
 
         private void DeclarePublishExchange(IModel channel, string exchangeName)
         {
@@ -492,29 +421,6 @@ namespace EasyNetQ
             };
 
             AddSubscriptionAction(subscribeAction);
-        }
-
-        public void FuturePublish<T>(DateTime timeToRespond, T message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException("message");
-            }
-
-            if (!connection.IsConnected)
-            {
-                throw new EasyNetQException("FuturePublish failed. No rabbit server connected.");
-            }
-
-            var typeName = serializeType(typeof(T));
-            var messageBody = serializer.MessageToBytes(message);
-
-            Publish(new ScheduleMe
-            {
-                WakeTime = timeToRespond,
-                BindingKey = typeName,
-                InnerMessage = messageBody
-            });
         }
 
         public event Action Connected;

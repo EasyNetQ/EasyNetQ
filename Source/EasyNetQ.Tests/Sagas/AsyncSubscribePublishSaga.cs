@@ -12,7 +12,13 @@ namespace EasyNetQ.Tests.Sagas
                 {
                     Text = requestMessage.Text
                 };
-                return Task.Factory.StartNew(() => bus.Publish(responseMessage));
+                return Task.Factory.StartNew(() =>
+                {
+                    using (var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Publish(responseMessage);
+                    }
+                });
             });
         }
     }

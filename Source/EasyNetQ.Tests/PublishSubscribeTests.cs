@@ -41,7 +41,10 @@ namespace EasyNetQ.Tests
         public void Should_be_able_to_publish()
         {
             var message = new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) };
-            bus.Publish(message);
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(message);
+            }
             Console.Out.WriteLine("message.Text = {0}", message.Text);
         }
 
@@ -69,11 +72,14 @@ namespace EasyNetQ.Tests
             bus.Subscribe<MyMessage>("test_c", msg => Console.WriteLine(msg.Text));
             bus.Subscribe<MyOtherMessage>("test_d", msg => Console.WriteLine(msg.Text));
 
-            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
-            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
-            
-            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
-            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+                publishChannel.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+
+                publishChannel.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+                publishChannel.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            }
 
             // allow time for messages to be consumed
             Thread.Sleep(1000);

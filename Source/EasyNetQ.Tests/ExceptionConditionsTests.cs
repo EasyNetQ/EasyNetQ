@@ -19,7 +19,11 @@ namespace EasyNetQ.Tests
                     Thread.Sleep(2000);
                     try
                     {
-                        bus.Publish(new MyMessage { Text = "Hello" });
+                        using (var publishChannel = bus.OpenPublishChannel())
+                        {
+                            publishChannel.Publish(new MyMessage { Text = "Hello" });
+                        }
+
                         Console.WriteLine("Published OK");
                     }
                     catch (EasyNetQException exception)
@@ -36,7 +40,10 @@ namespace EasyNetQ.Tests
             Console.WriteLine("Subscriber {0} got: {1} {2}", name, message.Text, message.Id);
             Thread.Sleep(2000);
             while (!bus.IsConnected) Thread.Sleep(100);
-            bus.Publish(new T { Text = "Hello From " + name, Id = ++message.Id });
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Publish(new T { Text = "Hello From " + name, Id = ++message.Id });
+            }
         }
 
         /// <summary>
@@ -58,7 +65,10 @@ namespace EasyNetQ.Tests
                 Console.WriteLine("Subscribed");
 
                 while(!busB.IsConnected) Thread.Sleep(100);
-                busA.Publish(new FromA {Text = "Initial From A ", Id = 0});
+                using (var publishChannel = busA.OpenPublishChannel())
+                {
+                    publishChannel.Publish(new FromA { Text = "Initial From A ", Id = 0 });
+                }
 
                 while (true)
                 {

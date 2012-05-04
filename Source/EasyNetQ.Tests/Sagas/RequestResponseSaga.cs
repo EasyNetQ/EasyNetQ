@@ -10,7 +10,11 @@
                 bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
                     var endMessage = new EndMessage {Text = response.Text};
-                    bus.Publish(endMessage);
+
+                    using (var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Publish(endMessage);
+                    }
                 });
             });
         }

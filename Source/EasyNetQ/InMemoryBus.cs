@@ -38,14 +38,9 @@ namespace EasyNetQ
             }
         }
 
-        public void Publish<T>(string topic, T message)
-        {
-            throw new NotImplementedException();
-        }
-
         public IPublishChannel OpenPublishChannel()
         {
-            throw new NotImplementedException();
+            return new InMemoryPublishChannel(this);
         }
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
@@ -114,17 +109,42 @@ namespace EasyNetQ
             });
         }
 
-        public void FuturePublish<T>(DateTime timeToRespond, T message)
-        {
-            throw new NotImplementedException();
-        }
-
         public event Action Connected;
         public event Action Disconnected;
 
         public bool IsConnected
         {
             get { return true; }
+        }
+    }
+
+    public class InMemoryPublishChannel : IPublishChannel
+    {
+        private readonly InMemoryBus inMemoryBus;
+
+        public InMemoryPublishChannel(InMemoryBus inMemoryBus)
+        {
+            this.inMemoryBus = inMemoryBus;
+        }
+
+        public void Dispose()
+        {
+            
+        }
+
+        public void Publish<T>(T message)
+        {
+            inMemoryBus.Publish(message);
+        }
+
+        public void Publish<T>(string topic, T message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FuturePublish<T>(DateTime timeToRespond, T message)
+        {
+            throw new NotImplementedException();
         }
     }
 }

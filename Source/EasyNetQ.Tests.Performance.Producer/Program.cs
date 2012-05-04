@@ -41,7 +41,10 @@ namespace EasyNetQ.Tests.Performance.Producer
 
                     try
                     {
-                        bus.Publish(message);
+                        using (var publishChannel = bus.OpenPublishChannel())
+                        {
+                            publishChannel.Publish(message);
+                        }
                         Interlocked.Increment(ref messageCount);
                     }
                     catch (EasyNetQException easyNetQException)
