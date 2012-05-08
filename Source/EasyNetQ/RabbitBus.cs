@@ -19,9 +19,9 @@ namespace EasyNetQ
 		private readonly Func<string> getCorrelationId;
 		private readonly IConventions conventions;
 
-        private readonly IDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
-        private readonly ISet<string> publishExchanges = new HashSet<string>(); 
-        private readonly ISet<string> requestExchanges = new HashSet<string>();
+        private readonly ConcurrentDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
+        private readonly ISet<string> publishExchanges = new ConcurrentHashSet<string>();
+        private readonly ISet<string> requestExchanges = new ConcurrentHashSet<string>();
         private readonly List<IModel> modelList = new List<IModel>();
 
 		private readonly ConcurrentBag<Action> subscribeActions;
@@ -260,14 +260,13 @@ namespace EasyNetQ
             //  2.  Worries about the uniqueness of MethodInfo.GetHashCode. Looking at the CLR source
             //      it seems that it's not overriden so it is the same as Object.GetHashCode(). This
             //      is unique for an instance in an app-domain, so it _should_ be OK for this usage.
-            if (!responseQueueNameCache.ContainsKey(onResponse.Method.GetHashCode()))
+            var uniqueResponseQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
+            if (responseQueueNameCache.TryAdd(onResponse.Method.GetHashCode(), uniqueResponseQueueName))
             {
                 logger.DebugWrite("Setting up return subscription for req/resp {0} {1}", 
                     typeof(TRequest).Name,
                     typeof(TResponse).Name);
 
-                var uniqueResponseQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
-                responseQueueNameCache.Add(onResponse.Method.GetHashCode(), uniqueResponseQueueName);
                 SubscribeToResponse(onResponse, uniqueResponseQueueName);
             }
 
@@ -456,7 +455,7 @@ namespace EasyNetQ
 
         private void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
         {
-            if (!requestExchanges.Contains(requestTypeName))
+            if (requestExchanges.Add(requestTypeName))
             {
                 logger.DebugWrite("Declaring Request/Response structure for request: {0}", requestTypeName);
 
@@ -478,8 +477,6 @@ namespace EasyNetQ
                     requestTypeName, // queue
                     rpcExchange, // exchange 
                     requestTypeName); // routingKey
-
-                requestExchanges.Add(requestTypeName);
             }
         }
 

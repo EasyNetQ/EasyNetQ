@@ -48,6 +48,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="BinarySerializer.cs" />
+    <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ConnectionString.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
