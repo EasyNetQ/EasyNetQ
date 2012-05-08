@@ -28,8 +28,6 @@ namespace EasyNetQ.Tests
             }
         }
 
-        // Failing test to demonstrate multi-threaded publisher creating a proliferation
-        // of channels
         [Test, Explicit("Requires a local rabbitMq instance to run")]
         public void MultThreaded_publisher_should_not_cause_channel_proliferation()
         {

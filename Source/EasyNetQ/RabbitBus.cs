@@ -103,14 +103,12 @@ namespace EasyNetQ
         private void DeclarePublishExchange(IModel channel, string exchangeName)
         {
             // no need to declare on every publish
-            if (!publishExchanges.Contains(exchangeName))
+            if (publishExchanges.Add(exchangeName))
             {
                 channel.ExchangeDeclare(
                     exchangeName,               // exchange
                     ExchangeType.Topic,    // type
                     true);                  // durable
-
-                publishExchanges.Add(exchangeName);
             }
         }
 
