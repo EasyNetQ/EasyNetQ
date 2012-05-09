@@ -64,9 +64,12 @@ namespace EasyNetQ.Tests
             {
                 var thread = new Thread(x =>
                 {
-                    bus.Request<TestRequestMessage, TestResponseMessage>(
-                        new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) },
-                        response => Console.WriteLine(response.Text));
+                    using (var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Request<TestRequestMessage, TestResponseMessage>(
+                            new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
+                            response => Console.WriteLine(response.Text));
+                    }
                 });
                 threads.Add(thread);
                 thread.Start();
@@ -77,7 +80,7 @@ namespace EasyNetQ.Tests
                 thread.Join();
             }
 
-            Assert.AreEqual(0, ((RabbitBus)bus).OpenChannelCount);
+            Assert.AreEqual(1, ((RabbitBus)bus).OpenChannelCount);
         }
     }
 }

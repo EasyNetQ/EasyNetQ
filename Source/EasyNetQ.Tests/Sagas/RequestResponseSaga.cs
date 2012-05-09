@@ -7,15 +7,18 @@
             bus.Subscribe<StartMessage>("id", startMessage =>
             {
                 var request = new TestRequestMessage {Text = startMessage.Text};
-                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                using (var publishChannel = bus.OpenPublishChannel())
                 {
-                    var endMessage = new EndMessage {Text = response.Text};
-
-                    using (var publishChannel = bus.OpenPublishChannel())
+                    publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                     {
-                        publishChannel.Publish(endMessage);
-                    }
-                });
+                        var endMessage = new EndMessage {Text = response.Text};
+
+                        using (var publishChannel2 = bus.OpenPublishChannel())
+                        {
+                            publishChannel2.Publish(endMessage);
+                        }
+                    });
+                }
             });
         }
     }

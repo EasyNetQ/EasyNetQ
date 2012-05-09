@@ -11,7 +11,17 @@ namespace EasyNetQ
     public class InMemoryBus : IBus
     {
         private readonly Dictionary<Type, List<object>> subscriptions = new Dictionary<Type, List<object>>(); 
-        private readonly Dictionary<Type, List<object>> asyncSubscriptions = new Dictionary<Type, List<object>>(); 
+        private readonly Dictionary<Type, List<object>> asyncSubscriptions = new Dictionary<Type, List<object>>();
+
+        public Dictionary<Type, List<object>> Subscriptions
+        {
+            get { return subscriptions; }
+        }
+
+        public Dictionary<Type, List<object>> AsyncSubscriptions
+        {
+            get { return asyncSubscriptions; }
+        }
 
         public void Dispose()
         {
@@ -145,6 +155,11 @@ namespace EasyNetQ
         public void FuturePublish<T>(DateTime timeToRespond, T message)
         {
             throw new NotImplementedException();
+        }
+
+        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+        {
+            inMemoryBus.Request(request, onResponse);
         }
     }
 }

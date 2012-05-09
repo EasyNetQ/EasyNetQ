@@ -80,7 +80,6 @@ namespace EasyNetQ
 
             var subscriptionInfo = subscriptions[consumerTag];
 
-
             try
             {
                 var completionTask = subscriptionInfo.Callback(

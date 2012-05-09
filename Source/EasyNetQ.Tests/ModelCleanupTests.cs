@@ -73,7 +73,10 @@ namespace EasyNetQ.Tests
             var aborted = false;
             model.AbortAction = () => aborted = true;
 
-            bus.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => {});
+            using (var publishChannel = bus.OpenPublishChannel())
+            {
+                publishChannel.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
+            }
             bus.Dispose();
 
             aborted.ShouldBeTrue();

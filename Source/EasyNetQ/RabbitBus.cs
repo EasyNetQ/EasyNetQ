@@ -26,9 +26,71 @@ namespace EasyNetQ
 
 		private readonly ConcurrentBag<Action> subscribeActions;
 
-        private const string rpcExchange = "easy_net_q_rpc";
-        private const bool noAck = false;
+        public const string RpcExchange = "easy_net_q_rpc";
+        public const bool NoAck = false;
+
+        public SerializeType SerializeType
+        {
+            get { return serializeType; }
+        }
+
+        public ISerializer Serializer
+        {
+            get { return serializer; }
+        }
+
+        public IPersistentConnection Connection
+        {
+            get { return connection; }
+        }
+
+        public IConsumerFactory ConsumerFactory
+        {
+            get { return consumerFactory; }
+        }
+
+        public IEasyNetQLogger Logger
+        {
+            get { return logger; }
+        }
+
+        public Func<string> GetCorrelationId
+        {
+            get { return getCorrelationId; }
+        }
+
+        public IConventions Conventions
+        {
+            get { return conventions; }
+        }
+
+        public ConcurrentDictionary<int, string> ResponseQueueNameCache
+        {
+            get { return responseQueueNameCache; }
+        }
+
+        public ISet<string> PublishExchanges
+        {
+            get { return publishExchanges; }
+        }
+
+        public ISet<string> RequestExchanges 
+        { 
+            get{ return requestExchanges; } 
+        }
+
+        public List<IModel> ModelList
+        {
+            get { return modelList; }
+        }
+
+        public ConcurrentBag<Action> SubscribeActions
+        {
+            get { return subscribeActions; }
+        }
+
         public int OpenChannelCount { get { return modelList.Count; } }
+
 
         // prefetchCount determines how many messages will be allowed in the local in-memory queue
         // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -87,14 +149,7 @@ namespace EasyNetQ
 
         public IPublishChannel OpenPublishChannel()
         {
-            return new RabbitPublishChannel(
-                connection, 
-                logger, 
-                getCorrelationId, 
-                publishExchanges, 
-                serializeType, 
-                serializer, 
-                conventions);
+            return new RabbitPublishChannel(this);
         }
 
         // channels should not be shared between threads.
@@ -112,7 +167,7 @@ namespace EasyNetQ
             }
         }
 
-        private void CheckMessageType<TMessage>(IBasicProperties properties)
+        public void CheckMessageType<TMessage>(IBasicProperties properties)
         {
             var typeName = serializeType(typeof (TMessage));
             if (properties.Type != typeName)
@@ -208,7 +263,7 @@ namespace EasyNetQ
 
                 channel.BasicConsume(
                     queueName,              // queue
-                    noAck,                  // noAck 
+                    NoAck,                  // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
             };
@@ -216,24 +271,15 @@ namespace EasyNetQ
             AddSubscriptionAction(subscribeAction);
         }
 
-
-        private string GetTopic<T>()
-		{
-			return conventions.TopicNamingConvention(typeof (T));
-		}
-
-
 		private string GetExchangeName<T>()
 		{
 			return conventions.ExchangeNamingConvention(typeof(T));
 		}
 
-
 		private string GetQueueName<T>(string subscriptionId)
 		{
 			return conventions.QueueNamingConvention(typeof (T), subscriptionId);
 		}
-
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
@@ -309,7 +355,7 @@ namespace EasyNetQ
 
             responseChannel.BasicConsume(
                 respondQueue,           // queue
-                noAck,                  // noAck 
+                NoAck,                  // noAck 
                 consumer.ConsumerTag,   // consumerTag
                 consumer);              // consumer
         }
@@ -336,7 +382,7 @@ namespace EasyNetQ
 
             var requestBody = serializer.MessageToBytes(request);
             threadLocalPublishChannel.Value.BasicPublish(
-                rpcExchange,            // exchange 
+                RpcExchange,            // exchange 
                 requestTypeName,        // routingKey 
                 requestProperties,      // basicProperties 
                 requestBody);           // body
@@ -412,7 +458,7 @@ namespace EasyNetQ
 
                 requestChannel.BasicConsume(
                     requestTypeName,        // queue 
-                    noAck,                   // noAck 
+                    NoAck,                   // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
             };
@@ -458,7 +504,7 @@ namespace EasyNetQ
                 logger.DebugWrite("Declaring Request/Response structure for request: {0}", requestTypeName);
 
                 channel.ExchangeDeclare(
-                    rpcExchange, // exchange 
+                    RpcExchange, // exchange 
                     ExchangeType.Direct, // type 
                     false, // autoDelete 
                     true, // durable 
@@ -473,13 +519,13 @@ namespace EasyNetQ
 
                 channel.QueueBind(
                     requestTypeName, // queue
-                    rpcExchange, // exchange 
+                    RpcExchange, // exchange 
                     requestTypeName); // routingKey
             }
         }
 
 
-    	private void AddSubscriptionAction(Action subscriptionAction)
+    	public void AddSubscriptionAction(Action subscriptionAction)
 		{
 			subscribeActions.Add(subscriptionAction);
 

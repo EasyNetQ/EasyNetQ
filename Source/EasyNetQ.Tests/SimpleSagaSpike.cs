@@ -43,16 +43,19 @@ namespace EasyNetQ.Tests
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
                 var request = new TestRequestMessage { Text = firstProcessedMessage };
 
-                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                using (var publishChannel = bus.OpenPublishChannel())
                 {
-                    Console.WriteLine("Saga got Response: {0}", response.Text);
-                    var secondProcessedMessage = response.Text + " - final process ";
-                    var endMessage = new EndMessage { Text = secondProcessedMessage };
-                    using (var publishChannel = bus.OpenPublishChannel())
+                    publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                     {
-                        publishChannel.Publish(endMessage);
-                    }
-                });
+                        Console.WriteLine("Saga got Response: {0}", response.Text);
+                        var secondProcessedMessage = response.Text + " - final process ";
+                        var endMessage = new EndMessage {Text = secondProcessedMessage};
+                        using (var publishChannel2 = bus.OpenPublishChannel())
+                        {
+                            publishChannel2.Publish(endMessage);
+                        }
+                    });
+                }
             });
             
             // setup the RPC endpoint

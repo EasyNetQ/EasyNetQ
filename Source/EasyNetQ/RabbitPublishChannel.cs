@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -8,39 +9,19 @@ namespace EasyNetQ
 {
     public class RabbitPublishChannel : IPublishChannel, IRawByteBus
     {
-        private readonly IPersistentConnection connection;
-        private readonly IEasyNetQLogger logger;
-        private readonly Func<string> getCorrelationId;
-        private readonly ISet<string> publishExchanges;
-        private readonly SerializeType serializeType;
-        private readonly ISerializer serializer;
-        private readonly IConventions conventions;
-
         private readonly IModel channel;
+        private readonly RabbitBus bus;
 
-        public RabbitPublishChannel(
-            IPersistentConnection connection, 
-            IEasyNetQLogger logger, 
-            Func<string> getCorrelationId, 
-            ISet<string> publishExchanges, 
-            SerializeType serializeType, 
-            ISerializer serializer, 
-            IConventions conventions)
+        public RabbitPublishChannel(RabbitBus bus)
         {
-            this.connection = connection;
-            this.logger = logger;
-            this.getCorrelationId = getCorrelationId;
-            this.publishExchanges = publishExchanges;
-            this.serializeType = serializeType;
-            this.serializer = serializer;
-            this.conventions = conventions;
+            this.bus = bus;
 
-            channel = connection.CreateModel();
+            channel = bus.Connection.CreateModel();
         }
 
         public void Publish<T>(T message)
         {
-            Publish(conventions.TopicNamingConvention(typeof(T)), message);
+            Publish(bus.Conventions.TopicNamingConvention(typeof(T)), message);
         }
 
         public void Publish<T>(string topic, T message)
@@ -50,9 +31,9 @@ namespace EasyNetQ
                 throw new ArgumentNullException("message");
             }
 
-            var typeName = serializeType(typeof(T));
-            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
-            var messageBody = serializer.MessageToBytes(message);
+            var typeName = bus.SerializeType(typeof(T));
+            var exchangeName = bus.Conventions.ExchangeNamingConvention(typeof(T));
+            var messageBody = bus.Serializer.MessageToBytes(message);
 
             RawPublish(exchangeName, topic, typeName, messageBody);
         }
@@ -64,7 +45,7 @@ namespace EasyNetQ
                 throw new EasyNetQException("PublishChannel is already disposed");
             }
 
-            if (!connection.IsConnected)
+            if (!bus.Connection.IsConnected)
             {
                 throw new EasyNetQException("Publish failed. No rabbit server connected.");
             }
@@ -76,7 +57,7 @@ namespace EasyNetQ
                 var defaultProperties = channel.CreateBasicProperties();
                 defaultProperties.SetPersistent(false);
                 defaultProperties.Type = typeName;
-                defaultProperties.CorrelationId = getCorrelationId();
+                defaultProperties.CorrelationId = bus.GetCorrelationId();
 
                 channel.BasicPublish(
                     exchangeName, // exchange
@@ -84,7 +65,7 @@ namespace EasyNetQ
                     defaultProperties, // basicProperties
                     messageBody); // body
 
-                logger.DebugWrite("Published {0}, CorrelationId {1}", exchangeName, defaultProperties.CorrelationId);
+                bus.Logger.DebugWrite("Published {0}, CorrelationId {1}", exchangeName, defaultProperties.CorrelationId);
             }
             catch (OperationInterruptedException exception)
             {
@@ -99,14 +80,14 @@ namespace EasyNetQ
         private void DeclarePublishExchange(string exchangeName)
         {
             // no need to declare on every publish
-            if (publishExchanges.Add(exchangeName))
+            if (bus.PublishExchanges.Add(exchangeName))
             {
                 channel.ExchangeDeclare(
                     exchangeName,               // exchange
                     ExchangeType.Topic,    // type
                     true);                  // durable
 
-                logger.DebugWrite("Declared publish exchange");
+                bus.Logger.DebugWrite("Declared publish exchange");
             }
         }
 
@@ -117,13 +98,13 @@ namespace EasyNetQ
                 throw new ArgumentNullException("message");
             }
 
-            if (!connection.IsConnected)
+            if (!bus.Connection.IsConnected)
             {
                 throw new EasyNetQException("FuturePublish failed. No rabbit server connected.");
             }
 
-            var typeName = serializeType(typeof(T));
-            var messageBody = serializer.MessageToBytes(message);
+            var typeName = bus.SerializeType(typeof(T));
+            var messageBody = bus.Serializer.MessageToBytes(message);
 
             Publish(new ScheduleMe
             {
@@ -142,6 +123,138 @@ namespace EasyNetQ
         {
             var exchangeName = typeName;
             RawPublish(exchangeName, topic, typeName, messageBody);
+        }
+
+        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+        {
+            if (onResponse == null)
+            {
+                throw new ArgumentNullException("onResponse");
+            }
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+            if (disposed)
+            {
+                throw new EasyNetQException("PublishChannel is already disposed");
+            }
+            if (!bus.Connection.IsConnected)
+            {
+                throw new EasyNetQException("Publish failed. No rabbit server connected.");
+            }
+
+            // rather than setting up a subscription on each call of Request, we cache a single
+            // subscription keyed on the hashcode of the onResponse action. This has a couple of
+            // consequences:
+            //  1.  Closures don't work as expected since the closed over variable is always the first
+            //      one that was called.
+            //  2.  Worries about the uniqueness of MethodInfo.GetHashCode. Looking at the CLR source
+            //      it seems that it's not overriden so it is the same as Object.GetHashCode(). This
+            //      is unique for an instance in an app-domain, so it _should_ be OK for this usage.
+            var uniqueResponseQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
+            if (bus.ResponseQueueNameCache.TryAdd(onResponse.Method.GetHashCode(), uniqueResponseQueueName))
+            {
+                bus.Logger.DebugWrite("Setting up return subscription for req/resp {0} {1}",
+                    typeof(TRequest).Name,
+                    typeof(TResponse).Name);
+
+                SubscribeToResponse(onResponse, uniqueResponseQueueName);
+            }
+
+            var returnQueueName = bus.ResponseQueueNameCache[onResponse.Method.GetHashCode()];
+
+            RequestPublish(request, returnQueueName);
+        }
+
+        private void SubscribeToResponse<TResponse>(Action<TResponse> onResponse, string returnQueueName)
+        {
+            var responseChannel = bus.Connection.CreateModel();
+            bus.ModelList.Add(responseChannel);
+
+            // respond queue is transient, only exists for the lifetime of the service.
+            var respondQueue = responseChannel.QueueDeclare(
+                returnQueueName,
+                false,              // durable
+                true,               // exclusive
+                true,               // autoDelete
+                null                // arguments
+                );
+
+            var consumer = bus.ConsumerFactory.CreateConsumer(responseChannel,
+                (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
+                {
+                    bus.CheckMessageType<TResponse>(properties);
+                    var response = bus.Serializer.BytesToMessage<TResponse>(body);
+
+                    var tcs = new TaskCompletionSource<object>();
+
+                    try
+                    {
+                        onResponse(response);
+                        tcs.SetResult(null);
+                    }
+                    catch (Exception exception)
+                    {
+                        tcs.SetException(exception);
+                    }
+                    return tcs.Task;
+                });
+
+            responseChannel.BasicConsume(
+                respondQueue,           // queue
+                RabbitBus.NoAck,                  // noAck 
+                consumer.ConsumerTag,   // consumerTag
+                consumer);              // consumer
+        }
+
+        private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
+        {
+            var requestTypeName = bus.SerializeType(typeof(TRequest));
+
+            // declare the exchange, binding and queue here. No need to set the mandatory flag, the recieving queue
+            // will already have been declared, so in the case of no responder being present, message will collect
+            // there.
+            DeclareRequestResponseStructure(channel, requestTypeName);
+
+            // tell the consumer to respond to the transient respondQueue
+            var requestProperties = channel.CreateBasicProperties();
+            requestProperties.ReplyTo = returnQueueName;
+            requestProperties.Type = requestTypeName;
+
+            var requestBody = bus.Serializer.MessageToBytes(request);
+            channel.BasicPublish(
+                RabbitBus.RpcExchange,            // exchange 
+                requestTypeName,        // routingKey 
+                requestProperties,      // basicProperties 
+                requestBody);           // body
+        }
+
+        private void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
+        {
+            if (bus.RequestExchanges.Add(requestTypeName))
+            {
+                bus.Logger.DebugWrite("Declaring Request/Response structure for request: {0}", requestTypeName);
+
+                channel.ExchangeDeclare(
+                    RabbitBus.RpcExchange, // exchange 
+                    ExchangeType.Direct, // type 
+                    false, // autoDelete 
+                    true, // durable 
+                    null); // arguments
+
+                channel.QueueDeclare(
+                    requestTypeName, // queue 
+                    true, // durable 
+                    false, // exclusive 
+                    false, // autoDelete 
+                    null); // arguments
+
+                channel.QueueBind(
+                    requestTypeName, // queue
+                    RabbitBus.RpcExchange, // exchange 
+                    requestTypeName); // routingKey
+            }
         }
 
         private bool disposed;

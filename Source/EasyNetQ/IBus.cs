@@ -130,15 +130,6 @@ namespace EasyNetQ
         void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage);
 
         /// <summary>
-        /// Makes an RPC style asynchronous request.
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="request">The request message.</param>
-        /// <param name="onResponse">The action to run when the response is received.</param>
-        void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse);
-
-        /// <summary>
         /// Responds to an RPC request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
