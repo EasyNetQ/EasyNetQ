@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests
         // 4. Run this test again to see the message consumed.
         // You should see all 10 messages get processes at once, even though each web request
         // takes 150 ms.
-        [Test]
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_handle_multiple_async_IO_operations_in_a_handler()
         {
             bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
@@ -82,7 +82,7 @@ namespace EasyNetQ.Tests
             Thread.Sleep(2000);
         }
 
-        [Test]
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_handle_async_tasks_in_sequence()
         {
             bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
