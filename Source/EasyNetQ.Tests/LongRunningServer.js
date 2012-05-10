@@ -26,6 +26,6 @@ http.createServer(function (req, res) {
         res.end('Not Found Here\n');
     }
 
-}).listen(1338, '127.0.0.1');
+}).listen(1338);
 
 console.log('LongRunningServer is at http://localhost:1338/');

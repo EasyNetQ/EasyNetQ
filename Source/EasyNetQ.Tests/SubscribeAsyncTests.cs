@@ -3,6 +3,7 @@
 using System;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -47,7 +48,64 @@ namespace EasyNetQ.Tests
             Thread.Sleep(2000);
         }
 
-        // 2. See above
+        // 1. Start LongRunningServer.js (a little node.js webserver in this directory)
+        // 2. Run this test to setup the subscription
+        // 3. Publish a message by running Publish_a_test_message_for_subscribe_async below
+        // 4. Run this test again to see the message consumed.
+        // You should see all 10 messages get processes at once, even though each web request
+        // takes 150 ms.
+        [Test]
+        public void Should_be_able_to_handle_multiple_async_IO_operations_in_a_handler()
+        {
+            bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
+            {
+                var downloadTasks = new[]
+                {
+                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=500")),
+                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=501")),
+                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=502")),
+                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=503")),
+                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=504")),
+                };
+
+                return Task.Factory.ContinueWhenAll(downloadTasks, tasks =>
+                {
+                    Console.WriteLine("Finished processing: {0}", message.Text);
+                    foreach (var task in tasks)
+                    {
+                        Console.WriteLine("\tDownloaded: {0}", task.Result);
+                    }
+                });
+            });
+
+            // give the test a chance to receive process the message
+            Thread.Sleep(2000);
+        }
+
+        [Test]
+        public void Should_be_able_to_handle_async_tasks_in_sequence()
+        {
+            bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
+            {
+                Console.WriteLine("Got message: {0}", message.Text);
+                var firstRequestTask = new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=100"));
+
+                return firstRequestTask.ContinueWith(task1 =>
+                {
+                    Console.WriteLine("First Response for: {0}, => {1}", message.Text, task1.Result);
+                    var secondRequestTask = new WebClient()
+                        .DownloadStringTask(new Uri("http://localhost:1338/?timeout=501"));
+
+                    return secondRequestTask.ContinueWith(task2 => 
+                        Console.WriteLine("Second Response for: {0}, => {1}", message.Text, task2.Result));
+                });
+            });
+
+            // give the test a chance to receive process the message
+            Thread.Sleep(2000);
+        }
+
+        // See above
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_a_test_message_for_subscribe_async()
         {
