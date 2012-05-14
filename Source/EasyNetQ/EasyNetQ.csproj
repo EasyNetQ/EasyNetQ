@@ -77,11 +77,18 @@
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
+    <Compile Include="Topology\DirectExchange.cs" />
+    <Compile Include="Topology\Exchange.cs" />
+    <Compile Include="Topology\ExchangeType.cs" />
+    <Compile Include="Topology\IExchange.cs" />
+    <Compile Include="Topology\ITopology.cs" />
+    <Compile Include="Topology\TopologyVisitor.cs" />
     <Compile Include="TypeNameSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EasyNetQ.nuspec" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
