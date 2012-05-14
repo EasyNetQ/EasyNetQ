@@ -9,7 +9,7 @@ namespace EasyNetQ.Scheduler
         {
             var bus = RabbitHutch.CreateBus();
 
-            var rawByteBus = bus as IRawByteBus;
+            var rawByteBus = bus.OpenPublishChannel() as IRawByteBus;
             if (rawByteBus == null)
             {
                 throw new EasyNetQException("Bus does not implement IRawByteBus");

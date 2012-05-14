@@ -58,6 +58,13 @@ namespace EasyNetQ.Scheduler
             {
                 purgeTimer.Dispose();
             }
+            if (rawByteBus != null)
+            {
+                if(rawByteBus is IDisposable)
+                {
+                  ((IDisposable)rawByteBus).Dispose();
+                }
+            }
             if (bus != null)
             {
                 bus.Dispose();
