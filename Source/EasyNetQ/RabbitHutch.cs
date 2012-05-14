@@ -122,13 +122,16 @@ namespace EasyNetQ
 
             var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger);
 
+            var conventions = new Conventions();
+
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
                 serializer,
                 new QueueingConsumerFactory(logger, consumerErrorStrategy),
                 connectionFactory,
                 logger, 
-                CorrelationIdGenerator.GetCorrelationId);
+                CorrelationIdGenerator.GetCorrelationId,
+                conventions);
         }
 
         /// <summary>

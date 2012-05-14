@@ -14,6 +14,7 @@ namespace EasyNetQ.Tests
         public IConnection Connection { get; set; }
         public IModel Model { get; set; }
         public Func<string> GetCorrelationId { get; set; }
+        public IConventions Conventions { get; set; }
 
         public IBus CreateBusWithMockAmqpClient()
         {
@@ -25,6 +26,7 @@ namespace EasyNetQ.Tests
             ConsumerErrorStrategy = ConsumerErrorStrategy ?? new DefaultConsumerErrorStrategy(ConnectionFactory, Serializer, Logger);
             ConsumerFactory = ConsumerFactory ?? new QueueingConsumerFactory(Logger, ConsumerErrorStrategy);
             GetCorrelationId = GetCorrelationId ?? CorrelationIdGenerator.GetCorrelationId;
+            Conventions = Conventions ?? new Conventions();
 
             return new RabbitBus(
                 TypeNameSerializer.Serialize,
@@ -32,7 +34,8 @@ namespace EasyNetQ.Tests
                 ConsumerFactory,
                 ConnectionFactory, 
                 Logger,
-                GetCorrelationId);
+                GetCorrelationId,
+                Conventions);
         }
     }
 }

@@ -105,7 +105,7 @@ namespace EasyNetQ
             IConnectionFactory connectionFactory, 
             IEasyNetQLogger logger,
 			Func<string> getCorrelationId,
-			IConventions conventions = null)
+			IConventions conventions)
         {
             if(serializeType == null)
             {
@@ -123,14 +123,18 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("connectionFactory");
             }
+            if(logger == null)
+            {
+                throw new ArgumentNullException("logger");
+            }
             if(getCorrelationId == null)
             {
                 throw new ArgumentNullException("getCorrelationId");
             }
-
-			// Use default conventions if none were supplied.
-			if (conventions == null)
-				conventions = new Conventions();
+            if(conventions == null)
+            {
+                throw new ArgumentNullException("conventions");
+            }
 
             this.serializeType = serializeType;
             this.consumerFactory = consumerFactory;
