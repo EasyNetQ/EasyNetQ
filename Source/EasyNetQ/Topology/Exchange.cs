@@ -1,7 +1,11 @@
-﻿namespace EasyNetQ.Topology
+﻿using System.Collections.Generic;
+
+namespace EasyNetQ.Topology
 {
     public abstract class Exchange : IExchange
     {
+        protected readonly IList<IBinding> bindings = new List<IBinding>();
+
         public static IExchange CreateDirect(string exchangeName)
         {
             return new DirectExchange(exchangeName);
@@ -20,17 +24,11 @@
         {
             return new TopicExchange(exchangeName);
         }
-    }
 
-    public class TopicExchange : Exchange
-    {
-        public TopicExchange(string exchangeName) : base(exchangeName)
+        public void BindTo(IExchange exchange, params string[] routingKeys)
         {
-        }
-
-        public override void Visit(ITopologyVisitor visitor)
-        {
-            visitor.CreateExchange(Name, ExchangeType.Topic);
+            var binding = new Binding(this, exchange, routingKeys);
+            bindings.Add(binding);
         }
     }
 }

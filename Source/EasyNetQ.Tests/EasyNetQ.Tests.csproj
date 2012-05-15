@@ -104,7 +104,7 @@
     <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
-    <Compile Include="Topology\ExchangeTests.cs" />
+    <Compile Include="Topology\TopologyTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>

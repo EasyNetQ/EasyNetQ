@@ -1,14 +1,14 @@
 namespace EasyNetQ.Topology
 {
-    public class DirectExchange : Exchange
+    public class TopicExchange : Exchange
     {
-        public DirectExchange(string name) : base(name)
+        public TopicExchange(string exchangeName) : base(exchangeName)
         {
         }
 
         public override void Visit(ITopologyVisitor visitor)
         {
-            visitor.CreateExchange(Name, ExchangeType.Direct);
+            visitor.CreateExchange(Name, ExchangeType.Topic);
             foreach (var binding in bindings)
             {
                 binding.Visit(visitor);

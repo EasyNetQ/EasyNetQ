@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Topology
 {
-    public interface IExchange : IBindable
+    public interface IQueue : IBindable
     {
         string Name { get; }
     }
