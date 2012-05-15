@@ -54,6 +54,7 @@ namespace EasyNetQ.Tests.Topology
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "Fanout", true));
         }
 
+        // XD (default)
         [Test]
         public void Should_get_the_default_exchange()
         {
@@ -83,6 +84,21 @@ namespace EasyNetQ.Tests.Topology
             model.AssertWasCalled(x => x.QueueDeclare(queueName, false, true, true, null));
         }
 
+        // QT (unnamed)
+        [Test]
+        public void Should_create_an_unnamed_transient_queue()
+        {
+            const string rabbit_generated_queue_name = "rabbit_generated_queue_name";
+            model.Stub(x => x.QueueDeclare()).Return(new QueueDeclareOk(rabbit_generated_queue_name, 0, 0));
+
+            var queue = Queue.DeclareTransient();
+            queue.Visit(visitor);
+
+            model.AssertWasCalled(x => x.QueueDeclare());
+
+            queue.Name.ShouldEqual(rabbit_generated_queue_name);
+        }
+
         //  XD -> QD
         [Test]
         public void Should_be_able_to_bind_a_queue_to_an_exchange()
@@ -96,6 +112,24 @@ namespace EasyNetQ.Tests.Topology
             model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, null));
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "Direct", true));
             model.AssertWasCalled(x => x.QueueBind(queueName, exchangeName, routingKey));
+        }
+
+        // XD   ->  QD (unnamed)
+        [Test]
+        public void Should_be_able_to_bind_an_unnamed_queue_to_an_exchange()
+        {
+            const string rabbit_generated_queue_name = "rabbit_generated_queue_name";
+            model.Stub(x => x.QueueDeclare()).Return(new QueueDeclareOk(rabbit_generated_queue_name, 0, 0));
+
+            var queue = Queue.DeclareTransient();
+            var exchange = Exchange.DeclareDirect(exchangeName);
+
+            queue.BindTo(exchange, routingKey);
+            queue.Visit(visitor);
+
+            model.AssertWasCalled(x => x.QueueDeclare());
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "Direct", true));
+            model.AssertWasCalled(x => x.QueueBind(rabbit_generated_queue_name, exchangeName, routingKey));
         }
 
         //      ->

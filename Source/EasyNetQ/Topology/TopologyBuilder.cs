@@ -38,6 +38,12 @@ namespace EasyNetQ.Topology
             model.QueueDeclare(queueName, durable, exclusive, autoDelete, null);
         }
 
+        public string CreateQueue()
+        {
+            var queueDeclareOk = model.QueueDeclare();
+            return queueDeclareOk.QueueName;
+        }
+
         public void CreateBinding(IBindable bindable, IExchange exchange, string[] routingKeys)
         {
             if(bindable == null)

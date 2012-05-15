@@ -72,7 +72,14 @@ namespace EasyNetQ.Topology
                 throw new ArgumentNullException("visitor");
             }
 
-            visitor.CreateQueue(Name, durable, exclusive, autoDelete);
+            if (Name == null)
+            {
+                Name = visitor.CreateQueue();
+            }
+            else
+            {
+                visitor.CreateQueue(Name, durable, exclusive, autoDelete);
+            }
             foreach (var binding in bindings)
             {
                 binding.Visit(visitor);
