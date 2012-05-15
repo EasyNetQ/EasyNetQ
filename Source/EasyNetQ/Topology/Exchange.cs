@@ -2,27 +2,35 @@
 
 namespace EasyNetQ.Topology
 {
-    public abstract class Exchange : IExchange
+    public class Exchange : IExchange
     {
         protected readonly IList<IBinding> bindings = new List<IBinding>();
+        public string Name { get; private set; }
+        public ExchangeType ExchangeType { get; private set; }
 
         public static IExchange CreateDirect(string exchangeName)
         {
-            return new DirectExchange(exchangeName);
+            return new Exchange(exchangeName, ExchangeType.Direct);
         }
-
-        protected Exchange(string name)
-        {
-            Name = name;
-        }
-
-        public abstract void Visit(ITopologyVisitor visitor);
-
-        public string Name { get; private set; }
 
         public static IExchange CreateTopic(string exchangeName)
         {
-            return new TopicExchange(exchangeName);
+            return new Exchange(exchangeName, ExchangeType.Topic);
+        }
+
+        protected Exchange(string name, ExchangeType exchangeType)
+        {
+            Name = name;
+            ExchangeType = exchangeType;
+        }
+
+        public void Visit(ITopologyVisitor visitor)
+        {
+            visitor.CreateExchange(Name, ExchangeType);
+            foreach (var binding in bindings)
+            {
+                binding.Visit(visitor);
+            }
         }
 
         public void BindTo(IExchange exchange, params string[] routingKeys)

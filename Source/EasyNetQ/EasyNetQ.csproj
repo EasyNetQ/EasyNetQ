@@ -78,7 +78,6 @@
     <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="Topology\Binding.cs" />
-    <Compile Include="Topology\DirectExchange.cs" />
     <Compile Include="Topology\Exchange.cs" />
     <Compile Include="Topology\ExchangeType.cs" />
     <Compile Include="Topology\IBindable.cs" />
@@ -88,7 +87,6 @@
     <Compile Include="Topology\ITopology.cs" />
     <Compile Include="Topology\ITopologyVisitor.cs" />
     <Compile Include="Topology\Queue.cs" />
-    <Compile Include="Topology\TopicExchange.cs" />
     <Compile Include="Topology\TopologyBuilder.cs" />
     <Compile Include="TypeNameSerializer.cs" />
   </ItemGroup>
