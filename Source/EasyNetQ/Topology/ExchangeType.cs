@@ -3,6 +3,7 @@
     public enum ExchangeType
     {
         Direct,
-        Topic
+        Topic,
+        Fanout
     }
 }

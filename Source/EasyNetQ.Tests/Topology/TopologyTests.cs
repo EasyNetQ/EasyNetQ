@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_create_a_direct_exchange()
         {
-            var exchange = Exchange.CreateDirect(exchangeName);
+            var exchange = Exchange.DeclareDirect(exchangeName);
             exchange.Visit(visitor);
 
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "Direct", true));
@@ -38,17 +38,36 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_create_a_topic_exchange()
         {
-            var exchange = Exchange.CreateTopic(exchangeName);
+            var exchange = Exchange.DeclareTopic(exchangeName);
             exchange.Visit(visitor);
 
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "Topic", true));
+        }
+
+        // XF
+        [Test]
+        public void Should_create_a_fanout_exchange()
+        {
+            var exchange = Exchange.DeclareFanout(exchangeName);
+            exchange.Visit(visitor);
+
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "Fanout", true));
+        }
+
+        [Test]
+        public void Should_get_the_default_exchange()
+        {
+            var exchange = Exchange.GetDefault();
+            exchange.Visit(visitor);
+
+            model.AssertWasCalled(x => x.ExchangeDeclare("", "Direct", true));
         }
 
         // QD
         [Test]
         public void Should_create_a_durable_queue()
         {
-            var queue = Queue.CreateDurable(queueName);
+            var queue = Queue.DeclareDurable(queueName);
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, null));
@@ -58,7 +77,7 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_create_a_transiet_queue()
         {
-            var queue = Queue.CreateTransient(queueName);
+            var queue = Queue.DeclareTransient(queueName);
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare(queueName, false, true, true, null));
@@ -68,8 +87,8 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_be_able_to_bind_a_queue_to_an_exchange()
         {
-            var queue = Queue.CreateDurable(queueName);
-            var exchange = Exchange.CreateDirect(exchangeName);
+            var queue = Queue.DeclareDurable(queueName);
+            var exchange = Exchange.DeclareDirect(exchangeName);
 
             queue.BindTo(exchange, routingKey);
             queue.Visit(visitor);
@@ -85,8 +104,8 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_be_able_to_have_multiple_bindings_to_an_exchange()
         {
-            var queue = Queue.CreateDurable(queueName);
-            var exchange = Exchange.CreateDirect(exchangeName);
+            var queue = Queue.DeclareDurable(queueName);
+            var exchange = Exchange.DeclareDirect(exchangeName);
 
             queue.BindTo(exchange, "a", "b", "c");
             queue.Visit(visitor);
@@ -102,8 +121,8 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_be_able_to_bind_an_exchange_to_an_exchange()
         {
-            var sourceExchange = Exchange.CreateDirect("source");
-            var destinationExchange = Exchange.CreateDirect("destination");
+            var sourceExchange = Exchange.DeclareDirect("source");
+            var destinationExchange = Exchange.DeclareDirect("destination");
 
             destinationExchange.BindTo(sourceExchange, routingKey);
             destinationExchange.Visit(visitor);
@@ -117,9 +136,9 @@ namespace EasyNetQ.Tests.Topology
         [Test]
         public void Should_be_able_to_bind_a_queue_to_an_exchange_and_then_to_an_exchange()
         {
-            var sourceExchange = Exchange.CreateDirect("source");
-            var destinationExchange = Exchange.CreateDirect("destination");
-            var queue = Queue.CreateDurable(queueName);
+            var sourceExchange = Exchange.DeclareDirect("source");
+            var destinationExchange = Exchange.DeclareDirect("destination");
+            var queue = Queue.DeclareDurable(queueName);
 
             destinationExchange.BindTo(sourceExchange, routingKey);
             queue.BindTo(destinationExchange, routingKey);

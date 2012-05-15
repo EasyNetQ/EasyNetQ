@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Topology
@@ -9,21 +10,53 @@ namespace EasyNetQ.Topology
 
         public TopologyBuilder(IModel model)
         {
+            if(model == null)
+            {
+                throw new ArgumentNullException("model");
+            }
+
             this.model = model;
         }
 
         public void CreateExchange(string exchangeName, ExchangeType exchangeType)
         {
+            if(exchangeName == null)
+            {
+                throw new ArgumentNullException("exchangeName");
+            }
+
             model.ExchangeDeclare(exchangeName, Enum.GetName(typeof(ExchangeType), exchangeType), true);
         }
 
         public void CreateQueue(string queueName, bool durable, bool exclusive, bool autoDelete)
         {
+            if (string.IsNullOrEmpty(queueName))
+            {
+                throw new ArgumentException("queueName is null or empty");
+            }
+
             model.QueueDeclare(queueName, durable, exclusive, autoDelete, null);
         }
 
         public void CreateBinding(IBindable bindable, IExchange exchange, string[] routingKeys)
         {
+            if(bindable == null)
+            {
+                throw new ArgumentNullException("bindable");
+            }
+            if(exchange == null)
+            {
+                throw new ArgumentNullException("exchange");
+            }
+            if (routingKeys.Any(string.IsNullOrEmpty))
+            {
+                throw new ArgumentException("RoutingKey is null or empty");
+            }
+            if (routingKeys.Length == 0)
+            {
+                throw new ArgumentException("There must be at least one routingKey");
+            }
+
             var queue = bindable as IQueue;
             if(queue != null)
             {
