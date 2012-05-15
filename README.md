@@ -51,6 +51,8 @@ http://mikehadlow.blogspot.com/2011/07/rabbitmq-subscriptions-with-dotnet.html
 
 http://mikehadlow.blogspot.com/2011/07/easynetq-how-should-messaging-client.html
 
+http://mikehadlow.blogspot.co.uk/2012/05/easynetq-breaking-change.html
+
 ## Getting started
 
 Just open EasyNetQ.sln in VisualStudio 2010 and build.
