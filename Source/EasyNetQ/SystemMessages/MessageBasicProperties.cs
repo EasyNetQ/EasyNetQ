@@ -17,6 +17,11 @@ namespace EasyNetQ.SystemMessages
 
         public MessageBasicProperties(IBasicProperties basicProperties) : this()
         {
+            CopyFrom(basicProperties);
+        }
+
+        public void CopyFrom(IBasicProperties basicProperties)
+        {
             ContentTypePresent = basicProperties.IsContentTypePresent();
             ContentEncodingPresent = basicProperties.IsContentEncodingPresent();
             HeadersPresent = basicProperties.IsHeadersPresent();
@@ -46,7 +51,7 @@ namespace EasyNetQ.SystemMessages
             AppId = basicProperties.AppId;
             ClusterId = basicProperties.ClusterId;
 
-            if(basicProperties.IsHeadersPresent())
+            if (basicProperties.IsHeadersPresent())
             {
                 foreach (DictionaryEntry header in basicProperties.Headers)
                 {

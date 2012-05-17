@@ -126,6 +126,11 @@ namespace EasyNetQ
         {
             get { return true; }
         }
+
+        public IAdvancedBus Advanced
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 
     public class InMemoryPublishChannel : IPublishChannel

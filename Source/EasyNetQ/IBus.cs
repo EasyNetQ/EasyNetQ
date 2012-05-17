@@ -163,5 +163,10 @@ namespace EasyNetQ
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }
+
+        /// <summary>
+        /// Return the advanced EasyNetQ advanced API.
+        /// </summary>
+        IAdvancedBus Advanced { get; }
     }
 }

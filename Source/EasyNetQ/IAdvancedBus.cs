@@ -9,7 +9,29 @@ namespace EasyNetQ
     /// of routing topology, but keeping the EasyNetQ serialisation, persistent connection,
     /// error handling and subscription thread.
     /// </summary>
-    public interface IAdvancedBus
+    public interface IAdvancedBus : IDisposable
+    {
+        /// <summary>
+        /// Subscribe to a stream of messages
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        void Subscribe<T>(IQueue queue, Func<IMessage<T>, Task> onMessage);
+
+        /// <summary>
+        /// Return a channel for publishing.
+        /// </summary>
+        /// <returns>IAdvancedPublishChannel</returns>
+        IAdvancedPublishChannel OpenPublishChannel();
+
+        /// <summary>
+        /// True if the bus is connected, False if it is not.
+        /// </summary>
+        bool IsConnected { get; }
+    }
+
+    public interface IAdvancedPublishChannel : IDisposable
     {
         /// <summary>
         /// Publish a message.
@@ -19,13 +41,5 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="message">The message to publish</param>
         void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message);
-
-        /// <summary>
-        /// Subscribe to a stream of messages
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="queue">The queue to take messages from</param>
-        /// <param name="onMessage">The message handler</param>
-        void Subscribe<T>(IQueue queue, Func<IMessage<T>, Task> onMessage);
     }
 }

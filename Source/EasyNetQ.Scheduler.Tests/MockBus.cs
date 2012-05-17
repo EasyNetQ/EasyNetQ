@@ -83,5 +83,10 @@ namespace EasyNetQ.Scheduler.Tests
         {
             get { return true; }
         }
+
+        public IAdvancedBus Advanced
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace EasyNetQ.Topology
     {
         protected readonly IList<IBinding> bindings = new List<IBinding>();
         public string Name { get; private set; }
-        public ExchangeType ExchangeType { get; private set; }
+        public string ExchangeType { get; private set; }
 
         public static IExchange DeclareDirect(string exchangeName)
         {
@@ -16,7 +16,7 @@ namespace EasyNetQ.Topology
             {
                 throw new ArgumentException("name is null or empty");
             }
-            return new Exchange(exchangeName, ExchangeType.Direct);
+            return new Exchange(exchangeName, Topology.ExchangeType.Direct);
         }
 
         public static IExchange DeclareTopic(string exchangeName)
@@ -25,7 +25,7 @@ namespace EasyNetQ.Topology
             {
                 throw new ArgumentException("name is null or empty");
             }
-            return new Exchange(exchangeName, ExchangeType.Topic);
+            return new Exchange(exchangeName, Topology.ExchangeType.Topic);
         }
 
         public static IExchange DeclareFanout(string exchangeName)
@@ -34,15 +34,15 @@ namespace EasyNetQ.Topology
             {
                 throw new ArgumentException("name is null or empty");
             }
-            return new Exchange(exchangeName, ExchangeType.Fanout);
+            return new Exchange(exchangeName, Topology.ExchangeType.Fanout);
         }
 
         public static IExchange GetDefault()
         {
-            return new Exchange("", ExchangeType.Direct);
+            return new DefaultExchange();
         }
 
-        protected Exchange(string name, ExchangeType exchangeType)
+        protected Exchange(string name, string exchangeType)
         {
             if(name == null)
             {
@@ -53,21 +53,23 @@ namespace EasyNetQ.Topology
             ExchangeType = exchangeType;
         }
 
-        public void Visit(ITopologyVisitor visitor)
+        public virtual void Visit(ITopologyVisitor visitor)
         {
             if (visitor == null)
             {
                 throw new ArgumentNullException("visitor");
             }
-
-            visitor.CreateExchange(Name, ExchangeType);
-            foreach (var binding in bindings)
+            if (Name != string.Empty)
             {
-                binding.Visit(visitor);
+                visitor.CreateExchange(Name, ExchangeType);
+                foreach (var binding in bindings)
+                {
+                    binding.Visit(visitor);
+                }
             }
         }
 
-        public void BindTo(IExchange exchange, params string[] routingKeys)
+        public virtual void BindTo(IExchange exchange, params string[] routingKeys)
         {
             if (exchange == null)
             {

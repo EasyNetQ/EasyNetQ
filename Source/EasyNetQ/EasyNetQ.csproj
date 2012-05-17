@@ -55,11 +55,13 @@
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
+    <Compile Include="IAdvancedBus.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
+    <Compile Include="IMessage.cs" />
     <Compile Include="InMemoryBus.cs" />
     <Compile Include="IPublishChannel.cs" />
     <Compile Include="IRawByteBus.cs" />
@@ -67,10 +69,14 @@
     <Compile Include="ISerializer.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="MessageCallback.cs" />
+    <Compile Include="MessageProperties.cs" />
     <Compile Include="PersistentConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueingConsumerFactory.cs" />
+    <Compile Include="RabbitAdvancedBus.cs" />
+    <Compile Include="RabbitAdvancedPublishChannel.cs" />
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitPublishChannel.cs" />
@@ -78,6 +84,7 @@
     <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="Topology\Binding.cs" />
+    <Compile Include="Topology\DefaultExchange.cs" />
     <Compile Include="Topology\Exchange.cs" />
     <Compile Include="Topology\ExchangeType.cs" />
     <Compile Include="Topology\IBindable.cs" />

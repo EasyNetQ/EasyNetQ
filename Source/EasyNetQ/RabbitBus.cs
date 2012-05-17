@@ -501,6 +501,11 @@ namespace EasyNetQ
             get { return connection.IsConnected; }
         }
 
+        public IAdvancedBus Advanced
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         private void DeclareRequestResponseStructure(IModel channel, string requestTypeName)
         {
             if (requestExchanges.Add(requestTypeName))

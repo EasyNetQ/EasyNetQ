@@ -91,6 +91,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishSubscribeTests.cs" />
     <Compile Include="PublishSubscribeWithTopicsTests.cs" />
+    <Compile Include="RabbitAdvancedBusTests.cs" />
     <Compile Include="RequestResponseTests.cs" />
     <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
     <Compile Include="Sagas\RequestResponseSaga.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="SimpleSagaSpike.cs" />
     <Compile Include="SubscribeAsyncTests.cs" />
     <Compile Include="SubscriberOfSpike.cs" />
+    <Compile Include="MessagePropertiesTests.cs" />
     <Compile Include="TaskExtensions.cs" />
     <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
@@ -137,7 +139,9 @@
   <ItemGroup>
     <Content Include="LongRunningServer.js" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SystemMessages\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

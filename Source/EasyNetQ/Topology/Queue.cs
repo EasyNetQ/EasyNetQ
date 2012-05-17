@@ -52,6 +52,10 @@ namespace EasyNetQ.Topology
             {
                 throw new ArgumentNullException("exchange");
             }
+            if (exchange is DefaultExchange)
+            {
+                throw new EasyNetQException("All queues are bound automatically to the default exchange, do bind manually.");
+            }
             if (routingKeys.Any(string.IsNullOrEmpty))
             {
                 throw new ArgumentException("RoutingKey is null or empty");

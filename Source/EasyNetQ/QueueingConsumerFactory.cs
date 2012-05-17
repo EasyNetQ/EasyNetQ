@@ -161,7 +161,6 @@ namespace EasyNetQ
         public void ClearConsumers()
         {
             sharedQueue.Close(); // Dequeue will stop blocking and throw an EndOfStreamException
-
             lock (sharedQueueLock)
             {
                 logger.DebugWrite("Clearing consumer subscriptions");

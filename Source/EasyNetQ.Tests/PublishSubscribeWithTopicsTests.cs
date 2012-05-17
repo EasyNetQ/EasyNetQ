@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
             return new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) };
         }
 
-        [Test]
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_some_messages_with_topics()
         {
             using (var publishChannel = bus.OpenPublishChannel())
@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
             }
         }
 
-        [Test]
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Subscribe_to_messages_with_topics()
         {
             bus.Subscribe<MyMessage>("id1", "X.*", msg => Console.WriteLine("I Get X: {0}", msg.Text));
@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests
             Thread.Sleep(500);
         }
 
-        [Test]
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_subscribe_to_multiple_topic_strings()
         {
             bus.Subscribe<MyMessage>("id4", new[]{"Y.*", "*.B"}, msg => Console.WriteLine("I Get Y or B: {0}", msg.Text));

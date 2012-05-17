@@ -1,9 +1,9 @@
 ﻿namespace EasyNetQ.Topology
 {
-    public enum ExchangeType
+    public class ExchangeType
     {
-        Direct,
-        Topic,
-        Fanout
+        public const string Direct = "direct";
+        public const string Topic = "topic";
+        public const string Fanout = "fanout";
     }
 }
