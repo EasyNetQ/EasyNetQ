@@ -69,7 +69,6 @@ namespace EasyNetQ
 
             this.serializeType = serializeType;
             this.serializer = serializer;
-            this.connection = connection;
             this.consumerFactory = consumerFactory;
             this.logger = logger;
             this.getCorrelationId = getCorrelationId;
@@ -116,13 +115,35 @@ namespace EasyNetQ
             get { return conventions; }
         }
 
-        public void Subscribe<T>(IQueue queue, Func<IMessage<T>, Task> onMessage)
+        public void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageRecievedInfo, Task> onMessage)
         {
             if(queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
             if(onMessage == null)
+            {
+                throw new ArgumentNullException("onMessage");
+            }
+
+            Subscribe(queue, (body, properties, messageRecievedInfo) =>
+            {
+                CheckMessageType<T>(properties);
+
+                var messageBody = serializer.BytesToMessage<T>(body);
+                var message = new Message<T>(messageBody);
+                message.SetProperties(properties);
+                return onMessage(message, messageRecievedInfo);
+            });
+        }
+
+        public void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageRecievedInfo, Task> onMessage)
+        {
+            if (queue == null)
+            {
+                throw new ArgumentNullException("queue");
+            }
+            if (onMessage == null)
             {
                 throw new ArgumentNullException("onMessage");
             }
@@ -136,18 +157,14 @@ namespace EasyNetQ
                 var channel = connection.CreateModel();
                 channelList.Add(channel);
 
-                var visitor = new TopologyBuilder(channel);
-                queue.Visit(visitor);
+                queue.Visit(new TopologyBuilder(channel));
 
                 channel.BasicQos(0, prefetchCount, false);
 
                 var consumer = consumerFactory.CreateConsumer(channel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
-                        CheckMessageType<T>(properties);
-
-                        var messageBody = serializer.BytesToMessage<T>(body);
-                        var message = new Message<T>(messageBody)
+                        var messageRecievedInfo = new MessageRecievedInfo
                         {
                             ConsumerTag = consumerTag,
                             DeliverTag = deliveryTag,
@@ -155,8 +172,8 @@ namespace EasyNetQ
                             Exchange = exchange,
                             RoutingKey = routingKey
                         };
-                        message.Properties.CopyFrom(properties);
-                        return onMessage(message);
+                        var messsageProperties = new MessageProperties(properties);
+                        return onMessage(body, messsageProperties, messageRecievedInfo);
                     });
 
                 channel.BasicConsume(
@@ -189,7 +206,7 @@ namespace EasyNetQ
             }
         }
 
-        private void CheckMessageType<TMessage>(IBasicProperties properties)
+        private void CheckMessageType<TMessage>(MessageProperties properties)
         {
             var typeName = serializeType(typeof(TMessage));
             if (properties.Type != typeName)

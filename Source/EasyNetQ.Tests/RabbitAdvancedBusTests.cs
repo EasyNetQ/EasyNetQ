@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Loggers;
@@ -61,15 +62,15 @@ namespace EasyNetQ.Tests
             var queue = Queue.DeclareDurable("advanced_test_queue");
             queue.BindTo(exchange, routingKey);
 
-            advancedBus.Subscribe<MyMessage>(queue, message => 
+            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("Got Message: {0}", message.Body.Text);
-                    Console.WriteLine("ConsumerTag: {0}", message.ConsumerTag);
-                    Console.WriteLine("DeliverTag: {0}", message.DeliverTag);
-                    Console.WriteLine("Redelivered: {0}", message.Redelivered);
-                    Console.WriteLine("Exchange: {0}", message.Exchange);
-                    Console.WriteLine("RoutingKey: {0}", message.RoutingKey);
+                    Console.WriteLine("ConsumerTag: {0}", messageRecievedInfo.ConsumerTag);
+                    Console.WriteLine("DeliverTag: {0}", messageRecievedInfo.DeliverTag);
+                    Console.WriteLine("Redelivered: {0}", messageRecievedInfo.Redelivered);
+                    Console.WriteLine("Exchange: {0}", messageRecievedInfo.Exchange);
+                    Console.WriteLine("RoutingKey: {0}", messageRecievedInfo.RoutingKey);
                 }));
 
             using (var channel = advancedBus.OpenPublishChannel())
@@ -87,7 +88,7 @@ namespace EasyNetQ.Tests
         {
             var queue = Queue.DeclareTransient();
 
-            advancedBus.Subscribe<MyMessage>(queue, message => 
+            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() => Console.WriteLine("Got message: {0}", message.Body.Text)));
 
             using (var channel = advancedBus.OpenPublishChannel())
@@ -105,7 +106,7 @@ namespace EasyNetQ.Tests
         {
             var queue = Queue.DeclareTransient();
 
-            advancedBus.Subscribe<MyMessage>(queue, message => 
+            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() => Console.WriteLine("Got reply to address: {0}", message.Properties.ReplyTo)));
 
             var messageToPublish = new Message<MyMessage>(new MyMessage {Text = "Hello from the publisher"});
@@ -132,7 +133,7 @@ namespace EasyNetQ.Tests
             exchange3.BindTo(exchange2, "route1");
             exchange2.BindTo(exchange1, "route1");
 
-            advancedBus.Subscribe<MyMessage>(queue, message =>
+            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) =>
                 Task.Factory.StartNew(() => Console.WriteLine("Got Message: {0}", message.Body.Text)));
 
             using (var channel = advancedBus.OpenPublishChannel())
@@ -157,18 +158,40 @@ namespace EasyNetQ.Tests
             queue2.BindTo(exchange, "B.X");
             queue3.BindTo(exchange, "*.Y");
 
-            advancedBus.Subscribe<MyMessage>(queue1, message =>
-                Task.Factory.StartNew(() => Console.WriteLine("1 Got Message: {0}", message.RoutingKey)));
-            advancedBus.Subscribe<MyMessage>(queue2, message =>
-                Task.Factory.StartNew(() => Console.WriteLine("2 Got Message: {0}", message.RoutingKey)));
-            advancedBus.Subscribe<MyMessage>(queue3, message =>
-                Task.Factory.StartNew(() => Console.WriteLine("3 Got Message: {0}", message.RoutingKey)));
+            advancedBus.Subscribe<MyMessage>(queue1, (message, messageRecievedInfo) =>
+                Task.Factory.StartNew(() => Console.WriteLine("1 Got Message: {0}", messageRecievedInfo.RoutingKey)));
+            advancedBus.Subscribe<MyMessage>(queue2, (message, messageRecievedInfo) =>
+                Task.Factory.StartNew(() => Console.WriteLine("2 Got Message: {0}", messageRecievedInfo.RoutingKey)));
+            advancedBus.Subscribe<MyMessage>(queue3, (message, messageRecievedInfo) =>
+                Task.Factory.StartNew(() => Console.WriteLine("3 Got Message: {0}", messageRecievedInfo.RoutingKey)));
 
             using (var channel = advancedBus.OpenPublishChannel())
             {
                 channel.Publish(exchange, "A.Y", new Message<MyMessage>(new MyMessage()));
                 channel.Publish(exchange, "B.X", new Message<MyMessage>(new MyMessage()));
                 channel.Publish(exchange, "B.Y", new Message<MyMessage>(new MyMessage()));
+            }
+
+            // give the test time to complete
+            Thread.Sleep(1000);
+        }
+
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_publish_subscribe_raw_bytes()
+        {
+            var queue = Queue.DeclareTransient();
+
+            advancedBus.Subscribe(queue, (message, properties, messageRecievedInfo) =>
+                Task.Factory.StartNew(() =>
+                {
+                    var messageString = Encoding.UTF8.GetString(message);
+                    Console.WriteLine("Got message: '{0}'", messageString);
+                }));
+
+            using (var channel = advancedBus.OpenPublishChannel())
+            {
+                channel.Publish(Exchange.GetDefault(), queue.Name, new MessageProperties(), 
+                    Encoding.UTF8.GetBytes("Hello World"));
             }
 
             // give the test time to complete

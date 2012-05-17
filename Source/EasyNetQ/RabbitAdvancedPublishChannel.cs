@@ -49,6 +49,35 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("message");
             }
+
+            var typeName = advancedBus.SerializeType(typeof(T));
+            var messageBody = advancedBus.Serializer.MessageToBytes(message.Body);
+
+            // message.Properties.persistent = true;
+            message.Properties.Type = typeName;
+            message.Properties.CorrelationId = advancedBus.GetCorrelationId();
+
+            Publish(exchange, routingKey, message.Properties, messageBody);
+        }
+
+        public void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody)
+        {
+            if (exchange == null)
+            {
+                throw new ArgumentNullException("exchange");
+            }
+            if (routingKey == null)
+            {
+                throw new ArgumentNullException("routingKey");
+            }
+            if(properties == null)
+            {
+                throw new ArgumentNullException("properties");
+            }
+            if(messageBody == null)
+            {
+                throw new ArgumentNullException("messageBody");
+            }
             if (disposed)
             {
                 throw new EasyNetQException("PublishChannel is already disposed");
@@ -57,17 +86,10 @@ namespace EasyNetQ
             {
                 throw new EasyNetQException("Publish failed. No rabbit server connected.");
             }
-
-            var typeName = advancedBus.SerializeType(typeof(T));
-            var messageBody = advancedBus.Serializer.MessageToBytes(message.Body);
-
             try
             {
                 var defaultProperties = channel.CreateBasicProperties();
-                message.Properties.CopyTo(defaultProperties);
-                defaultProperties.SetPersistent(false);
-                defaultProperties.Type = typeName;
-                defaultProperties.CorrelationId = advancedBus.GetCorrelationId();
+                properties.CopyTo(defaultProperties);
 
                 exchange.Visit(new TopologyBuilder(channel));
 
@@ -86,7 +108,7 @@ namespace EasyNetQ
             catch (System.IO.IOException exception)
             {
                 throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
-            }            
+            }
         }
     }
 }

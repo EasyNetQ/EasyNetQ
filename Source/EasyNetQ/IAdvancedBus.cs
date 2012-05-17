@@ -17,7 +17,17 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
-        void Subscribe<T>(IQueue queue, Func<IMessage<T>, Task> onMessage);
+        void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageRecievedInfo, Task> onMessage);
+
+        /// <summary>
+        /// Subscribe to raw bytes from the queue.
+        /// </summary>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the 
+        /// receive context. Returns a Task.
+        /// </param>
+        void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageRecievedInfo, Task> onMessage);
 
         /// <summary>
         /// Return a channel for publishing.
@@ -29,17 +39,5 @@ namespace EasyNetQ
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }
-    }
-
-    public interface IAdvancedPublishChannel : IDisposable
-    {
-        /// <summary>
-        /// Publish a message.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="exchange">The exchange to publish to</param>
-        /// <param name="routingKey">The routing key</param>
-        /// <param name="message">The message to publish</param>
-        void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message);
     }
 }
