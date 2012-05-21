@@ -40,6 +40,11 @@ namespace EasyNetQ
             get { return GetValue("host", "localhost"); }
         }
 
+        public string Port
+        {
+            get { return GetValue("port", "5672"); }
+        }
+
         public string VirtualHost
         {
             get { return GetValue("virtualHost", "/"); }
