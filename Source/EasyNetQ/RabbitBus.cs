@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
@@ -68,19 +67,6 @@ namespace EasyNetQ
         public IPublishChannel OpenPublishChannel()
         {
             return new RabbitPublishChannel(this);
-        }
-
-        public void CheckMessageType<TMessage>(IBasicProperties properties)
-        {
-            var typeName = serializeType(typeof (TMessage));
-            if (properties.Type != typeName)
-            {
-                logger.ErrorWrite("Message type is incorrect. Expected '{0}', but was '{1}'",
-                    typeName, properties.Type);
-
-                throw new EasyNetQInvalidMessageTypeException("Message type is incorrect. Expected '{0}', but was '{1}'",
-                    typeName, properties.Type);
-            }
         }
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
