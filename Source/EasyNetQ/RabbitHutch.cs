@@ -124,14 +124,20 @@ namespace EasyNetQ
 
             var conventions = new Conventions();
 
-            return new RabbitBus(
+            var advancedBus = new RabbitAdvancedBus(
+                connectionFactory,
                 TypeNameSerializer.Serialize,
                 serializer,
-                new QueueingConsumerFactory(logger, consumerErrorStrategy),
-                connectionFactory,
-                logger, 
-                CorrelationIdGenerator.GetCorrelationId,
+                new QueueingConsumerFactory(logger, consumerErrorStrategy), 
+                logger,
+                CorrelationIdGenerator.GetCorrelationId, 
                 conventions);
+
+            return new RabbitBus(
+                TypeNameSerializer.Serialize,
+                logger, 
+                conventions,
+                advancedBus);
         }
 
         /// <summary>

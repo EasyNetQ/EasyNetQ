@@ -46,8 +46,7 @@ namespace EasyNetQ.Tests
             }
             var successfullyWaited = pool.WaitOne(TimeSpan.FromSeconds(40));
             Assert.True(successfullyWaited);
-            var rbus = (RabbitBus)bus;
-            Assert.AreEqual(1, rbus.OpenChannelCount);
+            Assert.AreEqual(1, ((RabbitAdvancedBus)bus.Advanced).OpenChannelCount);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.

@@ -48,6 +48,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="BinarySerializer.cs" />
+    <Compile Include="BusExtensions.cs" />
     <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ConnectionString.cs" />
     <Compile Include="Conventions.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="IAdvancedBus.cs" />
+    <Compile Include="IAdvancedPublishChannel.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
@@ -64,7 +66,6 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="InMemoryBus.cs" />
     <Compile Include="IPublishChannel.cs" />
-    <Compile Include="IRawByteBus.cs" />
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="JsonSerializer.cs" />

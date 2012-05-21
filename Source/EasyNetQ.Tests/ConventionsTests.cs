@@ -76,14 +76,21 @@ namespace EasyNetQ.Tests
 
 		private void CreateBus(Conventions conventions, IModel model)
 		{
+		    var advancedBus = new RabbitAdvancedBus(
+                new MockConnectionFactory(new MockConnection(model)),
+                TypeNameSerializer.Serialize,
+                new JsonSerializer(),
+                new MockConsumerFactory(),
+                new MockLogger(),
+                CorrelationIdGenerator.GetCorrelationId,
+                conventions
+		        );
+
 			bus = new RabbitBus(
 				x => TypeNameSerializer.Serialize(x.GetType()),
-				new JsonSerializer(),
-				new MockConsumerFactory(),
-				new MockConnectionFactory(new MockConnection(model)),
 				new MockLogger(),
-				CorrelationIdGenerator.GetCorrelationId,
-				conventions
+				conventions,
+                advancedBus
 				);
 		}
 

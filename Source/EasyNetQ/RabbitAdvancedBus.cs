@@ -224,6 +224,8 @@ namespace EasyNetQ
             return new RabbitAdvancedPublishChannel(this);
         }
 
+        public int OpenChannelCount { get { return channelList.Count; } }
+
         public event Action Connected;
 
         protected void OnConnected()
@@ -269,7 +271,7 @@ namespace EasyNetQ
 
             disposed = true;
 
-            logger.DebugWrite("AdvancedBus disposed");
+            logger.DebugWrite("Connection disposed");
         }
     }
 }

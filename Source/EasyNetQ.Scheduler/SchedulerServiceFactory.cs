@@ -8,18 +8,10 @@ namespace EasyNetQ.Scheduler
         public static ISchedulerService CreateScheduler()
         {
             var bus = RabbitHutch.CreateBus();
-
-            var rawByteBus = bus.OpenPublishChannel() as IRawByteBus;
-            if (rawByteBus == null)
-            {
-                throw new EasyNetQException("Bus does not implement IRawByteBus");
-            }
-
             var logger = new Logger(LogManager.GetLogger("EasyNetQ.Scheduler"));
 
             return new SchedulerService(
                 bus, 
-                rawByteBus, 
                 logger,
                 new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow),
                 SchedulerServiceConfiguration.FromConfigFile());

@@ -1,6 +1,7 @@
 using System;
 using System.Transactions;
 using EasyNetQ.SystemMessages;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ.Scheduler
 {
@@ -16,7 +17,6 @@ namespace EasyNetQ.Scheduler
         private const string schedulerSubscriptionId = "schedulerSubscriptionId";
 
         private readonly IBus bus;
-        private readonly IRawByteBus rawByteBus;
         private readonly IEasyNetQLogger log;
         private readonly IScheduleRepository scheduleRepository;
         private readonly SchedulerServiceConfiguration configuration;
@@ -26,7 +26,6 @@ namespace EasyNetQ.Scheduler
 
         public SchedulerService(
             IBus bus, 
-            IRawByteBus rawByteBus,
             IEasyNetQLogger log, 
             IScheduleRepository scheduleRepository, 
             SchedulerServiceConfiguration configuration)
@@ -34,7 +33,6 @@ namespace EasyNetQ.Scheduler
             this.bus = bus;
             this.scheduleRepository = scheduleRepository;
             this.configuration = configuration;
-            this.rawByteBus = rawByteBus;
             this.log = log;
         }
 
@@ -58,13 +56,6 @@ namespace EasyNetQ.Scheduler
             {
                 purgeTimer.Dispose();
             }
-            if (rawByteBus != null)
-            {
-                if(rawByteBus is IDisposable)
-                {
-                  ((IDisposable)rawByteBus).Dispose();
-                }
-            }
             if (bus != null)
             {
                 bus.Dispose();
@@ -83,13 +74,20 @@ namespace EasyNetQ.Scheduler
             try
             {
                 using(var scope = new TransactionScope())
+                using(var channel = bus.Advanced.OpenPublishChannel())
                 {
                     var scheduledMessages = scheduleRepository.GetPending();
                     foreach (var scheduledMessage in scheduledMessages)
                     {
                         log.DebugWrite(string.Format(
                             "Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey));
-                        rawByteBus.RawPublish(scheduledMessage.BindingKey, scheduledMessage.InnerMessage);
+
+                        var exchange = Exchange.DeclareTopic(scheduledMessage.BindingKey);
+                        channel.Publish(
+                            exchange, 
+                            scheduledMessage.BindingKey, 
+                            new MessageProperties{ Type = scheduledMessage.BindingKey }, 
+                            scheduledMessage.InnerMessage);
                     }
 
                     scope.Complete();

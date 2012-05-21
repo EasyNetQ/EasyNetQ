@@ -24,15 +24,6 @@ namespace EasyNetQ
         void Publish<T>(string topic, T message);
 
         /// <summary>
-        /// Schedule a message to be published at some time in the future.
-        /// This required the EasyNetQ.Scheduler service to be running.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="timeToRespond">The time at which the message should be sent (UTC)</param>
-        /// <param name="message">The message to response with</param>
-        void FuturePublish<T>(DateTime timeToRespond, T message);
-
-        /// <summary>
         /// Makes an RPC style asynchronous request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>

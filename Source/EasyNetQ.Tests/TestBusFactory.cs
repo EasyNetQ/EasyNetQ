@@ -28,14 +28,20 @@ namespace EasyNetQ.Tests
             GetCorrelationId = GetCorrelationId ?? CorrelationIdGenerator.GetCorrelationId;
             Conventions = Conventions ?? new Conventions();
 
-            return new RabbitBus(
+            var advancedBus = new RabbitAdvancedBus(
+                ConnectionFactory,
                 TypeNameSerializer.Serialize,
-                Serializer, 
+                Serializer,
                 ConsumerFactory,
-                ConnectionFactory, 
                 Logger,
                 GetCorrelationId,
                 Conventions);
+            
+            return new RabbitBus(
+                TypeNameSerializer.Serialize,
+                Logger,
+                Conventions,
+                advancedBus);
         }
     }
 }

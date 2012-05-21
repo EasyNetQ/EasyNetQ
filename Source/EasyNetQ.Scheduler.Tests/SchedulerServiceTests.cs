@@ -3,7 +3,9 @@
 using System.Collections.Generic;
 using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
+using EasyNetQ.Topology;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Scheduler.Tests
 {
@@ -11,20 +13,26 @@ namespace EasyNetQ.Scheduler.Tests
     public class SchedulerServiceTests
     {
         private SchedulerService schedulerService;
-        private MockBus bus;
-        private MockRawByteBus rawByteBus;
-        private MockScheduleRepository scheduleRepository;
+        private IBus bus;
+        private IAdvancedBus advancedBus;
+        private IAdvancedPublishChannel channel;
+        private IScheduleRepository scheduleRepository;
 
         [SetUp]
         public void SetUp()
         {
-            bus = new MockBus();
-            rawByteBus = new MockRawByteBus();
-            scheduleRepository = new MockScheduleRepository();
+            bus = MockRepository.GenerateStub<IBus>();
+            advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
+            channel = MockRepository.GenerateStub<IAdvancedPublishChannel>();
+
+            bus.Stub(x => x.IsConnected).Return(true);
+            bus.Stub(x => x.Advanced).Return(advancedBus);
+            advancedBus.Stub(x => x.OpenPublishChannel()).Return(channel);
+
+            scheduleRepository = MockRepository.GenerateStub<IScheduleRepository>();
 
             schedulerService = new SchedulerService(
                 bus, 
-                rawByteBus, 
                 new ConsoleLogger(), 
                 scheduleRepository,
                 new SchedulerServiceConfiguration
@@ -43,18 +51,20 @@ namespace EasyNetQ.Scheduler.Tests
                 new ScheduleMe { BindingKey = "msg2"},
             };
 
-            var published = new List<string>();
-
-            scheduleRepository.GetPendingDelegate = () => pendingSchedule;
-
-            rawByteBus.RawPublishDelegate = (typeName, messageBody) =>
-                published.Add(typeName);
+            scheduleRepository.Stub(x => x.GetPending()).Return(pendingSchedule);
 
             schedulerService.OnPublishTimerTick(null);
 
-            published.Count.ShouldEqual(2);
-            published[0].ShouldEqual("msg1");
-            published[1].ShouldEqual("msg2");
+            channel.AssertWasCalled(x => x.Publish(
+                Arg<Exchange>.Is.Anything, 
+                Arg<string>.Is.Equal("msg1"),
+                Arg<MessageProperties>.Is.Anything,
+                Arg<byte[]>.Is.Anything));
+            channel.AssertWasCalled(x => x.Publish(
+                Arg<Exchange>.Is.Anything, 
+                Arg<string>.Is.Equal("msg2"),
+                Arg<MessageProperties>.Is.Anything,
+                Arg<byte[]>.Is.Anything));
         }
     }
 }
