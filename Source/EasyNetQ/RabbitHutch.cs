@@ -60,6 +60,7 @@ namespace EasyNetQ
 
             return CreateBus(
                 connectionValues.Host, 
+                connectionValues.Port, 
                 connectionValues.VirtualHost,
                 connectionValues.UserName, 
                 connectionValues.Password, 
@@ -71,6 +72,9 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="hostName">
         /// The RabbitMQ broker.
+        /// </param>
+        /// <param name="hostPort">
+        /// The RabbitMQ broker port.
         /// </param>
         /// <param name="virtualHost">
         /// The RabbitMQ virtualHost.
@@ -87,11 +91,15 @@ namespace EasyNetQ
         /// <returns>
         /// A new RabbitBus instance.
         /// </returns>
-        public static IBus CreateBus(string hostName, string virtualHost, string username, string password, IEasyNetQLogger logger)
+        public static IBus CreateBus(string hostName, string hostPort, string virtualHost, string username, string password, IEasyNetQLogger logger)
         {
             if(hostName == null)
             {
                 throw new ArgumentNullException("hostName");
+            }
+            if (hostPort == null)
+            {
+                throw new ArgumentNullException("hostPort");
             }
             if(virtualHost == null)
             {
@@ -110,9 +118,16 @@ namespace EasyNetQ
                 throw new ArgumentNullException("logger");
             }
 
+            var port = 0;
+            if (!Int32.TryParse(hostPort, out port))
+            {
+                throw new FormatException("hostPort must be a valid 32-bit interger.");
+            }
+
             var connectionFactory = new ConnectionFactoryWrapper(new ConnectionFactory
             {
                 HostName = hostName,
+                Port = port,
                 VirtualHost = virtualHost,
                 UserName = username,
                 Password = password

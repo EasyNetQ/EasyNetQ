@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
     public class ConnectionStringTests
     {
         const string connectionStringValue = 
-            "first=First Value;host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;";
+            "first=First Value;host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;port=12345";
         private ConnectionString connectionString;
 
         [SetUp]
@@ -53,6 +53,12 @@ namespace EasyNetQ.Tests
         public void Should_throw_on_malformed_string()
         {
             new ConnectionString("not a well formed name value pair;");
+        }
+
+        [Test]
+        public void Should_parse_port()
+        {
+            connectionString.Port.ShouldEqual("12345");
         }
     }
 }
