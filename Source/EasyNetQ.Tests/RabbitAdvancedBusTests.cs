@@ -19,27 +19,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            var connectionFactory = new ConnectionFactoryWrapper(new ConnectionFactory
-            {
-                HostName = "localhost",
-                VirtualHost = "/",
-                UserName = "guest",
-                Password = "guest"
-            });
-
-            var serializer = new JsonSerializer();
-            var logger = new ConsoleLogger();
-            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger);
-            var conventions = new Conventions();
-
-            advancedBus = new RabbitAdvancedBus(
-                connectionFactory,
-                TypeNameSerializer.Serialize,
-                serializer,
-                new QueueingConsumerFactory(logger, consumerErrorStrategy), 
-                logger,
-                CorrelationIdGenerator.GetCorrelationId,
-                conventions);
+            advancedBus = RabbitHutch.CreateBus("host=localhost").Advanced;
 
             while (!advancedBus.IsConnected)
             {
