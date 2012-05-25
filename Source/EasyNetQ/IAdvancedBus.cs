@@ -17,7 +17,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
-        void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageRecievedInfo, Task> onMessage);
+        void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
         /// Subscribe to raw bytes from the queue.
@@ -27,7 +27,7 @@ namespace EasyNetQ
         /// The message handler. Takes the message body, message properties and some information about the 
         /// receive context. Returns a Task.
         /// </param>
-        void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageRecievedInfo, Task> onMessage);
+        void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
         /// Return a channel for publishing.

@@ -115,7 +115,7 @@ namespace EasyNetQ
             get { return conventions; }
         }
 
-        public void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageRecievedInfo, Task> onMessage)
+        public void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
         {
             if(queue == null)
             {
@@ -137,7 +137,7 @@ namespace EasyNetQ
             });
         }
 
-        public void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageRecievedInfo, Task> onMessage)
+        public void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
             if (queue == null)
             {
@@ -164,7 +164,7 @@ namespace EasyNetQ
                 var consumer = consumerFactory.CreateConsumer(channel,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
-                        var messageRecievedInfo = new MessageRecievedInfo
+                        var messageRecievedInfo = new MessageReceivedInfo
                         {
                             ConsumerTag = consumerTag,
                             DeliverTag = deliveryTag,

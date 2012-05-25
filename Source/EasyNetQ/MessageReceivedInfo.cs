@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ
 {
-    public class MessageRecievedInfo
+    public class MessageReceivedInfo
     {
         public string ConsumerTag { get; set; }
         public ulong DeliverTag { get; set; }

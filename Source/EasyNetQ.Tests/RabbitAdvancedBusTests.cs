@@ -42,21 +42,26 @@ namespace EasyNetQ.Tests
             var queue = Queue.DeclareDurable("advanced_test_queue");
             queue.BindTo(exchange, routingKey);
 
-            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
+            advancedBus.Subscribe<MyMessage>(queue, (msg, messageReceivedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
-                    Console.WriteLine("Got Message: {0}", message.Body.Text);
-                    Console.WriteLine("ConsumerTag: {0}", messageRecievedInfo.ConsumerTag);
-                    Console.WriteLine("DeliverTag: {0}", messageRecievedInfo.DeliverTag);
-                    Console.WriteLine("Redelivered: {0}", messageRecievedInfo.Redelivered);
-                    Console.WriteLine("Exchange: {0}", messageRecievedInfo.Exchange);
-                    Console.WriteLine("RoutingKey: {0}", messageRecievedInfo.RoutingKey);
+                    Console.WriteLine("Got Message: {0}", msg.Body.Text);
+                    Console.WriteLine("ConsumerTag: {0}", messageReceivedInfo.ConsumerTag);
+                    Console.WriteLine("DeliverTag: {0}", messageReceivedInfo.DeliverTag);
+                    Console.WriteLine("Redelivered: {0}", messageReceivedInfo.Redelivered);
+                    Console.WriteLine("Exchange: {0}", messageReceivedInfo.Exchange);
+                    Console.WriteLine("RoutingKey: {0}", messageReceivedInfo.RoutingKey);
                 }));
+
+            var myMessage = new MyMessage {Text = "Hello from the publisher"};
+            var message = new Message<MyMessage>(myMessage);
+
+            message.Properties.AppId = "my_app_id";
+            message.Properties.ReplyTo = "my_reply_queue";
 
             using (var channel = advancedBus.OpenPublishChannel())
             {
-                channel.Publish(exchange, routingKey, 
-                    new Message<MyMessage>(new MyMessage { Text = "Hello from the publisher" }));
+                channel.Publish(exchange, routingKey, message);
             }
 
             // give the test time to complete
