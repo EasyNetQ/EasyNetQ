@@ -1,4 +1,4 @@
-A Nice .NET API for RabbitMQ
+A Nice .NET API for RabbitMQ - Development is sponsored by travel industry experts [15below](http://15below.com/)
 
 **[Documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Introduction)**
 
