@@ -54,7 +54,7 @@ using (var publishChannel = bus.OpenPublishChannel())
         <p>To subscribe...</p>
 
         <pre><code>
-bus.Subscribe&gt;MyMessage&lt;("my_subscription_id", msg =&gt; Console.WriteLine(msg.Text));
+bus.Subscribe&lt;MyMessage&gt;("my_subscription_id", msg =&gt; Console.WriteLine(msg.Text));
         </code></pre>
 
 
