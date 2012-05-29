@@ -87,6 +87,24 @@ namespace EasyNetQ.Tests
         }
 
         [Test, Explicit("Requires a RabbitMQ instance on localhost")]
+        public void Should_be_able_to_publish_the_wrong_message_type_to_a_subscriber()
+        {
+            var queue = Queue.DeclareTransient();
+
+            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
+                Task.Factory.StartNew(() => Console.WriteLine("Got message: {0}", message.Body.Text)));
+
+            using (var channel = advancedBus.OpenPublishChannel())
+            {
+                channel.Publish(Exchange.GetDefault(), queue.Name,
+                    new Message<MyOtherMessage>(new MyOtherMessage { Text = "Hello from the publisher" }));
+            }
+
+            // give the test time to complete
+            Thread.Sleep(1000);
+        }
+
+        [Test, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_pass_reply_to_address_to_consumer()
         {
             var queue = Queue.DeclareTransient();

@@ -72,7 +72,7 @@
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageCallback.cs" />
-    <Compile Include="MessageRecievedInfo.cs" />
+    <Compile Include="MessageReceivedInfo.cs" />
     <Compile Include="MessageProperties.cs" />
     <Compile Include="PersistentConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
