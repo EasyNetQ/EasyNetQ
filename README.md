@@ -6,6 +6,8 @@ Development is sponsored by travel industry experts [15below](http://15below.com
 
 **[NuGet](http://nuget.org/List/Packages/EasyNetQ)**
 
+**[Discussion Group](https://groups.google.com/group/easynetq)**
+
 Goals:
 
 1. Zero or at least minimal configuration.
