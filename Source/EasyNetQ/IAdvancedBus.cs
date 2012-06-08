@@ -39,5 +39,15 @@ namespace EasyNetQ
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }
+
+        /// <summary>
+        /// The message serializer
+        /// </summary>
+        ISerializer Serializer { get; }
+
+        /// <summary>
+        /// How EasyNetQ stringifies the message type
+        /// </summary>
+        SerializeType SerializeType { get; }
     }
 }

@@ -20,7 +20,7 @@ namespace EasyNetQ
             get { return advancedBus; }
         }
 
-        public RabbitBus Bus
+        public IBus Bus
         {
             get { return bus; }
         }

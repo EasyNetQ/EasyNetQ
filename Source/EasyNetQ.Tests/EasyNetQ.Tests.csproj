@@ -96,7 +96,6 @@
     <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
     <Compile Include="Sagas\RequestResponseSaga.cs" />
     <Compile Include="Sagas\SubscribePublishSaga.cs" />
-    <Compile Include="InMemoryBusTests.cs" />
     <Compile Include="SchedulingTests.cs" />
     <Compile Include="SimpleSagaSpike.cs" />
     <Compile Include="SubscribeAsyncTests.cs" />

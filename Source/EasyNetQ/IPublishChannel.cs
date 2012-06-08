@@ -31,5 +31,10 @@ namespace EasyNetQ
         /// <param name="request">The request message.</param>
         /// <param name="onResponse">The action to run when the response is received.</param>
         void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse);
+
+        /// <summary>
+        /// The bus that created this channel
+        /// </summary>
+        IBus Bus { get; }
     }
 }

@@ -10,6 +10,7 @@ namespace EasyNetQ
         /// This required the EasyNetQ.Scheduler service to be running.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
+        /// <param name="publishChannel">The publish channel to publish the future message on</param>
         /// <param name="timeToRespond">The time at which the message should be sent (UTC)</param>
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IPublishChannel publishChannel, DateTime timeToRespond, T message)
@@ -19,16 +20,7 @@ namespace EasyNetQ
                 throw new ArgumentNullException("message");
             }
 
-            var rabbitPublishChannel = publishChannel as RabbitPublishChannel;
-            if (rabbitPublishChannel == null)
-            {
-                throw new EasyNetQException("FuturePublish only works with a RabbitPublishChannel");
-            }
-            var advancedBus = rabbitPublishChannel.AdvancedBus as RabbitAdvancedBus;
-            if (advancedBus == null)
-            {
-                throw new EasyNetQException("FuturePublish only works with a RabbitAdvancedBus");
-            }
+            var advancedBus = publishChannel.Bus.Advanced;
             var typeName = advancedBus.SerializeType(typeof(T));
             var messageBody = advancedBus.Serializer.MessageToBytes(message);
 
