@@ -11,18 +11,27 @@ namespace EasyNetQ.SagaHost
     {
         public static ISagaHost CreateSagaHost(string sagaDirectory)
         {
-            var bus = RabbitHutch.CreateBus();
-            var log = log4net.LogManager.GetLogger(typeof (DefaultSagaHost));
+			var log = log4net.LogManager.GetLogger(typeof(DefaultSagaHost));
 
-            var containerName = ConfigurationManager.AppSettings.Get("container");
-            switch (containerName)
-            {
-                case "windsor" :
-                    Console.WriteLine("Using windsor ########################################");
-                    return new WindsorSagaHost(bus, log, sagaDirectory);
-                default :
-                    return new DefaultSagaHost(bus, log, sagaDirectory);
-            }
+			try
+			{
+				var bus = RabbitHutch.CreateBus();
+
+				var containerName = ConfigurationManager.AppSettings.Get("container");
+				switch (containerName)
+				{
+					case "windsor":
+						Console.WriteLine("Using windsor ########################################");
+						return new WindsorSagaHost(bus, log, sagaDirectory);
+					default:
+						return new DefaultSagaHost(bus, log, sagaDirectory);
+				}
+			}
+			catch (Exception ex)
+			{
+				log.Error("SagaHostFactory.CreateSagaHost: Exception occured", ex);
+				throw;
+			}
         }
     }
 }
