@@ -36,11 +36,19 @@ namespace EasyNetQ.SagaHost
 
         public void Start()
         {
-            container = new WindsorContainer()
-                .Install(FromAssembly.InDirectory(new AssemblyFilter(sagaDirectory)));
+			try
+			{
+				container = new WindsorContainer()
+					.Install(FromAssembly.InDirectory(new AssemblyFilter(sagaDirectory)));
 
-            var sagas = container.ResolveAll<ISaga>();
-            sagas.LogWith(log).InitializeWith(bus);
+				var sagas = container.ResolveAll<ISaga>();
+				sagas.LogWith(log).InitializeWith(bus, log);
+			}
+			catch (Exception ex)
+			{
+				log.Error("WindsorSagaHost.Start: Exception occured", ex);
+				throw;
+			}
         }
 
         public void Stop()

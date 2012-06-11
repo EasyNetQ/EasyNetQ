@@ -90,7 +90,7 @@ namespace EasyNetQ.SagaHost
             {
                 log.Debug("Loading Sagas ...");
                 sagas = value;
-                sagas.LogWith(log).InitializeWith(bus);
+                sagas.LogWith(log).InitializeWith(bus, log);
             }
         }
     }
