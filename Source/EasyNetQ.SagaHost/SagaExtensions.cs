@@ -5,11 +5,12 @@ namespace EasyNetQ.SagaHost
 {
     public static class SagaExtensions
     {
-        public static void InitializeWith(this IEnumerable<ISaga> sagas, IBus bus)
+		public static void InitializeWith(this IEnumerable<ISaga> sagas, IBus bus, ILog log)
         {
             foreach (var saga in sagas)
             {
-                saga.Initialize(bus);
+				log.Debug(string.Format("Initialising Saga: {0}", saga.GetType().FullName));
+				saga.Initialize(bus);
             }
         }
 
