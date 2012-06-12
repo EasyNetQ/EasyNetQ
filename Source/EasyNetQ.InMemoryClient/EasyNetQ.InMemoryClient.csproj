@@ -43,6 +43,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="BindingInfo.cs" />
+    <Compile Include="CircleBuffer.cs" />
     <Compile Include="ExchangeInfo.cs" />
     <Compile Include="InMemoryClientException.cs" />
     <Compile Include="InMemoryConnection.cs" />

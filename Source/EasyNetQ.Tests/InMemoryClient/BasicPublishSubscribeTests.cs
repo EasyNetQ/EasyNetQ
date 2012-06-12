@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.InMemoryClient
             MyMessage receivedMessage = null;
             bus.Subscribe<MyMessage>("subscriberId", message =>
             {
-                Console.WriteLine("Got message {0}", message.Text);
+                Console.WriteLine("Got message '{0}'", message.Text);
                 receivedMessage = message;
             });
 
@@ -60,6 +60,38 @@ namespace EasyNetQ.Tests.InMemoryClient
             Thread.Sleep(100);
 
             receivedMessage.Text.ShouldEqual(publishedMessage.Text);
+        }
+
+        [Test]
+        public void Should_load_share_between_multiple_consumers()
+        {
+            MyMessage receivedMessage1 = null;
+            bus.Subscribe<MyMessage>("subscriberId", message =>
+            {
+                Console.WriteLine("Handler A got '{0}'", message.Text);
+                receivedMessage1 = message;
+            });
+
+            MyMessage receivedMessage2 = null;
+            bus.Subscribe<MyMessage>("subscriberId", message =>
+            {
+                Console.WriteLine("Handler B got '{0}'", message.Text);
+                receivedMessage2 = message;
+            });
+
+            var publishedMessage1 = new MyMessage { Text = "Hello There From The First!" };
+            var publishedMessage2 = new MyMessage { Text = "Hello There From The Second!" };
+            using (var channel = bus.OpenPublishChannel())
+            {
+                channel.Publish(publishedMessage1);
+                channel.Publish(publishedMessage2);
+            }
+
+            // give the task background thread time to process the message.
+            Thread.Sleep(100);
+
+            receivedMessage1.Text.ShouldEqual(publishedMessage1.Text);
+            receivedMessage2.Text.ShouldEqual(publishedMessage2.Text);
         }
     }
 }

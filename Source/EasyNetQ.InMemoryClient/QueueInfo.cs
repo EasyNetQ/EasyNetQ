@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.InMemoryClient
@@ -12,7 +11,7 @@ namespace EasyNetQ.InMemoryClient
         public bool AutoDelete { get; private set; }        
         public IDictionary Arguments { get; private set; }
 
-        private readonly IList<ConsumerInfo> consumers = new List<ConsumerInfo>();
+        private readonly CircleBuffer<ConsumerInfo> consumers = new CircleBuffer<ConsumerInfo>();
 
         public QueueInfo(string name, bool durable, bool exclusive, bool autoDelete, IDictionary arguments)
         {
@@ -30,17 +29,16 @@ namespace EasyNetQ.InMemoryClient
 
         public void AcceptMessage(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body)
         {
-            foreach (var consumerInfo in consumers)
-            {
-                consumerInfo.BasicConsumer.HandleBasicDeliver(
-                    consumerInfo.ConsumerTag,
-                    0,
-                    false,
-                    exchange,
-                    routingKey,
-                    basicProperties,
-                    body);
-            }
+            var consumerInfo = consumers.Next;
+            consumerInfo.BasicConsumer.HandleBasicDeliver(
+                consumerInfo.ConsumerTag,
+                0,
+                false,
+                exchange,
+                routingKey,
+                basicProperties,
+                body);
+            
         }
     }
 

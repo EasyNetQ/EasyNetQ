@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.InMemoryClient
@@ -21,11 +20,16 @@ namespace EasyNetQ.InMemoryClient
 
         public void Publish(string routingKey, IBasicProperties basicProperties, byte[] body)
         {
+            var addressedQueues = new HashSet<string>();
             foreach (var bindingInfo in bindings)
             {
                 if (bindingInfo.RoutingKeyMatches(routingKey))
                 {
-                    bindingInfo.Queue.AcceptMessage(Name, routingKey, basicProperties, body);
+                    // each queue should only get a message once no matter how it's bound.
+                    if (addressedQueues.Add(bindingInfo.Queue.Name))
+                    {
+                        bindingInfo.Queue.AcceptMessage(Name, routingKey, basicProperties, body);
+                    }
                 }
             }
         }

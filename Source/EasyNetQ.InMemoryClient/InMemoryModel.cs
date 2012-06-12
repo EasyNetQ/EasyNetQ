@@ -237,7 +237,7 @@ namespace EasyNetQ.InMemoryClient
 
         public void BasicAck(ulong deliveryTag, bool multiple)
         {
-            throw new NotImplementedException();
+            // do nothing
         }
 
         public void BasicReject(ulong deliveryTag, bool requeue)
