@@ -118,6 +118,10 @@ namespace EasyNetQ
             try
             {
                 subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+                if (subscriptionInfo.ModelIsSingleUse)
+                {
+                    subscriptionInfo.Consumer.Model.Dispose();
+                }
             }
             catch (AlreadyClosedException alreadyClosedException)
             {
@@ -149,12 +153,12 @@ namespace EasyNetQ
                    string.Format("Exception:\n{0}\n", exception);
         }
 
-        public DefaultBasicConsumer CreateConsumer(IModel model, MessageCallback callback)
+        public DefaultBasicConsumer CreateConsumer(IModel model, bool modelIsSingleUse, MessageCallback callback)
         {
             var consumer = new QueueingBasicConsumer(model, sharedQueue);
             var consumerTag = Guid.NewGuid().ToString();
             consumer.ConsumerTag = consumerTag;
-            subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback));
+            subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback, modelIsSingleUse));
             return consumer;
         }
 
@@ -183,11 +187,13 @@ namespace EasyNetQ
     {
         public IBasicConsumer Consumer { get; private set; }
         public MessageCallback Callback { get; private set; }
+        public bool ModelIsSingleUse { get; private set; }
 
-        public SubscriptionInfo(IBasicConsumer consumer, MessageCallback callback)
+        public SubscriptionInfo(IBasicConsumer consumer, MessageCallback callback, bool modelIsSingleUse)
         {
             Consumer = consumer;
             Callback = callback;
+            ModelIsSingleUse = modelIsSingleUse;
         }
     }
 }

@@ -54,45 +54,45 @@ namespace EasyNetQ.Tests.InMemoryClient
             actualResult.ShouldEqual(expectedResult);
         }
 
-//        [Test]
-//        public void Should_request_closures_work()
-//        {
-//            bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
-//            {
-//                var response = new TestResponseMessage
-//                {
-//                    Text = request.Text + "--" + request.Text
-//                };
-//                return response;
-//            });
-//
-//            var results = new string[3];
-//
-//            using (var channel = bus.OpenPublishChannel())
-//            {
-//                var requestTexts = new[] {"one", "two", "three"};
-//                for (int i = 0; i < 3; i++)
-//                {
-//                    var request = new TestRequestMessage { Text = requestTexts[i] };
-//                    var index = i;
-//
-//                    channel.Request<TestRequestMessage, TestResponseMessage>(
-//                        request,
-//                        response => 
-//                        {
-//                            results[index] = response.Text;
-//                            Console.WriteLine("Got response '{0}' on index: {1}", response.Text, index);
-//                        });
-//                }
-//            }
-//
-//            // give the bus a chance to deliver the message
-//            Thread.Sleep(100);
-//
-//            results[0].ShouldEqual("one--one");
-//            results[1].ShouldEqual("two--two");
-//            results[2].ShouldEqual("three--three");
-//        }
+        [Test]
+        public void Should_request_closures_work()
+        {
+            bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
+            {
+                var response = new TestResponseMessage
+                {
+                    Text = request.Text + "--" + request.Text
+                };
+                return response;
+            });
+
+            var results = new string[3];
+
+            using (var channel = bus.OpenPublishChannel())
+            {
+                var requestTexts = new[] {"one", "two", "three"};
+                for (int i = 0; i < 3; i++)
+                {
+                    var request = new TestRequestMessage { Text = requestTexts[i] };
+                    var index = i;
+
+                    channel.Request<TestRequestMessage, TestResponseMessage>(
+                        request,
+                        response => 
+                        {
+                            results[index] = response.Text;
+                            Console.WriteLine("Got response '{0}' on index: {1}", response.Text, index);
+                        });
+                }
+            }
+
+            // give the bus a chance to deliver the message
+            Thread.Sleep(100);
+
+            results[0].ShouldEqual("one--one");
+            results[1].ShouldEqual("two--two");
+            results[2].ShouldEqual("three--three");
+        }
     }
 }
 

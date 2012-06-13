@@ -94,7 +94,8 @@ namespace EasyNetQ.InMemoryClient
 
         public QueueDeclareOk QueueDeclare()
         {
-            throw new NotImplementedException();
+            var serverGeneratedQueueName = Guid.NewGuid().ToString();
+            return QueueDeclare(serverGeneratedQueueName, false, true, true, null);
         }
 
         public QueueDeclareOk QueueDeclarePassive(string queue)

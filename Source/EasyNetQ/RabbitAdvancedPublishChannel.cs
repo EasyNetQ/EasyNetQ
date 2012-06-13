@@ -99,7 +99,8 @@ namespace EasyNetQ
                     defaultProperties,  // basicProperties
                     messageBody);       // body
 
-                advancedBus.Logger.DebugWrite("Published {0}, CorrelationId {1}", exchange.Name, defaultProperties.CorrelationId);
+                advancedBus.Logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", 
+                    exchange.Name, routingKey, defaultProperties.CorrelationId);
             }
             catch (OperationInterruptedException exception)
             {

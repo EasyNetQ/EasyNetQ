@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
         public void Large_number_of_request_calls_should_not_create_a_large_number_of_open_channels()
         {
             var pool = new Semaphore(0, 500);
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 10; i++)
             {
                 using (var publishChannel = bus.OpenPublishChannel())
                 {
@@ -46,6 +46,7 @@ namespace EasyNetQ.Tests
             }
             var successfullyWaited = pool.WaitOne(TimeSpan.FromSeconds(40));
             Assert.True(successfullyWaited);
+
             Assert.AreEqual(1, ((RabbitAdvancedBus)bus.Advanced).OpenChannelCount);
         }
 

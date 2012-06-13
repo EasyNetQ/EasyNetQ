@@ -1,4 +1,3 @@
-using System;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
@@ -9,12 +8,12 @@ namespace EasyNetQ.Tests
 		{
 		}
 
-		public DefaultBasicConsumer CreateConsumer(IModel model, MessageCallback callback)
-		{
-			return null;
-		}
+	    public DefaultBasicConsumer CreateConsumer(IModel model, bool modelIsSingleUse, MessageCallback callback)
+	    {
+	        return null;
+	    }
 
-		public void ClearConsumers()
+	    public void ClearConsumers()
 		{
 		}
 	}

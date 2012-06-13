@@ -64,32 +64,14 @@ namespace EasyNetQ
                 throw new ArgumentNullException("request");
             }
 
-            // rather than setting up a subscription on each call of Request, we cache a single
-            // subscription keyed on the hashcode of the onResponse action. This has a couple of
-            // consequences:
-            //  1.  Closures don't work as expected since the closed over variable is always the first
-            //      one that was called.
-            //  2.  Worries about the uniqueness of MethodInfo.GetHashCode. Looking at the CLR source
-            //      it seems that it's not overriden so it is the same as Object.GetHashCode(). This
-            //      is unique for an instance in an app-domain, so it _should_ be OK for this usage.
-            var uniqueResponseQueueName = "EasyNetQ_return_" + Guid.NewGuid().ToString();
-            if (bus.ResponseQueueNameCache.TryAdd(onResponse.Method.GetHashCode(), uniqueResponseQueueName))
-            {
-                bus.Logger.DebugWrite("Setting up return subscription for req/resp {0} {1}",
-                    typeof(TRequest).Name,
-                    typeof(TResponse).Name);
-
-                SubscribeToResponse(onResponse, uniqueResponseQueueName);
-            }
-
-            var returnQueueName = bus.ResponseQueueNameCache[onResponse.Method.GetHashCode()];
+            var returnQueueName = SubscribeToResponse(onResponse);
 
             RequestPublish(request, returnQueueName);
         }
 
-        private void SubscribeToResponse<TResponse>(Action<TResponse> onResponse, string returnQueueName)
+        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
         {
-            var queue = Queue.DeclareTransient(returnQueueName);
+            var queue = Queue.DeclareTransient("easynetq.response." + Guid.NewGuid().ToString());
 
             advancedBus.Subscribe<TResponse>(queue, (message, messageRecievedInfo) =>
             {
@@ -106,6 +88,8 @@ namespace EasyNetQ
                 }
                 return tcs.Task;
             });
+
+            return queue.Name;
         }
 
         private void RequestPublish<TRequest>(TRequest request, string returnQueueName)

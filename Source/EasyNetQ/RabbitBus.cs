@@ -15,8 +15,6 @@ namespace EasyNetQ
 		private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
 
-        private readonly ConcurrentDictionary<int, string> responseQueueNameCache = new ConcurrentDictionary<int, string>();
-
         public const string RpcExchange = "easy_net_q_rpc";
 
         public SerializeType SerializeType
@@ -32,11 +30,6 @@ namespace EasyNetQ
         public IConventions Conventions
         {
             get { return conventions; }
-        }
-
-        public ConcurrentDictionary<int, string> ResponseQueueNameCache
-        {
-            get { return responseQueueNameCache; }
         }
 
         public RabbitBus(

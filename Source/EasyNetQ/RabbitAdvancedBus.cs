@@ -155,13 +155,13 @@ namespace EasyNetQ
             Action subscribeAction = () =>
             {
                 var channel = connection.CreateModel();
-                channelList.Add(channel);
-
                 queue.Visit(new TopologyBuilder(channel));
+
+                channelList.Add(channel);
 
                 channel.BasicQos(0, prefetchCount, false);
 
-                var consumer = consumerFactory.CreateConsumer(channel,
+                var consumer = consumerFactory.CreateConsumer(channel, queue.IsSingleUse,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
                         var messageRecievedInfo = new MessageReceivedInfo
