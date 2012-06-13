@@ -93,6 +93,38 @@ namespace EasyNetQ.Tests.InMemoryClient
             receivedMessage1.Text.ShouldEqual(publishedMessage1.Text);
             receivedMessage2.Text.ShouldEqual(publishedMessage2.Text);
         }
+
+        [Test]
+        public void Should_work_with_topics()
+        {
+            MyMessage receivedMessage1 = null;
+            bus.Subscribe<MyMessage>("barSubscriber", "*.bar", message =>
+            {
+                Console.WriteLine("*.bar got '{0}'", message.Text);
+                receivedMessage1 = message;
+            });
+
+            MyMessage receivedMessage2 = null;
+            bus.Subscribe<MyMessage>("fooSubscriber", "foo.*", message =>
+            {
+                Console.WriteLine("foo.* got '{0}'", message.Text);
+                receivedMessage2 = message;
+            });
+
+            var fooNinja = new MyMessage { Text = "I should go to foo.ninja" };
+            var niceBar = new MyMessage { Text = "I should go to nice.bar" };
+            using (var channel = bus.OpenPublishChannel())
+            {
+                channel.Publish("foo.ninja", fooNinja);
+                channel.Publish("nice.bar", niceBar);
+            }
+
+            // give the task background thread time to process the message.
+            Thread.Sleep(100);
+
+            receivedMessage1.Text.ShouldEqual(niceBar.Text);
+            receivedMessage2.Text.ShouldEqual(fooNinja.Text);
+        }
     }
 }
 

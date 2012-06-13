@@ -168,6 +168,7 @@ namespace EasyNetQ
                 {
                     if (task.IsFaulted)
                     {
+                        Console.WriteLine("task faulted");
                         if (task.Exception != null)
                         {
                             tcs.SetException(task.Exception);
@@ -176,7 +177,10 @@ namespace EasyNetQ
                     else
                     {
                         // check we're connected
-                        while (!advancedBus.IsConnected) Thread.Sleep(100);
+                        while (!advancedBus.IsConnected)
+                        {
+                            Thread.Sleep(100);
+                        }
 
                         using (var channel = advancedBus.OpenPublishChannel())
                         {

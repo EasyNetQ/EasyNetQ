@@ -80,6 +80,7 @@
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
     <Compile Include="InMemoryClient\BasicPublishSubscribeTests.cs" />
+    <Compile Include="InMemoryClient\BasicRequestResponseTests.cs" />
     <Compile Include="InMemoryClient\BindingInfoTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="MockBasicProperties.cs" />

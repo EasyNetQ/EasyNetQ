@@ -13,6 +13,12 @@ namespace EasyNetQ.InMemoryClient
         private readonly IDictionary<string, ExchangeInfo> exchanges = new Dictionary<string, ExchangeInfo>();
         private readonly IDictionary<string, QueueInfo> queues = new Dictionary<string, QueueInfo>();
 
+        public InMemoryConnection()
+        {
+            // define the default direct exchange...
+            exchanges.Add("", new ExchangeInfo("", "direct", true));
+        }
+
         public IDictionary<string, ExchangeInfo> Exchanges
         {
             get { return exchanges; }

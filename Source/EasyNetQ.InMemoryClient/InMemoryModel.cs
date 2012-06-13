@@ -106,7 +106,11 @@ namespace EasyNetQ.InMemoryClient
         {
             if (!connection.Queues.ContainsKey(queue))
             {
-                connection.Queues.Add(queue, new QueueInfo(queue, durable, exclusive, autoDelete, arguments));
+                var queueInfo = new QueueInfo(queue, durable, exclusive, autoDelete, arguments);
+                connection.Queues.Add(queue, queueInfo);
+
+                // do the default bind to the default exchange ...
+                connection.Exchanges[""].BindTo(queueInfo, queue);
             }
             return new QueueDeclareOk(queue, 0, 0);
         }
@@ -226,7 +230,6 @@ namespace EasyNetQ.InMemoryClient
             {
                 throw new InMemoryClientException(string.Format("Exchange '{0}' does not exist", exchange));
             }
-
             connection.Exchanges[exchange].Publish(routingKey, basicProperties, body);
         }
 
