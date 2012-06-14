@@ -1,8 +1,9 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.0.<build>
-[assembly: AssemblyVersion("0.6.1.0")]
+[assembly: AssemblyVersion("0.6.2.0")]
 
+// 0.6.2.0  New model cleanup strategy based on consumer tracking
 // 0.6.1.0  Removed InMemoryBus, Removed concrete class dependencies from FuturePublish.
 // 0.6      Introduced IAdvancedBus, refactored IBus
 // 0.5      Added IPublishChannel and moved Publish and Request to it from IBus
