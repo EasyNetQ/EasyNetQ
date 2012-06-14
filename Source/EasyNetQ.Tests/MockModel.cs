@@ -270,7 +270,7 @@ namespace EasyNetQ.Tests
 
         public void Close()
         {
-            throw new NotImplementedException();
+            AbortAction();
         }
 
         public void Close(ushort replyCode, string replyText)

@@ -75,8 +75,10 @@ namespace EasyNetQ
                 throw new EasyNetQException("No callback found for ConsumerTag {0}", consumerTag);
             }
 
-            logger.DebugWrite("Subscriber Recieved {0}, CorrelationId {1}", 
-                basicDeliverEventArgs.RoutingKey, basicDeliverEventArgs.BasicProperties.CorrelationId);
+            logger.DebugWrite("Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'", 
+                basicDeliverEventArgs.RoutingKey, 
+                basicDeliverEventArgs.BasicProperties.CorrelationId,
+                consumerTag);
 
             var subscriptionInfo = subscriptions[consumerTag];
 
@@ -108,6 +110,13 @@ namespace EasyNetQ
                 consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
                 DoAck(basicDeliverEventArgs, subscriptionInfo);
             }
+            finally
+            {
+                if(subscriptionInfo.ModelIsSingleUse)
+                {
+                    subscriptions.Remove(consumerTag);
+                }
+            }
         }
 
         private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo)
@@ -120,7 +129,7 @@ namespace EasyNetQ
                 subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
                 if (subscriptionInfo.ModelIsSingleUse)
                 {
-                    subscriptionInfo.Consumer.Model.Dispose();
+                    subscriptionInfo.Consumer.CloseModel();
                 }
             }
             catch (AlreadyClosedException alreadyClosedException)
@@ -155,10 +164,14 @@ namespace EasyNetQ
 
         public DefaultBasicConsumer CreateConsumer(IModel model, bool modelIsSingleUse, MessageCallback callback)
         {
-            var consumer = new QueueingBasicConsumer(model, sharedQueue);
+            var consumer = new EasyNetQConsumer(model, sharedQueue);
             var consumerTag = Guid.NewGuid().ToString();
             consumer.ConsumerTag = consumerTag;
-            subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback, modelIsSingleUse));
+            subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback, modelIsSingleUse, model));
+
+            Console.WriteLine("Added subscriber, count: {0}, consumerTag: '{1}'", 
+                subscriptions.Count, consumerTag);
+
             return consumer;
         }
 
@@ -179,21 +192,29 @@ namespace EasyNetQ
             if (disposed) return;
             consumerErrorStrategy.Dispose();
             sharedQueue.Close();
+
+            foreach (var subscriptionInfo in subscriptions)
+            {
+                subscriptionInfo.Value.Channel.Close();
+            }
+
             disposed = true;
         }
     }
 
     public class SubscriptionInfo
     {
-        public IBasicConsumer Consumer { get; private set; }
+        public EasyNetQConsumer Consumer { get; private set; }
         public MessageCallback Callback { get; private set; }
         public bool ModelIsSingleUse { get; private set; }
+        public IModel Channel { get; private set; }
 
-        public SubscriptionInfo(IBasicConsumer consumer, MessageCallback callback, bool modelIsSingleUse)
+        public SubscriptionInfo(EasyNetQConsumer consumer, MessageCallback callback, bool modelIsSingleUse, IModel channel)
         {
             Consumer = consumer;
             Callback = callback;
             ModelIsSingleUse = modelIsSingleUse;
+            Channel = channel;
         }
     }
 }

@@ -50,8 +50,6 @@ namespace EasyNetQ.Tests
             {
                 thread.Join();
             }
-
-            Assert.AreEqual(0, ((RabbitAdvancedBus)bus.Advanced).OpenChannelCount);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -79,8 +77,6 @@ namespace EasyNetQ.Tests
             {
                 thread.Join();
             }
-
-            Assert.AreEqual(1, ((RabbitAdvancedBus)bus.Advanced).OpenChannelCount);
         }
     }
 }

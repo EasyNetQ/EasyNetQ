@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
@@ -19,7 +17,6 @@ namespace EasyNetQ
 
         private readonly IPersistentConnection connection;
         private readonly ConcurrentBag<Action> subscribeActions = new ConcurrentBag<Action>();
-        private readonly List<IModel> channelList = new List<IModel>();
 
         public const bool NoAck = false;
 
@@ -155,9 +152,9 @@ namespace EasyNetQ
             Action subscribeAction = () =>
             {
                 var channel = connection.CreateModel();
-                queue.Visit(new TopologyBuilder(channel));
+                channel.ModelShutdown += (model, reason) => Console.WriteLine("Model Shutdown for queue: '{0}'", queue.Name);
 
-                channelList.Add(channel);
+                queue.Visit(new TopologyBuilder(channel));
 
                 channel.BasicQos(0, prefetchCount, false);
 
@@ -224,8 +221,6 @@ namespace EasyNetQ
             return new RabbitAdvancedPublishChannel(this);
         }
 
-        public int OpenChannelCount { get { return channelList.Count; } }
-
         public event Action Connected;
 
         protected void OnConnected()
@@ -255,16 +250,6 @@ namespace EasyNetQ
         public void Dispose()
         {
             if (disposed) return;
-
-            // Abort all Models
-            if (channelList.Count > 0)
-            {
-                foreach (var model in channelList)
-                {
-                    if (null != model)
-                        model.Abort();
-                }
-            }
 
             consumerFactory.Dispose();
             connection.Dispose();
