@@ -175,9 +175,11 @@ namespace EasyNetQ
                             Thread.Sleep(100);
                         }
 
+                        var responseMessage = new Message<TResponse>(task.Result);
+                        responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
                         using (var channel = advancedBus.OpenPublishChannel())
                         {
-                            var responseMessage = new Message<TResponse>(task.Result);
                             channel.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, responseMessage);
                         }
                         tcs.SetResult(null);

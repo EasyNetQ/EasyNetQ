@@ -169,9 +169,6 @@ namespace EasyNetQ
             consumer.ConsumerTag = consumerTag;
             subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback, modelIsSingleUse, model));
 
-            Console.WriteLine("Added subscriber, count: {0}, consumerTag: '{1}'", 
-                subscriptions.Count, consumerTag);
-
             return consumer;
         }
 
