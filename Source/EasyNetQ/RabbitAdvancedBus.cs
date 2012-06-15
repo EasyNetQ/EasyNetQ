@@ -16,7 +16,7 @@ namespace EasyNetQ
         private readonly IConventions conventions;
 
         private readonly IPersistentConnection connection;
-        private readonly ConcurrentBag<Action> subscribeActions = new ConcurrentBag<Action>();
+        private readonly ConcurrentBag<SubscriptionAction> subscribeActions = new ConcurrentBag<SubscriptionAction>();
 
         public const bool NoAck = false;
 
@@ -149,7 +149,9 @@ namespace EasyNetQ
                 throw new EasyNetQException("This bus has been disposed");
             }
 
-            Action subscribeAction = () =>
+            var subscriptionAction = new SubscriptionAction();
+
+            subscriptionAction.Action = () =>
             {
                 var channel = connection.CreateModel();
                 channel.ModelShutdown += (model, reason) => Console.WriteLine("Model Shutdown for queue: '{0}'", queue.Name);
@@ -158,7 +160,7 @@ namespace EasyNetQ
 
                 channel.BasicQos(0, prefetchCount, false);
 
-                var consumer = consumerFactory.CreateConsumer(channel, queue.IsSingleUse,
+                var consumer = consumerFactory.CreateConsumer(subscriptionAction, channel, queue.IsSingleUse,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
                     {
                         var messageRecievedInfo = new MessageReceivedInfo
@@ -180,16 +182,16 @@ namespace EasyNetQ
                     consumer);              // consumer
             };
 
-            AddSubscriptionAction(subscribeAction);
+            AddSubscriptionAction(subscriptionAction);
         }
 
-        private void AddSubscriptionAction(Action subscriptionAction)
+        private void AddSubscriptionAction(SubscriptionAction subscriptionAction)
         {
             subscribeActions.Add(subscriptionAction);
 
             try
             {
-                subscriptionAction();
+                subscriptionAction.Action();
             }
             catch (OperationInterruptedException)
             {
@@ -230,7 +232,7 @@ namespace EasyNetQ
             logger.DebugWrite("Re-creating subscribers");
             foreach (var subscribeAction in subscribeActions)
             {
-                subscribeAction();
+                subscribeAction.Action();
             }
         }
 
@@ -258,5 +260,20 @@ namespace EasyNetQ
 
             logger.DebugWrite("Connection disposed");
         }
+    }
+
+    public class SubscriptionAction
+    {
+        public SubscriptionAction()
+        {
+            ClearAction();
+        }
+
+        public void ClearAction()
+        {
+            Action = () => { };
+        }
+
+        public Action Action { get; set; }
     }
 }

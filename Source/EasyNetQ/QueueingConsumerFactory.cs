@@ -130,6 +130,7 @@ namespace EasyNetQ
                 if (subscriptionInfo.ModelIsSingleUse)
                 {
                     subscriptionInfo.Consumer.CloseModel();
+                    subscriptionInfo.SubscriptionAction.ClearAction();
                 }
             }
             catch (AlreadyClosedException alreadyClosedException)
@@ -162,12 +163,16 @@ namespace EasyNetQ
                    string.Format("Exception:\n{0}\n", exception);
         }
 
-        public DefaultBasicConsumer CreateConsumer(IModel model, bool modelIsSingleUse, MessageCallback callback)
+        public DefaultBasicConsumer CreateConsumer(
+            SubscriptionAction subscriptionAction, 
+            IModel model, 
+            bool modelIsSingleUse, 
+            MessageCallback callback)
         {
             var consumer = new EasyNetQConsumer(model, sharedQueue);
             var consumerTag = Guid.NewGuid().ToString();
             consumer.ConsumerTag = consumerTag;
-            subscriptions.Add(consumerTag, new SubscriptionInfo(consumer, callback, modelIsSingleUse, model));
+            subscriptions.Add(consumerTag, new SubscriptionInfo(subscriptionAction, consumer, callback, modelIsSingleUse, model));
 
             return consumer;
         }
@@ -201,13 +206,15 @@ namespace EasyNetQ
 
     public class SubscriptionInfo
     {
+        public SubscriptionAction SubscriptionAction { get; set; }
         public EasyNetQConsumer Consumer { get; private set; }
         public MessageCallback Callback { get; private set; }
         public bool ModelIsSingleUse { get; private set; }
         public IModel Channel { get; private set; }
 
-        public SubscriptionInfo(EasyNetQConsumer consumer, MessageCallback callback, bool modelIsSingleUse, IModel channel)
+        public SubscriptionInfo(SubscriptionAction subscriptionAction, EasyNetQConsumer consumer, MessageCallback callback, bool modelIsSingleUse, IModel channel)
         {
+            SubscriptionAction = subscriptionAction;
             Consumer = consumer;
             Callback = callback;
             ModelIsSingleUse = modelIsSingleUse;

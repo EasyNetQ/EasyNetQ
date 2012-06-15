@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
 		{
 		}
 
-	    public DefaultBasicConsumer CreateConsumer(IModel model, bool modelIsSingleUse, MessageCallback callback)
+	    public DefaultBasicConsumer CreateConsumer(SubscriptionAction subscriptionAction, IModel model, bool modelIsSingleUse, MessageCallback callback)
 	    {
 	        return null;
 	    }

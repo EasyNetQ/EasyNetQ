@@ -5,7 +5,7 @@ namespace EasyNetQ
 {
     public interface IConsumerFactory : IDisposable
     {
-        DefaultBasicConsumer CreateConsumer(IModel model, bool modelIsSingleUse, MessageCallback callback);
+        DefaultBasicConsumer CreateConsumer(SubscriptionAction subscriptionAction, IModel model, bool modelIsSingleUse, MessageCallback callback);
         void ClearConsumers();
     }
 }
