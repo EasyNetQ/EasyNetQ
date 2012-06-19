@@ -17,7 +17,6 @@ namespace EasyNetQ.Tests
         {
             logger = new ConsoleLogger();
             bus = RabbitHutch.CreateBus("host=localhost", logger);
-            while(!bus.IsConnected) Thread.Sleep(10);
         }
 
         [TearDown]
@@ -38,8 +37,13 @@ namespace EasyNetQ.Tests
         [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
         public void Should_be_able_to_schedule_a_message()
         {
-            bus.Subscribe<PartyInvitation>("schedulingTest1", message => 
-                Console.WriteLine("Got scheduled message: {0}", message.Text));
+            var autoResetEvent = new AutoResetEvent(false);
+
+            bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
+            {
+                Console.WriteLine("Got scheduled message: {0}", message.Text);
+                autoResetEvent.Set();
+            });
 
             var invitation = new PartyInvitation
             {
@@ -52,7 +56,7 @@ namespace EasyNetQ.Tests
                 publishChannel.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
             }
 
-            Thread.Sleep(6000);
+            autoResetEvent.WaitOne(10000);
         }
 
         /// <summary>

@@ -4,10 +4,8 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Loggers;
 using EasyNetQ.Topology;
 using NUnit.Framework;
-using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
@@ -20,11 +18,6 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             advancedBus = RabbitHutch.CreateBus("host=localhost").Advanced;
-
-            while (!advancedBus.IsConnected)
-            {
-                Thread.Sleep(10);
-            }
         }
 
         [TearDown]
@@ -37,6 +30,8 @@ namespace EasyNetQ.Tests
         public void Should_be_able_to_do_a_simple_publish_and_subscribe()
         {
             const string routingKey = "advanced_test_routing_key";
+
+            var autoResetEvent = new AutoResetEvent(false);
 
             var exchange = Exchange.DeclareDirect("advanced_test_exchange");
             var queue = Queue.DeclareDurable("advanced_test_queue");
@@ -51,6 +46,7 @@ namespace EasyNetQ.Tests
                     Console.WriteLine("Redelivered: {0}", messageReceivedInfo.Redelivered);
                     Console.WriteLine("Exchange: {0}", messageReceivedInfo.Exchange);
                     Console.WriteLine("RoutingKey: {0}", messageReceivedInfo.RoutingKey);
+                    autoResetEvent.Set();
                 }));
 
             var myMessage = new MyMessage {Text = "Hello from the publisher"};
@@ -65,16 +61,22 @@ namespace EasyNetQ.Tests
             }
 
             // give the test time to complete
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
         }
 
         [Test, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_do_publish_subscribe_via_default_exchange()
         {
+            var autoResetEvent = new AutoResetEvent(false);
+
             var queue = Queue.DeclareTransient();
 
             advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
-                Task.Factory.StartNew(() => Console.WriteLine("Got message: {0}", message.Body.Text)));
+                Task.Factory.StartNew(() =>
+                {
+                    Console.WriteLine("Got message: {0}", message.Body.Text);
+                    autoResetEvent.Set();
+                }));
 
             using (var channel = advancedBus.OpenPublishChannel())
             {
@@ -83,7 +85,7 @@ namespace EasyNetQ.Tests
             }
 
             // give the test time to complete
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(500);
         }
 
         [Test, Explicit("Requires a RabbitMQ instance on localhost")]
@@ -92,7 +94,7 @@ namespace EasyNetQ.Tests
             var queue = Queue.DeclareTransient();
 
             advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
-                Task.Factory.StartNew(() => Console.WriteLine("Got message: {0}", message.Body.Text)));
+                Task.Factory.StartNew(() => { }));
 
             using (var channel = advancedBus.OpenPublishChannel())
             {
@@ -107,10 +109,16 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_pass_reply_to_address_to_consumer()
         {
+            var autoResetEvent = new AutoResetEvent(false);
+
             var queue = Queue.DeclareTransient();
 
             advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
-                Task.Factory.StartNew(() => Console.WriteLine("Got reply to address: {0}", message.Properties.ReplyTo)));
+                Task.Factory.StartNew(() =>
+                {
+                    Console.WriteLine("Got reply to address: {0}", message.Properties.ReplyTo);
+                    autoResetEvent.Set();
+                }));
 
             var messageToPublish = new Message<MyMessage>(new MyMessage {Text = "Hello from the publisher"});
             messageToPublish.Properties.ReplyTo = "the_reply_to_address";
@@ -121,12 +129,14 @@ namespace EasyNetQ.Tests
             }
 
             // give the test time to complete
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
         }
 
         [Test, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_bind_a_chain_of_exchanges()
         {
+            var autoResetEvent = new AutoResetEvent(false);
+
             var exchange1 = Exchange.DeclareDirect("advanced_test_exchange_1");
             var exchange2 = Exchange.DeclareDirect("advanced_test_exchange_2");
             var exchange3 = Exchange.DeclareDirect("advanced_test_exchange_3");
@@ -137,7 +147,11 @@ namespace EasyNetQ.Tests
             exchange2.BindTo(exchange1, "route1");
 
             advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) =>
-                Task.Factory.StartNew(() => Console.WriteLine("Got Message: {0}", message.Body.Text)));
+                Task.Factory.StartNew(() =>
+                {
+                    Console.WriteLine("Got Message: {0}", message.Body.Text);
+                    autoResetEvent.Set();
+                }));
 
             using (var channel = advancedBus.OpenPublishChannel())
             {
@@ -146,12 +160,14 @@ namespace EasyNetQ.Tests
             }
 
             // give the test time to complete
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
         }
 
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_topic_based_routing()
         {
+            var countdownEvent = new CountdownEvent(4);
+
             var exchange = Exchange.DeclareTopic("advanced_test_topic_exchange");
             var queue1 = Queue.DeclareDurable("advanced_test_queue_1");
             var queue2 = Queue.DeclareDurable("advanced_test_queue_2");
@@ -162,11 +178,23 @@ namespace EasyNetQ.Tests
             queue3.BindTo(exchange, "*.Y");
 
             advancedBus.Subscribe<MyMessage>(queue1, (message, messageRecievedInfo) =>
-                Task.Factory.StartNew(() => Console.WriteLine("1 Got Message: {0}", messageRecievedInfo.RoutingKey)));
+                Task.Factory.StartNew(() =>
+                {
+                    Console.WriteLine("1 Got Message: {0}", messageRecievedInfo.RoutingKey);
+                    countdownEvent.Signal();
+                }));
             advancedBus.Subscribe<MyMessage>(queue2, (message, messageRecievedInfo) =>
-                Task.Factory.StartNew(() => Console.WriteLine("2 Got Message: {0}", messageRecievedInfo.RoutingKey)));
+                Task.Factory.StartNew(() =>
+                {
+                    Console.WriteLine("2 Got Message: {0}", messageRecievedInfo.RoutingKey);
+                    countdownEvent.Signal();
+                }));
             advancedBus.Subscribe<MyMessage>(queue3, (message, messageRecievedInfo) =>
-                Task.Factory.StartNew(() => Console.WriteLine("3 Got Message: {0}", messageRecievedInfo.RoutingKey)));
+                Task.Factory.StartNew(() =>
+                {
+                    Console.WriteLine("3 Got Message: {0}", messageRecievedInfo.RoutingKey);
+                    countdownEvent.Signal();
+                }));
 
             using (var channel = advancedBus.OpenPublishChannel())
             {
@@ -176,12 +204,14 @@ namespace EasyNetQ.Tests
             }
 
             // give the test time to complete
-            Thread.Sleep(1000);
+            countdownEvent.Wait(1000);
         }
 
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_publish_subscribe_raw_bytes()
         {
+            var autoResetEvent = new AutoResetEvent(false);
+
             var queue = Queue.DeclareTransient();
 
             advancedBus.Subscribe(queue, (message, properties, messageRecievedInfo) =>
@@ -189,6 +219,7 @@ namespace EasyNetQ.Tests
                 {
                     var messageString = Encoding.UTF8.GetString(message);
                     Console.WriteLine("Got message: '{0}'", messageString);
+                    autoResetEvent.Set();
                 }));
 
             using (var channel = advancedBus.OpenPublishChannel())
@@ -198,7 +229,7 @@ namespace EasyNetQ.Tests
             }
 
             // give the test time to complete
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
         }
     }
 }

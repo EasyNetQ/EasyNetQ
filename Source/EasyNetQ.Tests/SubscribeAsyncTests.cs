@@ -17,7 +17,6 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while(!bus.IsConnected) Thread.Sleep(10);
         }
 
         [TearDown]
@@ -35,17 +34,21 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe_async()
         {
+            var countdownEvent = new CountdownEvent(10);
             // DownloadStringTask comes from http://blogs.msdn.com/b/pfxteam/archive/2010/05/04/10007557.aspx
 
             bus.SubscribeAsync<MyMessage>("subscribe_async_test", message => 
                 new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=500"))
-                    .ContinueWith(task => 
-                        Console.WriteLine("Received: '{0}', Downloaded: '{1}'", 
-                            message.Text, 
-                            task.Result)));
+                    .ContinueWith(task =>
+                    {
+                        Console.WriteLine("Received: '{0}', Downloaded: '{1}'",
+                            message.Text,
+                            task.Result);
+                        countdownEvent.Signal();
+                    }));
 
             // give the test a chance to receive process the message
-            Thread.Sleep(2000);
+            countdownEvent.Wait(2000);
         }
 
         // 1. Start LongRunningServer.js (a little node.js webserver in this directory)
@@ -122,14 +125,7 @@ namespace EasyNetQ.Tests
         public void WebClientSpike()
         {
             var downloadTask = new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=150"));
-            downloadTask.ContinueWith(task =>
-                    Console.WriteLine("Downloaded: '{0}'",
-                        task.Result));
-
-            while (!downloadTask.IsCompleted)
-            {
-                Thread.Sleep(100);
-            }
+            Console.WriteLine("Downloaded: '{0}'", downloadTask.Result);
         }
     }
 }

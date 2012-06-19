@@ -28,10 +28,15 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe()
         {
-            bus.Subscribe<MyMessage>("test", message => Console.WriteLine(message.Text));
+            var autoResetEvent = new AutoResetEvent(false);
+            bus.Subscribe<MyMessage>("test", message =>
+            {
+                Console.WriteLine(message.Text);
+                autoResetEvent.Set();
+            });
 
             // allow time for messages to be consumed
-            Thread.Sleep(500);
+            autoResetEvent.WaitOne(1000);
 
             Console.WriteLine("Stopped consuming");
         }
@@ -53,11 +58,16 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_also_send_messages_to_second_subscriber()
         {
+            var autoResetEvent = new AutoResetEvent(false);
             var messageQueue2 = RabbitHutch.CreateBus("host=localhost");
-            messageQueue2.Subscribe<MyMessage>("test2", msg => Console.WriteLine(msg.Text));
+            messageQueue2.Subscribe<MyMessage>("test2", msg =>
+            {
+                Console.WriteLine(msg.Text);
+                autoResetEvent.Set();
+            });
 
             // allow time for messages to be consumed
-            Thread.Sleep(500);
+            autoResetEvent.WaitOne(500);
 
             Console.WriteLine("Stopped consuming");
         }
@@ -67,10 +77,28 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_two_subscriptions_from_the_same_app_should_also_both_get_all_messages()
         {
-            bus.Subscribe<MyMessage>("test_a", msg => Console.WriteLine(msg.Text));
-            bus.Subscribe<MyOtherMessage>("test_b", msg => Console.WriteLine(msg.Text));
-            bus.Subscribe<MyMessage>("test_c", msg => Console.WriteLine(msg.Text));
-            bus.Subscribe<MyOtherMessage>("test_d", msg => Console.WriteLine(msg.Text));
+            var countdownEvent = new CountdownEvent(8);
+
+            bus.Subscribe<MyMessage>("test_a", msg =>
+            {
+                Console.WriteLine(msg.Text);
+                countdownEvent.Signal();
+            });
+            bus.Subscribe<MyOtherMessage>("test_b", msg =>
+            {
+                Console.WriteLine(msg.Text);
+                countdownEvent.Signal();
+            });
+            bus.Subscribe<MyMessage>("test_c", msg =>
+            {
+                Console.WriteLine(msg.Text);
+                countdownEvent.Signal();
+            });
+            bus.Subscribe<MyOtherMessage>("test_d", msg =>
+            {
+                Console.WriteLine(msg.Text);
+                countdownEvent.Signal();
+            });
 
             using (var publishChannel = bus.OpenPublishChannel())
             {
@@ -82,7 +110,7 @@ namespace EasyNetQ.Tests
             }
 
             // allow time for messages to be consumed
-            Thread.Sleep(1000);
+            countdownEvent.Wait(1000);
 
             Console.WriteLine("Stopped consuming");
         }
@@ -93,15 +121,20 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Long_running_subscriber_should_survive_a_rabbit_restart()
         {
+            var autoResetEvent = new AutoResetEvent(false);
             bus.Subscribe<MyMessage>("test", message =>
             {
                 Console.Out.WriteLine("Restart RabbitMQ now.");
-                Thread.Sleep(5000);
-                Console.WriteLine(message.Text);
+                new Timer(x =>
+                {
+                    Console.WriteLine(message.Text);
+                    autoResetEvent.Set();
+                }, null, 5000, Timeout.Infinite);
+                
             });
 
             // allow time for messages to be consumed
-            Thread.Sleep(7000);
+            autoResetEvent.WaitOne(7000);
 
             Console.WriteLine("Stopped consuming");
         }
@@ -109,16 +142,18 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_subscribe_OK_before_connection_to_broker_is_complete()
         {
+            var autoResetEvent = new AutoResetEvent(false);
             var testLocalBus = RabbitHutch.CreateBus("host=localhost");
 
             testLocalBus.Subscribe<MyMessage>("test", message =>
             {
                 Console.Out.WriteLine("message.Text = {0}", message.Text);
+                autoResetEvent.Set();
             });
             Console.WriteLine("--- subscribed ---");
 
             // allow time for bus to connect
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
             testLocalBus.Dispose();
         }
     }

@@ -16,7 +16,6 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while(!bus.IsConnected) Thread.Sleep(10);
         }
 
         [TearDown]
@@ -29,6 +28,7 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Large_number_of_request_calls_should_not_create_a_large_number_of_open_channels()
         {
+            var countdownEvent = new CountdownEvent(10);
             for (int i = 0; i < 10; i++)
             {
                 using (var publishChannel = bus.OpenPublishChannel())
@@ -38,12 +38,13 @@ namespace EasyNetQ.Tests
                         response =>
                             {
                                 Console.WriteLine("Got response: " + response.Text);
+                                countdownEvent.Signal();
                             }
                         );
                 }
             }
 
-            Thread.Sleep(1000);
+            countdownEvent.Wait(1000);
             Console.WriteLine("Test end");
         }
 
@@ -53,16 +54,21 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response()
         {
+            var autoResetEvent = new AutoResetEvent(false);
+
             var request = new TestRequestMessage {Text = "Hello from the client! "};
 
             Console.WriteLine("Making request");
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                    Console.WriteLine("Got response: '{0}'", response.Text));
+                {
+                    Console.WriteLine("Got response: '{0}'", response.Text);
+                    autoResetEvent.Set();
+                });
             }
 
-            Thread.Sleep(2000);
+            autoResetEvent.WaitOne(1000);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -71,17 +77,27 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
         {
-            for (int i = 0; i < 1000; i++)
+            const int numberOfCalls = 1000;
+
+            var countdownEvent = new CountdownEvent(numberOfCalls);
+            var count = 0;
+
+            for (int i = 0; i < numberOfCalls; i++)
             {
                 var request = new TestRequestMessage { Text = "Hello from the client! " + i.ToString() };
                 using (var publishChannel = bus.OpenPublishChannel())
                 {
                     publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                        Console.WriteLine("Got response: '{0}'", response.Text));
+                    {
+                        Console.WriteLine("Got response: '{0}'", response.Text);
+                        count++;
+                        countdownEvent.Signal();
+                    });
                 }
             }
 
-            Thread.Sleep(3000);
+            countdownEvent.Wait(15000);
+            count.ShouldEqual(numberOfCalls);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -90,16 +106,21 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_make_a_request_that_runs_async_on_the_server()
         {
+            var autoResetEvent = new AutoResetEvent(false);
             var request = new TestAsyncRequestMessage {Text = "Hello async from the client!"};
 
             Console.Out.WriteLine("Making request");
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
-                    response => Console.Out.WriteLine("response = {0}", response.Text));
+                    response =>
+                    {
+                        Console.Out.WriteLine("response = {0}", response.Text);
+                        autoResetEvent.Set();
+                    });
             }
 
-            Thread.Sleep(2000);
+            autoResetEvent.WaitOne(2000);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -108,6 +129,10 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_make_many_async_requests()
         {
+            const int numberOfCalls = 500;
+            var countdownEvent = new CountdownEvent(numberOfCalls);
+            var count = 0;
+
             for (int i = 0; i < 1000; i++)
             {
                 var request = new TestAsyncRequestMessage { Text = "Hello async from the client! " + i };
@@ -116,10 +141,15 @@ namespace EasyNetQ.Tests
                 {
                     publishChannel.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
                         response =>
-                            Console.Out.WriteLine("response = {0}", response.Text));
+                        {
+                            Console.Out.WriteLine("response = {0}", response.Text);
+                            Interlocked.Increment(ref count);
+                            countdownEvent.Signal();
+                        });
                 }
             }
-            Thread.Sleep(5000);
+            countdownEvent.Wait(10000);
+            count.ShouldEqual(numberOfCalls);
         }
 
         /// <summary>
@@ -190,7 +220,7 @@ namespace EasyNetQ.Tests
                     Console.WriteLine("Got response: '{0}'", response.Text));
             }
 
-            Thread.Sleep(2000);
+            Thread.Sleep(500);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -200,6 +230,7 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_that_throws_on_response_consumer()
         {
+            var autoResetEvent = new AutoResetEvent(false);
             var request = new TestRequestMessage { Text = "Hello from the client! " };
 
             Console.WriteLine("Making request");
@@ -208,11 +239,12 @@ namespace EasyNetQ.Tests
                 publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
                     Console.WriteLine("Got response: '{0}'", response.Text);
+                    autoResetEvent.Set();
                     throw new SomeRandomException("Something very bad just happened!");
                 });
             }
 
-            Thread.Sleep(2000);
+            autoResetEvent.WaitOne(1000);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -221,6 +253,8 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_that_takes_a_long_time()
         {
+            var autoResetEvent = new AutoResetEvent(false);
+
             var request = new TestRequestMessage
             {
                 Text = "Hello from the client! ",
@@ -231,10 +265,13 @@ namespace EasyNetQ.Tests
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                    Console.WriteLine("Got response: '{0}'", response.Text));
+                {
+                    Console.WriteLine("Got response: '{0}'", response.Text);
+                    autoResetEvent.Set();
+                });
             }
 
-            Thread.Sleep(7000);
+            autoResetEvent.WaitOne(10000);
         }
 
     }

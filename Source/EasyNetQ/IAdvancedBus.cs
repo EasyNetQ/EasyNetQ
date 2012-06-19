@@ -49,5 +49,15 @@ namespace EasyNetQ
         /// How EasyNetQ stringifies the message type
         /// </summary>
         SerializeType SerializeType { get; }
+
+        /// <summary>
+        /// Event fires when the bus connects
+        /// </summary>
+        event Action Connected;
+
+        /// <summary>
+        /// Event fires when the bus disconnects
+        /// </summary>
+        event Action Disconnected;
     }
 }

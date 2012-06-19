@@ -12,10 +12,14 @@ namespace EasyNetQ.Tests
         /// </summary>
         public void RunSaga()
         {
+            var autoResetEvent = new AutoResetEvent(false);
             var bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.Subscribe<EndMessage>("runSaga_spike", endMessage => 
-                Console.WriteLine("Got EndMessage: {0}", endMessage.Text));
+            bus.Subscribe<EndMessage>("runSaga_spike", endMessage =>
+            {
+                Console.WriteLine("Got EndMessage: {0}", endMessage.Text);
+                autoResetEvent.Set();
+            });
 
             var startMessage = new StartMessage
             {
@@ -28,7 +32,7 @@ namespace EasyNetQ.Tests
             }
 
             // give the message time to run through the process
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
         }
 
         public void Can_call_publish_inside_a_subscribe_handler()
@@ -68,10 +72,13 @@ namespace EasyNetQ.Tests
 
             // setup the final subscription
             Console.WriteLine("Setting up the final subscription");
-            bus.Subscribe<EndMessage>("inline_saga_spike", endMessage => 
-                Console.WriteLine("Test got EndMessage: {0}", endMessage.Text));
+            var autoResetEvent = new AutoResetEvent(false);
+            bus.Subscribe<EndMessage>("inline_saga_spike", endMessage =>
+            {
+                Console.WriteLine("Test got EndMessage: {0}", endMessage.Text);
+                autoResetEvent.Set();
+            });
 
-            Thread.Sleep(1000);
             // now kick it off
             Console.WriteLine("Test is publishing StartMessage");
             using (var publishChannel = bus.OpenPublishChannel())
@@ -80,7 +87,7 @@ namespace EasyNetQ.Tests
             }
 
             // give the message time to run through the process
-            Thread.Sleep(1000);
+            autoResetEvent.WaitOne(1000);
         }
     }
 }

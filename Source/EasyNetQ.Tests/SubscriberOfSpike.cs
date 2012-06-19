@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace EasyNetQ.Tests
 {
@@ -14,16 +13,11 @@ namespace EasyNetQ.Tests
 
             AutoRegisterSubscribers(bus, Assembly.GetExecutingAssembly());
 
-            // wait for the bus to come online
-            while(!bus.IsConnected) Thread.Sleep(10);
-
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Publish(new MyAutoSubscribedMessage{ Text = "Hello Message!"});
                 publishChannel.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
             }
-
-            Thread.Sleep(100);
         }
 
         private void AutoRegisterSubscribers(IBus bus, Assembly assembly)

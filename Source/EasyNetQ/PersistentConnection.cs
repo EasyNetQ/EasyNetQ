@@ -66,7 +66,7 @@ namespace EasyNetQ
                 connection = connectionFactory.CreateConnection();
                 connection.ConnectionShutdown += OnConnectionShutdown;
 
-                if (Connected != null) Connected();
+                OnConnected();
                 logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', VHost: '{1}'", connectionFactory.HostName, connectionFactory.VirtualHost);
             }
             catch (BrokerUnreachableException brokerUnreachableException)
@@ -85,12 +85,23 @@ namespace EasyNetQ
         void OnConnectionShutdown(IConnection _, ShutdownEventArgs reason)
         {
             if (disposed) return;
-            if (Disconnected != null) Disconnected();
+            OnDisconnected();
 
             // try to reconnect and re-subscribe
             logger.InfoWrite("Disconnected from RabbitMQ Broker");
 
             StartTryToConnect();
+        }
+
+        public void OnConnected()
+        {
+            logger.DebugWrite("OnConnected event fired");
+            if (Connected != null) Connected();
+        }
+
+        public void OnDisconnected()
+        {
+            if (Disconnected != null) Disconnected();
         }
 
         private bool disposed = false;

@@ -55,6 +55,9 @@ namespace EasyNetQ
             this.logger = logger;
 			this.conventions = conventions;
             this.advancedBus = advancedBus;
+
+            advancedBus.Connected += OnConnected;
+            advancedBus.Disconnected += OnDisconnected;
         }
 
         public IPublishChannel OpenPublishChannel()

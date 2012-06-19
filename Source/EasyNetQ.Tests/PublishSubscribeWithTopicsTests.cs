@@ -15,7 +15,6 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while (!bus.IsConnected) Thread.Sleep(10);
         }
 
         [TearDown]
@@ -43,19 +42,38 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Subscribe_to_messages_with_topics()
         {
-            bus.Subscribe<MyMessage>("id1", "X.*", msg => Console.WriteLine("I Get X: {0}", msg.Text));
-            bus.Subscribe<MyMessage>("id2", "*.A", msg => Console.WriteLine("I Get A: {0}", msg.Text));
-            bus.Subscribe<MyMessage>("id3", msg => Console.WriteLine("I Get All: {0}", msg.Text));
+            var countdownEvent = new CountdownEvent(7);
 
-            Thread.Sleep(500);
+            bus.Subscribe<MyMessage>("id1", "X.*", msg =>
+            {
+                Console.WriteLine("I Get X: {0}", msg.Text);
+                countdownEvent.Signal();
+            });
+            bus.Subscribe<MyMessage>("id2", "*.A", msg =>
+            {
+                Console.WriteLine("I Get A: {0}", msg.Text);
+                countdownEvent.Signal();
+            });
+            bus.Subscribe<MyMessage>("id3", msg =>
+            {
+                Console.WriteLine("I Get All: {0}", msg.Text);
+                countdownEvent.Signal();
+            });
+
+            countdownEvent.Wait(1000);
         }
 
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_subscribe_to_multiple_topic_strings()
         {
-            bus.Subscribe<MyMessage>("id4", new[]{"Y.*", "*.B"}, msg => Console.WriteLine("I Get Y or B: {0}", msg.Text));
+            var countdownEvent = new CountdownEvent(7);
+            bus.Subscribe<MyMessage>("id4", new[]{"Y.*", "*.B"}, msg =>
+            {
+                Console.WriteLine("I Get Y or B: {0}", msg.Text);
+                countdownEvent.Signal();
+            });
 
-            Thread.Sleep(500);
+            countdownEvent.Wait(500);
         }
     }
 }

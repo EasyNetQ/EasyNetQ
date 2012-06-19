@@ -28,6 +28,7 @@ namespace EasyNetQ.Tests.InMemoryClient
         public void Should_be_able_to_do_basic_request_response()
         {
             const string expectedResult = "Sending back 'Ninja!!'";
+            var autoResetEvent = new AutoResetEvent(false);
 
             bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
             {
@@ -45,11 +46,15 @@ namespace EasyNetQ.Tests.InMemoryClient
                 var request = new TestRequestMessage {Text = "Ninja!!"};
                 channel.Request<TestRequestMessage, TestResponseMessage>(
                     request,
-                    response => actualResult = response.Text);
+                    response => 
+                    {
+                        actualResult = response.Text;
+                        autoResetEvent.Set();
+                    });
             }
 
             // give the bus a chance to deliver the message
-            Thread.Sleep(100);
+            autoResetEvent.WaitOne();
 
             actualResult.ShouldEqual(expectedResult);
         }
@@ -57,6 +62,8 @@ namespace EasyNetQ.Tests.InMemoryClient
         [Test]
         public void Should_request_closures_work()
         {
+            var countdownEvent = new CountdownEvent(3);
+
             bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
             {
                 var response = new TestResponseMessage
@@ -82,12 +89,13 @@ namespace EasyNetQ.Tests.InMemoryClient
                         {
                             results[index] = response.Text;
                             Console.WriteLine("Got response '{0}' on index: {1}", response.Text, index);
+                            countdownEvent.Signal();
                         });
                 }
             }
 
             // give the bus a chance to deliver the message
-            Thread.Sleep(100);
+            countdownEvent.Wait();
 
             results[0].ShouldEqual("one--one");
             results[1].ShouldEqual("two--two");
