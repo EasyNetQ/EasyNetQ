@@ -121,7 +121,7 @@ namespace EasyNetQ
 
         private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo)
         {
-            const string failedToAckMessage = "Basic ack failed because chanel was closed with message {0}." +
+            const string failedToAckMessage = "Basic ack failed because channel was closed with message {0}." +
                                               " Message remains on RabbitMQ and will be retried.";
 
             try
