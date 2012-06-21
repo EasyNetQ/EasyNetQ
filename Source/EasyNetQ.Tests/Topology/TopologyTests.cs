@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Collections.Generic;
 using EasyNetQ.Topology;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -16,6 +17,7 @@ namespace EasyNetQ.Tests.Topology
         private const string exchangeName = "speedster";
         private const string queueName = "roadster";
         private const string routingKey = "drop_head";
+        private static readonly Dictionary<string, string> arguments = new Dictionary<string, string>() { { "argKey", "argValue" } };
 
         [SetUp]
         public void SetUp()
@@ -72,6 +74,15 @@ namespace EasyNetQ.Tests.Topology
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, null));
+        }
+
+        [Test]
+        public void Should_create_a_durable_queue_with_arguments()
+        {
+            var queue = Queue.DeclareDurable(queueName, arguments);
+            queue.Visit(visitor);
+
+            model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, arguments));
         }
 
         // QT
