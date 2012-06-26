@@ -11,6 +11,7 @@ namespace EasyNetQ.Tests
     [Serializable]
     public class TestRequestMessage
     {
+        public long Id { get; set; }
         public string Text { get; set; }
         public bool CausesExceptionInServer { get; set; }
         public bool CausesServerToTakeALongTimeToRespond { get; set; }
@@ -19,6 +20,7 @@ namespace EasyNetQ.Tests
     [Serializable]
     public class TestResponseMessage
     {
+        public long Id { get; set; }
         public string Text { get; set; }
     }
 

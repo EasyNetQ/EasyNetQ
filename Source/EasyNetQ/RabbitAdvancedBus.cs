@@ -154,7 +154,7 @@ namespace EasyNetQ
             subscriptionAction.Action = () =>
             {
                 var channel = connection.CreateModel();
-                channel.ModelShutdown += (model, reason) => Console.WriteLine("Model Shutdown for queue: '{0}'", queue.Name);
+                channel.ModelShutdown += (model, reason) => logger.DebugWrite("Model Shutdown for queue: '{0}'", queue.Name);
 
                 queue.Visit(new TopologyBuilder(channel));
 

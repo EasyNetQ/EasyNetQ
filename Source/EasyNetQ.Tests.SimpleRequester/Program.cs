@@ -1,31 +1,20 @@
 ﻿using System;
 using System.Threading;
+using EasyNetQ.Loggers;
 
 namespace EasyNetQ.Tests.SimpleRequester
 {
     class Program
     {
+        private static readonly IBus bus = RabbitHutch.CreateBus("host=localhost", new NoDebugLogger());
+        private static long count = 0;
+
+        private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorderA();
+        private const int publishIntervalMilliseconds = 10;
+
         static void Main(string[] args)
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
-            var count = 0;
-
-            var timer = new Timer(x =>
-            {
-                try
-                {
-                    using (var publishChannel = bus.OpenPublishChannel())
-                    {
-                        publishChannel.Request<TestRequestMessage, TestResponseMessage>(
-                            new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", count++) },
-                            ResponseHandler);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine("Exception thrown by Publish: {0}", exception.Message);
-                }
-            }, null, 1000, 1000);
+            var timer = new Timer(OnTimer, null, publishIntervalMilliseconds, publishIntervalMilliseconds);
 
             Console.Out.WriteLine("Timer running, ctrl-C to end");
 
@@ -35,28 +24,70 @@ namespace EasyNetQ.Tests.SimpleRequester
 
                 timer.Dispose();
                 bus.Dispose();
+                latencyRecorder.Dispose();
+
                 Console.WriteLine("Shut down complete");
             };
 
-            var running = true;
-            while (true)
+            Thread.Sleep(Timeout.Infinite);
+        }
+
+        private static readonly object requestLock = new object();
+
+        static void OnTimer(object state)
+        {
+            try
             {
-                Console.ReadKey();
-                if (running)
+                lock (requestLock)
                 {
-                    timer.Change(Timeout.Infinite, Timeout.Infinite);
+                    using (var publishChannel = bus.OpenPublishChannel())
+                    {
+                        publishChannel.Request<TestRequestMessage, TestResponseMessage>(
+                            new TestRequestMessage
+                            {
+                                Id = count,
+                                Text = string.Format("Hello from client number: {0}! ", count)
+                            },
+                            ResponseHandler);
+                    }
+                    latencyRecorder.RegisterRequest(count);
+                    count++;
                 }
-                else
-                {
-                    timer.Change(1000, 1000);
-                }
-                running = !running;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine("Exception thrown by Publish: {0}", exception.Message);
             }
         }
 
         static void ResponseHandler(TestResponseMessage response)
         {
-            Console.WriteLine("Got Response: '{0}'", response.Text);
+            latencyRecorder.RegisterResponse(response.Id);
+        }
+    }
+
+    public class NoDebugLogger : IEasyNetQLogger
+    {
+        private readonly ConsoleLogger consoleLogger = new ConsoleLogger();
+
+        public void DebugWrite(string format, params object[] args)
+        {
+            // do nothing
+        }
+
+        public void InfoWrite(string format, params object[] args)
+        {
+            // do nothing
+        }
+
+        public void ErrorWrite(string format, params object[] args)
+        {
+            consoleLogger.ErrorWrite(format, args);
+        }
+
+        public void ErrorWrite(Exception exception)
+        {
+            consoleLogger.ErrorWrite(exception);
         }
     }
 }

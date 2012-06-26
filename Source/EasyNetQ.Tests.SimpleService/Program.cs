@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Loggers;
 
 namespace EasyNetQ.Tests.SimpleService
 {
@@ -9,7 +10,7 @@ namespace EasyNetQ.Tests.SimpleService
     {
         static void Main(string[] args)
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
+            var bus = RabbitHutch.CreateBus("host=localhost", new NoDebugLogger());
             bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
             bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
 
@@ -39,7 +40,7 @@ namespace EasyNetQ.Tests.SimpleService
 
         public static TestResponseMessage HandleRequest(TestRequestMessage request)
         {
-            Console.WriteLine("Handling request: {0}", request.Text);
+            // Console.WriteLine("Handling request: {0}", request.Text);
             if (request.CausesServerToTakeALongTimeToRespond)
             {
                 Console.Out.WriteLine("Taking a long time to respond...");
@@ -50,7 +51,7 @@ namespace EasyNetQ.Tests.SimpleService
             {
                 throw new SomeRandomException("Something terrible has just happened!");
             }
-            return new TestResponseMessage{ Text = request.Text + " all done!" };
+            return new TestResponseMessage{ Id = request.Id, Text = request.Text + " all done!" };
         }
 
         private static Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)
@@ -102,5 +103,30 @@ namespace EasyNetQ.Tests.SimpleService
         protected SomeRandomException(
             SerializationInfo info,
             StreamingContext context) : base(info, context) {}
+    }
+
+    public class NoDebugLogger : IEasyNetQLogger
+    {
+        private readonly ConsoleLogger logger = new ConsoleLogger();
+
+        public void DebugWrite(string format, params object[] args)
+        {
+            
+        }
+
+        public void InfoWrite(string format, params object[] args)
+        {
+            
+        }
+
+        public void ErrorWrite(string format, params object[] args)
+        {
+            logger.ErrorWrite(format, args);
+        }
+
+        public void ErrorWrite(Exception exception)
+        {
+            logger.ErrorWrite(exception);
+        }
     }
 }
