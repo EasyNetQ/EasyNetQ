@@ -71,7 +71,7 @@ namespace EasyNetQ
 
         private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
         {
-            var queue = Queue.DeclareTransient("easynetq.response." + Guid.NewGuid().ToString());
+            var queue = Queue.DeclareTransient("easynetq.response." + Guid.NewGuid().ToString()).SetAsSingleUse();
 
             advancedBus.Subscribe<TResponse>(queue, (message, messageRecievedInfo) =>
             {

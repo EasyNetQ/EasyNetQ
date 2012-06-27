@@ -195,6 +195,7 @@ namespace EasyNetQ.InMemoryClient
                 throw new InMemoryClientException(string.Format("Queue '{0}' does not exist", queue));
             }
 
+            consumer.HandleBasicConsumeOk(consumerTag);
             connection.Queues[queue].AddConsumer(noAck, consumerTag, consumer);
 
             return "";

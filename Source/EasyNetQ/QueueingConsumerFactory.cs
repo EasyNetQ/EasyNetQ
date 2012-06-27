@@ -69,6 +69,7 @@ namespace EasyNetQ
             if (!subscriptionInfo.Consumer.IsRunning)
             {
                 // this message's consumer has stopped, so just return
+                logger.DebugWrite("Consumer has stopped running. ConsumerTag: {0}", consumerTag);
                 return;
             }
 

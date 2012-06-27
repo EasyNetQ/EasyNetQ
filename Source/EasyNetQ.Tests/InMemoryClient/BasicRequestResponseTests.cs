@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests.InMemoryClient
             }
 
             // give the bus a chance to deliver the message
-            autoResetEvent.WaitOne();
+            autoResetEvent.WaitOne(1000);
 
             actualResult.ShouldEqual(expectedResult);
         }
@@ -95,7 +95,7 @@ namespace EasyNetQ.Tests.InMemoryClient
             }
 
             // give the bus a chance to deliver the message
-            countdownEvent.Wait();
+            countdownEvent.Wait(1000);
 
             results[0].ShouldEqual("one--one");
             results[1].ShouldEqual("two--two");

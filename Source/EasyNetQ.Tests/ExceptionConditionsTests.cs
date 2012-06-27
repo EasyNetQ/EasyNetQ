@@ -62,10 +62,10 @@ namespace EasyNetQ.Tests
                 Console.WriteLine("About to subscribe");
 
                 // ping pong between busA and busB
-                busB.Subscribe<FromA>("restarted", message => Reply<FromB>(message, busB, "B"));
+                busB.Subscribe<FromA>("restarted", "#", message => Reply<FromB>(message, busB, "B"));
 
-                busA.Subscribe<FromB>("restarted_1", message => Reply<FromA>(message, busA, "A"));
-                busA.Subscribe<FromB>("restarted_2", message => 
+                busA.Subscribe<FromB>("restarted_1", "x.*", message => Reply<FromA>(message, busA, "A"));
+                busA.Subscribe<FromB>("restarted_2", "*.a", message => 
                     Console.WriteLine("Subscriber 2 got {0} {1}", message.Text, message.Id));
 
                 Console.WriteLine("Subscribed");
@@ -73,7 +73,7 @@ namespace EasyNetQ.Tests
                 while(!busB.IsConnected) Thread.Sleep(100);
                 using (var publishChannel = busA.OpenPublishChannel())
                 {
-                    publishChannel.Publish(new FromA { Text = "Initial From A ", Id = 0 });
+                    publishChannel.Publish("x.a", new FromA { Text = "Initial From A ", Id = 0 });
                 }
 
                 while (true)

@@ -4,5 +4,6 @@
     {
         string Name { get; }
         bool IsSingleUse { get; }
+        IQueue SetAsSingleUse();
     }
 }

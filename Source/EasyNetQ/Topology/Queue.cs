@@ -49,15 +49,17 @@ namespace EasyNetQ.Topology
             this.exclusive = exclusive;
             this.durable = durable;
             this.arguments = arguments;
-
-            // making this assumption for now, that declaring a queue as autoDelete means that 
-            // you only want to get one message and then Dispose.
-            IsSingleUse = autoDelete;
         }
 
         public string Name { get; private set; }
 
         public bool IsSingleUse { get; private set; }
+
+        public IQueue SetAsSingleUse()
+        {
+            IsSingleUse = true;
+            return this;
+        }
 
         public void BindTo(IExchange exchange, params string[] routingKeys)
         {
