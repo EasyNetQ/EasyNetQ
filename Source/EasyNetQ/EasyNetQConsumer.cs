@@ -1,6 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using System.Collections.Concurrent;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Util;
 
 namespace EasyNetQ
 {
@@ -10,42 +10,25 @@ namespace EasyNetQ
     /// </summary>
     public class EasyNetQConsumer : DefaultBasicConsumer
     {
-        private readonly SharedQueue queue;
-        private bool localModelClosing = false;
+        private readonly ConcurrentQueue<BasicDeliverEventArgs> queue;
 
-        public SharedQueue Queue
+        public ConcurrentQueue<BasicDeliverEventArgs> Queue
         {
             get { return queue; }
         }
 
-        public EasyNetQConsumer(IModel model, SharedQueue queue) : base(model)
+        public EasyNetQConsumer(IModel model, ConcurrentQueue<BasicDeliverEventArgs> queue)
+            : base(model)
         {
             this.queue = queue;
         }
 
         /// <summary>
-        /// Closes the consumer's model without closing the shared queue
+        /// Closes the consumer's model.
         /// </summary>
         public void CloseModel()
         {
-            localModelClosing = true;
-            try
-            {
-                this.Model.Close();
-            }
-            finally
-            {
-                localModelClosing = false;
-            }
-        }
-
-        public override void OnCancel()
-        {
-            if(!localModelClosing)
-            {
-                queue.Close();
-            }
-            base.OnCancel();
+            this.Model.Close();
         }
 
         /// <summary>

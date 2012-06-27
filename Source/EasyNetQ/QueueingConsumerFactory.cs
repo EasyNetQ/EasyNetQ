@@ -21,12 +21,11 @@ namespace EasyNetQ
     {
         private readonly IEasyNetQLogger logger;
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
-        private SharedQueue sharedQueue = new SharedQueue();
+        private readonly ConcurrentQueue<BasicDeliverEventArgs> queue = new ConcurrentQueue<BasicDeliverEventArgs>();
 
         private readonly IDictionary<string, SubscriptionInfo> subscriptions = 
             new ConcurrentDictionary<string, SubscriptionInfo>();
         
-        private readonly object sharedQueueLock = new object();
         private readonly Thread subscriptionCallbackThread;
 
         public QueueingConsumerFactory(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy)
@@ -43,24 +42,14 @@ namespace EasyNetQ
                 {
                     if (disposed) break;                    
 
-                    try
+                    BasicDeliverEventArgs deliverEventArgs;
+                    if (queue.TryDequeue(out deliverEventArgs))
                     {
-                        BasicDeliverEventArgs deliverEventArgs;
-                        lock (sharedQueueLock)
-                        {
-                            deliverEventArgs = (BasicDeliverEventArgs)sharedQueue.Dequeue();
-                        }
-                        if(deliverEventArgs != null)
-                        {
-                            HandleMessageDelivery(deliverEventArgs);
-                        }
+                        HandleMessageDelivery(deliverEventArgs);
                     }
-                    catch (EndOfStreamException)
+                    else
                     {
-                        // do nothing here, EOS fired when queue is closed
-                        // Looks like the connection has gone away, so wait a little while
-                        // before continuing to poll the queue
-                        Thread.Sleep(10);
+                        Thread.Sleep(0);
                     }
                 }
             });
@@ -72,15 +61,21 @@ namespace EasyNetQ
             var consumerTag = basicDeliverEventArgs.ConsumerTag;
             if (!subscriptions.ContainsKey(consumerTag))
             {
-                throw new EasyNetQException("No callback found for ConsumerTag {0}", consumerTag);
+                logger.DebugWrite("No subscription for consumerTag: {0}", consumerTag);
+                return;
+            }
+
+            var subscriptionInfo = subscriptions[consumerTag];
+            if (!subscriptionInfo.Consumer.IsRunning)
+            {
+                // this message's consumer has stopped, so just return
+                return;
             }
 
             logger.DebugWrite("Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'", 
                 basicDeliverEventArgs.RoutingKey, 
                 basicDeliverEventArgs.BasicProperties.CorrelationId,
                 consumerTag);
-
-            var subscriptionInfo = subscriptions[consumerTag];
 
             try
             {
@@ -98,17 +93,17 @@ namespace EasyNetQ
                     if(task.IsFaulted)
                     {
                         var exception = task.Exception;
-                        logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
-                        consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
+                        HandleErrorInSubscriptionHandler(basicDeliverEventArgs, subscriptionInfo, exception);
                     }
-                    DoAck(basicDeliverEventArgs, subscriptionInfo);
+                    else
+                    {
+                        DoAck(basicDeliverEventArgs, subscriptionInfo);
+                    }
                 });
             }
             catch (Exception exception)
             {
-                logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
-                consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
-                DoAck(basicDeliverEventArgs, subscriptionInfo);
+                HandleErrorInSubscriptionHandler(basicDeliverEventArgs, subscriptionInfo, exception);
             }
             finally
             {
@@ -117,6 +112,16 @@ namespace EasyNetQ
                     subscriptions.Remove(consumerTag);
                 }
             }
+        }
+
+        private void HandleErrorInSubscriptionHandler(
+            BasicDeliverEventArgs basicDeliverEventArgs,
+            SubscriptionInfo subscriptionInfo,
+            Exception exception)
+        {
+            logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
+            consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
+            DoAck(basicDeliverEventArgs, subscriptionInfo);
         }
 
         private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo)
@@ -169,7 +174,7 @@ namespace EasyNetQ
             bool modelIsSingleUse, 
             MessageCallback callback)
         {
-            var consumer = new EasyNetQConsumer(model, sharedQueue);
+            var consumer = new EasyNetQConsumer(model, queue);
             var consumerTag = Guid.NewGuid().ToString();
             consumer.ConsumerTag = consumerTag;
             subscriptions.Add(consumerTag, new SubscriptionInfo(subscriptionAction, consumer, callback, modelIsSingleUse, model));
@@ -179,13 +184,7 @@ namespace EasyNetQ
 
         public void ClearConsumers()
         {
-            sharedQueue.Close(); // Dequeue will stop blocking and throw an EndOfStreamException
-            lock (sharedQueueLock)
-            {
-                logger.DebugWrite("Clearing consumer subscriptions");
-                sharedQueue = new SharedQueue();
-                subscriptions.Clear();
-            }
+            subscriptions.Clear();
         }
 
         private bool disposed = false;
@@ -193,7 +192,6 @@ namespace EasyNetQ
         {
             if (disposed) return;
             consumerErrorStrategy.Dispose();
-            sharedQueue.Close();
 
             foreach (var subscriptionInfo in subscriptions)
             {

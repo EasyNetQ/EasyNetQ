@@ -49,6 +49,9 @@ namespace EasyNetQ.Tests
         /// <summary>
         /// Ping-pong between two EasyNetQ instances. Try stopping and starting RabbitMQ
         /// while this test is running.
+        /// 
+        /// A third subscriber taps FromA messages. Try deleting its queue, the other subscribers
+        /// should continue to ping-pong
         /// </summary>
         public void Server_goes_away_and_comes_back_during_subscription()
         {
@@ -60,7 +63,10 @@ namespace EasyNetQ.Tests
 
                 // ping pong between busA and busB
                 busB.Subscribe<FromA>("restarted", message => Reply<FromB>(message, busB, "B"));
-                busA.Subscribe<FromB>("restarted", message => Reply<FromA>(message, busA, "A"));
+
+                busA.Subscribe<FromB>("restarted_1", message => Reply<FromA>(message, busA, "A"));
+                busA.Subscribe<FromB>("restarted_2", message => 
+                    Console.WriteLine("Subscriber 2 got {0} {1}", message.Text, message.Id));
 
                 Console.WriteLine("Subscribed");
 

@@ -149,7 +149,7 @@ namespace EasyNetQ
                 throw new EasyNetQException("This bus has been disposed");
             }
 
-            var subscriptionAction = new SubscriptionAction();
+            var subscriptionAction = new SubscriptionAction(queue.IsSingleUse);
 
             subscriptionAction.Action = () =>
             {
@@ -187,7 +187,10 @@ namespace EasyNetQ
 
         private void AddSubscriptionAction(SubscriptionAction subscriptionAction)
         {
-            subscribeActions.Add(subscriptionAction);
+            if(subscriptionAction.IsMultiUse)
+            {
+                subscribeActions.Add(subscriptionAction);
+            }
 
             try
             {
@@ -264,8 +267,9 @@ namespace EasyNetQ
 
     public class SubscriptionAction
     {
-        public SubscriptionAction()
+        public SubscriptionAction(bool isSingleUse)
         {
+            IsSingleUse = isSingleUse;
             ClearAction();
         }
 
@@ -275,5 +279,7 @@ namespace EasyNetQ
         }
 
         public Action Action { get; set; }
+        public bool IsSingleUse { get; private set; }
+        public bool IsMultiUse { get { return !IsSingleUse; } }
     }
 }
