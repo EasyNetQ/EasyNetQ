@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Default">
+
+    <PropertyGroup>
+        <BaseDir>$(MSBuildProjectDirectory)\..</BaseDir>
+        <OutputDir>$(BaseDir)\bin</OutputDir>
+        <Tools>$(BaseDir)\Tools</Tools>
+        <MSBuildCommunityTasksPath>$(Tools)\MSBuildCommunityTasks</MSBuildCommunityTasksPath>
+        <Nunit>$(Tools)\NUnit\2.5</Nunit>
+        <Package>$(BaseDir)\Package</Package>
+    </PropertyGroup>
+
+    <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
+
+    <Target Name="Default" DependsOnTargets="Build; Test; Package" />
+
+    <ItemGroup>
+        <ProjectToBuild Include="..\Source\EasyNetQ.sln">
+            <Properties>OutputPath=$(OutputDir);Configuration=Release</Properties>
+        </ProjectToBuild>
+    </ItemGroup>
+
+    <Target Name="Build">
+        <MSBuild Projects="@(ProjectToBuild)" Targets="Clean;Rebuild"/>
+    </Target>
+
+    <Target Name="Test" DependsOnTargets="Build">
+        <CreateItem Include="$(OutputDir)\*.Tests.dll">  
+            <Output TaskParameter="Include" ItemName="TestAssembly" />  
+        </CreateItem> 
+        <NUnit ToolPath="$(Nunit)" DisableShadowCopy="true" Assemblies="@(TestAssembly)" Framework="4.0.30319" Force32Bit="true" />
+    </Target>
+
+    <!-- TODO: Get NuGet packaging to work -->
+    <Target Name="Package" DependsOnTargets="Build">
+        <Copy SourceFiles="$(Package)\EasyNetQ.nuspec" DestinationFolder="$(OutputDir)" />
+    </Target>
+
+</Project>
