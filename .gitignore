@@ -14,6 +14,9 @@ _ReSharper.*
 *.crunchproject.local.xml
 *.crunchsolution.local.xml
 
+# Ignore test output
+TestResult.xml
+
 # Ignore NuGet package files.
 *.nupkg
 lib

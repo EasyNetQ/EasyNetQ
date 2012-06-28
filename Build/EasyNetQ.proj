@@ -16,7 +16,7 @@
     <Target Name="Default" DependsOnTargets="Build; Test; Package" />
 
     <ItemGroup>
-        <ProjectToBuild Include="..\Source\EasyNetQ.sln">
+        <ProjectToBuild Include="$(BaseDir)\Source\EasyNetQ.sln">
             <Properties>OutputPath=$(OutputDir);Configuration=Release</Properties>
         </ProjectToBuild>
     </ItemGroup>
