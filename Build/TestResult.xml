@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="D:\Source\EasyNetQ\bin\EasyNetQ.Hosepipe.Tests.dll" total="71" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2012-06-28" time="15:54:38">
-  <environment nunit-version="2.5.10.11092" clr-version="2.0.50727.5456" os-version="Microsoft Windows NT 6.1.7601 Service Pack 1" platform="Win32NT" cwd="D:\Source\EasyNetQ\build" machine-name="THOMAS" user="mike.hadlow" user-domain="15BELOW" />
+<test-results name="D:\Source\EasyNetQ\bin\EasyNetQ.Hosepipe.Tests.dll" total="71" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2012-06-28" time="17:05:29">
+  <environment nunit-version="2.5.10.11092" clr-version="2.0.50727.5456" os-version="Microsoft Windows NT 6.1.7601 Service Pack 1" platform="Win32NT" cwd="D:\Source\EasyNetQ\Build" machine-name="THOMAS" user="mike.hadlow" user-domain="15BELOW" />
   <culture-info current-culture="en-GB" current-uiculture="en-US" />
-  <test-suite type="Test Project" name="" executed="True" result="Success" success="True" time="2.138" asserts="0">
+  <test-suite type="Test Project" name="" executed="True" result="Success" success="True" time="2.170" asserts="0">
     <results>
-      <test-suite type="Assembly" name="D:\Source\EasyNetQ\bin\EasyNetQ.Hosepipe.Tests.dll" executed="True" result="Success" success="True" time="0.373" asserts="0">
+      <test-suite type="Assembly" name="D:\Source\EasyNetQ\bin\EasyNetQ.Hosepipe.Tests.dll" executed="True" result="Success" success="True" time="0.391" asserts="0">
         <results>
-          <test-suite type="Namespace" name="EasyNetQ" executed="True" result="Success" success="True" time="0.369" asserts="0">
+          <test-suite type="Namespace" name="EasyNetQ" executed="True" result="Success" success="True" time="0.387" asserts="0">
             <results>
-              <test-suite type="Namespace" name="Hosepipe" executed="True" result="Success" success="True" time="0.369" asserts="0">
+              <test-suite type="Namespace" name="Hosepipe" executed="True" result="Success" success="True" time="0.386" asserts="0">
                 <results>
-                  <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.368" asserts="0">
+                  <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.386" asserts="0">
                     <results>
-                      <test-suite type="TestFixture" name="ArgParserTests" executed="True" result="Success" success="True" time="0.096" asserts="0">
+                      <test-suite type="TestFixture" name="ArgParserTests" executed="True" result="Success" success="True" time="0.105" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Hosepipe.Tests.ArgParserTests.Should_be_able_to_retrieve_args_by_key" executed="True" result="Success" success="True" time="0.077" asserts="4" />
+                          <test-case name="EasyNetQ.Hosepipe.Tests.ArgParserTests.Should_be_able_to_retrieve_args_by_key" executed="True" result="Success" success="True" time="0.087" asserts="4" />
                           <test-case name="EasyNetQ.Hosepipe.Tests.ArgParserTests.Should_be_able_to_retrieve_args_by_position" executed="True" result="Success" success="True" time="0.002" asserts="4" />
-                          <test-case name="EasyNetQ.Hosepipe.Tests.ArgParserTests.Should_be_able_to_retrieve_args_by_position_and_key" executed="True" result="Success" success="True" time="0.001" asserts="2" />
+                          <test-case name="EasyNetQ.Hosepipe.Tests.ArgParserTests.Should_be_able_to_retrieve_args_by_position_and_key" executed="True" result="Success" success="True" time="0.000" asserts="2" />
                           <test-case name="EasyNetQ.Hosepipe.Tests.ArgParserTests.Should_regex_spike" executed="True" result="Success" success="True" time="0.001" asserts="0" />
                         </results>
                       </test-suite>
-                      <test-suite type="TestFixture" name="ErrorMessageRepublishSpike" executed="True" result="Success" success="True" time="0.239" asserts="0">
+                      <test-suite type="TestFixture" name="ErrorMessageRepublishSpike" executed="True" result="Success" success="True" time="0.243" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Hosepipe.Tests.ErrorMessageRepublishSpike.Should_deserialise_error_message_correctly" executed="True" result="Success" success="True" time="0.237" asserts="2" />
-                          <test-case name="EasyNetQ.Hosepipe.Tests.ErrorMessageRepublishSpike.Should_fail_to_deseralize_some_other_random_message" executed="True" result="Success" success="True" time="0.000" asserts="1" />
+                          <test-case name="EasyNetQ.Hosepipe.Tests.ErrorMessageRepublishSpike.Should_deserialise_error_message_correctly" executed="True" result="Success" success="True" time="0.241" asserts="2" />
+                          <test-case name="EasyNetQ.Hosepipe.Tests.ErrorMessageRepublishSpike.Should_fail_to_deseralize_some_other_random_message" executed="True" result="Success" success="True" time="0.001" asserts="1" />
                         </results>
                       </test-suite>
                       <test-suite type="TestFixture" name="ErrorRetryTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
@@ -41,12 +41,12 @@
                       <test-suite type="TestFixture" name="ProgramTests" executed="True" result="Success" success="True" time="0.011" asserts="0">
                         <results>
                           <test-case name="EasyNetQ.Hosepipe.Tests.ProgramTests.Should_insert_messages_with_insert" executed="True" result="Success" success="True" time="0.005" asserts="3" />
-                          <test-case name="EasyNetQ.Hosepipe.Tests.ProgramTests.Should_output_messages_to_directory_with_dump" executed="True" result="Success" success="True" time="0.001" asserts="3" />
+                          <test-case name="EasyNetQ.Hosepipe.Tests.ProgramTests.Should_output_messages_to_directory_with_dump" executed="True" result="Success" success="True" time="0.002" asserts="3" />
                           <test-case name="EasyNetQ.Hosepipe.Tests.ProgramTests.Should_retry_errors_with_retry" executed="True" result="Success" success="True" time="0.001" asserts="2" />
                         </results>
                       </test-suite>
-                      <test-suite type="TestFixture" name="QueueInsertionTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
-                      <test-suite type="TestFixture" name="QueueRetrievalTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
+                      <test-suite type="TestFixture" name="QueueInsertionTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
+                      <test-suite type="TestFixture" name="QueueRetrievalTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
                     </results>
                   </test-suite>
                 </results>
@@ -55,17 +55,17 @@
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="Assembly" name="D:\Source\EasyNetQ\bin\EasyNetQ.Scheduler.Tests.dll" executed="True" result="Success" success="True" time="0.368" asserts="0">
+      <test-suite type="Assembly" name="D:\Source\EasyNetQ\bin\EasyNetQ.Scheduler.Tests.dll" executed="True" result="Success" success="True" time="0.426" asserts="0">
         <results>
-          <test-suite type="Namespace" name="EasyNetQ" executed="True" result="Success" success="True" time="0.363" asserts="0">
+          <test-suite type="Namespace" name="EasyNetQ" executed="True" result="Success" success="True" time="0.421" asserts="0">
             <results>
-              <test-suite type="Namespace" name="Scheduler" executed="True" result="Success" success="True" time="0.363" asserts="0">
+              <test-suite type="Namespace" name="Scheduler" executed="True" result="Success" success="True" time="0.421" asserts="0">
                 <results>
-                  <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.363" asserts="0">
+                  <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.421" asserts="0">
                     <results>
-                      <test-suite type="TestFixture" name="SchedulerServiceTests" executed="True" result="Success" success="True" time="0.360" asserts="0">
+                      <test-suite type="TestFixture" name="SchedulerServiceTests" executed="True" result="Success" success="True" time="0.420" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Scheduler.Tests.SchedulerServiceTests.Should_get_pending_scheduled_messages_and_update_them" executed="True" result="Success" success="True" time="0.356" asserts="0" />
+                          <test-case name="EasyNetQ.Scheduler.Tests.SchedulerServiceTests.Should_get_pending_scheduled_messages_and_update_them" executed="True" result="Success" success="True" time="0.415" asserts="0" />
                         </results>
                       </test-suite>
                     </results>
@@ -76,76 +76,76 @@
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="Assembly" name="D:\Source\EasyNetQ\bin\EasyNetQ.Tests.dll" executed="True" result="Success" success="True" time="0.991" asserts="0">
+      <test-suite type="Assembly" name="D:\Source\EasyNetQ\bin\EasyNetQ.Tests.dll" executed="True" result="Success" success="True" time="0.928" asserts="0">
         <results>
-          <test-suite type="Namespace" name="EasyNetQ" executed="True" result="Success" success="True" time="0.981" asserts="0">
+          <test-suite type="Namespace" name="EasyNetQ" executed="True" result="Success" success="True" time="0.925" asserts="0">
             <results>
-              <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.974" asserts="0">
+              <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.924" asserts="0">
                 <results>
-                  <test-suite type="TestFixture" name="BinarySerializerTests" executed="True" result="Success" success="True" time="0.018" asserts="0">
+                  <test-suite type="TestFixture" name="BinarySerializerTests" executed="True" result="Success" success="True" time="0.016" asserts="0">
                     <results>
-                      <test-case name="EasyNetQ.Tests.BinarySerializerTests.Should_be_able_to_serialize_and_deserialize_a_message" executed="True" result="Success" success="True" time="0.013" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.BinarySerializerTests.Should_be_able_to_serialize_and_deserialize_a_message" executed="True" result="Success" success="True" time="0.010" asserts="1" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="ConnectionErrorConditionsTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
-                  <test-suite type="TestFixture" name="ConnectionStringTests" executed="True" result="Success" success="True" time="0.013" asserts="0">
+                  <test-suite type="TestFixture" name="ConnectionErrorConditionsTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
+                  <test-suite type="TestFixture" name="ConnectionStringTests" executed="True" result="Success" success="True" time="0.018" asserts="0">
                     <results>
-                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_connection_string_into_name_value_pairs" executed="True" result="Success" success="True" time="0.001" asserts="3" />
+                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_connection_string_into_name_value_pairs" executed="True" result="Success" success="True" time="0.002" asserts="3" />
                       <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_host" executed="True" result="Success" success="True" time="0.000" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_password" executed="True" result="Success" success="True" time="0.000" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_port" executed="True" result="Success" success="True" time="0.000" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_username" executed="True" result="Success" success="True" time="0.000" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_password" executed="True" result="Success" success="True" time="0.001" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_port" executed="True" result="Success" success="True" time="0.001" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_username" executed="True" result="Success" success="True" time="0.001" asserts="1" />
                       <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_parse_virtualHost" executed="True" result="Success" success="True" time="0.000" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_throw_on_malformed_string" executed="True" result="Success" success="True" time="0.004" asserts="0" />
+                      <test-case name="EasyNetQ.Tests.ConnectionStringTests.Should_throw_on_malformed_string" executed="True" result="Success" success="True" time="0.005" asserts="0" />
                     </results>
                   </test-suite>
                   <test-suite type="TestFixture" name="ConsumerErrorConditionsTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
-                  <test-suite type="TestFixture" name="CorrelationIdTests" executed="True" result="Success" success="True" time="0.192" asserts="0">
+                  <test-suite type="TestFixture" name="CorrelationIdTests" executed="True" result="Success" success="True" time="0.198" asserts="0">
                     <results>
-                      <test-case name="EasyNetQ.Tests.CorrelationIdTests.Should_write_correlation_id_to_properties" executed="True" result="Success" success="True" time="0.191" asserts="3" />
+                      <test-case name="EasyNetQ.Tests.CorrelationIdTests.Should_write_correlation_id_to_properties" executed="True" result="Success" success="True" time="0.198" asserts="3" />
                     </results>
                   </test-suite>
                   <test-suite type="TestFixture" name="DefaultConsumerErrorStrategyTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
-                  <test-suite type="Namespace" name="InMemoryClient" executed="True" result="Success" success="True" time="0.222" asserts="0">
+                  <test-suite type="Namespace" name="InMemoryClient" executed="True" result="Success" success="True" time="0.239" asserts="0">
                     <results>
-                      <test-suite type="TestFixture" name="BasicPublishSubscribeTests" executed="True" result="Success" success="True" time="0.151" asserts="0">
+                      <test-suite type="TestFixture" name="BasicPublishSubscribeTests" executed="True" result="Success" success="True" time="0.172" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_be_able_to_publish" executed="True" result="Success" success="True" time="0.046" asserts="0" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_be_able_to_publish_and_subscribe" executed="True" result="Success" success="True" time="0.086" asserts="1" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_be_able_to_subscribe" executed="True" result="Success" success="True" time="0.001" asserts="0" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_load_share_between_multiple_consumers" executed="True" result="Success" success="True" time="0.004" asserts="2" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_work_with_topics" executed="True" result="Success" success="True" time="0.007" asserts="2" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_be_able_to_publish" executed="True" result="Success" success="True" time="0.047" asserts="0" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_be_able_to_publish_and_subscribe" executed="True" result="Success" success="True" time="0.105" asserts="1" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_be_able_to_subscribe" executed="True" result="Success" success="True" time="0.002" asserts="0" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_load_share_between_multiple_consumers" executed="True" result="Success" success="True" time="0.008" asserts="2" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicPublishSubscribeTests.Should_work_with_topics" executed="True" result="Success" success="True" time="0.004" asserts="2" />
                         </results>
                       </test-suite>
-                      <test-suite type="TestFixture" name="BasicRequestResponseTests" executed="True" result="Success" success="True" time="0.050" asserts="0">
+                      <test-suite type="TestFixture" name="BasicRequestResponseTests" executed="True" result="Success" success="True" time="0.041" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicRequestResponseTests.Should_be_able_to_do_basic_request_response" executed="True" result="Success" success="True" time="0.034" asserts="1" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicRequestResponseTests.Should_request_closures_work" executed="True" result="Success" success="True" time="0.014" asserts="3" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicRequestResponseTests.Should_be_able_to_do_basic_request_response" executed="True" result="Success" success="True" time="0.031" asserts="1" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BasicRequestResponseTests.Should_request_closures_work" executed="True" result="Success" success="True" time="0.007" asserts="3" />
                         </results>
                       </test-suite>
-                      <test-suite type="TestFixture" name="BindingInfoTests" executed="True" result="Success" success="True" time="0.015" asserts="0">
+                      <test-suite type="TestFixture" name="BindingInfoTests" executed="True" result="Success" success="True" time="0.017" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Dot_separated_keys_should_match_with_wild_cards" executed="True" result="Success" success="True" time="0.001" asserts="3" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Everything_should_match_hash" executed="True" result="Success" success="True" time="0.001" asserts="2" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_exact_match_should_match" executed="True" result="Success" success="True" time="0.000" asserts="2" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Dot_separated_keys_should_match_with_wild_cards" executed="True" result="Success" success="True" time="0.002" asserts="3" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Everything_should_match_hash" executed="True" result="Success" success="True" time="0.000" asserts="2" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_exact_match_should_match" executed="True" result="Success" success="True" time="0.001" asserts="2" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_hash_at_end" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_hash_at_start" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_hash_in_middle" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_hash_with_zero_chars" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_single_hash" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_single_hash_with_empty_string" executed="True" result="Success" success="True" time="0.000" asserts="1" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_sinlge_values" executed="True" result="Success" success="True" time="0.000" asserts="2" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_sinlge_values" executed="True" result="Success" success="True" time="0.001" asserts="2" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_match_wild_card" executed="True" result="Success" success="True" time="0.000" asserts="4" />
                           <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_not_match_hash_if_end_does_not_match" executed="True" result="Success" success="True" time="0.000" asserts="1" />
-                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_not_match_wrong_numbers_of_parts" executed="True" result="Success" success="True" time="0.001" asserts="3" />
+                          <test-case name="EasyNetQ.Tests.InMemoryClient.BindingInfoTests.Should_not_match_wrong_numbers_of_parts" executed="True" result="Success" success="True" time="0.000" asserts="3" />
                         </results>
                       </test-suite>
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="JsonSerializerTests" executed="True" result="Success" success="True" time="0.038" asserts="0">
+                  <test-suite type="TestFixture" name="JsonSerializerTests" executed="True" result="Success" success="True" time="0.037" asserts="0">
                     <results>
                       <test-case name="EasyNetQ.Tests.JsonSerializerTests.Should_be_able_to_serialize_and_deserialize_a_message" executed="True" result="Success" success="True" time="0.001" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.JsonSerializerTests.Should_be_able_to_serialize_basic_properties" executed="True" result="Success" success="True" time="0.036" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.JsonSerializerTests.Should_be_able_to_serialize_basic_properties" executed="True" result="Success" success="True" time="0.033" asserts="1" />
                     </results>
                   </test-suite>
                   <test-suite type="TestFixture" name="MessagePropertiesTests" executed="True" result="Success" success="True" time="0.002" asserts="0">
@@ -154,36 +154,36 @@
                       <test-case name="EasyNetQ.Tests.MessagePropertiesTests.Should_copy_to_rabbit_client_properties" executed="True" result="Success" success="True" time="0.000" asserts="3" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="ModelCleanupTests" executed="True" result="Success" success="True" time="0.028" asserts="0">
+                  <test-suite type="TestFixture" name="ModelCleanupTests" executed="True" result="Success" success="True" time="0.015" asserts="0">
                     <results>
                       <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_publish_model" executed="True" result="Success" success="True" time="0.002" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_request_response_model" executed="True" result="Success" success="True" time="0.006" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_respond_model" executed="True" result="Success" success="True" time="0.003" asserts="0" />
-                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_subscribe_async_model" executed="True" result="Success" success="True" time="0.004" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_subscribe_model" executed="True" result="Success" success="True" time="0.007" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_request_response_model" executed="True" result="Success" success="True" time="0.003" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_respond_model" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_subscribe_async_model" executed="True" result="Success" success="True" time="0.003" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.ModelCleanupTests.Should_cleanup_subscribe_model" executed="True" result="Success" success="True" time="0.001" asserts="1" />
                     </results>
                   </test-suite>
                   <test-suite type="TestFixture" name="MultiThreadedPublisherTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
                   <test-suite type="TestFixture" name="PublishSubscribeTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
-                  <test-suite type="TestFixture" name="PublishSubscribeWithTopicsTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
-                  <test-suite type="TestFixture" name="RabbitAdvancedBusTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
-                  <test-suite type="TestFixture" name="RequestResponseTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
+                  <test-suite type="TestFixture" name="PublishSubscribeWithTopicsTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
+                  <test-suite type="TestFixture" name="RabbitAdvancedBusTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
+                  <test-suite type="TestFixture" name="RequestResponseTests" executed="True" result="Inconclusive" success="False" time="0.001" asserts="0" />
                   <test-suite type="TestFixture" name="SchedulingTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
                   <test-suite type="TestFixture" name="SubscribeAsyncTests" executed="True" result="Inconclusive" success="False" time="0.000" asserts="0" />
-                  <test-suite type="Namespace" name="Topology" executed="True" result="Success" success="True" time="0.344" asserts="0">
+                  <test-suite type="Namespace" name="Topology" executed="True" result="Success" success="True" time="0.317" asserts="0">
                     <results>
-                      <test-suite type="TestFixture" name="TopologyTests" executed="True" result="Success" success="True" time="0.340" asserts="0">
+                      <test-suite type="TestFixture" name="TopologyTests" executed="True" result="Success" success="True" time="0.317" asserts="0">
                         <results>
-                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_bind_a_queue_to_an_exchange" executed="True" result="Success" success="True" time="0.293" asserts="0" />
+                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_bind_a_queue_to_an_exchange" executed="True" result="Success" success="True" time="0.275" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_bind_a_queue_to_an_exchange_and_then_to_an_exchange" executed="True" result="Success" success="True" time="0.004" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_bind_an_exchange_to_an_exchange" executed="True" result="Success" success="True" time="0.002" asserts="0" />
-                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_bind_an_unnamed_queue_to_an_exchange" executed="True" result="Success" success="True" time="0.010" asserts="0" />
+                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_bind_an_unnamed_queue_to_an_exchange" executed="True" result="Success" success="True" time="0.009" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_be_able_to_have_multiple_bindings_to_an_exchange" executed="True" result="Success" success="True" time="0.003" asserts="0" />
-                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_direct_exchange" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_direct_exchange" executed="True" result="Success" success="True" time="0.000" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_durable_queue" executed="True" result="Success" success="True" time="0.001" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_durable_queue_with_arguments" executed="True" result="Success" success="True" time="0.001" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_fanout_exchange" executed="True" result="Success" success="True" time="0.001" asserts="0" />
-                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_topic_exchange" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                          <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_topic_exchange" executed="True" result="Success" success="True" time="0.000" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_a_transiet_queue" executed="True" result="Success" success="True" time="0.001" asserts="0" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_create_an_unnamed_transient_queue" executed="True" result="Success" success="True" time="0.002" asserts="1" />
                           <test-case name="EasyNetQ.Tests.Topology.TopologyTests.Should_get_the_default_exchange" executed="True" result="Success" success="True" time="0.001" asserts="0" />
@@ -191,20 +191,20 @@
                       </test-suite>
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="TypeNameSerializerTests" executed="True" result="Success" success="True" time="0.006" asserts="0">
+                  <test-suite type="TestFixture" name="TypeNameSerializerTests" executed="True" result="Success" success="True" time="0.002" asserts="0">
                     <results>
-                      <test-case name="EasyNetQ.Tests.TypeNameSerializerTests.Should_serialize_a_custom_type" executed="True" result="Success" success="True" time="0.001" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.TypeNameSerializerTests.Should_serialize_a_custom_type" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                       <test-case name="EasyNetQ.Tests.TypeNameSerializerTests.Should_serialize_a_type_name" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="When_publishing_a_message" executed="True" result="Success" success="True" time="0.019" asserts="0">
+                  <test-suite type="TestFixture" name="When_publishing_a_message" executed="True" result="Success" success="True" time="0.016" asserts="0">
                     <results>
-                      <test-case name="EasyNetQ.Tests.When_publishing_a_message.Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to" executed="True" result="Success" success="True" time="0.012" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.When_publishing_a_message.Should_use_exchange_name_from_conventions_to_create_the_exchange" executed="True" result="Success" success="True" time="0.002" asserts="1" />
-                      <test-case name="EasyNetQ.Tests.When_publishing_a_message.Should_use_topic_name_from_conventions_as_the_topic_to_publish_to" executed="True" result="Success" success="True" time="0.002" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.When_publishing_a_message.Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to" executed="True" result="Success" success="True" time="0.003" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.When_publishing_a_message.Should_use_exchange_name_from_conventions_to_create_the_exchange" executed="True" result="Success" success="True" time="0.001" asserts="1" />
+                      <test-case name="EasyNetQ.Tests.When_publishing_a_message.Should_use_topic_name_from_conventions_as_the_topic_to_publish_to" executed="True" result="Success" success="True" time="0.000" asserts="1" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="When_using_default_conventions" executed="True" result="Success" success="True" time="0.014" asserts="0">
+                  <test-suite type="TestFixture" name="When_using_default_conventions" executed="True" result="Success" success="True" time="0.003" asserts="0">
                     <results>
                       <test-case name="EasyNetQ.Tests.When_using_default_conventions.The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method" executed="True" result="Success" success="True" time="0.001" asserts="1" />
                       <test-case name="EasyNetQ.Tests.When_using_default_conventions.The_default_queue_naming_convention_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id" executed="True" result="Success" success="True" time="0.000" asserts="1" />

@@ -13,3 +13,7 @@ _ReSharper.*
 # Ignore NCrunch cache files.
 *.crunchproject.local.xml
 *.crunchsolution.local.xml
+
+# Ignore NuGet package files.
+*.nupkg
+lib

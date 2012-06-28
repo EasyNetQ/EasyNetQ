@@ -1,16 +1,18 @@
-<?xml version="1.0"?>
-<package >
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
+    <id>EasyNetQ</id>
+    <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
+    <version>0.6.2.0</version>
+    <title>EasyNetQ</title>
     <authors>Mike Hadlow, Chris Edwards, A Hazelwood</authors>
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/mikehadlow/EasyNetQ/blob/master/licence.txt</licenseUrl>
     <projectUrl>https://github.com/mikehadlow/EasyNetQ/wiki/Introduction</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>EasyNetQ is a simple, opinionated .NET API for RabbitMQ</description>
-    <releaseNotes>Breaking change for Publish and Request. New Advanced API</releaseNotes>
+    <releaseNotes>
+    </releaseNotes>
     <copyright>Copyright Mike Hadlow 2012</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>

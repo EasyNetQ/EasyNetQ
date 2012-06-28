@@ -7,6 +7,7 @@
         <Tools>$(BaseDir)\Tools</Tools>
         <MSBuildCommunityTasksPath>$(Tools)\MSBuildCommunityTasks</MSBuildCommunityTasksPath>
         <Nunit>$(Tools)\NUnit\2.5</Nunit>
+        <NuGet>$(Tools)\NuGet</NuGet>
         <Package>$(BaseDir)\Package</Package>
     </PropertyGroup>
 
@@ -31,9 +32,20 @@
         <NUnit ToolPath="$(Nunit)" DisableShadowCopy="true" Assemblies="@(TestAssembly)" Framework="4.0.30319" Force32Bit="true" />
     </Target>
 
-    <!-- TODO: Get NuGet packaging to work -->
     <Target Name="Package" DependsOnTargets="Build">
-        <Copy SourceFiles="$(Package)\EasyNetQ.nuspec" DestinationFolder="$(OutputDir)" />
+        <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\lib\net40" />
+        
+        <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.dll">
+            <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+        </GetAssemblyIdentity>        
+        
+        <XmlUpdate
+            Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+            XmlFileName="$(Package)\EasyNetQ.nuspec"
+            XPath="/package/metadata/version"
+            Value="%(AsmInfo.Version)" />        
+        
+        <Exec WorkingDirectory="$(Package)" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.nuspec" /> 
     </Target>
 
 </Project>
