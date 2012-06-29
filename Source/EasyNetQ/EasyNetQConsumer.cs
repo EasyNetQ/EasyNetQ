@@ -10,14 +10,14 @@ namespace EasyNetQ
     /// </summary>
     public class EasyNetQConsumer : DefaultBasicConsumer
     {
-        private readonly ConcurrentQueue<BasicDeliverEventArgs> queue;
+        private readonly BlockingCollection<BasicDeliverEventArgs> queue;
 
-        public ConcurrentQueue<BasicDeliverEventArgs> Queue
+        public BlockingCollection<BasicDeliverEventArgs> Queue
         {
             get { return queue; }
         }
 
-        public EasyNetQConsumer(IModel model, ConcurrentQueue<BasicDeliverEventArgs> queue)
+        public EasyNetQConsumer(IModel model, BlockingCollection<BasicDeliverEventArgs> queue)
             : base(model)
         {
             this.queue = queue;
@@ -39,7 +39,7 @@ namespace EasyNetQ
         /// </summary>
         public override void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
         {
-            queue.Enqueue(new BasicDeliverEventArgs()
+            queue.Add(new BasicDeliverEventArgs()
             {
                 ConsumerTag = consumerTag,
                 DeliveryTag = deliveryTag,

@@ -21,7 +21,8 @@ namespace EasyNetQ
     {
         private readonly IEasyNetQLogger logger;
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
-        private readonly ConcurrentQueue<BasicDeliverEventArgs> queue = new ConcurrentQueue<BasicDeliverEventArgs>();
+        private readonly BlockingCollection<BasicDeliverEventArgs> queue = 
+            new BlockingCollection<BasicDeliverEventArgs>(new ConcurrentQueue<BasicDeliverEventArgs>());
 
         private readonly IDictionary<string, SubscriptionInfo> subscriptions = 
             new ConcurrentDictionary<string, SubscriptionInfo>();
@@ -40,17 +41,9 @@ namespace EasyNetQ
             {
                 while(true)
                 {
-                    if (disposed) break;                    
+                    if (disposed) break;
 
-                    BasicDeliverEventArgs deliverEventArgs;
-                    if (queue.TryDequeue(out deliverEventArgs))
-                    {
-                        HandleMessageDelivery(deliverEventArgs);
-                    }
-                    else
-                    {
-                        Thread.Sleep(0);
-                    }
+                    HandleMessageDelivery(queue.Take());
                 }
             });
             subscriptionCallbackThread.Start();
