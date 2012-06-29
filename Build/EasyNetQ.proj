@@ -2,6 +2,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Default">
 
     <PropertyGroup>
+        <BuildNumber>$(BUILD_NUMBER)</BuildNumber>
+        <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
         <BaseDir>$(MSBuildProjectDirectory)\..</BaseDir>
         <OutputDir>$(BaseDir)\bin</OutputDir>
         <Tools>$(BaseDir)\Tools</Tools>
@@ -9,19 +11,26 @@
         <Nunit>$(Tools)\NUnit\2.5</Nunit>
         <NuGet>$(Tools)\NuGet</NuGet>
         <Package>$(BaseDir)\Package</Package>
+        <Source>$(BaseDir)\Source</Source>
     </PropertyGroup>
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Build; Test; Package" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package" />
+
+    <Target Name="Version">
+        <FileUpdate Files="$(Source)\Version.cs"
+            Regex="AssemblyVersion\(&quot;(\d+)\.(\d+)\.(\d+)\.(\d+)&quot;\)"
+            ReplacementText="AssemblyVersion(&quot;$1.$2.$3.$(BuildNumber)&quot;)" />
+    </Target>
 
     <ItemGroup>
-        <ProjectToBuild Include="$(BaseDir)\Source\EasyNetQ.sln">
+        <ProjectToBuild Include="$(Source)\EasyNetQ.sln">
             <Properties>OutputPath=$(OutputDir);Configuration=Release</Properties>
         </ProjectToBuild>
     </ItemGroup>
 
-    <Target Name="Build">
+    <Target Name="Build" DependsOnTargets="Version">
         <MSBuild Projects="@(ProjectToBuild)" Targets="Clean;Rebuild"/>
     </Target>
 
@@ -33,6 +42,9 @@
     </Target>
 
     <Target Name="Package" DependsOnTargets="Build">
+
+        <Delete Files="$(Package)\*.nupkg" />
+    
         <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\lib\net40" />
         
         <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.dll">

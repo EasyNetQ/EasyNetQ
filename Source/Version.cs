@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.0.<build>
 [assembly: AssemblyVersion("0.6.2.0")]
