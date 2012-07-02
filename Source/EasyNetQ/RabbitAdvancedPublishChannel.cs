@@ -53,9 +53,11 @@ namespace EasyNetQ
             var typeName = advancedBus.SerializeType(typeof(T));
             var messageBody = advancedBus.Serializer.MessageToBytes(message.Body);
 
-            // message.Properties.persistent = true;
             message.Properties.Type = typeName;
-            message.Properties.CorrelationId = advancedBus.GetCorrelationId();
+            message.Properties.CorrelationId = 
+                string.IsNullOrEmpty(message.Properties.CorrelationId) ?
+                advancedBus.GetCorrelationId() : 
+                message.Properties.CorrelationId;
 
             Publish(exchange, routingKey, message.Properties, messageBody);
         }
