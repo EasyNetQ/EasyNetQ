@@ -99,9 +99,6 @@
     <Compile Include="Topology\TopologyBuilder.cs" />
     <Compile Include="TypeNameSerializer.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="EasyNetQ.nuspec" />
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
