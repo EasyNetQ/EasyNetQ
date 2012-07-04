@@ -4,6 +4,8 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing.v0_9_1;
 
+#pragma warning disable 67
+
 namespace EasyNetQ.InMemoryClient
 {
     public class InMemoryModel : IModel
@@ -345,3 +347,5 @@ namespace EasyNetQ.InMemoryClient
         public event BasicRecoverOkEventHandler BasicRecoverOk;
     }
 }
+
+#pragma warning restore 67

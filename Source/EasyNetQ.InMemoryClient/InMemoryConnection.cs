@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
+#pragma warning disable 67
+
 namespace EasyNetQ.InMemoryClient
 {
     /// <summary>
@@ -144,3 +146,5 @@ namespace EasyNetQ.InMemoryClient
         public event CallbackExceptionEventHandler CallbackException;
     }
 }
+
+#pragma warning restore 67

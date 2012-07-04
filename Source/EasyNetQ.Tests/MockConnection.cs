@@ -3,6 +3,8 @@ using System.Collections;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
+#pragma warning disable 67
+
 namespace EasyNetQ.Tests
 {
     public class MockConnection : IConnection
@@ -131,3 +133,5 @@ namespace EasyNetQ.Tests
         public event CallbackExceptionEventHandler CallbackException;
     }
 }
+
+#pragma warning restore 67

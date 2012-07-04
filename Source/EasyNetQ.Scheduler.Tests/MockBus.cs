@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+#pragma warning disable 67
+
 namespace EasyNetQ.Scheduler.Tests
 {
     public class MockBus : IBus
@@ -90,3 +92,5 @@ namespace EasyNetQ.Scheduler.Tests
         }
     }
 }
+
+#pragma warning restore 67

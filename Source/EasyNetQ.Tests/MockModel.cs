@@ -3,6 +3,8 @@ using System.Collections;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
+#pragma warning disable 67
+
 namespace EasyNetQ.Tests
 {
     public class MockModel : IModel
@@ -329,3 +331,5 @@ namespace EasyNetQ.Tests
         }
     }
 }
+
+#pragma warning restore 67

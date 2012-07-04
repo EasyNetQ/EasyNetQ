@@ -43,7 +43,11 @@
 
     <Target Name="Package" DependsOnTargets="Build">
 
-        <Delete Files="$(Package)\*.nupkg" />
+        <ItemGroup>
+            <FilesToDelete Include="$(Package)\*.nupkg"  />
+        </ItemGroup>
+      
+        <Delete Files="@(FilesToDelete)" />
     
         <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\lib\net40" />
         
@@ -57,7 +61,9 @@
             XPath="/package/metadata/version"
             Value="%(AsmInfo.Version)" />        
         
-        <Exec WorkingDirectory="$(Package)" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.nuspec" /> 
+        <Exec WorkingDirectory="$(Package)" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.nuspec" />
+
+        <Message Text="##teamcity[EasyNetQVersion '%(AsmInfo.Version)']" />
     </Target>
 
 </Project>
