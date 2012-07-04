@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RabbitMQ.Client;
@@ -29,14 +30,14 @@ namespace EasyNetQ.Topology
             model.ExchangeDeclare(exchangeName, exchangeType, true);
         }
 
-        public void CreateQueue(string queueName, bool durable, bool exclusive, bool autoDelete, Dictionary<string, string> arguments)
+        public void CreateQueue(string queueName, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             if (string.IsNullOrEmpty(queueName))
             {
                 throw new ArgumentException("queueName is null or empty");
             }
 
-            model.QueueDeclare(queueName, durable, exclusive, autoDelete, arguments);
+            model.QueueDeclare(queueName, durable, exclusive, autoDelete, (IDictionary)arguments);
         }
 
         public string CreateQueue()

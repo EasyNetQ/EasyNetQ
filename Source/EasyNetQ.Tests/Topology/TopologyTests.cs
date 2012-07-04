@@ -17,7 +17,10 @@ namespace EasyNetQ.Tests.Topology
         private const string exchangeName = "speedster";
         private const string queueName = "roadster";
         private const string routingKey = "drop_head";
-        private static readonly Dictionary<string, string> arguments = new Dictionary<string, string>() { { "argKey", "argValue" } };
+        private static readonly Dictionary<string, object> arguments = new Dictionary<string, object>
+        {
+            { "argKey", "argValue" }
+        };
 
         [SetUp]
         public void SetUp()

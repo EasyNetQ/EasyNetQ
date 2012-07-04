@@ -9,7 +9,7 @@ namespace EasyNetQ.Topology
         readonly bool durable;
         readonly bool exclusive;
         readonly bool autoDelete;
-        private readonly Dictionary<string, string> arguments;
+        private readonly IDictionary<string, object> arguments;
 
         private readonly IList<IBinding> bindings = new List<IBinding>();
 
@@ -18,7 +18,7 @@ namespace EasyNetQ.Topology
             return new Queue(true, false, false, queueName, null);
         }
 
-        public static IQueue DeclareDurable(string queueName, Dictionary<string, string> arguments)
+        public static IQueue DeclareDurable(string queueName, IDictionary<string, object> arguments)
         {
             return new Queue(true, false, false, queueName, arguments);
         }
@@ -33,7 +33,7 @@ namespace EasyNetQ.Topology
             return new Queue(false, true, true, null);
         }
 
-        protected Queue(bool durable, bool exclusive, bool autoDelete, string name, Dictionary<string, string> arguements)
+        protected Queue(bool durable, bool exclusive, bool autoDelete, string name, IDictionary<string, object> arguements)
             : this(durable, exclusive, autoDelete, arguements)
         {
             if(string.IsNullOrEmpty(name))
@@ -43,7 +43,7 @@ namespace EasyNetQ.Topology
             Name = name;
         }
 
-        protected Queue(bool durable, bool exclusive, bool autoDelete, Dictionary<string, string> arguments)
+        protected Queue(bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             this.autoDelete = autoDelete;
             this.exclusive = exclusive;
