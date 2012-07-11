@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -39,16 +40,25 @@ namespace EasyNetQ
         /// </summary>
         public override void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
         {
-            queue.Add(new BasicDeliverEventArgs()
+            try
             {
-                ConsumerTag = consumerTag,
-                DeliveryTag = deliveryTag,
-                Redelivered = redelivered,
-                Exchange = exchange,
-                RoutingKey = routingKey,
-                BasicProperties = properties,
-                Body = body
-            });
+                queue.Add(new BasicDeliverEventArgs()
+                {
+                    ConsumerTag = consumerTag,
+                    DeliveryTag = deliveryTag,
+                    Redelivered = redelivered,
+                    Exchange = exchange,
+                    RoutingKey = routingKey,
+                    BasicProperties = properties,
+                    Body = body
+                });
+            }
+            catch (InvalidOperationException)
+            {
+                // InvalidOperationException is thrown when queue.Add() is invoked
+                // after queue.CompleteAdding() has been called. EasyNetQ is being
+                // shut down so we shouldn't be accepting any more deliveries.
+            }
         }
 
     }

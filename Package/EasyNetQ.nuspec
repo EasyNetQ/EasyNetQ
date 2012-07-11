@@ -3,7 +3,7 @@
   <metadata>
     <id>EasyNetQ</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.6.3.202</version>
+    <version>0.6.3.0</version>
     <title>EasyNetQ</title>
     <authors>Mike Hadlow, Chris Edwards, A Hazelwood</authors>
     <owners>Mike Hadlow</owners>

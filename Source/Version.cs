@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.0.<build>
-[assembly: AssemblyVersion("0.6.3.202")]
+[assembly: AssemblyVersion("0.6.3.0")]
 
 // 0.6.3.0  Consumer Queue now uses BCL BlockingCollection.
 // 0.6.2.0  New model cleanup strategy based on consumer tracking

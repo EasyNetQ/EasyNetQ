@@ -8,7 +8,6 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using RabbitMQ.Client.Framing.v0_9_1;
-using RabbitMQ.Util;
 
 namespace EasyNetQ
 {
@@ -39,11 +38,20 @@ namespace EasyNetQ
             // run here.
             subscriptionCallbackThread = new Thread(_ =>
             {
-                while(true)
+                try
                 {
-                    if (disposed) break;
+                    while(true)
+                    {
+                        if (disposed) break;
 
-                    HandleMessageDelivery(queue.Take());
+                        HandleMessageDelivery(queue.Take());
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // InvalidOperationException is thrown when Take is called after 
+                    // queue.CompleteAdding(), this is signals that this class is being
+                    // disposed, so we allow the thread to complete.
                 }
             });
             subscriptionCallbackThread.Start();
@@ -186,6 +194,7 @@ namespace EasyNetQ
         {
             if (disposed) return;
             consumerErrorStrategy.Dispose();
+            queue.CompleteAdding();
 
             foreach (var subscriptionInfo in subscriptions)
             {
