@@ -13,6 +13,15 @@ namespace EasyNetQ.Topology
 
         private readonly IList<IBinding> bindings = new List<IBinding>();
 
+        public static IQueue Declare(
+            bool durable, 
+            bool exclusive, 
+            bool autoDelete,
+            IDictionary<string, object> arguments)
+        {
+            return new Queue(durable, exclusive, autoDelete, arguments);
+        }
+
         public static IQueue DeclareDurable(string queueName)
         {
             return new Queue(true, false, false, queueName, null);
