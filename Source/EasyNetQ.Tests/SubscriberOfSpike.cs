@@ -22,7 +22,9 @@ namespace EasyNetQ.Tests
 
         private void AutoRegisterSubscribers(IBus bus, Assembly assembly)
         {
-            var genericSubscribeMethod = bus.GetType().GetMethod("Subscribe");
+            var genericSubscribeMethod = bus.GetType().GetMember("Subscribe")
+                .Select(x => (MethodInfo)x)
+                .Single(x => x.GetParameters().Length == 2);
 
             var subscriberInfos = FindSubscribers(assembly);
 
