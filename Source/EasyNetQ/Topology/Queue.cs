@@ -22,6 +22,16 @@ namespace EasyNetQ.Topology
             return new Queue(durable, exclusive, autoDelete, arguments);
         }
 
+        public static IQueue Declare(
+            bool durable, 
+            bool exclusive, 
+            bool autoDelete,
+            string name,
+            IDictionary<string, object> arguments)
+        {
+            return new Queue(durable, exclusive, autoDelete, name, arguments);
+        }
+
         public static IQueue DeclareDurable(string queueName)
         {
             return new Queue(true, false, false, queueName, null);

@@ -20,3 +20,6 @@ TestResult.xml
 # Ignore NuGet package files.
 *.nupkg
 lib
+
+*.userprefs
+test-results
