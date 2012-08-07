@@ -63,7 +63,7 @@
         
         <Exec WorkingDirectory="$(Package)" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.nuspec" />
 
-        <Message Text="##teamcity[EasyNetQVersion '%(AsmInfo.Version)']" />
+        <Message Text="##teamcity[buildNumber '%(AsmInfo.Version)']" />
     </Target>
 
 </Project>
