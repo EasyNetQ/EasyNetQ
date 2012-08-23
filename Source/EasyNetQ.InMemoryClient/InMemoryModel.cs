@@ -44,7 +44,7 @@ namespace EasyNetQ.InMemoryClient
 
         public void ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary arguments)
         {
-            throw new NotImplementedException();
+            ExchangeDeclare(exchange, type, durable);
         }
 
         public void ExchangeDeclare(string exchange, string type, bool durable)

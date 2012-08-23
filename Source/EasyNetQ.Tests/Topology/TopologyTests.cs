@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.Topology
             var exchange = Exchange.DeclareDirect(exchangeName);
             exchange.Visit(visitor);
 
-            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true, false, null));
         }
 
         //  XT
@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.Topology
             var exchange = Exchange.DeclareTopic(exchangeName);
             exchange.Visit(visitor);
 
-            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic", true, false, null));
         }
 
         // XF
@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.Topology
             var exchange = Exchange.DeclareFanout(exchangeName);
             exchange.Visit(visitor);
 
-            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "fanout", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "fanout", true, false, null));
         }
 
         // XD (default)
@@ -124,7 +124,7 @@ namespace EasyNetQ.Tests.Topology
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, null));
-            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true, false, null));
             model.AssertWasCalled(x => x.QueueBind(queueName, exchangeName, routingKey));
         }
 
@@ -142,7 +142,7 @@ namespace EasyNetQ.Tests.Topology
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare());
-            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true, false, null));
             model.AssertWasCalled(x => x.QueueBind(rabbit_generated_queue_name, exchangeName, routingKey));
         }
 
@@ -159,7 +159,7 @@ namespace EasyNetQ.Tests.Topology
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, null));
-            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true, false, null));
             model.AssertWasCalled(x => x.QueueBind(queueName, exchangeName, "a"));
             model.AssertWasCalled(x => x.QueueBind(queueName, exchangeName, "b"));
             model.AssertWasCalled(x => x.QueueBind(queueName, exchangeName, "c"));
@@ -175,8 +175,8 @@ namespace EasyNetQ.Tests.Topology
             destinationExchange.BindTo(sourceExchange, routingKey);
             destinationExchange.Visit(visitor);
 
-            model.AssertWasCalled(x => x.ExchangeDeclare("destination", "direct", true));
-            model.AssertWasCalled(x => x.ExchangeDeclare("source", "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare("destination", "direct", true, false, null));
+            model.AssertWasCalled(x => x.ExchangeDeclare("source", "direct", true, false, null));
             model.AssertWasCalled(x => x.ExchangeBind("destination", "source", routingKey));
         }
 
@@ -194,9 +194,9 @@ namespace EasyNetQ.Tests.Topology
             queue.Visit(visitor);
 
             model.AssertWasCalled(x => x.QueueDeclare(queueName, true, false, false, null));
-            model.AssertWasCalled(x => x.ExchangeDeclare("destination", "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare("destination", "direct", true, false, null));
             model.AssertWasCalled(x => x.QueueBind(queueName, "destination", routingKey));
-            model.AssertWasCalled(x => x.ExchangeDeclare("source", "direct", true));
+            model.AssertWasCalled(x => x.ExchangeDeclare("source", "direct", true, false, null));
             model.AssertWasCalled(x => x.ExchangeBind("destination", "source", routingKey));
         }
     }
