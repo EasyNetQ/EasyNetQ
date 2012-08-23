@@ -20,14 +20,14 @@ namespace EasyNetQ.Topology
             this.model = model;
         }
 
-        public void CreateExchange(string exchangeName, string exchangeType)
+        public void CreateExchange(string exchangeName, string exchangeType, bool autoDelete, IDictionary arguments)
         {
             if(exchangeName == null)
             {
                 throw new ArgumentNullException("exchangeName");
             }
 
-            model.ExchangeDeclare(exchangeName, exchangeType, true);
+            model.ExchangeDeclare(exchangeName, exchangeType, true, autoDelete, arguments);
         }
 
         public void CreateQueue(string queueName, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
