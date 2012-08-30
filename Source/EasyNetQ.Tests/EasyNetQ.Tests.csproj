@@ -72,6 +72,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="BinarySerializerTests.cs" />
+    <Compile Include="Bugs\CannonCreateQueueExchangeUsingAdvancedAPI.cs" />
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
