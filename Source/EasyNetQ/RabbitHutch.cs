@@ -64,6 +64,7 @@ namespace EasyNetQ
                 connectionValues.VirtualHost,
                 connectionValues.UserName, 
                 connectionValues.Password, 
+                connectionValues.RequestedHeartbeat,
                 logger);
         }
 
@@ -85,13 +86,16 @@ namespace EasyNetQ
         /// <param name="password">
         /// The password to use to connect to the RabbitMQ broker.
         /// </param>
+        /// <param name="requestedHeartbeat">
+        /// The heartbeat to set for the connection. Null for no heartbeat.
+        /// </param>
         /// <param name="logger">
         /// The logger to use.
         /// </param>
         /// <returns>
         /// A new RabbitBus instance.
         /// </returns>
-        public static IBus CreateBus(string hostName, string hostPort, string virtualHost, string username, string password, IEasyNetQLogger logger)
+        public static IBus CreateBus(string hostName, string hostPort, string virtualHost, string username, string password, string requestedHeartbeat, IEasyNetQLogger logger)
         {
             if(hostName == null)
             {
@@ -124,14 +128,29 @@ namespace EasyNetQ
                 throw new FormatException("hostPort must be a valid 32-bit interger.");
             }
 
-            var connectionFactory = new ConnectionFactoryWrapper(new ConnectionFactory
+            var rabbitConnectionFactory = new ConnectionFactory
+                {
+                    HostName = hostName, 
+                    Port = port, 
+                    VirtualHost = virtualHost, 
+                    UserName = username, 
+                    Password = password
+                };
+
+            if(requestedHeartbeat != null)
             {
-                HostName = hostName,
-                Port = port,
-                VirtualHost = virtualHost,
-                UserName = username,
-                Password = password
-            });
+                ushort heartbeat;
+                if (ushort.TryParse(requestedHeartbeat, out heartbeat))
+                {
+                    rabbitConnectionFactory.RequestedHeartbeat = heartbeat;
+                }
+                else
+                {
+                    throw new FormatException("requestedHeartbeat must be a valid 32-bit interger.");
+                }
+            }
+
+            var connectionFactory = new ConnectionFactoryWrapper(rabbitConnectionFactory);
 
             var serializer = new JsonSerializer();
 
