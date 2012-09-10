@@ -12,7 +12,7 @@ namespace EasyNetQ
     {
         private readonly SerializeType serializeType;
         private readonly IEasyNetQLogger logger;
-		private readonly IConventions conventions;
+        private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
 
         public const string RpcExchange = "easy_net_q_rpc";
@@ -33,27 +33,27 @@ namespace EasyNetQ
         }
 
         public RabbitBus(
-            SerializeType serializeType, 
+            SerializeType serializeType,
             IEasyNetQLogger logger,
-			IConventions conventions, 
+            IConventions conventions,
             IAdvancedBus advancedBus)
         {
-            if(serializeType == null)
+            if (serializeType == null)
             {
                 throw new ArgumentNullException("serializeType");
             }
-            if(logger == null)
+            if (logger == null)
             {
                 throw new ArgumentNullException("logger");
             }
-            if(conventions == null)
+            if (conventions == null)
             {
                 throw new ArgumentNullException("conventions");
             }
 
             this.serializeType = serializeType;
             this.logger = logger;
-			this.conventions = conventions;
+            this.conventions = conventions;
             this.advancedBus = advancedBus;
 
             advancedBus.Connected += OnConnected;
@@ -67,15 +67,30 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
-            Subscribe(subscriptionId, "#", onMessage);
+            Subscribe(subscriptionId, onMessage, null);
+        }
+
+        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, IDictionary<string, object> arguments)
+        {
+            Subscribe(subscriptionId, "#", onMessage, arguments);
         }
 
         public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
         {
-            Subscribe(subscriptionId, Enumerable.Repeat(topic, 1), onMessage);
+            Subscribe(subscriptionId, topic, onMessage, null);
+        }
+
+        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage, IDictionary<string, object> arguments)
+        {
+            Subscribe(subscriptionId, Enumerable.Repeat(topic, 1), onMessage, arguments);
         }
 
         public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
+        {
+            Subscribe(subscriptionId, topics, onMessage, null);
+        }
+
+        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage, IDictionary<string, object> arguments)
         {
             SubscribeAsync<T>(subscriptionId, topics, msg =>
             {
@@ -90,20 +105,36 @@ namespace EasyNetQ
                     tcs.SetException(exception);
                 }
                 return tcs.Task;
-            });
+            },
+            arguments);
         }
 
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
         {
-            SubscribeAsync(subscriptionId, "#", onMessage);
+            SubscribeAsync(subscriptionId, onMessage, null);
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, IDictionary<string, object> arguments)
+        {
+            SubscribeAsync(subscriptionId, "#", onMessage, arguments);
         }
 
         public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
         {
-            SubscribeAsync(subscriptionId, Enumerable.Repeat(topic, 1), onMessage);
+            SubscribeAsync(subscriptionId, onMessage, null);
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage, IDictionary<string, object> arguments)
+        {
+            SubscribeAsync(subscriptionId, Enumerable.Repeat(topic, 1), onMessage, arguments);
         }
 
         public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
+        {
+            SubscribeAsync(subscriptionId, topics, onMessage, null);
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage, IDictionary<string, object> arguments)
         {
             if (onMessage == null)
             {
@@ -113,37 +144,47 @@ namespace EasyNetQ
             var queueName = GetQueueName<T>(subscriptionId);
             var exchangeName = GetExchangeName<T>();
 
-            var queue = Queue.DeclareDurable(queueName);
+            var queue = Queue.DeclareDurable(queueName, arguments);
             var exchange = Exchange.DeclareTopic(exchangeName);
             queue.BindTo(exchange, topics.ToArray());
 
             advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
 
-		private string GetExchangeName<T>()
-		{
-			return conventions.ExchangeNamingConvention(typeof(T));
-		}
+        private string GetExchangeName<T>()
+        {
+            return conventions.ExchangeNamingConvention(typeof(T));
+        }
 
-		private string GetQueueName<T>(string subscriptionId)
-		{
-			return conventions.QueueNamingConvention(typeof (T), subscriptionId);
-		}
+        private string GetQueueName<T>(string subscriptionId)
+        {
+            return conventions.QueueNamingConvention(typeof(T), subscriptionId);
+        }
 
         public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
         {
-            if(responder == null)
+            Respond(responder, null);
+        }
+
+        public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
+        {
+            if (responder == null)
             {
                 throw new ArgumentNullException("responder");
             }
 
-            Func<TRequest, Task<TResponse>> taskResponder = 
+            Func<TRequest, Task<TResponse>> taskResponder =
                 request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
 
-            RespondAsync(taskResponder);
+            RespondAsync(taskResponder, arguments);
         }
 
         public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
+        {
+            RespondAsync(responder, null);
+        }
+
+        public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
         {
             if (responder == null)
             {
@@ -153,7 +194,7 @@ namespace EasyNetQ
             var requestTypeName = serializeType(typeof(TRequest));
 
             var exchange = Exchange.DeclareDirect(RpcExchange);
-            var queue = Queue.DeclareDurable(requestTypeName);
+            var queue = Queue.DeclareDurable(requestTypeName, arguments);
             queue.BindTo(exchange, requestTypeName);
 
             advancedBus.Subscribe<TRequest>(queue, (requestMessage, messageRecievedInfo) =>

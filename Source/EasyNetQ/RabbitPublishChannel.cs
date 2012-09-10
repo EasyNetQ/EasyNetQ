@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
@@ -55,6 +56,11 @@ namespace EasyNetQ
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
+            Request(request, onResponse, null);
+        }
+
+        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments)
+        {
             if (onResponse == null)
             {
                 throw new ArgumentNullException("onResponse");
@@ -64,14 +70,14 @@ namespace EasyNetQ
                 throw new ArgumentNullException("request");
             }
 
-            var returnQueueName = SubscribeToResponse(onResponse);
-
+            var returnQueueName = SubscribeToResponse(onResponse, arguments);
             RequestPublish(request, returnQueueName);
         }
 
-        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
+
+        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {
-            var queue = Queue.DeclareTransient("easynetq.response." + Guid.NewGuid().ToString()).SetAsSingleUse();
+            var queue = Queue.DeclareTransient("easynetq.response." + Guid.NewGuid().ToString(), arguments).SetAsSingleUse();
 
             advancedBus.Subscribe<TResponse>(queue, (message, messageRecievedInfo) =>
             {
