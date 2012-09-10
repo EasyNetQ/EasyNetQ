@@ -33,7 +33,17 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, IDictionary<string, object> arguments)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage, IDictionary<string, object> arguments)
         {
             throw new NotImplementedException();
         }
@@ -43,7 +53,17 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage, IDictionary<string, object> arguments)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, IDictionary<string, object> arguments)
         {
             throw new NotImplementedException();
         }
@@ -53,7 +73,17 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage, IDictionary<string, object> arguments)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage, IDictionary<string, object> arguments)
         {
             throw new NotImplementedException();
         }
@@ -63,12 +93,22 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
-        public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
+        public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
         {
             throw new NotImplementedException();
         }
 
+        public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
+        {
+            throw new NotImplementedException();
+        }
+        
         public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ
 {
@@ -31,6 +32,16 @@ namespace EasyNetQ
         /// <param name="request">The request message.</param>
         /// <param name="onResponse">The action to run when the response is received.</param>
         void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse);
+
+        /// <summary>
+        /// Makes an RPC style asynchronous request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        /// <param name="onResponse">The action to run when the response is received.</param>
+        /// <param name="arguments">AMQP arguments. For e.q. Message TTL("x-message-ttl", "60"), High Availability policy("x-ha-policy", "all") and so on.</param>
+        void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments);
 
         /// <summary>
         /// The bus that created this channel
