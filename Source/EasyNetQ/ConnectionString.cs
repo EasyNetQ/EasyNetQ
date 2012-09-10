@@ -60,6 +60,11 @@ namespace EasyNetQ
             get { return GetValue("password", "guest"); }
         }
 
+        public string RequestedHeartbeat
+        {
+            get { return GetValue("requestedHeartbeat", null); }
+        }
+
         public string GetValue(string key)
         {
             if (!parametersDictionary.ContainsKey(key))
