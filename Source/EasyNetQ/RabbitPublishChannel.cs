@@ -50,7 +50,12 @@ namespace EasyNetQ
 
             var exchangeName = bus.Conventions.ExchangeNamingConvention(typeof(T));
             var exchange = Exchange.DeclareTopic(exchangeName);
-            advancedPublishChannel.Publish(exchange, topic, new Message<T>(message));
+            var easyNetQMessage = new Message<T>(message);
+
+            // by default publish persistent messages
+            easyNetQMessage.Properties.DeliveryMode = 2;
+            
+            advancedPublishChannel.Publish(exchange, topic, easyNetQMessage);
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
