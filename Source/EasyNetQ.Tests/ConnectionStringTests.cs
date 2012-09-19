@@ -7,8 +7,8 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class ConnectionStringTests
     {
-        const string connectionStringValue = 
-            "first=First Value;host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;port=12345";
+        const string connectionStringValue =
+            "first=First Value;host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3";
         private ConnectionString connectionString;
 
         [SetUp]
@@ -59,6 +59,12 @@ namespace EasyNetQ.Tests
         public void Should_parse_port()
         {
             connectionString.Port.ShouldEqual("12345");
+        }
+
+        [Test]
+        public void Should_parse_heartbeat()
+        {
+            connectionString.RequestedHeartbeat.ShouldEqual("3");
         }
     }
 }

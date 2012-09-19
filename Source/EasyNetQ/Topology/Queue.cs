@@ -47,6 +47,11 @@ namespace EasyNetQ.Topology
             return new Queue(false, true, true, queueName, null);
         }
 
+        public static IQueue DeclareTransient(string queueName, IDictionary<string, object> arguments)
+        {
+            return new Queue(false, true, true, queueName, arguments);
+        }
+
         public static IQueue DeclareTransient()
         {
             return new Queue(false, true, true, null);
