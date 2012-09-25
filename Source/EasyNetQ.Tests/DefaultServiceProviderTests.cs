@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -52,12 +53,38 @@ namespace EasyNetQ.Tests
         [Test, Explicit("Requires RabbitMQ instance")]
         public void Should_be_able_to_replace_bus_components()
         {
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = new TestLogger();
 
-            using(var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register(_ => logger)))
+            using (var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => logger)))
             {
-                // should not blow up
+                // should see the test logger on the console
             }
+        }
+    }
+
+    public class TestLogger : IEasyNetQLogger
+    {
+        public void DebugWrite(string format, params object[] args)
+        {
+            Console.WriteLine("I am the test logger");
+            Console.WriteLine(format, args);
+        }
+
+        public void InfoWrite(string format, params object[] args)
+        {
+            Console.WriteLine("I am the test logger");
+            Console.WriteLine(format, args);
+        }
+
+        public void ErrorWrite(string format, params object[] args)
+        {
+            Console.WriteLine("I am the test logger");
+            Console.WriteLine(format, args);
+        }
+
+        public void ErrorWrite(Exception exception)
+        {
+            throw new NotImplementedException();
         }
     }
 

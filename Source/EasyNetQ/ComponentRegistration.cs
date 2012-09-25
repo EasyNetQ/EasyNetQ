@@ -9,6 +9,7 @@ namespace EasyNetQ
         public static IServiceProvider CreateServiceProvider(Action<IServiceRegister> registerServices)
         {
             var serviceProvider = new DefaultServiceProvider();
+            registerServices(serviceProvider);
 
             // we only want single instances of these shared services, so instantiate them here
             var logger = new ConsoleLogger();
@@ -58,7 +59,6 @@ namespace EasyNetQ
                     x.Resolve<IAdvancedBus>()
                 ));
 
-            registerServices(serviceProvider);
             return serviceProvider;
         }
          
