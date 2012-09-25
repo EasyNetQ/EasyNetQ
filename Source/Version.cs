@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.0.<build>
-[assembly: AssemblyVersion("0.6.4.0")]
+[assembly: AssemblyVersion("0.7.0.0")]
 
 // 0.7.0.0  Added IServiceProvider to make it easy to plug in your own dependencies. Some breaking changes to RabbitHutch
 // 0.6.3.0  Consumer Queue now uses BCL BlockingCollection.
