@@ -48,6 +48,17 @@ namespace EasyNetQ.Tests
             var resolvedService = serviceProvider.Resolve<IMySecond>();
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
+
+        [Test, Explicit("Requires RabbitMQ instance")]
+        public void Should_be_able_to_replace_bus_components()
+        {
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            using(var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register(_ => logger)))
+            {
+                // should not blow up
+            }
+        }
     }
 
     public interface IMyFirst

@@ -1,7 +1,5 @@
 using System;
 using System.Configuration;
-using EasyNetQ.Loggers;
-using RabbitMQ.Client;
 
 namespace EasyNetQ
 {

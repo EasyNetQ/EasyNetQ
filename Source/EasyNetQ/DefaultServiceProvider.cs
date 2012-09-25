@@ -23,6 +23,11 @@ namespace EasyNetQ
 
         public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
         {
+            if (components.ContainsKey(typeof (TService)))
+            {
+                components.Remove(typeof (TService));
+            }
+
             components.Add(typeof(TService), serviceCreator);
             return this;
         }
