@@ -6,7 +6,9 @@ namespace EasyNetQ.Tests.SimpleRequester
 {
     class Program
     {
-        private static readonly IBus bus = RabbitHutch.CreateBus("host=localhost", new NoDebugLogger());
+        private static readonly IBus bus = RabbitHutch.CreateBus("host=localhost",
+            x => x.Register(_ => new NoDebugLogger()));
+
         private static long count = 0;
 
         private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorderA();

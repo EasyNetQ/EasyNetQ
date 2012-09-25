@@ -16,7 +16,8 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             logger = new ConsoleLogger();
-            bus = RabbitHutch.CreateBus("host=localhost", logger);
+            bus = RabbitHutch.CreateBus("host=localhost",
+                x => x.Register<IEasyNetQLogger>(_ => logger));
         }
 
         [TearDown]

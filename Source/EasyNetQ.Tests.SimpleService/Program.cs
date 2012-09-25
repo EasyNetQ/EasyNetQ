@@ -10,7 +10,8 @@ namespace EasyNetQ.Tests.SimpleService
     {
         static void Main(string[] args)
         {
-            var bus = RabbitHutch.CreateBus("host=localhost", new NoDebugLogger());
+            var bus = RabbitHutch.CreateBus("host=localhost",
+                x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
             bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
             bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
 

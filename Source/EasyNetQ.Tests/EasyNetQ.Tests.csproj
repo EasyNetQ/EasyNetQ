@@ -102,6 +102,7 @@
     <Compile Include="Sagas\RequestResponseSaga.cs" />
     <Compile Include="Sagas\SubscribePublishSaga.cs" />
     <Compile Include="SchedulingTests.cs" />
+    <Compile Include="DefaultServiceProviderTests.cs" />
     <Compile Include="SimpleSagaSpike.cs" />
     <Compile Include="SubscribeAsyncTests.cs" />
     <Compile Include="SubscriberOfSpike.cs" />

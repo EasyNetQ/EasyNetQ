@@ -55,12 +55,14 @@
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
+    <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQConsumer.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="IAdvancedBus.cs" />
     <Compile Include="IAdvancedPublishChannel.cs" />
     <Compile Include="IBus.cs" />
+    <Compile Include="IConnectionConfiguration.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
@@ -69,6 +71,7 @@
     <Compile Include="IPublishChannel.cs" />
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />
+    <Compile Include="IServiceProvider.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Message.cs" />

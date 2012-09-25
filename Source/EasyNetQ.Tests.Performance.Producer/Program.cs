@@ -22,7 +22,8 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            var bus = RabbitHutch.CreateBus("host=localhost", new NoDebugLogger());
+            var bus = RabbitHutch.CreateBus("host=localhost",
+                x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
 
             int messageCount = 0;
             var messageRateTimer = new Timer(state =>

@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using EasyNetQ.Loggers;
 using EasyNetQ.Topology;
 using NUnit.Framework;
 
@@ -24,7 +23,7 @@ namespace EasyNetQ.Tests.Bugs
         [Test, Explicit("Requires a local RabbitMQ instance")]
         public void Should_create_queue_and_exchange()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost", new ConsoleLogger()).Advanced;
+            var bus = RabbitHutch.CreateBus("host=localhost").Advanced;
             var queue = Queue.Declare(true, false, false, "testq2", new Dictionary<string, object>() { { "x-ha-policy", "all" } });
             var exchange = Exchange.DeclareTopic("exchamgename");
             queue.BindTo(exchange, "test");

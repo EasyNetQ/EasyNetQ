@@ -58,13 +58,13 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_parse_port()
         {
-            connectionString.Port.ShouldEqual("12345");
+            connectionString.Port.ShouldEqual(12345);
         }
 
         [Test]
         public void Should_parse_heartbeat()
         {
-            connectionString.RequestedHeartbeat.ShouldEqual("3");
+            connectionString.RequestedHeartbeat.ShouldEqual(3);
         }
     }
 }
