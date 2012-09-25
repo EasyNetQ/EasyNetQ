@@ -10,11 +10,16 @@ namespace EasyNetQ
         {
             var serviceProvider = new DefaultServiceProvider();
 
+            // we only want single instances of these shared services, so instantiate them here
+            var logger = new ConsoleLogger();
+            var serializer = new JsonSerializer();
+            var conventions = new Conventions();
+
             // default service registration
             serviceProvider
-                .Register<IEasyNetQLogger>(x => new ConsoleLogger())
-                .Register<ISerializer>(x => new JsonSerializer())
-                .Register<IConventions>(x => new Conventions())
+                .Register<IEasyNetQLogger>(x => logger)
+                .Register<ISerializer>(x => serializer)
+                .Register<IConventions>(x => conventions)
                 .Register<SerializeType>(x => TypeNameSerializer.Serialize)
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IConsumerErrorStrategy>(x => new DefaultConsumerErrorStrategy(

@@ -26,6 +26,11 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString)
         {
+            if(connectionString == null)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
             return CreateBus(connectionString, x => {});
         }
 
@@ -51,6 +56,10 @@ namespace EasyNetQ
             if(connectionString == null)
             {
                 throw new ArgumentNullException("connectionString");
+            }
+            if(registerServices == null)
+            {
+                throw new ArgumentNullException("registerServices");
             }
 
             var connectionValues = new ConnectionString(connectionString);
@@ -142,6 +151,15 @@ namespace EasyNetQ
         /// <returns></returns>
         public static IBus CreateBus(IConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
+            if(connectionConfiguration == null)
+            {
+                throw new ArgumentNullException("connectionConfiguration");
+            }
+            if(registerServices == null)
+            {
+                throw new ArgumentNullException("registerServices");
+            }
+
             Action<IServiceRegister> registerServices2 = x =>
             {
                 x.Register(_ => connectionConfiguration);
