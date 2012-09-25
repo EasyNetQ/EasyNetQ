@@ -48,10 +48,13 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AutoSubscriber.cs" />
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ConnectionString.cs" />
+    <Compile Include="ConsumerAttribute.cs" />
+    <Compile Include="ConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
@@ -64,6 +67,7 @@
     <Compile Include="IBus.cs" />
     <Compile Include="IConnectionConfiguration.cs" />
     <Compile Include="IConnectionFactory.cs" />
+    <Compile Include="IConsume.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
