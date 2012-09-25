@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="BusExtensions.cs" />
+    <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ConnectionString.cs" />
     <Compile Include="Conventions.cs" />
