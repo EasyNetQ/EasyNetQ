@@ -1,4 +1,5 @@
-﻿using System;
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -19,7 +20,7 @@ namespace EasyNetQ.Tests
             const string fixedSubscriptionId = "2f481170-8bc4-4d0f-a972-bd45191b1706";
             var autoSubscriber = new AutoSubscriber(busFake)
             {
-                SubscriptionIdFn = c => fixedSubscriptionId
+                GenerateSubscriptionId = c => fixedSubscriptionId
             };
 
             autoSubscriber.Subscribe(GetType().Assembly);
@@ -32,6 +33,7 @@ namespace EasyNetQ.Tests
             interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
         }
 
+        // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>
         {
             public void Consume(MessageA message) { }
@@ -152,3 +154,5 @@ namespace EasyNetQ.Tests
         }
     }
 }
+
+// ReSharper restore InconsistentNaming

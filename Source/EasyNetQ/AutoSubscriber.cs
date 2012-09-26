@@ -11,14 +11,14 @@ namespace EasyNetQ
     /// </summary>
     public class AutoSubscriber
     {
-        protected readonly IBus Bus;
+        protected readonly IBus bus;
 
         /// <summary>
         /// Responsible for resolving a concrete subscriber. Defaults to
         /// parameterless constructor. This is where you hook in your IoC
         /// framework.
         /// </summary>
-        public Func<Type, object> SubscriberFn { protected get; set; }
+        public Func<Type, object> CreateConsumer { protected get; set; }
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -28,22 +28,22 @@ namespace EasyNetQ
         /// equal keys exists, you will get round robin consumption of
         /// messages.
         /// </summary>
-        public Func<ConsumerInfo, string> SubscriptionIdFn { protected get; set; }
+        public Func<ConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
 
         public AutoSubscriber(IBus bus)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
 
-            Bus = bus;
-            SubscriberFn = Activator.CreateInstance;
-            SubscriptionIdFn = s => Guid.NewGuid().ToString();
+            this.bus = bus;
+            CreateConsumer = Activator.CreateInstance;
+            GenerateSubscriptionId = s => Guid.NewGuid().ToString();
         }
 
         /// <summary>
         /// Registers all consumers in passed assembly. The actual Subscriber instances is
-        /// created using <seealso cref="SubscriberFn"/>. The SubscriptionId per consumer
-        /// method is determined by <seealso cref="SubscriptionIdFn"/> or if the method
+        /// created using <seealso cref="CreateConsumer"/>. The SubscriptionId per consumer
+        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
         /// is marked with <see cref="ConsumerAttribute"/> with a custom SubscriptionId.
         /// </summary>
         /// <param name="assembly"></param>
@@ -54,7 +54,7 @@ namespace EasyNetQ
 
             foreach (var kv in subscriptionInfos)
             {
-                var subscriber = SubscriberFn(kv.Key);
+                var subscriber = CreateConsumer(kv.Key);
                 foreach (var subscriptionInfo in kv.Value)
                 {
                     var consumeMethod = GetConsumeMethodFor(subscriptionInfo);
@@ -64,17 +64,17 @@ namespace EasyNetQ
                     var subscriptionAttribute = GetSubscriptionAttribute(consumeMethod);
                     var subscriptionId = subscriptionAttribute != null
                                              ? subscriptionAttribute.SubscriptionId
-                                             : SubscriptionIdFn(subscriptionInfo);
+                                             : GenerateSubscriptionId(subscriptionInfo);
 
                     var busSubscribeMethod = genericBusSubscribeMethod.MakeGenericMethod(subscriptionInfo.MessageType);
-                    busSubscribeMethod.Invoke(Bus, new object[] { subscriptionId, consumeDelegate });
+                    busSubscribeMethod.Invoke(bus, new object[] { subscriptionId, consumeDelegate });
                 }
             }
         }
 
         protected virtual MethodInfo GetSubscribeMethodOfBus()
         {
-            return Bus.GetType().GetMethods()
+            return bus.GetType().GetMethods()
                 .Where(m => m.Name == "Subscribe")
                 .Select(m => new { Method = m, Params = m.GetParameters() })
                 .Single(m => m.Params.Length == 2
