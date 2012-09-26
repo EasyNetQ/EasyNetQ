@@ -11,6 +11,7 @@ namespace EasyNetQ
     /// </summary>
     public class AutoSubscriber
     {
+        protected const string ConsumeMethodName = "Consume";
         protected readonly IBus bus;
 
         /// <summary>
@@ -46,11 +47,33 @@ namespace EasyNetQ
         /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
         /// is marked with <see cref="ConsumerAttribute"/> with a custom SubscriptionId.
         /// </summary>
-        /// <param name="assembly"></param>
-        public virtual void Subscribe(Assembly assembly)
+        /// <param name="assemblies">The assembleis to scan for consumers.</param>
+        public virtual void Subscribe(params Assembly[] assemblies)
         {
+            Subscribe(typeof(IConsume<>), assemblies);
+        }
+
+        /// <summary>
+        /// Registers all consumers in passed assembly. The actual Subscriber instances is
+        /// created using <seealso cref="CreateConsumer"/>. The SubscriptionId per consumer
+        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
+        /// is marked with <see cref="ConsumerAttribute"/> with a custom SubscriptionId.
+        /// </summary>
+        /// <param name="markerType">The interface type used for defining a subscriber. Needs to have a method named 'Consume'.</param>
+        /// <param name="assemblies">The assembleis to scan for consumers.</param>
+        public virtual void Subscribe(Type markerType, params Assembly[] assemblies)
+        {
+            if(markerType == null)
+                throw new ArgumentNullException("markerType");
+
+            if (!IsValidMarkerType(markerType))
+                throw new ArgumentException(string.Format("Type '{0}' must be an interface and contain a '{1}' method.", markerType.Name, ConsumeMethodName), "markerType");
+
+            if (assemblies == null || !assemblies.Any())
+                throw new ArgumentException("No assemblies specified.", "assemblies");
+
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus();
-            var subscriptionInfos = GetSubscriptionInfos(assembly.GetTypes());
+            var subscriptionInfos = GetSubscriptionInfos(markerType, assemblies.SelectMany(a => a.GetTypes()));
 
             foreach (var kv in subscriptionInfos)
             {
@@ -72,6 +95,11 @@ namespace EasyNetQ
             }
         }
 
+        protected virtual bool IsValidMarkerType(Type markerType)
+        {
+            return markerType.IsInterface && markerType.GetMethods().Any(m => m.Name == ConsumeMethodName);
+        }
+
         protected virtual MethodInfo GetSubscribeMethodOfBus()
         {
             return bus.GetType().GetMethods()
@@ -84,7 +112,7 @@ namespace EasyNetQ
 
         protected virtual MethodInfo GetConsumeMethodFor(ConsumerInfo subscriptionInfo)
         {
-            return subscriptionInfo.ConcreteType.GetMethod("Consume", new[] { subscriptionInfo.MessageType });
+            return subscriptionInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { subscriptionInfo.MessageType });
         }
 
         protected virtual ConsumerAttribute GetSubscriptionAttribute(MethodInfo consumeMethod)
@@ -92,14 +120,12 @@ namespace EasyNetQ
             return consumeMethod.GetCustomAttributes(typeof(ConsumerAttribute), true).SingleOrDefault() as ConsumerAttribute;
         }
 
-        protected virtual IEnumerable<KeyValuePair<Type, ConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types)
+        protected virtual IEnumerable<KeyValuePair<Type, ConsumerInfo[]>> GetSubscriptionInfos(Type markerType, IEnumerable<Type> types)
         {
-            var marker = typeof(IConsume<>);
-
             foreach (var concreteType in types.Where(t => t.IsClass))
             {
                 var subscriptionInfos = concreteType.GetInterfaces()
-                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == marker)
+                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == markerType)
                     .Select(i => new ConsumerInfo(concreteType, i, i.GetGenericArguments()[0]))
                     .ToArray();
 
