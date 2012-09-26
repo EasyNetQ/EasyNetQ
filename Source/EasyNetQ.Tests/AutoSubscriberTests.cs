@@ -33,8 +33,45 @@ namespace EasyNetQ.Tests
             interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
         }
 
+        [Test]
+        public void Should_be_able_to_autosubscribe_to_several_messages_in_one_consumer_with_custom_interface()
+        {
+            var interceptedSubscriptions = new List<Tuple<string, Delegate>>();
+            var busFake = new BusFake
+            {
+                InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
+            };
+            const string fixedSubscriptionId = "2f481170-8bc4-4d0f-a972-bd45191b1706";
+            var autoSubscriber = new AutoSubscriber(busFake)
+            {
+                GenerateSubscriptionId = c => fixedSubscriptionId
+            };
+
+            autoSubscriber.Subscribe(typeof(IConsumeCustom<>), GetType().Assembly);
+
+            interceptedSubscriptions.Count.ShouldEqual(2);
+            interceptedSubscriptions[0].Item1.ShouldEqual(fixedSubscriptionId);
+            interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
+
+            interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
+            interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
+        }
+
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>
+        {
+            public void Consume(MessageA message) { }
+
+            [Consumer(SubscriptionId = "MyExplicitId")]
+            public void Consume(MessageB message) { }
+        }
+
+        private interface IConsumeCustom<in T>
+        {
+            void Consume(T message);
+        }
+
+        private class MyCustomConsumer : IConsumeCustom<MessageA>, IConsumeCustom<MessageB>
         {
             public void Consume(MessageA message) { }
 
