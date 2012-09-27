@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace EasyNetQ
 {
@@ -13,6 +15,11 @@ namespace EasyNetQ
     {
         protected const string ConsumeMethodName = "Consume";
         protected readonly IBus bus;
+
+        /// <summary>
+        /// Used when generating the unique SubscriptionId checksum.
+        /// </summary>
+        public string SubscriptionIdPrefix { get; private set; }
 
         /// <summary>
         /// Responsible for resolving a concrete subscriber. Defaults to
@@ -31,14 +38,33 @@ namespace EasyNetQ
         /// </summary>
         public Func<ConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
 
-        public AutoSubscriber(IBus bus)
+        public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
 
+            if(string.IsNullOrWhiteSpace(subscriptionIdPrefix))
+                throw new ArgumentNullException("subscriptionIdPrefix", "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
+
             this.bus = bus;
+            SubscriptionIdPrefix = subscriptionIdPrefix;
             CreateConsumer = Activator.CreateInstance;
-            GenerateSubscriptionId = s => Guid.NewGuid().ToString();
+            GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
+        }
+
+        protected virtual string DefaultSubscriptionIdGenerator(ConsumerInfo c)
+        {
+            var r = new StringBuilder();
+            var unique = string.Concat(SubscriptionIdPrefix, ":", c.ConcreteType.FullName, ":", c.MessageType.FullName);
+
+            using (var md5 = MD5.Create())
+            {
+                var buff = md5.ComputeHash(Encoding.UTF8.GetBytes(unique));
+                foreach (var b in buff)
+                    r.Append(b.ToString("x2"));
+            }
+
+            return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
         }
 
         /// <summary>
@@ -63,7 +89,7 @@ namespace EasyNetQ
         /// <param name="assemblies">The assembleis to scan for consumers.</param>
         public virtual void Subscribe(Type markerType, params Assembly[] assemblies)
         {
-            if(markerType == null)
+            if (markerType == null)
                 throw new ArgumentNullException("markerType");
 
             if (!IsValidMarkerType(markerType))
