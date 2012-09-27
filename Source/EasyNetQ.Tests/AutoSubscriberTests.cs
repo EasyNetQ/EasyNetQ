@@ -17,20 +17,21 @@ namespace EasyNetQ.Tests
             {
                 InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
             };
-            const string fixedSubscriptionId = "2f481170-8bc4-4d0f-a972-bd45191b1706";
-            var autoSubscriber = new AutoSubscriber(busFake)
-            {
-                GenerateSubscriptionId = c => fixedSubscriptionId
-            };
+            var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix");
 
             autoSubscriber.Subscribe(GetType().Assembly);
 
-            interceptedSubscriptions.Count.ShouldEqual(2);
-            interceptedSubscriptions[0].Item1.ShouldEqual(fixedSubscriptionId);
+            interceptedSubscriptions.Count.ShouldEqual(3);
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(MyConsumer)).ShouldBeTrue();
+
+            interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
             interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
 
             interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
             interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
+
+            interceptedSubscriptions[2].Item1.ShouldEqual("MyAppPrefix:cf5f54ed13478763e2da2bb3c9487baa");
+            interceptedSubscriptions[2].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageC));
         }
 
         [Test]
@@ -41,42 +42,75 @@ namespace EasyNetQ.Tests
             {
                 InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
             };
-            const string fixedSubscriptionId = "2f481170-8bc4-4d0f-a972-bd45191b1706";
-            var autoSubscriber = new AutoSubscriber(busFake)
-            {
-                GenerateSubscriptionId = c => fixedSubscriptionId
-            };
+            var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix");
 
             autoSubscriber.Subscribe(typeof(IConsumeCustom<>), GetType().Assembly);
 
-            interceptedSubscriptions.Count.ShouldEqual(2);
-            interceptedSubscriptions[0].Item1.ShouldEqual(fixedSubscriptionId);
+            interceptedSubscriptions.Count.ShouldEqual(3);
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(MyConsumerWithCustomInterface)).ShouldBeTrue();
+
+            interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:63c317b761366d57679a8bb0f7fa925a");
             interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
 
             interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
             interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
+
+            interceptedSubscriptions[2].Item1.ShouldEqual("MyAppPrefix:813fd8f08e61068e054dcff403da5ce7");
+            interceptedSubscriptions[2].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageC));
+        }
+
+        [Test]
+        public void Should_be_able_to_take_control_of_subscription_id_generation()
+        {
+            var interceptedSubscriptions = new List<Tuple<string, Delegate>>();
+            var busFake = new BusFake
+            {
+                InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
+            };
+            var fixedSubscriptionIds = new[] { "2f481170-8bc4-4d0f-a972-bd45191b1706", "be4ac633-ea29-4ed0-a0bf-419a01a0e9d4" };
+            var callCount = 0;
+            var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix")
+            {
+                GenerateSubscriptionId = c => fixedSubscriptionIds[callCount++]
+            };
+
+            autoSubscriber.Subscribe(GetType().Assembly);
+
+            interceptedSubscriptions.Count.ShouldEqual(3);
+            interceptedSubscriptions[0].Item1.ShouldEqual(fixedSubscriptionIds[0]);
+            interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
+
+            interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
+            interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
+
+            interceptedSubscriptions[2].Item1.ShouldEqual(fixedSubscriptionIds[1]);
+            interceptedSubscriptions[2].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageC));
         }
 
         // Discovered by reflection over test assembly, do not remove.
-        private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>
+        private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
             public void Consume(MessageA message) { }
 
             [Consumer(SubscriptionId = "MyExplicitId")]
             public void Consume(MessageB message) { }
+
+            public void Consume(MessageC message) { }
+        }
+
+        private class MyConsumerWithCustomInterface : IConsumeCustom<MessageA>, IConsumeCustom<MessageB>, IConsumeCustom<MessageC>
+        {
+            public void Consume(MessageA message) { }
+
+            [Consumer(SubscriptionId = "MyExplicitId")]
+            public void Consume(MessageB message) { }
+
+            public void Consume(MessageC message) { }
         }
 
         private interface IConsumeCustom<in T>
         {
             void Consume(T message);
-        }
-
-        private class MyCustomConsumer : IConsumeCustom<MessageA>, IConsumeCustom<MessageB>
-        {
-            public void Consume(MessageA message) { }
-
-            [Consumer(SubscriptionId = "MyExplicitId")]
-            public void Consume(MessageB message) { }
         }
 
         private class MessageA
@@ -85,6 +119,11 @@ namespace EasyNetQ.Tests
         }
 
         private class MessageB
+        {
+            public string Text { get; set; }
+        }
+
+        private class MessageC
         {
             public string Text { get; set; }
         }
