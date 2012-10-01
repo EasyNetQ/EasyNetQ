@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ
 {
@@ -60,9 +61,11 @@ namespace EasyNetQ
                 throw new ArgumentNullException("registerServices");
             }
 
-            var connectionValues = new ConnectionString(connectionString);
+            var connectionStringParser = new ConnectionStringParser();
 
-            return CreateBus(connectionValues, registerServices);
+            var connectionConfiguration = connectionStringParser.Parse(connectionString);
+
+            return CreateBus(connectionConfiguration, registerServices);
         }
 
         /// <summary>

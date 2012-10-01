@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.ConnectionString;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -8,21 +9,16 @@ namespace EasyNetQ.Tests
     public class ConnectionStringTests
     {
         const string connectionStringValue =
-            "first=First Value;host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3";
-        private ConnectionString connectionString;
+            "host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3";
+        private IConnectionConfiguration connectionString;
+
+        private IConnectionConfiguration defaults;
 
         [SetUp]
         public void SetUp()
         {
-            connectionString = new ConnectionString(connectionStringValue);
-        }
-
-        [Test]
-        public void Should_parse_connection_string_into_name_value_pairs()
-        {
-            connectionString.GetValue("first").ShouldEqual("First Value");
-            connectionString.GetValue("host").ShouldEqual("192.168.1.1");
-            connectionString.GetValue("virtualHost").ShouldEqual("Copa");
+            connectionString = new ConnectionStringParser().Parse(connectionStringValue);
+            defaults = new ConnectionStringParser().Parse("host=localhost");
         }
 
         [Test]
@@ -52,7 +48,14 @@ namespace EasyNetQ.Tests
         [Test, ExpectedException(typeof(EasyNetQException))]
         public void Should_throw_on_malformed_string()
         {
-            new ConnectionString("not a well formed name value pair;");
+            new ConnectionStringParser().Parse("not a well formed name value pair;");
+        }
+
+        [Test, ExpectedException(typeof(EasyNetQException))]
+        public void Should_fail_if_host_is_not_present()
+        {
+            new ConnectionStringParser().Parse(
+                "virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3");
         }
 
         [Test]
@@ -65,6 +68,37 @@ namespace EasyNetQ.Tests
         public void Should_parse_heartbeat()
         {
             connectionString.RequestedHeartbeat.ShouldEqual(3);
+        }
+
+        [Test]
+        public void Should_set_default_port()
+        {
+            defaults.Port.ShouldEqual(5672);
+        }
+
+        [Test]
+        public void Should_set_default_virtual_host()
+        {
+            defaults.VirtualHost.ShouldEqual("/");
+        }
+
+        [Test]
+        public void Should_set_default_username()
+        {
+            defaults.UserName.ShouldEqual("guest");
+
+        }
+
+        [Test]
+        public void Should_set_default_password()
+        {
+            defaults.Password.ShouldEqual("guest");
+        }
+
+        [Test]
+        public void Should_set_default_requestHeartbeat()
+        {
+            defaults.RequestedHeartbeat.ShouldEqual(0);
         }
     }
 }

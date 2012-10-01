@@ -53,7 +53,8 @@
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConcurrentHashSet.cs" />
-    <Compile Include="ConnectionString.cs" />
+    <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
+    <Compile Include="ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="ConsumerAttribute.cs" />
     <Compile Include="ConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
@@ -91,6 +92,16 @@
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitPublishChannel.cs" />
+    <Compile Include="Sprache\Failure.cs" />
+    <Compile Include="Sprache\IFailure.cs" />
+    <Compile Include="Sprache\Input.cs" />
+    <Compile Include="Sprache\IResultOfT.cs" />
+    <Compile Include="Sprache\ISuccess.cs" />
+    <Compile Include="Sprache\Parse.cs" />
+    <Compile Include="Sprache\ParseException.cs" />
+    <Compile Include="Sprache\ParserOfT.cs" />
+    <Compile Include="Sprache\ResultHelper.cs" />
+    <Compile Include="Sprache\Success.cs" />
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
