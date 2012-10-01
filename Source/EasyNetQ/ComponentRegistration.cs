@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using EasyNetQ.Loggers;
 using RabbitMQ.Client;
 
@@ -36,7 +37,7 @@ namespace EasyNetQ
                     var configuration = x.Resolve<IConnectionConfiguration>();
                     var rabbitConnectionFactory = new ConnectionFactory
                     {
-                        HostName = configuration.Host,
+                        HostName = configuration.Hosts.First().Host,
                         Port = configuration.Port,
                         VirtualHost = configuration.VirtualHost,
                         UserName = configuration.UserName,

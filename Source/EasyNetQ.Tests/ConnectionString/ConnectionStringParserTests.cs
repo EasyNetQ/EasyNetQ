@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Linq;
 using EasyNetQ.ConnectionString;
 using NUnit.Framework;
 
@@ -23,7 +24,7 @@ namespace EasyNetQ.Tests.ConnectionString
         {
             var connectionConfiguration = connectionStringParser.Parse(connectionString);
 
-            connectionConfiguration.Host.ShouldEqual("192.168.1.1");
+            connectionConfiguration.Hosts.First().Host.ShouldEqual("192.168.1.1");
             connectionConfiguration.VirtualHost.ShouldEqual("Copa");
             connectionConfiguration.UserName.ShouldEqual("Copa");
             connectionConfiguration.Password.ShouldEqual("abc_xyz");

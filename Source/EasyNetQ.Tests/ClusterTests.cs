@@ -12,7 +12,6 @@ namespace EasyNetQ.Tests
         private const string clusterPort1 = "5672"; // rabbit@ubuntu
         private const string clusterPort2 = "5673"; // rabbit_1@ubuntu
         private string connectionString;
-        private IBus bus;
 
         [SetUp]
         public void SetUp()

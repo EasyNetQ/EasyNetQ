@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using EasyNetQ.ConnectionString;
 
@@ -128,7 +129,10 @@ namespace EasyNetQ
 
             var connectionConfiguration = new ConnectionConfiguration
             {
-                Host = hostName,
+                Hosts = new List<IHostConfiguration>
+                    {
+                        new HostConfiguration { Host = hostName, Port = hostPort }
+                    },
                 Port = hostPort,
                 VirtualHost = virtualHost,
                 UserName = username,

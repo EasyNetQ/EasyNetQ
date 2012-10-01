@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Linq;
 using EasyNetQ.ConnectionString;
 using NUnit.Framework;
 
@@ -9,7 +10,8 @@ namespace EasyNetQ.Tests
     public class ConnectionStringTests
     {
         const string connectionStringValue =
-            "host=192.168.1.1;virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3";
+            "host=192.168.1.1:1001,my.little.host:1002;virtualHost=Copa;username=Copa;" + 
+            "password=abc_xyz;port=12345;requestedHeartbeat=3";
         private IConnectionConfiguration connectionString;
 
         private IConnectionConfiguration defaults;
@@ -24,7 +26,25 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_parse_host()
         {
-            connectionString.Host.ShouldEqual("192.168.1.1");
+            connectionString.Hosts.First().Host.ShouldEqual("192.168.1.1");
+        }
+
+        [Test]
+        public void Should_parse_host_port()
+        {
+            connectionString.Hosts.First().Port.ShouldEqual(1001);
+        }
+
+        [Test]
+        public void Should_parse_second_host()
+        {
+            connectionString.Hosts.Last().Host.ShouldEqual("my.little.host");
+        }
+
+        [Test]
+        public void Should_parse_seond_port()
+        {
+            connectionString.Hosts.Last().Port.ShouldEqual(1002);
         }
 
         [Test]
@@ -68,6 +88,12 @@ namespace EasyNetQ.Tests
         public void Should_parse_heartbeat()
         {
             connectionString.RequestedHeartbeat.ShouldEqual(3);
+        }
+
+        [Test]
+        public void Should_parse_host_only()
+        {
+            defaults.Hosts.First().Host.ShouldEqual("localhost");
         }
 
         [Test]
