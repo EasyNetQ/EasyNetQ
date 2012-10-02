@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.7.1.0")]
+[assembly: AssemblyVersion("0.7.2.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.7.2.0  Cluster support
 // 0.7.1.0  Daniel Wertheim's AutoSubscriber
 // 0.7.0.0  Added IServiceProvider to make it easy to plug in your own dependencies. Some breaking changes to RabbitHutch
 // 0.6.3.0  Consumer Queue now uses BCL BlockingCollection.
