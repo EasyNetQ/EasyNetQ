@@ -1,42 +1,91 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using System.Linq;
+using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
     public interface IConnectionFactory
     {
         IConnection CreateConnection();
-        string HostName { get; }
-        string VirtualHost { get; }
-        string UserName { get; }
+        IConnectionConfiguration Configuration { get; }
+        IHostConfiguration CurrentHost { get; }
+        bool Next();
+        void Success();
+        void Reset();
+        bool Succeeded { get; }
     }
 
     public class ConnectionFactoryWrapper : IConnectionFactory
     {
-        private readonly ConnectionFactory connectionFactory;
+        public IConnectionConfiguration Configuration { get; private set; }
+        private readonly TryNextCollection<ConnectionFactoryInfo> connectionFactores = new TryNextCollection<ConnectionFactoryInfo>();
 
-        public ConnectionFactoryWrapper(ConnectionFactory connectionFactory)
+        public ConnectionFactoryWrapper(IConnectionConfiguration connectionConfiguration)
         {
-            this.connectionFactory = connectionFactory;
+            if(connectionConfiguration == null)
+            {
+                throw new ArgumentNullException("connectionConfiguration");
+            }
+            if (!connectionConfiguration.Hosts.Any())
+            {
+                throw new EasyNetQException("At least one host must be defined in connectionConfiguration");
+            }
+
+            Configuration = connectionConfiguration;
+
+            foreach (var hostConfiguration in Configuration.Hosts)
+            {
+                connectionFactores.Add(new ConnectionFactoryInfo(new ConnectionFactory
+                    {
+                        HostName = hostConfiguration.Host,
+                        Port = hostConfiguration.Port,
+                        VirtualHost = Configuration.VirtualHost,
+                        UserName = Configuration.UserName,
+                        Password = Configuration.Password
+                    }, hostConfiguration));
+            }
         }
 
-        public IConnection CreateConnection()
+        public virtual IConnection CreateConnection()
         {
-            return connectionFactory.CreateConnection();
+            return connectionFactores.Current().ConnectionFactory.CreateConnection();
         }
 
-        public string HostName
+        public IHostConfiguration CurrentHost
         {
-            get { return connectionFactory.HostName; }
+            get { return connectionFactores.Current().HostConfiguration; }
         }
 
-        public string VirtualHost
+        public bool Next()
         {
-            get { return connectionFactory.VirtualHost; }
+            return connectionFactores.Next();
         }
 
-        public string UserName
+        public void Reset()
         {
-            get { return connectionFactory.UserName; }
+            connectionFactores.Reset();
+        }
+
+        public void Success()
+        {
+            connectionFactores.Success();
+        }
+
+        public bool Succeeded
+        {
+            get { return connectionFactores.Succeeded; }
+        }
+
+        class ConnectionFactoryInfo
+        {
+            public ConnectionFactoryInfo(ConnectionFactory connectionFactory, IHostConfiguration hostConfiguration)
+            {
+                ConnectionFactory = connectionFactory;
+                HostConfiguration = hostConfiguration;
+            }
+
+            public ConnectionFactory ConnectionFactory { get; private set; }
+            public IHostConfiguration HostConfiguration { get; private set; }
         }
     }
 }

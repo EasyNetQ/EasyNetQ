@@ -117,6 +117,7 @@
     <Compile Include="Topology\ITopologyVisitor.cs" />
     <Compile Include="Topology\Queue.cs" />
     <Compile Include="Topology\TopologyBuilder.cs" />
+    <Compile Include="TryNextCollection.cs" />
     <Compile Include="TypeNameSerializer.cs" />
   </ItemGroup>
   <ItemGroup />

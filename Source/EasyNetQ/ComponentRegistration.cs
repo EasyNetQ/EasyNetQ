@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using EasyNetQ.Loggers;
-using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
@@ -30,21 +28,9 @@ namespace EasyNetQ
                     x.Resolve<IEasyNetQLogger>()))
                 .Register<IConsumerFactory>(x => new QueueingConsumerFactory(
                     x.Resolve<IEasyNetQLogger>(),
-                    x.Resolve<IConsumerErrorStrategy>()
-                    ))
-                .Register<IConnectionFactory>(x =>
-                {
-                    var configuration = x.Resolve<IConnectionConfiguration>();
-                    var rabbitConnectionFactory = new ConnectionFactory
-                    {
-                        HostName = configuration.Hosts.First().Host,
-                        Port = configuration.Port,
-                        VirtualHost = configuration.VirtualHost,
-                        UserName = configuration.UserName,
-                        Password = configuration.Password
-                    };
-                    return new ConnectionFactoryWrapper(rabbitConnectionFactory);
-                })
+                    x.Resolve<IConsumerErrorStrategy>()))
+                .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
+                    x.Resolve<IConnectionConfiguration>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),

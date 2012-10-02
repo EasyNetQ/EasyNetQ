@@ -142,9 +142,9 @@ namespace EasyNetQ
         {
             return
                 "Please check EasyNetQ connection information and that the RabbitMQ Service is running at the specified endpoint.\n" +
-                string.Format("\tHostname: '{0}'\n", connectionFactory.HostName) +
-                string.Format("\tVirtualHost: '{0}'\n", connectionFactory.VirtualHost) +
-                string.Format("\tUserName: '{0}'\n", connectionFactory.UserName) +
+                string.Format("\tHostname: '{0}'\n", connectionFactory.CurrentHost.Host) +
+                string.Format("\tVirtualHost: '{0}'\n", connectionFactory.Configuration.VirtualHost) +
+                string.Format("\tUserName: '{0}'\n", connectionFactory.Configuration.UserName) +
                 "Failed to write error message to error queue";
         }
 

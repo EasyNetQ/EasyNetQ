@@ -1,34 +1,26 @@
+using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
-    public class MockConnectionFactory : IConnectionFactory
+    public class MockConnectionFactory : ConnectionFactoryWrapper
     {
         public IConnection Connection { get; set; }
 
-        public MockConnectionFactory(IConnection connection)
+        public MockConnectionFactory(IConnection connection) : base(new ConnectionConfiguration
+        {
+            Hosts = new List<IHostConfiguration>
+            {
+                new HostConfiguration()
+            }
+        })
         {
             Connection = connection;
         }
 
-        public IConnection CreateConnection()
+        public override IConnection CreateConnection()
         {
             return Connection;
-        }
-
-        public string HostName
-        {
-            get { return "localhost"; }
-        }
-
-        public string VirtualHost
-        {
-            get { return "/"; }
-        }
-
-        public string UserName
-        {
-            get { return "guest"; }
         }
     }
 }

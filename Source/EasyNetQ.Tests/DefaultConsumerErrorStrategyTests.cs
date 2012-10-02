@@ -1,12 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing.v0_9_1;
 
@@ -22,9 +22,12 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            connectionFactory = new ConnectionFactoryWrapper(new ConnectionFactory
+            connectionFactory = new ConnectionFactoryWrapper(new ConnectionConfiguration
             {
-                HostName = "localhost",
+                Hosts = new List<IHostConfiguration>
+                {
+                    new HostConfiguration { Host = "localhost", Port = 5672 }
+                },
                 UserName = "guest",
                 Password = "guest"
             });

@@ -1,27 +1,20 @@
-﻿using RabbitMQ.Client;
+﻿using System.Collections.Generic;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.InMemoryClient
 {
-    public class InMemoryConnectionFactory : IConnectionFactory
+    public class InMemoryConnectionFactory : ConnectionFactoryWrapper
     {
-        public IConnection CreateConnection()
+        public InMemoryConnectionFactory() : base(new ConnectionConfiguration
+        {
+            Hosts = new List<IHostConfiguration> { new HostConfiguration() }
+        })
+        {
+        }
+
+        public override IConnection CreateConnection()
         {
             return new InMemoryConnection();
-        }
-
-        public string HostName
-        {
-            get { return "TheHostName"; }
-        }
-
-        public string VirtualHost
-        {
-            get { return "TheVirtualHostName"; }
-        }
-
-        public string UserName
-        {
-            get { return "TheUserName"; }
         }
     }
 }

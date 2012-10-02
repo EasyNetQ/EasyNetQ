@@ -61,35 +61,50 @@ namespace EasyNetQ
 
             logger.DebugWrite("Trying to connect");
             if (disposed) return;
-            try
+
+            connectionFactory.Reset();
+            do
             {
-                connection = connectionFactory.CreateConnection();
+                try
+                {
+                    connection = connectionFactory.CreateConnection();
+                    connectionFactory.Success();
+                }
+                catch (System.Net.Sockets.SocketException socketException)
+                {
+                    LogException(socketException);
+                }
+                catch (BrokerUnreachableException brokerUnreachableException)
+                {
+                    LogException(brokerUnreachableException);
+                }
+            } while (connectionFactory.Next());
+
+            if (connectionFactory.Succeeded)
+            {
                 connection.ConnectionShutdown += OnConnectionShutdown;
 
                 OnConnected();
-                logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', VHost: '{1}'", connectionFactory.HostName,
-                    connectionFactory.VirtualHost);
+                logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
+                    connectionFactory.CurrentHost.Host,
+                    connectionFactory.CurrentHost.Port,
+                    connectionFactory.Configuration.VirtualHost);
             }
-            catch (System.Net.Sockets.SocketException socketException)
+            else
             {
-                LogException(socketException);
-                StartTryToConnect();
-            }
-            catch (BrokerUnreachableException brokerUnreachableException)
-            {
-                LogException(brokerUnreachableException);
+                logger.ErrorWrite("Failed to connected to any Broker. Retrying in {0} ms\n", 
+                    connectAttemptIntervalMilliseconds);
                 StartTryToConnect();
             }
         }
 
         void LogException(Exception exception)
         {
-            logger.ErrorWrite("Failed to connect to Broker: '{0}', VHost: '{1}'. Retrying in {2} ms\n" +
-                "Check HostName, VirtualHost, Username and Password.\n" +
+            logger.ErrorWrite("Failed to connect to Broker: '{0}', Port: {1} VHost: '{2}'. " +
                     "ExceptionMessage: '{3}'",
-                connectionFactory.HostName,
-                connectionFactory.VirtualHost,
-                connectAttemptIntervalMilliseconds,
+                connectionFactory.CurrentHost.Host,
+                connectionFactory.CurrentHost.Port,
+                connectionFactory.Configuration.VirtualHost,
                 exception.Message);
         }
 
@@ -101,7 +116,7 @@ namespace EasyNetQ
             // try to reconnect and re-subscribe
             logger.InfoWrite("Disconnected from RabbitMQ Broker");
 
-            StartTryToConnect();
+            TryToConnect(null);
         }
 
         public void OnConnected()
