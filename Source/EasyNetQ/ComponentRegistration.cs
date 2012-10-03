@@ -22,6 +22,7 @@ namespace EasyNetQ
                 .Register<IConventions>(x => conventions)
                 .Register<SerializeType>(x => TypeNameSerializer.Serialize)
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
+                .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>(x => new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
                 .Register<IConsumerErrorStrategy>(x => new DefaultConsumerErrorStrategy(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<ISerializer>(),
@@ -30,7 +31,8 @@ namespace EasyNetQ
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConsumerErrorStrategy>()))
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
-                    x.Resolve<IConnectionConfiguration>()))
+                    x.Resolve<IConnectionConfiguration>(),
+                    x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),

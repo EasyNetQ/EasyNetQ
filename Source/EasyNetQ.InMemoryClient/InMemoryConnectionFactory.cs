@@ -8,7 +8,7 @@ namespace EasyNetQ.InMemoryClient
         public InMemoryConnectionFactory() : base(new ConnectionConfiguration
         {
             Hosts = new List<IHostConfiguration> { new HostConfiguration() }
-        })
+        }, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
         {
         }
 

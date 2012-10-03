@@ -56,24 +56,21 @@ namespace EasyNetQ.Tests
         public void Server_goes_away_and_comes_back_during_subscription()
         {
             Console.WriteLine("Creating busses");
-            using (var busA = RabbitHutch.CreateBus("host=localhost"))
-            using (var busB = RabbitHutch.CreateBus("host=localhost"))
+            using (var busA = RabbitHutch.CreateBus("host=ubuntu:5672,ubuntu:5674"))
+            using (var busB = RabbitHutch.CreateBus("host=ubuntu:5674,ubuntu:5672"))
             {
                 Console.WriteLine("About to subscribe");
 
                 // ping pong between busA and busB
-                busB.Subscribe<FromA>("restarted", "#", message => Reply<FromB>(message, busB, "B"));
-
-                busA.Subscribe<FromB>("restarted_1", "x.*", message => Reply<FromA>(message, busA, "A"));
-                busA.Subscribe<FromB>("restarted_2", "*.a", message => 
-                    Console.WriteLine("Subscriber 2 got {0} {1}", message.Text, message.Id));
+                busB.Subscribe<FromA>("restarted", message => Reply<FromB>(message, busB, "B"));
+                busA.Subscribe<FromB>("restarted_1", message => Reply<FromA>(message, busA, "A"));
 
                 Console.WriteLine("Subscribed");
 
                 while(!busB.IsConnected) Thread.Sleep(100);
                 using (var publishChannel = busA.OpenPublishChannel())
                 {
-                    publishChannel.Publish("x.a", new FromA { Text = "Initial From A ", Id = 0 });
+                    publishChannel.Publish(new FromA { Text = "Initial From A ", Id = 0 });
                 }
 
                 while (true)

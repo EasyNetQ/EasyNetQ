@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
                 },
                 UserName = "guest",
                 Password = "guest"
-            });
+            }, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>());
             serializer = new JsonSerializer();
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger());
         }

@@ -67,6 +67,7 @@
     <Compile Include="IAdvancedBus.cs" />
     <Compile Include="IAdvancedPublishChannel.cs" />
     <Compile Include="IBus.cs" />
+    <Compile Include="IClusterHostSelectionStrategy.cs" />
     <Compile Include="IConnectionConfiguration.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsume.cs" />
@@ -117,7 +118,7 @@
     <Compile Include="Topology\ITopologyVisitor.cs" />
     <Compile Include="Topology\Queue.cs" />
     <Compile Include="Topology\TopologyBuilder.cs" />
-    <Compile Include="TryNextCollection.cs" />
+    <Compile Include="DefaultClusterHostSelectionStrategy.cs" />
     <Compile Include="TypeNameSerializer.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -1,21 +1,20 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
 using System.IO;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
 {
     [TestFixture]
-    public class TryNextCollectionTests
+    public class DefaultClusterHostSelectionStrategyTests
     {
-        private TryNextCollection<int> tryNextCollection;
+        private IClusterHostSelectionStrategy<int> defaultClusterHostSelectionStrategy;
         private StringWriter writer;    
 
         [SetUp]
         public void SetUp()
         {
-            tryNextCollection = new TryNextCollection<int>
+            defaultClusterHostSelectionStrategy = new DefaultClusterHostSelectionStrategy<int>
             {
                 0,
                 1,
@@ -31,12 +30,12 @@ namespace EasyNetQ.Tests
         {
             do
             {
-                var item = tryNextCollection.Current();
+                var item = defaultClusterHostSelectionStrategy.Current();
                 writer.Write(item);
-            } while (tryNextCollection.Next());
+            } while (defaultClusterHostSelectionStrategy.Next());
 
             writer.ToString().ShouldEqual("0123");
-            tryNextCollection.Succeeded.ShouldBeFalse();
+            defaultClusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
         }
 
         [Test]
@@ -45,16 +44,16 @@ namespace EasyNetQ.Tests
             var count = 0;
             do
             {
-                var item = tryNextCollection.Current();
+                var item = defaultClusterHostSelectionStrategy.Current();
                 writer.Write(item);
 
                 count++;
-                if (count == 2) tryNextCollection.Success();
+                if (count == 2) defaultClusterHostSelectionStrategy.Success();
 
-            } while (tryNextCollection.Next());
+            } while (defaultClusterHostSelectionStrategy.Next());
 
             writer.ToString().ShouldEqual("01");
-            tryNextCollection.Succeeded.ShouldBeTrue();
+            defaultClusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
         }
 
         [Test]
@@ -63,19 +62,20 @@ namespace EasyNetQ.Tests
             for (var i = 0; i < 10; i++)
             {
                 var count = 0;
-                tryNextCollection.Reset();
+                defaultClusterHostSelectionStrategy.Reset();
                 do
                 {
-                    var item = tryNextCollection.Current();
+                    var item = defaultClusterHostSelectionStrategy.Current();
                     writer.Write(item);
 
                     count++;
-                    if (count == 3) tryNextCollection.Success();
+                    if (count == 3) defaultClusterHostSelectionStrategy.Success();
 
-                } while (tryNextCollection.Next());
+                } while (defaultClusterHostSelectionStrategy.Next());
+                writer.Write("_");
             }
 
-            writer.ToString().ShouldEqual("012301230123012301230123012301");
+            writer.ToString().ShouldEqual("012_301_230_123_012_301_230_123_012_301_");
         }
     }
 }

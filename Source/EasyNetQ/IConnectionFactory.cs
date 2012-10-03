@@ -18,10 +18,11 @@ namespace EasyNetQ
     public class ConnectionFactoryWrapper : IConnectionFactory
     {
         public IConnectionConfiguration Configuration { get; private set; }
-        private readonly TryNextCollection<ConnectionFactoryInfo> connectionFactores = new TryNextCollection<ConnectionFactoryInfo>();
+        private readonly IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy;
 
-        public ConnectionFactoryWrapper(IConnectionConfiguration connectionConfiguration)
+        public ConnectionFactoryWrapper(IConnectionConfiguration connectionConfiguration, IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy)
         {
+            this.clusterHostSelectionStrategy = clusterHostSelectionStrategy;
             if(connectionConfiguration == null)
             {
                 throw new ArgumentNullException("connectionConfiguration");
@@ -35,7 +36,7 @@ namespace EasyNetQ
 
             foreach (var hostConfiguration in Configuration.Hosts)
             {
-                connectionFactores.Add(new ConnectionFactoryInfo(new ConnectionFactory
+                clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(new ConnectionFactory
                     {
                         HostName = hostConfiguration.Host,
                         Port = hostConfiguration.Port,
@@ -48,44 +49,45 @@ namespace EasyNetQ
 
         public virtual IConnection CreateConnection()
         {
-            return connectionFactores.Current().ConnectionFactory.CreateConnection();
+            return clusterHostSelectionStrategy.Current().ConnectionFactory.CreateConnection();
         }
 
         public IHostConfiguration CurrentHost
         {
-            get { return connectionFactores.Current().HostConfiguration; }
+            get { return clusterHostSelectionStrategy.Current().HostConfiguration; }
         }
 
         public bool Next()
         {
-            return connectionFactores.Next();
+            return clusterHostSelectionStrategy.Next();
         }
 
         public void Reset()
         {
-            connectionFactores.Reset();
+            clusterHostSelectionStrategy.Reset();
         }
 
         public void Success()
         {
-            connectionFactores.Success();
+            clusterHostSelectionStrategy.Success();
         }
 
         public bool Succeeded
         {
-            get { return connectionFactores.Succeeded; }
-        }
-
-        class ConnectionFactoryInfo
-        {
-            public ConnectionFactoryInfo(ConnectionFactory connectionFactory, IHostConfiguration hostConfiguration)
-            {
-                ConnectionFactory = connectionFactory;
-                HostConfiguration = hostConfiguration;
-            }
-
-            public ConnectionFactory ConnectionFactory { get; private set; }
-            public IHostConfiguration HostConfiguration { get; private set; }
+            get { return clusterHostSelectionStrategy.Succeeded; }
         }
     }
+
+    public class ConnectionFactoryInfo
+    {
+        public ConnectionFactoryInfo(ConnectionFactory connectionFactory, IHostConfiguration hostConfiguration)
+        {
+            ConnectionFactory = connectionFactory;
+            HostConfiguration = hostConfiguration;
+        }
+
+        public ConnectionFactory ConnectionFactory { get; private set; }
+        public IHostConfiguration HostConfiguration { get; private set; }
+    }
+
 }

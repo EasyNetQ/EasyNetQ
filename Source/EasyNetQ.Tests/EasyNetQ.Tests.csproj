@@ -116,7 +116,7 @@
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
     <Compile Include="Topology\TopologyTests.cs" />
-    <Compile Include="TryNextCollectionTests.cs" />
+    <Compile Include="DefaultClusterHostSelectionStrategyTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>

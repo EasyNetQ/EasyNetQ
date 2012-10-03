@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 namespace EasyNetQ
@@ -7,7 +6,7 @@ namespace EasyNetQ
     /// <summary>
     /// A collection that hands out the next item until success, or until every item has been tried.
     /// </summary>
-    public class TryNextCollection<T> : IEnumerable<T>
+    public class DefaultClusterHostSelectionStrategy<T> : IClusterHostSelectionStrategy<T>, IEnumerable<T>
     {
         private readonly IList<T> items = new List<T>();
         private int currentIndex = 0;
@@ -59,7 +58,7 @@ namespace EasyNetQ
 
         private bool firstUse = true;
 
-        public TryNextCollection()
+        public DefaultClusterHostSelectionStrategy()
         {
             Succeeded = false;
         }

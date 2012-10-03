@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
             {
                 new HostConfiguration()
             }
-        })
+        }, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
         {
             Connection = connection;
         }
