@@ -33,9 +33,9 @@ namespace EasyNetQ.Tests
         {
             using (var publishChannel = bus.OpenPublishChannel())
             {
-                publishChannel.Publish("X.A", CreateMessage());
-                publishChannel.Publish("X.B", CreateMessage());
-                publishChannel.Publish("Y.A", CreateMessage());
+                publishChannel.Publish(CreateMessage(), x => x.WithTopic("X.A"));
+                publishChannel.Publish(CreateMessage(), x => x.WithTopic("X.B"));
+                publishChannel.Publish(CreateMessage(), x => x.WithTopic("Y.A"));
             }
         }
 
@@ -44,16 +44,18 @@ namespace EasyNetQ.Tests
         {
             var countdownEvent = new CountdownEvent(7);
 
-            bus.Subscribe<MyMessage>("id1", "X.*", msg =>
+            bus.Subscribe<MyMessage>("id1", msg =>
             {
                 Console.WriteLine("I Get X: {0}", msg.Text);
                 countdownEvent.Signal();
-            });
-            bus.Subscribe<MyMessage>("id2", "*.A", msg =>
+            }, x => x.WithTopic("X.*"));
+
+            bus.Subscribe<MyMessage>("id2", msg =>
             {
                 Console.WriteLine("I Get A: {0}", msg.Text);
                 countdownEvent.Signal();
-            });
+            }, x => x.WithTopic("*.A"));
+
             bus.Subscribe<MyMessage>("id3", msg =>
             {
                 Console.WriteLine("I Get All: {0}", msg.Text);
@@ -67,11 +69,11 @@ namespace EasyNetQ.Tests
         public void Should_subscribe_to_multiple_topic_strings()
         {
             var countdownEvent = new CountdownEvent(7);
-            bus.Subscribe<MyMessage>("id4", new[]{"Y.*", "*.B"}, msg =>
+            bus.Subscribe<MyMessage>("id4", msg =>
             {
                 Console.WriteLine("I Get Y or B: {0}", msg.Text);
                 countdownEvent.Signal();
-            });
+            }, x => x.WithTopic("Y.*").WithTopic("*.B"));
 
             countdownEvent.Wait(500);
         }

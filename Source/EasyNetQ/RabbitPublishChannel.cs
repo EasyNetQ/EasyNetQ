@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -35,19 +37,22 @@ namespace EasyNetQ
 
         public void Publish<T>(T message)
         {
-            Publish(bus.Conventions.TopicNamingConvention(typeof(T)), message);
+            Publish(message, x => {});
         }
 
-        public void Publish<T>(string topic, T message)
+        public void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
         {
-            if(topic == null)
-            {
-                throw new ArgumentNullException("topic");
-            }
-            if (message == null)
+            if(message == null)
             {
                 throw new ArgumentNullException("message");
             }
+            if(configure == null)
+            {
+                throw new ArgumentNullException("configure");
+            }
+
+            var configuration = new PublishConfiguration<T>();
+            configure(configuration);
 
             var exchangeName = bus.Conventions.ExchangeNamingConvention(typeof(T));
             var exchange = Exchange.DeclareTopic(exchangeName);
@@ -55,7 +60,11 @@ namespace EasyNetQ
 
             // by default publish persistent messages
             easyNetQMessage.Properties.DeliveryMode = 2;
-            
+
+            var topic = configuration.Topics.Any()
+                ? configuration.Topics[0]
+                : bus.Conventions.TopicNamingConvention(typeof (T));
+
             advancedPublishChannel.Publish(exchange, topic, easyNetQMessage);
         }
 

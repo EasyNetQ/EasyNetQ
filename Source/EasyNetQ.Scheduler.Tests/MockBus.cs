@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 
 #pragma warning disable 67
 
@@ -9,16 +10,6 @@ namespace EasyNetQ.Scheduler.Tests
     public class MockBus : IBus
     {
         public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish<T>(T message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish<T>(string topic, T message)
         {
             throw new NotImplementedException();
         }
@@ -33,27 +24,7 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
-        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, IDictionary<string, object> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage, IDictionary<string, object> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage, IDictionary<string, object> arguments)
+        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
             throw new NotImplementedException();
         }
@@ -63,32 +34,7 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
-        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
             throw new NotImplementedException();
         }
@@ -109,11 +55,6 @@ namespace EasyNetQ.Scheduler.Tests
         }
 
         public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FuturePublish<T>(DateTime timeToRespond, T message)
         {
             throw new NotImplementedException();
         }

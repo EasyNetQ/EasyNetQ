@@ -106,27 +106,27 @@ namespace EasyNetQ.Tests.InMemoryClient
             var countdownEvent = new CountdownEvent(2);
 
             MyMessage receivedMessage1 = null;
-            bus.Subscribe<MyMessage>("barSubscriber", "*.bar", message =>
+            bus.Subscribe<MyMessage>("barSubscriber", message =>
             {
                 Console.WriteLine("*.bar got '{0}'", message.Text);
                 receivedMessage1 = message;
                 countdownEvent.Signal();
-            });
+            }, x => x.WithTopic("*.bar"));
 
             MyMessage receivedMessage2 = null;
-            bus.Subscribe<MyMessage>("fooSubscriber", "foo.*", message =>
+            bus.Subscribe<MyMessage>("fooSubscriber", message =>
             {
                 Console.WriteLine("foo.* got '{0}'", message.Text);
                 receivedMessage2 = message;
                 countdownEvent.Signal();
-            });
+            }, x => x.WithTopic("foo.*"));
 
             var fooNinja = new MyMessage { Text = "I should go to foo.ninja" };
             var niceBar = new MyMessage { Text = "I should go to nice.bar" };
             using (var channel = bus.OpenPublishChannel())
             {
-                channel.Publish("foo.ninja", fooNinja);
-                channel.Publish("nice.bar", niceBar);
+                channel.Publish(fooNinja, x => x.WithTopic("foo.ninja"));
+                channel.Publish(niceBar, x => x.WithTopic("nice.bar"));
             }
 
             // give the task background thread time to process the message.

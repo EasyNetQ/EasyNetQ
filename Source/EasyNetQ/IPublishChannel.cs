@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EasyNetQ.FluentConfiguration;
 
 namespace EasyNetQ
 {
@@ -20,9 +21,9 @@ namespace EasyNetQ
         /// Publishes a message with a topic
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="topic">The topic</param>
         /// <param name="message">The message to publish</param>
-        void Publish<T>(string topic, T message);
+        /// <param name="configure">Configure the publish e.g. x => x.WithTopic("1010.brighton")</param>
+        void Publish<T>(T message, Action<IPublishConfiguration<T>> configure);
 
         /// <summary>
         /// Makes an RPC style asynchronous request.

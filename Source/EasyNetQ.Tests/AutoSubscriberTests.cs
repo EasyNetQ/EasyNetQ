@@ -1,7 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
+
+#pragma warning disable 67 // disable event is never used warning
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -148,27 +152,7 @@ namespace EasyNetQ.Tests
                     InterceptSubscribe(subscriptionId, onMessage);
             }
 
-            public void Subscribe<T>(string subscriptionId, Action<T> onMessage, IDictionary<string, object> arguments)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage, IDictionary<string, object> arguments)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage, IDictionary<string, object> arguments)
+            public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
             {
                 throw new NotImplementedException();
             }
@@ -178,27 +162,7 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
-            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage, IDictionary<string, object> arguments)
+            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
             {
                 throw new NotImplementedException();
             }

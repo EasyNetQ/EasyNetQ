@@ -84,6 +84,7 @@
     <Compile Include="CorrelationIdTests.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
+    <Compile Include="FluentConfiguration\SubscriptionConfigurationTests.cs" />
     <Compile Include="InMemoryClient\AdvancedPublishSubscribeTests.cs" />
     <Compile Include="InMemoryClient\BasicPublishSubscribeTests.cs" />
     <Compile Include="InMemoryClient\BasicRequestResponseTests.cs" />

@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -67,32 +67,12 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
-            Subscribe(subscriptionId, onMessage, null);
+            Subscribe(subscriptionId, onMessage, x => x.WithTopic("#"));
         }
 
-        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, IDictionary<string, object> arguments)
+        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
-            Subscribe(subscriptionId, "#", onMessage, arguments);
-        }
-
-        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage)
-        {
-            Subscribe(subscriptionId, topic, onMessage, null);
-        }
-
-        public void Subscribe<T>(string subscriptionId, string topic, Action<T> onMessage, IDictionary<string, object> arguments)
-        {
-            Subscribe(subscriptionId, Enumerable.Repeat(topic, 1), onMessage, arguments);
-        }
-
-        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage)
-        {
-            Subscribe(subscriptionId, topics, onMessage, null);
-        }
-
-        public void Subscribe<T>(string subscriptionId, IEnumerable<string> topics, Action<T> onMessage, IDictionary<string, object> arguments)
-        {
-            SubscribeAsync<T>(subscriptionId, topics, msg =>
+            SubscribeAsync(subscriptionId, msg =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
@@ -106,47 +86,35 @@ namespace EasyNetQ
                 }
                 return tcs.Task;
             },
-            arguments);
+            configure);
         }
 
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
         {
-            SubscribeAsync(subscriptionId, onMessage, null);
+            SubscribeAsync(subscriptionId, onMessage, x => x.WithTopic("#"));
         }
 
-        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, IDictionary<string, object> arguments)
+        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
-            SubscribeAsync(subscriptionId, "#", onMessage, arguments);
-        }
+            if(subscriptionId == null)
+            {
+                throw new ArgumentNullException("subscriptionId");
+            }
 
-        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage)
-        {
-            SubscribeAsync(subscriptionId, onMessage, null);
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, string topic, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-        {
-            SubscribeAsync(subscriptionId, Enumerable.Repeat(topic, 1), onMessage, arguments);
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage)
-        {
-            SubscribeAsync(subscriptionId, topics, onMessage, null);
-        }
-
-        public void SubscribeAsync<T>(string subscriptionId, IEnumerable<string> topics, Func<T, Task> onMessage, IDictionary<string, object> arguments)
-        {
             if (onMessage == null)
             {
                 throw new ArgumentNullException("onMessage");
             }
 
+            var configuration = new SubscriptionConfiguration<T>();
+            configure(configuration);
+
             var queueName = GetQueueName<T>(subscriptionId);
             var exchangeName = GetExchangeName<T>();
 
-            var queue = Queue.DeclareDurable(queueName, arguments);
+            var queue = Queue.DeclareDurable(queueName, configuration.Arguments);
             var exchange = Exchange.DeclareTopic(exchangeName);
-            queue.BindTo(exchange, topics.ToArray());
+            queue.BindTo(exchange, configuration.Topics.ToArray());
 
             advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
