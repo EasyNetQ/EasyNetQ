@@ -49,9 +49,6 @@ namespace EasyNetQ.Tests
         /// <summary>
         /// Ping-pong between two EasyNetQ instances. Try stopping and starting RabbitMQ
         /// while this test is running.
-        /// 
-        /// A third subscriber taps FromA messages. Try deleting its queue, the other subscribers
-        /// should continue to ping-pong
         /// </summary>
         public void Server_goes_away_and_comes_back_during_subscription()
         {
