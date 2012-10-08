@@ -34,6 +34,7 @@ namespace EasyNetQ
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
+                    x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),
                     x.Resolve<ISerializer>(),

@@ -10,6 +10,7 @@ namespace EasyNetQ
         string UserName { get; }
         string Password { get; }
         ushort RequestedHeartbeat { get; }
+        ushort PrefetchCount { get; }
 
         IEnumerable<IHostConfiguration> Hosts { get; }
     }
@@ -27,8 +28,10 @@ namespace EasyNetQ
         public string UserName { get; set; }
         public string Password { get; set; }
         public ushort RequestedHeartbeat { get; set; }
+        public ushort PrefetchCount { get; set; }
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
+
 
         public ConnectionConfiguration()
         {
@@ -38,6 +41,13 @@ namespace EasyNetQ
             UserName = "guest";
             Password = "guest";
             RequestedHeartbeat = 0;
+
+            // prefetchCount determines how many messages will be allowed in the local in-memory queue
+            // setting to zero makes this infinite, but risks an out-of-memory exception.
+            // set to 50 based on this blog post:
+            // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
+            PrefetchCount = 50;
+            
             Hosts = new List<IHostConfiguration>();
         }
 

@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.ConnectionString
     {
         private IConnectionStringParser connectionStringParser;
         private const string connectionString =
-            "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;requestedHeartbeat=3";
+            "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;requestedHeartbeat=3;prefetchcount=2";
 
         [SetUp]
         public void SetUp()
@@ -30,6 +30,7 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.Password.ShouldEqual("abc_xyz");
             connectionConfiguration.Port.ShouldEqual(12345);
             connectionConfiguration.RequestedHeartbeat.ShouldEqual(3);
+            connectionConfiguration.PrefetchCount.ShouldEqual(2);
         }
     }
 }

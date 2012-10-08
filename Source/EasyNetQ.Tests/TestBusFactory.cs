@@ -29,6 +29,7 @@ namespace EasyNetQ.Tests
             Conventions = Conventions ?? new Conventions();
 
             var advancedBus = new RabbitAdvancedBus(
+                new ConnectionConfiguration(), 
                 ConnectionFactory,
                 TypeNameSerializer.Serialize,
                 Serializer,

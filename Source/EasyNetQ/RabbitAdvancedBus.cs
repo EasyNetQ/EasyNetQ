@@ -8,6 +8,7 @@ namespace EasyNetQ
 {
     public class RabbitAdvancedBus : IAdvancedBus
     {
+        private readonly IConnectionConfiguration connectionConfiguration;
         private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
         private readonly IConsumerFactory consumerFactory;
@@ -20,13 +21,8 @@ namespace EasyNetQ
 
         public const bool NoAck = false;
 
-        // prefetchCount determines how many messages will be allowed in the local in-memory queue
-        // setting to zero makes this infinite, but risks an out-of-memory exception.
-        // set to 50 based on this blog post:
-        // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
-        private const int prefetchCount = 50; 
-
         public RabbitAdvancedBus(
+            IConnectionConfiguration connectionConfiguration,
             IConnectionFactory connectionFactory,
             SerializeType serializeType, 
             ISerializer serializer, 
@@ -35,6 +31,10 @@ namespace EasyNetQ
             Func<string> getCorrelationId, 
             IConventions conventions)
         {
+            if(connectionConfiguration == null)
+            {
+                throw new ArgumentNullException("connectionConfiguration");
+            }
             if (connectionFactory == null)
             {
                 throw new ArgumentNullException("connectionFactory");
@@ -64,6 +64,7 @@ namespace EasyNetQ
                 throw new ArgumentNullException("conventions");
             }
 
+            this.connectionConfiguration = connectionConfiguration;
             this.serializeType = serializeType;
             this.serializer = serializer;
             this.consumerFactory = consumerFactory;
@@ -158,7 +159,7 @@ namespace EasyNetQ
 
                 queue.Visit(new TopologyBuilder(channel));
 
-                channel.BasicQos(0, prefetchCount, false);
+                channel.BasicQos(0, connectionConfiguration.PrefetchCount, false);
 
                 var consumer = consumerFactory.CreateConsumer(subscriptionAction, channel, queue.IsSingleUse,
                     (consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body) =>
@@ -180,6 +181,10 @@ namespace EasyNetQ
                     NoAck,                  // noAck 
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
+
+                logger.DebugWrite("Declared Consumer. queue='{0}', prefetchcount={1}",
+                    queue.Name,
+                    connectionConfiguration.PrefetchCount);
             };
 
             AddSubscriptionAction(subscriptionAction);

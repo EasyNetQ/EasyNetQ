@@ -14,6 +14,7 @@ namespace EasyNetQ.InMemoryClient
             var conventions = new Conventions();
 
             var advancedBus = new RabbitAdvancedBus(
+                new ConnectionConfiguration(), 
                 connectionFactory,
                 TypeNameSerializer.Serialize,
                 serializer,
