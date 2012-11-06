@@ -1,6 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
+using System.Diagnostics;
 using System.Threading;
+using EasyNetQ.Loggers;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -13,7 +16,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateBus("host=localhost");
+            bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => new DelegateLogger()));
         }
 
         [TearDown]
@@ -44,6 +47,52 @@ namespace EasyNetQ.Tests
             }
 
             confirmed.ShouldBeTrue();
+        }
+
+        [Test, Explicit("needs a RabbitMQ broker on localhost to run")]
+        [ExpectedException(typeof(EasyNetQException))]
+        public void Should_throw_if_callbacks_are_not_set()
+        {
+            using (var channel = bus.OpenPublishChannel(x => x.WithPublisherConfirms()))
+            {
+                var message = new MyMessage { Text = "Hello Confirm!" };
+                channel.Publish(message);
+            }
+        }
+
+        [Test, Explicit("needs a RabbitMQ broker on localhost to run")]
+        public void Should_run_a_batch_nicely()
+        {
+            const int batchSize = 10000;
+            var callbackCount = 0;
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            using (var channel = bus.OpenPublishChannel(x => x.WithPublisherConfirms()))
+            {
+                for (int i = 0; i < batchSize; i++)
+                {
+                    var message = new MyMessage {Text = string.Format("Hello Message {0}", i)};
+                    channel.Publish(message, x => 
+                        x.OnSuccess(() => {
+                            callbackCount++;
+                        })
+                        .OnFailure(() =>
+                        {
+                            callbackCount++;
+                        }));
+                }
+
+                // wait until all the publications have been acknowleged.
+                while (callbackCount < batchSize)
+                {
+                    if (stopwatch.Elapsed.Seconds > 10)
+                    {
+                        throw new ApplicationException("Aborted batch with timeout");
+                    }
+                    Thread.Sleep(10);
+                }
+            }
         }
     }
 }

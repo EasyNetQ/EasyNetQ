@@ -86,6 +86,7 @@
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
+    <Compile Include="Loggers\DelegateLogger.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageCallback.cs" />
     <Compile Include="MessageReceivedInfo.cs" />
