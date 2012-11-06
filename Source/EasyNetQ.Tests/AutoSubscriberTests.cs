@@ -146,6 +146,11 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
+            public IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
+            {
+                throw new NotImplementedException();
+            }
+
             public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
             {
                 if (InterceptSubscribe != null)

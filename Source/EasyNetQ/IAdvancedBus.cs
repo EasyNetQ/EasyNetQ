@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -34,6 +35,15 @@ namespace EasyNetQ
         /// </summary>
         /// <returns>IAdvancedPublishChannel</returns>
         IAdvancedPublishChannel OpenPublishChannel();
+
+        /// <summary>
+        /// Return a channel for publishing.
+        /// </summary>
+        /// <param name="configure">
+        /// Channel configuration e.g. x => x.WithPublisherConfirms()
+        /// </param>
+        /// <returns>IAdvancedPublishChannel</returns>
+        IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure);
 
         /// <summary>
         /// True if the bus is connected, False if it is not.

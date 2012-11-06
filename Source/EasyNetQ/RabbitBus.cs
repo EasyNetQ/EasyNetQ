@@ -62,7 +62,12 @@ namespace EasyNetQ
 
         public IPublishChannel OpenPublishChannel()
         {
-            return new RabbitPublishChannel(this);
+            return OpenPublishChannel(x => { });
+        }
+
+        public IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
+        {
+            return new RabbitPublishChannel(this, configure);
         }
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
@@ -192,7 +197,7 @@ namespace EasyNetQ
 
                         using (var channel = advancedBus.OpenPublishChannel())
                         {
-                            channel.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, responseMessage);
+                            channel.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, responseMessage, configuration => {});
                         }
                         tcs.SetResult(null);
                     }

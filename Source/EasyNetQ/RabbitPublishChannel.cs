@@ -28,11 +28,11 @@ namespace EasyNetQ
             get { return bus; }
         }
 
-        public RabbitPublishChannel(RabbitBus bus)
+        public RabbitPublishChannel(RabbitBus bus, Action<IChannelConfiguration> configure)
         {
             this.bus = bus;
             advancedBus = bus.Advanced;
-            advancedPublishChannel = advancedBus.OpenPublishChannel();
+            advancedPublishChannel = advancedBus.OpenPublishChannel(configure);
         }
 
         public void Publish<T>(T message)
@@ -65,7 +65,22 @@ namespace EasyNetQ
                 ? configuration.Topics[0]
                 : bus.Conventions.TopicNamingConvention(typeof (T));
 
-            advancedPublishChannel.Publish(exchange, topic, easyNetQMessage);
+            advancedPublishChannel.Publish(exchange, topic, easyNetQMessage, MapConfiguration(configuration));
+        }
+
+        private Action<IAdvancedPublishConfiguration> MapConfiguration<T>(PublishConfiguration<T> configuration)
+        {
+            return x =>
+            {
+                if (configuration.SuccessCallback != null)
+                {
+                    x.OnSuccess(configuration.SuccessCallback);
+                }
+                if (configuration.FailureCallback != null)
+                {
+                    x.OnFailure(configuration.FailureCallback);
+                }
+            };
         }
 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
@@ -120,7 +135,7 @@ namespace EasyNetQ
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;
 
-            advancedPublishChannel.Publish(exchange, requestTypeName, requestMessage);
+            advancedPublishChannel.Publish(exchange, requestTypeName, requestMessage, configuration => {});
         }
 
         public void Dispose()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Exceptions;
 
@@ -228,7 +229,12 @@ namespace EasyNetQ
 
         public IAdvancedPublishChannel OpenPublishChannel()
         {
-            return new RabbitAdvancedPublishChannel(this);
+            return OpenPublishChannel(x => { });
+        }
+
+        public IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
+        {
+            return new RabbitAdvancedPublishChannel(this, configure);
         }
 
         public event Action Connected;

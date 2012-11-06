@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -9,8 +10,10 @@ namespace EasyNetQ
     {
         private readonly RabbitAdvancedBus advancedBus;
         private readonly IModel channel;
+        private readonly ChannelConfiguration channelConfiguration;
+        private readonly IPublisherConfirms publisherConfirms;
 
-        public RabbitAdvancedPublishChannel(RabbitAdvancedBus advancedBus)
+        public RabbitAdvancedPublishChannel(RabbitAdvancedBus advancedBus, Action<IChannelConfiguration> configure)
         {
             if(advancedBus == null)
             {
@@ -23,6 +26,24 @@ namespace EasyNetQ
 
             this.advancedBus = advancedBus;
             channel = advancedBus.Connection.CreateModel();
+
+            channelConfiguration = new ChannelConfiguration();
+            configure(channelConfiguration);
+
+            publisherConfirms = ConfigureChannel(channelConfiguration, channel);
+        }
+
+        private static IPublisherConfirms ConfigureChannel(ChannelConfiguration configuration, IModel channel)
+        {
+            if (configuration.PublisherConfirmsOn)
+            {
+                channel.ConfirmSelect();
+                var publisherConfirms = new PublisherConfirms();
+                channel.BasicAcks += publisherConfirms.SuccessfulPublish;
+                channel.BasicNacks += publisherConfirms.FailedPublish;
+                return publisherConfirms;
+            }
+            return null;
         }
 
         private bool disposed;
@@ -35,7 +56,7 @@ namespace EasyNetQ
             disposed = true;
         }
 
-        public void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message)
+        public void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure)
         {
             if(exchange == null)
             {
@@ -49,6 +70,10 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("message");
             }
+            if(configure == null)
+            {
+                throw new ArgumentNullException("configure");
+            }
 
             var typeName = advancedBus.SerializeType(typeof(T));
             var messageBody = advancedBus.Serializer.MessageToBytes(message.Body);
@@ -59,10 +84,10 @@ namespace EasyNetQ
                 advancedBus.GetCorrelationId() : 
                 message.Properties.CorrelationId;
 
-            Publish(exchange, routingKey, message.Properties, messageBody);
+            Publish(exchange, routingKey, message.Properties, messageBody, configure);
         }
 
-        public void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody)
+        public void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure)
         {
             if (exchange == null)
             {
@@ -80,6 +105,10 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("messageBody");
             }
+            if(configure == null)
+            {
+                throw new ArgumentNullException("configure");
+            }
             if (disposed)
             {
                 throw new EasyNetQException("PublishChannel is already disposed");
@@ -90,6 +119,19 @@ namespace EasyNetQ
             }
             try
             {
+                var configuration = new AdvancedPublishConfiguration();
+                configure(configuration);
+
+                if (publisherConfirms != null)
+                {
+                    if (configuration.SuccessCallback == null || configuration.FailureCallback == null)
+                    {
+                        throw new EasyNetQException("When pulisher confirms are on, you must supply success and failure callbacks in the publish configuration");
+                    }
+
+                    publisherConfirms.RegisterCallbacks(channel, configuration.SuccessCallback, configuration.FailureCallback);
+                }
+
                 var defaultProperties = channel.CreateBasicProperties();
                 properties.CopyTo(defaultProperties);
 
@@ -112,6 +154,16 @@ namespace EasyNetQ
             {
                 throw new EasyNetQException("Publish Failed: '{0}'", exception.Message);
             }
+        }
+
+        public void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message)
+        {
+            Publish(exchange, routingKey, message, configuration => {});
+        }
+
+        public void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody)
+        {
+            Publish(exchange, routingKey, properties, messageBody, configuration => {});
         }
     }
 }
