@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9888950B-EF30-4763-9076-38B071CDB535}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EasyNetQ.Management.Client</RootNamespace>
+    <AssemblyName>EasyNetQ.Management.Client</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\References\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="EasyNetQManagementException.cs" />
+    <Compile Include="IManagementClient.cs" />
+    <Compile Include="ManagementClient.cs" />
+    <Compile Include="Model\Application.cs" />
+    <Compile Include="Model\Arguments.cs" />
+    <Compile Include="Model\AuthMechanism.cs" />
+    <Compile Include="Model\Binding.cs" />
+    <Compile Include="Model\Capabilities.cs" />
+    <Compile Include="Model\Channel.cs" />
+    <Compile Include="Model\ClientProperties.cs" />
+    <Compile Include="Model\Connection.cs" />
+    <Compile Include="Model\ConnectionDetails.cs" />
+    <Compile Include="Model\Context.cs" />
+    <Compile Include="Model\Definitions.cs" />
+    <Compile Include="Model\Exchange.cs" />
+    <Compile Include="Model\ExchangeType.cs" />
+    <Compile Include="Model\Listener.cs" />
+    <Compile Include="Model\MessagesDetails.cs" />
+    <Compile Include="Model\MessagesReadyDetails.cs" />
+    <Compile Include="Model\MessagesUnacknowledgedDetails.cs" />
+    <Compile Include="Model\Node.cs" />
+    <Compile Include="Model\Overview.cs" />
+    <Compile Include="Model\Permission.cs" />
+    <Compile Include="Model\Queue.cs" />
+    <Compile Include="Model\QueueEx.cs" />
+    <Compile Include="Model\QueueTotals.cs" />
+    <Compile Include="Model\User.cs" />
+    <Compile Include="Model\Vhost.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
