@@ -45,6 +45,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Model\ExchangeInfoTests.cs" />
     <Compile Include="Model\NodeSerializationTests.cs" />
     <Compile Include="ResourceLoader.cs" />
     <Compile Include="ManagementClientTests.cs" />
@@ -65,12 +66,15 @@
     <EmbeddedResource Include="Json\Nodes.json" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Json\Bindings.json" />
-    <None Include="Json\Channels.json" />
-    <None Include="Json\Connections.json" />
-    <None Include="Json\Definitions.json" />
-    <None Include="Json\Exchanges.json" />
-    <None Include="Json\Queues.json" />
+    <EmbeddedResource Include="Json\Bindings.json" />
+    <EmbeddedResource Include="Json\Channels.json" />
+    <EmbeddedResource Include="Json\Connections.json" />
+    <EmbeddedResource Include="Json\Definitions.json" />
+    <EmbeddedResource Include="Json\Exchanges.json" />
+    <EmbeddedResource Include="Json\Queues.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
