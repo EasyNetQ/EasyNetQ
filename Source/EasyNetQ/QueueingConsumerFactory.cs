@@ -133,7 +133,21 @@ namespace EasyNetQ
 
             try
             {
-                subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+                switch (consumerErrorStrategy.PostExceptionAckStrategy())
+                {
+                    case PostExceptionAckStrategy.ShouldAck:
+                        subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
+                        break;
+                    case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
+                        subscriptionInfo.Consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, false);
+                        break;
+                    case PostExceptionAckStrategy.ShouldNackWithRequeue:
+                        subscriptionInfo.Consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, true);
+                        break;
+                    case PostExceptionAckStrategy.DoNothing:
+                        break;
+                }
+
                 if (subscriptionInfo.ModelIsSingleUse)
                 {
                     subscriptionInfo.Consumer.CloseModel();

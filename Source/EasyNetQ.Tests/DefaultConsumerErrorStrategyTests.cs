@@ -84,6 +84,13 @@ namespace EasyNetQ.Tests
                 }
             }
         }
+
+        [Test]
+        public void Should_ack_after_exception_is_handled()
+        {
+            consumerErrorStrategy.PostExceptionAckStrategy()
+                .ShouldEqual(PostExceptionAckStrategy.ShouldAck);
+        }
     }
 }
 
