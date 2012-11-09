@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.8.2.0")]
+[assembly: AssemblyVersion("0.8.3.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.8.3.0  ConsumerErrorStrategy ack strategy
 // 0.8.2.0  Publisher confirms
 // 0.8.1.0  Prefetch count can be configured with the prefetchcount connection string value.
 // 0.8.0.0  Fluent publisher & subscriber configuration. Breaking change to IBus and IPublishChannel.
