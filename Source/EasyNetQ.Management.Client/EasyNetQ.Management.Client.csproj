@@ -45,6 +45,7 @@
     <Compile Include="EasyNetQManagementException.cs" />
     <Compile Include="IManagementClient.cs" />
     <Compile Include="ManagementClient.cs" />
+    <Compile Include="Model\AlivenessTestResult.cs" />
     <Compile Include="Model\Application.cs" />
     <Compile Include="Model\Arguments.cs" />
     <Compile Include="Model\AuthMechanism.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Model\Node.cs" />
     <Compile Include="Model\Overview.cs" />
     <Compile Include="Model\Permission.cs" />
+    <Compile Include="Model\PermissionInfo.cs" />
     <Compile Include="Model\PublishInfo.cs" />
     <Compile Include="Model\PublishResult.cs" />
     <Compile Include="Model\Queue.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Model\QueueInfo.cs" />
     <Compile Include="Model\QueueTotals.cs" />
     <Compile Include="Model\User.cs" />
+    <Compile Include="Model\UserInfo.cs" />
     <Compile Include="Model\Vhost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

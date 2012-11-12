@@ -53,6 +53,7 @@
     <Compile Include="AckNackSpike.cs" />
     <Compile Include="BlockingCollectionSpike.cs" />
     <Compile Include="CallbackConsumer.cs" />
+    <Compile Include="ClientProperties.cs" />
     <Compile Include="DetectingThreadExitSpike.cs" />
     <Compile Include="IO.Ntfs\AlternateDataStreamInfo.cs" />
     <Compile Include="IO.Ntfs\FileStreamAttributes.cs" />

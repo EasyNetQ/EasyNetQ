@@ -7,7 +7,11 @@ namespace Mike.AmqpSpike
     {
         public static void Do(Action<IModel> modelAction)
         {
-            var connectionFactory = new ConnectionFactory { HostName = "localhost" };
+            var connectionFactory = new ConnectionFactory
+            {
+                HostName = "localhost",
+                
+            };
             using (var connection = connectionFactory.CreateConnection())
             using (var channel = connection.CreateModel())
             {

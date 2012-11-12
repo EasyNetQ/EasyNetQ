@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using EasyNetQ.Management.Client.Model;
 using NUnit.Framework;
@@ -9,6 +8,7 @@ using NUnit.Framework;
 namespace EasyNetQ.Management.Client.Tests
 {
     [TestFixture]
+    [Explicit ("requires a rabbitMQ instance on localhost to run")]
     public class ManagementClientTests
     {
         private IManagementClient managementClient;
@@ -98,12 +98,22 @@ namespace EasyNetQ.Management.Client.Tests
         private const string testExchange = "management_api_test_exchange";
 
         [Test]
+        public void Should_be_able_to_get_an_individual_exchange_by_name()
+        {
+            var vhost = new Vhost { name = "/" };
+            var exchange = managementClient.GetExchange(testExchange, vhost);
+
+            exchange.name.ShouldEqual(testExchange);
+        }
+
+        [Test]
         public void Should_be_able_to_create_an_exchange()
         {
             var vhost = new Vhost {name = "/"};
 
             var exchangeInfo = new ExchangeInfo(testExchange, "direct");
-            managementClient.CreateExchange(exchangeInfo, vhost);
+            var exchange = managementClient.CreateExchange(exchangeInfo, vhost);
+            exchange.name.ShouldEqual(testExchange);
         }
 
         [Test]
@@ -187,12 +197,21 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_get_a_queue_by_name()
+        {
+            var vhost = new Vhost { name = "/" };
+            var queue = managementClient.GetQueue(testQueue, vhost);
+            queue.name.ShouldEqual(testQueue);
+        }
+
+        [Test]
         public void Should_be_able_to_create_a_queue()
         {
             var queueInfo = new QueueInfo(testQueue);
             var vhost = new Vhost {name = "/"};
 
-            managementClient.CreateQueue(queueInfo, vhost);
+            var queue = managementClient.CreateQueue(queueInfo, vhost);
+            queue.name.ShouldEqual(testQueue);
         }
 
         [Test]
@@ -347,15 +366,72 @@ namespace EasyNetQ.Management.Client.Tests
             }
         }
 
+        private const string testVHost = "management_test_virtual_host";
+
+        [Test]
+        public void Should_be_able_to_get_an_individual_vhost()
+        {
+            var vhost = managementClient.GetVhost(testVHost);
+            vhost.name.ShouldEqual(testVHost);
+        }
+
+        [Test]
+        public void Should_create_a_virtual_host()
+        {
+            var vhost = managementClient.CreateVirtualHost(testVHost);
+            vhost.name.ShouldEqual(testVHost);
+        }
+
+        [Test]
+        public void Should_delete_a_virtual_host()
+        {
+            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.name == testVHost);
+            if(vhost == null)
+            {
+                throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
+            }
+            managementClient.DeleteVirtualHost(vhost);
+        }
+
         [Test]
         public void Should_get_users()
         {
             var users = managementClient.GetUsers();
 
-            foreach (User user in users)
+            foreach (var user in users)
             {
                 Console.Out.WriteLine("user.name = {0}", user.name);
             }
+        }
+
+        private const string testUser = "mikey";
+
+        [Test]
+        public void Should_be_able_to_get_a_user_by_name()
+        {
+            var user = managementClient.GetUser(testUser);
+            user.name.ShouldEqual(testUser);
+        }
+
+        [Test]
+        public void Should_be_able_to_create_a_user()
+        {
+            var userInfo = new UserInfo(testUser, "topSecret").AddTag("administrator");
+
+            var user = managementClient.CreateUser(userInfo);
+            user.name.ShouldEqual(testUser);
+        }
+
+        [Test]
+        public void Should_be_able_to_delete_a_user()
+        {
+            var user = managementClient.GetUsers().SingleOrDefault(x => x.name == testUser);
+            if (user == null)
+            {
+                throw new ApplicationException(string.Format("user '{0}' hasn't been created", testUser));
+            }
+
+            managementClient.DeleteUser(user);
         }
 
         [Test]
@@ -363,10 +439,54 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var permissions = managementClient.GetPermissions();
 
-            foreach (Permission permission in permissions)
+            foreach (var permission in permissions)
             {
                 Console.Out.WriteLine("permission.user = {0}", permission.user);
             }
+        }
+
+        [Test]
+        public void Should_be_able_to_create_permissions()
+        {
+            var user = managementClient.GetUsers().SingleOrDefault(x => x.name == testUser);
+            if (user == null)
+            {
+                throw new ApplicationException(string.Format("user '{0}' hasn't been created", testUser));
+            }
+            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.name == testVHost);
+            if (vhost == null)
+            {
+                throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
+            }
+
+            var permissionInfo = new PermissionInfo(user, vhost);
+            managementClient.CreatePermission(permissionInfo);
+        }
+
+        [Test]
+        public void Should_be_able_to_delete_permissions()
+        {
+            var permission = managementClient.GetPermissions()
+                .SingleOrDefault(x => x.user == testUser && x.vhost == testVHost);
+
+            if (permission == null)
+            {
+                throw new ApplicationException(string.Format("No permission for vhost: {0} and user: {1}",
+                    testVHost, testUser));
+            }
+
+            managementClient.DeletePermission(permission);
+        }
+
+        [Test]
+        public void Should_check_that_the_broker_is_alive()
+        {
+            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.name == testVHost);
+            if (vhost == null)
+            {
+                throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
+            }
+            managementClient.IsAlive(vhost).ShouldBeTrue();
         }
     }
 }

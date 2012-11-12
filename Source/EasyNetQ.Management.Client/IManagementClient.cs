@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using EasyNetQ.Management.Client.Model;
 using Queue = EasyNetQ.Management.Client.Model.Queue;
@@ -84,7 +83,8 @@ namespace EasyNetQ.Management.Client
         /// Creates the given exchange
         /// </summary>
         /// <param name="exchangeInfo"></param>
-        void CreateExchange(ExchangeInfo exchangeInfo, Vhost vhost);
+        /// <param name="vhost"></param>
+        Exchange CreateExchange(ExchangeInfo exchangeInfo, Vhost vhost);
 
         /// <summary>
         /// Delete the given exchange
@@ -123,7 +123,7 @@ namespace EasyNetQ.Management.Client
         /// </summary>
         /// <param name="queueInfo"></param>
         /// <param name="vhost"></param>
-        void CreateQueue(QueueInfo queueInfo, Vhost vhost);
+        Queue CreateQueue(QueueInfo queueInfo, Vhost vhost);
 
         /// <summary>
         /// Delete the given queue
@@ -179,5 +179,78 @@ namespace EasyNetQ.Management.Client
         /// </summary>
         /// <param name="binding"></param>
         void DeleteBinding(Binding binding);
+
+        /// <summary>
+        /// Create a new virtual host
+        /// </summary>
+        /// <param name="virtualHostName">The name of the new virtual host</param>
+        Vhost CreateVirtualHost(string virtualHostName);
+
+        /// <summary>
+        /// Delete a virtual host
+        /// </summary>
+        /// <param name="vhost">The virtual host to delete</param>
+        void DeleteVirtualHost(Vhost vhost);
+
+        /// <summary>
+        /// Create a new user
+        /// </summary>
+        /// <param name="userInfo">The user to create</param>
+        User CreateUser(UserInfo userInfo);
+
+        /// <summary>
+        /// Delete a user
+        /// </summary>
+        /// <param name="user">The user to delete</param>
+        void DeleteUser(User user);
+
+        /// <summary>
+        /// Create a permission
+        /// </summary>
+        /// <param name="permissionInfo">The permission to create</param>
+        void CreatePermission(PermissionInfo permissionInfo);
+
+        /// <summary>
+        /// Delete a permission
+        /// </summary>
+        /// <param name="permission">The permission to delete</param>
+        void DeletePermission(Permission permission);
+
+        /// <summary>
+        /// Declares a test queue, then publishes and consumes a message. Intended for use 
+        /// by monitoring tools. If everything is working correctly, will return true.
+        /// Note: the test queue will not be deleted (to to prevent queue churn if this 
+        /// is repeatedly pinged).
+        /// </summary>
+        bool IsAlive(Vhost vhost);
+
+        /// <summary>
+        /// Get an individual exchange by name
+        /// </summary>
+        /// <param name="exchangeName">The name of the exchange</param>
+        /// <param name="vhost">The virtual host that contains the exchange</param>
+        /// <returns>The exchange</returns>
+        Exchange GetExchange(string exchangeName, Vhost vhost);
+
+        /// <summary>
+        /// Get an individual queue by name
+        /// </summary>
+        /// <param name="queueName">The name of the queue</param>
+        /// <param name="vhost">The virtual host that contains the queue</param>
+        /// <returns>The Queue</returns>
+        Queue GetQueue(string queueName, Vhost vhost);
+
+        /// <summary>
+        /// Get an individual vhost by name
+        /// </summary>
+        /// <param name="vhostName">The VHost</param>
+        Vhost GetVhost(string vhostName);
+
+        /// <summary>
+        /// Get a user by name
+        /// </summary>
+        /// <param name="userName">The name of the user</param>
+        /// <returns>The User</returns>
+        User GetUser(string userName);
     }
 }
