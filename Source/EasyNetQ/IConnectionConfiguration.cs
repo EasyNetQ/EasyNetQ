@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace EasyNetQ
 {
@@ -11,7 +14,8 @@ namespace EasyNetQ
         string Password { get; }
         ushort RequestedHeartbeat { get; }
         ushort PrefetchCount { get; }
-
+        IDictionary<string, string> ClientProperties { get; } 
+        
         IEnumerable<IHostConfiguration> Hosts { get; }
     }
 
@@ -29,6 +33,7 @@ namespace EasyNetQ
         public string Password { get; set; }
         public ushort RequestedHeartbeat { get; set; }
         public ushort PrefetchCount { get; set; }
+        public IDictionary<string, string> ClientProperties { get; private set; } 
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
 
@@ -49,6 +54,26 @@ namespace EasyNetQ
             PrefetchCount = 50;
             
             Hosts = new List<IHostConfiguration>();
+            ClientProperties = new Dictionary<string, string>();
+            SetDefaultClientProperties(ClientProperties);
+        }
+
+        private void SetDefaultClientProperties(IDictionary<string, string> clientProperties)
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+            var applicationName = Path.GetFileName(applicationNameAndPath);
+            var applicationPath = Path.GetDirectoryName(applicationNameAndPath);
+            var hostname = Environment.MachineName;
+
+            clientProperties.Add("Client API", "EasyNetQ");
+            clientProperties.Add("EasyNetQ Version", version);
+            clientProperties.Add("Application", applicationName);
+            clientProperties.Add("Application Location", applicationPath);
+            clientProperties.Add("Machine Name", hostname);
+            clientProperties.Add("User", UserName);
+            clientProperties.Add("Connected", DateTime.Now.ToString("MM/dd/yy HH:mm:ss"));
+
         }
 
         public void Validate()
