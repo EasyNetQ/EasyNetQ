@@ -7,6 +7,7 @@ using NUnit.Framework;
 namespace EasyNetQ.Management.Client.Tests
 {
     [TestFixture]
+    [Explicit("Requires a RabbitMQ server on localhost to work")]
     public class ScenarioTest
     {
         [SetUp]
