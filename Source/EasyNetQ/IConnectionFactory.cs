@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using RabbitMQ.Client;
 
@@ -42,9 +44,20 @@ namespace EasyNetQ
                         Port = hostConfiguration.Port,
                         VirtualHost = Configuration.VirtualHost,
                         UserName = Configuration.UserName,
-                        Password = Configuration.Password
+                        Password = Configuration.Password,
+                        ClientProperties = ConvertToHashtable(Configuration.ClientProperties)
                     }, hostConfiguration));
             }
+        }
+
+        private static IDictionary ConvertToHashtable(IDictionary<string, string> clientProperties)
+        {
+            var dictionary = new Hashtable();
+            foreach (var clientProperty in clientProperties)
+            {
+                dictionary.Add(clientProperty.Key, clientProperty.Value);
+            }
+            return dictionary;
         }
 
         public virtual IConnection CreateConnection()

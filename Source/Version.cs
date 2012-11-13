@@ -6,6 +6,7 @@
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
 // 0.9.0.0  Management
+// 0.8.4.0  Better client information sent to RabbitMQ
 // 0.8.3.0  ConsumerErrorStrategy ack strategy
 // 0.8.2.0  Publisher confirms
 // 0.8.1.0  Prefetch count can be configured with the prefetchcount connection string value.
