@@ -66,13 +66,13 @@ namespace EasyNetQ
             var applicationPath = Path.GetDirectoryName(applicationNameAndPath);
             var hostname = Environment.MachineName;
 
-            clientProperties.Add("Client API", "EasyNetQ");
-            clientProperties.Add("EasyNetQ Version", version);
-            clientProperties.Add("Application", applicationName);
-            clientProperties.Add("Application Location", applicationPath);
-            clientProperties.Add("Machine Name", hostname);
-            clientProperties.Add("User", UserName);
-            clientProperties.Add("Connected", DateTime.Now.ToString("MM/dd/yy HH:mm:ss"));
+            clientProperties.Add("client_api", "EasyNetQ");
+            clientProperties.Add("easynetq_version", version);
+            clientProperties.Add("application", applicationName);
+            clientProperties.Add("application_location", applicationPath);
+            clientProperties.Add("machine_name", hostname);
+            clientProperties.Add("user", UserName);
+            clientProperties.Add("connected", DateTime.Now.ToString("MM/dd/yy HH:mm:ss"));
 
         }
 

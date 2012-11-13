@@ -54,8 +54,17 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var connections = managementClient.GetConnections();
 
-            connections.Count().ShouldEqual(1);
-            connections.First().name.ShouldEqual("[::1]:57775 -> [::1]:5672");
+            foreach (var connection in connections)
+            {
+                Console.Out.WriteLine("connection.name = {0}", connection.name);
+                Console.WriteLine("user:\t{0}", connection.client_properties.user);
+                Console.WriteLine("application:\t{0}", connection.client_properties.application);
+                Console.WriteLine("client_api:\t{0}", connection.client_properties.client_api);
+                Console.WriteLine("application_location:\t{0}", connection.client_properties.application_location);
+                Console.WriteLine("connected:\t{0}", connection.client_properties.connected);
+                Console.WriteLine("easynetq_version:\t{0}", connection.client_properties.easynetq_version);
+                Console.WriteLine("machine_name:\t{0}", connection.client_properties.machine_name);
+            }
         }
 
         [Test]

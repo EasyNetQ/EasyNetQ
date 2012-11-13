@@ -1,12 +1,16 @@
+using System;
+
 namespace EasyNetQ.Management.Client.Model
 {
     public class ClientProperties
     {
-        public string copyright { get; set; }
-        public string information { get; set; }
-        public string version { get; set; }
-        public string platform { get; set; }
-        public string product { get; set; }
         public Capabilities capabilities { get; set; }
+        public string user { get; set; }
+        public string application { get; set; }
+        public string client_api { get; set; }
+        public string application_location { get; set; }
+        public DateTime connected { get; set; }
+        public string easynetq_version { get; set; }
+        public string machine_name { get; set; }
     }
 }
