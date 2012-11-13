@@ -16,7 +16,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package; PackageManagementClient" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -44,12 +44,12 @@
     <Target Name="Package" DependsOnTargets="Build">
 
         <ItemGroup>
-            <FilesToDelete Include="$(Package)\*.nupkg"  />
+            <FilesToDelete Include="$(Package)\EasyNetQ\*.nupkg"  />
         </ItemGroup>
       
         <Delete Files="@(FilesToDelete)" />
     
-        <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\lib\net40" />
+        <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
         
         <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.dll">
             <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
@@ -57,13 +57,37 @@
         
         <XmlUpdate
             Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
-            XmlFileName="$(Package)\EasyNetQ.nuspec"
+            XmlFileName="$(Package)\EasyNetQ\EasyNetQ.nuspec"
             XPath="/package/metadata/version"
             Value="%(AsmInfo.Version)" />        
         
-        <Exec WorkingDirectory="$(Package)" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.nuspec" />
+        <Exec WorkingDirectory="$(Package)\EasyNetQ" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ\EasyNetQ.nuspec" />
 
         <Message Text="##teamcity[buildNumber '%(AsmInfo.Version)']" />
+    </Target>
+
+    <Target Name="PackageManagementClient" DependsOnTargets="Build">
+
+        <ItemGroup>
+            <FilesToDelete Include="$(Package)\EasyNetQ.Management.Client\*.nupkg"  />
+        </ItemGroup>
+      
+        <Delete Files="@(FilesToDelete)" />
+    
+        <Copy SourceFiles="$(OutputDir)\EasyNetQ.Management.Client.dll" DestinationFolder="$(Package)\EasyNetQ.Management.Client\lib\net40" />
+        
+        <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.Management.Client.dll">
+            <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+        </GetAssemblyIdentity>        
+        
+        <XmlUpdate
+            Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+            XmlFileName="$(Package)\EasyNetQ.Management.Client\EasyNetQ.Management.Client.nuspec"
+            XPath="/package/metadata/version"
+            Value="%(AsmInfo.Version)" />        
+        
+        <Exec WorkingDirectory="$(Package)\EasyNetQ.Management.Client" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.Management.Client\EasyNetQ.Management.Client.nuspec" />
+
     </Target>
 
 </Project>
