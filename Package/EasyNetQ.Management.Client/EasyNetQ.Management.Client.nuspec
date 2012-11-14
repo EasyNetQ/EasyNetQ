@@ -8,7 +8,7 @@
     <authors>Mike Hadlow</authors>
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/mikehadlow/EasyNetQ/blob/master/licence.txt</licenseUrl>
-    <projectUrl>http://easynetq.com/</projectUrl>
+    <projectUrl>https://github.com/mikehadlow/EasyNetQ/wiki/Management-API-Introduction</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>EasyNetQ.Management.Client is a .NET client for the RabbitMQ RESTful management API</description>
     <releaseNotes>

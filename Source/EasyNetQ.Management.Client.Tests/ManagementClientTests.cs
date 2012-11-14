@@ -28,8 +28,22 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var overview = managementClient.GetOverview();
 
-            overview.management_version.ShouldEqual("2.8.6");
-            overview.exchange_types[0].name.ShouldEqual("topic");
+            Console.Out.WriteLine("overview.management_version = {0}", overview.management_version);
+            foreach (var exchangeType in overview.exchange_types)
+            {
+                Console.Out.WriteLine("exchangeType.name = {0}", exchangeType.name);
+            }
+            foreach (var listener in overview.listeners)
+            {
+                Console.Out.WriteLine("listener.ip_address = {0}", listener.ip_address);
+            }
+
+            Console.Out.WriteLine("overview.queue_totals = {0}", overview.queue_totals.messages);
+
+            foreach (var context in overview.contexts)
+            {
+                Console.Out.WriteLine("context.description = {0}", context.description);
+            }
         }
 
         [Test]
@@ -89,8 +103,12 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var channels = managementClient.GetChannels();
 
-            channels.Count().ShouldEqual(1);
-            channels.First().consumer_count.ShouldEqual(1);
+            foreach (var channel in channels)
+            {
+                Console.Out.WriteLine("channel.name = {0}", channel.name);
+                Console.Out.WriteLine("channel.user = {0}", channel.user);
+                Console.Out.WriteLine("channel.prefetch_count = {0}", channel.prefetch_count);
+            }
         }
 
         [Test]
@@ -185,7 +203,6 @@ namespace EasyNetQ.Management.Client.Tests
             }
 
             var publishInfo = new PublishInfo(testQueue, "Hello World");
-
             var result = managementClient.Publish(exchange, publishInfo);
 
             // the testExchange isn't bound to a queue
@@ -216,9 +233,8 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_be_able_to_create_a_queue()
         {
+            var vhost = managementClient.GetVhost("/");
             var queueInfo = new QueueInfo(testQueue);
-            var vhost = new Vhost {name = "/"};
-
             var queue = managementClient.CreateQueue(queueInfo, vhost);
             queue.name.ShouldEqual(testQueue);
         }
@@ -274,7 +290,6 @@ namespace EasyNetQ.Management.Client.Tests
             }
 
             var criteria = new GetMessagesCriteria(1, true);
-
             var messages = managementClient.GetMessagesFromQueue(queue, criteria);
 
             foreach (var message in messages)
@@ -323,17 +338,9 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_create_binding()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
-            if (queue == null)
-            {
-                throw new ApplicationException("Test queue has not been created");
-            }
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
-            if (exchange == null)
-            {
-                throw new ApplicationException(
-                    string.Format("Test exchange '{0}' hasn't been created", testExchange));
-            }
+            var vhost = managementClient.GetVhost("/");
+            var queue = managementClient.GetQueue(testQueue, vhost);
+            var exchange = managementClient.GetExchange(testExchange, vhost);
 
             var bindingInfo = new BindingInfo(testQueue);
 
@@ -343,25 +350,16 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_delete_binding()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
-            if (queue == null)
-            {
-                throw new ApplicationException("Test queue has not been created");
-            }
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
-            if (exchange == null)
-            {
-                throw new ApplicationException(
-                    string.Format("Test exchange '{0}' hasn't been created", testExchange));
-            }
+            var vhost = managementClient.GetVhost("/");
+            var queue = managementClient.GetQueue(testQueue, vhost);
+            var exchange = managementClient.GetExchange(testExchange, vhost);
 
-            var binding = managementClient.GetBindings(exchange, queue).FirstOrDefault();
-            if (binding == null)
-            {
-                throw new ApplicationException("Test binding has not been created");
-            }
+            var bindings = managementClient.GetBindings(exchange, queue);
 
-            managementClient.DeleteBinding(binding);
+            foreach (var binding in bindings)
+            {
+                managementClient.DeleteBinding(binding);
+            }
         }
 
         [Test]
@@ -394,11 +392,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_delete_a_virtual_host()
         {
-            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.name == testVHost);
-            if(vhost == null)
-            {
-                throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
-            }
+            var vhost = managementClient.GetVhost(testVHost);
             managementClient.DeleteVirtualHost(vhost);
         }
 
@@ -434,12 +428,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_be_able_to_delete_a_user()
         {
-            var user = managementClient.GetUsers().SingleOrDefault(x => x.name == testUser);
-            if (user == null)
-            {
-                throw new ApplicationException(string.Format("user '{0}' hasn't been created", testUser));
-            }
-
+            var user = managementClient.GetUser(testUser);
             managementClient.DeleteUser(user);
         }
 
@@ -451,6 +440,10 @@ namespace EasyNetQ.Management.Client.Tests
             foreach (var permission in permissions)
             {
                 Console.Out.WriteLine("permission.user = {0}", permission.user);
+                Console.Out.WriteLine("permission.vhost = {0}", permission.vhost);
+                Console.Out.WriteLine("permission.configure = {0}", permission.configure);
+                Console.Out.WriteLine("permission.read = {0}", permission.read);
+                Console.Out.WriteLine("permission.write = {0}", permission.write);
             }
         }
 
