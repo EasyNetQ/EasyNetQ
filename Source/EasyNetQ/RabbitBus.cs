@@ -72,7 +72,7 @@ namespace EasyNetQ
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
-            Subscribe(subscriptionId, onMessage, x => x.WithTopic("#"));
+            Subscribe(subscriptionId, onMessage, x => { });
         }
 
         public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
@@ -96,7 +96,7 @@ namespace EasyNetQ
 
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
         {
-            SubscribeAsync(subscriptionId, onMessage, x => x.WithTopic("#"));
+            SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
         public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
@@ -119,7 +119,15 @@ namespace EasyNetQ
 
             var queue = Queue.DeclareDurable(queueName, configuration.Arguments);
             var exchange = Exchange.DeclareTopic(exchangeName);
-            queue.BindTo(exchange, configuration.Topics.ToArray());
+
+            var topics = configuration.Topics.ToArray();
+
+            if(topics.Length == 0)
+            {
+                topics = new[]{"#"};
+            }
+
+            queue.BindTo(exchange, topics);
 
             advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
