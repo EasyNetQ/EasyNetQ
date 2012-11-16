@@ -43,6 +43,16 @@ RPC server...
 		new TestResponseMessage{ Text = request.Text + " all done!" });
 	
 
+## Management API
+
+EasyNetQ also has a client-side library for the RabbitMQ Management HTTP API. This lets you control all aspects for your
+RabbitMQ broker from .NET code, including creating virtual hosts and users; setting permissions; monitoring queues, 
+connections and channels; and setting up exchanges, queues and bindings. 
+
+See the **[documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Management-API-Introduction)**.
+
+The annoucement blog post is [here](http://mikehadlow.blogspot.co.uk/2012/11/a-c-net-client-proxy-for-rabbitmq.html)
+
 ## Some blog posts about EasyNetQ ...
 
 http://mikehadlow.blogspot.com/2011/05/easynetq-simple-net-api-for-rabbitmq.html
