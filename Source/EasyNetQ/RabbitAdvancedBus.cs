@@ -244,9 +244,18 @@ namespace EasyNetQ
             if (Connected != null) Connected();
 
             logger.DebugWrite("Re-creating subscribers");
-            foreach (var subscribeAction in subscribeActions)
+            try
             {
-                subscribeAction.Action();
+                foreach (var subscribeAction in subscribeActions)
+                {
+                    subscribeAction.Action();
+                }
+            }
+            catch (OperationInterruptedException operationInterruptedException)
+            {
+                logger.ErrorWrite("Re-creating subscribers failed: reason: '{0}'\n{1}", 
+                    operationInterruptedException.Message, 
+                    operationInterruptedException.ToString());
             }
         }
 
