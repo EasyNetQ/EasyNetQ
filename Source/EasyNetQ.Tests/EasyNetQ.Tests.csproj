@@ -74,6 +74,7 @@
     <Compile Include="AutoSubscriberTests.cs" />
     <Compile Include="BinarySerializerTests.cs" />
     <Compile Include="Bugs\CannonCreateQueueExchangeUsingAdvancedAPI.cs" />
+    <Compile Include="Bugs\SubscriptionOnTransientQueueThrowsOnReconnect.cs" />
     <Compile Include="ClusterTests.cs" />
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />

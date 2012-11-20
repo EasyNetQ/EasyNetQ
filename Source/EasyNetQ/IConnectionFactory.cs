@@ -45,6 +45,7 @@ namespace EasyNetQ
                         VirtualHost = Configuration.VirtualHost,
                         UserName = Configuration.UserName,
                         Password = Configuration.Password,
+                        RequestedHeartbeat = Configuration.RequestedHeartbeat,
                         ClientProperties = ConvertToHashtable(Configuration.ClientProperties)
                     }, hostConfiguration));
             }

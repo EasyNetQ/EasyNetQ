@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Threading;
 using NUnit.Framework;
 
@@ -23,7 +24,7 @@ namespace EasyNetQ.Tests
             var host1 = string.Format(hostFormat, clusterHost1, clusterPort1);
             var host2 = string.Format(hostFormat, clusterHost2, clusterPort2);
             var hosts = string.Format("{0},{1}", host1, host2);
-            connectionString = string.Format("host={0}", hosts);
+            connectionString = string.Format("host={0};requestedHeartbeat=1", hosts);
 
             bus = RabbitHutch.CreateBus(connectionString);
         }
@@ -45,6 +46,25 @@ namespace EasyNetQ.Tests
         {
             // just watch what happens
             Thread.Sleep(5 * 60 * 1000); // let's give it 5 minutes
+        }
+
+        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        public void Should_be_able_to_resubscribe_on_reconnection()
+        {
+            bus.Subscribe<MyMessage>("cluster_test", message => Console.WriteLine(message.Text));
+            var count = 0;
+
+//            while (true)
+//            {
+//                Thread.Sleep(5 * 1000); // let's give it 5 minutes    
+//                using (var channel = bus.OpenPublishChannel())
+//                {
+//                    channel.Publish(new MyMessage { Text = "Hello " + count.ToString()});
+//                }
+//                count++;
+//            }
+
+            Thread.Sleep(TimeSpan.FromMinutes(5)); // let's give it 5 minutes    
         }
     }
 }
