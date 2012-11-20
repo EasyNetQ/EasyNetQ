@@ -84,7 +84,7 @@ namespace EasyNetQ
             return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, originalRoutingKey);
         }
 
-        public void HandleConsumerError(BasicDeliverEventArgs devliverArgs, Exception exception)
+        public virtual void HandleConsumerError(BasicDeliverEventArgs devliverArgs, Exception exception)
         {
             try
             {
@@ -122,7 +122,7 @@ namespace EasyNetQ
             }
         }
 
-        public PostExceptionAckStrategy PostExceptionAckStrategy()
+        public virtual PostExceptionAckStrategy PostExceptionAckStrategy()
         {
             return EasyNetQ.PostExceptionAckStrategy.ShouldAck;
         }
@@ -154,7 +154,7 @@ namespace EasyNetQ
         }
 
         private bool disposed = false;
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (disposed) return;
 

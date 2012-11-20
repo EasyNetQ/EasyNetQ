@@ -19,7 +19,7 @@ namespace EasyNetQ
 
     public class ConnectionFactoryWrapper : IConnectionFactory
     {
-        public IConnectionConfiguration Configuration { get; private set; }
+        public virtual IConnectionConfiguration Configuration { get; private set; }
         private readonly IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy;
 
         public ConnectionFactoryWrapper(IConnectionConfiguration connectionConfiguration, IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy)
@@ -65,27 +65,27 @@ namespace EasyNetQ
             return clusterHostSelectionStrategy.Current().ConnectionFactory.CreateConnection();
         }
 
-        public IHostConfiguration CurrentHost
+        public virtual IHostConfiguration CurrentHost
         {
             get { return clusterHostSelectionStrategy.Current().HostConfiguration; }
         }
 
-        public bool Next()
+        public virtual bool Next()
         {
             return clusterHostSelectionStrategy.Next();
         }
 
-        public void Reset()
+        public virtual void Reset()
         {
             clusterHostSelectionStrategy.Reset();
         }
 
-        public void Success()
+        public virtual void Success()
         {
             clusterHostSelectionStrategy.Success();
         }
 
-        public bool Succeeded
+        public virtual bool Succeeded
         {
             get { return clusterHostSelectionStrategy.Succeeded; }
         }

@@ -9,9 +9,9 @@ namespace EasyNetQ
     /// </summary>
     public class DefaultServiceProvider : IServiceProvider, IServiceRegister
     {
-        private readonly IDictionary<Type, object> components = new Dictionary<Type, object>(); 
+        private readonly IDictionary<Type, object> components = new Dictionary<Type, object>();
 
-        public TService Resolve<TService>() where TService : class 
+        public virtual TService Resolve<TService>() where TService : class 
         {
             if (!components.ContainsKey(typeof (TService)))
             {
@@ -21,7 +21,7 @@ namespace EasyNetQ
             return ((Func<IServiceProvider, TService>)components[typeof(TService)])(this);
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
+        public virtual IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
         {
             // first to register wins
             if (components.ContainsKey(typeof(TService))) return this;

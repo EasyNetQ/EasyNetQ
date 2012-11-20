@@ -48,7 +48,7 @@ namespace EasyNetQ
 
         private bool disposed;
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (disposed) return;
             channel.Abort();
@@ -56,7 +56,7 @@ namespace EasyNetQ
             disposed = true;
         }
 
-        public void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure)
+        public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure)
         {
             if(exchange == null)
             {
@@ -87,7 +87,7 @@ namespace EasyNetQ
             Publish(exchange, routingKey, message.Properties, messageBody, configure);
         }
 
-        public void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure)
+        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure)
         {
             if (exchange == null)
             {
@@ -156,12 +156,12 @@ namespace EasyNetQ
             }
         }
 
-        public void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message)
+        public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message)
         {
             Publish(exchange, routingKey, message, configuration => {});
         }
 
-        public void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody)
+        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody)
         {
             Publish(exchange, routingKey, properties, messageBody, configuration => {});
         }

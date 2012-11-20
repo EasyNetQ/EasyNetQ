@@ -60,22 +60,22 @@ namespace EasyNetQ
             advancedBus.Disconnected += OnDisconnected;
         }
 
-        public IPublishChannel OpenPublishChannel()
+        public virtual IPublishChannel OpenPublishChannel()
         {
             return OpenPublishChannel(x => { });
         }
 
-        public IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
+        public virtual IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
         {
             return new RabbitPublishChannel(this, configure);
         }
 
-        public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
+        public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage)
         {
             Subscribe(subscriptionId, onMessage, x => { });
         }
 
-        public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
+        public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
             SubscribeAsync(subscriptionId, msg =>
             {
@@ -94,12 +94,12 @@ namespace EasyNetQ
             configure);
         }
 
-        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
+        public virtual void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
         {
             SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
-        public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
+        public virtual void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
             if(subscriptionId == null)
             {
@@ -142,12 +142,12 @@ namespace EasyNetQ
             return conventions.QueueNamingConvention(typeof(T), subscriptionId);
         }
 
-        public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
+        public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
         {
             Respond(responder, null);
         }
 
-        public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
+        public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
         {
             if (responder == null)
             {
@@ -160,12 +160,12 @@ namespace EasyNetQ
             RespondAsync(taskResponder, arguments);
         }
 
-        public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
+        public virtual void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
         {
             RespondAsync(responder, null);
         }
 
-        public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
+        public virtual void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
         {
             if (responder == null)
             {
@@ -215,31 +215,31 @@ namespace EasyNetQ
             });
         }
 
-        public event Action Connected;
+        public virtual event Action Connected;
 
         protected void OnConnected()
         {
             if (Connected != null) Connected();
         }
 
-        public event Action Disconnected;
+        public virtual event Action Disconnected;
 
         protected void OnDisconnected()
         {
             if (Disconnected != null) Disconnected();
         }
 
-        public bool IsConnected
+        public virtual bool IsConnected
         {
             get { return advancedBus.IsConnected; }
         }
 
-        public IAdvancedBus Advanced
+        public virtual IAdvancedBus Advanced
         {
             get { return advancedBus; }
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             advancedBus.Dispose();
         }

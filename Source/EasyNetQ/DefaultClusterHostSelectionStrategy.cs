@@ -12,13 +12,13 @@ namespace EasyNetQ
         private int currentIndex = 0;
         private int startIndex = 0;
 
-        public void Add(T item)
+        public virtual void Add(T item)
         {
             items.Add(item);
             startIndex = items.Count-1;
         }
 
-        public T Current()
+        public virtual T Current()
         {
             if (items.Count == 0)
             {
@@ -28,7 +28,7 @@ namespace EasyNetQ
             return items[currentIndex];
         }
 
-        public bool Next()
+        public virtual bool Next()
         {
             if (currentIndex == startIndex) return false;
             if (Succeeded) return false;
@@ -38,7 +38,7 @@ namespace EasyNetQ
             return true;
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public virtual IEnumerator<T> GetEnumerator()
         {
             return items.GetEnumerator();
         }
@@ -48,13 +48,13 @@ namespace EasyNetQ
             return GetEnumerator();
         }
 
-        public void Success()
+        public virtual void Success()
         {
             Succeeded = true;
             startIndex = currentIndex;
         }
 
-        public bool Succeeded { get; private set; }
+        public virtual bool Succeeded { get; private set; }
 
         private bool firstUse = true;
 
@@ -63,7 +63,7 @@ namespace EasyNetQ
             Succeeded = false;
         }
 
-        public void Reset()
+        public virtual void Reset()
         {
             Succeeded = false;
             if (firstUse)

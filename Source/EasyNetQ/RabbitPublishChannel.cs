@@ -23,7 +23,7 @@ namespace EasyNetQ
             get { return advancedBus; }
         }
 
-        public IBus Bus
+        public virtual IBus Bus
         {
             get { return bus; }
         }
@@ -35,12 +35,12 @@ namespace EasyNetQ
             advancedPublishChannel = advancedBus.OpenPublishChannel(configure);
         }
 
-        public void Publish<T>(T message)
+        public virtual void Publish<T>(T message)
         {
             Publish(message, x => {});
         }
 
-        public void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
+        public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
         {
             if(message == null)
             {
@@ -83,11 +83,11 @@ namespace EasyNetQ
             };
         }
 
-        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+        public virtual void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
             Request(request, onResponse, null);
         }
-
+        virtual 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {
             if (onResponse == null)

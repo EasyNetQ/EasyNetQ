@@ -79,12 +79,12 @@ namespace EasyNetQ
             connection.Disconnected += OnDisconnected;
         }
 
-        public SerializeType SerializeType
+        public virtual SerializeType SerializeType
         {
             get { return serializeType; }
         }
 
-        public ISerializer Serializer
+        public virtual ISerializer Serializer
         {
             get { return serializer; }
         }
@@ -114,7 +114,7 @@ namespace EasyNetQ
             get { return conventions; }
         }
 
-        public void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
+        public virtual void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
         {
             if(queue == null)
             {
@@ -136,7 +136,7 @@ namespace EasyNetQ
             });
         }
 
-        public void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+        public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
             if (queue == null)
             {
@@ -227,17 +227,17 @@ namespace EasyNetQ
             }
         }
 
-        public IAdvancedPublishChannel OpenPublishChannel()
+        public virtual IAdvancedPublishChannel OpenPublishChannel()
         {
             return OpenPublishChannel(x => { });
         }
 
-        public IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
+        public virtual IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
         {
             return new RabbitAdvancedPublishChannel(this, configure);
         }
 
-        public event Action Connected;
+        public virtual event Action Connected;
 
         protected void OnConnected()
         {
@@ -250,20 +250,20 @@ namespace EasyNetQ
             }
         }
 
-        public event Action Disconnected;
+        public virtual event Action Disconnected;
 
         protected void OnDisconnected()
         {
             if (Disconnected != null) Disconnected();
         }
 
-        public bool IsConnected
+        public virtual bool IsConnected
         {
             get { return connection.IsConnected; }
         }
 
         private bool disposed = false;
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (disposed) return;
 
