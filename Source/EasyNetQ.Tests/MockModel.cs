@@ -210,6 +210,11 @@ namespace EasyNetQ.Tests
             BasicPublishAction(exchange, routingKey, basicProperties, body);
         }
 
+        public void BasicPublish(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
+        {
+            throw new NotImplementedException();
+        }
+
         public void BasicPublish(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
         {
             throw new NotImplementedException();

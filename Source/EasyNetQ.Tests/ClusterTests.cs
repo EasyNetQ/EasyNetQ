@@ -52,8 +52,8 @@ namespace EasyNetQ.Tests
         public void Should_be_able_to_resubscribe_on_reconnection()
         {
             bus.Subscribe<MyMessage>("cluster_test", message => Console.WriteLine(message.Text));
-            var count = 0;
 
+//            var count = 0;
 //            while (true)
 //            {
 //                Thread.Sleep(5 * 1000); // let's give it 5 minutes    

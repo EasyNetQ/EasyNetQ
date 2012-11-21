@@ -19,6 +19,7 @@ namespace EasyNetQ.Tests
         private QueueingConsumerFactory queueingConsumerFactory;
         private IConsumerErrorStrategy consumerErrorStrategy;
         private AutoResetEvent autoResetEvent;
+        const ulong deliveryTag = 123;
 
         [SetUp]
         public void SetUp()
@@ -32,8 +33,20 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_ack_on_successful_message_handler()
         {
-            const ulong deliveryTag = 123;
+            var model = MockRepository.GenerateStub<IModel>();
 
+            var args = CreateBasicDeliverEventArgs(deliveryTag, model, SuccessMessageCallback);
+
+            queueingConsumerFactory.HandleMessageDelivery(args);
+            autoResetEvent.WaitOne(1000);
+
+            model.AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+        }
+
+        [Test]
+        public void Should_ack_on_successful_message_handler_and_ignore_postExcaptionAckStrategy()
+        {
+            consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldNackWithRequeue);
             var model = MockRepository.GenerateStub<IModel>();
 
             var args = CreateBasicDeliverEventArgs(deliveryTag, model, SuccessMessageCallback);
@@ -47,7 +60,6 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_ack_on_error_when_error_strategy_request()
         {
-            const ulong deliveryTag = 123;
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldAck);
 
             var model = MockRepository.GenerateStub<IModel>();
@@ -64,7 +76,6 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_noAck_with_requeue_on_error_when_error_strategy_requests()
         {
-            const ulong deliveryTag = 123;
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldNackWithRequeue);
 
             var model = MockRepository.GenerateStub<IModel>();
@@ -81,7 +92,6 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_noAck_with_no_requeue_when_error_strategy_requets()
         {
-            const ulong deliveryTag = 123;
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldNackWithoutRequeue);
 
             var model = MockRepository.GenerateStub<IModel>();
@@ -98,7 +108,6 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_not_ack_or_nack_when_error_strategy_requests()
         {
-            const ulong deliveryTag = 123;
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.DoNothing);
 
             var model = MockRepository.GenerateStub<IModel>();
