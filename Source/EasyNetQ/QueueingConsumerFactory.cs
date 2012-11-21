@@ -28,6 +28,9 @@ namespace EasyNetQ
         
         private readonly Thread subscriptionCallbackThread;
 
+        // useful for testing, called when DoAck is called after a message is handled
+        public Action SynchronisationAction { get; set; }
+
         public QueueingConsumerFactory(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy)
         {
             this.logger = logger;
@@ -57,12 +60,17 @@ namespace EasyNetQ
             subscriptionCallbackThread.Start();
         }
 
-        private void HandleMessageDelivery(BasicDeliverEventArgs basicDeliverEventArgs)
+        public void HandleMessageDelivery(BasicDeliverEventArgs basicDeliverEventArgs)
         {
             var consumerTag = basicDeliverEventArgs.ConsumerTag;
+            if (consumerTag == null)
+            {
+                logger.ErrorWrite("BasicDeliverEventArgs.ConsumerTag is null");
+                return;
+            }
             if (!subscriptions.ContainsKey(consumerTag))
             {
-                logger.DebugWrite("No subscription for consumerTag: {0}", consumerTag);
+                logger.ErrorWrite("No subscription for consumerTag: {0}", consumerTag);
                 return;
             }
 
@@ -99,7 +107,7 @@ namespace EasyNetQ
                     }
                     else
                     {
-                        DoAck(basicDeliverEventArgs, subscriptionInfo);
+                        DoAck(basicDeliverEventArgs, subscriptionInfo, SuccessAckStrategy);
                     }
                 });
             }
@@ -123,30 +131,17 @@ namespace EasyNetQ
         {
             logger.ErrorWrite(BuildErrorMessage(basicDeliverEventArgs, exception));
             consumerErrorStrategy.HandleConsumerError(basicDeliverEventArgs, exception);
-            DoAck(basicDeliverEventArgs, subscriptionInfo);
+            DoAck(basicDeliverEventArgs, subscriptionInfo, ExceptionAckStrategy);
         }
 
-        private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo)
+        private void DoAck(BasicDeliverEventArgs basicDeliverEventArgs, SubscriptionInfo subscriptionInfo, Action<IModel, ulong> ackStrategy)
         {
             const string failedToAckMessage = "Basic ack failed because channel was closed with message {0}." +
                                               " Message remains on RabbitMQ and will be retried.";
 
             try
             {
-                switch (consumerErrorStrategy.PostExceptionAckStrategy())
-                {
-                    case PostExceptionAckStrategy.ShouldAck:
-                        subscriptionInfo.Consumer.Model.BasicAck(basicDeliverEventArgs.DeliveryTag, false);
-                        break;
-                    case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
-                        subscriptionInfo.Consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, false);
-                        break;
-                    case PostExceptionAckStrategy.ShouldNackWithRequeue:
-                        subscriptionInfo.Consumer.Model.BasicNack(basicDeliverEventArgs.DeliveryTag, false, true);
-                        break;
-                    case PostExceptionAckStrategy.DoNothing:
-                        break;
-                }
+                ackStrategy(subscriptionInfo.Consumer.Model, basicDeliverEventArgs.DeliveryTag);
 
                 if (subscriptionInfo.ModelIsSingleUse)
                 {
@@ -161,6 +156,36 @@ namespace EasyNetQ
             catch (IOException ioException)
             {
                 logger.InfoWrite(failedToAckMessage, ioException.Message);
+            }
+            finally
+            {
+                if (SynchronisationAction != null)
+                {
+                    SynchronisationAction();
+                }
+            }
+        }
+
+        private void SuccessAckStrategy(IModel model, ulong deliveryTag)
+        {
+            model.BasicAck(deliveryTag, false);
+        }
+
+        private void ExceptionAckStrategy(IModel model, ulong deliveryTag)
+        {
+            switch (consumerErrorStrategy.PostExceptionAckStrategy())
+            {
+                case PostExceptionAckStrategy.ShouldAck:
+                    model.BasicAck(deliveryTag, false);
+                    break;
+                case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
+                    model.BasicNack(deliveryTag, false, false);
+                    break;
+                case PostExceptionAckStrategy.ShouldNackWithRequeue:
+                    model.BasicNack(deliveryTag, false, true);
+                    break;
+                case PostExceptionAckStrategy.DoNothing:
+                    break;
             }
         }
 

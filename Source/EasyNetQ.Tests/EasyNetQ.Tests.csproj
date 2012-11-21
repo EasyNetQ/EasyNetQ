@@ -104,6 +104,7 @@
     <Compile Include="PublishSubscribeTests.cs" />
     <Compile Include="PublishSubscribeWithPublisherConfirms.cs" />
     <Compile Include="PublishSubscribeWithTopicsTests.cs" />
+    <Compile Include="QueueingConsumerFactoryTests.cs" />
     <Compile Include="RabbitAdvancedBusTests.cs" />
     <Compile Include="RequestResponseTests.cs" />
     <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
