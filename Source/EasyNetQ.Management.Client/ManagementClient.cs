@@ -18,7 +18,7 @@ namespace EasyNetQ.Management.Client
         public ManagementClient(
             string hostUrl, 
             string username, 
-            string password) : this(hostUrl, username, password, 55672)
+            string password) : this(hostUrl, username, password, 15672)
         {
         }
 

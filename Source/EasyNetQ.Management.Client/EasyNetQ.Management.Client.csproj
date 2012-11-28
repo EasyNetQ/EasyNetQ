@@ -49,6 +49,7 @@
     <Compile Include="Model\Application.cs" />
     <Compile Include="Model\Arguments.cs" />
     <Compile Include="Model\AuthMechanism.cs" />
+    <Compile Include="Model\BackingQueueStatus.cs" />
     <Compile Include="Model\Binding.cs" />
     <Compile Include="Model\BindingInfo.cs" />
     <Compile Include="Model\BindingReference.cs" />

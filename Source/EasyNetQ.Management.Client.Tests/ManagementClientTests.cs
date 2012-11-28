@@ -60,7 +60,7 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var definitions = managementClient.GetDefinitions();
 
-            definitions.rabbit_version.ShouldEqual("2.8.6");
+            definitions.rabbit_version.ShouldEqual("3.0.0");
         }
 
         [Test]

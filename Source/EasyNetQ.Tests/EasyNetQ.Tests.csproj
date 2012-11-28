@@ -76,6 +76,7 @@
     <Compile Include="Bugs\CannonCreateQueueExchangeUsingAdvancedAPI.cs" />
     <Compile Include="Bugs\SubscriptionOnTransientQueueThrowsOnReconnect.cs" />
     <Compile Include="ClusterTests.cs" />
+    <Compile Include="ComponentRegistrationTests.cs" />
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammarTests.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="MockConnection.cs" />
     <Compile Include="MockConnectionFactory.cs" />
     <Compile Include="MockConsumerFactory.cs" />
+    <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="MockLogger.cs" />
     <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />
