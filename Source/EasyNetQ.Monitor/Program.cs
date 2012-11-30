@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using EasyNetQ.Monitor.AlertSinks;
-using EasyNetQ.Monitor.Checks;
+﻿using Castle.Windsor;
+using Castle.Windsor.Installer;
 using Topshelf;
 
 namespace EasyNetQ.Monitor
@@ -12,11 +10,27 @@ namespace EasyNetQ.Monitor
         {
             HostFactory.Run(x =>
             {
-                x.Service<MonitorService>(s =>
+                x.Service<IMonitorService>(s =>
                 {
-                    s.ConstructUsing(name => CreateMonitorService());
+                    IWindsorContainer container = null;
+              
+                    s.ConstructUsing(name =>
+                    {
+                        container = new WindsorContainer().Install(FromAssembly.This());
+                        return container.Resolve<IMonitorService>();
+                    });
+                    
                     s.WhenStarted(tc => tc.Start());
-                    s.WhenStopped(tc => tc.Stop());
+                    
+                    s.WhenStopped(tc =>
+                    {
+                        tc.Stop();
+                        if (container != null)
+                        {
+                            container.Release(tc);
+                            container.Dispose();
+                        }
+                    });
                 });
 
                 x.RunAsLocalSystem();
@@ -26,30 +40,5 @@ namespace EasyNetQ.Monitor
                 x.SetServiceName("EasyNetQ.Monitor");
             });
         }
-
-        private static MonitorService CreateMonitorService()
-        {
-            var configuration = MonitorConfigurationSection.Settings;
-            var monitorRun = new MonitorRun(
-                GetBrokers(configuration), 
-                GetChecks(), 
-                new ManagementClientFactory(),
-                configuration, 
-                new NullAlertSink());
-
-            return new MonitorService(monitorRun, configuration);
-        }
-
-        private static IEnumerable<Broker> GetBrokers(MonitorConfigurationSection configuration)
-        {
-            return configuration.Brokers.Cast<object>().Cast<Broker>();
-        }
-
-        private static IEnumerable<ICheck> GetChecks()
-        {
-            yield return new MaxConnectionsCheck();
-        }
     }
-
-    
 }

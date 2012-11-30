@@ -3,15 +3,21 @@ using System.Threading;
 
 namespace EasyNetQ.Monitor
 {
-    public class MonitorService
+    public interface IMonitorService
     {
-        private readonly IMonitorRun monitorRun;
+        void Start();
+        void Stop();
+    }
+
+    public class MonitorService : IMonitorService
+    {
         private readonly MonitorConfigurationSection configurationSection;
         private readonly Timer timer;
 
-        public MonitorService(IMonitorRun monitorRun, MonitorConfigurationSection configurationSection)
+        public MonitorService(
+            IMonitorRun monitorRun, 
+            MonitorConfigurationSection configurationSection)
         {
-            this.monitorRun = monitorRun;
             this.configurationSection = configurationSection;
             timer = new Timer(state => monitorRun.Run());
         }
@@ -19,8 +25,8 @@ namespace EasyNetQ.Monitor
         public void Start()
         {
             timer.Change(
-                TimeSpan.FromMinutes(configurationSection.IntervalMinutes),
-                TimeSpan.FromMinutes(configurationSection.IntervalMinutes));
+                TimeSpan.FromSeconds(configurationSection.IntervalMinutes),
+                TimeSpan.FromSeconds(configurationSection.IntervalMinutes));
         }
 
         public void Stop()

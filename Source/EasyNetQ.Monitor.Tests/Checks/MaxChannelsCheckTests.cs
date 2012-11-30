@@ -4,49 +4,49 @@ using EasyNetQ.Management.Client.Model;
 using EasyNetQ.Monitor.Checks;
 using NUnit.Framework;
 using Rhino.Mocks;
-using log4net;
 
 namespace EasyNetQ.Monitor.Tests.Checks
 {
     [TestFixture]
-    public class MaxConnectionsCheckTests : CheckTestBase
+    public class MaxChannelsCheckTests : CheckTestBase
     {
-        private ICheck maxConnectionsCheck;
+        private ICheck maxChannelsCheck;
 
         protected override void DoSetUp()
         {
-            var log = MockRepository.GenerateStub<ILog>();
-
-            maxConnectionsCheck = new MaxConnectionsCheck(100, log);
+            maxChannelsCheck = new MaxChannelsCheck(100);
         }
 
         [Test]
-        public void Should_alert_when_connections_are_over_configured_limit()
+        public void Should_alert_when_channels_exceed_maximum()
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
                 object_totals = new ObjectTotals
                 {
-                    connections = 100
+                    channels = 100
                 }
             });
-            var result = maxConnectionsCheck.RunCheck(ManagementClient);
+
+            var result = maxChannelsCheck.RunCheck(ManagementClient);
+
             result.Alert.ShouldBeTrue();
-            result.Message.ShouldEqual(
-                "broker http://the.broker.com connections have exceeded alert level 100. Now 100");
+            result.Message.ShouldEqual("broker 'http://the.broker.com' channels have exceeded alert level 100, now 100");
         }
 
         [Test]
-        public void Should_not_alert_when_connections_are_under_configured_limit()
+        public void Should_not_alert_when_channels_are_under_maximum()
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
                 object_totals = new ObjectTotals
                 {
-                    connections = 99
+                    channels = 99
                 }
             });
-            var result = maxConnectionsCheck.RunCheck(ManagementClient);
+
+            var result = maxChannelsCheck.RunCheck(ManagementClient);
+
             result.Alert.ShouldBeFalse();
         }
     }

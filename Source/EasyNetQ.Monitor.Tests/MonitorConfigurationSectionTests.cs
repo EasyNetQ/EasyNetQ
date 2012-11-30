@@ -36,14 +36,6 @@ namespace EasyNetQ.Monitor.Tests
             writer.GetStringBuilder().ToString().ShouldEqual(expectedResult);
             // Console.WriteLine(writer.GetStringBuilder().ToString());
         }
-
-        [Test]
-        public void Should_get_check_settings()
-        {
-            section.CheckSettings.AlertChannelCount.ShouldEqual(100);
-            section.CheckSettings.AlertConnectionCount.ShouldEqual(100);
-            section.CheckSettings.AlertQueueCount.ShouldEqual(100);
-        }
     }
 }
 

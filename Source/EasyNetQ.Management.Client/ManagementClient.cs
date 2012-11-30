@@ -22,6 +22,21 @@ namespace EasyNetQ.Management.Client
         {
         }
 
+        public string HostUrl
+        {
+            get { return hostUrl; }
+        }
+
+        public string Username
+        {
+            get { return username; }
+        }
+
+        public int PortNumber
+        {
+            get { return portNumber; }
+        }
+
         public ManagementClient(string hostUrl, string username, string password, int portNumber)
         {
             if (string.IsNullOrEmpty(hostUrl))
@@ -484,7 +499,6 @@ namespace EasyNetQ.Management.Client
         {
             request.ContentType = "application/json";
             var body = JsonConvert.SerializeObject(item);
-            Console.WriteLine(body);
             using (var requestStream = request.GetRequestStream())
             using (var writer = new StreamWriter(requestStream))
             {
@@ -506,7 +520,6 @@ namespace EasyNetQ.Management.Client
                     responseBody = reader.ReadToEnd();
                 }
             }
-            Console.WriteLine(responseBody);
             return responseBody;
         }
 

@@ -34,20 +34,35 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core">
+      <HintPath>..\packages\Castle.Core.3.1.0\lib\net40-client\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor">
+      <HintPath>..\packages\Castle.Windsor.3.1.0\lib\net40-client\Castle.Windsor.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.0\lib\net40-client\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
     <Reference Include="Topshelf">
       <HintPath>..\packages\TopShelf.3.1.0\lib\net40-full\Topshelf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlertSinks\EventLogAlertSink.cs" />
+    <Compile Include="AlertSinks\Log4NetAlertSink.cs" />
     <Compile Include="AlertSinks\NullAlertSink.cs" />
+    <Compile Include="AppSettingsConvention.cs" />
+    <Compile Include="Checks\MaxChannelsCheck.cs" />
     <Compile Include="Checks\MaxConnectionsCheck.cs" />
+    <Compile Include="Checks\MaxQueuedMessagesCheck.cs" />
     <Compile Include="IAlertSink.cs" />
     <Compile Include="ICheck.cs" />
+    <Compile Include="Installer.cs" />
     <Compile Include="ManagementClientFactory.cs" />
     <Compile Include="MonitorConfigurationSection.cs" />
     <Compile Include="MonitorRun.cs" />

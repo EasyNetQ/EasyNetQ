@@ -4,7 +4,7 @@ namespace EasyNetQ.Monitor
 {
     public interface ICheck
     {
-        CheckResult RunCheck(IManagementClient managementClient, MonitorConfigurationSection configuration, Broker broker);
+        CheckResult RunCheck(IManagementClient managementClient);
     }
 
     public class CheckResult

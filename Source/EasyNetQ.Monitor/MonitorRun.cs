@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EasyNetQ.Monitor
@@ -13,36 +14,35 @@ namespace EasyNetQ.Monitor
         private readonly IEnumerable<Broker> brokers;
         private readonly IEnumerable<ICheck> checks;
         private readonly IManagementClientFactory managementClientFactory;
-        private readonly MonitorConfigurationSection configuration;
-        private readonly IAlertSink alertSink;
+        private readonly IEnumerable<IAlertSink> alertSinks;
 
         public MonitorRun(
             IEnumerable<Broker> brokers, 
             IEnumerable<ICheck> checks, 
             IManagementClientFactory managementClientFactory, 
-            MonitorConfigurationSection configuration, 
-            IAlertSink alertSink)
+            IEnumerable<IAlertSink> alertSinks)
         {
             this.brokers = brokers;
             this.checks = checks;
             this.managementClientFactory = managementClientFactory;
-            this.configuration = configuration;
-            this.alertSink = alertSink;
+            this.alertSinks = alertSinks;
         }
 
         public void Run()
         {
-            var alerts =
+            var actions =
                 from broker in brokers
-                let managementClient = managementClientFactory.CreateManagementClient(broker)
                 from check in checks
-                let runResult = check.RunCheck(managementClient, configuration, broker)
+                from sink in alertSinks
+                let managementClient = managementClientFactory.CreateManagementClient(broker)
+                let runResult = check.RunCheck(managementClient)
                 where runResult.Alert
-                select runResult.Message;
+                let alert = runResult.Message
+                select (Action)(() => sink.Alert(alert));
 
-            foreach (var alert in alerts)
+            foreach (var action in actions)
             {
-                alertSink.Alert(alert);
+                action();
             }
         }
     }

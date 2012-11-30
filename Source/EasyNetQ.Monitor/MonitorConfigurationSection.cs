@@ -24,13 +24,6 @@ namespace EasyNetQ.Monitor
         {
             get { return (Brokers) this["brokers"]; }
         }
-
-        [ConfigurationProperty("checkSettings")]
-        public CheckSettings CheckSettings
-        {
-            get { return (CheckSettings) this["checkSettings"]; }
-            set { this["checkSettings"] = value; }
-        }
     }
 
     public class Brokers : ConfigurationElementCollection
@@ -67,30 +60,6 @@ namespace EasyNetQ.Monitor
         {
             get { return (string) this["password"]; }
             set { this["password"] = value; }
-        }
-    }
-
-    public class CheckSettings : ConfigurationElement
-    {
-        [ConfigurationProperty("alertQueueCount")]
-        public ulong AlertQueueCount
-        {
-            get { return (ulong)this["alertQueueCount"]; }
-            set { this["alertQueueCount"] = value; }
-        }
-
-        [ConfigurationProperty("alertConnectionCount")]
-        public ulong AlertConnectionCount
-        {
-            get { return (ulong) this["alertConnectionCount"]; }
-            set { this["alertConnectionCount"] = value; }
-        }
-
-        [ConfigurationProperty("alertChannelCount")]
-        public ulong AlertChannelCount
-        {
-            get { return (ulong)this["alertChannelCount"]; }
-            set { this["alertChannelCount"] = value; }
         }
     }
 }
