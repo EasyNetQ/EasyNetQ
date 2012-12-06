@@ -48,7 +48,7 @@ namespace EasyNetQ.Monitor.Tests
         {
             var checks = container.ResolveAll<ICheck>();
 
-            checks.Count().ShouldEqual(3);
+            checks.Count().ShouldEqual(5);
         }
 
         private static void CheckForPotentiallyMisconfiguredComponents(IWindsorContainer container)

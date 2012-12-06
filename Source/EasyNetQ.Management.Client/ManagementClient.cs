@@ -405,10 +405,10 @@ namespace EasyNetQ.Management.Client
         {
             var request = CreateRequestForPath(path);
 
-            var response = (HttpWebResponse) request.GetResponse();
-            if (response.StatusCode != HttpStatusCode.OK)
+            var response = request.GetHttpResponse();
+            if (response.StatusCode != HttpStatusCode.NotFound)
             {
-                throw new EasyNetQManagementException("Request failed with status code {0}", response.StatusCode);
+                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
 
             var responseBody = GetBodyFromResponse(response);
@@ -423,7 +423,11 @@ namespace EasyNetQ.Management.Client
 
             InsertRequestBody(request, item);
 
-            var response = (HttpWebResponse)request.GetResponse();
+            var response = request.GetHttpResponse();
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+            }
 
             var responseBody = GetBodyFromResponse(response);
 
@@ -437,10 +441,10 @@ namespace EasyNetQ.Management.Client
 
             try
             {
-                var response = (HttpWebResponse) request.GetResponse();
+                var response = request.GetHttpResponse();
                 if (response.StatusCode != HttpStatusCode.NoContent)
                 {
-                    throw new EasyNetQManagementException("Unexpected status code: {0}", response.StatusCode);
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
                 }
             }
             catch (WebException webException)
@@ -458,10 +462,10 @@ namespace EasyNetQ.Management.Client
 
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
+                var response = request.GetHttpResponse();
                 if (response.StatusCode != HttpStatusCode.NoContent)
                 {
-                    throw new EasyNetQManagementException("Unexpected status code: {0}", response.StatusCode);
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
                 }
             }
             catch (WebException webException)
@@ -481,10 +485,10 @@ namespace EasyNetQ.Management.Client
 
             try
             {
-                var response = (HttpWebResponse) request.GetResponse();
+                var response = request.GetHttpResponse();
                 if (response.StatusCode != HttpStatusCode.NoContent)
                 {
-                    throw new EasyNetQManagementException("Unexpected status code: {0}", response.StatusCode);
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
                 }
             }
             catch (WebException webException)

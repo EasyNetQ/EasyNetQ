@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EasyNetQ.Management.Client;
 
 namespace EasyNetQ.Monitor
 {
@@ -35,7 +36,7 @@ namespace EasyNetQ.Monitor
                 from check in checks
                 from sink in alertSinks
                 let managementClient = managementClientFactory.CreateManagementClient(broker)
-                let runResult = check.RunCheck(managementClient)
+                let runResult = RunCheckInExceptionHandler(check, managementClient)
                 where runResult.Alert
                 let alert = runResult.Message
                 select (Action)(() => sink.Alert(alert));
@@ -43,6 +44,26 @@ namespace EasyNetQ.Monitor
             foreach (var action in actions)
             {
                 action();
+            }
+        }
+
+        private static CheckResult RunCheckInExceptionHandler(ICheck check, IManagementClient managementClient)
+        {
+            try
+            {
+                return check.RunCheck(managementClient);
+            }
+            catch (UnexpectedHttpStatusCodeException exception)
+            {
+                return new CheckResult(true, string.Format("Check '{0}' got unexpected status code {1} {2}",
+                    check.GetType().ToString(),
+                    exception.StatusCodeNumber,
+                    exception.StatusCode
+                    ));
+            }
+            catch (Exception exception)
+            {
+                return new CheckResult(true, exception.ToString());
             }
         }
     }
