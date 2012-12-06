@@ -60,7 +60,7 @@
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
-    <Compile Include="DefaultMessageConsumer.cs" />
+    <Compile Include="DefaultMessageDispatcher.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQConsumer.cs" />
@@ -80,7 +80,7 @@
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
     <Compile Include="IMessage.cs" />
-    <Compile Include="IMessageConsumer.cs" />
+    <Compile Include="IMessageDispatcher.cs" />
     <Compile Include="IPublishChannel.cs" />
     <Compile Include="IPublisherConfirms.cs" />
     <Compile Include="ISaga.cs" />

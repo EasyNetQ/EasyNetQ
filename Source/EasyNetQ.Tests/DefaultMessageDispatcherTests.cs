@@ -4,17 +4,17 @@ using NUnit.Framework;
 namespace EasyNetQ.Tests
 {
     [TestFixture]
-    public class DefaultMessageConsumerTests
+    public class DefaultMessageDispatcherTests
     {
         [Test]
-        public void Should_create_consumer_instance_and_consume_message()
+        public void Should_create_consumer_instance_and_dispatch_message()
         {
-            var consumer = new DefaultMessageConsumer();
+            var dispatcher = new DefaultMessageDispatcher();
             var message = new MyMessage();
             var consumedMessage = (MyMessage) null;
             
             MyMessageConsumer.ConsumedMessageFunc = m => consumedMessage = m;
-            consumer.Consume<MyMessage, MyMessageConsumer>(message);
+            dispatcher.Dispatch<MyMessage, MyMessageConsumer>(message);
 
             Assert.AreSame(message, consumedMessage);
         }
