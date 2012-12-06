@@ -4,6 +4,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
@@ -28,14 +30,26 @@ namespace EasyNetQ.Tests
             interceptedSubscriptions.Count.ShouldEqual(4);
             interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
 
-            interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
-            interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
+            CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
+            CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
+            CheckSubscriptionsContains<MessageC>(interceptedSubscriptions, "MyAppPrefix:cf5f54ed13478763e2da2bb3c9487baa");
+        }
 
-            interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
-            interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
+        /// <summary>
+        /// We don't care about the order that consumers are discovered by reflection, just that
+        /// they are discovered. This makes these tests less brittle.
+        /// </summary>
+        /// <typeparam name="MessageType"></typeparam>
+        /// <param name="subscriptions"></param>
+        /// <param name="subscriptionId"></param>
+        private void CheckSubscriptionsContains<MessageType>(IEnumerable<Tuple<string, Delegate>> subscriptions, string subscriptionId)
+        {
+            var contains = subscriptions.Any(x =>
+                x.Item1 == subscriptionId && x.Item2.Method.GetParameters()[0].ParameterType == typeof(MessageType)
+                );
 
-            interceptedSubscriptions[2].Item1.ShouldEqual("MyAppPrefix:cf5f54ed13478763e2da2bb3c9487baa");
-            interceptedSubscriptions[2].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageC));
+            contains.ShouldBeTrue(string.Format(
+                "Subscription '{0}' of type {1} not found.", subscriptionId, typeof(MessageType).Name));
         }
 
         [Test]
@@ -53,14 +67,9 @@ namespace EasyNetQ.Tests
             interceptedSubscriptions.Count.ShouldEqual(3);
             interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
 
-            interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:63c317b761366d57679a8bb0f7fa925a");
-            interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
-
-            interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
-            interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
-
-            interceptedSubscriptions[2].Item1.ShouldEqual("MyAppPrefix:813fd8f08e61068e054dcff403da5ce7");
-            interceptedSubscriptions[2].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageC));
+            CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:63c317b761366d57679a8bb0f7fa925a");
+            CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
+            CheckSubscriptionsContains<MessageC>(interceptedSubscriptions, "MyAppPrefix:813fd8f08e61068e054dcff403da5ce7");
         }
 
         [Test]
@@ -71,24 +80,19 @@ namespace EasyNetQ.Tests
             {
                 InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
             };
-            var fixedSubscriptionIds = new[] { "2f481170-8bc4-4d0f-a972-bd45191b1706", "be4ac633-ea29-4ed0-a0bf-419a01a0e9d4", "FD76E65A-2042-40C1-9A68-E998A95CD918" };
-            var callCount = 0;
+
             var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix")
             {
-                GenerateSubscriptionId = c => fixedSubscriptionIds[callCount++]
+                GenerateSubscriptionId = c => c.MessageType.Name.ToString(CultureInfo.InvariantCulture)
             };
 
             autoSubscriber.Subscribe(GetType().Assembly);
 
             interceptedSubscriptions.Count.ShouldEqual(4);
-            interceptedSubscriptions[0].Item1.ShouldEqual(fixedSubscriptionIds[0]);
-            interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
 
-            interceptedSubscriptions[1].Item1.ShouldEqual("MyExplicitId");
-            interceptedSubscriptions[1].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageB));
-
-            interceptedSubscriptions[2].Item1.ShouldEqual(fixedSubscriptionIds[1]);
-            interceptedSubscriptions[2].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageC));
+            CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MessageA");
+            CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
+            CheckSubscriptionsContains<MessageC>(interceptedSubscriptions, "MessageC");
         }
 
         // Discovered by reflection over test assembly, do not remove.

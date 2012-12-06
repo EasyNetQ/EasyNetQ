@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -76,6 +76,7 @@
     <Compile Include="Bugs\CannonCreateQueueExchangeUsingAdvancedAPI.cs" />
     <Compile Include="Bugs\SubscriptionOnTransientQueueThrowsOnReconnect.cs" />
     <Compile Include="ClusterTests.cs" />
+    <Compile Include="ComponentRegistrationTests.cs" />
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammarTests.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="MockConnection.cs" />
     <Compile Include="MockConnectionFactory.cs" />
     <Compile Include="MockConsumerFactory.cs" />
+    <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="MockLogger.cs" />
     <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />
