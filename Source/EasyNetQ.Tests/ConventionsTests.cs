@@ -67,14 +67,17 @@ namespace EasyNetQ.Tests
 			                  		QueueNamingConvention = (x, y) => "CustomQueueNamingConvention",
 			                  		TopicNamingConvention = x => "CustomTopicNamingConvention"
 			                  	};
-			CreateBus(customConventions, mockModel);
+
+            var namesProvider = new DefaultNamesProvider();
+
+            CreateBus(customConventions, namesProvider, mockModel);
 		    using (var publishChannel = bus.OpenPublishChannel())
 		    {
                 publishChannel.Publish(new TestMessage());
 		    }
 		}
 
-		private void CreateBus(Conventions conventions, IModel model)
+		private void CreateBus(Conventions conventions, INamesProvider namesProvider, IModel model)
 		{
 		    var advancedBus = new RabbitAdvancedBus(
                 new ConnectionConfiguration(), 
@@ -91,6 +94,7 @@ namespace EasyNetQ.Tests
 				x => TypeNameSerializer.Serialize(x.GetType()),
 				new MockLogger(),
 				conventions,
+                namesProvider,
                 advancedBus
 				);
 		}

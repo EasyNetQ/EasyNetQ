@@ -9,10 +9,12 @@ namespace EasyNetQ.Hosepipe.Tests
     public class MessageReaderTests
     {
         private IMessageReader messageReader;
+        private INamesProvider namesProvider;
 
         [SetUp]
         public void SetUp()
         {
+            namesProvider = new DefaultNamesProvider();
             messageReader = new MessageReader();
         }
 
@@ -44,7 +46,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 MessageFilePath = @"C:\temp\MessageOutput"
             };
 
-            var messages = messageReader.ReadMessages(parameters, DefaultConsumerErrorStrategy.EasyNetQErrorQueue);
+            var messages = messageReader.ReadMessages(parameters, namesProvider.EasyNetQErrorQueue);
             foreach (var message in messages)
             {
                 Console.WriteLine(message);

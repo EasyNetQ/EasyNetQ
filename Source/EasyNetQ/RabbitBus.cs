@@ -14,9 +14,8 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
-
-        public const string RpcExchange = "easy_net_q_rpc";
-
+        private readonly INamesProvider namesProvider;
+        
         public SerializeType SerializeType
         {
             get { return serializeType; }
@@ -36,6 +35,7 @@ namespace EasyNetQ
             SerializeType serializeType,
             IEasyNetQLogger logger,
             IConventions conventions,
+            INamesProvider namesProvider,
             IAdvancedBus advancedBus)
         {
             if (serializeType == null)
@@ -50,11 +50,16 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("conventions");
             }
+            if (namesProvider == null)
+            {
+                throw new ArgumentNullException("namesProvider");
+            }
 
             this.serializeType = serializeType;
             this.logger = logger;
             this.conventions = conventions;
             this.advancedBus = advancedBus;
+            this.namesProvider = namesProvider;
 
             advancedBus.Connected += OnConnected;
             advancedBus.Disconnected += OnDisconnected;
@@ -67,7 +72,7 @@ namespace EasyNetQ
 
         public virtual IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
         {
-            return new RabbitPublishChannel(this, configure);
+            return new RabbitPublishChannel(this, configure, namesProvider);
         }
 
         public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage)
@@ -174,7 +179,7 @@ namespace EasyNetQ
 
             var requestTypeName = serializeType(typeof(TRequest));
 
-            var exchange = Exchange.DeclareDirect(RpcExchange);
+            var exchange = Exchange.DeclareDirect(namesProvider.RpcExchange);
             var queue = Queue.DeclareDurable(requestTypeName, arguments);
             queue.BindTo(exchange, requestTypeName);
 
