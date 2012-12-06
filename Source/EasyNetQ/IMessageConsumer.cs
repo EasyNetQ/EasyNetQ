@@ -2,6 +2,6 @@ namespace EasyNetQ
 {
     public interface IMessageConsumer
     {
-        void Consume<TMessage, TMessageHandler>(TMessage message) where TMessage : class;
+        void Consume<TMessage, TConsumer>(TMessage message) where TMessage : class;
     }
 }
