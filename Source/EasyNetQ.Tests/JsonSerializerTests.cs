@@ -74,9 +74,24 @@ namespace EasyNetQ.Tests
 
             getPropertiesString(originalProperties).ShouldEqual(getPropertiesString(newProperties));
         }
+
+        class A { }
+        class B : A {}
+        class PolyMessage
+        {
+            public A AorB { get; set; }
+        }
+
+        [Test]
+        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties()
+        {
+            var bytes = serializer.MessageToBytes<PolyMessage>(new PolyMessage { AorB = new B() });
+
+            var result = serializer.BytesToMessage<PolyMessage>(bytes);
+
+            Assert.IsInstanceOf<B>(result.AorB);
+        }
     }
-
-
 }
 
 // ReSharper restore InconsistentNaming
