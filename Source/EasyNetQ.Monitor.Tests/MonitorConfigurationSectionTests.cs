@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System.IO;
 using NUnit.Framework;
 
 namespace EasyNetQ.Monitor.Tests
@@ -19,22 +18,15 @@ namespace EasyNetQ.Monitor.Tests
         [Test]
         public void Should_get_brokers()
         {
-            const string expectedResult = 
-@"managementUrl = http://localhost, username = guest, password = guest
-";
-
-            var writer = new StringWriter();
-
+            var count = 0;
             foreach (Broker broker in section.Brokers)
             {
-                writer.WriteLine("managementUrl = {0}, username = {1}, password = {2}", 
-                    broker.ManagementUrl,
-                    broker.Username,
-                    broker.Password);
+                count++;
+                broker.ManagementUrl.ShouldEqual("http://localhost");
+                broker.Username.ShouldEqual("guest");
+                broker.Password.ShouldEqual("guest");
             }
-
-            writer.GetStringBuilder().ToString().ShouldEqual(expectedResult);
-            // Console.WriteLine(writer.GetStringBuilder().ToString());
+            count.ShouldEqual(1);
         }
     }
 }
