@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
             autoSubscriber.Subscribe(GetType().Assembly);
 
             interceptedSubscriptions.Count.ShouldEqual(3);
-            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(MyConsumer)).ShouldBeTrue();
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
 
             interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
             interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests
             autoSubscriber.Subscribe(typeof(IConsumeCustom<>), GetType().Assembly);
 
             interceptedSubscriptions.Count.ShouldEqual(3);
-            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(MyConsumerWithCustomInterface)).ShouldBeTrue();
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
 
             interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:63c317b761366d57679a8bb0f7fa925a");
             interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));

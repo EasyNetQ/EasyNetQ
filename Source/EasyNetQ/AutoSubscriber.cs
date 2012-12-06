@@ -22,11 +22,9 @@ namespace EasyNetQ
         public string SubscriptionIdPrefix { get; private set; }
 
         /// <summary>
-        /// Responsible for resolving a concrete subscriber. Defaults to
-        /// parameterless constructor. This is where you hook in your IoC
-        /// framework.
+        /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
-        public Func<Type, object> CreateConsumer { protected get; set; }
+        public IMessageConsumer MessageConsumer { get; set; } 
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -48,7 +46,7 @@ namespace EasyNetQ
 
             this.bus = bus;
             SubscriptionIdPrefix = subscriptionIdPrefix;
-            CreateConsumer = Activator.CreateInstance;
+            MessageConsumer = new DefaultMessageConsumer();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         }
 
@@ -103,14 +101,15 @@ namespace EasyNetQ
 
             foreach (var kv in subscriptionInfos)
             {
-                var subscriber = CreateConsumer(kv.Key);
                 foreach (var subscriptionInfo in kv.Value)
                 {
-                    var consumeMethod = GetConsumeMethodFor(subscriptionInfo);
-                    var consumeAction = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
-                    var consumeDelegate = Delegate.CreateDelegate(consumeAction, subscriber, consumeMethod);
+                    var consumeMethod = MessageConsumer.GetType()
+                        .GetMethod(ConsumeMethodName, BindingFlags.Instance | BindingFlags.Public)
+                        .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
 
-                    var subscriptionAttribute = GetSubscriptionAttribute(consumeMethod);
+                    var consumeDelegateType = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
+                    var consumeDelegate = Delegate.CreateDelegate(consumeDelegateType, MessageConsumer, consumeMethod);
+                    var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
                     var subscriptionId = subscriptionAttribute != null
                                              ? subscriptionAttribute.SubscriptionId
                                              : GenerateSubscriptionId(subscriptionInfo);
@@ -135,14 +134,11 @@ namespace EasyNetQ
                     && m.Params[0].ParameterType == typeof(string)
                     && m.Params[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<>)).Method;
         }
-
-        protected virtual MethodInfo GetConsumeMethodFor(ConsumerInfo subscriptionInfo)
+        
+        protected virtual ConsumerAttribute GetSubscriptionAttribute(ConsumerInfo consumerInfo)
         {
-            return subscriptionInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { subscriptionInfo.MessageType });
-        }
+            var consumeMethod = consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType });
 
-        protected virtual ConsumerAttribute GetSubscriptionAttribute(MethodInfo consumeMethod)
-        {
             return consumeMethod.GetCustomAttributes(typeof(ConsumerAttribute), true).SingleOrDefault() as ConsumerAttribute;
         }
 
