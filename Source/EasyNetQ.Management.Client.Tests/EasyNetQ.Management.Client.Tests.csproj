@@ -46,8 +46,10 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Model\ExchangeInfoTests.cs" />
+    <Compile Include="Model\MessageSerializationTests.cs" />
     <Compile Include="Model\NodeSerializationTests.cs" />
     <Compile Include="Model\PermissionInfoTests.cs" />
+    <Compile Include="Model\PublishInfoTests.cs" />
     <Compile Include="Model\UserInfoTests.cs" />
     <Compile Include="ResourceLoader.cs" />
     <Compile Include="ManagementClientTests.cs" />

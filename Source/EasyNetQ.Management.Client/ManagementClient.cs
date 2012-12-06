@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using EasyNetQ.Management.Client.Model;
+using EasyNetQ.Management.Client.Serialization;
 using Newtonsoft.Json;
 
 namespace EasyNetQ.Management.Client
@@ -406,14 +407,12 @@ namespace EasyNetQ.Management.Client
             var request = CreateRequestForPath(path);
 
             var response = request.GetHttpResponse();
-            if (response.StatusCode != HttpStatusCode.NotFound)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
 
-            var responseBody = GetBodyFromResponse(response);
-
-            return JsonConvert.DeserializeObject<T>(responseBody);
+            return DeserializeResponse<T>(response);
         }
 
         private TResult Post<TItem, TResult>(string path, TItem item)
@@ -429,9 +428,7 @@ namespace EasyNetQ.Management.Client
                 throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
 
-            var responseBody = GetBodyFromResponse(response);
-
-            return JsonConvert.DeserializeObject<TResult>(responseBody);
+            return DeserializeResponse<TResult>(response);
         }
 
         private void Delete(string path)
@@ -508,6 +505,12 @@ namespace EasyNetQ.Management.Client
             {
                 writer.Write(body);
             }
+        }
+
+        private static T DeserializeResponse<T>(HttpWebResponse response)
+        {
+            var responseBody = GetBodyFromResponse(response);
+            return JsonConvert.DeserializeObject<T>(responseBody, new PropertyConverter());
         }
 
         private static string GetBodyFromResponse(HttpWebResponse response)

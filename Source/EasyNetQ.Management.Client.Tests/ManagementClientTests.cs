@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using EasyNetQ.Management.Client.Model;
 using NUnit.Framework;
@@ -289,12 +290,27 @@ namespace EasyNetQ.Management.Client.Tests
                 throw new ApplicationException("Test queue has not been created");
             }
 
-            var criteria = new GetMessagesCriteria(1, true);
+            var defaultExchange = new Exchange { name = "amq.default", vhost = "/" };
+
+            var properties = new Dictionary<string, string>
+            {
+                { "app_id", "management-test"}
+            };
+
+            var publishInfo = new PublishInfo(properties, testQueue, "Hello World", "string");
+
+            managementClient.Publish(defaultExchange, publishInfo);
+
+            var criteria = new GetMessagesCriteria(1, false);
             var messages = managementClient.GetMessagesFromQueue(queue, criteria);
 
             foreach (var message in messages)
             {
                 Console.Out.WriteLine("message.payload = {0}", message.payload);
+                foreach (var property in message.properties)
+                {
+                    Console.Out.WriteLine("key: '{0}', value: '{1}'", property.Key, property.Value);
+                }
             }
         }
 

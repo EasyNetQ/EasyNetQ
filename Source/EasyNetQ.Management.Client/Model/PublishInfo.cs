@@ -10,6 +10,8 @@ namespace EasyNetQ.Management.Client.Model
         public string payload { get; private set; }
         public string payload_encoding { get; private set; }
 
+        private readonly ISet<string> payloadEncodings = new HashSet<string>{ "string", "base64" };
+
         public PublishInfo(IDictionary<string, string> properties, string routingKey, string payload, string payloadEncoding)
         {
             if(properties == null)
@@ -27,6 +29,11 @@ namespace EasyNetQ.Management.Client.Model
             if(payloadEncoding == null)
             {
                 throw new ArgumentNullException("payloadEncoding");
+            }
+            if (!payloadEncodings.Contains(payloadEncoding))
+            {
+                throw new ArgumentException(string.Format("payloadEncoding must be one of: '{0}'",
+                    string.Join(", ", payloadEncodings)));
             }
 
             this.properties = properties;
