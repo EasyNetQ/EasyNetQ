@@ -19,7 +19,8 @@ namespace EasyNetQ.Tests
             Assert.AreSame(message, consumedMessage);
         }
 
-        public class MyMessageConsumer : IConsume<MyMessage>
+        // Discovered by reflection over test assembly, do not remove.
+        private class MyMessageConsumer : IConsume<MyMessage>
         {
             public static Action<MyMessage> ConsumedMessageFunc { get; set; }
 

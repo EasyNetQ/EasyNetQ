@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests
 
             autoSubscriber.Subscribe(GetType().Assembly);
 
-            interceptedSubscriptions.Count.ShouldEqual(3);
+            interceptedSubscriptions.Count.ShouldEqual(4);
             interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
 
             interceptedSubscriptions[0].Item1.ShouldEqual("MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
@@ -71,7 +71,7 @@ namespace EasyNetQ.Tests
             {
                 InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
             };
-            var fixedSubscriptionIds = new[] { "2f481170-8bc4-4d0f-a972-bd45191b1706", "be4ac633-ea29-4ed0-a0bf-419a01a0e9d4" };
+            var fixedSubscriptionIds = new[] { "2f481170-8bc4-4d0f-a972-bd45191b1706", "be4ac633-ea29-4ed0-a0bf-419a01a0e9d4", "FD76E65A-2042-40C1-9A68-E998A95CD918" };
             var callCount = 0;
             var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix")
             {
@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests
 
             autoSubscriber.Subscribe(GetType().Assembly);
 
-            interceptedSubscriptions.Count.ShouldEqual(3);
+            interceptedSubscriptions.Count.ShouldEqual(4);
             interceptedSubscriptions[0].Item1.ShouldEqual(fixedSubscriptionIds[0]);
             interceptedSubscriptions[0].Item2.Method.GetParameters()[0].ParameterType.ShouldEqual(typeof(MessageA));
 
