@@ -2,6 +2,8 @@
 
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,7 +14,7 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class PublisherConfirmsTests
     {
-        private IPublisherConfirms publisherConfirms;
+        private PublisherConfirms publisherConfirms;
         private IModel channel;
 
         [SetUp]
@@ -79,7 +81,7 @@ namespace EasyNetQ.Tests
         {
             const string expectedOutput = "Success0 Success1 Success2 Success3 Success4 Success5 --multiple ack of 5 complete --Failure6 Failure7 Failure8 ";
             var writer = new StringWriter();
-//            var writer = Console.Out;
+            //var writer = Console.Out;
 
             Action<ulong> registerCallback = sequenceNumber =>
             {
@@ -114,6 +116,34 @@ namespace EasyNetQ.Tests
             publisherConfirms.FailedPublish(channel, args2);
 
             writer.ToString().ShouldEqual(expectedOutput);
+        }
+
+        [Test]
+        public void Should_have_thread_safe_publish()
+        {
+            ulong sequenceNumber = 0;
+            channel.Stub(x => x.NextPublishSeqNo).Do(new Func<ulong>(() => sequenceNumber++));
+
+            const int repeat = 100000;
+            var register = new Task(() =>
+            {
+                for (int i = 0; i < repeat; ++i)
+                {
+                    var tag = i;
+
+                    publisherConfirms.RegisterCallbacks(channel, () => { }, () => { });
+
+                    Task.Factory.StartNew(() => publisherConfirms.SuccessfulPublish(channel, new BasicAckEventArgs
+                    {
+                        DeliveryTag = (ulong)tag
+                    }), TaskCreationOptions.AttachedToParent);
+                }
+            });
+
+            register.Start();
+            register.Wait();
+
+            Assert.That(publisherConfirms.NumCallbacks, Is.EqualTo(0));
         }
     }
 }
