@@ -2,12 +2,12 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class Binding
     {
-        public string source { get; set; }
-        public string vhost { get; set; }
-        public string destination { get; set; }
-        public string destination_type { get; set; }
-        public string routing_key { get; set; }
-        public Arguments arguments { get; set; }
-        public string properties_key { get; set; }
+        public string Source { get; set; }
+        public string Vhost { get; set; }
+        public string Destination { get; set; }
+        public string DestinationType { get; set; }
+        public string RoutingKey { get; set; }
+        public Arguments Arguments { get; set; }
+        public string PropertiesKey { get; set; }
     }
 }

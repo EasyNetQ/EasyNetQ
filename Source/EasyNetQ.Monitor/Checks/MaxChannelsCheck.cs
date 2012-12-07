@@ -15,10 +15,10 @@ namespace EasyNetQ.Monitor.Checks
         {
             var overview = managementClient.GetOverview();
 
-            var alert = overview.object_totals.channels >= alertChannelCount;
+            var alert = overview.ObjectTotals.Channels >= alertChannelCount;
 
             var message = string.Format("broker '{0}' channels have exceeded alert level {1}, now {2}",
-                managementClient.HostUrl, alertChannelCount, overview.object_totals.channels);
+                managementClient.HostUrl, alertChannelCount, overview.ObjectTotals.Channels);
 
             return new CheckResult(alert, message);
         }

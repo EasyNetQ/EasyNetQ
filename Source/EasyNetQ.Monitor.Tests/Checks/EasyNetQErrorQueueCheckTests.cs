@@ -14,7 +14,7 @@ namespace EasyNetQ.Monitor.Tests.Checks
     public class EasyNetQErrorQueueCheckTests : CheckTestBase
     {
         private ICheck easyNetQErrorQueueCheck;
-        readonly Vhost vhost = new Vhost { name = "my_vhost" };
+        readonly Vhost vhost = new Vhost { Name = "my_vhost" };
 
 
         protected override void DoSetUp()
@@ -32,7 +32,7 @@ namespace EasyNetQ.Monitor.Tests.Checks
 
             var queue = new Queue
             {
-                messages = 1
+                Messages = 1
             };
 
             ManagementClient.Stub(x => x.GetQueue("EasyNetQ_Default_Error_Queue", vhost)).Return(queue);
@@ -53,7 +53,7 @@ namespace EasyNetQ.Monitor.Tests.Checks
             
             var queue = new Queue
             {
-                messages = 0
+                Messages = 0
             };
 
             ManagementClient.Stub(x => x.GetQueue("EasyNetQ_Default_Error_Queue", vhost)).Return(queue);
@@ -66,7 +66,7 @@ namespace EasyNetQ.Monitor.Tests.Checks
         [Test]
         public void Should_alert_for_each_error_queue_in_each_vhost()
         {
-            var vhost2 = new Vhost {name = "my_other_vhost"};
+            var vhost2 = new Vhost {Name = "my_other_vhost"};
             ManagementClient.Stub(x => x.GetVHosts()).Return(new[]
             {
                 vhost,
@@ -75,7 +75,7 @@ namespace EasyNetQ.Monitor.Tests.Checks
 
             var queue = new Queue
             {
-                messages = 1
+                Messages = 1
             };
 
             ManagementClient.Stub(x => x.GetQueue("EasyNetQ_Default_Error_Queue", vhost)).Return(queue);

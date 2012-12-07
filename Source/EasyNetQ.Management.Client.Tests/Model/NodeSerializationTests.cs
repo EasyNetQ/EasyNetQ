@@ -28,8 +28,8 @@ namespace EasyNetQ.Management.Client.Tests.Model
         {
             var node = nodes[0];
 
-            node.name.ShouldEqual("rabbit@THOMAS");
-            node.uptime.ShouldEqual(98495039);
+            node.Name.ShouldEqual("rabbit@THOMAS");
+            node.Uptime.ShouldEqual(98495039);
         }
     }
 }

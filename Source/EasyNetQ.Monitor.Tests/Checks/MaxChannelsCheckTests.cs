@@ -22,9 +22,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
-                object_totals = new ObjectTotals
+                ObjectTotals = new ObjectTotals
                 {
-                    channels = 100
+                    Channels = 100
                 }
             });
 
@@ -39,9 +39,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
-                object_totals = new ObjectTotals
+                ObjectTotals = new ObjectTotals
                 {
-                    channels = 99
+                    Channels = 99
                 }
             });
 

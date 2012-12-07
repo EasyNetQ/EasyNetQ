@@ -2,21 +2,21 @@
 {
     public class Channel
     {
-        public ConnectionDetails connection_details { get; set; }
-        public string idle_since { get; set; }
-        public bool transactional { get; set; }
-        public bool confirm { get; set; }
-        public int consumer_count { get; set; }
-        public int messages_unacknowledged { get; set; }
-        public int messages_unconfirmed { get; set; }
-        public int messages_uncommitted { get; set; }
-        public int acks_uncommitted { get; set; }
-        public int prefetch_count { get; set; }
-        public bool client_flow_blocked { get; set; }
-        public string node { get; set; }
-        public string name { get; set; }
-        public int number { get; set; }
-        public string user { get; set; }
-        public string vhost { get; set; }
+        public ConnectionDetails ConnectionDetails { get; set; }
+        public string IdleSince { get; set; }
+        public bool Transactional { get; set; }
+        public bool Confirm { get; set; }
+        public int ConsumerCount { get; set; }
+        public int MessagesUnacknowledged { get; set; }
+        public int MessagesUnconfirmed { get; set; }
+        public int MessagesUncommitted { get; set; }
+        public int AcksUncommitted { get; set; }
+        public int PrefetchCount { get; set; }
+        public bool ClientFlowBlocked { get; set; }
+        public string Node { get; set; }
+        public string Name { get; set; }
+        public int Number { get; set; }
+        public string User { get; set; }
+        public string Vhost { get; set; }
     }
 }

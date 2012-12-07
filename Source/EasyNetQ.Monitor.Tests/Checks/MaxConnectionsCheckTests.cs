@@ -25,9 +25,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
-                object_totals = new ObjectTotals
+                ObjectTotals = new ObjectTotals
                 {
-                    connections = 100
+                    Connections = 100
                 }
             });
             var result = maxConnectionsCheck.RunCheck(ManagementClient);
@@ -41,9 +41,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
-                object_totals = new ObjectTotals
+                ObjectTotals = new ObjectTotals
                 {
-                    connections = 99
+                    Connections = 99
                 }
             });
             var result = maxConnectionsCheck.RunCheck(ManagementClient);

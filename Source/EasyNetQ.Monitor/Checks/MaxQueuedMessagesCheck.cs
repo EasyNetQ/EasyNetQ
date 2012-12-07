@@ -14,9 +14,9 @@ namespace EasyNetQ.Monitor.Checks
         public CheckResult RunCheck(IManagementClient managementClient)
         {
             var overview = managementClient.GetOverview();
-            var alert = overview.queue_totals.messages >= alertQueueCount;
+            var alert = overview.QueueTotals.Messages >= alertQueueCount;
             var message = string.Format("broker '{0}' queued messages exceed alert level {1}, now {2}",
-                managementClient.HostUrl, alertQueueCount, overview.queue_totals.messages);
+                managementClient.HostUrl, alertQueueCount, overview.QueueTotals.Messages);
 
             return new CheckResult(alert, message);
         }
