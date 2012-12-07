@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -8,35 +8,39 @@ namespace EasyNetQ
 {
     public class PublisherConfirms : IPublisherConfirms
     {
-        private readonly IDictionary<ulong, CallbackSet> callbacks = new Dictionary<ulong, CallbackSet>();
+        private readonly ConcurrentDictionary<ulong, CallbackSet> callbacks = new ConcurrentDictionary<ulong, CallbackSet>();
+
+        public int NumCallbacks
+        {
+            get { return callbacks.Count; }
+        }
 
         public void RegisterCallbacks(IModel channel, Action successCallback, Action failureCallback)
         {
-            if(channel == null)
+            if (channel == null)
             {
                 throw new ArgumentNullException("channel");
             }
-            if(successCallback == null)
+            if (successCallback == null)
             {
                 throw new ArgumentNullException("successCallback");
             }
-            if(failureCallback == null)
+            if (failureCallback == null)
             {
                 throw new ArgumentNullException("failureCallback");
             }
 
             var sequenceNumber = channel.NextPublishSeqNo;
-            if (callbacks.ContainsKey(sequenceNumber))
+
+            if (!callbacks.TryAdd(sequenceNumber, new CallbackSet(successCallback, failureCallback)))
             {
                 throw new EasyNetQException("Duplicate NextPublishSeqNo. publish channels are not thread safe. Are you sharing a channel between threads?");
             }
-
-            callbacks.Add(sequenceNumber, new CallbackSet(successCallback, failureCallback));
         }
 
         public void SuccessfulPublish(IModel channel, BasicAckEventArgs args)
         {
-            if(args == null)
+            if (args == null)
             {
                 throw new ArgumentNullException("args");
             }
@@ -76,14 +80,14 @@ namespace EasyNetQ
 
         private void RunForSequenceNumber(ulong sequenceNumber, Action<CallbackSet> callbackSetAction)
         {
-            if (!callbacks.ContainsKey(sequenceNumber))
+            CallbackSet callbackSet;
+            if (!callbacks.TryGetValue(sequenceNumber, out callbackSet))
             {
                 throw new EasyNetQException("Delivery callback has unrecorded sequence number");
             }
 
-            var callbackSet = callbacks[sequenceNumber];
             callbackSetAction(callbackSet);
-            callbacks.Remove(sequenceNumber);
+            callbacks.TryRemove(sequenceNumber, out callbackSet);
         }
 
         private class CallbackSet

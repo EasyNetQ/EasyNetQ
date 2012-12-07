@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class PublisherConfirmsTests
     {
-        private IPublisherConfirms publisherConfirms;
+        private PublisherConfirms publisherConfirms;
         private IModel channel;
 
         [SetUp]
@@ -119,39 +119,31 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
-        public void Should()
+        public void Should_have_thread_safe_publish()
         {
             ulong sequenceNumber = 0;
             channel.Stub(x => x.NextPublishSeqNo).Do(new Func<ulong>(() => sequenceNumber++));
 
-            var repeat = 10000;
-
+            const int repeat = 100000;
             var register = new Task(() =>
             {
                 for (int i = 0; i < repeat; ++i)
                 {
+                    var tag = i;
+
                     publisherConfirms.RegisterCallbacks(channel, () => { }, () => { });
-                }
-            });
 
-            var success = new Task(() =>
-            {
-                Thread.Sleep(100);
-
-                for (int i = 0; i < repeat; ++i)
-                {
-                    publisherConfirms.SuccessfulPublish(channel, new BasicAckEventArgs
+                    Task.Factory.StartNew(() => publisherConfirms.SuccessfulPublish(channel, new BasicAckEventArgs
                     {
-                        DeliveryTag = (ulong)i
-                    });
+                        DeliveryTag = (ulong)tag
+                    }), TaskCreationOptions.AttachedToParent);
                 }
             });
 
             register.Start();
-            success.Start();
-
             register.Wait();
-            success.Wait();
+
+            Assert.That(publisherConfirms.NumCallbacks, Is.EqualTo(0));
         }
     }
 }
