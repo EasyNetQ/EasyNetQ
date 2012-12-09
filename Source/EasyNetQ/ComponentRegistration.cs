@@ -20,7 +20,6 @@ namespace EasyNetQ
                 .Register<IEasyNetQLogger>(x => logger)
                 .Register<ISerializer>(x => serializer)
                 .Register<IConventions>(x => conventions)
-                .Register<INamesProvider>(x => new DefaultNamesProvider())
                 .Register<SerializeType>(x => TypeNameSerializer.Serialize)
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>(x => new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
@@ -28,7 +27,7 @@ namespace EasyNetQ
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<ISerializer>(),
                     x.Resolve<IEasyNetQLogger>(),
-                    x.Resolve<INamesProvider>()))
+                    x.Resolve<IConventions>()))
                 .Register<IConsumerFactory>(x => new QueueingConsumerFactory(
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConsumerErrorStrategy>()))
@@ -48,7 +47,6 @@ namespace EasyNetQ
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConventions>(),
-                    x.Resolve<INamesProvider>(),
                     x.Resolve<IAdvancedBus>()));
 
             return serviceProvider;

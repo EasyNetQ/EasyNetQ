@@ -8,12 +8,12 @@ namespace EasyNetQ.Hosepipe.Tests
     public class ErrorRetryTests
     {
         private ErrorRetry errorRetry;
-        private INamesProvider namesProvider;
+        private IConventions conventions;
 
         [SetUp]
         public void SetUp()
         {
-            namesProvider = new DefaultNamesProvider();
+            conventions = new Conventions();
             errorRetry = new ErrorRetry(new JsonSerializer());
         }
 
@@ -29,7 +29,7 @@ namespace EasyNetQ.Hosepipe.Tests
             };
 
             var rawErrorMessages = new MessageReader()
-                .ReadMessages(parameters, namesProvider.EasyNetQErrorQueue);
+                .ReadMessages(parameters, conventions.ErrorQueueNamingConvention());
 
             errorRetry.RetryErrors(rawErrorMessages, parameters);
         }

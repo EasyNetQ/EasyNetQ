@@ -25,7 +25,7 @@ namespace EasyNetQ
         private readonly IConnectionFactory connectionFactory;
         private readonly ISerializer serializer;
         private readonly IEasyNetQLogger logger;
-        private readonly INamesProvider namesProvider;
+        private readonly IConventions conventions;
         private IConnection connection;
         private bool errorQueueDeclared = false;
         private readonly IDictionary<string, string> errorExchanges = new Dictionary<string, string>();
@@ -34,17 +34,17 @@ namespace EasyNetQ
             IConnectionFactory connectionFactory, 
             ISerializer serializer,
             IEasyNetQLogger logger,
-            INamesProvider namesProvider)
+            IConventions conventions)
         {
-            if (namesProvider == null)
+            if (conventions == null)
             {
-                throw new ArgumentNullException("namesProvider");
+                throw new ArgumentNullException("conventions");
             }
 
             this.connectionFactory = connectionFactory;
             this.serializer = serializer;
             this.logger = logger;
-            this.namesProvider = namesProvider;
+            this.conventions = conventions;
         }
 
         private void Connect()
@@ -60,7 +60,7 @@ namespace EasyNetQ
             if (!errorQueueDeclared)
             {
                 model.QueueDeclare(
-                    queue: namesProvider.EasyNetQErrorQueue,
+                    queue: conventions.ErrorQueueNamingConvention(),
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
@@ -73,9 +73,9 @@ namespace EasyNetQ
         {
             if (!errorExchanges.ContainsKey(originalRoutingKey))
             {
-                var exchangeName = namesProvider.ErrorExchangePrefix + originalRoutingKey;
+                var exchangeName = conventions.ErrorExchangeNamingConvention(originalRoutingKey);
                 model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable:true);
-                model.QueueBind(namesProvider.EasyNetQErrorQueue, exchangeName, originalRoutingKey);
+                model.QueueBind(conventions.ErrorQueueNamingConvention(), exchangeName, originalRoutingKey);
 
                 errorExchanges.Add(originalRoutingKey, exchangeName);
             }

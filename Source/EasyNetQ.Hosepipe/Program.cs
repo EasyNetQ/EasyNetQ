@@ -14,7 +14,7 @@ namespace EasyNetQ.Hosepipe
         private readonly IMessageReader messageReader;
         private readonly IQueueInsertion queueInsertion;
         private readonly IErrorRetry errorRetry;
-        private readonly INamesProvider namesProvider;
+        private readonly IConventions conventions;
 
         public Program(
             ArgParser argParser, 
@@ -23,7 +23,7 @@ namespace EasyNetQ.Hosepipe
             IMessageReader messageReader, 
             IQueueInsertion queueInsertion, 
             IErrorRetry errorRetry,
-            INamesProvider namesProvider)
+            IConventions conventions)
         {
             this.argParser = argParser;
             this.queueRetreival = queueRetreival;
@@ -31,7 +31,7 @@ namespace EasyNetQ.Hosepipe
             this.messageReader = messageReader;
             this.queueInsertion = queueInsertion;
             this.errorRetry = errorRetry;
-            this.namesProvider = namesProvider;
+            this.conventions = conventions;
         }
 
         public static void Main(string[] args)
@@ -44,7 +44,7 @@ namespace EasyNetQ.Hosepipe
                 new MessageReader(), 
                 new QueueInsertion(),
                 new ErrorRetry(new JsonSerializer()),
-                new DefaultNamesProvider());
+                new Conventions());
             program.Start(args);
         }
 
@@ -126,7 +126,7 @@ namespace EasyNetQ.Hosepipe
 
         private void ErrorDump(QueueParameters parameters)
         {
-            parameters.QueueName = namesProvider.EasyNetQErrorQueue;
+            parameters.QueueName = conventions.ErrorQueueNamingConvention();
             Dump(parameters);
         }
 
@@ -135,7 +135,7 @@ namespace EasyNetQ.Hosepipe
             var count = 0;
             errorRetry.RetryErrors(
                 WithEach(
-                    messageReader.ReadMessages(parameters, namesProvider.EasyNetQErrorQueue), 
+                    messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention()), 
                     () => count++), 
                 parameters);
 

@@ -84,7 +84,6 @@
     <Compile Include="ConsumerErrorConditionsTests.cs" />
     <Compile Include="ConventionsTests.cs" />
     <Compile Include="CorrelationIdTests.cs" />
-    <Compile Include="MockCustomNamesProvider.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
@@ -103,7 +102,6 @@
     <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />
     <Compile Include="MultiThreadedPublisherTests.cs" />
-    <Compile Include="NamesProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublisherConfirmsTests.cs" />
     <Compile Include="PublishSubscribeTests.cs" />

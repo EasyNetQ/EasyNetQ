@@ -16,7 +16,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private MockMessageReader messageReader;
         private MockQueueInsertion queueInsertion;
         private MockErrorRetry errorRetry;
-        private DefaultNamesProvider namesProvider;
+        private Conventions conventions;
 
         [SetUp]
         public void SetUp()
@@ -26,7 +26,7 @@ namespace EasyNetQ.Hosepipe.Tests
             messageReader = new MockMessageReader();
             queueInsertion = new MockQueueInsertion();
             errorRetry = new MockErrorRetry();
-            namesProvider = new DefaultNamesProvider();
+            conventions = new Conventions();
 
             program = new Program(
                 new ArgParser(), 
@@ -35,7 +35,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 messageReader,
                 queueInsertion,
                 errorRetry,
-                namesProvider);
+                conventions);
         }
 
         private readonly string expectedDumpOutput = 

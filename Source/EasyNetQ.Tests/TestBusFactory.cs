@@ -9,7 +9,6 @@ namespace EasyNetQ.Tests
         public IEasyNetQLogger Logger { get; set; }
         public IConnectionFactory ConnectionFactory { get; set; }
         public ISerializer Serializer { get; set; }
-        public INamesProvider NamesProvider { get; set; }
         public IConsumerFactory ConsumerFactory { get; set; }
         public IConsumerErrorStrategy ConsumerErrorStrategy { get; set; }
         public IConnection Connection { get; set; }
@@ -24,12 +23,10 @@ namespace EasyNetQ.Tests
             Connection = Connection ?? new MockConnection(Model);
             ConnectionFactory = ConnectionFactory ?? new MockConnectionFactory(Connection);
             Serializer = Serializer ?? new JsonSerializer();
-            NamesProvider = NamesProvider ?? new DefaultNamesProvider();
-            ConsumerErrorStrategy = ConsumerErrorStrategy ?? new DefaultConsumerErrorStrategy(ConnectionFactory, Serializer, Logger, NamesProvider);
+            Conventions = Conventions ?? new Conventions();
+            ConsumerErrorStrategy = ConsumerErrorStrategy ?? new DefaultConsumerErrorStrategy(ConnectionFactory, Serializer, Logger, Conventions);
             ConsumerFactory = ConsumerFactory ?? new QueueingConsumerFactory(Logger, ConsumerErrorStrategy);
             GetCorrelationId = GetCorrelationId ?? CorrelationIdGenerator.GetCorrelationId;
-            Conventions = Conventions ?? new Conventions();
-            
 
             var advancedBus = new RabbitAdvancedBus(
                 new ConnectionConfiguration(), 
@@ -45,7 +42,7 @@ namespace EasyNetQ.Tests
                 TypeNameSerializer.Serialize,
                 Logger,
                 Conventions,
-                NamesProvider, advancedBus);
+                advancedBus);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests
         private DefaultConsumerErrorStrategy consumerErrorStrategy;
         private IConnectionFactory connectionFactory;
         private ISerializer serializer;
-        private INamesProvider namesProvider;
+        private IConventions conventions;
 
         [SetUp]
         public void SetUp()
@@ -33,8 +33,8 @@ namespace EasyNetQ.Tests
                 Password = "guest"
             }, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>());
             serializer = new JsonSerializer();
-            namesProvider = new DefaultNamesProvider();
-            consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger(), namesProvider);
+            conventions = new Conventions();
+            consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger(), conventions);
          
         }
 
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests
             using(var connection = connectionFactory.CreateConnection())
             using(var model = connection.CreateModel())
             {
-                var getArgs = model.BasicGet(namesProvider.EasyNetQErrorQueue, true);
+                var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(), true);
                 if (getArgs == null)
                 {
                     Assert.Fail("Nothing on the error queue");

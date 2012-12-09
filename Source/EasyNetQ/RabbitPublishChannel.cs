@@ -12,7 +12,7 @@ namespace EasyNetQ
         private readonly IAdvancedPublishChannel advancedPublishChannel;
         private readonly IAdvancedBus advancedBus;
         private readonly RabbitBus bus;
-        private readonly INamesProvider namesProvider;
+        private readonly IConventions conventions;
 
         public IAdvancedPublishChannel AdvancedPublishChannel
         {
@@ -29,15 +29,15 @@ namespace EasyNetQ
             get { return bus; }
         }
 
-        public RabbitPublishChannel(RabbitBus bus, Action<IChannelConfiguration> configure, INamesProvider namesProvider)
+        public RabbitPublishChannel(RabbitBus bus, Action<IChannelConfiguration> configure, IConventions conventions)
         {
-            if (namesProvider == null)
+            if (conventions == null)
             {
-                throw new ArgumentNullException("namesProvider");
+                throw new ArgumentNullException("conventions");
             }
 
             this.bus = bus;
-            this.namesProvider = namesProvider;
+            this.conventions = conventions;
             advancedBus = bus.Advanced;
             advancedPublishChannel = advancedBus.OpenPublishChannel(configure);
         }
@@ -137,7 +137,7 @@ namespace EasyNetQ
         private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
         {
             var requestTypeName = bus.SerializeType(typeof(TRequest));
-            var exchange = Exchange.DeclareDirect(namesProvider.RpcExchange);
+            var exchange = Exchange.DeclareDirect(conventions.RpcExchangeNamingConvention());
 
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;
