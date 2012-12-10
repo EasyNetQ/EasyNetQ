@@ -29,21 +29,21 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var overview = managementClient.GetOverview();
 
-            Console.Out.WriteLine("overview.management_version = {0}", overview.ManagementVersion);
+            Console.Out.WriteLine("overview.ManagementVersion = {0}", overview.ManagementVersion);
             foreach (var exchangeType in overview.ExchangeTypes)
             {
-                Console.Out.WriteLine("exchangeType.name = {0}", exchangeType.Name);
+                Console.Out.WriteLine("exchangeType.Name = {0}", exchangeType.Name);
             }
             foreach (var listener in overview.Listeners)
             {
-                Console.Out.WriteLine("listener.ip_address = {0}", listener.IpAddress);
+                Console.Out.WriteLine("listener.IpAddress = {0}", listener.IpAddress);
             }
 
-            Console.Out.WriteLine("overview.queue_totals = {0}", overview.QueueTotals.Messages);
+            Console.Out.WriteLine("overview.Messages = {0}", overview.QueueTotals.Messages);
 
             foreach (var context in overview.Contexts)
             {
-                Console.Out.WriteLine("context.description = {0}", context.Description);
+                Console.Out.WriteLine("context.Description = {0}", context.Description);
             }
         }
 
@@ -71,14 +71,14 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var connection in connections)
             {
-                Console.Out.WriteLine("connection.name = {0}", connection.Name);
-                Console.WriteLine("user:\t{0}", connection.ClientProperties.User);
-                Console.WriteLine("application:\t{0}", connection.ClientProperties.Application);
-                Console.WriteLine("client_api:\t{0}", connection.ClientProperties.ClientApi);
-                Console.WriteLine("application_location:\t{0}", connection.ClientProperties.ApplicationLocation);
-                Console.WriteLine("connected:\t{0}", connection.ClientProperties.Connected);
-                Console.WriteLine("easynetq_version:\t{0}", connection.ClientProperties.EasynetqVersion);
-                Console.WriteLine("machine_name:\t{0}", connection.ClientProperties.MachineName);
+                Console.Out.WriteLine("connection.Name = {0}", connection.Name);
+                Console.WriteLine("User:\t{0}", connection.ClientProperties.User);
+                Console.WriteLine("Application:\t{0}", connection.ClientProperties.Application);
+                Console.WriteLine("ClientApi:\t{0}", connection.ClientProperties.ClientApi);
+                Console.WriteLine("ApplicationLocation:\t{0}", connection.ClientProperties.ApplicationLocation);
+                Console.WriteLine("Connected:\t{0}", connection.ClientProperties.Connected);
+                Console.WriteLine("EasynetqVersion:\t{0}", connection.ClientProperties.EasynetqVersion);
+                Console.WriteLine("MachineName:\t{0}", connection.ClientProperties.MachineName);
             }
         }
 
@@ -92,7 +92,7 @@ namespace EasyNetQ.Management.Client.Tests
             managementClient.CloseConnection(connections.First());
         }
 
-        [Test, ExpectedException(typeof(EasyNetQManagementException))]
+        [Test, ExpectedException(typeof(UnexpectedHttpStatusCodeException))]
         public void Should_throw_when_trying_to_close_unknown_connection()
         {
             var connection = new Connection {Name = "unknown"};
@@ -106,9 +106,9 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var channel in channels)
             {
-                Console.Out.WriteLine("channel.name = {0}", channel.Name);
-                Console.Out.WriteLine("channel.user = {0}", channel.User);
-                Console.Out.WriteLine("channel.prefetch_count = {0}", channel.PrefetchCount);
+                Console.Out.WriteLine("channel.Name = {0}", channel.Name);
+                Console.Out.WriteLine("channel.User = {0}", channel.User);
+                Console.Out.WriteLine("channel.PrefetchCount = {0}", channel.PrefetchCount);
             }
         }
 
@@ -119,7 +119,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (Exchange exchange in exchanges)
             {
-                Console.Out.WriteLine("exchange.name = {0}", exchange.Name);
+                Console.Out.WriteLine("exchange.Name = {0}", exchange.Name);
             }
         }
 
@@ -171,7 +171,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
+                Console.Out.WriteLine("binding.RoutingKey = {0}", binding.RoutingKey);
             }
         }
 
@@ -189,7 +189,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
+                Console.Out.WriteLine("binding.RoutingKey = {0}", binding.RoutingKey);
             }
         }
 
@@ -219,7 +219,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (Queue queue in queues)
             {
-                Console.Out.WriteLine("queue.name = {0}", queue.Name);
+                Console.Out.WriteLine("queue.Name = {0}", queue.Name);
             }
         }
 
@@ -265,7 +265,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
+                Console.Out.WriteLine("binding.RoutingKey = {0}", binding.RoutingKey);
             }
         }
 
@@ -306,7 +306,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var message in messages)
             {
-                Console.Out.WriteLine("message.payload = {0}", message.Payload);
+                Console.Out.WriteLine("message.Payload = {0}", message.Payload);
                 foreach (var property in message.Properties)
                 {
                     Console.Out.WriteLine("key: '{0}', value: '{1}'", property.Key, property.Value);
@@ -321,9 +321,9 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.destination = {0}", binding.Destination);
-                Console.Out.WriteLine("binding.source = {0}", binding.Source);
-                Console.Out.WriteLine("binding.properties_key = {0}", binding.PropertiesKey);
+                Console.Out.WriteLine("binding.Destination = {0}", binding.Destination);
+                Console.Out.WriteLine("binding.Source = {0}", binding.Source);
+                Console.Out.WriteLine("binding.PropertiesKey = {0}", binding.PropertiesKey);
             }
         }
 
@@ -346,8 +346,8 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
-                Console.Out.WriteLine("binding.properties_key = {0}", binding.PropertiesKey);
+                Console.Out.WriteLine("binding.RoutingKey = {0}", binding.RoutingKey);
+                Console.Out.WriteLine("binding.PropertiesKey = {0}", binding.PropertiesKey);
             }
         }
 
@@ -385,7 +385,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var vhost in vhosts)
             {
-                Console.Out.WriteLine("vhost.name = {0}", vhost.Name);
+                Console.Out.WriteLine("vhost.Name = {0}", vhost.Name);
             }
         }
 
@@ -419,7 +419,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var user in users)
             {
-                Console.Out.WriteLine("user.name = {0}", user.Name);
+                Console.Out.WriteLine("user.Name = {0}", user.Name);
             }
         }
 
@@ -455,11 +455,11 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var permission in permissions)
             {
-                Console.Out.WriteLine("permission.user = {0}", permission.User);
-                Console.Out.WriteLine("permission.vhost = {0}", permission.Vhost);
-                Console.Out.WriteLine("permission.configure = {0}", permission.Configure);
-                Console.Out.WriteLine("permission.read = {0}", permission.Read);
-                Console.Out.WriteLine("permission.write = {0}", permission.Write);
+                Console.Out.WriteLine("permission.User = {0}", permission.User);
+                Console.Out.WriteLine("permission.Vhost = {0}", permission.Vhost);
+                Console.Out.WriteLine("permission.Configure = {0}", permission.Configure);
+                Console.Out.WriteLine("permission.Read = {0}", permission.Read);
+                Console.Out.WriteLine("permission.Write = {0}", permission.Write);
             }
         }
 

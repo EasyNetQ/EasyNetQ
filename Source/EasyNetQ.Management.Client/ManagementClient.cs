@@ -431,7 +431,7 @@ namespace EasyNetQ.Management.Client
             InsertRequestBody(request, item);
 
             var response = request.GetHttpResponse();
-            if (response.StatusCode != HttpStatusCode.OK)
+            if (!(response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created))
             {
                 throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
