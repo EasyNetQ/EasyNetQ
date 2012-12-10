@@ -6,21 +6,21 @@ namespace EasyNetQ.Management.Client.Model
     {
         public Properties()
         {
-            headers = new Dictionary<string, string>();
+            Headers = new Dictionary<string, string>();
         }
 
-        public Dictionary<string, string> headers { get; set; } 
+        public Dictionary<string, string> Headers { get; set; } 
     }
 
     public class Message
     {
-        public int payload_bytes { get; set; }
-        public bool redelivered { get; set; }
-        public string exchange { get; set; }
-        public string routing_key { get; set; }
-        public int message_count { get; set; }
-        public Properties properties { get; set; }
-        public string payload { get; set; }
-        public string payload_encoding { get; set; }
+        public int PayloadBytes { get; set; }
+        public bool Redelivered { get; set; }
+        public string Exchange { get; set; }
+        public string RoutingKey { get; set; }
+        public int MessageCount { get; set; }
+        public Properties Properties { get; set; }
+        public string Payload { get; set; }
+        public string PayloadEncoding { get; set; }
     }
 }

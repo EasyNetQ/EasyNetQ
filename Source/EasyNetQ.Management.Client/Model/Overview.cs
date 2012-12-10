@@ -4,26 +4,26 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class Overview
     {
-        public string management_version { get; set; }
-        public string statistics_level { get; set; }
-        public List<ExchangeType> exchange_types { get; set; }
-        public string rabbitmq_version { get; set; }
-        public string erlang_version { get; set; }
-        public List<object> message_stats { get; set; }
-        public QueueTotals queue_totals { get; set; }
-        public ObjectTotals object_totals { get; set; }
-        public string node { get; set; }
-        public string statistics_db_node { get; set; }
-        public List<Listener> listeners { get; set; }
-        public List<Context> contexts { get; set; }
+        public string ManagementVersion { get; set; }
+        public string StatisticsLevel { get; set; }
+        public List<ExchangeType> ExchangeTypes { get; set; }
+        public string RabbitmqVersion { get; set; }
+        public string ErlangVersion { get; set; }
+        public List<object> MessageStats { get; set; }
+        public QueueTotals QueueTotals { get; set; }
+        public ObjectTotals ObjectTotals { get; set; }
+        public string Node { get; set; }
+        public string StatisticsDbNode { get; set; }
+        public List<Listener> Listeners { get; set; }
+        public List<Context> Contexts { get; set; }
     }
 
     public class ObjectTotals
     {
-        public int consumers { get; set; }
-        public int queues { get; set; }
-        public int exchanges { get; set; }
-        public int connections { get; set; }
-        public int channels { get; set; }
+        public int Consumers { get; set; }
+        public int Queues { get; set; }
+        public int Exchanges { get; set; }
+        public int Connections { get; set; }
+        public int Channels { get; set; }
     }
 }

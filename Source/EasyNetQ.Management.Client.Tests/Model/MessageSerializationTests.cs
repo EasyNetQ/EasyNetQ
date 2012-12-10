@@ -25,10 +25,10 @@ namespace EasyNetQ.Management.Client.Tests.Model
 
             var message = JsonConvert.DeserializeObject<Message>(json, new PropertyConverter());
 
-            message.properties.Count.ShouldEqual(1);
-            message.payload.ShouldEqual("Hello World");
-            message.properties["delivery_mode"].ShouldEqual("2");
-            message.properties.headers["key"].ShouldEqual("value");
+            message.Properties.Count.ShouldEqual(1);
+            message.Payload.ShouldEqual("Hello World");
+            message.Properties["delivery_mode"].ShouldEqual("2");
+            message.Properties.Headers["key"].ShouldEqual("value");
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace EasyNetQ.Management.Client.Tests.Model
 
             var message = JsonConvert.DeserializeObject<Message>(json, new PropertyConverter());
 
-            message.properties.Count.ShouldEqual(0);
+            message.Properties.Count.ShouldEqual(0);
         }
     }
 }

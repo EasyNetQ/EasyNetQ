@@ -2,8 +2,8 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class AuthMechanism
     {
-        public string name { get; set; }
-        public string description { get; set; }
-        public bool enabled { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public bool Enabled { get; set; }
     }
 }

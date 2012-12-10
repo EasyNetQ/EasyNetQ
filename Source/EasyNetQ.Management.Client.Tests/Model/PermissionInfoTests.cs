@@ -15,29 +15,29 @@ namespace EasyNetQ.Management.Client.Tests.Model
         [SetUp]
         public void SetUp()
         {
-            user = new User {name = "mikey"};
-            vhost = new Vhost {name = "theVHostName"};
+            user = new User { Name = "mikey" };
+            vhost = new Vhost { Name = "theVHostName" };
             permissionInfo = new PermissionInfo(user, vhost);
         }
 
         [Test]
         public void Should_return_the_correct_user_name()
         {
-            permissionInfo.GetUserName().ShouldEqual(user.name);
+            permissionInfo.GetUserName().ShouldEqual(user.Name);
         }
 
         [Test]
         public void Should_return_the_correct_vhost_name()
         {
-            permissionInfo.GetVirtualHostName().ShouldEqual(vhost.name);
+            permissionInfo.GetVirtualHostName().ShouldEqual(vhost.Name);
         }
 
         [Test]
         public void Should_set_default_permissions_to_allow_all()
         {
-            permissionInfo.configure.ShouldEqual(".*");
-            permissionInfo.write.ShouldEqual(".*");
-            permissionInfo.read.ShouldEqual(".*");
+            permissionInfo.Configure.ShouldEqual(".*");
+            permissionInfo.Write.ShouldEqual(".*");
+            permissionInfo.Read.ShouldEqual(".*");
         }
 
         [Test]
@@ -45,19 +45,19 @@ namespace EasyNetQ.Management.Client.Tests.Model
         {
             var permissions = permissionInfo.DenyAllConfigure().DenyAllRead().DenyAllWrite();
 
-            permissions.configure.ShouldEqual("^$");
-            permissions.write.ShouldEqual("^$");
-            permissions.read.ShouldEqual("^$");
+            permissions.Configure.ShouldEqual("^$");
+            permissions.Write.ShouldEqual("^$");
+            permissions.Read.ShouldEqual("^$");
         }
 
         [Test]
         public void Should_be_able_to_set_arbitrary_permissions()
         {
-            var permissions = permissionInfo.Configure("abc").Read("def").Write("xyz");
+            var permissions = permissionInfo.SetConfigure("abc").SetRead("def").SetWrite("xyz");
 
-            permissions.configure.ShouldEqual("abc");
-            permissions.write.ShouldEqual("xyz");
-            permissions.read.ShouldEqual("def");
+            permissions.Configure.ShouldEqual("abc");
+            permissions.Write.ShouldEqual("xyz");
+            permissions.Read.ShouldEqual("def");
         }
     }
 }

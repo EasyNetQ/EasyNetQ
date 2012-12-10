@@ -18,13 +18,13 @@ namespace EasyNetQ.Monitor.Checks
         public CheckResult RunCheck(IManagementClient managementClient)
         {
             var overview = managementClient.GetOverview();
-            var alert = overview.object_totals.connections >= alertConnectionCount;
+            var alert = overview.ObjectTotals.Connections >= alertConnectionCount;
             var message = alert
                 ? string.Format(
                     "broker {0} connections have exceeded alert level {1}. Now {2}", 
                     managementClient.HostUrl,
                     alertConnectionCount,
-                    overview.object_totals.connections)
+                    overview.ObjectTotals.Connections)
                 : "";
 
             return new CheckResult(alert, message);

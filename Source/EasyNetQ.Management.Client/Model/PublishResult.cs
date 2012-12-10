@@ -2,6 +2,6 @@
 {
     public class PublishResult
     {
-        public bool routed { get; set; }     
+        public bool Routed { get; set; }     
     }
 }

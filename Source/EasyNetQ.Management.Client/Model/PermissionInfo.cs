@@ -2,9 +2,9 @@
 {
     public class PermissionInfo
     {
-        public string configure { get; private set; }
-        public string write { get; private set; }
-        public string read { get; private set; }
+        public string Configure { get; private set; }
+        public string Write { get; private set; }
+        public string Read { get; private set; }
 
         private readonly User user;
         private readonly Vhost vhost;
@@ -17,53 +17,52 @@
             this.user = user;
             this.vhost = vhost;
 
-            configure = write = read = allowAll;
+            Configure = Write = Read = allowAll;
         }
 
         public string GetUserName()
         {
-            return user.name;
+            return user.Name;
         }
 
         public string GetVirtualHostName()
         {
-            return vhost.name;
+            return vhost.Name;
         }
 
-        public PermissionInfo Configure(string resourcesToAllow)
+        public PermissionInfo SetConfigure(string resourcesToAllow)
         {
-            configure = resourcesToAllow;
+            Configure = resourcesToAllow;
             return this;
         }
 
-        public PermissionInfo Write(string resourcedToAllow)
+        public PermissionInfo SetWrite(string resourcedToAllow)
         {
-            write = resourcedToAllow;
+            Write = resourcedToAllow;
             return this;
         }
 
-        public PermissionInfo Read(string resourcesToAllow)
+        public PermissionInfo SetRead(string resourcesToAllow)
         {
-            read = resourcesToAllow;
+            Read = resourcesToAllow;
             return this;
         }
-
 
         public PermissionInfo DenyAllConfigure()
         {
-            configure = denyAll;
+            Configure = denyAll;
             return this;
         }
 
         public PermissionInfo DenyAllWrite()
         {
-            write = denyAll;
+            Write = denyAll;
             return this;
         }
 
         public PermissionInfo DenyAllRead()
         {
-            read = denyAll;
+            Read = denyAll;
             return this;
         }
     }

@@ -7,8 +7,8 @@ namespace EasyNetQ.Management.Client.Model
     public class UserInfo
     {
         private readonly string name;
-        public string password { get; private set; }
-        public string tags
+        public string Password { get; private set; }
+        public string Tags
         {
             get
             {
@@ -21,7 +21,7 @@ namespace EasyNetQ.Management.Client.Model
         private readonly ISet<string> allowedTags = new HashSet<string>
         {
             "administrator", "monitoring", "management"
-        }; 
+        };
 
         private readonly ISet<string> tagList = new HashSet<string>();
 
@@ -37,7 +37,7 @@ namespace EasyNetQ.Management.Client.Model
             }
 
             this.name = name;
-            this.password = password;
+            this.Password = password;
         }
 
         public UserInfo AddTag(string tag)

@@ -2,8 +2,8 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class Application
     {
-        public string name { get; set; }
-        public string description { get; set; }
-        public string version { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Version { get; set; }
     }
 }

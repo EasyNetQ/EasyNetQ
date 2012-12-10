@@ -33,7 +33,7 @@ namespace EasyNetQ.Management.Client.Serialization
                             var headers = (JObject) property.Value;
                             foreach (var header in headers.Properties())
                             {
-                                properties.headers.Add(header.Name, header.Value.ToString());
+                                properties.Headers.Add(header.Name, header.Value.ToString());
                             }
                         }
                     }

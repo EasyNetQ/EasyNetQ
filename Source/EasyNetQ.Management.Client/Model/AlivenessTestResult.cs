@@ -2,6 +2,6 @@
 {
     public class AlivenessTestResult
     {
-        public string status { get; set; }     
+        public string Status { get; set; }     
     }
 }

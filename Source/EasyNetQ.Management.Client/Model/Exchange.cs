@@ -2,12 +2,12 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class Exchange
     {
-        public string name { get; set; }
-        public string vhost { get; set; }
-        public string type { get; set; }
-        public bool durable { get; set; }
-        public bool auto_delete { get; set; }
-        public bool @internal { get; set; }
-        public Arguments arguments { get; set; }
+        public string Name { get; set; }
+        public string Vhost { get; set; }
+        public string Type { get; set; }
+        public bool Durable { get; set; }
+        public bool AutoDelete { get; set; }
+        public bool Internal { get; set; }
+        public Arguments Arguments { get; set; }
     }
 }

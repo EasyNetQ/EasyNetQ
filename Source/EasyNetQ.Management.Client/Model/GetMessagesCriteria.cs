@@ -5,9 +5,9 @@
     /// </summary>
     public class GetMessagesCriteria
     {
-        public long count { get; private set; }
-        public bool requeue { get; private set; }
-        public string encoding { get; private set; }
+        public long Count { get; private set; }
+        public bool Requeue { get; private set; }
+        public string Encoding { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -23,9 +23,9 @@
         /// </param>
         public GetMessagesCriteria(long count, bool requeue)
         {
-            this.requeue = requeue;
-            this.count = count;
-            encoding = "auto";
+            Requeue = requeue;
+            Count = count;
+            Encoding = "auto";
         }
     }
 }

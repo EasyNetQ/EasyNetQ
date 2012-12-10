@@ -25,9 +25,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
             {
                 new Queue
                 {
-                    name = "my_queue",
-                    vhost = "my_virtual_host",
-                    messages = 101
+                    Name = "my_queue",
+                    Vhost = "my_virtual_host",
+                    Messages = 101
                 }
             });
 
@@ -46,9 +46,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
             {
                 new Queue
                 {
-                    name = "my_queue",
-                    vhost = "my_virtual_host",
-                    messages = 99
+                    Name = "my_queue",
+                    Vhost = "my_virtual_host",
+                    Messages = 99
                 }
             });
 

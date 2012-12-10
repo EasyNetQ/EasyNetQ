@@ -19,8 +19,8 @@ namespace EasyNetQ.Monitor.Checks
             var queues = managementClient.GetQueues();
             var alertQueues =
                 from queue in queues
-                where queue.messages >= alertIndividualQueueMessagesCount
-                select string.Format("{0} on {1} with {2} messages", queue.name, queue.vhost, queue.messages);
+                where queue.Messages >= alertIndividualQueueMessagesCount
+                select string.Format("{0} on {1} with {2} messages", queue.Name, queue.Vhost, queue.Messages);
 
             var message = string.Format(alertMessage, 
                 managementClient.HostUrl,
