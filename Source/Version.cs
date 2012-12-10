@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.9.1.0")]
+[assembly: AssemblyVersion("0.9.2.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.9.2.0  C# style property names on Management.Client
 // 0.9.1.0  Upgrade to RabbitMQ.Client 3.0.0.0
 // 0.9.0.0  Management
 // 0.8.4.0  Better client information sent to RabbitMQ
