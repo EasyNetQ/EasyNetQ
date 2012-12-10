@@ -5,28 +5,28 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class PublishInfo
     {
-        public IDictionary<string, string> properties { get; private set; }
-        public string routing_key { get; private set; }
-        public string payload { get; private set; }
-        public string payload_encoding { get; private set; }
+        public IDictionary<string, string> Properties { get; private set; }
+        public string RoutingKey { get; private set; }
+        public string Payload { get; private set; }
+        public string PayloadEncoding { get; private set; }
 
-        private readonly ISet<string> payloadEncodings = new HashSet<string>{ "string", "base64" };
+        private readonly ISet<string> payloadEncodings = new HashSet<string> { "string", "base64" };
 
         public PublishInfo(IDictionary<string, string> properties, string routingKey, string payload, string payloadEncoding)
         {
-            if(properties == null)
+            if (properties == null)
             {
                 throw new ArgumentNullException("properties");
             }
-            if(routingKey == null)
+            if (routingKey == null)
             {
                 throw new ArgumentNullException("routingKey");
             }
-            if(payload == null)
+            if (payload == null)
             {
                 throw new ArgumentNullException("payload");
             }
-            if(payloadEncoding == null)
+            if (payloadEncoding == null)
             {
                 throw new ArgumentNullException("payloadEncoding");
             }
@@ -36,13 +36,13 @@ namespace EasyNetQ.Management.Client.Model
                     string.Join(", ", payloadEncodings)));
             }
 
-            this.properties = properties;
-            routing_key = routingKey;
-            this.payload = payload;
-            payload_encoding = payloadEncoding;
+            Properties = properties;
+            RoutingKey = routingKey;
+            Payload = payload;
+            PayloadEncoding = payloadEncoding;
         }
 
-        public PublishInfo(string routingKey, string payload) : 
+        public PublishInfo(string routingKey, string payload) :
             this(new Dictionary<string, string>(), routingKey, payload, "string")
         {
         }

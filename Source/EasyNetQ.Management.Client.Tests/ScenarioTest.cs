@@ -34,7 +34,7 @@ namespace EasyNetQ.Management.Client.Tests
             initial.CreatePermission(new PermissionInfo(user, vhost));
 
             // now log in again as the new user
-            var management = new ManagementClient("http://localhost", user.name, "topSecret");
+            var management = new ManagementClient("http://localhost", user.Name, "topSecret");
 
             // test that everything's OK
             management.IsAlive(vhost);
@@ -56,7 +56,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var message in messages)
             {
-                Console.Out.WriteLine("message.payload = {0}", message.payload);
+                Console.Out.WriteLine("message.payload = {0}", message.Payload);
             }
         }
     }

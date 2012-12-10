@@ -2,9 +2,9 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class Context
     {
-        public string node { get; set; }
-        public string description { get; set; }
-        public string path { get; set; }
-        public int port { get; set; }
+        public string Node { get; set; }
+        public string Description { get; set; }
+        public string Path { get; set; }
+        public int Port { get; set; }
     }
 }

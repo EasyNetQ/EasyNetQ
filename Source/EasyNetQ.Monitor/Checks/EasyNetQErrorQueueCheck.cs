@@ -15,8 +15,8 @@ namespace EasyNetQ.Monitor.Checks
             var vhostsWithErrors =
                 from vhost in managementClient.GetVHosts()
                 let errorQueue = GetErrorQueue(managementClient, vhost)
-                where errorQueue.messages > 0
-                select vhost.name;
+                where errorQueue.Messages > 0
+                select vhost.Name;
 
             var message = string.Format(errorMessage, managementClient.HostUrl, string.Join(", ", vhostsWithErrors));
 
@@ -33,7 +33,7 @@ namespace EasyNetQ.Monitor.Checks
             {
                 if (exception.StatusCode == HttpStatusCode.NotFound)
                 {
-                    return new Queue { messages = 0 };
+                    return new Queue { Messages = 0 };
                 }
                 throw;
             }

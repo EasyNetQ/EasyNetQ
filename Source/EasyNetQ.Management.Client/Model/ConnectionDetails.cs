@@ -2,8 +2,8 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class ConnectionDetails
     {
-        public string name { get; set; }
-        public string peer_address { get; set; }
-        public int peer_port { get; set; }
+        public string Name { get; set; }
+        public string PeerAddress { get; set; }
+        public int PeerPort { get; set; }
     }
 }

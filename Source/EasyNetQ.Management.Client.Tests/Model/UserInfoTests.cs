@@ -23,14 +23,14 @@ namespace EasyNetQ.Management.Client.Tests.Model
         public void Should_have_correct_name_and_password()
         {
             userInfo.GetName().ShouldEqual(userName);
-            userInfo.password.ShouldEqual(password);
+            userInfo.Password.ShouldEqual(password);
         }
 
         [Test]
         public void Should_be_able_to_add_tags()
         {
             userInfo.AddTag("administrator").AddTag("management");
-            userInfo.tags.ShouldEqual("administrator,management");
+            userInfo.Tags.ShouldEqual("administrator,management");
         }
 
         [Test, ExpectedException(typeof(ArgumentException))]
@@ -48,7 +48,7 @@ namespace EasyNetQ.Management.Client.Tests.Model
         [Test]
         public void Should_have_a_default_tag_of_administrator()
         {
-            userInfo.tags.ShouldEqual("administrator");
+            userInfo.Tags.ShouldEqual("administrator");
         }
     }
 }

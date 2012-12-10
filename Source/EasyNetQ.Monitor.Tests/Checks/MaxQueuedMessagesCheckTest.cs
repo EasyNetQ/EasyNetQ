@@ -22,9 +22,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
-                queue_totals = new QueueTotals
+                QueueTotals = new QueueTotals
                 {
-                    messages = 100
+                    Messages = 100
                 }
             });
 
@@ -39,9 +39,9 @@ namespace EasyNetQ.Monitor.Tests.Checks
         {
             ManagementClient.Stub(x => x.GetOverview()).Return(new Overview
             {
-                queue_totals = new QueueTotals
+                QueueTotals = new QueueTotals
                 {
-                    messages = 99
+                    Messages = 99
                 }
             });
 

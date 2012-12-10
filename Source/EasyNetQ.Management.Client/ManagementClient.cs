@@ -15,12 +15,20 @@ namespace EasyNetQ.Management.Client
         private readonly string username;
         private readonly string password;
         private readonly int portNumber;
+        private readonly JsonSerializerSettings settings;
 
         public ManagementClient(
-            string hostUrl, 
-            string username, 
-            string password) : this(hostUrl, username, password, 15672)
+            string hostUrl,
+            string username,
+            string password)
+            : this(hostUrl, username, password, 15672)
         {
+            settings = new JsonSerializerSettings
+            {
+                ContractResolver = new RabbitContractResolver(),
+            };
+
+            settings.Converters.Add(new PropertyConverter());
         }
 
         public string HostUrl
@@ -83,12 +91,12 @@ namespace EasyNetQ.Management.Client
 
         public void CloseConnection(Connection connection)
         {
-            if(connection == null)
+            if (connection == null)
             {
                 throw new ArgumentNullException("connection");
             }
 
-            Delete(string.Format("connections/{0}", connection.name));
+            Delete(string.Format("connections/{0}", connection.Name));
         }
 
         public IEnumerable<Channel> GetChannels()
@@ -104,74 +112,74 @@ namespace EasyNetQ.Management.Client
         public Exchange GetExchange(string exchangeName, Vhost vhost)
         {
             return Get<Exchange>(string.Format("exchanges/{0}/{1}",
-                SanitiseVhostName(vhost.name), exchangeName));
+                SanitiseVhostName(vhost.Name), exchangeName));
         }
 
         public Queue GetQueue(string queueName, Vhost vhost)
         {
             return Get<Queue>(string.Format("queues/{0}/{1}",
-                SanitiseVhostName(vhost.name), queueName));
+                SanitiseVhostName(vhost.Name), queueName));
         }
 
         public Exchange CreateExchange(ExchangeInfo exchangeInfo, Vhost vhost)
         {
-            if(exchangeInfo == null)
+            if (exchangeInfo == null)
             {
                 throw new ArgumentNullException("exchangeInfo");
             }
-            if(vhost == null)
+            if (vhost == null)
             {
                 throw new ArgumentNullException("vhost");
             }
 
-            Put(string.Format("exchanges/{0}/{1}", SanitiseVhostName(vhost.name), exchangeInfo.GetName()), exchangeInfo);
+            Put(string.Format("exchanges/{0}/{1}", SanitiseVhostName(vhost.Name), exchangeInfo.GetName()), exchangeInfo);
 
             return GetExchange(exchangeInfo.GetName(), vhost);
         }
 
         public void DeleteExchange(Exchange exchange)
         {
-            if(exchange == null)
+            if (exchange == null)
             {
                 throw new ArgumentNullException("exchange");
             }
 
-            Delete(string.Format("exchanges/{0}/{1}", SanitiseVhostName(exchange.vhost), exchange.name));
+            Delete(string.Format("exchanges/{0}/{1}", SanitiseVhostName(exchange.Vhost), exchange.Name));
         }
 
         public IEnumerable<Binding> GetBindingsWithSource(Exchange exchange)
         {
-            if(exchange == null)
+            if (exchange == null)
             {
                 throw new ArgumentNullException("exchange");
             }
 
-            return Get<IEnumerable<Binding>>(string.Format("exchanges/{0}/{1}/bindings/source", SanitiseVhostName(exchange.vhost), exchange.name));
+            return Get<IEnumerable<Binding>>(string.Format("exchanges/{0}/{1}/bindings/source", SanitiseVhostName(exchange.Vhost), exchange.Name));
         }
 
         public IEnumerable<Binding> GetBindingsWithDestination(Exchange exchange)
         {
-            if(exchange == null)
+            if (exchange == null)
             {
                 throw new ArgumentNullException("exchange");
             }
 
-            return Get<IEnumerable<Binding>>(string.Format("exchanges/{0}/{1}/bindings/destination", SanitiseVhostName(exchange.vhost), exchange.name));
+            return Get<IEnumerable<Binding>>(string.Format("exchanges/{0}/{1}/bindings/destination", SanitiseVhostName(exchange.Vhost), exchange.Name));
         }
 
         public PublishResult Publish(Exchange exchange, PublishInfo publishInfo)
         {
-            if(exchange == null)
+            if (exchange == null)
             {
                 throw new ArgumentNullException("exchange");
             }
-            if(publishInfo == null)
+            if (publishInfo == null)
             {
                 throw new ArgumentNullException("publishInfo");
             }
 
             return Post<PublishInfo, PublishResult>(
-                string.Format("exchanges/{0}/{1}/publish", SanitiseVhostName(exchange.vhost), exchange.name), 
+                string.Format("exchanges/{0}/{1}/publish", SanitiseVhostName(exchange.Vhost), exchange.Name),
                 publishInfo);
         }
 
@@ -182,60 +190,60 @@ namespace EasyNetQ.Management.Client
 
         public Queue CreateQueue(QueueInfo queueInfo, Vhost vhost)
         {
-            if(queueInfo == null)
+            if (queueInfo == null)
             {
                 throw new ArgumentNullException("queueInfo");
             }
-            if(vhost == null)
+            if (vhost == null)
             {
                 throw new ArgumentNullException("vhost");
             }
 
-            Put(string.Format("queues/{0}/{1}", SanitiseVhostName(vhost.name), queueInfo.GetName()), queueInfo);
+            Put(string.Format("queues/{0}/{1}", SanitiseVhostName(vhost.Name), queueInfo.GetName()), queueInfo);
 
             return GetQueue(queueInfo.GetName(), vhost);
         }
 
         public void DeleteQueue(Queue queue)
         {
-            if(queue == null)
+            if (queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
 
-            Delete(string.Format("queues/{0}/{1}", SanitiseVhostName(queue.vhost), queue.name));
+            Delete(string.Format("queues/{0}/{1}", SanitiseVhostName(queue.Vhost), queue.Name));
         }
 
         public IEnumerable<Binding> GetBindingsForQueue(Queue queue)
         {
-            if(queue == null)
+            if (queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
 
             return Get<IEnumerable<Binding>>(
-                string.Format("queues/{0}/{1}/bindings", SanitiseVhostName(queue.vhost), queue.name));
+                string.Format("queues/{0}/{1}/bindings", SanitiseVhostName(queue.Vhost), queue.Name));
         }
 
         public void Purge(Queue queue)
         {
-            if(queue == null)
+            if (queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
 
-            Delete(string.Format("queues/{0}/{1}/contents", SanitiseVhostName(queue.vhost), queue.name));
+            Delete(string.Format("queues/{0}/{1}/contents", SanitiseVhostName(queue.Vhost), queue.Name));
         }
 
         public IEnumerable<Message> GetMessagesFromQueue(Queue queue, GetMessagesCriteria criteria)
         {
-            if(queue == null)
+            if (queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
 
             return Post<GetMessagesCriteria, IEnumerable<Message>>(
-                string.Format("queues/{0}/{1}/get", SanitiseVhostName(queue.vhost), queue.name),
+                string.Format("queues/{0}/{1}/get", SanitiseVhostName(queue.Vhost), queue.Name),
                 criteria);
         }
 
@@ -246,52 +254,52 @@ namespace EasyNetQ.Management.Client
 
         public void CreateBinding(Exchange exchange, Queue queue, BindingInfo bindingInfo)
         {
-            if(exchange == null)
+            if (exchange == null)
             {
                 throw new ArgumentNullException("exchange");
             }
-            if(queue == null)
+            if (queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
-            if(bindingInfo == null)
+            if (bindingInfo == null)
             {
                 throw new ArgumentNullException("bindingInfo");
             }
 
             Post<BindingInfo, object>(
-                string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.vhost), exchange.name, queue.name), 
+                string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.Vhost), exchange.Name, queue.Name),
                 bindingInfo);
         }
 
         public IEnumerable<Binding> GetBindings(Exchange exchange, Queue queue)
         {
-            if(exchange == null)
+            if (exchange == null)
             {
                 throw new ArgumentNullException("exchange");
             }
-            if(queue == null)
+            if (queue == null)
             {
                 throw new ArgumentNullException("queue");
             }
 
             return Get<IEnumerable<Binding>>(
-                string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.vhost),
-                    exchange.name, queue.name));
+                string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.Vhost),
+                    exchange.Name, queue.Name));
         }
 
         public void DeleteBinding(Binding binding)
         {
-            if(binding == null)
+            if (binding == null)
             {
                 throw new ArgumentNullException("binding");
             }
 
-            Delete(string.Format("bindings/{0}/e/{1}/q/{2}/{3}", 
-                SanitiseVhostName(binding.vhost),
-                binding.source, 
-                binding.destination, 
-                RecodeBindingPropertiesKey(binding.properties_key)));
+            Delete(string.Format("bindings/{0}/e/{1}/q/{2}/{3}",
+                SanitiseVhostName(binding.Vhost),
+                binding.Source,
+                binding.Destination,
+                RecodeBindingPropertiesKey(binding.PropertiesKey)));
         }
 
         public IEnumerable<Vhost> GetVHosts()
@@ -306,7 +314,7 @@ namespace EasyNetQ.Management.Client
 
         public Vhost CreateVirtualHost(string virtualHostName)
         {
-            if(string.IsNullOrEmpty(virtualHostName))
+            if (string.IsNullOrEmpty(virtualHostName))
             {
                 throw new ArgumentException("virtualHostName is null or empty");
             }
@@ -318,12 +326,12 @@ namespace EasyNetQ.Management.Client
 
         public void DeleteVirtualHost(Vhost vhost)
         {
-            if(vhost == null)
+            if (vhost == null)
             {
                 throw new ArgumentNullException("vhost");
             }
 
-            Delete(string.Format("vhosts/{0}", vhost.name));
+            Delete(string.Format("vhosts/{0}", vhost.Name));
         }
 
         public IEnumerable<User> GetUsers()
@@ -338,7 +346,7 @@ namespace EasyNetQ.Management.Client
 
         public User CreateUser(UserInfo userInfo)
         {
-            if(userInfo == null)
+            if (userInfo == null)
             {
                 throw new ArgumentNullException("userInfo");
             }
@@ -350,12 +358,12 @@ namespace EasyNetQ.Management.Client
 
         public void DeleteUser(User user)
         {
-            if(user == null)
+            if (user == null)
             {
                 throw new ArgumentNullException("user");
             }
 
-            Delete(string.Format("users/{0}", user.name));
+            Delete(string.Format("users/{0}", user.Name));
         }
 
 
@@ -366,40 +374,40 @@ namespace EasyNetQ.Management.Client
 
         public void CreatePermission(PermissionInfo permissionInfo)
         {
-            if(permissionInfo == null)
+            if (permissionInfo == null)
             {
                 throw new ArgumentNullException("permissionInfo");
             }
 
-            Put(string.Format("permissions/{0}/{1}", 
-                    permissionInfo.GetVirtualHostName(), 
-                    permissionInfo.GetUserName()), 
+            Put(string.Format("permissions/{0}/{1}",
+                    permissionInfo.GetVirtualHostName(),
+                    permissionInfo.GetUserName()),
                 permissionInfo);
         }
 
         public void DeletePermission(Permission permission)
         {
-            if(permission == null)
+            if (permission == null)
             {
                 throw new ArgumentNullException("permission");
             }
 
             Delete(string.Format("permissions/{0}/{1}",
-                permission.vhost,
-                permission.user));
+                permission.Vhost,
+                permission.User));
         }
 
         public bool IsAlive(Vhost vhost)
         {
-            if(vhost == null)
+            if (vhost == null)
             {
                 throw new ArgumentNullException("vhost");
             }
 
             var result = Get<AlivenessTestResult>(string.Format("aliveness-test/{0}",
-                SanitiseVhostName(vhost.name)));
+                SanitiseVhostName(vhost.Name)));
 
-            return result.status == "ok";
+            return result.Status == "ok";
         }
 
         private T Get<T>(string path)
@@ -496,10 +504,11 @@ namespace EasyNetQ.Management.Client
             }
         }
 
-        private static void InsertRequestBody<T>(HttpWebRequest request, T item)
+        private void InsertRequestBody<T>(HttpWebRequest request, T item)
         {
             request.ContentType = "application/json";
-            var body = JsonConvert.SerializeObject(item);
+
+            var body = JsonConvert.SerializeObject(item, settings);
             using (var requestStream = request.GetRequestStream())
             using (var writer = new StreamWriter(requestStream))
             {
@@ -507,10 +516,10 @@ namespace EasyNetQ.Management.Client
             }
         }
 
-        private static T DeserializeResponse<T>(HttpWebResponse response)
+        private T DeserializeResponse<T>(HttpWebResponse response)
         {
             var responseBody = GetBodyFromResponse(response);
-            return JsonConvert.DeserializeObject<T>(responseBody, new PropertyConverter());
+            return JsonConvert.DeserializeObject<T>(responseBody, settings);
         }
 
         private static string GetBodyFromResponse(HttpWebResponse response)

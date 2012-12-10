@@ -5,11 +5,11 @@ namespace EasyNetQ.Management.Client.Model
 {
     public class ExchangeInfo
     {
-        public string type { get; private set; }
-        public bool auto_delete { get; private set; }
-        public bool durable { get; private set; }
-        public bool @internal { get; private set; }
-        public Arguments arguments { get; private set; }
+        public string Type { get; private set; }
+        public bool AutoDelete { get; private set; }
+        public bool Durable { get; private set; }
+        public bool Internal { get; private set; }
+        public Arguments Arguments { get; private set; }
 
         private readonly string name;
 
@@ -40,11 +40,11 @@ namespace EasyNetQ.Management.Client.Model
             }
 
             this.name = name;
-            this.type = type;
-            auto_delete = autoDelete;
-            this.durable = durable;
-            this.@internal = @internal;
-            this.arguments = arguments;
+            Type = type;
+            AutoDelete = autoDelete;
+            Durable = durable;
+            Internal = @internal;
+            Arguments = arguments;
         }
 
         public string GetName()

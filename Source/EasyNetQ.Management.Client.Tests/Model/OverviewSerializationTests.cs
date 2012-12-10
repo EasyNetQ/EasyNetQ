@@ -20,16 +20,16 @@ namespace EasyNetQ.Management.Client.Tests.Model
         [Test]
         public void Should_contain_management_version()
         {
-            overview.management_version.ShouldEqual("2.8.6");
-            overview.statistics_level.ShouldEqual("fine");
+            overview.ManagementVersion.ShouldEqual("2.8.6");
+            overview.StatisticsLevel.ShouldEqual("fine");
         }
 
         [Test]
         public void Should_congtain_exchange_types()
         {
-            overview.exchange_types[0].name.ShouldEqual("topic");
-            overview.exchange_types[0].description.ShouldEqual("AMQP topic exchange, as per the AMQP specification");
-            overview.exchange_types[0].enabled.ShouldBeTrue();
+            overview.ExchangeTypes[0].Name.ShouldEqual("topic");
+            overview.ExchangeTypes[0].Description.ShouldEqual("AMQP topic exchange, as per the AMQP specification");
+            overview.ExchangeTypes[0].Enabled.ShouldBeTrue();
         }
     }
 }

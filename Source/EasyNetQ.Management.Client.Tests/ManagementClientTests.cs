@@ -29,21 +29,21 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var overview = managementClient.GetOverview();
 
-            Console.Out.WriteLine("overview.management_version = {0}", overview.management_version);
-            foreach (var exchangeType in overview.exchange_types)
+            Console.Out.WriteLine("overview.management_version = {0}", overview.ManagementVersion);
+            foreach (var exchangeType in overview.ExchangeTypes)
             {
-                Console.Out.WriteLine("exchangeType.name = {0}", exchangeType.name);
+                Console.Out.WriteLine("exchangeType.name = {0}", exchangeType.Name);
             }
-            foreach (var listener in overview.listeners)
+            foreach (var listener in overview.Listeners)
             {
-                Console.Out.WriteLine("listener.ip_address = {0}", listener.ip_address);
+                Console.Out.WriteLine("listener.ip_address = {0}", listener.IpAddress);
             }
 
-            Console.Out.WriteLine("overview.queue_totals = {0}", overview.queue_totals.messages);
+            Console.Out.WriteLine("overview.queue_totals = {0}", overview.QueueTotals.Messages);
 
-            foreach (var context in overview.contexts)
+            foreach (var context in overview.Contexts)
             {
-                Console.Out.WriteLine("context.description = {0}", context.description);
+                Console.Out.WriteLine("context.description = {0}", context.Description);
             }
         }
 
@@ -53,7 +53,7 @@ namespace EasyNetQ.Management.Client.Tests
             var nodes = managementClient.GetNodes();
 
             nodes.Count().ShouldEqual(1);
-            nodes.First().name.ShouldEqual("rabbit@THOMAS");
+            nodes.First().Name.ShouldEqual("rabbit@THOMAS");
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var definitions = managementClient.GetDefinitions();
 
-            definitions.rabbit_version.ShouldEqual("3.0.0");
+            definitions.RabbitVersion.ShouldEqual("3.0.0");
         }
 
         [Test]
@@ -71,14 +71,14 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var connection in connections)
             {
-                Console.Out.WriteLine("connection.name = {0}", connection.name);
-                Console.WriteLine("user:\t{0}", connection.client_properties.user);
-                Console.WriteLine("application:\t{0}", connection.client_properties.application);
-                Console.WriteLine("client_api:\t{0}", connection.client_properties.client_api);
-                Console.WriteLine("application_location:\t{0}", connection.client_properties.application_location);
-                Console.WriteLine("connected:\t{0}", connection.client_properties.connected);
-                Console.WriteLine("easynetq_version:\t{0}", connection.client_properties.easynetq_version);
-                Console.WriteLine("machine_name:\t{0}", connection.client_properties.machine_name);
+                Console.Out.WriteLine("connection.name = {0}", connection.Name);
+                Console.WriteLine("user:\t{0}", connection.ClientProperties.User);
+                Console.WriteLine("application:\t{0}", connection.ClientProperties.Application);
+                Console.WriteLine("client_api:\t{0}", connection.ClientProperties.ClientApi);
+                Console.WriteLine("application_location:\t{0}", connection.ClientProperties.ApplicationLocation);
+                Console.WriteLine("connected:\t{0}", connection.ClientProperties.Connected);
+                Console.WriteLine("easynetq_version:\t{0}", connection.ClientProperties.EasynetqVersion);
+                Console.WriteLine("machine_name:\t{0}", connection.ClientProperties.MachineName);
             }
         }
 
@@ -95,7 +95,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test, ExpectedException(typeof(EasyNetQManagementException))]
         public void Should_throw_when_trying_to_close_unknown_connection()
         {
-            var connection = new Connection {name = "unknown"};
+            var connection = new Connection {Name = "unknown"};
             managementClient.CloseConnection(connection);
         }
 
@@ -106,9 +106,9 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var channel in channels)
             {
-                Console.Out.WriteLine("channel.name = {0}", channel.name);
-                Console.Out.WriteLine("channel.user = {0}", channel.user);
-                Console.Out.WriteLine("channel.prefetch_count = {0}", channel.prefetch_count);
+                Console.Out.WriteLine("channel.name = {0}", channel.Name);
+                Console.Out.WriteLine("channel.user = {0}", channel.User);
+                Console.Out.WriteLine("channel.prefetch_count = {0}", channel.PrefetchCount);
             }
         }
 
@@ -119,7 +119,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (Exchange exchange in exchanges)
             {
-                Console.Out.WriteLine("exchange.name = {0}", exchange.name);
+                Console.Out.WriteLine("exchange.name = {0}", exchange.Name);
             }
         }
 
@@ -128,26 +128,26 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_be_able_to_get_an_individual_exchange_by_name()
         {
-            var vhost = new Vhost { name = "/" };
+            var vhost = new Vhost { Name = "/" };
             var exchange = managementClient.GetExchange(testExchange, vhost);
 
-            exchange.name.ShouldEqual(testExchange);
+            exchange.Name.ShouldEqual(testExchange);
         }
 
         [Test]
         public void Should_be_able_to_create_an_exchange()
         {
-            var vhost = new Vhost {name = "/"};
+            var vhost = new Vhost {Name = "/"};
 
             var exchangeInfo = new ExchangeInfo(testExchange, "direct");
             var exchange = managementClient.CreateExchange(exchangeInfo, vhost);
-            exchange.name.ShouldEqual(testExchange);
+            exchange.Name.ShouldEqual(testExchange);
         }
 
         [Test]
         public void Should_be_able_to_delete_an_exchange()
         {
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
+            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
             if (exchange == null)
             {
                 throw new ApplicationException(
@@ -160,7 +160,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_get_all_bindings_for_which_the_exchange_is_the_source()
         {
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
+            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
             if (exchange == null)
             {
                 throw new ApplicationException(
@@ -171,14 +171,14 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.routing_key);
+                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
             }
         }
 
         [Test]
         public void Should_get_all_bindings_for_which_the_exchange_is_the_destination()
         {
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
+            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
             if (exchange == null)
             {
                 throw new ApplicationException(
@@ -189,14 +189,14 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.routing_key);
+                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
             }
         }
 
         [Test]
         public void Should_be_able_to_publish_to_an_exchange()
         {
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
+            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
             if (exchange == null)
             {
                 throw new ApplicationException(
@@ -207,7 +207,7 @@ namespace EasyNetQ.Management.Client.Tests
             var result = managementClient.Publish(exchange, publishInfo);
 
             // the testExchange isn't bound to a queue
-            result.routed.ShouldBeFalse();
+            result.Routed.ShouldBeFalse();
         }
 
         private const string testQueue = "management_api_test_queue";
@@ -219,16 +219,16 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (Queue queue in queues)
             {
-                Console.Out.WriteLine("queue.name = {0}", queue.name);
+                Console.Out.WriteLine("queue.name = {0}", queue.Name);
             }
         }
 
         [Test]
         public void Should_be_able_to_get_a_queue_by_name()
         {
-            var vhost = new Vhost { name = "/" };
+            var vhost = new Vhost { Name = "/" };
             var queue = managementClient.GetQueue(testQueue, vhost);
-            queue.name.ShouldEqual(testQueue);
+            queue.Name.ShouldEqual(testQueue);
         }
 
         [Test]
@@ -237,13 +237,13 @@ namespace EasyNetQ.Management.Client.Tests
             var vhost = managementClient.GetVhost("/");
             var queueInfo = new QueueInfo(testQueue);
             var queue = managementClient.CreateQueue(queueInfo, vhost);
-            queue.name.ShouldEqual(testQueue);
+            queue.Name.ShouldEqual(testQueue);
         }
 
         [Test]
         public void Should_be_able_to_delete_a_queue()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
+            var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
             {
                 throw new ApplicationException("Test queue has not been created");
@@ -255,7 +255,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_be_able_to_get_all_the_bindings_for_a_queue()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
+            var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
             {
                 throw new ApplicationException("Test queue has not been created");
@@ -265,14 +265,14 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.routing_key);
+                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
             }
         }
 
         [Test]
         public void Should_purge_a_queue()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
+            var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
             {
                 throw new ApplicationException("Test queue has not been created");
@@ -284,13 +284,13 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_be_able_to_get_messages_from_a_queue()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
+            var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
             {
                 throw new ApplicationException("Test queue has not been created");
             }
 
-            var defaultExchange = new Exchange { name = "amq.default", vhost = "/" };
+            var defaultExchange = new Exchange { Name = "amq.default", Vhost = "/" };
 
             var properties = new Dictionary<string, string>
             {
@@ -306,8 +306,8 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var message in messages)
             {
-                Console.Out.WriteLine("message.payload = {0}", message.payload);
-                foreach (var property in message.properties)
+                Console.Out.WriteLine("message.payload = {0}", message.Payload);
+                foreach (var property in message.Properties)
                 {
                     Console.Out.WriteLine("key: '{0}', value: '{1}'", property.Key, property.Value);
                 }
@@ -321,21 +321,21 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.destination = {0}", binding.destination);
-                Console.Out.WriteLine("binding.source = {0}", binding.source);
-                Console.Out.WriteLine("binding.properties_key = {0}", binding.properties_key);
+                Console.Out.WriteLine("binding.destination = {0}", binding.Destination);
+                Console.Out.WriteLine("binding.source = {0}", binding.Source);
+                Console.Out.WriteLine("binding.properties_key = {0}", binding.PropertiesKey);
             }
         }
 
         [Test]
         public void Should_be_able_to_get_a_list_of_bindings_between_an_exchange_and_a_queue()
         {
-            var queue = managementClient.GetQueues().SingleOrDefault(x => x.name == testQueue);
+            var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
             {
                 throw new ApplicationException("Test queue has not been created");
             }
-            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.name == testExchange);
+            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
             if (exchange == null)
             {
                 throw new ApplicationException(
@@ -346,8 +346,8 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var binding in bindings)
             {
-                Console.Out.WriteLine("binding.routing_key = {0}", binding.routing_key);
-                Console.Out.WriteLine("binding.properties_key = {0}", binding.properties_key);
+                Console.Out.WriteLine("binding.routing_key = {0}", binding.RoutingKey);
+                Console.Out.WriteLine("binding.properties_key = {0}", binding.PropertiesKey);
             }
         }
 
@@ -385,7 +385,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var vhost in vhosts)
             {
-                Console.Out.WriteLine("vhost.name = {0}", vhost.name);
+                Console.Out.WriteLine("vhost.name = {0}", vhost.Name);
             }
         }
 
@@ -395,14 +395,14 @@ namespace EasyNetQ.Management.Client.Tests
         public void Should_be_able_to_get_an_individual_vhost()
         {
             var vhost = managementClient.GetVhost(testVHost);
-            vhost.name.ShouldEqual(testVHost);
+            vhost.Name.ShouldEqual(testVHost);
         }
 
         [Test]
         public void Should_create_a_virtual_host()
         {
             var vhost = managementClient.CreateVirtualHost(testVHost);
-            vhost.name.ShouldEqual(testVHost);
+            vhost.Name.ShouldEqual(testVHost);
         }
 
         [Test]
@@ -419,7 +419,7 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var user in users)
             {
-                Console.Out.WriteLine("user.name = {0}", user.name);
+                Console.Out.WriteLine("user.name = {0}", user.Name);
             }
         }
 
@@ -429,7 +429,7 @@ namespace EasyNetQ.Management.Client.Tests
         public void Should_be_able_to_get_a_user_by_name()
         {
             var user = managementClient.GetUser(testUser);
-            user.name.ShouldEqual(testUser);
+            user.Name.ShouldEqual(testUser);
         }
 
         [Test]
@@ -438,7 +438,7 @@ namespace EasyNetQ.Management.Client.Tests
             var userInfo = new UserInfo(testUser, "topSecret").AddTag("administrator");
 
             var user = managementClient.CreateUser(userInfo);
-            user.name.ShouldEqual(testUser);
+            user.Name.ShouldEqual(testUser);
         }
 
         [Test]
@@ -455,23 +455,23 @@ namespace EasyNetQ.Management.Client.Tests
 
             foreach (var permission in permissions)
             {
-                Console.Out.WriteLine("permission.user = {0}", permission.user);
-                Console.Out.WriteLine("permission.vhost = {0}", permission.vhost);
-                Console.Out.WriteLine("permission.configure = {0}", permission.configure);
-                Console.Out.WriteLine("permission.read = {0}", permission.read);
-                Console.Out.WriteLine("permission.write = {0}", permission.write);
+                Console.Out.WriteLine("permission.user = {0}", permission.User);
+                Console.Out.WriteLine("permission.vhost = {0}", permission.Vhost);
+                Console.Out.WriteLine("permission.configure = {0}", permission.Configure);
+                Console.Out.WriteLine("permission.read = {0}", permission.Read);
+                Console.Out.WriteLine("permission.write = {0}", permission.Write);
             }
         }
 
         [Test]
         public void Should_be_able_to_create_permissions()
         {
-            var user = managementClient.GetUsers().SingleOrDefault(x => x.name == testUser);
+            var user = managementClient.GetUsers().SingleOrDefault(x => x.Name == testUser);
             if (user == null)
             {
                 throw new ApplicationException(string.Format("user '{0}' hasn't been created", testUser));
             }
-            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.name == testVHost);
+            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.Name == testVHost);
             if (vhost == null)
             {
                 throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
@@ -485,7 +485,7 @@ namespace EasyNetQ.Management.Client.Tests
         public void Should_be_able_to_delete_permissions()
         {
             var permission = managementClient.GetPermissions()
-                .SingleOrDefault(x => x.user == testUser && x.vhost == testVHost);
+                .SingleOrDefault(x => x.User == testUser && x.Vhost == testVHost);
 
             if (permission == null)
             {
@@ -499,7 +499,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_check_that_the_broker_is_alive()
         {
-            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.name == testVHost);
+            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.Name == testVHost);
             if (vhost == null)
             {
                 throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
