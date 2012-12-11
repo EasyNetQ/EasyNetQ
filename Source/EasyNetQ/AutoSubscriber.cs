@@ -14,6 +14,7 @@ namespace EasyNetQ
     public class AutoSubscriber
     {
         protected const string ConsumeMethodName = "Consume";
+        protected const string DispatchMethodName = "Dispatch";
         protected readonly IBus bus;
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace EasyNetQ
         /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
-        public IMessageConsumer MessageConsumer { get; set; } 
+        public IMessageDispatcher MessageDispatcher { get; set; } 
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -46,7 +47,7 @@ namespace EasyNetQ
 
             this.bus = bus;
             SubscriptionIdPrefix = subscriptionIdPrefix;
-            MessageConsumer = new DefaultMessageConsumer();
+            MessageDispatcher = new DefaultMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         }
 
@@ -103,19 +104,19 @@ namespace EasyNetQ
             {
                 foreach (var subscriptionInfo in kv.Value)
                 {
-                    var consumeMethod = MessageConsumer.GetType()
-                        .GetMethod(ConsumeMethodName, BindingFlags.Instance | BindingFlags.Public)
+                    var dispatchMethod = MessageDispatcher.GetType()
+                        .GetMethod(DispatchMethodName, BindingFlags.Instance | BindingFlags.Public)
                         .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
 
-                    var consumeDelegateType = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
-                    var consumeDelegate = Delegate.CreateDelegate(consumeDelegateType, MessageConsumer, consumeMethod);
+                    var dispatchMethodType = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
+                    var dispatchDelegate = Delegate.CreateDelegate(dispatchMethodType, MessageDispatcher, dispatchMethod);
                     var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
                     var subscriptionId = subscriptionAttribute != null
                                              ? subscriptionAttribute.SubscriptionId
                                              : GenerateSubscriptionId(subscriptionInfo);
 
                     var busSubscribeMethod = genericBusSubscribeMethod.MakeGenericMethod(subscriptionInfo.MessageType);
-                    busSubscribeMethod.Invoke(bus, new object[] { subscriptionId, consumeDelegate });
+                    busSubscribeMethod.Invoke(bus, new object[] { subscriptionId, dispatchDelegate });
                 }
             }
         }

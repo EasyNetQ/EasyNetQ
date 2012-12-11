@@ -2,9 +2,9 @@ using System;
 
 namespace EasyNetQ
 {
-    public class DefaultMessageConsumer : IMessageConsumer
+    public class DefaultMessageDispatcher : IMessageDispatcher
     {
-        public void Consume<TMessage, TConsumer>(TMessage message) where TMessage : class
+        public void Dispatch<TMessage, TConsumer>(TMessage message) where TMessage : class
         {
             var consumer = (IConsume<TMessage>)Activator.CreateInstance(typeof(TConsumer));
 
