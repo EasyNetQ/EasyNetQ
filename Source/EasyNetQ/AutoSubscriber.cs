@@ -24,7 +24,7 @@ namespace EasyNetQ
         /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
-        public IMessageConsumer MessageConsumer { get; set; } 
+        public IMessageDispatcher MessageDispatcher { get; set; } 
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -46,7 +46,7 @@ namespace EasyNetQ
 
             this.bus = bus;
             SubscriptionIdPrefix = subscriptionIdPrefix;
-            MessageConsumer = new DefaultMessageConsumer();
+            MessageDispatcher = new DefaultMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         }
 
@@ -103,12 +103,12 @@ namespace EasyNetQ
             {
                 foreach (var subscriptionInfo in kv.Value)
                 {
-                    var consumeMethod = MessageConsumer.GetType()
+                    var consumeMethod = MessageDispatcher.GetType()
                         .GetMethod(ConsumeMethodName, BindingFlags.Instance | BindingFlags.Public)
                         .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
 
                     var consumeDelegateType = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
-                    var consumeDelegate = Delegate.CreateDelegate(consumeDelegateType, MessageConsumer, consumeMethod);
+                    var consumeDelegate = Delegate.CreateDelegate(consumeDelegateType, MessageDispatcher, consumeMethod);
                     var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
                     var subscriptionId = subscriptionAttribute != null
                                              ? subscriptionAttribute.SubscriptionId
