@@ -11,12 +11,12 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_create_consumer_instance_and_consume_message()
         {
-            var consumer = new DefaultMessageConsumer();
+            var consumer = new DefaultMessageDispatcher();
             var message = new MyMessage();
             var consumedMessage = (MyMessage) null;
             
             MyMessageConsumer.ConsumedMessageFunc = m => consumedMessage = m;
-            consumer.Consume<MyMessage, MyMessageConsumer>(message);
+            consumer.Dispatch<MyMessage, MyMessageConsumer>(message);
 
             Assert.AreSame(message, consumedMessage);
         }

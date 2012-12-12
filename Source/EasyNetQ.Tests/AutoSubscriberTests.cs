@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests
             autoSubscriber.Subscribe(GetType().Assembly);
 
             interceptedSubscriptions.Count.ShouldEqual(4);
-            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageDispatcher)).ShouldBeTrue();
 
             CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
             CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
@@ -65,7 +65,7 @@ namespace EasyNetQ.Tests
             autoSubscriber.Subscribe(typeof(IConsumeCustom<>), GetType().Assembly);
 
             interceptedSubscriptions.Count.ShouldEqual(3);
-            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageConsumer)).ShouldBeTrue();
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageDispatcher)).ShouldBeTrue();
 
             CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:63c317b761366d57679a8bb0f7fa925a");
             CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
