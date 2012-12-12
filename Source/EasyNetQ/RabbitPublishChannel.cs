@@ -37,10 +37,20 @@ namespace EasyNetQ
 
         public virtual void Publish<T>(T message)
         {
-            Publish(message, x => {});
+            Publish(message, x => {}, new MessageProperties());
         }
 
         public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
+        {
+            Publish(message, configure, new MessageProperties());
+        }
+
+        public virtual void Publish<T>(T message, MessageProperties messageProperties)
+        {
+            Publish(message, x => { }, messageProperties);
+        }
+
+        public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure, MessageProperties messageProperties)
         {
             if(message == null)
             {
@@ -50,6 +60,7 @@ namespace EasyNetQ
             {
                 throw new ArgumentNullException("configure");
             }
+            if (messageProperties == null) throw new ArgumentNullException("messageProperties");
 
             var configuration = new PublishConfiguration<T>();
             configure(configuration);
@@ -57,6 +68,7 @@ namespace EasyNetQ
             var exchangeName = bus.Conventions.ExchangeNamingConvention(typeof(T));
             var exchange = Exchange.DeclareTopic(exchangeName);
             var easyNetQMessage = new Message<T>(message);
+            easyNetQMessage.SetProperties(messageProperties);
 
             // by default publish persistent messages
             easyNetQMessage.Properties.DeliveryMode = 2;

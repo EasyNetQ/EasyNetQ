@@ -48,5 +48,8 @@ namespace EasyNetQ
         /// The bus that created this channel
         /// </summary>
         IBus Bus { get; }
+
+        void Publish<T>(T message, MessageProperties messageProperties);
+        void Publish<T>(T message, Action<IPublishConfiguration<T>> configure, MessageProperties messageProperties);
     }
 }
