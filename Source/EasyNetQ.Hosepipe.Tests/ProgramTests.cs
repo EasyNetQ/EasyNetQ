@@ -16,6 +16,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private MockMessageReader messageReader;
         private MockQueueInsertion queueInsertion;
         private MockErrorRetry errorRetry;
+        private Conventions conventions;
 
         [SetUp]
         public void SetUp()
@@ -25,6 +26,7 @@ namespace EasyNetQ.Hosepipe.Tests
             messageReader = new MockMessageReader();
             queueInsertion = new MockQueueInsertion();
             errorRetry = new MockErrorRetry();
+            conventions = new Conventions();
 
             program = new Program(
                 new ArgParser(), 
@@ -32,7 +34,8 @@ namespace EasyNetQ.Hosepipe.Tests
                 messageWriter,
                 messageReader,
                 queueInsertion,
-                errorRetry);
+                errorRetry,
+                conventions);
         }
 
         private readonly string expectedDumpOutput = 
@@ -86,6 +89,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private readonly string expectedRetryOutput = 
             "2 Error messages from directory '" + Environment.CurrentDirectory + "' republished\r\n";
 
+        
         [Test]
         public void Should_retry_errors_with_retry()
         {

@@ -10,8 +10,9 @@ namespace EasyNetQ.InMemoryClient
 
             var serializer = new JsonSerializer();
             var logger = new ConsoleLogger();
-            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger);
             var conventions = new Conventions();
+            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger, conventions);
+           
 
             var advancedBus = new RabbitAdvancedBus(
                 new ConnectionConfiguration(), 

@@ -10,7 +10,7 @@ namespace EasyNetQ.Tests
 
 	    public DefaultBasicConsumer CreateConsumer(SubscriptionAction subscriptionAction, IModel model, bool modelIsSingleUse, MessageCallback callback)
 	    {
-	        return null;
+            return new DefaultBasicConsumer();
 	    }
 
 	    public void ClearConsumers()

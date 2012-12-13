@@ -14,9 +14,7 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
-
-        public const string RpcExchange = "easy_net_q_rpc";
-
+        
         public SerializeType SerializeType
         {
             get { return serializeType; }
@@ -67,7 +65,7 @@ namespace EasyNetQ
 
         public virtual IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
         {
-            return new RabbitPublishChannel(this, configure);
+            return new RabbitPublishChannel(this, configure, conventions);
         }
 
         public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage)
@@ -174,7 +172,7 @@ namespace EasyNetQ
 
             var requestTypeName = serializeType(typeof(TRequest));
 
-            var exchange = Exchange.DeclareDirect(RpcExchange);
+            var exchange = Exchange.DeclareDirect(conventions.RpcExchangeNamingConvention());
             var queue = Queue.DeclareDurable(requestTypeName, arguments);
             queue.BindTo(exchange, requestTypeName);
 
