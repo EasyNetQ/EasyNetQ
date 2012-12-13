@@ -26,7 +26,8 @@ namespace EasyNetQ
                 .Register<IConsumerErrorStrategy>(x => new DefaultConsumerErrorStrategy(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<ISerializer>(),
-                    x.Resolve<IEasyNetQLogger>()))
+                    x.Resolve<IEasyNetQLogger>(),
+                    x.Resolve<IConventions>()))
                 .Register<IConsumerFactory>(x => new QueueingConsumerFactory(
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConsumerErrorStrategy>()))
