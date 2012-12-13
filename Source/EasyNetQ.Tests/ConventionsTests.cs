@@ -1,7 +1,9 @@
 // ReSharper disable InconsistentNaming
 
+using System;
 using NUnit.Framework;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Tests
 {
@@ -37,6 +39,27 @@ namespace EasyNetQ.Tests
 			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
 			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)) + "_" + subscriptionId);
 		}
+
+        [Test]
+        public void The_default_error_queue_name_should_be()
+        {
+            var result = conventions.ErrorQueueNamingConvention();
+            result.ShouldEqual("EasyNetQ_Default_Error_Queue");
+        }
+
+        [Test]
+        public void The_default_error_exchange_name_should_be()
+        {
+            var result = conventions.ErrorExchangeNamingConvention("routingKey");
+            result.ShouldEqual("ErrorExchange_routingKey");
+        }
+
+        [Test]
+        public void The_default_rpc_exchange_name_should_be()
+        {
+            var result = conventions.RpcExchangeNamingConvention();
+            result.ShouldEqual("easy_net_q_rpc");
+        }
 	}
 
 	[TestFixture]
@@ -67,7 +90,8 @@ namespace EasyNetQ.Tests
 			                  		QueueNamingConvention = (x, y) => "CustomQueueNamingConvention",
 			                  		TopicNamingConvention = x => "CustomTopicNamingConvention"
 			                  	};
-			CreateBus(customConventions, mockModel);
+
+            CreateBus(customConventions, mockModel);
 		    using (var publishChannel = bus.OpenPublishChannel())
 		    {
                 publishChannel.Publish(new TestMessage());
@@ -113,6 +137,105 @@ namespace EasyNetQ.Tests
 			publishedToTopic.ShouldEqual("CustomTopicNamingConvention");
 		}
 	}
+
+    [TestFixture]
+    public class When_registering_respons_handler
+    {
+        private RabbitBus bus;
+        private string createdExchangeName;
+
+        [SetUp]
+        public void SetUp()
+        {
+            var mockModel = new MockModel
+            {
+                ExchangeDeclareAction = (exchangeName, type, durable, autoDelete, arguments) => createdExchangeName = exchangeName,
+                BasicConsumeAction = (queue, noAck, consumerTag, consumer) => { return string.Empty; }
+            };
+
+            var customConventions = new Conventions
+            {
+                RpcExchangeNamingConvention = () => "CustomRpcExchangeName"
+            };
+
+            CreateBus(customConventions, mockModel);
+            bus.Respond<TestMessage, TestMessage>(t => { return new TestMessage(); });
+        }
+
+        private void CreateBus(IConventions conventions, IModel model)
+        {
+            var advancedBus = new RabbitAdvancedBus(
+                new ConnectionConfiguration(),
+                new MockConnectionFactory(new MockConnection(model)),
+                TypeNameSerializer.Serialize,
+                new JsonSerializer(),
+                new MockConsumerFactory(),
+                new MockLogger(),
+                CorrelationIdGenerator.GetCorrelationId,
+                new Conventions()
+                );
+
+            bus = new RabbitBus(
+                x => TypeNameSerializer.Serialize(x.GetType()),
+                new MockLogger(),
+                conventions,
+                advancedBus
+                );
+        }
+
+        [Test]
+        public void Should_use_exchange_name_from_custom_names_provider()
+        {
+            createdExchangeName.ShouldEqual("CustomRpcExchangeName");
+        }
+    }
+
+
+    [TestFixture]
+    public class When_using_default_consumer_error_strategy
+    {
+        private DefaultConsumerErrorStrategy errorStrategy;
+        private string createdExchangeName;
+        private string createdQueueName;
+
+        [SetUp]
+        public void SetUp()
+        {
+            var mockModel = new MockModel
+            {
+                ExchangeDeclareAction = (exchangeName, type, durable, autoDelete, arguments) => createdExchangeName = exchangeName,
+                QueueDeclareAction = (queue, durable, exclusive, autoDelete, arguments) =>
+                {
+                    createdQueueName = queue;
+                    return new QueueDeclareOk(queue, 0, 0);
+                }
+            };
+
+            var customConventions = new Conventions
+            {
+                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
+                ErrorExchangeNamingConvention = (originalRoutingKey) => "CustomErrorExchangePrefixName." + originalRoutingKey
+            };
+
+            errorStrategy = new DefaultConsumerErrorStrategy(new MockConnectionFactory(new MockConnection(mockModel)), new JsonSerializer(), new MockLogger(), customConventions);
+
+            var basicDeliverEventArgs = new BasicDeliverEventArgs();
+            basicDeliverEventArgs.RoutingKey = "RoutingKey";
+            errorStrategy.HandleConsumerError(basicDeliverEventArgs, new Exception());
+        }
+
+        [Test]
+        public void Should_use_exchange_name_from_custom_names_provider()
+        {
+            createdExchangeName.ShouldEqual("CustomErrorExchangePrefixName.RoutingKey");
+        }
+
+        [Test]
+        public void Should_use_queue_name_from_custom_names_provider()
+        {
+            createdQueueName.ShouldEqual("CustomEasyNetQErrorQueueName");
+        }
+    }
 }
 
 // ReSharper restore InconsistentNaming

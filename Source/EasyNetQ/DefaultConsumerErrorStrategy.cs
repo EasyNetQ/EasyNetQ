@@ -22,12 +22,10 @@ namespace EasyNetQ
     /// </summary>
     public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     {
-        public const string EasyNetQErrorQueue = "EasyNetQ_Default_Error_Queue";
-        public const string ErrorExchangePrefix = "ErrorExchange_";
-
         private readonly IConnectionFactory connectionFactory;
         private readonly ISerializer serializer;
         private readonly IEasyNetQLogger logger;
+        private readonly IConventions conventions;
         private IConnection connection;
         private bool errorQueueDeclared = false;
         private readonly IDictionary<string, string> errorExchanges = new Dictionary<string, string>();
@@ -35,11 +33,18 @@ namespace EasyNetQ
         public DefaultConsumerErrorStrategy(
             IConnectionFactory connectionFactory, 
             ISerializer serializer,
-            IEasyNetQLogger logger)
+            IEasyNetQLogger logger,
+            IConventions conventions)
         {
+            if (conventions == null)
+            {
+                throw new ArgumentNullException("conventions");
+            }
+
             this.connectionFactory = connectionFactory;
             this.serializer = serializer;
             this.logger = logger;
+            this.conventions = conventions;
         }
 
         private void Connect()
@@ -55,7 +60,7 @@ namespace EasyNetQ
             if (!errorQueueDeclared)
             {
                 model.QueueDeclare(
-                    queue: EasyNetQErrorQueue,
+                    queue: conventions.ErrorQueueNamingConvention(),
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
@@ -68,9 +73,9 @@ namespace EasyNetQ
         {
             if (!errorExchanges.ContainsKey(originalRoutingKey))
             {
-                var exchangeName = ErrorExchangePrefix + originalRoutingKey;
-                model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable:true);    
-                model.QueueBind(EasyNetQErrorQueue, exchangeName, originalRoutingKey);
+                var exchangeName = conventions.ErrorExchangeNamingConvention(originalRoutingKey);
+                model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable:true);
+                model.QueueBind(conventions.ErrorQueueNamingConvention(), exchangeName, originalRoutingKey);
 
                 errorExchanges.Add(originalRoutingKey, exchangeName);
             }
