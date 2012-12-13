@@ -23,10 +23,10 @@ namespace EasyNetQ.Tests
             Connection = Connection ?? new MockConnection(Model);
             ConnectionFactory = ConnectionFactory ?? new MockConnectionFactory(Connection);
             Serializer = Serializer ?? new JsonSerializer();
-            ConsumerErrorStrategy = ConsumerErrorStrategy ?? new DefaultConsumerErrorStrategy(ConnectionFactory, Serializer, Logger);
+            Conventions = Conventions ?? new Conventions();
+            ConsumerErrorStrategy = ConsumerErrorStrategy ?? new DefaultConsumerErrorStrategy(ConnectionFactory, Serializer, Logger, Conventions);
             ConsumerFactory = ConsumerFactory ?? new QueueingConsumerFactory(Logger, ConsumerErrorStrategy);
             GetCorrelationId = GetCorrelationId ?? CorrelationIdGenerator.GetCorrelationId;
-            Conventions = Conventions ?? new Conventions();
 
             var advancedBus = new RabbitAdvancedBus(
                 new ConnectionConfiguration(), 
