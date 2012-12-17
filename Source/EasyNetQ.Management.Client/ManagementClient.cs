@@ -23,12 +23,6 @@ namespace EasyNetQ.Management.Client
             string password)
             : this(hostUrl, username, password, 15672)
         {
-            settings = new JsonSerializerSettings
-            {
-                ContractResolver = new RabbitContractResolver(),
-            };
-
-            settings.Converters.Add(new PropertyConverter());
         }
 
         public string HostUrl
@@ -65,6 +59,13 @@ namespace EasyNetQ.Management.Client
             this.username = username;
             this.password = password;
             this.portNumber = portNumber;
+
+            settings = new JsonSerializerSettings
+            {
+                ContractResolver = new RabbitContractResolver(),
+            };
+
+            settings.Converters.Add(new PropertyConverter());
 
             LeaveDotsAndSlashesEscaped();
         }
