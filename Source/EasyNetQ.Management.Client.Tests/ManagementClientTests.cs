@@ -1,10 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Management.Client.Model;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EasyNetQ.Management.Client.Model;
-using NUnit.Framework;
 
 namespace EasyNetQ.Management.Client.Tests
 {
@@ -72,13 +72,19 @@ namespace EasyNetQ.Management.Client.Tests
             foreach (var connection in connections)
             {
                 Console.Out.WriteLine("connection.Name = {0}", connection.Name);
-                Console.WriteLine("User:\t{0}", connection.ClientProperties.User);
-                Console.WriteLine("Application:\t{0}", connection.ClientProperties.Application);
-                Console.WriteLine("ClientApi:\t{0}", connection.ClientProperties.ClientApi);
-                Console.WriteLine("ApplicationLocation:\t{0}", connection.ClientProperties.ApplicationLocation);
-                Console.WriteLine("Connected:\t{0}", connection.ClientProperties.Connected);
-                Console.WriteLine("EasynetqVersion:\t{0}", connection.ClientProperties.EasynetqVersion);
-                Console.WriteLine("MachineName:\t{0}", connection.ClientProperties.MachineName);
+
+                ClientProperties clientProperties = connection.ClientProperties;
+
+                Console.WriteLine("User:\t{0}", clientProperties.User);
+                Console.WriteLine("Application:\t{0}", clientProperties.Application);
+                Console.WriteLine("ClientApi:\t{0}", clientProperties.ClientApi);
+                Console.WriteLine("ApplicationLocation:\t{0}", clientProperties.ApplicationLocation);
+                Console.WriteLine("Connected:\t{0}", clientProperties.Connected);
+                Console.WriteLine("EasynetqVersion:\t{0}", clientProperties.EasynetqVersion);
+                Console.WriteLine("MachineName:\t{0}", clientProperties.MachineName);
+
+                //Test the dynamic nature
+                Console.WriteLine("Copyright:\t{0}", ((dynamic)clientProperties).Copyright);
             }
         }
 

@@ -42,6 +42,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Dynamic\PropertyExpando.cs" />
     <Compile Include="EasyNetQManagementException.cs" />
     <Compile Include="HttpWebRequestExtensions.cs" />
     <Compile Include="IManagementClient.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Model\Vhost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitContractResolver.cs" />
+    <Compile Include="Serialization\ClientPropertiesJsonConverter.cs" />
     <Compile Include="Serialization\PropertyConverter.cs" />
     <Compile Include="UnexpectedHttpStatusCodeException.cs" />
   </ItemGroup>
