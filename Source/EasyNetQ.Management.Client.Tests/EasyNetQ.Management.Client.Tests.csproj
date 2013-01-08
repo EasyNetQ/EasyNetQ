@@ -45,6 +45,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ManagementClientInternalsTests.cs" />
     <Compile Include="Model\ExchangeInfoTests.cs" />
     <Compile Include="Model\MessageSerializationTests.cs" />
     <Compile Include="Model\NodeSerializationTests.cs" />
