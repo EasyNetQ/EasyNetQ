@@ -1,23 +1,26 @@
-﻿namespace EasyNetQ.Management.Client.Model
+﻿using System;
+using System.Dynamic;
+
+namespace EasyNetQ.Management.Client.Model
 {
     public class Connection
     {
-        public int RecvOct { get; set; }
-        public int RecvCnt { get; set; }
-        public int SendOct { get; set; }
-        public int SendCnt { get; set; }
-        public int SendPend { get; set; }
+        public Int64 RecvOct { get; set; }
+        public Int64 RecvCnt { get; set; }
+        public Int64 SendOct { get; set; }
+        public Int64 SendCnt { get; set; }
+        public Int64 SendPend { get; set; }
         public string State { get; set; }
         public string LastBlockedBy { get; set; }
         public string LastBlockedAge { get; set; }
-        public int Channels { get; set; }
+        public Int64 Channels { get; set; }
         public string Type { get; set; }
         public string Node { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
-        public int Port { get; set; }
+        public Int64 Port { get; set; }
         public string PeerAddress { get; set; }
-        public int PeerPort { get; set; }
+        public Int64 PeerPort { get; set; }
         public bool Ssl { get; set; }
         public string PeerCertSubject { get; set; }
         public string PeerCertIssuer { get; set; }
@@ -30,8 +33,8 @@
         public string Protocol { get; set; }
         public string User { get; set; }
         public string Vhost { get; set; }
-        public int Timeout { get; set; }
-        public int FrameMax { get; set; }
+        public Int64 Timeout { get; set; }
+        public Int64 FrameMax { get; set; }
         public ClientProperties ClientProperties { get; set; }
     }
 }
