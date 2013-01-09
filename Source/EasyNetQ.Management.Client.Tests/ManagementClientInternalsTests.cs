@@ -33,6 +33,105 @@ namespace EasyNetQ.Management.Client.Tests
             var connections = JsonConvert.DeserializeObject<IEnumerable<Connection>>(responseBody, settings);
         }
 
+        [Test]
+        public void GetChannels()
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                ContractResolver = new RabbitContractResolver(),
+            };
+
+            settings.Converters.Add(new PropertyConverter());
+
+            String responseBody = GetExampleGetChannelsJsonResponseBody();
+
+            var channels = JsonConvert.DeserializeObject<IEnumerable<Channel>>(responseBody, settings).ToList();
+
+            Assert.AreEqual(2,channels.Count);
+
+            Assert.AreEqual(48538, channels[0].MessageStats.DeliverGet);
+            Assert.AreEqual(48538, channels[0].MessageStats.DeliverNoAck);
+            Assert.AreEqual(0, channels[0].MessageStats.Publish);
+
+            Assert.AreEqual(0, channels[1].MessageStats.DeliverGet);
+            Assert.AreEqual(0, channels[1].MessageStats.DeliverNoAck);
+            Assert.AreEqual(48538, channels[1].MessageStats.Publish);
+
+        }
+
+        private String GetExampleGetChannelsJsonResponseBody()
+        {
+            return @"
+[{
+	""connection_details"": {
+		""name"": ""10.1.1.55:62305"",
+		""peer_address"": ""10.1.1.55"",
+		""peer_port"": 62305
+	},
+	""message_stats"": 
+	{
+		""deliver_get"": 48538,
+		""deliver_get_details"": 
+		{
+			""rate"": 1300.1826094676971,
+			""interval"": 5000836,
+			""last_event"": 1357767545361
+		},
+		""deliver_no_ack"": 48538,
+		""deliver_no_ack_details"": 
+		{
+			""rate"": 1300.1826094676971,
+			""interval"": 5000836,
+			""last_event"": 1357767545361
+		}
+	},
+	""transactional"": false,
+	""confirm"": false,
+	""consumer_count"": 1,
+	""messages_unacknowledged"": 0,
+	""messages_unconfirmed"": 0,
+	""messages_uncommitted"": 0,
+	""acks_uncommitted"": 0,
+	""prefetch_count"": 0,
+	""client_flow_blocked"": false,
+	""name"": ""10.1.1.55:62305:1"",
+	""node"": ""rabbit@centosRabbit"",
+	""number"": 1,
+	""user"": ""liquid_dialler_user"",
+	""vhost"": ""DANDESKTOP""
+},
+{
+	""connection_details"": {
+		""name"": ""10.1.1.55:62305"",
+		""peer_address"": ""10.1.1.55"",
+		""peer_port"": 62305
+	},
+	""message_stats"": {
+		""publish"": 48538,
+		""publish_details"": {
+			""rate"": 1300.125933453228,
+			""interval"": 5001054,
+			""last_event"": 1357767545361
+		}
+	},
+	""transactional"": false,
+	""confirm"": false,
+	""consumer_count"": 0,
+	""messages_unacknowledged"": 0,
+	""messages_unconfirmed"": 0,
+	""messages_uncommitted"": 0,
+	""acks_uncommitted"": 0,
+	""prefetch_count"": 0,
+	""client_flow_blocked"": false,
+	""name"": ""10.1.1.55:62305:2"",
+	""node"": ""rabbit@centosRabbit"",
+	""number"": 2,
+	""user"": ""liquid_dialler_user"",
+	""vhost"": ""DANDESKTOP""
+}]
+";
+        }
+
         private String GetExampleGetConnectionsJsonResponseBody()
         {
             return @"

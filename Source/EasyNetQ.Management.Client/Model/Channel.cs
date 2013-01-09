@@ -3,6 +3,7 @@
     public class Channel
     {
         public ConnectionDetails ConnectionDetails { get; set; }
+        public MessageStats MessageStats { get; set; }
         public string IdleSince { get; set; }
         public bool Transactional { get; set; }
         public bool Confirm { get; set; }
