@@ -62,6 +62,8 @@
     <Compile Include="Model\ConnectionDetails.cs" />
     <Compile Include="Model\Context.cs" />
     <Compile Include="Model\Definitions.cs" />
+    <Compile Include="Model\DeliverGetDetails.cs" />
+    <Compile Include="Model\DeliverNoAckDetails.cs" />
     <Compile Include="Model\Exchange.cs" />
     <Compile Include="Model\ExchangeInfo.cs" />
     <Compile Include="Model\ExchangeType.cs" />
@@ -72,11 +74,13 @@
     <Compile Include="Model\Message.cs" />
     <Compile Include="Model\MessagesDetails.cs" />
     <Compile Include="Model\MessagesReadyDetails.cs" />
+    <Compile Include="Model\MessageStats.cs" />
     <Compile Include="Model\MessagesUnacknowledgedDetails.cs" />
     <Compile Include="Model\Node.cs" />
     <Compile Include="Model\Overview.cs" />
     <Compile Include="Model\Permission.cs" />
     <Compile Include="Model\PermissionInfo.cs" />
+    <Compile Include="Model\PublishDetails.cs" />
     <Compile Include="Model\PublishInfo.cs" />
     <Compile Include="Model\PublishResult.cs" />
     <Compile Include="Model\Queue.cs" />
@@ -90,6 +94,9 @@
     <Compile Include="RabbitContractResolver.cs" />
     <Compile Include="Serialization\ClientPropertiesJsonConverter.cs" />
     <Compile Include="Serialization\PropertyConverter.cs" />
+    <Compile Include="Serialization\UnixDateTimeConverter.cs" />
+    <Compile Include="Serialization\UnixDateTimeHelper.cs" />
+    <Compile Include="Serialization\UnixMsDateTimeConverter.cs" />
     <Compile Include="UnexpectedHttpStatusCodeException.cs" />
   </ItemGroup>
   <ItemGroup>
