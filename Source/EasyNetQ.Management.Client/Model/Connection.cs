@@ -18,7 +18,7 @@ namespace EasyNetQ.Management.Client.Model
         public string Node { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
-        public Int64 Port { get; set; }
+        public int Port { get; set; }
         public string PeerAddress { get; set; }
         public Int64 PeerPort { get; set; }
         public bool Ssl { get; set; }
