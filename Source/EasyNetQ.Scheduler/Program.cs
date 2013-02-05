@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using log4net.Config;
+﻿using log4net.Config;
 using Topshelf;
 
 namespace EasyNetQ.Scheduler
@@ -13,9 +11,6 @@ namespace EasyNetQ.Scheduler
 
             HostFactory.Run(hostConfiguration =>
             {
-                hostConfiguration.AfterStartingServices(() => Console.WriteLine("Started EasyNetQ.Scheduler"));
-                hostConfiguration.AfterStoppingServices(() => Console.WriteLine("Stopped EasyNetQ.Scheduler"));
-                // hostConfiguration.EnableDashboard();
                 hostConfiguration.RunAsLocalSystem();
                 hostConfiguration.SetDescription("EasyNetQ.Scheduler");
                 hostConfiguration.SetDisplayName("EasyNetQ.Scheduler");
@@ -23,11 +18,18 @@ namespace EasyNetQ.Scheduler
 
                 hostConfiguration.Service<ISchedulerService>(serviceConfiguration =>
                 {
-                    serviceConfiguration.SetServiceName("SchedulerService");
                     serviceConfiguration.ConstructUsing(_ => SchedulerServiceFactory.CreateScheduler());
 
-                    serviceConfiguration.WhenStarted(service => service.Start());
-                    serviceConfiguration.WhenStopped(service => service.Stop());
+                    serviceConfiguration.WhenStarted((service, _) =>
+                    {
+                        service.Start();
+                        return true;
+                    });
+                    serviceConfiguration.WhenStopped((service, _) =>
+                    {
+                        service.Stop();
+                        return true;
+                    });
                 });
             });
         }

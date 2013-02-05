@@ -22,11 +22,18 @@ namespace EasyNetQ.SagaHost
 
                 hostConfiguration.Service<ISagaHost>(serviceConfiguration =>
                 {
-                    serviceConfiguration.SetServiceName("SagaHostingService");
                     serviceConfiguration.ConstructUsing(name => SagaHostFactory.CreateSagaHost(sagaDirectory));
 
-                    serviceConfiguration.WhenStarted(sagaHostingService => sagaHostingService.Start());
-                    serviceConfiguration.WhenStopped(sagaHostingService => sagaHostingService.Stop());
+                    serviceConfiguration.WhenStarted((sagaHostingService, _) =>
+                    {
+                        sagaHostingService.Start();
+                        return true;
+                    });
+                    serviceConfiguration.WhenStopped((sagaHostingService, _) =>
+                    {
+                        sagaHostingService.Stop();
+                        return true;
+                    });
                 });
             });
         }
