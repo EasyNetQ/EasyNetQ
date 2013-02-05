@@ -56,6 +56,7 @@ namespace EasyNetQ.Tests
                 "Subscription '{0}' of type {1} not found.", subscriptionId, typeof(MessageType).Name));
         }
 
+
         [Test]
         public void Should_be_able_to_take_control_of_subscription_id_generation()
         {
@@ -104,6 +105,46 @@ namespace EasyNetQ.Tests
             dispatcher.DispatchedMessage.ShouldBeTheSameAs(message);
         }
 
+        [Test]
+        public void Should_be_able_to_subscribe_asynchronously()
+        {
+            var interceptedSubscriptions = new List<Tuple<string, Delegate>>();
+            var busFake = new BusFake
+            {
+                InterceptSubscribeAsync = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
+            };
+            var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix");
+
+            autoSubscriber.SubscribeAsync(GetType().Assembly);
+
+            interceptedSubscriptions.Count.ShouldEqual(4);
+
+            CheckAsyncSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
+            CheckAsyncSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
+            CheckAsyncSubscriptionsContains<MessageC>(interceptedSubscriptions, "MyAppPrefix:cf5f54ed13478763e2da2bb3c9487baa");
+
+            //var messageADispatcher = (Action<MessageA>)interceptedSubscriptions.Single(x => x.Item2.GetType().GetGenericArguments()[0] == typeof(MessageA)).Item2;
+            //var message = new MessageA { Text = "Hello World" };
+            //messageADispatcher(message);
+        }
+
+        /// <summary>
+        /// We don't care about the order that consumers are discovered by reflection, just that
+        /// they are discovered. This makes these tests less brittle.
+        /// </summary>
+        /// <typeparam name="MessageType"></typeparam>
+        /// <param name="subscriptions"></param>
+        /// <param name="subscriptionId"></param>
+        private void CheckAsyncSubscriptionsContains<MessageType>(IEnumerable<Tuple<string, Delegate>> subscriptions, string subscriptionId)
+        {
+            var contains = subscriptions.Any(x =>
+                x.Item1 == subscriptionId);
+                //&& x.Item2.Method.GetGenericArguments()[0] == typeof(MessageType));
+
+            contains.ShouldBeTrue(string.Format(
+                "Subscription '{0}' of type {1} not found.", subscriptionId, typeof(MessageType).Name));
+        }
+
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
@@ -137,6 +178,8 @@ namespace EasyNetQ.Tests
         {
             public Action<string, Delegate> InterceptSubscribe;
 
+            public Action<string, Delegate> InterceptSubscribeAsync;
+
             public void Dispose()
             {
                 throw new NotImplementedException();
@@ -165,7 +208,8 @@ namespace EasyNetQ.Tests
 
             public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
             {
-                throw new NotImplementedException();
+                if (InterceptSubscribeAsync != null)
+                    InterceptSubscribeAsync(subscriptionId, onMessage);
             }
 
             public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
