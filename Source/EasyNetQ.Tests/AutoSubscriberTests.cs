@@ -33,6 +33,10 @@ namespace EasyNetQ.Tests
             CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
             CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
             CheckSubscriptionsContains<MessageC>(interceptedSubscriptions, "MyAppPrefix:cf5f54ed13478763e2da2bb3c9487baa");
+
+            var messageADispatcher = (Action<MessageA>)interceptedSubscriptions.Single(x => x.Item2.GetType().GetGenericArguments()[0] == typeof(MessageA)).Item2;
+            var message = new MessageA{ Text = "Hello World" };
+            messageADispatcher(message);
         }
 
         /// <summary>
@@ -50,26 +54,6 @@ namespace EasyNetQ.Tests
 
             contains.ShouldBeTrue(string.Format(
                 "Subscription '{0}' of type {1} not found.", subscriptionId, typeof(MessageType).Name));
-        }
-
-        [Test]
-        public void Should_be_able_to_autosubscribe_to_several_messages_in_one_consumer_with_custom_interface()
-        {
-            var interceptedSubscriptions = new List<Tuple<string, Delegate>>();
-            var busFake = new BusFake
-            {
-                InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
-            };
-            var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix");
-
-            autoSubscriber.Subscribe(typeof(IConsumeCustom<>), GetType().Assembly);
-
-            interceptedSubscriptions.Count.ShouldEqual(3);
-            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageDispatcher)).ShouldBeTrue();
-
-            CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:63c317b761366d57679a8bb0f7fa925a");
-            CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
-            CheckSubscriptionsContains<MessageC>(interceptedSubscriptions, "MyAppPrefix:813fd8f08e61068e054dcff403da5ce7");
         }
 
         [Test]
@@ -123,27 +107,15 @@ namespace EasyNetQ.Tests
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
-            public void Consume(MessageA message) { }
+            public void Consume(MessageA message)
+            {
+                Console.Out.WriteLine("Message handled: '{0}'", message.Text);
+            }
 
             [Consumer(SubscriptionId = "MyExplicitId")]
             public void Consume(MessageB message) { }
 
             public void Consume(MessageC message) { }
-        }
-
-        private class MyConsumerWithCustomInterface : IConsumeCustom<MessageA>, IConsumeCustom<MessageB>, IConsumeCustom<MessageC>
-        {
-            public void Consume(MessageA message) { }
-
-            [Consumer(SubscriptionId = "MyExplicitId")]
-            public void Consume(MessageB message) { }
-
-            public void Consume(MessageC message) { }
-        }
-
-        private interface IConsumeCustom<in T>
-        {
-            void Consume(T message);
         }
 
         private class MessageA

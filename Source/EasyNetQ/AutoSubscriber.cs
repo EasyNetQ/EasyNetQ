@@ -75,30 +75,11 @@ namespace EasyNetQ
         /// <param name="assemblies">The assembleis to scan for consumers.</param>
         public virtual void Subscribe(params Assembly[] assemblies)
         {
-            Subscribe(typeof(IConsume<>), assemblies);
-        }
-
-        /// <summary>
-        /// Registers all consumers in passed assembly. The actual Subscriber instances is
-        /// created using <seealso cref="CreateConsumer"/>. The SubscriptionId per consumer
-        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
-        /// is marked with <see cref="ConsumerAttribute"/> with a custom SubscriptionId.
-        /// </summary>
-        /// <param name="markerType">The interface type used for defining a subscriber. Needs to have a method named 'Consume'.</param>
-        /// <param name="assemblies">The assembleis to scan for consumers.</param>
-        public virtual void Subscribe(Type markerType, params Assembly[] assemblies)
-        {
-            if (markerType == null)
-                throw new ArgumentNullException("markerType");
-
-            if (!IsValidMarkerType(markerType))
-                throw new ArgumentException(string.Format("Type '{0}' must be an interface and contain a '{1}' method.", markerType.Name, ConsumeMethodName), "markerType");
-
             if (assemblies == null || !assemblies.Any())
                 throw new ArgumentException("No assemblies specified.", "assemblies");
 
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus();
-            var subscriptionInfos = GetSubscriptionInfos(markerType, assemblies.SelectMany(a => a.GetTypes()));
+            var subscriptionInfos = GetSubscriptionInfos(assemblies.SelectMany(a => a.GetTypes()));
 
             foreach (var kv in subscriptionInfos)
             {
@@ -143,12 +124,12 @@ namespace EasyNetQ
             return consumeMethod.GetCustomAttributes(typeof(ConsumerAttribute), true).SingleOrDefault() as ConsumerAttribute;
         }
 
-        protected virtual IEnumerable<KeyValuePair<Type, ConsumerInfo[]>> GetSubscriptionInfos(Type markerType, IEnumerable<Type> types)
+        protected virtual IEnumerable<KeyValuePair<Type, ConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types)
         {
             foreach (var concreteType in types.Where(t => t.IsClass))
             {
                 var subscriptionInfos = concreteType.GetInterfaces()
-                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == markerType)
+                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConsume<>))
                     .Select(i => new ConsumerInfo(concreteType, i, i.GetGenericArguments()[0]))
                     .ToArray();
 
