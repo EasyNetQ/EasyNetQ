@@ -95,6 +95,31 @@ namespace EasyNetQ.Tests
             CheckSubscriptionsContains<MessageC>(interceptedSubscriptions, "MessageC");
         }
 
+        [Test]
+        public void Should_be_able_to_use_a_custom_message_dispatcher()
+        {
+            var interceptedSubscriptions = new List<Tuple<string, Delegate>>();
+            var busFake = new BusFake
+            {
+                InterceptSubscribe = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
+            };
+
+            var dispatcher = new CustomMessageDispatcher();
+
+            var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix")
+            {
+                MessageDispatcher = dispatcher
+            };
+
+            autoSubscriber.Subscribe(GetType().Assembly);
+
+            var messageADispatcher = (Action<MessageA>)interceptedSubscriptions.Single(x => x.Item2.GetType().GetGenericArguments()[0] == typeof(MessageA)).Item2;
+            var message = new MessageA();
+            messageADispatcher(message);
+
+            dispatcher.DispatchedMessage.ShouldBeTheSameAs(message);
+        }
+
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
@@ -200,6 +225,18 @@ namespace EasyNetQ.Tests
             public event Action Disconnected;
             public bool IsConnected { get; private set; }
             public IAdvancedBus Advanced { get; private set; }
+        }
+
+        private class CustomMessageDispatcher : IMessageDispatcher
+        {
+            public object DispatchedMessage { get; private set; }
+
+            public void Dispatch<TMessage, TConsumer>(TMessage message)
+                where TMessage : class
+                where TConsumer : IConsume<TMessage>
+            {
+                DispatchedMessage = message;
+            }
         }
     }
 }
