@@ -49,7 +49,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AutoSubscriber.cs" />
-    <Compile Include="BinarySerializer.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConcurrentHashSet.cs" />
