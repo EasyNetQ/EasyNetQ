@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EasyNetQ
 {
@@ -102,6 +104,37 @@ namespace EasyNetQ
             }
         }
 
+        public void SubscribeAsync(params Assembly[] assemblies)
+        {
+            if (assemblies == null || !assemblies.Any())
+                throw new ArgumentException("No assemblies specified.", "assemblies");
+
+            var genericBusSubscribeAsyncMethod = GetSubscribeAsyncMethodOfBus();
+            var subscriptionInfos = GetSubscriptionInfos(assemblies.SelectMany(a => a.GetTypes()));
+
+            foreach (var kv in subscriptionInfos)
+            {
+                foreach (var subscriptionInfo in kv.Value)
+                {
+                    var dispatchMethod = MessageDispatcher.GetType()
+                        .GetMethod(DispatchMethodName, BindingFlags.Instance | BindingFlags.Public)
+                        .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
+
+                    var dispatchMethodType = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
+                    var dispatchDelegate = Delegate.CreateDelegate(dispatchMethodType, MessageDispatcher, dispatchMethod);
+                    var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
+                    var subscriptionId = subscriptionAttribute != null
+                                             ? subscriptionAttribute.SubscriptionId
+                                             : GenerateSubscriptionId(subscriptionInfo);
+
+                    var busSubscribeAsyncMethod = genericBusSubscribeAsyncMethod.MakeGenericMethod(subscriptionInfo.MessageType);
+
+                    var onMessage = new Func<object, Task>(e => Task.Factory.StartNew(() => dispatchDelegate.DynamicInvoke(e)));
+                    busSubscribeAsyncMethod.Invoke(bus, new object[] { subscriptionId, onMessage }); ;
+                }
+            }
+        }
+
         protected virtual bool IsValidMarkerType(Type markerType)
         {
             return markerType.IsInterface && markerType.GetMethods().Any(m => m.Name == ConsumeMethodName);
@@ -115,6 +148,18 @@ namespace EasyNetQ
                 .Single(m => m.Params.Length == 2
                     && m.Params[0].ParameterType == typeof(string)
                     && m.Params[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<>)).Method;
+        }
+
+        protected MethodInfo GetSubscribeAsyncMethodOfBus()
+        {
+            MethodInfo info = bus.GetType().GetMethods()
+                   .Where(m => m.Name == "SubscribeAsync")
+                   .Select(m => new { Method = m, Params = m.GetParameters() })
+                   .Single(m => m.Params.Length == 2
+                       && m.Params[0].ParameterType == typeof(string)
+                       && m.Params[1].ParameterType.GetGenericArguments()[1] == typeof(Task)
+                       ).Method;
+            return info;
         }
         
         protected virtual ConsumerAttribute GetSubscriptionAttribute(ConsumerInfo consumerInfo)
