@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
@@ -108,10 +109,10 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_be_able_to_subscribe_asynchronously()
         {
-            var interceptedSubscriptions = new List<Tuple<string, Delegate>>();
+            var interceptedSubscriptions = new List<Tuple<string, Type>>();
             var busFake = new BusFake
             {
-                InterceptSubscribeAsync = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Delegate>(s, a))
+                InterceptSubscribeAsync = (s, a) => interceptedSubscriptions.Add(new Tuple<string, Type>(s, a))
             };
             var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix");
 
@@ -122,10 +123,6 @@ namespace EasyNetQ.Tests
             CheckAsyncSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
             CheckAsyncSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
             CheckAsyncSubscriptionsContains<MessageC>(interceptedSubscriptions, "MyAppPrefix:cf5f54ed13478763e2da2bb3c9487baa");
-
-            //var messageADispatcher = (Action<MessageA>)interceptedSubscriptions.Single(x => x.Item2.GetType().GetGenericArguments()[0] == typeof(MessageA)).Item2;
-            //var message = new MessageA { Text = "Hello World" };
-            //messageADispatcher(message);
         }
 
         /// <summary>
@@ -135,11 +132,11 @@ namespace EasyNetQ.Tests
         /// <typeparam name="MessageType"></typeparam>
         /// <param name="subscriptions"></param>
         /// <param name="subscriptionId"></param>
-        private void CheckAsyncSubscriptionsContains<MessageType>(IEnumerable<Tuple<string, Delegate>> subscriptions, string subscriptionId)
+        private void CheckAsyncSubscriptionsContains<MessageType>(IEnumerable<Tuple<string, Type>> subscriptions, string subscriptionId)
         {
             var contains = subscriptions.Any(x =>
-                x.Item1 == subscriptionId);
-                //&& x.Item2.Method.GetGenericArguments()[0] == typeof(MessageType));
+                                             x.Item1 == subscriptionId
+                                             && x.Item2 == typeof (MessageType));
 
             contains.ShouldBeTrue(string.Format(
                 "Subscription '{0}' of type {1} not found.", subscriptionId, typeof(MessageType).Name));
@@ -178,7 +175,7 @@ namespace EasyNetQ.Tests
         {
             public Action<string, Delegate> InterceptSubscribe;
 
-            public Action<string, Delegate> InterceptSubscribeAsync;
+            public Action<string, Type> InterceptSubscribeAsync;
 
             public void Dispose()
             {
@@ -209,7 +206,7 @@ namespace EasyNetQ.Tests
             public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
             {
                 if (InterceptSubscribeAsync != null)
-                    InterceptSubscribeAsync(subscriptionId, onMessage);
+                    InterceptSubscribeAsync(subscriptionId, typeof(T));
             }
 
             public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)

@@ -157,18 +157,9 @@ namespace EasyNetQ
                    .Select(m => new { Method = m, Params = m.GetParameters() })
                    .Single(m => m.Params.Length == 2
                        && m.Params[0].ParameterType == typeof(string)
-                //&& m.Params[1].ParameterType.GetGenericTypeDefinition() == typeof(Func<>) //<-- not sure how to pull this off?
+                       && m.Params[1].ParameterType.GetGenericArguments()[1] == typeof(Task)
                        ).Method;
             return info;
-
-            /////https://gist.github.com/jonnii/4714812 this doesn't work - we don't know TMessage at compile-time for Func<TMessage,Task>
-            //return GetMethod<IBus>(b => b.SubscribeAsync((string)null, (Func<int, Task>)null));
-        }
-
-        private static MethodInfo GetMethod<T>(Expression<Action<T>> methodSelector)
-        {
-            var body = (MethodCallExpression)methodSelector.Body;
-            return body.Method;
         }
         
         protected virtual ConsumerAttribute GetSubscriptionAttribute(ConsumerInfo consumerInfo)
@@ -191,7 +182,5 @@ namespace EasyNetQ
                     yield return new KeyValuePair<Type, ConsumerInfo[]>(concreteType, subscriptionInfos);
             }
         }
-
-
     }
 }
