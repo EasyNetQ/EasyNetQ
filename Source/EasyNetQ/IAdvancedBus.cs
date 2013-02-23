@@ -21,6 +21,14 @@ namespace EasyNetQ
         void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
+        /// Subscribe to a stream of messages
+        /// </summary>
+        /// <param name="messageType">The message type</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        void Subscribe(Type messageType, IQueue queue, Func<IMessage, MessageReceivedInfo, Task> onMessage);
+
+        /// <summary>
         /// Subscribe to raw bytes from the queue.
         /// </summary>
         /// <param name="queue">The queue to subscribe to</param>

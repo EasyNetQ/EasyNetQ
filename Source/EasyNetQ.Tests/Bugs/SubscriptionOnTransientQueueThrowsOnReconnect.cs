@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.Bugs
         {
             var queue = Queue.DeclareTransient();
 
-            bus.Subscribe<MyMessage>(queue, (message, info) => Task.Factory.StartNew(() => Console.WriteLine("Got message: {0}", message.Body.Text)));
+            bus.Subscribe<MyMessage>(queue, (message, info) => Task.Factory.StartNew(() => Console.WriteLine("Got message: {0}", message.GetBody().Text)));
 
             // now, force close the connection
 

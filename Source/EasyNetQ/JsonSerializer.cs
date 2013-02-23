@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace EasyNetQ
@@ -10,14 +11,14 @@ namespace EasyNetQ
             TypeNameHandling = TypeNameHandling.Auto
         };
 
-        public byte[] MessageToBytes<T>(T message)
+        public byte[] Serialize(object message)
         {
             return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, serializerSettings));
         }
 
-        public T BytesToMessage<T>(byte[] bytes)
+        public object Deserialize(Type messageType, byte[] bytes)
         {
-            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(bytes), serializerSettings);
+            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), messageType, serializerSettings);
         }
     }
 }

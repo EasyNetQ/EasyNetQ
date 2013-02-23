@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
         public void Should_be_able_to_serialize_and_deserialize_a_message()
         {
             var initialMessage = new TestMessage {Text = "Hello!"};
-            var serializedMessage = serializer.MessageToBytes(initialMessage);
+            var serializedMessage = serializer.Serialize(initialMessage);
             var deserializedMessage = serializer.BytesToMessage<TestMessage>(serializedMessage);
 
             deserializedMessage.Text.ShouldEqual(initialMessage.Text);

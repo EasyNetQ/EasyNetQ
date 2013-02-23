@@ -6,7 +6,7 @@ namespace EasyNetQ
 {
     public class BinarySerializer : ISerializer
     {
-        public byte[] MessageToBytes<T>(T message)
+        public byte[] Serialize(object message)
         {
             if (message == null)
             {
@@ -24,7 +24,7 @@ namespace EasyNetQ
             return messageBody;
         }
 
-        public T BytesToMessage<T>(byte[] bytes)
+        public object Deserialize(Type messageType, byte[] bytes)
         {
             if (bytes == null)
             {
@@ -34,7 +34,7 @@ namespace EasyNetQ
             var formatter = new BinaryFormatter();
             using (var stream = new MemoryStream(bytes))
             {
-                return (T)formatter.Deserialize(stream);
+                return formatter.Deserialize(stream);
             }
         }
     }

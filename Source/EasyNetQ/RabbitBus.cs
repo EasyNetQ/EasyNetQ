@@ -73,9 +73,33 @@ namespace EasyNetQ
             Subscribe(subscriptionId, onMessage, x => { });
         }
 
+        public virtual void Subscribe(string subscriptionId, Type messageType, Action<object> onMessage)
+        {
+            Subscribe(subscriptionId, messageType, onMessage, x => { });
+        }
+
         public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
             SubscribeAsync(subscriptionId, msg =>
+            {
+                var tcs = new TaskCompletionSource<object>();
+                try
+                {
+                    onMessage(msg);
+                    tcs.SetResult(null);
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            },
+            configure);
+        }
+
+        public virtual void Subscribe(string subscriptionId, Type messageType, Action<object> onMessage, Action<ISubscriptionConfiguration> configure)
+        {
+            SubscribeAsync(subscriptionId, messageType, msg =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
@@ -97,6 +121,11 @@ namespace EasyNetQ
             SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
+        public virtual void SubscribeAsync(string sunscriptionId, Type messageType, Func<object, Task> onMessage)
+        {
+            SubscribeAsync(sunscriptionId, messageType, onMessage, x => { });
+        }
+
         public virtual void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
             if(subscriptionId == null)
@@ -109,35 +138,53 @@ namespace EasyNetQ
                 throw new ArgumentNullException("onMessage");
             }
 
-            var configuration = new SubscriptionConfiguration<T>();
+            Func<object, Task> typedOnMessage = msg => onMessage((T) msg);
+            Action<ISubscriptionConfiguration> typedConfigure = config => configure(new SubscriptionConfigurationWrapper<T>(config));
+
+            SubscribeAsync(subscriptionId, typeof(T), typedOnMessage, typedConfigure);
+        }
+
+        public virtual void SubscribeAsync(string subscriptionId, Type messageType, Func<object, Task> onMessage, Action<ISubscriptionConfiguration> configure)
+        {
+            if (subscriptionId == null)
+            {
+                throw new ArgumentNullException("subscriptionId");
+            }
+
+            if (onMessage == null)
+            {
+                throw new ArgumentNullException("onMessage");
+            }
+
+            var configuration = new SubscriptionConfiguration();
             configure(configuration);
 
-            var queueName = GetQueueName<T>(subscriptionId);
-            var exchangeName = GetExchangeName<T>();
+            var queueName = GetQueueName(subscriptionId, messageType);
+            var exchangeName = GetExchangeName(messageType);
 
             var queue = Queue.DeclareDurable(queueName, configuration.Arguments);
             var exchange = Exchange.DeclareTopic(exchangeName);
 
             var topics = configuration.Topics.ToArray();
 
-            if(topics.Length == 0)
+            if (topics.Length == 0)
             {
-                topics = new[]{"#"};
+                topics = new[] { "#" };
             }
 
             queue.BindTo(exchange, topics);
 
-            advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
+            advancedBus.Subscribe(messageType, queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
 
-        private string GetExchangeName<T>()
+        private string GetExchangeName(Type messageType)
         {
-            return conventions.ExchangeNamingConvention(typeof(T));
+            return conventions.ExchangeNamingConvention(messageType);
         }
 
-        private string GetQueueName<T>(string subscriptionId)
+        private string GetQueueName(string subscriptionId, Type messageType)
         {
-            return conventions.QueueNamingConvention(typeof(T), subscriptionId);
+            return conventions.QueueNamingConvention(messageType, subscriptionId);
         }
 
         public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
@@ -180,7 +227,7 @@ namespace EasyNetQ
             {
                 var tcs = new TaskCompletionSource<object>();
 
-                responder(requestMessage.Body).ContinueWith(task =>
+                responder(requestMessage.GetBody()).ContinueWith(task =>
                 {
                     if (task.IsFaulted)
                     {

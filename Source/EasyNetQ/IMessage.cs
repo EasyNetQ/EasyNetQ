@@ -1,8 +1,12 @@
 ﻿namespace EasyNetQ
 {
-    public interface IMessage<T>
+    public interface IMessage
     {
         MessageProperties Properties { get; }
-        T Body { get; }
+        object Body { get; }
+    }
+    public interface IMessage<T> : IMessage
+    {
+        T GetBody();
     }
 }
