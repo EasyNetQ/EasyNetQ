@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.FluentConfiguration
         }
 
         [Test]
-        public void Should_set_properties_on_SubscriptionConfiguration()
+        public void Wrapper_should_set_properties_on_SubscriptionConfiguration()
         {
             Action<ISubscriptionConfiguration<object>> configure = x =>
                 x
@@ -24,7 +24,27 @@ namespace EasyNetQ.Tests.FluentConfiguration
                     .WithTopic("abc")
                     .WithTopic("def");
 
-            var configuration = new SubscriptionConfiguration<object>();
+            var configuration = new SubscriptionConfiguration();
+            var configurationWrapper = new SubscriptionConfigurationWrapper<object>(configuration);
+            configure(configurationWrapper);
+
+            configuration.Topics[0].ShouldEqual("abc");
+            configuration.Topics[1].ShouldEqual("def");
+            configuration.Arguments["key1"].ShouldEqual("value1");
+            configuration.Arguments["key2"].ShouldEqual("value2");
+        }
+
+        [Test]
+        public void Should_set_properties_on_SubscriptionConfiguration()
+        {
+            Action<ISubscriptionConfiguration> configure = x =>
+                x
+                    .WithArgument("key1", "value1")
+                    .WithArgument("key2", "value2")
+                    .WithTopic("abc")
+                    .WithTopic("def");
+
+            var configuration = new SubscriptionConfiguration();
             configure(configuration);
 
             configuration.Topics[0].ShouldEqual("abc");

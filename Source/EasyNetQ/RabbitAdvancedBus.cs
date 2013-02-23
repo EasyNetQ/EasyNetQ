@@ -136,6 +136,28 @@ namespace EasyNetQ
             });
         }
 
+        public virtual void Subscribe(Type messageType, IQueue queue, Func<IMessage, MessageReceivedInfo, Task> onMessage)
+        {
+            if (queue == null)
+            {
+                throw new ArgumentNullException("queue");
+            }
+            if (onMessage == null)
+            {
+                throw new ArgumentNullException("onMessage");
+            }
+
+            Subscribe(queue, (body, properties, messageRecievedInfo) =>
+            {
+                CheckMessageType(messageType, properties);
+
+                var messageBody = serializer.Deserialize(messageType, body);
+                var message = new Message(messageBody);
+                message.SetProperties(properties);
+                return onMessage(message, messageRecievedInfo);
+            });
+        }
+
         public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
             if (queue == null)

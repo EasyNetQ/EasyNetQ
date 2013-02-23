@@ -193,10 +193,31 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
+            public void Subscribe(string subscriptionId, Type messageType, Action<object> onMessage)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Subscribe(string subscriptionId, Type messageType, Action<object> onMessage, Action<ISubscriptionConfiguration> configure)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SubscribeAsync(string subscriptionId, Type messageType, Func<object, Task> onMessage)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SubscribeAsync(string subscriptionId, Type messageType, Func<object, Task> onMessage, Action<ISubscriptionConfiguration> configure)
+            {
+                throw new NotImplementedException();
+            }
+
             public event Action Connected;
             public event Action Disconnected;
             public bool IsConnected { get; private set; }
             public IAdvancedBus Advanced { get; private set; }
+
         }
 
         private class CustomMessageDispatcher : IMessageDispatcher

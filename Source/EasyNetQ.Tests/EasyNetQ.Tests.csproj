@@ -86,6 +86,7 @@
     <Compile Include="ConnectionString\ConnectionStringParserTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
     <Compile Include="ConventionsTests.cs" />
+    <Compile Include="SubscribeAsyncUntypedTests.cs" />
     <Compile Include="CorrelationIdTests.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />

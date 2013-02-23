@@ -44,6 +44,26 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public void Subscribe(string subscriptionId, Type messageType, Action<object> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe(string subscriptionId, Type messageType, Action<object> onMessage, Action<ISubscriptionConfiguration> configure)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync(string subscriptionId, Type messageType, Func<object, Task> onMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeAsync(string subscriptionId, Type messageType, Func<object, Task> onMessage, Action<ISubscriptionConfiguration> configure)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
         {
             throw new NotImplementedException();
