@@ -127,7 +127,7 @@ namespace EasyNetQ
 
             queue.BindTo(exchange, topics);
 
-            advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
+            advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.GetBody()));
         }
 
         private string GetExchangeName<T>()
@@ -180,7 +180,7 @@ namespace EasyNetQ
             {
                 var tcs = new TaskCompletionSource<object>();
 
-                responder(requestMessage.Body).ContinueWith(task =>
+                responder(requestMessage.GetBody()).ContinueWith(task =>
                 {
                     if (task.IsFaulted)
                     {

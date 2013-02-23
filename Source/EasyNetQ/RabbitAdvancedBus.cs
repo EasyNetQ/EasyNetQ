@@ -127,7 +127,7 @@ namespace EasyNetQ
 
             Subscribe(queue, (body, properties, messageRecievedInfo) =>
             {
-                CheckMessageType<T>(properties);
+                CheckMessageType(typeof(T), properties);
 
                 var messageBody = serializer.BytesToMessage<T>(body);
                 var message = new Message<T>(messageBody);
@@ -214,9 +214,9 @@ namespace EasyNetQ
             }
         }
 
-        private void CheckMessageType<TMessage>(MessageProperties properties)
+        private void CheckMessageType(Type messageType, MessageProperties properties)
         {
-            var typeName = serializeType(typeof(TMessage));
+            var typeName = serializeType(messageType);
             if (properties.Type != typeName)
             {
                 logger.ErrorWrite("Message type is incorrect. Expected '{0}', but was '{1}'",

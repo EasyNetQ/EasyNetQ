@@ -121,7 +121,7 @@ namespace EasyNetQ
 
                 try
                 {
-                    onResponse(message.Body);
+                    onResponse(message.GetBody());
                     tcs.SetResult(null);
                 }
                 catch (Exception exception)

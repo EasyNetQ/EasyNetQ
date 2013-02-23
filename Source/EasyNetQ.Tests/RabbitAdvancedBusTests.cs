@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
             advancedBus.Subscribe<MyMessage>(queue, (msg, messageReceivedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
-                    Console.WriteLine("Got Message: {0}", msg.Body.Text);
+                    Console.WriteLine("Got Message: {0}", msg.GetBody().Text);
                     Console.WriteLine("ConsumerTag: {0}", messageReceivedInfo.ConsumerTag);
                     Console.WriteLine("DeliverTag: {0}", messageReceivedInfo.DeliverTag);
                     Console.WriteLine("Redelivered: {0}", messageReceivedInfo.Redelivered);
@@ -74,7 +74,7 @@ namespace EasyNetQ.Tests
             advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
-                    Console.WriteLine("Got message: {0}", message.Body.Text);
+                    Console.WriteLine("Got message: {0}", message.GetBody().Text);
                     autoResetEvent.Set();
                 }));
 
@@ -149,7 +149,7 @@ namespace EasyNetQ.Tests
             advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) =>
                 Task.Factory.StartNew(() =>
                 {
-                    Console.WriteLine("Got Message: {0}", message.Body.Text);
+                    Console.WriteLine("Got Message: {0}", message.GetBody().Text);
                     autoResetEvent.Set();
                 }));
 
