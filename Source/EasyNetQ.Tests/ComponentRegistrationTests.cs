@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 
@@ -39,9 +40,9 @@ namespace EasyNetQ.Tests
             this.serializer = serializer;
         }
 
-        public byte[] MessageToBytes<T>(T message)
+        public byte[] Serialize(object message)
         {
-            var unencrypted = serializer.MessageToBytes(message);
+            var unencrypted = serializer.Serialize(message);
             return Encrypt(unencrypted);
         }
 
@@ -51,10 +52,10 @@ namespace EasyNetQ.Tests
             return new byte[0];
         }
 
-        public T BytesToMessage<T>(byte[] encryptedBytes)
+        public object Deserialize(Type messageType, byte[] encryptedBytes)
         {
             var unencryptedBytes = Decrypt(encryptedBytes);
-            return serializer.BytesToMessage<T>(unencryptedBytes);
+            return serializer.Deserialize(messageType, unencryptedBytes);
         }
 
         private byte[] Decrypt(byte[] encryptedBytes)

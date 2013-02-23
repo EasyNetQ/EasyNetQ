@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
         {
             var message = new MyMessage {Text = "Hello World"};
 
-            var binaryMessage = serializer.MessageToBytes(message);
+            var binaryMessage = serializer.Serialize(message);
             var deseralizedMessage = serializer.BytesToMessage<MyMessage>(binaryMessage);
 
             message.Text.ShouldEqual(deseralizedMessage.Text);
@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests
 
             var messageBasicProperties = new MessageBasicProperties(originalProperties);
 
-            var binaryMessage = serializer.MessageToBytes(messageBasicProperties);
+            var binaryMessage = serializer.Serialize(messageBasicProperties);
             var deserializedMessageBasicProperties = serializer.BytesToMessage<MessageBasicProperties>(binaryMessage);
 
             var newProperties = new BasicProperties();

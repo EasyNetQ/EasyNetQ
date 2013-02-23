@@ -145,7 +145,7 @@ namespace EasyNetQ
                 BasicProperties = new MessageBasicProperties(devliverArgs.BasicProperties)
             };
 
-            return serializer.MessageToBytes(error);
+            return serializer.Serialize(error);
         }
 
         private string CreateConnectionCheckMessage()

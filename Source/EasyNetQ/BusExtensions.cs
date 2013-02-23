@@ -22,7 +22,7 @@ namespace EasyNetQ
 
             var advancedBus = publishChannel.Bus.Advanced;
             var typeName = advancedBus.SerializeType(typeof(T));
-            var messageBody = advancedBus.Serializer.MessageToBytes(message);
+            var messageBody = advancedBus.Serializer.Serialize(message);
 
             publishChannel.Publish(new ScheduleMe
             {
