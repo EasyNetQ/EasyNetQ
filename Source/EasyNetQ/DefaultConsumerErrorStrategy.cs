@@ -102,6 +102,7 @@ namespace EasyNetQ
                     var messageBody = CreateErrorMessage(devliverArgs, exception);
                     var properties = model.CreateBasicProperties();
                     properties.SetPersistent(true);
+                    properties.Type = TypeNameSerializer.Serialize(typeof (Error));
 
                     model.BasicPublish(errorExchange, devliverArgs.RoutingKey, properties, messageBody);
                 }

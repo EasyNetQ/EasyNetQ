@@ -121,6 +121,7 @@
     <Compile Include="SubscribeAsyncTests.cs" />
     <Compile Include="SubscriberOfSpike.cs" />
     <Compile Include="MessagePropertiesTests.cs" />
+    <Compile Include="SubscribeToErrorQueueSpike.cs" />
     <Compile Include="TaskExtensions.cs" />
     <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
