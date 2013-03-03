@@ -36,10 +36,7 @@ namespace EasyNetQ
             IEasyNetQLogger logger,
             IConventions conventions)
         {
-            if (conventions == null)
-            {
-                throw new ArgumentNullException("conventions");
-            }
+            Preconditions.CheckNotNull(conventions, "conventions");
 
             this.connectionFactory = connectionFactory;
             this.serializer = serializer;

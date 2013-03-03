@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using EasyNetQ;
 
 namespace Sprache
 {
@@ -11,16 +12,16 @@ namespace Sprache
     {
         public static IResult<T> TryParse<T>(this Parser<T> parser, string input)
         {
-            if (parser == null) throw new ArgumentNullException("parser");
-            if (input == null) throw new ArgumentNullException("input");
+            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(input, "input");
 
             return parser(new Input(input));
         }
 
         public static T Parse<T>(this Parser<T> parser, string input)
         {
-            if (parser == null) throw new ArgumentNullException("parser");
-            if (input == null) throw new ArgumentNullException("input");
+            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(input, "input");
 
             var result = parser.TryParse(input);
             

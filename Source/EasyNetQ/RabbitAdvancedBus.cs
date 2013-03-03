@@ -32,38 +32,14 @@ namespace EasyNetQ
             Func<string> getCorrelationId, 
             IConventions conventions)
         {
-            if(connectionConfiguration == null)
-            {
-                throw new ArgumentNullException("connectionConfiguration");
-            }
-            if (connectionFactory == null)
-            {
-                throw new ArgumentNullException("connectionFactory");
-            }
-            if (serializeType == null)
-            {
-                throw new ArgumentNullException("serializeType");
-            }
-            if (serializer == null)
-            {
-                throw new ArgumentNullException("serializer");
-            }
-            if (consumerFactory == null)
-            {
-                throw new ArgumentNullException("consumerFactory");
-            }
-            if (logger == null)
-            {
-                throw new ArgumentNullException("logger");
-            }
-            if (getCorrelationId == null)
-            {
-                throw new ArgumentNullException("getCorrelationId");
-            }
-            if (conventions == null)
-            {
-                throw new ArgumentNullException("conventions");
-            }
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
+            Preconditions.CheckNotNull(serializeType, "serializeType");
+            Preconditions.CheckNotNull(serializer, "serializer");
+            Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
+            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
+            Preconditions.CheckNotNull(conventions, "conventions");
 
             this.connectionConfiguration = connectionConfiguration;
             this.serializeType = serializeType;
@@ -116,14 +92,8 @@ namespace EasyNetQ
 
         public virtual void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
         {
-            if(queue == null)
-            {
-                throw new ArgumentNullException("queue");
-            }
-            if(onMessage == null)
-            {
-                throw new ArgumentNullException("onMessage");
-            }
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
 
             Subscribe(queue, (body, properties, messageRecievedInfo) =>
             {
@@ -138,14 +108,9 @@ namespace EasyNetQ
 
         public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
-            if (queue == null)
-            {
-                throw new ArgumentNullException("queue");
-            }
-            if (onMessage == null)
-            {
-                throw new ArgumentNullException("onMessage");
-            }
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+
             if (disposed)
             {
                 throw new EasyNetQException("This bus has been disposed");

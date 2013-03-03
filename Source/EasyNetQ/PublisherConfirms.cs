@@ -17,18 +17,9 @@ namespace EasyNetQ
 
         public void RegisterCallbacks(IModel channel, Action successCallback, Action failureCallback)
         {
-            if (channel == null)
-            {
-                throw new ArgumentNullException("channel");
-            }
-            if (successCallback == null)
-            {
-                throw new ArgumentNullException("successCallback");
-            }
-            if (failureCallback == null)
-            {
-                throw new ArgumentNullException("failureCallback");
-            }
+            Preconditions.CheckNotNull(channel, "channel");
+            Preconditions.CheckNotNull(successCallback, "successCallback");
+            Preconditions.CheckNotNull(failureCallback, "failureCallback");
 
             var sequenceNumber = channel.NextPublishSeqNo;
 
@@ -40,20 +31,14 @@ namespace EasyNetQ
 
         public void SuccessfulPublish(IModel channel, BasicAckEventArgs args)
         {
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
+            Preconditions.CheckNotNull(args, "args");
 
             ProcessArgsAndRun(args.Multiple, args.DeliveryTag, x => x.Success());
         }
 
         public void FailedPublish(IModel channel, BasicNackEventArgs args)
         {
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
+            Preconditions.CheckNotNull(args, "args");
 
             ProcessArgsAndRun(args.Multiple, args.DeliveryTag, x => x.Failure());
         }

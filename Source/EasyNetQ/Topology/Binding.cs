@@ -7,22 +7,10 @@ namespace EasyNetQ.Topology
     {
         public Binding(IBindable bindable, IExchange exchange, params string[] routingKeys)
         {
-            if(bindable == null)
-            {
-                throw new ArgumentNullException("bindable");
-            }
-            if(exchange == null)
-            {
-                throw new ArgumentNullException("exchange");
-            }
-            if (routingKeys.Any(string.IsNullOrEmpty))
-            {
-                throw new ArgumentException("RoutingKey is null or empty");
-            }
-            if (routingKeys.Length == 0)
-            {
-                throw new ArgumentException("There must be at least one routingKey");
-            }
+            Preconditions.CheckNotNull(bindable, "bindable");
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckAny(routingKeys, "routingKeys", "There must be at least one routingKey");
+            Preconditions.CheckFalse(routingKeys.Any(string.IsNullOrEmpty), "routingKeys", "RoutingKey is null or empty");
 
             Bindable = bindable;
             Exchange = exchange;
@@ -31,10 +19,7 @@ namespace EasyNetQ.Topology
 
         public void Visit(ITopologyVisitor visitor)
         {
-            if(visitor == null)
-            {
-                throw new ArgumentNullException("visitor");
-            }
+            Preconditions.CheckNotNull(visitor, "visitor");
 
             Exchange.Visit(visitor);
             visitor.CreateBinding(Bindable, Exchange, RoutingKeys);

@@ -15,10 +15,8 @@ namespace EasyNetQ
 
         public RabbitAdvancedPublishChannel(RabbitAdvancedBus advancedBus, Action<IChannelConfiguration> configure)
         {
-            if(advancedBus == null)
-            {
-                throw new ArgumentNullException("advancedBus");
-            }
+            Preconditions.CheckNotNull(advancedBus, "advancedBus");
+
             if (!advancedBus.Connection.IsConnected)
             {
                 throw new EasyNetQException("Cannot open channel for publishing, the broker is not connected");
@@ -58,22 +56,10 @@ namespace EasyNetQ
 
         public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure)
         {
-            if(exchange == null)
-            {
-                throw new ArgumentNullException("exchange");
-            }
-            if(routingKey == null)
-            {
-                throw new ArgumentNullException("routingKey");
-            }
-            if(message == null)
-            {
-                throw new ArgumentNullException("message");
-            }
-            if(configure == null)
-            {
-                throw new ArgumentNullException("configure");
-            }
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
 
             var typeName = advancedBus.SerializeType(typeof(T));
             var messageBody = advancedBus.Serializer.MessageToBytes(message.Body);
@@ -89,26 +75,12 @@ namespace EasyNetQ
 
         public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure)
         {
-            if (exchange == null)
-            {
-                throw new ArgumentNullException("exchange");
-            }
-            if (routingKey == null)
-            {
-                throw new ArgumentNullException("routingKey");
-            }
-            if(properties == null)
-            {
-                throw new ArgumentNullException("properties");
-            }
-            if(messageBody == null)
-            {
-                throw new ArgumentNullException("messageBody");
-            }
-            if(configure == null)
-            {
-                throw new ArgumentNullException("configure");
-            }
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckNotNull(properties, "properties");
+            Preconditions.CheckNotNull(messageBody, "messageBody");
+            Preconditions.CheckNotNull(configure, "configure");
+
             if (disposed)
             {
                 throw new EasyNetQException("PublishChannel is already disposed");
@@ -117,6 +89,7 @@ namespace EasyNetQ
             {
                 throw new EasyNetQException("Publish failed. No rabbit server connected.");
             }
+
             try
             {
                 var configuration = new AdvancedPublishConfiguration();
