@@ -66,21 +66,16 @@ namespace EasyNetQ.ConnectionString
         /// <returns></returns>
         public static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
         {
-            if (getter == null)
-                throw new ArgumentNullException("getter");
+            Preconditions.CheckNotNull(getter, "getter");
 
             var memberEx = getter.Body as MemberExpression;
 
-            if (memberEx == null)
-                throw new ArgumentException("Body is not a member-expression.");
+            Preconditions.CheckNotNull(memberEx, "getter", "Body is not a member-expression.");
 
             var property = memberEx.Member as PropertyInfo;
 
-            if (property == null)
-                throw new ArgumentException("Member is not a property.");
-
-            if (!property.CanWrite)
-                throw new ArgumentException("Property is not writable.");
+            Preconditions.CheckNotNull(property, "getter", "Member is not a property.");
+            Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
             return (Action<TContaining, TProperty>)
                 Delegate.CreateDelegate(typeof(Action<TContaining, TProperty>),

@@ -39,11 +39,8 @@ namespace EasyNetQ
 
         public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
         {
-            if (bus == null)
-                throw new ArgumentNullException("bus");
-
-            if(string.IsNullOrWhiteSpace(subscriptionIdPrefix))
-                throw new ArgumentNullException("subscriptionIdPrefix", "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
+            Preconditions.CheckNotNull(bus, "bus");
+            Preconditions.CheckNotBlank(subscriptionIdPrefix, "subscriptionIdPrefix", "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
 
             this.bus = bus;
             SubscriptionIdPrefix = subscriptionIdPrefix;
@@ -75,8 +72,7 @@ namespace EasyNetQ
         /// <param name="assemblies">The assembleis to scan for consumers.</param>
         public virtual void Subscribe(params Assembly[] assemblies)
         {
-            if (assemblies == null || !assemblies.Any())
-                throw new ArgumentException("No assemblies specified.", "assemblies");
+            Preconditions.CheckAny(assemblies, "assemblies", "No assemblies specified.");
 
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus();
             var subscriptionInfos = GetSubscriptionInfos(assemblies.SelectMany(a => a.GetTypes()));

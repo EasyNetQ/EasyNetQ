@@ -15,55 +15,37 @@ namespace EasyNetQ.Topology
 
         public static IExchange DeclareDirect(string exchangeName)
         {
-            if (string.IsNullOrEmpty(exchangeName))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(exchangeName, "exchangeName");
             return new Exchange(exchangeName, Topology.ExchangeType.Direct);
         }
 
         public static IExchange DeclareDirect(string exchangeName, bool autoDelete, IDictionary arguments)
         {
-            if (string.IsNullOrEmpty(exchangeName))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(exchangeName, "exchangeName");
             return new Exchange(exchangeName, Topology.ExchangeType.Direct, autoDelete, arguments);
         }
 
         public static IExchange DeclareTopic(string exchangeName)
         {
-            if (string.IsNullOrEmpty(exchangeName))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(exchangeName, "exchangeName");
             return new Exchange(exchangeName, Topology.ExchangeType.Topic);
         }
 
         public static IExchange DeclareTopic(string exchangeName, bool autoDelete, IDictionary arguments)
         {
-            if (string.IsNullOrEmpty(exchangeName))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(exchangeName, "exchangeName");
             return new Exchange(exchangeName, Topology.ExchangeType.Topic, autoDelete, arguments);
         }
 
         public static IExchange DeclareFanout(string exchangeName)
         {
-            if (string.IsNullOrEmpty(exchangeName))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(exchangeName, "exchangeName");
             return new Exchange(exchangeName, Topology.ExchangeType.Fanout);
         }
 
         public static IExchange DeclareFanout(string exchangeName, bool autoDelete, IDictionary arguments)
         {
-            if (string.IsNullOrEmpty(exchangeName))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(exchangeName, "exchangeName");
             return new Exchange(exchangeName, Topology.ExchangeType.Fanout, autoDelete, arguments);
         }
 
@@ -74,10 +56,7 @@ namespace EasyNetQ.Topology
 
         protected Exchange(string name, string exchangeType)
         {
-            if(name == null)
-            {
-                throw new ArgumentNullException("name");
-            }
+            Preconditions.CheckNotNull(name, "name");
 
             Name = name;
             ExchangeType = exchangeType;
@@ -85,10 +64,7 @@ namespace EasyNetQ.Topology
 
         protected Exchange(string name, string exchangeType, bool autoDelete, IDictionary arguments)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException("name");
-            }
+            Preconditions.CheckNotNull(name, "name");
 
             Name = name;
             ExchangeType = exchangeType;
@@ -98,10 +74,8 @@ namespace EasyNetQ.Topology
 
         public virtual void Visit(ITopologyVisitor visitor)
         {
-            if (visitor == null)
-            {
-                throw new ArgumentNullException("visitor");
-            }
+            Preconditions.CheckNotNull(visitor, "visitor");
+
             if (Name != string.Empty)
             {
                 visitor.CreateExchange(Name, ExchangeType, AutoDelete, Arguments);
@@ -114,18 +88,9 @@ namespace EasyNetQ.Topology
 
         public virtual void BindTo(IExchange exchange, params string[] routingKeys)
         {
-            if (exchange == null)
-            {
-                throw new ArgumentNullException("exchange");
-            }
-            if (routingKeys.Any(string.IsNullOrEmpty))
-            {
-                throw new ArgumentException("RoutingKey is null or empty");
-            }
-            if (routingKeys.Length == 0)
-            {
-                throw new ArgumentException("There must be at least one routingKey");
-            }
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckAny(routingKeys, "routingKeys", "There must be at least one routingKey");
+            Preconditions.CheckFalse(routingKeys.Any(string.IsNullOrEmpty), "routingKeys", "RoutingKey is null or empty");
 
             var binding = new Binding(this, exchange, routingKeys);
             bindings.Add(binding);

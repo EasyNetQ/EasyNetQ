@@ -36,18 +36,9 @@ namespace EasyNetQ
             IConventions conventions,
             IAdvancedBus advancedBus)
         {
-            if (serializeType == null)
-            {
-                throw new ArgumentNullException("serializeType");
-            }
-            if (logger == null)
-            {
-                throw new ArgumentNullException("logger");
-            }
-            if (conventions == null)
-            {
-                throw new ArgumentNullException("conventions");
-            }
+            Preconditions.CheckNotNull(serializeType, "serializeType");
+            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(conventions, "conventions");
 
             this.serializeType = serializeType;
             this.logger = logger;
@@ -99,15 +90,8 @@ namespace EasyNetQ
 
         public virtual void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
         {
-            if(subscriptionId == null)
-            {
-                throw new ArgumentNullException("subscriptionId");
-            }
-
-            if (onMessage == null)
-            {
-                throw new ArgumentNullException("onMessage");
-            }
+            Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
 
             var configuration = new SubscriptionConfiguration<T>();
             configure(configuration);
@@ -147,10 +131,7 @@ namespace EasyNetQ
 
         public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
         {
-            if (responder == null)
-            {
-                throw new ArgumentNullException("responder");
-            }
+            Preconditions.CheckNotNull(responder, "responder");
 
             Func<TRequest, Task<TResponse>> taskResponder =
                 request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
@@ -165,10 +146,7 @@ namespace EasyNetQ
 
         public virtual void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
         {
-            if (responder == null)
-            {
-                throw new ArgumentNullException("responder");
-            }
+            Preconditions.CheckNotNull(responder, "responder");
 
             var requestTypeName = serializeType(typeof(TRequest));
 
