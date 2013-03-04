@@ -128,6 +128,7 @@
     <Compile Include="Topology\TopologyBuilder.cs" />
     <Compile Include="DefaultClusterHostSelectionStrategy.cs" />
     <Compile Include="TypeNameSerializer.cs" />
+    <Compile Include="Preconditions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

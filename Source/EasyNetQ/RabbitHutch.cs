@@ -26,10 +26,7 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString)
         {
-            if(connectionString == null)
-            {
-                throw new ArgumentNullException("connectionString");
-            }
+            Preconditions.CheckNotNull(connectionString, "connectionString");
 
             return CreateBus(connectionString, x => {});
         }
@@ -53,14 +50,8 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
         {
-            if(connectionString == null)
-            {
-                throw new ArgumentNullException("connectionString");
-            }
-            if(registerServices == null)
-            {
-                throw new ArgumentNullException("registerServices");
-            }
+            Preconditions.CheckNotNull(connectionString, "connectionString");
+            Preconditions.CheckNotNull(registerServices, "registerServices");
 
             var connectionStringParser = new ConnectionStringParser();
 
@@ -106,26 +97,11 @@ namespace EasyNetQ
             ushort requestedHeartbeat, 
             Action<IServiceRegister> registerServices)
         {
-            if(hostName == null)
-            {
-                throw new ArgumentNullException("hostName");
-            }
-            if(virtualHost == null)
-            {
-                throw new ArgumentNullException("virtualHost");
-            }
-            if(username == null)
-            {
-                throw new ArgumentNullException("username");
-            }
-            if(password == null)
-            {
-                throw new ArgumentNullException("password");
-            }
-            if(registerServices == null)
-            {
-                throw new ArgumentNullException("registerServices");
-            }
+            Preconditions.CheckNotNull(hostName, "hostName");
+            Preconditions.CheckNotNull(virtualHost, "virtualHost");
+            Preconditions.CheckNotNull(username, "username");
+            Preconditions.CheckNotNull(password, "password");
+            Preconditions.CheckNotNull(registerServices, "registerServices");
 
             var connectionConfiguration = new ConnectionConfiguration
             {
@@ -156,14 +132,8 @@ namespace EasyNetQ
         /// <returns></returns>
         public static IBus CreateBus(IConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
-            if(connectionConfiguration == null)
-            {
-                throw new ArgumentNullException("connectionConfiguration");
-            }
-            if(registerServices == null)
-            {
-                throw new ArgumentNullException("registerServices");
-            }
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(registerServices, "registerServices");
 
             Action<IServiceRegister> registerServices2 = x =>
             {

@@ -60,10 +60,8 @@ namespace EasyNetQ.Topology
         protected Queue(bool durable, bool exclusive, bool autoDelete, string name, IDictionary<string, object> arguements)
             : this(durable, exclusive, autoDelete, arguements)
         {
-            if(string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException("name is null or empty");
-            }
+            Preconditions.CheckNotBlank(name, "name");
+
             Name = name;
         }
 
@@ -87,21 +85,13 @@ namespace EasyNetQ.Topology
 
         public void BindTo(IExchange exchange, params string[] routingKeys)
         {
-            if(exchange == null)
-            {
-                throw new ArgumentNullException("exchange");
-            }
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckAny(routingKeys, "routingKeys", "There must be at least one routingKey");
+            Preconditions.CheckFalse(routingKeys.Any(string.IsNullOrEmpty), "routingKeys", "RoutingKey is null or empty");
+
             if (exchange is DefaultExchange)
             {
                 throw new EasyNetQException("All queues are bound automatically to the default exchange, do bind manually.");
-            }
-            if (routingKeys.Any(string.IsNullOrEmpty))
-            {
-                throw new ArgumentException("RoutingKey is null or empty");
-            }
-            if (routingKeys.Length == 0)
-            {
-                throw new ArgumentException("There must be at least one routingKey");
             }
 
             var binding = new Binding(this, exchange, routingKeys);
@@ -110,10 +100,7 @@ namespace EasyNetQ.Topology
 
         public void Visit(ITopologyVisitor visitor)
         {
-            if(visitor == null)
-            {
-                throw new ArgumentNullException("visitor");
-            }
+            Preconditions.CheckNotNull(visitor, "visitor");
 
             if (Name == null)
             {

@@ -31,10 +31,7 @@ namespace EasyNetQ
 
         public RabbitPublishChannel(RabbitBus bus, Action<IChannelConfiguration> configure, IConventions conventions)
         {
-            if (conventions == null)
-            {
-                throw new ArgumentNullException("conventions");
-            }
+            Preconditions.CheckNotNull(conventions, "conventions");
 
             this.bus = bus;
             this.conventions = conventions;
@@ -49,14 +46,8 @@ namespace EasyNetQ
 
         public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
         {
-            if(message == null)
-            {
-                throw new ArgumentNullException("message");
-            }
-            if(configure == null)
-            {
-                throw new ArgumentNullException("configure");
-            }
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
 
             var configuration = new PublishConfiguration<T>();
             configure(configuration);
@@ -97,14 +88,8 @@ namespace EasyNetQ
         virtual 
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {
-            if (onResponse == null)
-            {
-                throw new ArgumentNullException("onResponse");
-            }
-            if (request == null)
-            {
-                throw new ArgumentNullException("request");
-            }
+            Preconditions.CheckNotNull(onResponse, "onResponse");
+            Preconditions.CheckNotNull(request, "request");
 
             var returnQueueName = SubscribeToResponse(onResponse, arguments);
             RequestPublish(request, returnQueueName);
