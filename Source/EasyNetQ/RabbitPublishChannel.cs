@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
@@ -85,7 +86,7 @@ namespace EasyNetQ
         {
             Request(request, onResponse, null);
         }
-        virtual 
+
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {
             Preconditions.CheckNotNull(onResponse, "onResponse");
@@ -95,6 +96,51 @@ namespace EasyNetQ
             RequestPublish(request, returnQueueName);
         }
 
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), null);
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, IDictionary<string, object> arguments)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), arguments);
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            token.Register(() => taskCompletionSource.TrySetCanceled());
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), null);
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, IDictionary<string, object> arguments, CancellationToken token)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            token.Register(() => taskCompletionSource.TrySetCanceled());
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), arguments);
+
+            return taskCompletionSource.Task;
+        }
 
         private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {

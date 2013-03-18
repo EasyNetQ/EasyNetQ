@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.InMemoryClient;
 using NUnit.Framework;
 
@@ -57,6 +58,77 @@ namespace EasyNetQ.Tests.InMemoryClient
             autoResetEvent.WaitOne(1000);
 
             actualResult.ShouldEqual(expectedResult);
+        }
+
+        [Test]
+        public void Should_be_able_to_do_basic_request_async()
+        {
+            const string expectedResult = "Sending back 'Ninja!!'";
+            var autoResetEvent = new AutoResetEvent(false);
+
+            bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
+            {
+                var response = new TestResponseMessage
+                {
+                    Text = string.Format("Sending back '{0}'", request.Text)
+                };
+                return response;
+            });
+
+            var actualResult = string.Empty;
+
+            using (var channel = bus.OpenPublishChannel())
+            {
+                var request = new TestRequestMessage { Text = "Ninja!!" };
+
+                var responseTask = channel.RequestAsync<TestRequestMessage, TestResponseMessage>(request);
+
+                responseTask.ContinueWith(t =>
+                    {
+                        actualResult = t.Result.Text;
+                        autoResetEvent.Set();
+                    });
+            }
+
+            // give the bus a chance to deliver the message
+            autoResetEvent.WaitOne(1000);
+
+            actualResult.ShouldEqual(expectedResult);
+        }
+
+        [Test]
+        public void Should_be_able_to_do_basic_request_async_cancellation()
+        {
+            const string expectedResult = "Sending back 'Ninja!!'";
+            var autoResetEvent = new AutoResetEvent(false);
+
+            bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
+            {
+                var response = new TestResponseMessage
+                {
+                    Text = string.Format("Sending back '{0}'", request.Text)
+                };
+                return response;
+            });
+
+            using (var channel = bus.OpenPublishChannel())
+            {
+                var request = new TestRequestMessage { Text = "Ninja!!" };
+
+                var cancellationSource = new CancellationTokenSource();
+
+                var responseTask = channel.RequestAsync<TestRequestMessage, TestResponseMessage>(request, cancellationSource.Token);
+
+                responseTask.ContinueWith(t =>
+                {
+                    autoResetEvent.Set();
+                }, TaskContinuationOptions.OnlyOnCanceled);
+
+                cancellationSource.Cancel();
+            }
+
+            // give the bus a chance to deliver the message
+            Assert.IsTrue(autoResetEvent.WaitOne(1000));
         }
 
         [Test]
