@@ -13,6 +13,8 @@ _ReSharper.*
 # Ignore NCrunch cache files.
 *.crunchproject.local.xml
 *.crunchsolution.local.xml
+*.ncrunchproject
+*.ncrunchsolution
 
 # Ignore test output
 TestResult.xml
