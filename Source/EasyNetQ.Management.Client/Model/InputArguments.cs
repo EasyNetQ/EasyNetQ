@@ -2,5 +2,5 @@ using System.Collections.Generic;
 
 namespace EasyNetQ.Management.Client.Model
 {
-    public class InputArguments : List<InputArgument>{}
+    public class InputArguments : Dictionary<string, string>{}
 }
