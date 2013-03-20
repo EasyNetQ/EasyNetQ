@@ -11,14 +11,9 @@ namespace EasyNetQ
 
         public ConsumerInfo(Type concreteType, Type interfaceType, Type messageType)
         {
-            if (concreteType == null)
-                throw new ArgumentNullException("concreteType");
-
-            if (interfaceType == null)
-                throw new ArgumentNullException("interfaceType");
-
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
+            Preconditions.CheckNotNull(concreteType, "concreteType");
+            Preconditions.CheckNotNull(interfaceType, "interfaceType");
+            Preconditions.CheckNotNull(messageType, "messageType");
 
             ConcreteType = concreteType;
             InterfaceType = interfaceType;

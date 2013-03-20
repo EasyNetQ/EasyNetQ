@@ -6,10 +6,7 @@ namespace EasyNetQ
     {
         public static string Serialize(Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException("type");
-            }
+            Preconditions.CheckNotNull(type, "type");
             return type.FullName.Replace('.', '_') + ":" + type.Assembly.GetName().Name.Replace('.', '_');
         }
     }

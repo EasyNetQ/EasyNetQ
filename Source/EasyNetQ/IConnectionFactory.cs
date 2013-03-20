@@ -25,14 +25,9 @@ namespace EasyNetQ
         public ConnectionFactoryWrapper(IConnectionConfiguration connectionConfiguration, IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy)
         {
             this.clusterHostSelectionStrategy = clusterHostSelectionStrategy;
-            if(connectionConfiguration == null)
-            {
-                throw new ArgumentNullException("connectionConfiguration");
-            }
-            if (!connectionConfiguration.Hosts.Any())
-            {
-                throw new EasyNetQException("At least one host must be defined in connectionConfiguration");
-            }
+
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckAny(connectionConfiguration.Hosts, "connectionConfiguration", "At least one host must be defined in connectionConfiguration");
 
             Configuration = connectionConfiguration;
 

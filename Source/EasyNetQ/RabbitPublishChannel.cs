@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
@@ -31,10 +32,7 @@ namespace EasyNetQ
 
         public RabbitPublishChannel(RabbitBus bus, Action<IChannelConfiguration> configure, IConventions conventions)
         {
-            if (conventions == null)
-            {
-                throw new ArgumentNullException("conventions");
-            }
+            Preconditions.CheckNotNull(conventions, "conventions");
 
             this.bus = bus;
             this.conventions = conventions;
@@ -49,14 +47,8 @@ namespace EasyNetQ
 
         public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
         {
-            if(message == null)
-            {
-                throw new ArgumentNullException("message");
-            }
-            if(configure == null)
-            {
-                throw new ArgumentNullException("configure");
-            }
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
 
             var configuration = new PublishConfiguration<T>();
             configure(configuration);
@@ -94,22 +86,61 @@ namespace EasyNetQ
         {
             Request(request, onResponse, null);
         }
-        virtual 
+
         public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {
-            if (onResponse == null)
-            {
-                throw new ArgumentNullException("onResponse");
-            }
-            if (request == null)
-            {
-                throw new ArgumentNullException("request");
-            }
+            Preconditions.CheckNotNull(onResponse, "onResponse");
+            Preconditions.CheckNotNull(request, "request");
 
             var returnQueueName = SubscribeToResponse(onResponse, arguments);
             RequestPublish(request, returnQueueName);
         }
 
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), null);
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, IDictionary<string, object> arguments)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), arguments);
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            token.Register(() => taskCompletionSource.TrySetCanceled());
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), null);
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, IDictionary<string, object> arguments, CancellationToken token)
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            token.Register(() => taskCompletionSource.TrySetCanceled());
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), arguments);
+
+            return taskCompletionSource.Task;
+        }
 
         private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse, IDictionary<string, object> arguments)
         {

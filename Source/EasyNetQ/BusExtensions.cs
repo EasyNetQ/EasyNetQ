@@ -15,10 +15,7 @@ namespace EasyNetQ
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IPublishChannel publishChannel, DateTime timeToRespond, T message)
         {
-            if (message == null)
-            {
-                throw new ArgumentNullException("message");
-            }
+            Preconditions.CheckNotNull(message, "message");
 
             var advancedBus = publishChannel.Bus.Advanced;
             var typeName = advancedBus.SerializeType(typeof(T));
