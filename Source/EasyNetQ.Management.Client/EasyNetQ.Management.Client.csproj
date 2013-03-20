@@ -68,7 +68,6 @@
     <Compile Include="Model\ExchangeInfo.cs" />
     <Compile Include="Model\ExchangeType.cs" />
     <Compile Include="Model\GetMessagesCriteria.cs" />
-    <Compile Include="Model\InputArgument.cs" />
     <Compile Include="Model\InputArguments.cs" />
     <Compile Include="Model\Listener.cs" />
     <Compile Include="Model\Message.cs" />
