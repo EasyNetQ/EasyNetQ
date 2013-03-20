@@ -247,6 +247,19 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_create_a_queue_with_arguments()
+        {
+            var exchangeName = "test-dead-letter-exchange";
+            var argumentKey = "x-dead-letter-exchange";
+            var vhost = managementClient.GetVhost("/");
+            var queueInfo = new QueueInfo(testQueue);
+            queueInfo.Arguments.Add(argumentKey, exchangeName);
+            var queue = managementClient.CreateQueue(queueInfo, vhost);
+            queue.Arguments[argumentKey].ShouldNotBeNull();
+            queue.Arguments[argumentKey].ShouldEqual(exchangeName);
+        }
+
+        [Test]
         public void Should_be_able_to_delete_a_queue()
         {
             var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
