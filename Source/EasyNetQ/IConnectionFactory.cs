@@ -38,14 +38,21 @@ namespace EasyNetQ
                 {
                     connectionFactory.uri = connectionConfiguration.AMQPConnectionString;
                 }
-                else
-                {
-                    connectionFactory.HostName = hostConfiguration.Host;
-                    connectionFactory.Port = hostConfiguration.Port;
+
+                connectionFactory.HostName = hostConfiguration.Host;
+                
+                if(connectionFactory.VirtualHost == "/")
                     connectionFactory.VirtualHost = Configuration.VirtualHost;
+                
+                if(connectionFactory.UserName == "guest")
                     connectionFactory.UserName = Configuration.UserName;
+
+                if(connectionFactory.Password == "guest")
                     connectionFactory.Password = Configuration.Password;
-                }
+
+                if (connectionFactory.Port == -1)
+                    connectionFactory.Port = connectionFactory.Port;
+
                 connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
                 connectionFactory.ClientProperties = ConvertToHashtable(Configuration.ClientProperties);
                 clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));
