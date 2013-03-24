@@ -21,7 +21,8 @@ namespace EasyNetQ.ConnectionString
 
         public static Parser<IEnumerable<IHostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
-        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Select(_ => new Uri(_));
+        private static Uri result;
+        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x,UriKind.Absolute, out result)).Select(_ => new Uri(_));
 
         public static Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
@@ -36,7 +37,15 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("prefetchcount", Number, c => c.PrefetchCount)
         }.Aggregate((a, b) => a.Or(b));
 
-        public static Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';');
+        public static Parser<UpdateConfiguration> AMQPAlone =
+            AMQP.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>) (configuration
+                                                                                       =>
+                {
+                    configuration.AMQPConnectionString = _;
+                    return configuration;
+                }));
+
+        public static Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.ListDelimitedBy(';'));
 
         public static Parser<UpdateConfiguration> BuildKeyValueParser<T>(
             string keyName,

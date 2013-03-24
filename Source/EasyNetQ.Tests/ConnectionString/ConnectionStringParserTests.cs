@@ -40,13 +40,13 @@ namespace EasyNetQ.Tests.ConnectionString
         [Test]
         public void Should_Throw_Exception_OnInvalidAmqp()
         {
-            Assert.That(() => connectionStringParser.Parse("amqp=Foo"), Throws.InstanceOf<UriFormatException>());
+            Assert.That(() => connectionStringParser.Parse("amqp=Foo"), Throws.InstanceOf<EasyNetQException>());
         }
 
         [TestCaseSource("AppendixAExamples")]
         public void Should_parse_Examples(AmqpSpecification spec)
         {
-            IConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=" + spec.amqpUri);
+            IConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("" + spec.amqpUri);
 
             connectionConfiguration.Port.ShouldEqual(spec.port);
             connectionConfiguration.AMQPConnectionString.ShouldEqual(spec.amqpUri);
