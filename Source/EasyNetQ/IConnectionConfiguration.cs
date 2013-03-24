@@ -14,6 +14,7 @@ namespace EasyNetQ
         string Password { get; }
         ushort RequestedHeartbeat { get; }
         ushort PrefetchCount { get; }
+        Uri AMQPConnectionString { get; }
         IDictionary<string, string> ClientProperties { get; } 
         
         IEnumerable<IHostConfiguration> Hosts { get; }
@@ -33,6 +34,7 @@ namespace EasyNetQ
         public string Password { get; set; }
         public ushort RequestedHeartbeat { get; set; }
         public ushort PrefetchCount { get; set; }
+        public Uri AMQPConnectionString { get; set; }
         public IDictionary<string, string> ClientProperties { get; private set; } 
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
