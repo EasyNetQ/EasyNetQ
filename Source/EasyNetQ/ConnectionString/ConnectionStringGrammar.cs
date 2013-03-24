@@ -45,7 +45,7 @@ namespace EasyNetQ.ConnectionString
                     return configuration;
                 }));
 
-        public static Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.ListDelimitedBy(';'));
+        public static Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.Once());
 
         public static Parser<UpdateConfiguration> BuildKeyValueParser<T>(
             string keyName,
