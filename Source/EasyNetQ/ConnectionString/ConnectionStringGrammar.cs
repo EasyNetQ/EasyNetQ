@@ -21,9 +21,12 @@ namespace EasyNetQ.ConnectionString
 
         public static Parser<IEnumerable<IHostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
+        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Select(_ => new Uri(_));
+
         public static Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
             // add new connection string parts here
+            BuildKeyValueParser("amqp", AMQP, c => c.AMQPConnectionString),
             BuildKeyValueParser("host", Hosts, c => c.Hosts),
             BuildKeyValueParser("port", Number, c => c.Port),
             BuildKeyValueParser("virtualHost", Text, c => c.VirtualHost),
