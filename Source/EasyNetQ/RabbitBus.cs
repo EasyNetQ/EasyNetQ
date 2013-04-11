@@ -148,11 +148,11 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(responder, "responder");
 
-            var requestTypeName = serializeType(typeof(TRequest));
+            var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof (TRequest));
 
             var exchange = Exchange.DeclareDirect(conventions.RpcExchangeNamingConvention());
-            var queue = Queue.DeclareDurable(requestTypeName, arguments);
-            queue.BindTo(exchange, requestTypeName);
+            var queue = Queue.DeclareDurable(routingKey, arguments);
+            queue.BindTo(exchange, routingKey);
 
             advancedBus.Subscribe<TRequest>(queue, (requestMessage, messageRecievedInfo) =>
             {

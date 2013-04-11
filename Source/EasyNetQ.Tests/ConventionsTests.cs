@@ -62,6 +62,13 @@ namespace EasyNetQ.Tests
             var result = conventions.RpcExchangeNamingConvention();
             result.ShouldEqual("easy_net_q_rpc");
         }
+
+        [Test]
+        public void The_default_rpc_routingkey_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
+        {
+            var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
+            result.ShouldEqual(TypeNameSerializer.Serialize(typeof(TestMessage)));
+        }
 	}
 
 	[TestFixture]
@@ -145,6 +152,8 @@ namespace EasyNetQ.Tests
     {
         private RabbitBus bus;
         private string createdExchangeName;
+        private string routingKeyName;
+        private string queueName;
 
         [SetUp]
         public void SetUp()
@@ -152,12 +161,18 @@ namespace EasyNetQ.Tests
             var mockModel = new MockModel
             {
                 ExchangeDeclareAction = (exchangeName, type, durable, autoDelete, arguments) => createdExchangeName = exchangeName,
-                BasicConsumeAction = (queue, noAck, consumerTag, consumer) => { return string.Empty; }
+                BasicConsumeAction = (queue, noAck, consumerTag, consumer) => { return string.Empty; },
+                QueueBindAction = (queue, exchange, routingKey) =>
+                                      {
+                                          routingKeyName = routingKey;
+                                          queueName = queue;
+                                      }
             };
 
             var customConventions = new Conventions
             {
-                RpcExchangeNamingConvention = () => "CustomRpcExchangeName"
+                RpcExchangeNamingConvention = () => "CustomRpcExchangeName",
+                RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
             };
 
             CreateBus(customConventions, mockModel);
@@ -189,6 +204,18 @@ namespace EasyNetQ.Tests
         public void Should_use_exchange_name_from_custom_names_provider()
         {
             createdExchangeName.ShouldEqual("CustomRpcExchangeName");
+        }
+
+        [Test]
+        public void Should_use_routingkey_name_for_routingkey_from_custom_names_provider()
+        {
+            routingKeyName.ShouldEqual("CustomRpcRoutingKeyName");
+        }
+
+        [Test]
+        public void Should_use_routingkey_name_for_queue_from_custom_names_provider()
+        {
+            queueName.ShouldEqual("CustomRpcRoutingKeyName");
         }
     }
 

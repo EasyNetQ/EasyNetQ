@@ -167,13 +167,13 @@ namespace EasyNetQ
 
         private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
         {
-            var requestTypeName = bus.SerializeType(typeof(TRequest));
+            var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
             var exchange = Exchange.DeclareDirect(conventions.RpcExchangeNamingConvention());
 
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;
 
-            advancedPublishChannel.Publish(exchange, requestTypeName, requestMessage, configuration => {});
+            advancedPublishChannel.Publish(exchange, routingKey, requestMessage, configuration => { });
         }
 
         public void Dispose()
