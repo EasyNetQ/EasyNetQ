@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ namespace EasyNetQ
         string Password { get; }
         ushort RequestedHeartbeat { get; }
         ushort PrefetchCount { get; }
+        Uri AMQPConnectionString { get; }
         IDictionary<string, string> ClientProperties { get; } 
         
         IEnumerable<IHostConfiguration> Hosts { get; }
@@ -27,12 +29,14 @@ namespace EasyNetQ
 
     public class ConnectionConfiguration : IConnectionConfiguration
     {
+        private const int DefaultPort = 5672;
         public ushort Port { get; set; }
         public string VirtualHost { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
         public ushort RequestedHeartbeat { get; set; }
         public ushort PrefetchCount { get; set; }
+        public Uri AMQPConnectionString { get; set; }
         public IDictionary<string, string> ClientProperties { get; private set; } 
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
@@ -41,7 +45,7 @@ namespace EasyNetQ
         public ConnectionConfiguration()
         {
             // set default values
-            Port = 5672;
+            Port = DefaultPort;
             VirtualHost = "/";
             UserName = "guest";
             Password = "guest";
@@ -78,6 +82,12 @@ namespace EasyNetQ
 
         public void Validate()
         {
+            if (AMQPConnectionString != null)
+            {
+                if(Port == DefaultPort && AMQPConnectionString.Port > 0) 
+                        Port = (ushort) AMQPConnectionString.Port;
+                Hosts = Hosts.Concat(new[] {new HostConfiguration {Host = AMQPConnectionString.Host}});
+            }
             if (!Hosts.Any())
             {
                 throw new EasyNetQException("Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\"");

@@ -33,16 +33,29 @@ namespace EasyNetQ
 
             foreach (var hostConfiguration in Configuration.Hosts)
             {
-                clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(new ConnectionFactory
-                    {
-                        HostName = hostConfiguration.Host,
-                        Port = hostConfiguration.Port,
-                        VirtualHost = Configuration.VirtualHost,
-                        UserName = Configuration.UserName,
-                        Password = Configuration.Password,
-                        RequestedHeartbeat = Configuration.RequestedHeartbeat,
-                        ClientProperties = ConvertToHashtable(Configuration.ClientProperties)
-                    }, hostConfiguration));
+                var connectionFactory = new ConnectionFactory();
+                if (connectionConfiguration.AMQPConnectionString != null)
+                {
+                    connectionFactory.uri = connectionConfiguration.AMQPConnectionString;
+                }
+
+                connectionFactory.HostName = hostConfiguration.Host;
+                
+                if(connectionFactory.VirtualHost == "/")
+                    connectionFactory.VirtualHost = Configuration.VirtualHost;
+                
+                if(connectionFactory.UserName == "guest")
+                    connectionFactory.UserName = Configuration.UserName;
+
+                if(connectionFactory.Password == "guest")
+                    connectionFactory.Password = Configuration.Password;
+
+                if (connectionFactory.Port == -1)
+                    connectionFactory.Port = connectionFactory.Port;
+
+                connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
+                connectionFactory.ClientProperties = ConvertToHashtable(Configuration.ClientProperties);
+                clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));
             }
         }
 

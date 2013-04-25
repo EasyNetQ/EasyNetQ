@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Linq;
 using EasyNetQ.ConnectionString;
 using NUnit.Framework;
@@ -45,6 +46,29 @@ namespace EasyNetQ.Tests.ConnectionString
             hosts.ElementAt(1).Port.ShouldEqual(1002);
             hosts.ElementAt(2).Host.ShouldEqual("host.three");
             hosts.ElementAt(2).Port.ShouldEqual(1003);
+        }
+
+        [Test]
+        public void Should_parse_amqp()
+        {
+            var hosts = ConnectionStringGrammar.AMQP.Parse("amqp://localhost/");
+            
+            hosts.Port.ShouldEqual(-1);
+            hosts.Host.ShouldEqual("localhost");
+        } 
+        
+        [Test]
+        public void Should_try_to_parse_amqp()
+        {
+            Assert.That(() => ConnectionStringGrammar.AMQP.Parse("asd"),
+                        Throws.InstanceOf<ParseException>()
+                        .With.Message.Contains("asd"));
+        }
+
+        [Test]
+        public void Should_throw_when_parsing_empty()
+        {
+            Assert.That(() => ConnectionStringGrammar.ConnectionStringBuilder.Parse(""), Throws.InstanceOf<ParseException>());
         }
     }
 
