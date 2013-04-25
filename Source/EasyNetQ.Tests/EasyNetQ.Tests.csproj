@@ -81,6 +81,7 @@
     <Compile Include="ComponentRegistrationTests.cs" />
     <Compile Include="ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
+    <Compile Include="ConnectionFactoryWrapperTests.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammarTests.cs" />
     <Compile Include="ConnectionString\ConnectionStringParserTests.cs" />
     <Compile Include="ConsumerErrorConditionsTests.cs" />
