@@ -181,6 +181,14 @@ namespace EasyNetQ.Management.Client
         void CreateBinding(Exchange exchange, Queue queue, BindingInfo bindingInfo);
 
         /// <summary>
+        /// Create a binding between an exchange and an exchange
+        /// </summary>
+        /// <param name="sourceExchange">the source exchange</param>
+        /// <param name="destinationExchange">the destination exchange</param>
+        /// <param name="bindingInfo">properties of the binding</param>
+        void CreateBinding(Exchange sourceExchange, Exchange destinationExchange, BindingInfo bindingInfo);
+
+        /// <summary>
         /// A list of all bindings between an exchange and a queue. 
         /// Remember, an exchange and a queue can be bound together many times!
         /// </summary>
