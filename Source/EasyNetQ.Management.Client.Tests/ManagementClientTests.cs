@@ -1,9 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Management.Client.Model;
-
 using NUnit.Framework;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +9,7 @@ using System.Linq;
 namespace EasyNetQ.Management.Client.Tests
 {
     [TestFixture]
-    [Explicit("requires a rabbitMQ instance on localhost to run")]
+    [Explicit ("requires a rabbitMQ instance on localhost to run")]
     public class ManagementClientTests
     {
         private IManagementClient managementClient;
@@ -100,11 +98,10 @@ namespace EasyNetQ.Management.Client.Tests
             managementClient.CloseConnection(connections.First());
         }
 
-        [Test]
-        [ExpectedException(typeof(UnexpectedHttpStatusCodeException))]
+        [Test, ExpectedException(typeof(UnexpectedHttpStatusCodeException))]
         public void Should_throw_when_trying_to_close_unknown_connection()
         {
-            var connection = new Connection { Name = "unknown" };
+            var connection = new Connection {Name = "unknown"};
             managementClient.CloseConnection(connection);
         }
 
@@ -146,7 +143,7 @@ namespace EasyNetQ.Management.Client.Tests
         [Test]
         public void Should_be_able_to_create_an_exchange()
         {
-            var vhost = new Vhost { Name = "/" };
+            var vhost = new Vhost {Name = "/"};
 
             var exchangeInfo = new ExchangeInfo(testExchange, "direct");
             var exchange = managementClient.CreateExchange(exchangeInfo, vhost);
@@ -267,7 +264,9 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
+            {
                 throw new ApplicationException("Test queue has not been created");
+            }
 
             managementClient.DeleteQueue(queue);
         }
@@ -277,7 +276,9 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
+            {
                 throw new ApplicationException("Test queue has not been created");
+            }
 
             var bindings = managementClient.GetBindingsForQueue(queue);
 
@@ -292,7 +293,9 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
+            {
                 throw new ApplicationException("Test queue has not been created");
+            }
 
             managementClient.Purge(queue);
         }
@@ -302,14 +305,16 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
+            {
                 throw new ApplicationException("Test queue has not been created");
+            }
 
             var defaultExchange = new Exchange { Name = "amq.default", Vhost = "/" };
 
             var properties = new Dictionary<string, string>
-                {
-                    { "app_id", "management-test" }
-                };
+            {
+                { "app_id", "management-test"}
+            };
 
             var publishInfo = new PublishInfo(properties, testQueue, "Hello World", "string");
 
@@ -346,7 +351,9 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var queue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
             if (queue == null)
+            {
                 throw new ApplicationException("Test queue has not been created");
+            }
             var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
             if (exchange == null)
             {
@@ -384,14 +391,14 @@ namespace EasyNetQ.Management.Client.Tests
             var vhost = managementClient.GetVhost("/");
             var sourceExchangeInfo = new ExchangeInfo(sourceExchangeName, "direct");
             var destinationExchangeInfo = new ExchangeInfo(destinationExchangeName, "direct");
-            
+
             var sourceExchange = managementClient.CreateExchange(sourceExchangeInfo, vhost);
             var destinationExchange = managementClient.CreateExchange(destinationExchangeInfo, vhost);
 
             managementClient.CreateBinding(sourceExchange, destinationExchange, new BindingInfo("#"));
 
             var binding = managementClient.GetBindingsWithSource(sourceExchange).First();
-            
+
             managementClient.DeleteExchange(sourceExchange);
             managementClient.DeleteExchange(destinationExchange);
 
@@ -505,10 +512,14 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var user = managementClient.GetUsers().SingleOrDefault(x => x.Name == testUser);
             if (user == null)
+            {
                 throw new ApplicationException(string.Format("user '{0}' hasn't been created", testUser));
+            }
             var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.Name == testVHost);
             if (vhost == null)
+            {
                 throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
+            }
 
             var permissionInfo = new PermissionInfo(user, vhost);
             managementClient.CreatePermission(permissionInfo);
@@ -522,11 +533,8 @@ namespace EasyNetQ.Management.Client.Tests
 
             if (permission == null)
             {
-                throw new ApplicationException(
-                    string.Format(
-                        "No permission for vhost: {0} and user: {1}",
-                        testVHost,
-                        testUser));
+                throw new ApplicationException(string.Format("No permission for vhost: {0} and user: {1}",
+                    testVHost, testUser));
             }
 
             managementClient.DeletePermission(permission);
@@ -537,7 +545,9 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.Name == testVHost);
             if (vhost == null)
+            {
                 throw new ApplicationException(string.Format("Test vhost: '{0}' has not been created", testVHost));
+            }
             managementClient.IsAlive(vhost).ShouldBeTrue();
         }
     }
