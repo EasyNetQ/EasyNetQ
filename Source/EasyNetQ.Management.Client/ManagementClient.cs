@@ -273,6 +273,26 @@ namespace EasyNetQ.Management.Client
                 bindingInfo);
         }
 
+        public void CreateBinding(Exchange sourceExchange, Exchange destinationExchange, BindingInfo bindingInfo)
+        {
+            if (sourceExchange == null)
+            {
+                throw new ArgumentNullException("sourceExchange");
+            }
+            if (destinationExchange == null)
+            {
+                throw new ArgumentNullException("destinationExchange");
+            }
+            if (bindingInfo == null)
+            {
+                throw new ArgumentNullException("bindingInfo");
+            }
+
+            Post<BindingInfo, object>(
+                string.Format("bindings/{0}/e/{1}/e/{2}", SanitiseVhostName(sourceExchange.Vhost), sourceExchange.Name, destinationExchange.Name),
+                bindingInfo);
+        }
+
         public IEnumerable<Binding> GetBindings(Exchange exchange, Queue queue)
         {
             if (exchange == null)
