@@ -383,6 +383,31 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_create_exchange_to_exchange_binding()
+        {
+            const string sourceExchangeName = "management_api_test_source_exchange";
+            const string destinationExchangeName = "management_api_test_destination_exchange";
+
+            var vhost = managementClient.GetVhost("/");
+            var sourceExchangeInfo = new ExchangeInfo(sourceExchangeName, "direct");
+            var destinationExchangeInfo = new ExchangeInfo(destinationExchangeName, "direct");
+
+            var sourceExchange = managementClient.CreateExchange(sourceExchangeInfo, vhost);
+            var destinationExchange = managementClient.CreateExchange(destinationExchangeInfo, vhost);
+
+            managementClient.CreateBinding(sourceExchange, destinationExchange, new BindingInfo("#"));
+
+            var binding = managementClient.GetBindingsWithSource(sourceExchange).First();
+
+            managementClient.DeleteExchange(sourceExchange);
+            managementClient.DeleteExchange(destinationExchange);
+
+            Assert.AreEqual("exchange", binding.DestinationType);
+            Assert.AreEqual(destinationExchangeName, binding.Destination);
+            Assert.AreEqual("#", binding.RoutingKey);
+        }
+
+        [Test]
         public void Should_delete_binding()
         {
             var vhost = managementClient.GetVhost("/");
