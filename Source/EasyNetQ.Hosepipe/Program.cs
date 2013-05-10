@@ -66,7 +66,7 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
-            arguments.WithKey<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
+            arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
                 .FailWith(messsage("Invalid number of messages to retrieve"));
 
             try
