@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.SystemMessages;
@@ -28,7 +29,7 @@ namespace EasyNetQ
         private readonly IConventions conventions;
         private IConnection connection;
         private bool errorQueueDeclared = false;
-        private readonly IDictionary<string, string> errorExchanges = new Dictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> errorExchanges = new ConcurrentDictionary<string, string>();
 
         public DefaultConsumerErrorStrategy(
             IConnectionFactory connectionFactory, 
@@ -68,16 +69,13 @@ namespace EasyNetQ
 
         private string DeclareErrorExchangeAndBindToDefaultErrorQueue(IModel model, string originalRoutingKey)
         {
-            if (!errorExchanges.ContainsKey(originalRoutingKey))
+            return errorExchanges.GetOrAdd(originalRoutingKey, _ =>
             {
                 var exchangeName = conventions.ErrorExchangeNamingConvention(originalRoutingKey);
-                model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable:true);
+                model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
                 model.QueueBind(conventions.ErrorQueueNamingConvention(), exchangeName, originalRoutingKey);
-
-                errorExchanges.Add(originalRoutingKey, exchangeName);
-            }
-
-            return errorExchanges[originalRoutingKey];
+                return exchangeName;
+            });
         }
 
         private string DeclareErrorExchangeQueueStructure(IModel model, string originalRoutingKey)
