@@ -126,6 +126,23 @@ namespace EasyNetQ.Tests
         {
             defaults.RequestedHeartbeat.ShouldEqual(0);
         }
+
+        [Test]
+        public void Should_not_have_case_sensitive_keys()
+        {
+            const string connectionStringAlternateCasing =
+                "Host=192.168.1.1:1001,my.little.host:1002;VirtualHost=Copa;UserName=Copa;" +
+                "Password=abc_xyz;Port=12345;RequestedHeartbeat=3";
+
+            var parsed = new ConnectionStringParser().Parse(connectionStringAlternateCasing);
+            parsed.Hosts.First().Host.ShouldEqual("192.168.1.1");
+            parsed.Hosts.First().Port.ShouldEqual(1001);
+            parsed.VirtualHost.ShouldEqual("Copa");
+            parsed.UserName.ShouldEqual("Copa");
+            parsed.Password.ShouldEqual("abc_xyz");
+            parsed.Port.ShouldEqual(12345);
+            parsed.RequestedHeartbeat.ShouldEqual(3);
+        }
     }
 }
 

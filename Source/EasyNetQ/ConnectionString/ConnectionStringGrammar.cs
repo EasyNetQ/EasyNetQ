@@ -53,7 +53,7 @@ namespace EasyNetQ.ConnectionString
             Expression<Func<ConnectionConfiguration, T>> getter)
         {
             return
-                from key in Parse.String(keyName).Token()
+                from key in Parse.CaseInsensitiveString(keyName).Token()
                 from separator in Parse.Char('=')
                 from value in valueParser
                 select (Func<ConnectionConfiguration, ConnectionConfiguration>)(c =>
