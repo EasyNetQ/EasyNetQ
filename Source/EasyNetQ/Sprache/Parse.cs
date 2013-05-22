@@ -123,15 +123,6 @@ namespace Sprache
                 .Named(s);
         }
 
-        public static void Spike()
-        {
-            var results = CaseInsensitiveString("virtualHost").Parse("VirtualHost");
-            foreach (var result in results)
-            {
-                Console.Out.WriteLine("result = {0}", result);
-            }
-        }
-
         /// <summary>
         /// Parse first, and if successful, then parse second.
         /// </summary>
