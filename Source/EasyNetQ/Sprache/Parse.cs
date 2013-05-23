@@ -61,6 +61,16 @@ namespace Sprache
         }
 
         /// <summary>
+        /// Parse a single character c.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static Parser<char> CharCaseInsensitive(char c)
+        {
+            return Char(ch => System.Char.ToLower(c) == System.Char.ToLower(ch), c.ToString());
+        }
+
+        /// <summary>
         /// Parse a single character except c.
         /// </summary>
         /// <param name="c"></param>
@@ -69,6 +79,8 @@ namespace Sprache
         {
             return CharExcept(ch => c == ch, c.ToString());
         }
+
+
 
         public static readonly Parser<char> AnyChar = Char(c => true, "any character");
         public static readonly Parser<char> WhiteSpace = Char(char.IsWhiteSpace, "whitespace");
@@ -94,7 +106,23 @@ namespace Sprache
                     (a, p) => a.Concat(p.Once()))
                 .Named(s);
         }
-        
+
+        /// <summary>
+        /// Parse a string of characters.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static Parser<IEnumerable<char>> CaseInsensitiveString(string s)
+        {
+            Preconditions.CheckNotNull(s, "s");
+
+            return s
+                .Select(CharCaseInsensitive)
+                .Aggregate(Return(Enumerable.Empty<char>()),
+                    (a, p) => a.Concat(p.Once()))
+                .Named(s);
+        }
+
         /// <summary>
         /// Parse first, and if successful, then parse second.
         /// </summary>
