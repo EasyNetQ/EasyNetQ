@@ -19,8 +19,11 @@ namespace EasyNetQ.Management.Client.Model
         public string Name { get; set; }
         public string Address { get; set; }
         public int Port { get; set; }
+        //PeerAddress is the connected Peer IP Address for RabbitMQ Version <3.0
         public string PeerAddress { get; set; }
-        public Int64 PeerPort { get; set; }
+        //PeerAddress is the connected Peer IP Address for RabbitMQ Version >3.0
+        public string PeerHost { get; set; }
+        public Int32 PeerPort { get; set; }
         public bool Ssl { get; set; }
         public string PeerCertSubject { get; set; }
         public string PeerCertIssuer { get; set; }

@@ -29,7 +29,7 @@ namespace EasyNetQ.Management.Client.Tests.Model
             var node = nodes[0];
 
             node.Name.ShouldEqual("rabbit@THOMAS");
-            node.Uptime.ShouldEqual(98495039);
+            node.Uptime.ShouldEqual(11463012619);
         }
     }
 }

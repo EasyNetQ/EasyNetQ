@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.Management.Client.Model
 {
@@ -29,7 +30,7 @@ namespace EasyNetQ.Management.Client.Model
         public int ProcTotal { get; set; }
         public string StatisticsLevel { get; set; }
         public string ErlangVersion { get; set; }
-        public int Uptime { get; set; }
+        public Int64 Uptime { get; set; }
         public int RunQueue { get; set; }
         public int Processors { get; set; }
         public List<ExchangeType> ExchangeTypes { get; set; }
