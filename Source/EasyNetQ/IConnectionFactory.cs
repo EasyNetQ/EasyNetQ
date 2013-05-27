@@ -51,7 +51,10 @@ namespace EasyNetQ
                     connectionFactory.Password = Configuration.Password;
 
                 if (connectionFactory.Port == -1)
-                    connectionFactory.Port = connectionFactory.Port;
+					connectionFactory.Port = hostConfiguration.Port;
+
+				if (Configuration.Ssl.Enabled)
+					connectionFactory.Ssl = Configuration.Ssl;
 
                 connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
                 connectionFactory.ClientProperties = ConvertToHashtable(Configuration.ClientProperties);
