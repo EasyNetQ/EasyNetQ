@@ -50,7 +50,7 @@ namespace EasyNetQ
                         HandleMessageDelivery(queue.Take());
                     }
                 }
-                catch (InvalidOperationException)
+                catch (InvalidOperationException ex)
                 {
                     // InvalidOperationException is thrown when Take is called after 
                     // queue.CompleteAdding(), this is signals that this class is being
