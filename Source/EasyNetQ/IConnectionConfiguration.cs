@@ -22,7 +22,7 @@ namespace EasyNetQ
         
         IEnumerable<IHostConfiguration> Hosts { get; }
 
-		SslOption Ssl { get; }
+        SslOption Ssl { get; }
     }
 
     public interface IHostConfiguration
@@ -44,9 +44,9 @@ namespace EasyNetQ
         public IDictionary<string, string> ClientProperties { get; private set; } 
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
-		public SslOption Ssl { get; private set; }
+        public SslOption Ssl { get; private set; }
 
-	    public ConnectionConfiguration()
+        public ConnectionConfiguration()
         {
             // set default values
             Port = DefaultPort;
@@ -65,7 +65,7 @@ namespace EasyNetQ
             ClientProperties = new Dictionary<string, string>();
             SetDefaultClientProperties(ClientProperties);
 
-			Ssl = new SslOption();
+            Ssl = new SslOption();
         }
 
         private void SetDefaultClientProperties(IDictionary<string, string> clientProperties)
