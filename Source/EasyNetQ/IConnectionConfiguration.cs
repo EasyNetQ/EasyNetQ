@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Security;
 using System.Reflection;
+using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
@@ -16,9 +18,11 @@ namespace EasyNetQ
         ushort RequestedHeartbeat { get; }
         ushort PrefetchCount { get; }
         Uri AMQPConnectionString { get; }
-        IDictionary<string, string> ClientProperties { get; } 
+        IDictionary<string, string> ClientProperties { get; }
         
         IEnumerable<IHostConfiguration> Hosts { get; }
+
+        SslOption Ssl { get; }
     }
 
     public interface IHostConfiguration
@@ -40,7 +44,7 @@ namespace EasyNetQ
         public IDictionary<string, string> ClientProperties { get; private set; } 
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
-
+        public SslOption Ssl { get; private set; }
 
         public ConnectionConfiguration()
         {
@@ -60,6 +64,8 @@ namespace EasyNetQ
             Hosts = new List<IHostConfiguration>();
             ClientProperties = new Dictionary<string, string>();
             SetDefaultClientProperties(ClientProperties);
+
+            Ssl = new SslOption();
         }
 
         private void SetDefaultClientProperties(IDictionary<string, string> clientProperties)
