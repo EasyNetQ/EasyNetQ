@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Monitor", "EasyNet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Monitor.Tests", "EasyNetQ.Monitor.Tests\EasyNetQ.Monitor.Tests.csproj", "{185C7912-C7FB-475D-8489-E9F8BABE78D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Trace", "EasyNetQ.Trace\EasyNetQ.Trace.csproj", "{11DF08A9-3D14-44CC-A65E-5933121D3D63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -281,6 +283,16 @@ Global
 		{185C7912-C7FB-475D-8489-E9F8BABE78D5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{185C7912-C7FB-475D-8489-E9F8BABE78D5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{185C7912-C7FB-475D-8489-E9F8BABE78D5}.Release|x86.ActiveCfg = Release|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
