@@ -21,13 +21,10 @@ namespace EasyNetQ.Trace
         static void Main(string[] args)
         {
             Console.WriteLine("Trace is running. Ctrl-C to exit");
-            var autoResetEvent = new AutoResetEvent(false);
             Console.CancelKeyPress += (sender, eventArgs) =>
                 {
                     eventArgs.Cancel = true;
                     tokenSource.Cancel();
-                    autoResetEvent.Set();
-                    deliveryQueue.Dispose();
                 };
 
             var connectionString = args.Length == 0
@@ -37,7 +34,7 @@ namespace EasyNetQ.Trace
             HandleDelivery();
             using (ConnectAndSubscribe(connectionString))
             {
-                autoResetEvent.WaitOne();
+                tokenSource.Token.WaitHandle.WaitOne();
             }
 
             Console.WriteLine("Shutdown");
@@ -45,7 +42,7 @@ namespace EasyNetQ.Trace
 
         static void HandleDelivery()
         {
-            var deliveryThread = new Thread(() =>
+            new Thread(() =>
                 {
                     try
                     {
@@ -54,12 +51,15 @@ namespace EasyNetQ.Trace
                             HandleDelivery(deliverEventArgs);
                         }
                     }
+                    // deliveryQueue has been disposed so do nothing
+                    catch (OperationCanceledException)
+                    {}
                     catch (ObjectDisposedException)
-                    {
-                        // deliveryQueue has been disposed so do nothing
-                    }
-                }) {Name = "EasyNetQ.Trace - delivery thread."};
-            deliveryThread.Start();
+                    {}
+                })
+                {
+                    Name = "EasyNetQ.Trace - delivery."
+                }.Start();
         }
 
         static IDisposable ConnectAndSubscribe(string connectionString)
@@ -80,7 +80,10 @@ namespace EasyNetQ.Trace
             connection.ConnectionShutdown += (connection1, reason) =>
                 {
                     if(!tokenSource.IsCancellationRequested)
+                    {
+                        Console.Out.WriteLine("\nConnection closed.\nReason {0}\nNow reconnecting", reason.ToString());
                         disposable.ToBeDisposed = ConnectAndSubscribe(connectionString);
+                    }
                 };
 
             Subscribe(connection, traceExchange, publishRoutingKey);
@@ -91,7 +94,7 @@ namespace EasyNetQ.Trace
 
         static void Subscribe(IConnection connection, string exchangeName, string routingKey)
         {
-            var thread = new Thread(() =>
+            new Thread(() =>
                 {
                     var channel = connection.CreateModel();
                     var queueDeclareOk = channel.QueueDeclare();
@@ -100,10 +103,10 @@ namespace EasyNetQ.Trace
 
                     try
                     {
-                        while (!tokenSource.IsCancellationRequested)
+                        while (!tokenSource.IsCancellationRequested && channel.IsOpen)
                         {
                             var deliveryArgs = subscription.Next();
-                            if (deliveryArgs != null)
+                            if (!(deliveryArgs == null || tokenSource.IsCancellationRequested))
                             {
                                 deliveryQueue.Add(deliveryArgs, tokenSource.Token);
                             }
@@ -115,8 +118,10 @@ namespace EasyNetQ.Trace
                     catch (ObjectDisposedException)
                     {}
                     Console.Out.WriteLine("Subscription to exchange {0}, routingKey {1} closed", exchangeName, routingKey);
-                }) {Name = string.Format("EasyNetQ.Trace - subscription {0} {1}", exchangeName, routingKey)};
-            thread.Start();
+                })
+                {
+                    Name = string.Format("EasyNetQ.Trace - subscription {0} {1}", exchangeName, routingKey)
+                }.Start();
         }
 
         static void HandleDelivery(BasicDeliverEventArgs basicDeliverEventArgs)
