@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 using System;
 using System.Threading;
+using EasyNetQ.Loggers;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -155,6 +156,46 @@ namespace EasyNetQ.Tests
             // allow time for bus to connect
             autoResetEvent.WaitOne(1000);
             testLocalBus.Dispose();
+        }
+
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_round_robin_between_subscribers()
+        {
+            Action<IServiceRegister> setNoDebugLogger = register =>
+                register.Register<IEasyNetQLogger>(_ => new DelegateLogger());
+
+            const string connectionString = "host=localhost;prefetchcount=100";
+
+            var publishBus = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
+            var subscribeBus1 = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
+            var subscribeBus2 = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
+
+            // first set up the subscribers
+            subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message =>
+                {
+                    Console.WriteLine("Subscriber 1: {0}", message.Text);
+                    //Thread.Sleep(20);
+                });
+            subscribeBus2.Subscribe<MyMessage>("roundRobinTest", message =>
+                {
+                    Console.WriteLine("Subscriber 2: {0}", message.Text);
+                    //Thread.Sleep(1);
+                });
+
+            // now publish some messages
+            using (var channel = publishBus.OpenPublishChannel())
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    channel.Publish(new MyMessage{ Text = string.Format("Message{0}", i)});
+                }
+            }
+
+            Thread.Sleep(1000);
+
+            publishBus.Dispose();
+            subscribeBus1.Dispose();
+            subscribeBus2.Dispose();
         }
     }
 
