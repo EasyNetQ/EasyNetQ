@@ -36,38 +36,48 @@ namespace EasyNetQ.Trace
                     tokenSource.Cancel();
                 };
 
-            CommandLine.Parser.Default.ParseArguments(args, options);
-
-            if (options.csvoutput != null)
+            if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
-                //Create CSV file and write header row.
-                csvFile = new CSVFile(options.csvoutput);
+
+                if (options.csvoutput != null)
+                {
+                    //Create CSV file and write header row.
+                    csvFile = new CSVFile(options.csvoutput);
+
+                    List<string> columnlist = new List<string>();
+
+                    columnlist.Add("Message#");
+                    columnlist.Add("Date Time");
+                    columnlist.Add("Routing Key");
+                    columnlist.Add("Exchange");
+                    columnlist.Add("Body");
+
+                    csvFile.WriteRow(columnlist);
+
+                }
+
+
+                var connectionString = options.AMQP;
+
+                Console.WriteLine("Trace is running. Ctrl-C to exit");
+
+                HandleDelivery();
+                try
+                {
+
+                    using (ConnectAndSubscribe(connectionString))
+                    {
+                        tokenSource.Token.WaitHandle.WaitOne();
+                    }
+
+                    Console.WriteLine("Shutdown");
+                }
+                catch (Exception e)
+                {
+                    Console.Out.WriteLine(e.Message);
+                }
                 
-                List<string> columnlist = new List<string>();
-
-                columnlist.Add("Message#");
-                columnlist.Add("Date Time");
-                columnlist.Add("Routing Key");
-                columnlist.Add("Exchange");
-                columnlist.Add("Body");
-
-                csvFile.WriteRow(columnlist);
-
             }
-
-
-            var connectionString = options.AMQP;
-
-            Console.WriteLine("Trace is running. Ctrl-C to exit");
-
-            HandleDelivery();
-            using (ConnectAndSubscribe(connectionString))
-            {
-                tokenSource.Token.WaitHandle.WaitOne();
-            }
-
-            Console.WriteLine("Shutdown");
-
         }
 
         static void HandleDelivery()
