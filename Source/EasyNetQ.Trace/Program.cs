@@ -29,8 +29,7 @@ namespace EasyNetQ.Trace
         static void Main(string[] args)
         {
 
-            Console.WriteLine("Trace is running. Ctrl-C to exit");
-
+            
             Console.CancelKeyPress += (sender, eventArgs) =>
                 {
                     eventArgs.Cancel = true;
@@ -58,6 +57,8 @@ namespace EasyNetQ.Trace
 
 
             var connectionString = options.AMQP;
+
+            Console.WriteLine("Trace is running. Ctrl-C to exit");
 
             HandleDelivery();
             using (ConnectAndSubscribe(connectionString))
@@ -166,7 +167,7 @@ namespace EasyNetQ.Trace
 
             Func<byte[], string> decode = bytes => Encoding.UTF8.GetString(bytes);
 
-            if (options.verbose)
+            if (!options.quiet)
             {
                 //Standard output
                 Console.Out.WriteLine("");
@@ -214,19 +215,21 @@ namespace EasyNetQ.Trace
         }
     }
 
-
     class Options //Define command line options
     {
         [Option('a', "amqp-connection-string", Required = false, DefaultValue = "amqp://localhost/", HelpText = "AMQP Connection string.")]
         public string AMQP { get; set; }
 
-        [Option('v', "verbose", DefaultValue = false, HelpText = "Verbose console output")]
-        public bool verbose { get; set; }
+        [Option('q', "quiet", DefaultValue = false, HelpText = "Switch off verbose console output")]
+        public bool quiet { get; set; }
 
         [Option('o', "output-csv", Required = false, HelpText = "CSV File name for output")]
         public string csvoutput { get; set; }
 
+        [HelpOption]
+        public string GetUsage()
+        {
+            return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+        }
     }
-
-    
 }
