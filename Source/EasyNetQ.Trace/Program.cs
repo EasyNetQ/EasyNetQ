@@ -215,7 +215,11 @@ namespace EasyNetQ.Trace
         }
     }
 
-    class Options //Define command line options
+
+    /// <summary>
+    ///  Define command line options
+    /// </summary>
+    class Options
     {
         [Option('a', "amqp-connection-string", Required = false, DefaultValue = "amqp://localhost/", HelpText = "AMQP Connection string.")]
         public string AMQP { get; set; }
