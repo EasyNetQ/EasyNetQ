@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading;
-using System.IO;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -22,7 +22,7 @@ namespace EasyNetQ.Trace
         private static readonly BlockingCollection<BasicDeliverEventArgs> deliveryQueue = 
             new BlockingCollection<BasicDeliverEventArgs>(1);
 
-        private static Options options = new Options();
+        private static readonly Options options = new Options();
         private static CSVFile csvFile;
 
 
@@ -36,7 +36,7 @@ namespace EasyNetQ.Trace
                     tokenSource.Cancel();
                 };
 
-            if (CommandLine.Parser.Default.ParseArguments(args, options))
+            if (Parser.Default.ParseArguments(args, options))
             {
 
                 if (options.csvoutput != null)
@@ -44,13 +44,14 @@ namespace EasyNetQ.Trace
                     //Create CSV file and write header row.
                     csvFile = new CSVFile(options.csvoutput);
 
-                    List<string> columnlist = new List<string>();
-
-                    columnlist.Add("Message#");
-                    columnlist.Add("Date Time");
-                    columnlist.Add("Routing Key");
-                    columnlist.Add("Exchange");
-                    columnlist.Add("Body");
+                    var columnlist = new List<string>
+                        {
+                            "Message#", 
+                            "Date Time", 
+                            "Routing Key", 
+                            "Exchange", 
+                            "Body"
+                        };
 
                     csvFile.WriteRow(columnlist);
 
@@ -192,23 +193,18 @@ namespace EasyNetQ.Trace
             {
                 //CSV Output
                 //Message#,Date Time,Routing Key,Exchange,Body
-                List<string> columnlist = new List<string>();
-
-                columnlist.Add(msgCount.ToString());
-                columnlist.Add(DateTime.Now.ToString());
-                columnlist.Add(basicDeliverEventArgs.RoutingKey);
-                columnlist.Add(decode((byte[])getHeader("exchange_name")));
-                columnlist.Add(decode(basicDeliverEventArgs.Body).ToString());
+                var columnlist = new List<string>
+                    {
+                        msgCount.ToString(CultureInfo.InvariantCulture),
+                        DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                        basicDeliverEventArgs.RoutingKey,
+                        decode((byte[]) getHeader("exchange_name")),
+                        decode(basicDeliverEventArgs.Body)
+                    };
 
                 csvFile.WriteRow(columnlist);
 
             }
-
-        }
-
-        static void OutputToCSV()
-        {
-
         }
     }
 
