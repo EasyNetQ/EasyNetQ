@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.10.1.0")]
+[assembly: AssemblyVersion("0.11.0.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.11.0.0 Exchange durability can be configured
 // 0.10.1.0 EasyNetQ.Trace
 // 0.10.0.0 John-Mark Newton's RequestAsync API change
 // 0.9.2.0  C# style property names on Management.Client
