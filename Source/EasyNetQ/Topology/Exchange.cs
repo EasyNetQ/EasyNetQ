@@ -10,6 +10,7 @@ namespace EasyNetQ.Topology
         protected readonly IList<IBinding> bindings = new List<IBinding>();
         public string Name { get; private set; }
         public string ExchangeType { get; private set; }
+        public bool Durable { get; private set; }
         public bool AutoDelete { get; private set; }
         public IDictionary Arguments { get; private set; }
 
@@ -19,10 +20,10 @@ namespace EasyNetQ.Topology
             return new Exchange(exchangeName, Topology.ExchangeType.Direct);
         }
 
-        public static IExchange DeclareDirect(string exchangeName, bool autoDelete, IDictionary arguments)
+        public static IExchange DeclareDirect(string exchangeName, bool durable, bool autoDelete, IDictionary arguments)
         {
             Preconditions.CheckNotBlank(exchangeName, "exchangeName");
-            return new Exchange(exchangeName, Topology.ExchangeType.Direct, autoDelete, arguments);
+            return new Exchange(exchangeName, Topology.ExchangeType.Direct, durable, autoDelete, arguments);
         }
 
         public static IExchange DeclareTopic(string exchangeName)
@@ -31,10 +32,10 @@ namespace EasyNetQ.Topology
             return new Exchange(exchangeName, Topology.ExchangeType.Topic);
         }
 
-        public static IExchange DeclareTopic(string exchangeName, bool autoDelete, IDictionary arguments)
+        public static IExchange DeclareTopic(string exchangeName, bool durable, bool autoDelete, IDictionary arguments)
         {
             Preconditions.CheckNotBlank(exchangeName, "exchangeName");
-            return new Exchange(exchangeName, Topology.ExchangeType.Topic, autoDelete, arguments);
+            return new Exchange(exchangeName, Topology.ExchangeType.Topic, durable, autoDelete, arguments);
         }
 
         public static IExchange DeclareFanout(string exchangeName)
@@ -43,10 +44,10 @@ namespace EasyNetQ.Topology
             return new Exchange(exchangeName, Topology.ExchangeType.Fanout);
         }
 
-        public static IExchange DeclareFanout(string exchangeName, bool autoDelete, IDictionary arguments)
+        public static IExchange DeclareFanout(string exchangeName, bool durable, bool autoDelete, IDictionary arguments)
         {
             Preconditions.CheckNotBlank(exchangeName, "exchangeName");
-            return new Exchange(exchangeName, Topology.ExchangeType.Fanout, autoDelete, arguments);
+            return new Exchange(exchangeName, Topology.ExchangeType.Fanout, durable, autoDelete, arguments);
         }
 
         public static IExchange GetDefault()
@@ -60,14 +61,16 @@ namespace EasyNetQ.Topology
 
             Name = name;
             ExchangeType = exchangeType;
+            Durable = true;
         }
 
-        protected Exchange(string name, string exchangeType, bool autoDelete, IDictionary arguments)
+        protected Exchange(string name, string exchangeType, bool durable, bool autoDelete, IDictionary arguments)
         {
             Preconditions.CheckNotNull(name, "name");
 
             Name = name;
             ExchangeType = exchangeType;
+            Durable = durable;
             AutoDelete = autoDelete;
             Arguments = arguments;
         }
@@ -78,7 +81,7 @@ namespace EasyNetQ.Topology
 
             if (Name != string.Empty)
             {
-                visitor.CreateExchange(Name, ExchangeType, AutoDelete, Arguments);
+                visitor.CreateExchange(Name, ExchangeType, Durable, AutoDelete, Arguments);
                 foreach (var binding in bindings)
                 {
                     binding.Visit(visitor);

@@ -39,6 +39,17 @@ namespace EasyNetQ.Tests.Topology
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", true, false, null));
         }
 
+        // XT
+        [Test]
+        public void Should_create_a_direct_exchange_with_advanced_options()
+        {
+            var args = new Dictionary<string, string>();
+            var exchange = Exchange.DeclareDirect(exchangeName, false, true, args);
+            exchange.Visit(visitor);
+
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "direct", false, true, args));
+        }
+
         //  XT
         [Test]
         public void Should_create_a_topic_exchange()
@@ -49,6 +60,17 @@ namespace EasyNetQ.Tests.Topology
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic", true, false, null));
         }
 
+        // XT
+        [Test]
+        public void Should_create_a_topic_exchange_with_advanced_options()
+        {
+            var args = new Dictionary<string, string>();
+            var exchange = Exchange.DeclareTopic(exchangeName, false, true, args);
+            exchange.Visit(visitor);
+
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic", false, true, args));
+        }
+
         // XF
         [Test]
         public void Should_create_a_fanout_exchange()
@@ -57,6 +79,17 @@ namespace EasyNetQ.Tests.Topology
             exchange.Visit(visitor);
 
             model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "fanout", true, false, null));
+        }
+
+        // XT
+        [Test]
+        public void Should_create_a_fanout_exchange_with_advanced_options()
+        {
+            var args = new Dictionary<string, string>();
+            var exchange = Exchange.DeclareFanout(exchangeName, false, true, args);
+            exchange.Visit(visitor);
+
+            model.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "fanout", false, true, args));
         }
 
         // XD (default)
