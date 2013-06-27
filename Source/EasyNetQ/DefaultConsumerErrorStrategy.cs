@@ -128,7 +128,7 @@ namespace EasyNetQ
             return EasyNetQ.PostExceptionAckStrategy.ShouldAck;
         }
 
-        private byte[] CreateErrorMessage(BasicDeliverEventArgs devliverArgs, Exception exception)
+        private byte[] CreateErrorMessage(BasicDeliverEventArgs deliverArgs, Exception exception)
         {
             var messageAsString = Encoding.UTF8.GetString(devliverArgs.Body);
             var error = new Error
