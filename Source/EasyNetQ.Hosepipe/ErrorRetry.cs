@@ -32,7 +32,10 @@ namespace EasyNetQ.Hosepipe
             {
                 try
                 {
-                    model.ExchangeDeclarePassive(error.Exchange);
+                    if (error.Exchange != string.Empty)
+                    {
+                        model.ExchangeDeclarePassive(error.Exchange);
+                    }
 
                     var properties = model.CreateBasicProperties();
                     error.BasicProperties.CopyTo(properties);
