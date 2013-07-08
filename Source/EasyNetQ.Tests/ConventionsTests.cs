@@ -117,8 +117,8 @@ namespace EasyNetQ.Tests
                 new MockConsumerFactory(),
                 new MockLogger(),
                 CorrelationIdGenerator.GetCorrelationId,
-                conventions
-		        );
+                conventions,
+                new DefaultMessageValidationStrategy(new MockLogger(), TypeNameSerializer.Serialize));
 
 			bus = new RabbitBus(
 				x => TypeNameSerializer.Serialize(x.GetType()),
@@ -189,8 +189,8 @@ namespace EasyNetQ.Tests
                 new MockConsumerFactory(),
                 new MockLogger(),
                 CorrelationIdGenerator.GetCorrelationId,
-                new Conventions()
-                );
+                new Conventions(),
+                new DefaultMessageValidationStrategy(new MockLogger(), TypeNameSerializer.Serialize));
 
             bus = new RabbitBus(
                 x => TypeNameSerializer.Serialize(x.GetType()),

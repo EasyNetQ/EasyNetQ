@@ -34,6 +34,9 @@ namespace EasyNetQ
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))
+                .Register<IMessageValidationStrategy>(x => new DefaultMessageValidationStrategy(
+                    x.Resolve<IEasyNetQLogger>(),
+                    x.Resolve<SerializeType>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IConnectionFactory>(),
@@ -42,7 +45,8 @@ namespace EasyNetQ
                     x.Resolve<IConsumerFactory>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<Func<string>>(),
-                    x.Resolve<IConventions>()))
+                    x.Resolve<IConventions>(),
+                    x.Resolve<IMessageValidationStrategy>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),

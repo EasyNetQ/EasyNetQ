@@ -12,7 +12,7 @@ namespace EasyNetQ.InMemoryClient
             var logger = new ConsoleLogger();
             var conventions = new Conventions();
             var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger, conventions);
-           
+            var messageValidationStrategy = new DefaultMessageValidationStrategy(logger, TypeNameSerializer.Serialize);
 
             var advancedBus = new RabbitAdvancedBus(
                 new ConnectionConfiguration(), 
@@ -22,7 +22,8 @@ namespace EasyNetQ.InMemoryClient
                 new QueueingConsumerFactory(logger, consumerErrorStrategy),
                 logger,
                 CorrelationIdGenerator.GetCorrelationId,
-                conventions);
+                conventions,
+                messageValidationStrategy);
 
             return new RabbitBus(
                 TypeNameSerializer.Serialize,

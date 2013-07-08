@@ -89,6 +89,7 @@
     <Compile Include="CorrelationIdTests.cs" />
     <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />
+    <Compile Include="DefaultMessageValidationStrategyTests.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
     <Compile Include="FluentConfiguration\SubscriptionConfigurationTests.cs" />
     <Compile Include="InMemoryClient\AdvancedPublishSubscribeTests.cs" />

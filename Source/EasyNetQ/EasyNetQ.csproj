@@ -60,6 +60,7 @@
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
     <Compile Include="DefaultMessageDispatcher.cs" />
+    <Compile Include="DefaultMessageValidationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQConsumer.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
+    <Compile Include="IMessageValidationStrategy.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Loggers\DelegateLogger.cs" />

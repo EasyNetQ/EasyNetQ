@@ -27,6 +27,7 @@ namespace EasyNetQ.Tests
             ConsumerErrorStrategy = ConsumerErrorStrategy ?? new DefaultConsumerErrorStrategy(ConnectionFactory, Serializer, Logger, Conventions);
             ConsumerFactory = ConsumerFactory ?? new QueueingConsumerFactory(Logger, ConsumerErrorStrategy);
             GetCorrelationId = GetCorrelationId ?? CorrelationIdGenerator.GetCorrelationId;
+            var messageValidationStrategy = new DefaultMessageValidationStrategy(Logger, TypeNameSerializer.Serialize);
 
             var advancedBus = new RabbitAdvancedBus(
                 new ConnectionConfiguration(), 
@@ -36,7 +37,8 @@ namespace EasyNetQ.Tests
                 ConsumerFactory,
                 Logger,
                 GetCorrelationId,
-                Conventions);
+                Conventions,
+                messageValidationStrategy);
             
             return new RabbitBus(
                 TypeNameSerializer.Serialize,

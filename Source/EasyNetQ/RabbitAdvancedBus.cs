@@ -16,6 +16,7 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly Func<string> getCorrelationId;
         private readonly IConventions conventions;
+        private readonly IMessageValidationStrategy messageValidationStrategy;
 
         private readonly IPersistentConnection connection;
         private readonly ConcurrentBag<SubscriptionAction> subscribeActions = new ConcurrentBag<SubscriptionAction>();
@@ -30,7 +31,8 @@ namespace EasyNetQ
             IConsumerFactory consumerFactory, 
             IEasyNetQLogger logger, 
             Func<string> getCorrelationId, 
-            IConventions conventions)
+            IConventions conventions,
+            IMessageValidationStrategy messageValidationStrategy)
         {
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
@@ -40,6 +42,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
             Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(messageValidationStrategy, "messageValidationStrategy");
 
             this.connectionConfiguration = connectionConfiguration;
             this.serializeType = serializeType;
@@ -48,6 +51,7 @@ namespace EasyNetQ
             this.logger = logger;
             this.getCorrelationId = getCorrelationId;
             this.conventions = conventions;
+            this.messageValidationStrategy = messageValidationStrategy;
 
             connection = new PersistentConnection(connectionFactory, logger);
             connection.Connected += OnConnected;
@@ -97,7 +101,7 @@ namespace EasyNetQ
 
             Subscribe(queue, (body, properties, messageRecievedInfo) =>
             {
-                CheckMessageType<T>(properties);
+                messageValidationStrategy.CheckMessageType<T>(body, properties, messageRecievedInfo);
 
                 var messageBody = serializer.BytesToMessage<T>(body);
                 var message = new Message<T>(messageBody);
@@ -176,19 +180,6 @@ namespace EasyNetQ
                 // Looks like the channel closed between our IsConnected check
                 // and the subscription action. Do nothing here, when the 
                 // connection comes back, the subcription action will be run then.
-            }
-        }
-
-        private void CheckMessageType<TMessage>(MessageProperties properties)
-        {
-            var typeName = serializeType(typeof(TMessage));
-            if (properties.Type != typeName)
-            {
-                logger.ErrorWrite("Message type is incorrect. Expected '{0}', but was '{1}'",
-                    typeName, properties.Type);
-
-                throw new EasyNetQInvalidMessageTypeException("Message type is incorrect. Expected '{0}', but was '{1}'",
-                    typeName, properties.Type);
             }
         }
 

@@ -5,6 +5,7 @@
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.11.1.0 New plugable validation strategy (IMessageValidationStrategy)
 // 0.11.0.0 Exchange durability can be configured
 // 0.10.1.0 EasyNetQ.Trace
 // 0.10.0.0 John-Mark Newton's RequestAsync API change
