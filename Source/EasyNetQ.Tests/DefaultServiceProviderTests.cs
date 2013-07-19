@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.Loggers;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -58,6 +59,22 @@ namespace EasyNetQ.Tests
             using (var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => logger)))
             {
                 // should see the test logger on the console
+            }
+        }
+
+        [Test, Explicit("Requires RabbitMQ instance")]
+        public void Should_be_able_to_sneakily_get_the_service_provider()
+        {
+            IServiceProvider provider = null;
+            using (var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(sp =>
+                {
+                    provider = sp;
+                    return new ConsoleLogger();
+                })))
+            {
+                // now get any services you need ...
+                var logger = provider.Resolve<IEasyNetQLogger>();
+                logger.DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
             }
         }
     }
