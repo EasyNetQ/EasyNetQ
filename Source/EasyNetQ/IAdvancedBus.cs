@@ -31,6 +31,17 @@ namespace EasyNetQ
         void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
+        /// Subscribe to raw bytes from the queue.
+        /// </summary>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the 
+        /// receive context. Returns a Task.
+        /// </param>
+        /// <param name="topologyVisitor">Topology visitor to apply to the queue></param>
+        void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, ITopologyVisitor topologyVisitor);
+
+        /// <summary>
         /// Return a channel for publishing.
         /// </summary>
         /// <returns>IAdvancedPublishChannel</returns>
