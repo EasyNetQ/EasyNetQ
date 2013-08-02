@@ -112,6 +112,13 @@ namespace EasyNetQ
 
         public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
+            using (var channel = connection.CreateModel())
+            {
+                Subscribe(queue, onMessage, new TopologyBuilder(channel));
+            }
+        }
+        public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, ITopologyVisitor topologyVisitor)
+        {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
@@ -127,7 +134,7 @@ namespace EasyNetQ
                 var channel = connection.CreateModel();
                 channel.ModelShutdown += (model, reason) => logger.DebugWrite("Model Shutdown for queue: '{0}'", queue.Name);
 
-                queue.Visit(new TopologyBuilder(channel));
+                queue.Visit(topologyVisitor);
 
                 channel.BasicQos(0, connectionConfiguration.PrefetchCount, false);
 
