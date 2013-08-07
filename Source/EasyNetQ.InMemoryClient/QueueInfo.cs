@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.InMemoryClient
 {
     public class QueueInfo
     {
+        public string Id { get; private set; }
         public string Name { get; private set; }        
         public bool Durable { get; private set; }        
         public bool Exclusive { get; private set; }        
@@ -15,6 +17,7 @@ namespace EasyNetQ.InMemoryClient
 
         public QueueInfo(string name, bool durable, bool exclusive, bool autoDelete, IDictionary arguments)
         {
+            Id = Guid.NewGuid().ToString();
             Name = name;
             Durable = durable;
             Exclusive = exclusive;
@@ -39,6 +42,20 @@ namespace EasyNetQ.InMemoryClient
                 basicProperties,
                 body);
             
+        }
+
+        /// <summary>
+        /// http://www.rabbitmq.com/consumer-cancel.html
+        /// Fires if:
+        /// a) queue is deleted
+        /// b) queues main node is down. In case of HA queues in a cluster.
+        /// </summary>
+        public void FireConsumerCancelNotification()
+        {
+            foreach (var consumerInfo in consumers.CircleOnesEnumerator())
+            {
+                consumerInfo.BasicConsumer.HandleBasicCancel(consumerInfo.ConsumerTag);    
+            }
         }
     }
 

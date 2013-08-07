@@ -5,6 +5,8 @@ namespace EasyNetQ.InMemoryClient
 {
     public class InMemoryConnectionFactory : ConnectionFactoryWrapper
     {
+        public InMemoryConnection CurrentConnection { get; private set; }
+
         public InMemoryConnectionFactory() : base(new ConnectionConfiguration
         {
             Hosts = new List<IHostConfiguration> { new HostConfiguration() }
@@ -14,7 +16,7 @@ namespace EasyNetQ.InMemoryClient
 
         public override IConnection CreateConnection()
         {
-            return new InMemoryConnection();
+            return (CurrentConnection = new InMemoryConnection());
         }
     }
 }

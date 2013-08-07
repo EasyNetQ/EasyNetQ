@@ -19,7 +19,9 @@ namespace EasyNetQ.Tests
         private QueueingConsumerFactory queueingConsumerFactory;
         private IConsumerErrorStrategy consumerErrorStrategy;
         private AutoResetEvent autoResetEvent;
+        private const string consumerTag = "abc";
         const ulong deliveryTag = 123;
+        
 
         [SetUp]
         public void SetUp()
@@ -35,7 +37,7 @@ namespace EasyNetQ.Tests
         {
             var model = MockRepository.GenerateStub<IModel>();
 
-            var args = CreateBasicDeliverEventArgs(deliveryTag, model, SuccessMessageCallback);
+            var args = CreateBasicDeliverEventArgs(consumerTag, deliveryTag, model, SuccessMessageCallback);
 
             queueingConsumerFactory.HandleMessageDelivery(args);
             autoResetEvent.WaitOne(1000);
@@ -49,7 +51,7 @@ namespace EasyNetQ.Tests
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldNackWithRequeue);
             var model = MockRepository.GenerateStub<IModel>();
 
-            var args = CreateBasicDeliverEventArgs(deliveryTag, model, SuccessMessageCallback);
+            var args = CreateBasicDeliverEventArgs(consumerTag, deliveryTag, model, SuccessMessageCallback);
 
             queueingConsumerFactory.HandleMessageDelivery(args);
             autoResetEvent.WaitOne(1000);
@@ -64,7 +66,7 @@ namespace EasyNetQ.Tests
 
             var model = MockRepository.GenerateStub<IModel>();
 
-            var args = CreateBasicDeliverEventArgs(deliveryTag, model, ExceptionMessageCallback);
+            var args = CreateBasicDeliverEventArgs(consumerTag, deliveryTag, model, ExceptionMessageCallback);
 
             queueingConsumerFactory.HandleMessageDelivery(args);
             autoResetEvent.WaitOne(1000);
@@ -80,7 +82,7 @@ namespace EasyNetQ.Tests
 
             var model = MockRepository.GenerateStub<IModel>();
 
-            var args = CreateBasicDeliverEventArgs(deliveryTag, model, ExceptionMessageCallback);
+            var args = CreateBasicDeliverEventArgs(consumerTag, deliveryTag, model, ExceptionMessageCallback);
 
             queueingConsumerFactory.HandleMessageDelivery(args);
             autoResetEvent.WaitOne(1000);
@@ -96,7 +98,7 @@ namespace EasyNetQ.Tests
 
             var model = MockRepository.GenerateStub<IModel>();
 
-            var args = CreateBasicDeliverEventArgs(deliveryTag, model, ExceptionMessageCallback);
+            var args = CreateBasicDeliverEventArgs(consumerTag, deliveryTag, model, ExceptionMessageCallback);
 
             queueingConsumerFactory.HandleMessageDelivery(args);
             autoResetEvent.WaitOne(1000);
@@ -112,7 +114,7 @@ namespace EasyNetQ.Tests
 
             var model = MockRepository.GenerateStub<IModel>();
 
-            var args = CreateBasicDeliverEventArgs(deliveryTag, model, ExceptionMessageCallback);
+            var args = CreateBasicDeliverEventArgs(consumerTag, deliveryTag, model, ExceptionMessageCallback);
 
             queueingConsumerFactory.HandleMessageDelivery(args);
             autoResetEvent.WaitOne(1000);
@@ -121,10 +123,31 @@ namespace EasyNetQ.Tests
             model.AssertWasNotCalled(x => x.BasicNack(Arg<ulong>.Is.Anything, Arg<bool>.Is.Anything, Arg<bool>.Is.Anything));
         }
 
-        private BasicDeliverEventArgs CreateBasicDeliverEventArgs(ulong deliveryTag, IModel model, MessageCallback callback)
+        [Test]
+        public void Should_be_able_to_recreate_consumer_with_existing_consumerTag()
+        {
+            var model = MockRepository.GenerateStub<IModel>();
+            queueingConsumerFactory.CreateConsumer(new SubscriptionAction(consumerTag, null, false), model, false, null);
+
+            bool succeeded;
+            try
+            {
+                queueingConsumerFactory.CreateConsumer(new SubscriptionAction(consumerTag, null, false), model, false,
+                                                       null);
+                succeeded = true;
+            }
+            catch (Exception)
+            {
+                succeeded = false;
+            }
+
+            Assert.IsTrue(succeeded);
+        }
+
+        private BasicDeliverEventArgs CreateBasicDeliverEventArgs(string consumerTag, ulong deliveryTag, IModel model, MessageCallback callback)
         {
             var consumer = queueingConsumerFactory.CreateConsumer(
-                new SubscriptionAction(false), model, false, callback);
+                new SubscriptionAction(consumerTag, null, false), model, false, callback);
 
             consumer.HandleBasicConsumeOk(consumer.ConsumerTag);
 
