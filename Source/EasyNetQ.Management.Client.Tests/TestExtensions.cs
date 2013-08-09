@@ -25,6 +25,13 @@ namespace EasyNetQ.Management.Client.Tests
             return actual;
         }
 
+        public static T ShouldNotEqual<T>(this T actual, object expected)
+        {
+            Assert.AreNotEqual(expected, actual);
+            return actual;
+        }
+
+
         public static T ShouldEqual<T>(this T actual, object expected, string message)
         {
             Assert.AreEqual(expected, actual, message);

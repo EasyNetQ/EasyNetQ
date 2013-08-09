@@ -66,6 +66,8 @@ namespace EasyNetQ.Management.Client
             };
 
             settings.Converters.Add(new PropertyConverter());
+            settings.Converters.Add(new MessageStatsOrEmptyArrayConverter());
+            settings.Converters.Add(new QueueTotalsOrEmptyArrayConverter());
 
             LeaveDotsAndSlashesEscaped();
         }

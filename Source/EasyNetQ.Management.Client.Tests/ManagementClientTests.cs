@@ -39,7 +39,7 @@ namespace EasyNetQ.Management.Client.Tests
                 Console.Out.WriteLine("listener.IpAddress = {0}", listener.IpAddress);
             }
 
-            Console.Out.WriteLine("overview.Messages = {0}", overview.QueueTotals.Messages);
+            Console.Out.WriteLine("overview.Messages = {0}", overview.QueueTotals != null ? overview.QueueTotals.Messages : 0);
 
             foreach (var context in overview.Contexts)
             {
@@ -52,8 +52,8 @@ namespace EasyNetQ.Management.Client.Tests
         {
             var nodes = managementClient.GetNodes();
 
-            nodes.Count().ShouldEqual(1);
-            nodes.First().Name.ShouldEqual("rabbit@THOMAS");
+            nodes.Count().ShouldNotEqual(0);
+            nodes.First().Name.ShouldEqual("rabbit@" + Environment.MachineName);
         }
 
         [Test]
