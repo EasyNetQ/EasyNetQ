@@ -10,7 +10,7 @@ namespace EasyNetQ.Management.Client.Serialization
     {
         
     }
-    class QueueTotalsOrEmptyArrayConverter : ObjectOrEmptyArrayConverter<List<object>>
+    class QueueTotalsOrEmptyArrayConverter : ObjectOrEmptyArrayConverter<QueueTotals>
     {
         
     }

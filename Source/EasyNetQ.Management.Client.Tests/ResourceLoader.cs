@@ -15,6 +15,16 @@ namespace EasyNetQ.Management.Client.Tests
         /// <returns>The contents as a string</returns>
         public static T LoadObjectFromJson<T>(string fileToLoad)
         {
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new RabbitContractResolver(),
+            };
+
+            settings.Converters.Add(new PropertyConverter());
+            return LoadObjectFromJson<T>(fileToLoad, settings);
+        }
+        public static T LoadObjectFromJson<T>(string fileToLoad, JsonSerializerSettings settings)
+        {
             const string namespaceFormat = "EasyNetQ.Management.Client.Tests.Json.{0}";
             var resourceName = string.Format(namespaceFormat, fileToLoad);
             var assembly = Assembly.GetExecutingAssembly();
@@ -31,12 +41,7 @@ namespace EasyNetQ.Management.Client.Tests
                 }
             }
 
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new RabbitContractResolver(),
-            };
-
-            settings.Converters.Add(new PropertyConverter());
+            
 
             return JsonConvert.DeserializeObject<T>(contents, settings);
         }     
