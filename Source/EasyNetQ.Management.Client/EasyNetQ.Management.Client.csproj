@@ -79,6 +79,7 @@
     <Compile Include="Model\Overview.cs" />
     <Compile Include="Model\Permission.cs" />
     <Compile Include="Model\PermissionInfo.cs" />
+    <Compile Include="Model\Policy.cs" />
     <Compile Include="Model\PublishDetails.cs" />
     <Compile Include="Model\PublishInfo.cs" />
     <Compile Include="Model\PublishResult.cs" />

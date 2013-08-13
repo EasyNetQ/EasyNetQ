@@ -50,6 +50,7 @@
     <Compile Include="Model\MessageSerializationTests.cs" />
     <Compile Include="Model\NodeSerializationTests.cs" />
     <Compile Include="Model\PermissionInfoTests.cs" />
+    <Compile Include="Model\PolicySerializationTests.cs" />
     <Compile Include="Model\PublishInfoTests.cs" />
     <Compile Include="Model\UserInfoTests.cs" />
     <Compile Include="ResourceLoader.cs" />
@@ -81,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <EmbeddedResource Include="Json\Policies_ha_exactly.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
