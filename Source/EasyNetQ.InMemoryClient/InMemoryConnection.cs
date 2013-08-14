@@ -31,6 +31,16 @@ namespace EasyNetQ.InMemoryClient
             get { return queues; }
         }
 
+        public void DeleteQueue(string queueName)
+        {
+            if (queues.ContainsKey(queueName))
+            {
+                var queueInfo = queues[queueName];
+                queues.Remove(queueName);
+                queueInfo.FireConsumerCancelNotification();
+            }
+        }
+
         public void Dispose()
         {
             // nothing to do.

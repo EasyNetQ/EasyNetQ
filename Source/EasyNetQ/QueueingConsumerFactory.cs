@@ -210,15 +210,22 @@ namespace EasyNetQ
         }
 
         public DefaultBasicConsumer CreateConsumer(
-            SubscriptionAction subscriptionAction, 
+            SubscriptionAction subscriptionAction,
             IModel model, 
             bool modelIsSingleUse, 
             MessageCallback callback)
         {
             var consumer = new EasyNetQConsumer(model, queue);
-            var consumerTag = Guid.NewGuid().ToString();
-            consumer.ConsumerTag = consumerTag;
-            subscriptions.Add(consumerTag, new SubscriptionInfo(subscriptionAction, consumer, callback, modelIsSingleUse, model));
+            consumer.ConsumerTag = subscriptionAction.Id;
+
+            if (subscriptions.ContainsKey(consumer.ConsumerTag))
+            {
+                logger.DebugWrite("Removing existing subscription with ConsumerTag: " + consumer.ConsumerTag);
+                subscriptions.Remove(consumer.ConsumerTag);
+            }
+
+            logger.DebugWrite("Adding subscription with ConsumerTag: " + consumer.ConsumerTag);
+            subscriptions.Add(consumer.ConsumerTag, new SubscriptionInfo(subscriptionAction, consumer, callback, modelIsSingleUse, model));
 
             return consumer;
         }

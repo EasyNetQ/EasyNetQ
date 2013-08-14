@@ -9,8 +9,9 @@ namespace EasyNetQ
     /// Identical to the C# client's DefaultQueueingConsumer but it doesn't close the queue
     /// when its own model is closed.
     /// </summary>
-    public class EasyNetQConsumer : DefaultBasicConsumer
+    public class EasyNetQConsumer : DefaultBasicConsumer, IConsumerCancelNotifications
     {
+        public event BasicCancelEventHandler BasicCancel;
         private readonly BlockingCollection<BasicDeliverEventArgs> queue;
 
         public BlockingCollection<BasicDeliverEventArgs> Queue
@@ -31,6 +32,17 @@ namespace EasyNetQ
         {
             this.Model.Close();
         }
+
+        public override void HandleBasicCancel(string consumerTag)
+        {
+            if (BasicCancel != null)
+            {
+                BasicCancel(this, new BasicCancelEventArgs(consumerTag));
+            }
+
+            base.HandleBasicCancel(consumerTag);
+        }
+
 
         /// <summary>
         /// Overrides DefaultBasicConsumer's
@@ -61,5 +73,17 @@ namespace EasyNetQ
             }
         }
 
+    }
+
+    public delegate void BasicCancelEventHandler(object sender, BasicCancelEventArgs args);
+
+    public class BasicCancelEventArgs
+    {
+        public string ConsumerTag { get; private set; }
+
+        public BasicCancelEventArgs(string consumerTag)
+        {
+            ConsumerTag = consumerTag;
+        }
     }
 }

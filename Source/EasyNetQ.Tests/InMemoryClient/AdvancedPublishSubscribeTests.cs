@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.InMemoryClient
         [SetUp]
         public void SetUp()
         {
-            bus = InMemoryRabbitHutch.CreateBus().Advanced;
+            bus = new InMemoryRabbitHutch().CreateBus().Advanced;
         }
 
         [Test, Explicit("Failing on build server for some reason")]
