@@ -65,9 +65,9 @@ namespace EasyNetQ
             var messageBody = advancedBus.Serializer.MessageToBytes(message.Body);
 
             message.Properties.Type = typeName;
-            message.Properties.CorrelationId = 
+            message.Properties.CorrelationId =
                 string.IsNullOrEmpty(message.Properties.CorrelationId) ?
-                advancedBus.GetCorrelationId() : 
+                advancedBus.GetCorrelationId() :
                 message.Properties.CorrelationId;
 
             Publish(exchange, routingKey, message.Properties, messageBody, configure);
@@ -78,7 +78,7 @@ namespace EasyNetQ
         {
             Publish(exchange, routingKey, properties, messageBody, configure, new TopologyBuilder(channel));
         }
-        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure,ITopologyVisitor topologyVisitor)
+        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure, ITopologyVisitor topologyVisitor)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(routingKey, "routingKey");
@@ -121,7 +121,7 @@ namespace EasyNetQ
                     defaultProperties,  // basicProperties
                     messageBody);       // body
 
-                advancedBus.Logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", 
+                advancedBus.Logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
                     exchange.Name, routingKey, defaultProperties.CorrelationId);
             }
             catch (OperationInterruptedException exception)
@@ -136,12 +136,12 @@ namespace EasyNetQ
 
         public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message)
         {
-            Publish(exchange, routingKey, message, configuration => {});
+            Publish(exchange, routingKey, message, configuration => { });
         }
 
         public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody)
         {
-            Publish(exchange, routingKey, properties, messageBody, configuration => {});
+            Publish(exchange, routingKey, properties, messageBody, configuration => { });
         }
     }
 }

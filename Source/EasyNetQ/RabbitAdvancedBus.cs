@@ -111,14 +111,14 @@ namespace EasyNetQ
                 return onMessage(message, messageRecievedInfo);
             });
         }
-
+ 
         public void Subscribe(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
             Subscribe(queue, onMessage, null);
         }
 
         public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, ITopologyVisitor topologyVisitor)
-        {
+        {      
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
@@ -132,14 +132,20 @@ namespace EasyNetQ
 
             subscriptionAction.Action = () =>
             {
-                // Reusing same channel in case queue or queue consumer is being recreated
-                var channel = subscriptionAction.Channel ?? CreateChannel(queue); 
-                subscriptionAction.Channel = channel;
-
+                // recreate channel and topologyVisitor if current channel is no longer open (to survive server restart)
+                if (subscriptionAction.Channel == null || subscriptionAction.Channel.IsOpen == false)
+                {                    
+                    subscriptionAction.Channel = CreateChannel(queue);
+                    topologyVisitor = new TopologyBuilder(subscriptionAction.Channel);
+                }
+                
+                var channel = subscriptionAction.Channel;
+                
                 // Leaving topologyVisitor parameter for backward compatibility even though
                 // TopologyBuilder should always be recreated from current channel because otherwise
-                // it will fail to recreate queues in case of consumer cancelation notification
+                // it will fail to recreate queues in case of consumer cancelation notification.                
                 var currentTopologyVisitor = topologyVisitor ?? new TopologyBuilder(channel);
+
                 queue.Visit(currentTopologyVisitor);
 
                 channel.BasicQos(0, connectionConfiguration.PrefetchCount, false);
