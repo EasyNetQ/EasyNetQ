@@ -15,7 +15,7 @@ namespace EasyNetQ.Management.Client
         private readonly string username;
         private readonly string password;
         private readonly int portNumber;
-        private readonly JsonSerializerSettings settings;
+        public static readonly JsonSerializerSettings Settings;
 
         public ManagementClient(
             string hostUrl,
@@ -23,6 +23,18 @@ namespace EasyNetQ.Management.Client
             string password)
             : this(hostUrl, username, password, 15672)
         {
+        }
+
+        static ManagementClient()
+        {
+            Settings = new JsonSerializerSettings
+            {
+                ContractResolver = new RabbitContractResolver(),
+            };
+
+            Settings.Converters.Add(new PropertyConverter());
+            Settings.Converters.Add(new MessageStatsOrEmptyArrayConverter());
+            Settings.Converters.Add(new QueueTotalsOrEmptyArrayConverter());
         }
 
         public string HostUrl
@@ -60,12 +72,7 @@ namespace EasyNetQ.Management.Client
             this.password = password;
             this.portNumber = portNumber;
 
-            settings = new JsonSerializerSettings
-            {
-                ContractResolver = new RabbitContractResolver(),
-            };
-
-            settings.Converters.Add(new PropertyConverter());
+            
 
             LeaveDotsAndSlashesEscaped();
         }
@@ -529,7 +536,7 @@ namespace EasyNetQ.Management.Client
         {
             request.ContentType = "application/json";
 
-            var body = JsonConvert.SerializeObject(item, settings);
+            var body = JsonConvert.SerializeObject(item, Settings);
             using (var requestStream = request.GetRequestStream())
             using (var writer = new StreamWriter(requestStream))
             {
@@ -540,7 +547,7 @@ namespace EasyNetQ.Management.Client
         private T DeserializeResponse<T>(HttpWebResponse response)
         {
             var responseBody = GetBodyFromResponse(response);
-            return JsonConvert.DeserializeObject<T>(responseBody, settings);
+            return JsonConvert.DeserializeObject<T>(responseBody, Settings);
         }
 
         private static string GetBodyFromResponse(HttpWebResponse response)

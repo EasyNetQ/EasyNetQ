@@ -92,6 +92,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitContractResolver.cs" />
     <Compile Include="Serialization\ClientPropertiesJsonConverter.cs" />
+    <Compile Include="Serialization\ObjectOrEmptyArrayConverter.cs" />
     <Compile Include="Serialization\PropertyConverter.cs" />
     <Compile Include="Serialization\UnixDateTimeConverter.cs" />
     <Compile Include="Serialization\UnixDateTimeHelper.cs" />

@@ -84,7 +84,7 @@ namespace EasyNetQ
             return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, originalRoutingKey);
         }
 
-        public virtual void HandleConsumerError(BasicDeliverEventArgs devliverArgs, Exception exception)
+        public virtual void HandleConsumerError(BasicDeliverEventArgs deliverArgs, Exception exception)
         {
             try
             {
@@ -92,14 +92,14 @@ namespace EasyNetQ
 
                 using (var model = connection.CreateModel())
                 {
-                    var errorExchange = DeclareErrorExchangeQueueStructure(model, devliverArgs.RoutingKey);
+                    var errorExchange = DeclareErrorExchangeQueueStructure(model, deliverArgs.RoutingKey);
 
-                    var messageBody = CreateErrorMessage(devliverArgs, exception);
+                    var messageBody = CreateErrorMessage(deliverArgs, exception);
                     var properties = model.CreateBasicProperties();
                     properties.SetPersistent(true);
                     properties.Type = TypeNameSerializer.Serialize(typeof (Error));
 
-                    model.BasicPublish(errorExchange, devliverArgs.RoutingKey, properties, messageBody);
+                    model.BasicPublish(errorExchange, deliverArgs.RoutingKey, properties, messageBody);
                 }
             }
             catch (BrokerUnreachableException)
@@ -128,17 +128,17 @@ namespace EasyNetQ
             return EasyNetQ.PostExceptionAckStrategy.ShouldAck;
         }
 
-        private byte[] CreateErrorMessage(BasicDeliverEventArgs devliverArgs, Exception exception)
+        private byte[] CreateErrorMessage(BasicDeliverEventArgs deliverArgs, Exception exception)
         {
-            var messageAsString = Encoding.UTF8.GetString(devliverArgs.Body);
+            var messageAsString = Encoding.UTF8.GetString(deliverArgs.Body);
             var error = new Error
             {
-                RoutingKey = devliverArgs.RoutingKey,
-                Exchange = devliverArgs.Exchange,
+                RoutingKey = deliverArgs.RoutingKey,
+                Exchange = deliverArgs.Exchange,
                 Exception = exception.ToString(),
                 Message = messageAsString,
                 DateTime = DateTime.Now,
-                BasicProperties = new MessageBasicProperties(devliverArgs.BasicProperties)
+                BasicProperties = new MessageBasicProperties(deliverArgs.BasicProperties)
             };
 
             return serializer.MessageToBytes(error);
