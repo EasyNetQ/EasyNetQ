@@ -4,19 +4,21 @@ namespace EasyNetQ.InMemoryClient
 {
     public class InMemoryRabbitHutch
     {
-        public static IBus CreateBus()
+        public InMemoryConnectionFactory ConnectionFactory { get; private set; }
+
+        public IBus CreateBus()
         {
-            var connectionFactory = new InMemoryConnectionFactory();
+            ConnectionFactory = new InMemoryConnectionFactory();
 
             var serializer = new JsonSerializer();
             var logger = new ConsoleLogger();
             var conventions = new Conventions();
-            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, logger, conventions);
+            var consumerErrorStrategy = new DefaultConsumerErrorStrategy(ConnectionFactory, serializer, logger, conventions);
             var messageValidationStrategy = new DefaultMessageValidationStrategy(logger, TypeNameSerializer.Serialize);
 
             var advancedBus = new RabbitAdvancedBus(
-                new ConnectionConfiguration(), 
-                connectionFactory,
+                new ConnectionConfiguration(),
+                ConnectionFactory,
                 TypeNameSerializer.Serialize,
                 serializer,
                 new QueueingConsumerFactory(logger, consumerErrorStrategy),

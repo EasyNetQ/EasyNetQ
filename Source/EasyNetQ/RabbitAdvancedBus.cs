@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
@@ -19,7 +21,7 @@ namespace EasyNetQ
         private readonly IMessageValidationStrategy messageValidationStrategy;
 
         private readonly IPersistentConnection connection;
-        private readonly ConcurrentBag<SubscriptionAction> subscribeActions = new ConcurrentBag<SubscriptionAction>();
+        private readonly ConcurrentDictionary<string, SubscriptionAction> subscribeActions = new ConcurrentDictionary<string, SubscriptionAction>();
 
         public const bool NoAck = false;
 
@@ -110,13 +112,11 @@ namespace EasyNetQ
             });
         }
 
-        public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+        public void Subscribe(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
-            using (var channel = connection.CreateModel())
-            {
-                Subscribe(queue, onMessage, new TopologyBuilder(channel));
-            }
+            Subscribe(queue, onMessage, null);
         }
+
         public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, ITopologyVisitor topologyVisitor)
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -127,14 +127,20 @@ namespace EasyNetQ
                 throw new EasyNetQException("This bus has been disposed");
             }
 
-            var subscriptionAction = new SubscriptionAction(queue.IsSingleUse);
+            var newConsumerTag = Guid.NewGuid().ToString();
+            var subscriptionAction = new SubscriptionAction(newConsumerTag, logger, queue.IsSingleUse);
 
             subscriptionAction.Action = () =>
             {
-                var channel = connection.CreateModel();
-                channel.ModelShutdown += (model, reason) => logger.DebugWrite("Model Shutdown for queue: '{0}'", queue.Name);
+                // Reusing same channel in case queue or queue consumer is being recreated
+                var channel = subscriptionAction.Channel ?? CreateChannel(queue); 
+                subscriptionAction.Channel = channel;
 
-                queue.Visit(topologyVisitor);
+                // Leaving topologyVisitor parameter for backward compatibility even though
+                // TopologyBuilder should always be recreated from current channel because otherwise
+                // it will fail to recreate queues in case of consumer cancelation notification
+                var currentTopologyVisitor = topologyVisitor ?? new TopologyBuilder(channel);
+                queue.Visit(currentTopologyVisitor);
 
                 channel.BasicQos(0, connectionConfiguration.PrefetchCount, false);
 
@@ -153,6 +159,12 @@ namespace EasyNetQ
                         return onMessage(body, messsageProperties, messageRecievedInfo);
                     });
 
+                var cancelNotifications = consumer as IConsumerCancelNotifications;
+                if (cancelNotifications != null)
+                {
+                    cancelNotifications.BasicCancel += OnBasicCancel;
+                }
+
                 channel.BasicConsume(
                     queue.Name,             // queue
                     NoAck,                  // noAck 
@@ -164,30 +176,29 @@ namespace EasyNetQ
                     connectionConfiguration.PrefetchCount);
             };
 
+            
+
             AddSubscriptionAction(subscriptionAction);
+        }
+
+        private IModel CreateChannel(IQueue queue)
+        {
+            var channel = connection.CreateModel();
+            channel.ModelShutdown += (model, reason) => logger.DebugWrite("Model Shutdown for queue: '{0}'", queue.Name);
+            return channel;
         }
 
         private void AddSubscriptionAction(SubscriptionAction subscriptionAction)
         {
             if(subscriptionAction.IsMultiUse)
             {
-                subscribeActions.Add(subscriptionAction);
+                if (!subscribeActions.TryAdd(subscriptionAction.Id, subscriptionAction))
+                {
+                    throw new EasyNetQException("Failed remember subscription action");
+                }
             }
 
-            try
-            {
-                subscriptionAction.Action();
-            }
-            catch (OperationInterruptedException)
-            {
-
-            }
-            catch (EasyNetQException)
-            {
-                // Looks like the channel closed between our IsConnected check
-                // and the subscription action. Do nothing here, when the 
-                // connection comes back, the subcription action will be run then.
-            }
+            subscriptionAction.ExecuteAction();
         }
 
         public virtual IAdvancedPublishChannel OpenPublishChannel()
@@ -207,18 +218,10 @@ namespace EasyNetQ
             if (Connected != null) Connected();
 
             logger.DebugWrite("Re-creating subscribers");
-            try
+
+            foreach (var subscribeAction in subscribeActions.Values)
             {
-                foreach (var subscribeAction in subscribeActions)
-                {
-                    subscribeAction.Action();
-                }
-            }
-            catch (OperationInterruptedException operationInterruptedException)
-            {
-                logger.ErrorWrite("Re-creating subscribers failed: reason: '{0}'\n{1}", 
-                    operationInterruptedException.Message, 
-                    operationInterruptedException.ToString());
+                subscribeAction.ExecuteAction();
             }
         }
 
@@ -232,6 +235,26 @@ namespace EasyNetQ
         public virtual bool IsConnected
         {
             get { return connection.IsConnected; }
+        }
+
+        /// <summary>
+        ///     Handles Consumer Cancel Notification: http://www.rabbitmq.com/consumer-cancel.html
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnBasicCancel(object sender, BasicCancelEventArgs args)
+        {
+            logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. Recreating queue and queue listener. Consumer tag: " + args.ConsumerTag);
+
+            if (subscribeActions.ContainsKey(args.ConsumerTag))
+            {
+                // According to: http://www.rabbitmq.com/releases/rabbitmq-dotnet-client/v3.1.4/rabbitmq-dotnet-client-3.1.4-user-guide.pdf section 2.9.
+                // All IBasicConsumer methods are dispatched by single background thread 
+                // and MUST NOT invoke blocking AMQP operations: IModel.QueueDeclare, IModel.BasicCancel or IModel.BasicPublish...
+                // For this reason we are recreating queues and queue listeners on separate thread.
+                // Which is disposed after we are done.
+                new Thread(() => subscribeActions[args.ConsumerTag].ExecuteAction()).Start();
+            }
         }
 
         private bool disposed = false;
@@ -250,19 +273,45 @@ namespace EasyNetQ
 
     public class SubscriptionAction
     {
-        public SubscriptionAction(bool isSingleUse)
+        public SubscriptionAction(string id, IEasyNetQLogger logger, bool isSingleUse)
         {
+            this.logger = logger;
+            Id = id;
             IsSingleUse = isSingleUse;
             ClearAction();
         }
 
+        private readonly IEasyNetQLogger logger;
+        public string Id { get; private set; }
+        public Action Action { get; set; }
+        public IModel Channel { get; set; }
+        public bool IsSingleUse { get; private set; }
+        public bool IsMultiUse { get { return !IsSingleUse; } }
+
         public void ClearAction()
         {
             Action = () => { };
+            Channel = null;
         }
 
-        public Action Action { get; set; }
-        public bool IsSingleUse { get; private set; }
-        public bool IsMultiUse { get { return !IsSingleUse; } }
+        public void ExecuteAction()
+        {
+            try
+            {
+               Action();
+            }            
+            catch (OperationInterruptedException operationInterruptedException)
+            {
+                logger.ErrorWrite("Failed to create subscribers: reason: '{0}'\n{1}",
+                operationInterruptedException.Message,
+                operationInterruptedException.ToString());
+            }
+            catch (EasyNetQException)
+            {
+                // Looks like the channel closed between our IsConnected check
+                // and the subscription action. Do nothing here, when the 
+                // connection comes back, the subscription action will be run then.
+            }
+        }
     }
 }

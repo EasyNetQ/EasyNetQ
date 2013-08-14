@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.InMemoryClient
 {
-    public class CircleBuffer<T>
+    public class CircleBuffer<T> 
     {
         private CircleBufferNode<T> current;
 
@@ -26,6 +27,19 @@ namespace EasyNetQ.InMemoryClient
                 current = current.Next;
                 return current.Value;
             }
+        }
+
+        public IEnumerable<T> CircleOnesEnumerator()
+        {
+            var first = current.Next;
+            bool finished = false;
+            do
+            {
+                var next = current.Next;
+                yield return next.Value;
+
+                finished = next.Equals(first);
+            } while (!finished);
         }
     }
 

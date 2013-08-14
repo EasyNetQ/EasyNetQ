@@ -11,11 +11,14 @@ namespace EasyNetQ.Tests.InMemoryClient
     public class BasicPublishSubscribeTests
     {
         private IBus bus;
+        
+        private InMemoryRabbitHutch inMemoryRabbitHutch;
 
         [SetUp]
         public void SetUp()
         {
-            bus = InMemoryRabbitHutch.CreateBus();
+            inMemoryRabbitHutch = new InMemoryRabbitHutch();
+            bus = inMemoryRabbitHutch.CreateBus();
         }
 
         [TearDown]
@@ -38,6 +41,33 @@ namespace EasyNetQ.Tests.InMemoryClient
         public void Should_be_able_to_subscribe()
         {
             bus.Subscribe<MyMessage>("subscriberId", message => Console.WriteLine("Got message: {0}", message.Text));
+        }
+
+        [Test]
+        public void Should_be_able_to_resubscribe_in_case_queue_is_deleted_or_primary_node_is_down()
+        {
+            const string subscriberTag = "testConsumerCancelNotification";
+            const string queueName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests_testConsumerCancelNotification";
+            
+            bus.Subscribe<MyMessage>(subscriberTag, message => { });
+
+            var originalQueueId = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues[queueName].Id;
+
+            inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.DeleteQueue(queueName);
+
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues.ContainsKey(queueName))
+                {
+                    break;
+                }
+                Thread.Sleep(100); // Give time for background thread to reregister queue
+            }
+
+            var currentQueueId = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues[queueName].Id;
+
+            Assert.AreNotEqual(currentQueueId, originalQueueId);
         }
 
         [Test]

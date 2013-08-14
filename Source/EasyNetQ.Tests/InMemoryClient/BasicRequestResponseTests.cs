@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests.InMemoryClient
         [SetUp]
         public void SetUp()
         {
-            bus = InMemoryRabbitHutch.CreateBus();
+            bus = new InMemoryRabbitHutch().CreateBus();
         }
 
         [TearDown]
