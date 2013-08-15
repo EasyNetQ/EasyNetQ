@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 
 namespace EasyNetQ.Management.Client
 {
+    using Newtonsoft.Json.Converters;
+
     public class ManagementClient : IManagementClient
     {
         private readonly string hostUrl;
@@ -35,6 +37,8 @@ namespace EasyNetQ.Management.Client
             Settings.Converters.Add(new PropertyConverter());
             Settings.Converters.Add(new MessageStatsOrEmptyArrayConverter());
             Settings.Converters.Add(new QueueTotalsOrEmptyArrayConverter());
+            Settings.Converters.Add(new StringEnumConverter { CamelCaseText = true});
+            Settings.Converters.Add(new HaParamsConverter());
         }
 
         public string HostUrl

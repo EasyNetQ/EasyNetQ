@@ -58,6 +58,7 @@
     <Compile Include="Model\OverviewSerializationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScenarioTest.cs" />
+    <Compile Include="Serialization\HaParamsConverterTests.cs" />
     <Compile Include="TestExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -82,7 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EmbeddedResource Include="Json\Policies_ha_exactly.json" />
+    <EmbeddedResource Include="Json\Policies_ha.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

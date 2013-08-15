@@ -1,1 +1,0 @@
-﻿[{"vhost":"/","name":"ha-duplicate","pattern":"^dup.*","definition":{"ha-mode":"exactly","ha-params":2},"priority":1}]
