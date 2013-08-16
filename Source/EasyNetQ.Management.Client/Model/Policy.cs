@@ -1,5 +1,7 @@
 ﻿namespace EasyNetQ.Management.Client.Model
 {
+    using Newtonsoft.Json;
+
     public class Policy
     {
         public string Vhost { get; set; }

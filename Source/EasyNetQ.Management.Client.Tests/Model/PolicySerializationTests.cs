@@ -1,7 +1,9 @@
 ﻿namespace EasyNetQ.Management.Client.Tests.Model
 {
+    using System;
     using System.Linq;
     using Client.Model;
+    using Newtonsoft.Json;
     using NUnit.Framework;
 
     [TestFixture]
@@ -44,5 +46,20 @@
             Assert.AreEqual(HaSyncMode.Automatic, policy.Definition.HaSyncMode);
             Assert.AreEqual(0, policy.Priority);
         }
+
+        [Test]
+        public void Should_write_all_ha_policy_without_param()
+        {
+            var serializedMessage = JsonConvert.SerializeObject(new Policy
+            {
+                Name = "bob",
+                Pattern = "foo",
+                Definition = new PolicyDefinition {HaMode = HaMode.All}
+            }, ManagementClient.Settings);
+            Console.WriteLine(serializedMessage);
+            Assert.IsFalse(serializedMessage.Contains("ha-params"));
+            Assert.IsFalse(serializedMessage.Contains("federation_upstream_set"));
+        }
+
     }
 }

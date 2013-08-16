@@ -376,6 +376,39 @@ namespace EasyNetQ.Management.Client
             return Get<User>(string.Format("users/{0}", userName));
         }
 
+        public IEnumerable<Policy> GetPolicies()
+        {
+            return Get<IEnumerable<Policy>>("policies");
+        }
+
+        public void CreatePolicy(Policy policy)
+        {
+            if (string.IsNullOrEmpty(policy.Name))
+            {
+                throw new ArgumentException("Policy name is empty");
+            }
+            if (string.IsNullOrEmpty(policy.Vhost))
+            {
+                throw new ArgumentException("vhost name is empty");
+            }
+            if (policy.Definition == null)
+            {
+                throw new ArgumentException("Definition should not be null");
+            }
+
+            Put(GetPolicyUrl(policy.Name, policy.Vhost), policy);
+        }
+
+        private string GetPolicyUrl(string policyName, string vhost)
+        {
+            return string.Format("policies/{0}/{1}", SanitiseVhostName(vhost), policyName);
+        }
+
+        public void DeletePolicy(string policyName, Vhost vhost)
+        {
+            Delete(GetPolicyUrl(policyName, vhost.Name));
+        }
+
         public User CreateUser(UserInfo userInfo)
         {
             if (userInfo == null)
