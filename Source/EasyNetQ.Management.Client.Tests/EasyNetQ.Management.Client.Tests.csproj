@@ -49,6 +49,7 @@
     <Compile Include="Model\ExchangeInfoTests.cs" />
     <Compile Include="Model\MessageSerializationTests.cs" />
     <Compile Include="Model\NodeSerializationTests.cs" />
+    <Compile Include="Model\ParameterSerializationTests.cs" />
     <Compile Include="Model\PermissionInfoTests.cs" />
     <Compile Include="Model\PolicySerializationTests.cs" />
     <Compile Include="Model\PublishInfoTests.cs" />

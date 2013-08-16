@@ -294,5 +294,24 @@ namespace EasyNetQ.Management.Client
         /// <param name="policyName">Policy name</param>
         /// <param name="vhost">vhost on which the policy resides</param>
         void DeletePolicy(string policyName, Vhost vhost);
+
+        /// <summary>
+        /// Get all parameters on the cluster
+        /// </summary>
+        IEnumerable<Parameter> GetParameters();
+
+        /// <summary>
+        /// Creates a parameter on the cluster
+        /// </summary>
+        /// <param name="policy">Parameter to create</param>
+        void CreateParameter(Parameter parameter);
+
+        /// <summary>
+        /// Delete a parameter from the cluster
+        /// </summary>
+        /// <param name="componentName"></param>
+        /// <param name="vhost"></param>
+        /// <param name="name"></param>
+        void DeleteParameter(string componentName, string vhost, string name);
     }
 }

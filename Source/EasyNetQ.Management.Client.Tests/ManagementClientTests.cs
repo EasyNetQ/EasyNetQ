@@ -596,6 +596,38 @@ namespace EasyNetQ.Management.Client.Tests
             Assert.AreEqual(0, managementClient.GetPolicies().Count(p => p.Name == policyName && p.Vhost == "/"));
         }
 
+        [Test]
+        public void Should_be_able_to_list_parameters()
+        {
+            var parameters = managementClient.GetParameters();
+            Assert.NotNull(parameters);
+        }
+
+        [Test]
+        [Ignore("Requires the federation plugin to work")]
+        public void Should_be_able_to_create_parameter()
+        {
+            try
+            {
+                managementClient.DeleteParameter("federation-upstream", "/", "myfakefederationupstream");
+            }
+            catch (UnexpectedHttpStatusCodeException ex)
+            {
+                if (ex.StatusCodeNumber != 404)
+                {
+                    throw;
+                }
+            }
+            
+            managementClient.CreateParameter(new Parameter
+            {
+                Component = "federation-upstream",
+                Name = "myfakefederationupstream",
+                Vhost = "/",
+                Value = new {uri = "amqp://guest:guest@localhost"}
+            });
+            Assert.True(managementClient.GetParameters().Where(p=>p.Name == "myfakefederationupstream").Any());
+        }
     }
 }
 

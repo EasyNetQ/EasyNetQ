@@ -409,6 +409,29 @@ namespace EasyNetQ.Management.Client
             Delete(GetPolicyUrl(policyName, vhost.Name));
         }
 
+        public IEnumerable<Parameter> GetParameters()
+        {
+            return Get<IEnumerable<Parameter>>("parameters");
+        }
+
+        public void CreateParameter(Parameter parameter)
+        {
+            var componentName = parameter.Component;
+            var vhostName = parameter.Vhost;
+            var parameterName = parameter.Name;
+            Put(GetParameterUrl(componentName, vhostName, parameterName), parameter);
+        }
+
+        private string GetParameterUrl(string componentName, string vhost, string parameterName)
+        {
+            return string.Format("parameters/{0}/{1}/{2}", componentName, SanitiseVhostName(vhost), parameterName);
+        }
+
+        public void DeleteParameter(string componentName, string vhost, string name)
+        {
+            Delete(GetParameterUrl(componentName, vhost, name));
+        }
+
         public User CreateUser(UserInfo userInfo)
         {
             if (userInfo == null)

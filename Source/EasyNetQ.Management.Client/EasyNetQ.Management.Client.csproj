@@ -80,6 +80,7 @@
     <Compile Include="Model\MessagesUnacknowledgedDetails.cs" />
     <Compile Include="Model\Node.cs" />
     <Compile Include="Model\Overview.cs" />
+    <Compile Include="Model\Parameter.cs" />
     <Compile Include="Model\Permission.cs" />
     <Compile Include="Model\PermissionInfo.cs" />
     <Compile Include="Model\Policy.cs" />
