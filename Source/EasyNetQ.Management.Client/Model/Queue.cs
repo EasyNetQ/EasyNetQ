@@ -21,5 +21,7 @@ namespace EasyNetQ.Management.Client.Model
         public bool AutoDelete { get; set; }
         public Arguments Arguments { get; set; }
         public string Node { get; set; }
+        public IEnumerable<string> SlaveNodes { get; set; }
+        public IEnumerable<string> SynchronisedSlaveNodes { get; set; }
     }
 }
