@@ -4,7 +4,7 @@
 
     public class PolicyDefinition
     {
-        [JsonProperty("ha-mode")]
+        [JsonProperty("ha-mode", NullValueHandling = NullValueHandling.Ignore)]
         public HaMode HaMode;
         [JsonProperty("ha-params", NullValueHandling = NullValueHandling.Ignore)]
         public HaParams HaParams;

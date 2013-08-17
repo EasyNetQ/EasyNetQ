@@ -64,13 +64,6 @@
 
         [Test]
         [ExpectedException(typeof(JsonSerializationException))]
-        public void Should_not_be_able_to_serialize_unset_type()
-        {
-            JsonConvert.SerializeObject(new HaParams { AssociatedHaMode = HaMode.Unset, Nodes = new[] { "a", "b" } }, new HaParamsConverter());
-        }
-
-        [Test]
-        [ExpectedException(typeof(JsonSerializationException))]
         public void Should_not_be_able_to_serialize_all_type()
         {
             JsonConvert.SerializeObject(new HaParams { AssociatedHaMode = HaMode.All, Nodes = new[] { "a", "b" } }, new HaParamsConverter());

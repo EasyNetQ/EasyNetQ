@@ -2,7 +2,6 @@
 {
     public enum HaMode
     {
-        Unset,
         All,
         Exactly,
         Nodes

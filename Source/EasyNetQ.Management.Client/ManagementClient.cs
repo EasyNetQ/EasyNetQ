@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 
 namespace EasyNetQ.Management.Client
 {
+    using System.Diagnostics.Contracts;
     using Newtonsoft.Json.Converters;
 
     public class ManagementClient : IManagementClient
