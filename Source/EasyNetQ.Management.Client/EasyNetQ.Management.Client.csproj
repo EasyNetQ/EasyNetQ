@@ -68,6 +68,9 @@
     <Compile Include="Model\ExchangeInfo.cs" />
     <Compile Include="Model\ExchangeType.cs" />
     <Compile Include="Model\GetMessagesCriteria.cs" />
+    <Compile Include="Model\HaMode.cs" />
+    <Compile Include="Model\HaParams.cs" />
+    <Compile Include="Model\HaSyncMode.cs" />
     <Compile Include="Model\InputArguments.cs" />
     <Compile Include="Model\Listener.cs" />
     <Compile Include="Model\Message.cs" />
@@ -77,8 +80,11 @@
     <Compile Include="Model\MessagesUnacknowledgedDetails.cs" />
     <Compile Include="Model\Node.cs" />
     <Compile Include="Model\Overview.cs" />
+    <Compile Include="Model\Parameter.cs" />
     <Compile Include="Model\Permission.cs" />
     <Compile Include="Model\PermissionInfo.cs" />
+    <Compile Include="Model\Policy.cs" />
+    <Compile Include="Model\PolicyDefinition.cs" />
     <Compile Include="Model\PublishDetails.cs" />
     <Compile Include="Model\PublishInfo.cs" />
     <Compile Include="Model\PublishResult.cs" />
@@ -92,6 +98,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitContractResolver.cs" />
     <Compile Include="Serialization\ClientPropertiesJsonConverter.cs" />
+    <Compile Include="Serialization\HaParamsConverter.cs" />
     <Compile Include="Serialization\ObjectOrEmptyArrayConverter.cs" />
     <Compile Include="Serialization\PropertyConverter.cs" />
     <Compile Include="Serialization\UnixDateTimeConverter.cs" />

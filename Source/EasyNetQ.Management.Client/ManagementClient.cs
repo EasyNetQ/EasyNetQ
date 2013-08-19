@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 
 namespace EasyNetQ.Management.Client
 {
+    using System.Diagnostics.Contracts;
+    using Newtonsoft.Json.Converters;
+
     public class ManagementClient : IManagementClient
     {
         private readonly string hostUrl;
@@ -35,6 +38,8 @@ namespace EasyNetQ.Management.Client
             Settings.Converters.Add(new PropertyConverter());
             Settings.Converters.Add(new MessageStatsOrEmptyArrayConverter());
             Settings.Converters.Add(new QueueTotalsOrEmptyArrayConverter());
+            Settings.Converters.Add(new StringEnumConverter { CamelCaseText = true});
+            Settings.Converters.Add(new HaParamsConverter());
         }
 
         public string HostUrl
@@ -370,6 +375,62 @@ namespace EasyNetQ.Management.Client
         public User GetUser(string userName)
         {
             return Get<User>(string.Format("users/{0}", userName));
+        }
+
+        public IEnumerable<Policy> GetPolicies()
+        {
+            return Get<IEnumerable<Policy>>("policies");
+        }
+
+        public void CreatePolicy(Policy policy)
+        {
+            if (string.IsNullOrEmpty(policy.Name))
+            {
+                throw new ArgumentException("Policy name is empty");
+            }
+            if (string.IsNullOrEmpty(policy.Vhost))
+            {
+                throw new ArgumentException("vhost name is empty");
+            }
+            if (policy.Definition == null)
+            {
+                throw new ArgumentException("Definition should not be null");
+            }
+
+            Put(GetPolicyUrl(policy.Name, policy.Vhost), policy);
+        }
+
+        private string GetPolicyUrl(string policyName, string vhost)
+        {
+            return string.Format("policies/{0}/{1}", SanitiseVhostName(vhost), policyName);
+        }
+
+        public void DeletePolicy(string policyName, Vhost vhost)
+        {
+            Delete(GetPolicyUrl(policyName, vhost.Name));
+        }
+
+        public IEnumerable<Parameter> GetParameters()
+        {
+            return Get<IEnumerable<Parameter>>("parameters");
+        }
+
+        public void CreateParameter(Parameter parameter)
+        {
+            var componentName = parameter.Component;
+            var vhostName = parameter.Vhost;
+            var parameterName = parameter.Name;
+            Put(GetParameterUrl(componentName, vhostName, parameterName), parameter);
+        }
+
+        private string GetParameterUrl(string componentName, string vhost, string parameterName)
+        {
+            return string.Format("parameters/{0}/{1}/{2}", componentName, SanitiseVhostName(vhost), parameterName);
+        }
+
+        public void DeleteParameter(string componentName, string vhost, string name)
+        {
+            Delete(GetParameterUrl(componentName, vhost, name));
         }
 
         public User CreateUser(UserInfo userInfo)
