@@ -130,13 +130,12 @@ namespace EasyNetQ
             var newConsumerTag = Guid.NewGuid().ToString();
             var subscriptionAction = new SubscriptionAction(newConsumerTag, logger, queue.IsSingleUse);
 
-            subscriptionAction.Action = () =>
+            subscriptionAction.Action = (isNewConnection) =>
             {
-                // recreate channel and topologyVisitor if current channel is no longer open (to survive server restart)
-                if (subscriptionAction.Channel == null || subscriptionAction.Channel.IsOpen == false)
+                // recreate channel if current channel is no longer open or connection was dropped and reconnected (to survive server restart)
+                if (subscriptionAction.Channel == null || subscriptionAction.Channel.IsOpen == false || isNewConnection)
                 {                    
                     subscriptionAction.Channel = CreateChannel(queue);
-                    topologyVisitor = new TopologyBuilder(subscriptionAction.Channel);
                 }
                 
                 var channel = subscriptionAction.Channel;
@@ -204,7 +203,7 @@ namespace EasyNetQ
                 }
             }
 
-            subscriptionAction.ExecuteAction();
+            subscriptionAction.ExecuteAction(true);
         }
 
         public virtual IAdvancedPublishChannel OpenPublishChannel()
@@ -227,7 +226,7 @@ namespace EasyNetQ
 
             foreach (var subscribeAction in subscribeActions.Values)
             {
-                subscribeAction.ExecuteAction();
+                subscribeAction.ExecuteAction(true);
             }
         }
 
@@ -259,7 +258,7 @@ namespace EasyNetQ
                 // and MUST NOT invoke blocking AMQP operations: IModel.QueueDeclare, IModel.BasicCancel or IModel.BasicPublish...
                 // For this reason we are recreating queues and queue listeners on separate thread.
                 // Which is disposed after we are done.
-                new Thread(() => subscribeActions[args.ConsumerTag].ExecuteAction()).Start();
+                new Thread(() => subscribeActions[args.ConsumerTag].ExecuteAction(false)).Start();
             }
         }
 
@@ -289,34 +288,36 @@ namespace EasyNetQ
 
         private readonly IEasyNetQLogger logger;
         public string Id { get; private set; }
-        public Action Action { get; set; }
+        public Action<bool> Action { get; set; }
         public IModel Channel { get; set; }
         public bool IsSingleUse { get; private set; }
         public bool IsMultiUse { get { return !IsSingleUse; } }
 
         public void ClearAction()
         {
-            Action = () => { };
+            Action = (c) => { };
             Channel = null;
         }
 
-        public void ExecuteAction()
+        public void ExecuteAction(bool isNewConnection)
         {
             try
             {
-               Action();
-            }            
+                Action(isNewConnection);
+            }
             catch (OperationInterruptedException operationInterruptedException)
             {
                 logger.ErrorWrite("Failed to create subscribers: reason: '{0}'\n{1}",
-                operationInterruptedException.Message,
-                operationInterruptedException.ToString());
+                                  operationInterruptedException.Message,
+                                  operationInterruptedException.ToString());
             }
-            catch (EasyNetQException)
+            catch (EasyNetQException exc)
             {
+                // and the subscription action."
                 // Looks like the channel closed between our IsConnected check
                 // and the subscription action. Do nothing here, when the 
                 // connection comes back, the subscription action will be run then.
+                logger.DebugWrite("Channel closed between our IsConnected check.", exc);
             }
         }
     }
