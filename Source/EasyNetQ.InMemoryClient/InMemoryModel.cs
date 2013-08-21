@@ -335,7 +335,7 @@ namespace EasyNetQ.InMemoryClient
 
         public bool IsOpen
         {
-            get { throw new NotImplementedException(); }
+            get { return true; }
         }
 
         public ulong NextPublishSeqNo
