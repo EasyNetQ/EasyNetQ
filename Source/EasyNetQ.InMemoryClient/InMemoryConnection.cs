@@ -14,6 +14,7 @@ namespace EasyNetQ.InMemoryClient
     {
         private readonly IDictionary<string, ExchangeInfo> exchanges = new Dictionary<string, ExchangeInfo>();
         private readonly IDictionary<string, QueueInfo> queues = new Dictionary<string, QueueInfo>();
+        private readonly IList<IModel> channels = new List<IModel>();
 
         public InMemoryConnection()
         {
@@ -29,6 +30,11 @@ namespace EasyNetQ.InMemoryClient
         public IDictionary<string, QueueInfo> Queues
         {
             get { return queues; }
+        }
+
+        public IList<IModel> Channels
+        {
+            get { return channels; }
         }
 
         public void DeleteQueue(string queueName)
@@ -48,12 +54,19 @@ namespace EasyNetQ.InMemoryClient
 
         public IModel CreateModel()
         {
-            return new InMemoryModel(this);
+            var channel = new InMemoryModel(this);
+            channels.Add(channel);
+            
+            return channel;
         }
 
         public void Close()
         {
             // nothing to do.
+            if (ConnectionShutdown != null)
+            {
+                ConnectionShutdown.Invoke(this, new ShutdownEventArgs(new ShutdownInitiator(), 0, ""));
+            }
         }
 
         public void Close(ushort reasonCode, string reasonText)

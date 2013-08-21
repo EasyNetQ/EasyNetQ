@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Linq;
 using System.Threading;
 using EasyNetQ.InMemoryClient;
 using NUnit.Framework;
@@ -44,7 +45,7 @@ namespace EasyNetQ.Tests.InMemoryClient
         }
 
         [Test]
-        public void Should_be_able_to_resubscribe_in_case_queue_is_deleted_or_primary_node_is_down()
+        public void Should_be_able_to_resubscribe_on_same_channel_after_queue_is_deleted_or_primary_node_is_down()
         {
             const string subscriberTag = "testConsumerCancelNotification";
             const string queueName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests_testConsumerCancelNotification";
@@ -52,6 +53,7 @@ namespace EasyNetQ.Tests.InMemoryClient
             bus.Subscribe<MyMessage>(subscriberTag, message => { });
 
             var originalQueueId = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues[queueName].Id;
+            var originalChannel = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Channels.Last();
 
             inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.DeleteQueue(queueName);
 
@@ -62,12 +64,41 @@ namespace EasyNetQ.Tests.InMemoryClient
                 {
                     break;
                 }
+                Thread.Sleep(100); // Give time for background thread to reregister queue.
+            }
+            
+            var currentQueueId = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues[queueName].Id;
+            var currentChannel = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Channels.Last();
+
+            Assert.AreNotEqual(currentQueueId, originalQueueId); // Queue is recreated with new ID.
+            Assert.AreEqual(originalChannel, currentChannel);  // Same channel has been reused. 
+        }
+
+        [Test]
+        public void Should_be_able_to_resubscribe_on_new_channel_after_reconnecting()
+        {
+            const string subscriberTag = "testResubscribeAfterReconnecting";
+            const string queueName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests_testResubscribeAfterReconnecting";
+
+            bus.Subscribe<MyMessage>(subscriberTag, message => { });
+
+            var originalChannel = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Channels.Last();
+
+            inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Close();
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues.ContainsKey(queueName))
+                {
+                    break;
+                }
                 Thread.Sleep(100); // Give time for background thread to reregister queue
             }
 
-            var currentQueueId = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues[queueName].Id;
+            var currentChannel = inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Channels.Last();
 
-            Assert.AreNotEqual(currentQueueId, originalQueueId);
+            Assert.IsTrue(inMemoryRabbitHutch.ConnectionFactory.CurrentConnection.Queues.ContainsKey(queueName));
+            Assert.AreNotEqual(originalChannel, currentChannel);  // New channel has been created. Old channels cannot be reused.
         }
 
         [Test]
