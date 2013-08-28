@@ -93,10 +93,6 @@
     <Compile Include="EasyNetQConsumerTest.cs" />
     <Compile Include="ExceptionConditionsTests.cs" />
     <Compile Include="FluentConfiguration\SubscriptionConfigurationTests.cs" />
-    <Compile Include="InMemoryClient\AdvancedPublishSubscribeTests.cs" />
-    <Compile Include="InMemoryClient\BasicPublishSubscribeTests.cs" />
-    <Compile Include="InMemoryClient\BasicRequestResponseTests.cs" />
-    <Compile Include="InMemoryClient\BindingInfoTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="ModelCleanupTests.cs" />
@@ -127,10 +123,6 @@
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.InMemoryClient\EasyNetQ.InMemoryClient.csproj">
-      <Project>{E5115EA9-CD2E-439B-878A-DEF7F3E8FD99}</Project>
-      <Name>EasyNetQ.InMemoryClient</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj">
       <Project>{E7AF3836-8354-4CDE-A9E7-352569B65B1E}</Project>
       <Name>EasyNetQ.Tests.Messages</Name>
