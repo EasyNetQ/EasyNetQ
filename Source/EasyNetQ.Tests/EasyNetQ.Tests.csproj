@@ -98,13 +98,7 @@
     <Compile Include="InMemoryClient\BasicRequestResponseTests.cs" />
     <Compile Include="InMemoryClient\BindingInfoTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
-    <Compile Include="MockBasicProperties.cs" />
-    <Compile Include="MockConnection.cs" />
-    <Compile Include="MockConnectionFactory.cs" />
-    <Compile Include="MockConsumerFactory.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
-    <Compile Include="MockLogger.cs" />
-    <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />
     <Compile Include="MultiThreadedPublisherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -126,7 +120,6 @@
     <Compile Include="MessagePropertiesTests.cs" />
     <Compile Include="SubscribeToErrorQueueSpike.cs" />
     <Compile Include="TaskExtensions.cs" />
-    <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
     <Compile Include="Topology\TopologyTests.cs" />

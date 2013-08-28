@@ -1,7 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
+using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
 {
@@ -9,60 +10,42 @@ namespace EasyNetQ.Tests
     public class ModelCleanupTests
     {
         private IBus bus;
-        private MockModel model;
+        private MockBuilder mockBuilder;
 
         [SetUp]
         public void SetUp()
         {
-            model = new MockModel
-            {
-                BasicPublishAction = (a,b,c,d) => { }
-            };
-            var busFactory = new TestBusFactory();
-            bus = busFactory.CreateBusWithMockAmqpClient();
-
-            ((MockConnection) busFactory.Connection).CreateModelAction = () => {
-                Console.Out.WriteLine("Creating Model");
-                return model;
-            };
+            mockBuilder = new MockBuilder();
+            bus = mockBuilder.Bus;
         }
 
         [Test]
         public void Should_cleanup_publish_model()
         {
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Publish(new TestMessage());
             }
 
-            aborted.ShouldBeTrue();
+            mockBuilder.Channel.AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_subscribe_model()
         {
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
             bus.Subscribe<TestMessage>("abc", mgs => {});
             bus.Dispose();
 
-            aborted.ShouldBeTrue();
+            mockBuilder.Channel.AssertWasCalled(x => x.Close());
         }
 
         [Test]
         public void Should_cleanup_subscribe_async_model()
         {
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
             bus.SubscribeAsync<TestMessage>("abc", msg => null);
             bus.Dispose();
 
-            aborted.ShouldBeTrue();
+            mockBuilder.Channel.AssertWasCalled(x => x.Close());
         }
 
         [Test]
@@ -70,22 +53,22 @@ namespace EasyNetQ.Tests
         {
             // TODO: Actually creates two IModel instances, should check that both get cleaned up
 
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
             }
             bus.Dispose();
 
-            aborted.ShouldBeTrue();
+            mockBuilder.Channel.AssertWasCalled(x => x.Close());
         }
 
         [Test]
         public void Should_cleanup_respond_model()
         {
-            // TODO: Implement this test
+            bus.Respond<TestRequestMessage, TestResponseMessage>(x => null);
+            bus.Dispose();
+
+            mockBuilder.Channel.AssertWasCalled(x => x.Close());
         }
     }
 }

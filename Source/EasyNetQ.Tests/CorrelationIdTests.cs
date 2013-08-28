@@ -1,7 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
+using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
 {
@@ -11,17 +14,13 @@ namespace EasyNetQ.Tests
         private const string correlationId = "the correlation id";
 
         private IBus bus;
-        private MockModel model;
+        private MockBuilder mockBuilder;
 
         [SetUp]
         public void SetUp()
         {
-            model = new MockModel();
-            bus = new TestBusFactory
-            {
-                Model = model,
-                GetCorrelationId = () => correlationId
-            }.CreateBusWithMockAmqpClient();
+            mockBuilder = new MockBuilder(x => x.Register<Func<string>>(_ => () => correlationId));
+            bus = mockBuilder.Bus;
         }
 
         [Test]
@@ -29,10 +28,16 @@ namespace EasyNetQ.Tests
         {
             IBasicProperties basicProperties = null;
 
-            model.BasicPublishAction = (a, b, properties, body) =>
-            {
-                basicProperties = properties;
-            };
+            mockBuilder.Channel.Stub(x => x.BasicPublish(
+                Arg<string>.Is.Anything,
+                Arg<string>.Is.Anything,
+                Arg<IBasicProperties>.Is.Anything,
+                Arg<byte[]>.Is.Anything)).Callback<string, string, IBasicProperties, byte[]>(
+                    (a, b, properties, body) =>
+                        {
+                            basicProperties = properties;
+                            return true;
+                        });
 
             using (var publishChannel = bus.OpenPublishChannel())
             {
