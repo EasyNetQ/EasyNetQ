@@ -53,8 +53,8 @@ namespace EasyNetQ.Tests
         public void Server_goes_away_and_comes_back_during_subscription()
         {
             Console.WriteLine("Creating busses");
-            using (var busA = RabbitHutch.CreateBus("host=ubuntu:5672,ubuntu:5674"))
-            using (var busB = RabbitHutch.CreateBus("host=ubuntu:5674,ubuntu:5672"))
+            using (var busA = RabbitHutch.CreateBus("host=localhost"))
+            using (var busB = RabbitHutch.CreateBus("host=localhost"))
             {
                 Console.WriteLine("About to subscribe");
 
