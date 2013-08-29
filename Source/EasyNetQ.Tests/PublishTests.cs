@@ -10,44 +10,47 @@ using Rhino.Mocks;
 namespace EasyNetQ.Tests
 {
     [TestFixture]
-    public class When_Publish_is_called
+    public class When_publish_is_called
     {
         private const string correlationId = "abc123";
 
         private MockBuilder mockBuilder;
-        private IEasyNetQLogger logger;
         byte[] body;
         private IBasicProperties properties;
 
         [SetUp]
         public void SetUp()
         {
-            logger = MockRepository.GenerateStub<IEasyNetQLogger>();
             mockBuilder = new MockBuilder(x => 
-                x.Register(_ => logger)
-                .Register<Func<string>>(_ => () => correlationId));
+                x.Register<Func<string>>(_ => () => correlationId));
 
-            mockBuilder.Channel.Stub(x => 
-                x.BasicPublish(null, null, null, null))
-                    .IgnoreArguments()
-                    .Callback<string, string, IBasicProperties, byte[]>((e, r, p, b) =>
+            using (var channel = mockBuilder.Bus.OpenPublishChannel())
+            {
+                mockBuilder.Channels[0].Stub(x =>
+                    x.BasicPublish(null, null, null, null))
+                        .IgnoreArguments()
+                        .Callback<string, string, IBasicProperties, byte[]>((e, r, p, b) =>
                         {
                             body = b;
                             properties = p;
                             return true;
                         });
 
-            using (var channel = mockBuilder.Bus.OpenPublishChannel())
-            {
                 var message = new MyMessage { Text = "Hiya!" };
                 channel.Publish(message);
             }
         }
 
         [Test]
+        public void Should_create_a_channel_to_publish_on()
+        {
+            mockBuilder.Channels.Count.ShouldEqual(1);
+        }
+
+        [Test]
         public void Should_call_basic_publish()
         {
-            mockBuilder.Channel.AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.BasicPublish(
                     Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"), 
                     Arg<string>.Is.Equal(""), 
@@ -79,20 +82,20 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_exchange()
         {
-            mockBuilder.Channel.AssertWasCalled(x => x.ExchangeDeclare(
+            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
                 "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests", "topic", true, false, null));
         }
 
         [Test]
         public void Should_close_channel()
         {
-            mockBuilder.Channel.AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[0].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_write_debug_message_saying_message_was_published()
         {
-            logger.AssertWasCalled(x => x.DebugWrite(
+            mockBuilder.Logger.AssertWasCalled(x => x.DebugWrite(
                 "Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
                 "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests",
                 "",
@@ -121,7 +124,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_call_basic_publish_with_correct_routing_key()
         {
-            mockBuilder.Channel.AssertWasCalled(x =>
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.BasicPublish(
                     Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"),
                     Arg<string>.Is.Equal("X.A"),

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
@@ -9,8 +10,9 @@ namespace EasyNetQ.Tests.Mocking
     {
         readonly IConnectionFactory connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
         readonly IConnection connection = MockRepository.GenerateStub<IConnection>();
-        readonly IModel channel = MockRepository.GenerateStub<IModel>();
+        readonly List<IModel> channels = new List<IModel>();
         readonly IBasicProperties basicProperties = new BasicProperties();
+        private readonly IEasyNetQLogger logger = MockRepository.GenerateStub<IEasyNetQLogger>();
         private readonly IBus bus;
 
         public const string Host = "my_host";
@@ -36,14 +38,19 @@ namespace EasyNetQ.Tests.Mocking
 
             connection.Stub(x => x.IsOpen).Return(true);
             
-            connection.Stub(x => x.CreateModel()).Return(channel);
-
-            channel.Stub(x => x.CreateBasicProperties()).Return(basicProperties);
+            connection.Stub(x => x.CreateModel()).WhenCalled(i =>
+                {
+                    var channel = MockRepository.GenerateStub<IModel>();
+                    i.ReturnValue = channel;
+                    channels.Add(channel);
+                    channel.Stub(x => x.CreateBasicProperties()).Return(basicProperties);
+                });
 
             bus = RabbitHutch.CreateBus("host=localhost", x =>
                     {
                         registerServices(x);
                         x.Register(_ => connectionFactory);
+                        x.Register(_ => logger);
                     });
         }
 
@@ -57,14 +64,19 @@ namespace EasyNetQ.Tests.Mocking
             get { return connection; }
         }
 
-        public IModel Channel
+        public List<IModel> Channels
         {
-            get { return channel; }
+            get { return channels; }
         }
 
         public IBasicProperties BasicProperties
         {
             get { return basicProperties; }
+        }
+
+        public IEasyNetQLogger Logger
+        {
+            get { return logger; }
         }
 
         public IBus Bus

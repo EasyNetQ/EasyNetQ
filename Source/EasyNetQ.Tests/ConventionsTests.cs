@@ -87,14 +87,10 @@ namespace EasyNetQ.Tests
                 QueueNamingConvention = (x, y) => "CustomQueueNamingConvention",
                 TopicNamingConvention = x => "CustomTopicNamingConvention"
             };
-            
-            mockBuilder = new MockBuilder();
-            var bus = RabbitHutch.CreateBus("host=localhost",
-                x => x
-                    .Register(_ => mockBuilder.ConnectionFactory)
-                    .Register<IConventions>(_ => customConventions));
 
-		    using (var publishChannel = bus.OpenPublishChannel())
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
+
+		    using (var publishChannel = mockBuilder.Bus.OpenPublishChannel())
 		    {
                 publishChannel.Publish(new TestMessage());
 		    }
@@ -103,14 +99,14 @@ namespace EasyNetQ.Tests
 		[Test]
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
-            mockBuilder.Channel.AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.ExchangeDeclare("CustomExchangeNamingConvention", "topic", true, false, null));
 		}
 
 		[Test]
 		public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
 		{
-            mockBuilder.Channel.AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.BasicPublish(
                     Arg<string>.Is.Equal("CustomExchangeNamingConvention"), 
                     Arg<string>.Is.Anything, 
@@ -121,7 +117,7 @@ namespace EasyNetQ.Tests
 		[Test]
 		public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
 		{
-            mockBuilder.Channel.AssertWasCalled(x =>
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.BasicPublish(
                     Arg<string>.Is.Anything,
                     Arg<string>.Is.Equal("CustomTopicNamingConvention"),
@@ -144,19 +140,15 @@ namespace EasyNetQ.Tests
                 RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
             };
 
-            mockBuilder = new MockBuilder();
-            var bus = RabbitHutch.CreateBus("host=localhost",
-                x => x
-                    .Register(_ => mockBuilder.ConnectionFactory)
-                    .Register<IConventions>(_ => customConventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
 
-            bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
+            mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
         [Test]
         public void Should_correctly_bind_using_new_conventions()
         {
-            mockBuilder.Channel.AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.QueueBind(
                     "CustomRpcRoutingKeyName",
                     "CustomRpcExchangeName",
@@ -166,7 +158,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_correct_exchange()
         {
-            mockBuilder.Channel.AssertWasCalled(x =>
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.ExchangeDeclare("CustomRpcExchangeName", "direct", true, false, null));
         }
 
@@ -224,14 +216,14 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_use_exchange_name_from_custom_names_provider()
         {
-            mockBuilder.Channel.AssertWasCalled(x =>
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true));
         }
 
         [Test]
         public void Should_use_queue_name_from_custom_names_provider()
         {
-            mockBuilder.Channel.AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null));
         }
     }

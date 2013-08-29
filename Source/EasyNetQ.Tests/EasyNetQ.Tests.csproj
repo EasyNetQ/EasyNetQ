@@ -79,7 +79,6 @@
     <Compile Include="Bugs\SubscriptionOnTransientQueueThrowsOnReconnect.cs" />
     <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
-    <Compile Include="ComponentRegistrationTests.cs" />
     <Compile Include="Integration\ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConnectionFactoryWrapperTests.cs" />
@@ -87,7 +86,6 @@
     <Compile Include="ConnectionString\ConnectionStringParserTests.cs" />
     <Compile Include="Integration\ConsumerErrorConditionsTests.cs" />
     <Compile Include="ConventionsTests.cs" />
-    <Compile Include="CorrelationIdTests.cs" />
     <Compile Include="Integration\DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />
     <Compile Include="DefaultMessageValidationStrategyTests.cs" />

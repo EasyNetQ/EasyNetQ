@@ -109,7 +109,7 @@ namespace EasyNetQ.Tests
         {
             public void Consume(MessageA message)
             {
-                Console.Out.WriteLine("Message handled: '{0}'", message.Text);
+                // Console.Out.WriteLine("Message handled: '{0}'", message.Text);
             }
 
             [Consumer(SubscriptionId = "MyExplicitId")]

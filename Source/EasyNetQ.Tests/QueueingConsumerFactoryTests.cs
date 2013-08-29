@@ -27,7 +27,11 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             consumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
-            queueingConsumerFactory = new QueueingConsumerFactory(new ConsoleLogger(), consumerErrorStrategy);
+            
+            queueingConsumerFactory = new QueueingConsumerFactory(
+                MockRepository.GenerateStub<IEasyNetQLogger>(), 
+                consumerErrorStrategy);
+
             autoResetEvent = new AutoResetEvent(false);
             queueingConsumerFactory.SynchronisationAction = () => autoResetEvent.Set();
         }
