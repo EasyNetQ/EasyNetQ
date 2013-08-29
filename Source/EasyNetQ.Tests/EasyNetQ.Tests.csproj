@@ -103,6 +103,7 @@
     <Compile Include="Integration\PublishSubscribeTests.cs" />
     <Compile Include="Integration\PublishSubscribeWithPublisherConfirms.cs" />
     <Compile Include="Integration\PublishSubscribeWithTopicsTests.cs" />
+    <Compile Include="PublishTests.cs" />
     <Compile Include="QueueingConsumerFactoryTests.cs" />
     <Compile Include="Integration\RabbitAdvancedBusTests.cs" />
     <Compile Include="Integration\RequestResponseTests.cs" />
