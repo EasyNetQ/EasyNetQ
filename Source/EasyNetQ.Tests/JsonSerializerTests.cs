@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Text;
 using EasyNetQ.SystemMessages;
+using EasyNetQ.Tests.Integration;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using BasicProperties = RabbitMQ.Client.Framing.v0_8.BasicProperties;

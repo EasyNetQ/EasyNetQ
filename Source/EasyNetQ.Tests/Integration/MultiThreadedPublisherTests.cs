@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     public class MultiThreadedPublisherTests

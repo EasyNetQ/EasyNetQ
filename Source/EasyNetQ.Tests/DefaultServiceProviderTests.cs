@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using EasyNetQ.Loggers;
+using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -51,57 +50,30 @@ namespace EasyNetQ.Tests
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
 
-        [Test, Explicit("Requires RabbitMQ instance")]
+        [Test]
         public void Should_be_able_to_replace_bus_components()
         {
-            var logger = new TestLogger();
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            new MockBuilder(x => x.Register(_ => logger));
 
-            using (var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => logger)))
-            {
-                // should see the test logger on the console
-            }
+            logger.AssertWasCalled(x => x.DebugWrite("Trying to connect"));
         }
 
-        [Test, Explicit("Requires RabbitMQ instance")]
+        [Test]
         public void Should_be_able_to_sneakily_get_the_service_provider()
         {
             IServiceProvider provider = null;
-            using (var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(sp =>
-                {
-                    provider = sp;
-                    return new ConsoleLogger();
-                })))
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            new MockBuilder(x => x.Register(sp =>
             {
-                // now get any services you need ...
-                var logger = provider.Resolve<IEasyNetQLogger>();
-                logger.DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
-            }
-        }
-    }
+                provider = sp;
+                return logger;
+            }));
+            var retrievedLogger = provider.Resolve<IEasyNetQLogger>();
+            retrievedLogger.DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
 
-    public class TestLogger : IEasyNetQLogger
-    {
-        public void DebugWrite(string format, params object[] args)
-        {
-            Console.WriteLine("I am the test logger");
-            Console.WriteLine(format, args);
-        }
-
-        public void InfoWrite(string format, params object[] args)
-        {
-            Console.WriteLine("I am the test logger");
-            Console.WriteLine(format, args);
-        }
-
-        public void ErrorWrite(string format, params object[] args)
-        {
-            Console.WriteLine("I am the test logger");
-            Console.WriteLine(format, args);
-        }
-
-        public void ErrorWrite(Exception exception)
-        {
-            throw new NotImplementedException();
+            logger.AssertWasCalled(x => x.DebugWrite("Hey, I'm pretending to be EasyNetQ :)"));
         }
     }
 

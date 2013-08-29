@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     public class SubscriberOfSpike
     {

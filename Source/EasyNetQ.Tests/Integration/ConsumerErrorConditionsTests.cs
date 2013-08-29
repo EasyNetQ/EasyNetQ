@@ -15,12 +15,6 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-
-            // wait for rabbit to connect
-            while (!bus.IsConnected)
-            {
-                Thread.Sleep(10);
-            }
         }
 
         [TearDown]

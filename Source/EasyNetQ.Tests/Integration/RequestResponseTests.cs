@@ -1,11 +1,12 @@
 // ReSharper disable InconsistentNaming
+
 using System;
 using System.Runtime.Serialization;
 using System.Threading;
 using NUnit.Framework;
 using RabbitMQ.Client;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     public class RequestResponseTests

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Topology;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     public class RabbitAdvancedBusTests

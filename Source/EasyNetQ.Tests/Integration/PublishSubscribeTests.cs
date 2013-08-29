@@ -1,10 +1,11 @@
 // ReSharper disable InconsistentNaming
+
 using System;
 using System.Threading;
 using EasyNetQ.Loggers;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     public class PublishSubscribeTests
@@ -197,16 +198,6 @@ namespace EasyNetQ.Tests
             subscribeBus1.Dispose();
             subscribeBus2.Dispose();
         }
-    }
-
-    public class MyMessage
-    {
-        public string Text { get; set; }
-    }
-
-    public class MyOtherMessage
-    {
-        public string Text { get; set; }
     }
 }
 

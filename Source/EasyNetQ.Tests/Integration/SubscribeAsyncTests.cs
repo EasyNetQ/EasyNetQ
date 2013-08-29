@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     public class SubscribeAsyncTests

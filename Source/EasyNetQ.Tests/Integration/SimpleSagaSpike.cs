@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     public class SimpleSagaSpike
     {
