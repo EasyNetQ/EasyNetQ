@@ -99,6 +99,36 @@ namespace EasyNetQ.Tests
                 correlationId));
         }
     }
+
+    [TestFixture]
+    public class When_publish_with_topic_is_called
+    {
+        private MockBuilder mockBuilder;
+
+        [SetUp]
+        public void SetUp()
+        {
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            mockBuilder = new MockBuilder(x => x.Register(_ => logger));
+
+            using (var channel = mockBuilder.Bus.OpenPublishChannel())
+            {
+                var message = new MyMessage { Text = "Hiya!" };
+                channel.Publish(message, x => x.WithTopic("X.A"));
+            }
+        }
+
+        [Test]
+        public void Should_call_basic_publish_with_correct_routing_key()
+        {
+            mockBuilder.Channel.AssertWasCalled(x =>
+                x.BasicPublish(
+                    Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"),
+                    Arg<string>.Is.Equal("X.A"),
+                    Arg<IBasicProperties>.Is.Equal(mockBuilder.BasicProperties),
+                    Arg<byte[]>.Is.Anything));
+        }
+    }
 }
 
 // ReSharper restore InconsistentNaming
