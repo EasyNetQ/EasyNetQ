@@ -38,7 +38,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        [Test]
+        [Test, Explicit(@"Needs message files in 'C:\temp\MessageOutput'")]
         public void Should_be_able_to_read_only_error_messages()
         {
             var parameters = new QueueParameters

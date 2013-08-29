@@ -33,7 +33,7 @@ namespace EasyNetQ.Scheduler.Tests
 
             schedulerService = new SchedulerService(
                 bus, 
-                new ConsoleLogger(), 
+                MockRepository.GenerateStub<IEasyNetQLogger>(), 
                 scheduleRepository,
                 new SchedulerServiceConfiguration
                 {
