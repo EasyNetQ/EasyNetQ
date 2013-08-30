@@ -1,12 +1,15 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Collections;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
 
@@ -101,6 +104,7 @@ namespace EasyNetQ.Tests
 
         private const string typeName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests";
         private const string subscriptionId = "the_subscription_id";
+        private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
         private const ulong deliveryTag = 123;
 
@@ -143,7 +147,7 @@ namespace EasyNetQ.Tests
                 new BasicProperties
                 {
                     Type = typeName,
-                    CorrelationId = "some correlation id"
+                    CorrelationId = correlationId
                 },
                 body);
 
@@ -162,6 +166,126 @@ namespace EasyNetQ.Tests
         public void Should_ack_the_message()
         {
             mockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+        }
+
+        [Test]
+        public void Should_write_debug_message()
+        {
+            const string expectedMessageFormat = "Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'";
+
+            mockBuilder.Logger.AssertWasCalled(
+                x => x.DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag));
+        }
+    }
+
+    [TestFixture]
+    public class When_the_handler_throws_an_exception
+    {
+        private MockBuilder mockBuilder;
+        private IConsumerErrorStrategy consumerErrorStrategy;
+
+        private const string typeName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests";
+        private const string subscriptionId = "the_subscription_id";
+        private const string correlationId = "the_correlation_id";
+        private const string consumerTag = "the_consumer_tag";
+        private const ulong deliveryTag = 123;
+
+        private MyMessage originalMessage;
+        private readonly Exception originalException = new Exception("Some exception message");
+        private BasicDeliverEventArgs basicDeliverEventArgs;
+        private Exception raisedException;
+
+        [SetUp]
+        public void SetUp()
+        {
+            var conventions = new Conventions
+            {
+                ConsumerTagConvention = () => consumerTag
+            };
+
+            consumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            consumerErrorStrategy.Stub(x => x.HandleConsumerError(null, null))
+                .IgnoreArguments()
+                .WhenCalled(i =>
+                {
+                    basicDeliverEventArgs = (BasicDeliverEventArgs) i.Arguments[0];
+                    raisedException = (Exception) i.Arguments[1];
+                });
+            consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldAck);
+
+            mockBuilder = new MockBuilder(x => x
+                .Register<IConventions>(_ => conventions)
+                .Register(_ => consumerErrorStrategy)
+                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                );
+
+            mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
+            {
+                throw originalException;
+            });
+
+
+            const string text = "Hello there, I am the text!";
+            originalMessage = new MyMessage { Text = text };
+
+            var body = new JsonSerializer().MessageToBytes(originalMessage);
+
+            // deliver a message
+            mockBuilder.Consumers[0].HandleBasicDeliver(
+                consumerTag,
+                deliveryTag,
+                false, // redelivered
+                typeName,
+                "#",
+                new BasicProperties
+                {
+                    Type = typeName,
+                    CorrelationId = correlationId
+                },
+                body);
+
+            // wait for the subscription thread to handle the message ...
+            var autoResetEvent = new AutoResetEvent(false);
+            var consumerFactory = (QueueingConsumerFactory) mockBuilder.ServiceProvider.Resolve<IConsumerFactory>();
+            consumerFactory.SynchronisationAction = () => autoResetEvent.Set();
+            autoResetEvent.WaitOne(1000);
+        }
+
+        [Test]
+        public void Should_ack()
+        {
+            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+        }
+
+        [Test]
+        public void Should_write_exception_log_message()
+        {
+            // to brittle to put exact message here I think
+            mockBuilder.Logger.AssertWasCalled(x => x.ErrorWrite(Arg<string>.Is.Anything, Arg<object[]>.Is.Anything));
+        }
+
+        [Test]
+        public void Should_invoke_the_consumer_error_strategy()
+        {
+            consumerErrorStrategy.AssertWasCalled(x => 
+                x.HandleConsumerError(Arg<BasicDeliverEventArgs>.Is.Anything, Arg<Exception>.Is.Anything));
+        }
+
+        [Test]
+        public void Should_pass_the_exception_to_consumerErrorStrategy()
+        {
+            raisedException.ShouldNotBeNull();
+            raisedException.InnerException.ShouldNotBeNull();
+            raisedException.InnerException.ShouldBeTheSameAs(originalException);
+        }
+
+        [Test]
+        public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
+        {
+            basicDeliverEventArgs.ShouldNotBeNull();
+            basicDeliverEventArgs.ConsumerTag.ShouldEqual(consumerTag);
+            basicDeliverEventArgs.DeliveryTag.ShouldEqual(deliveryTag);
+            basicDeliverEventArgs.RoutingKey.ShouldEqual("#");
         }
     }
 }
