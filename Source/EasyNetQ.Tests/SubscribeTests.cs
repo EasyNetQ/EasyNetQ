@@ -2,10 +2,7 @@
 
 using System;
 using System.Collections;
-using System.Runtime.Serialization;
-using System.Text;
 using System.Threading;
-using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;

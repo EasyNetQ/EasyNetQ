@@ -59,15 +59,15 @@ namespace EasyNetQ.Tests.Mocking
                 });
 
             bus = RabbitHutch.CreateBus("host=localhost", x =>
+                {
+                    registerServices(x);
+                    x.Register(sp => 
                     {
-                        registerServices(x);
-                        x.Register(sp => 
-                        {
-                            serviceProvider = sp;
-                            return connectionFactory;
-                        });
-                        x.Register(_ => logger);
+                        serviceProvider = sp;
+                        return connectionFactory;
                     });
+                    x.Register(_ => logger);
+                });
         }
 
         public IConnectionFactory ConnectionFactory
