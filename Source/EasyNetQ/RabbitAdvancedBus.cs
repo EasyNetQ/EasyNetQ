@@ -127,7 +127,7 @@ namespace EasyNetQ
                 throw new EasyNetQException("This bus has been disposed");
             }
 
-            var newConsumerTag = Guid.NewGuid().ToString();
+            var newConsumerTag = conventions.ConsumerTagConvention();
             var subscriptionAction = new SubscriptionAction(newConsumerTag, logger, queue.IsSingleUse);
 
             subscriptionAction.Action = (isNewConnection) =>

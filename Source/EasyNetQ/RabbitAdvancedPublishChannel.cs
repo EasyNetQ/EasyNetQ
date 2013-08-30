@@ -104,7 +104,7 @@ namespace EasyNetQ
                 {
                     if (configuration.SuccessCallback == null || configuration.FailureCallback == null)
                     {
-                        throw new EasyNetQException("When pulisher confirms are on, you must supply success and failure callbacks in the publish configuration");
+                        throw new EasyNetQException("When publisher confirms are on, you must supply success and failure callbacks in the publish configuration");
                     }
 
                     publisherConfirms.RegisterCallbacks(channel, configuration.SuccessCallback, configuration.FailureCallback);

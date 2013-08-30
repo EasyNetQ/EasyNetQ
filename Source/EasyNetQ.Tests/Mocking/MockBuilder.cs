@@ -11,6 +11,7 @@ namespace EasyNetQ.Tests.Mocking
         readonly IConnectionFactory connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
         readonly IConnection connection = MockRepository.GenerateStub<IConnection>();
         readonly List<IModel> channels = new List<IModel>();
+        readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>(); 
         readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IEasyNetQLogger logger = MockRepository.GenerateStub<IEasyNetQLogger>();
         private readonly IBus bus;
@@ -44,6 +45,16 @@ namespace EasyNetQ.Tests.Mocking
                     i.ReturnValue = channel;
                     channels.Add(channel);
                     channel.Stub(x => x.CreateBasicProperties()).Return(basicProperties);
+                    channel.Stub(x => x.BasicConsume(null, false, null, null))
+                        .IgnoreArguments()
+                        .WhenCalled(consumeInvokation =>
+                        {
+                            var consumerTag = (string)consumeInvokation.Arguments[2];
+                            var consumer = (DefaultBasicConsumer)consumeInvokation.Arguments[3];
+
+                            consumer.HandleBasicConsumeOk(consumerTag);
+                            consumers.Add(consumer);
+                        }).Return("");
                 });
 
             bus = RabbitHutch.CreateBus("host=localhost", x =>
@@ -67,6 +78,11 @@ namespace EasyNetQ.Tests.Mocking
         public List<IModel> Channels
         {
             get { return channels; }
+        }
+
+        public List<IBasicConsumer> Consumers
+        {
+            get { return consumers; }
         }
 
         public IBasicProperties BasicProperties
