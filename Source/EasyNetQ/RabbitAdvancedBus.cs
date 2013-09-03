@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
@@ -215,6 +217,114 @@ namespace EasyNetQ
         {
             return new RabbitAdvancedPublishChannel(this, configure);
         }
+
+        // ---------------------------------- Exchange / Queue / Binding -----------------------------------
+
+        public IQueue QueueDeclare(
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false,
+            bool autoDelete = false, 
+            uint perQueueTtl = UInt32.MaxValue, 
+            uint expires = UInt32.MaxValue)
+        {
+            using (var model = connection.CreateModel())
+            {
+                IDictionary<string, object> arguments = new Dictionary<string, object>();
+                if (passive)
+                {
+                    model.QueueDeclarePassive(name);
+                }
+                else
+                {
+                    if (perQueueTtl != uint.MaxValue)
+                    {
+                        arguments.Add("x-message-ttl", perQueueTtl);
+                    }
+
+                    if (expires != uint.MaxValue)
+                    {
+                        arguments.Add("x-expires", expires);
+                    }
+
+                    model.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary)arguments);
+                }
+
+                return Topology.Queue.Declare(durable, exclusive, autoDelete, name, arguments);
+            }
+        }
+
+        public void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)
+        {
+            using (var model = connection.CreateModel())
+            {
+                model.QueueDelete(queue.Name, ifUnused, ifEmpty);
+            }
+        }
+
+        public IExchange ExchangeDeclare(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false,
+            bool @internal = false)
+        {
+            using (var model = connection.CreateModel())
+            {
+                model.ExchangeDeclare(name, type, durable, autoDelete, null);
+                return new Exchange(name, type);
+            }
+        }
+
+        public void ExchangeDelete(IExchange exchange, bool ifUnused = false)
+        {
+            using (var model = connection.CreateModel())
+            {
+                model.ExchangeDelete(exchange.Name, ifUnused);
+            }
+        }
+
+        public IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
+        {
+            using (var model = connection.CreateModel())
+            {
+                model.QueueBind(queue.Name, exchange.Name, routingKey);
+                return new Binding(queue, exchange, routingKey);
+            }
+        }
+
+        public IBinding Bind(IExchange source, IExchange destination, string routingKey)
+        {
+            using (var model = connection.CreateModel())
+            {
+                model.ExchangeBind(destination.Name, source.Name, routingKey);
+                return new Binding(destination, source, routingKey);
+            }
+        }
+
+        public void BindingDelete(IBinding binding)
+        {
+            using (var model = connection.CreateModel())
+            {
+                var queue = binding.Bindable as IQueue;
+                if (queue != null)
+                {
+                    model.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKeys[0], null);
+                }
+                else
+                {
+                    var destination = binding.Bindable as IExchange;
+                    if (destination != null)
+                    {
+                        model.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKeys[0]);
+                    }
+                }
+            }
+        }
+
+        //------------------------------------------------------------------------------------------
 
         public virtual event Action Connected;
 

@@ -55,7 +55,7 @@ namespace EasyNetQ.Topology
             return new DefaultExchange();
         }
 
-        protected Exchange(string name, string exchangeType)
+        public Exchange(string name, string exchangeType)
         {
             Preconditions.CheckNotNull(name, "name");
 

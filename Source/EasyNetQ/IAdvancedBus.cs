@@ -57,6 +57,85 @@ namespace EasyNetQ
         IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure);
 
         /// <summary>
+        /// Declare a queue. If the queue already exists this method does nothing
+        /// </summary>
+        /// <param name="name">The name of the queue</param>
+        /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
+        /// <param name="durable">Durable queues remain active when a server restarts.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
+        /// and are deleted when that connection closes.</param>
+        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
+        /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
+        /// <returns>The queue</returns>
+        IQueue QueueDeclare(
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
+            bool autoDelete = false,
+            uint perQueueTtl = uint.MaxValue,
+            uint expires = uint.MaxValue);
+
+        /// <summary>
+        /// Delete a queue
+        /// </summary>
+        /// <param name="queue">The queue to delete</param>
+        /// <param name="ifUnused">Only delete if unused</param>
+        /// <param name="ifEmpty">Only delete if empty</param>
+        void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false);
+
+        /// <summary>
+        /// Declare an exchange
+        /// </summary>
+        /// <param name="name">The exchange name</param>
+        /// <param name="type">The type of exchange</param>
+        /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
+        /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
+        /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
+        /// but only when bound to other exchanges.</param>
+        /// <returns>The exchange</returns>
+        IExchange ExchangeDeclare(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false);
+
+        /// <summary>
+        /// Delete an exchange
+        /// </summary>
+        /// <param name="exchange">The exchange to delete</param>
+        /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
+        void ExchangeDelete(IExchange exchange, bool ifUnused = false);
+
+        /// <summary>
+        /// Bind an exchange to a queue. Does nothing if the binding already exists.
+        /// </summary>
+        /// <param name="exchange">The exchange to bind</param>
+        /// <param name="queue">The queue to bind</param>
+        /// <param name="routingKey">The routing key</param>
+        /// <returns>A binding</returns>
+        IBinding Bind(IExchange exchange, IQueue queue, string routingKey);
+
+        /// <summary>
+        /// Bind two exchanges. Does nothing if the binding already exists.
+        /// </summary>
+        /// <param name="source">The source exchange</param>
+        /// <param name="destination">The destination exchange</param>
+        /// <param name="routingKey">The routing key</param>
+        /// <returns>A binding</returns>
+        IBinding Bind(IExchange source, IExchange destination, string routingKey);
+
+        /// <summary>
+        /// Delete a binding
+        /// </summary>
+        /// <param name="binding">the binding to delete</param>
+        void BindingDelete(IBinding binding);
+
+        /// <summary>
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }
