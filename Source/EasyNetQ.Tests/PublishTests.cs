@@ -45,7 +45,8 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_create_a_channel_to_publish_on()
         {
-            mockBuilder.Channels.Count.ShouldEqual(1);
+            // a channel is also created then disposed to declare the exchange.
+            mockBuilder.Channels.Count.ShouldEqual(2);
         }
 
         [Test]
@@ -83,7 +84,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
+            mockBuilder.Channels[1].AssertWasCalled(x => x.ExchangeDeclare(
                 "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests", "topic", true, false, null));
         }
 

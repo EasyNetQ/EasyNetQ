@@ -92,7 +92,6 @@
     <Compile Include="DefaultMessageValidationStrategyTests.cs" />
     <Compile Include="EasyNetQConsumerTest.cs" />
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
-    <Compile Include="FluentConfiguration\SubscriptionConfigurationTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="ModelCleanupTests.cs" />
@@ -120,7 +119,6 @@
     <Compile Include="TaskExtensions.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
-    <Compile Include="Topology\TopologyTests.cs" />
     <Compile Include="DefaultClusterHostSelectionStrategyTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
@@ -154,7 +152,9 @@
   <ItemGroup>
     <Content Include="LongRunningServer.js" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="FluentConfiguration\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

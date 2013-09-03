@@ -17,14 +17,6 @@ namespace EasyNetQ.Topology
             RoutingKeys = routingKeys;
         }
 
-        public void Visit(ITopologyVisitor visitor)
-        {
-            Preconditions.CheckNotNull(visitor, "visitor");
-
-            Exchange.Visit(visitor);
-            visitor.CreateBinding(Bindable, Exchange, RoutingKeys);
-        }
-
         public IBindable Bindable { get; private set; }
         public IExchange Exchange { get; private set; }
         public string[] RoutingKeys { get; private set; }

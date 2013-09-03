@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests.Integration
             var queue = Queue.DeclareDurable(errorQueueName);
             var autoResetEvent = new AutoResetEvent(false);
 
-            bus.Advanced.Subscribe<SystemMessages.Error>(queue, (message, info) =>
+            bus.Advanced.Consume<SystemMessages.Error>(queue, (message, info) =>
             {
                 var error = message.Body;
 

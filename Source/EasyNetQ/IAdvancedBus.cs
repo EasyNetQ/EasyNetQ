@@ -13,33 +13,22 @@ namespace EasyNetQ
     public interface IAdvancedBus : IDisposable
     {
         /// <summary>
-        /// Subscribe to a stream of messages
+        /// Consume a stream of messages
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
-        void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage);
+        void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
-        /// Subscribe to raw bytes from the queue.
+        /// Consume raw bytes from the queue.
         /// </summary>
         /// <param name="queue">The queue to subscribe to</param>
         /// <param name="onMessage">
         /// The message handler. Takes the message body, message properties and some information about the 
         /// receive context. Returns a Task.
         /// </param>
-        void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
-
-        /// <summary>
-        /// Subscribe to raw bytes from the queue.
-        /// </summary>
-        /// <param name="queue">The queue to subscribe to</param>
-        /// <param name="onMessage">
-        /// The message handler. Takes the message body, message properties and some information about the 
-        /// receive context. Returns a Task.
-        /// </param>
-        /// <param name="topologyVisitor">Topology visitor to apply to the queue></param>
-        void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, ITopologyVisitor topologyVisitor);
+        void Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
         /// Return a channel for publishing.

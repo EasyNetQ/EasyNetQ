@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Topology
 {
-    public interface IBindable : ITopology
+    public interface IBindable
     {
         /// <summary>
         /// Bind a destination, either a queue or an exchange, to an exchange.

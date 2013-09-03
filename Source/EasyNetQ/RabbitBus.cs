@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
@@ -99,19 +97,22 @@ namespace EasyNetQ
             var queueName = GetQueueName<T>(subscriptionId);
             var exchangeName = GetExchangeName<T>();
 
-            var queue = Queue.DeclareDurable(queueName, configuration.Arguments);
-            var exchange = Exchange.DeclareTopic(exchangeName);
+            var queue = advancedBus.QueueDeclare(queueName);
+            var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
-            var topics = configuration.Topics.ToArray();
-
-            if(topics.Length == 0)
+            if(configuration.Topics.Count == 0)
             {
-                topics = new[]{"#"};
+                advancedBus.Bind(exchange, queue, "#");
+            }
+            else
+            {
+                foreach (var topic in configuration.Topics)
+                {
+                    advancedBus.Bind(exchange, queue, topic);
+                }
             }
 
-            queue.BindTo(exchange, topics);
-
-            advancedBus.Subscribe<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
+            advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
 
         private string GetExchangeName<T>()
@@ -126,35 +127,25 @@ namespace EasyNetQ
 
         public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
         {
-            Respond(responder, null);
-        }
-
-        public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
-        {
             Preconditions.CheckNotNull(responder, "responder");
 
             Func<TRequest, Task<TResponse>> taskResponder =
                 request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
 
-            RespondAsync(taskResponder, arguments);
+            RespondAsync(taskResponder);
         }
 
         public virtual void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
-        {
-            RespondAsync(responder, null);
-        }
-
-        public virtual void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
         {
             Preconditions.CheckNotNull(responder, "responder");
 
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof (TRequest));
 
-            var exchange = Exchange.DeclareDirect(conventions.RpcExchangeNamingConvention());
-            var queue = Queue.DeclareDurable(routingKey, arguments);
-            queue.BindTo(exchange, routingKey);
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+            var queue = advancedBus.QueueDeclare(routingKey);
+            advancedBus.Bind(exchange, queue, routingKey);
 
-            advancedBus.Subscribe<TRequest>(queue, (requestMessage, messageRecievedInfo) =>
+            advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) =>
             {
                 var tcs = new TaskCompletionSource<object>();
 

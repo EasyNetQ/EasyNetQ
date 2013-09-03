@@ -98,12 +98,12 @@ namespace EasyNetQ
             get { return conventions; }
         }
 
-        public virtual void Subscribe<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
+        public virtual void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
-            Subscribe(queue, (body, properties, messageRecievedInfo) =>
+            Consume(queue, (body, properties, messageRecievedInfo) =>
             {
                 messageValidationStrategy.CheckMessageType<T>(body, properties, messageRecievedInfo);
 
@@ -114,12 +114,7 @@ namespace EasyNetQ
             });
         }
  
-        public void Subscribe(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
-        {
-            Subscribe(queue, onMessage, null);
-        }
-
-        public virtual void Subscribe(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, ITopologyVisitor topologyVisitor)
+        public virtual void Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {      
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -142,13 +137,6 @@ namespace EasyNetQ
                 
                 var channel = subscriptionAction.Channel;
                 
-                // Leaving topologyVisitor parameter for backward compatibility even though
-                // TopologyBuilder should always be recreated from current channel because otherwise
-                // it will fail to recreate queues in case of consumer cancelation notification.                
-                var currentTopologyVisitor = topologyVisitor ?? new TopologyBuilder(channel);
-
-                queue.Visit(currentTopologyVisitor);
-
                 channel.BasicQos(0, connectionConfiguration.PrefetchCount, false);
 
                 var consumer = consumerFactory.CreateConsumer(subscriptionAction, channel, queue.IsSingleUse,

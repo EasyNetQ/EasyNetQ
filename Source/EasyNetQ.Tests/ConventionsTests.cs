@@ -99,7 +99,7 @@ namespace EasyNetQ.Tests
 		[Test]
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[1].AssertWasCalled(x => 
                 x.ExchangeDeclare("CustomExchangeNamingConvention", "topic", true, false, null));
 		}
 
@@ -148,7 +148,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_correctly_bind_using_new_conventions()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[2].AssertWasCalled(x => 
                 x.QueueBind(
                     "CustomRpcRoutingKeyName",
                     "CustomRpcExchangeName",

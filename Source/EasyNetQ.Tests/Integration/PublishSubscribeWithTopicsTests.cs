@@ -86,20 +86,6 @@ namespace EasyNetQ.Tests.Integration
                 publishChannel.Publish(CreateMessage());
             }
         }
-
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
-        public void Subscribe_to_messages_without_a_topic_with_arguments()
-        {
-            var countdownEvent = new CountdownEvent(7);
-
-            bus.Subscribe<MyMessage>("id1", msg =>
-            {
-                Console.WriteLine("I Get X: {0}", msg.Text);
-                countdownEvent.Signal();
-            }, x => x.WithArgument("x-made-up-argument", "any value"));
-
-            countdownEvent.Wait(1000);
-        }
     }
 }
 

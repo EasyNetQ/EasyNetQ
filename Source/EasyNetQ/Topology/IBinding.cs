@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Topology
 {
-    public interface IBinding : ITopology
+    public interface IBinding
     {
         IBindable Bindable { get; }
         IExchange Exchange { get; }

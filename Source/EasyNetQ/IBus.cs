@@ -109,17 +109,6 @@ namespace EasyNetQ
         void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder);
 
         /// <summary>
-        /// Responds to an RPC request.
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="responder">
-        /// A function to run when the request is received. It should return the response.
-        /// </param>
-        /// <param name="arguments">AMQP arguments. For e.q. Message TTL("x-message-ttl", "60"), High Availability policy("x-ha-policy", "all") and so on.</param>
-        void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments);
-
-        /// <summary>
         /// Responds to an RPC request asynchronously.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
@@ -128,17 +117,6 @@ namespace EasyNetQ
         /// A function to run when the request is received.
         /// </param>
         void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder);
-
-        /// <summary>
-        /// Responds to an RPC request asynchronously.
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type</typeparam>
-        /// <param name="responder">
-        /// A function to run when the request is received.
-        /// </param>
-        /// <param name="arguments">AMQP arguments. For e.q. Message TTL("x-message-ttl", "60"), High Availability policy("x-ha-policy", "all") and so on.</param>
-        void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments);
 
         /// <summary>
         /// Fires once the bus has connected to a RabbitMQ server.

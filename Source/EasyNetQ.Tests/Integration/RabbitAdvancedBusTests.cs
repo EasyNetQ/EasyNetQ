@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests.Integration
             var queue = Queue.DeclareDurable("advanced_test_queue");
             queue.BindTo(exchange, routingKey);
 
-            advancedBus.Subscribe<MyMessage>(queue, (msg, messageReceivedInfo) => 
+            advancedBus.Consume<MyMessage>(queue, (msg, messageReceivedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("Got Message: {0}", msg.Body.Text);
@@ -71,7 +71,7 @@ namespace EasyNetQ.Tests.Integration
 
             var queue = Queue.DeclareTransient();
 
-            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
+            advancedBus.Consume<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("Got message: {0}", message.Body.Text);
@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var queue = Queue.DeclareTransient();
 
-            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
+            advancedBus.Consume<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() => { }));
 
             using (var channel = advancedBus.OpenPublishChannel())
@@ -113,7 +113,7 @@ namespace EasyNetQ.Tests.Integration
 
             var queue = Queue.DeclareTransient();
 
-            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) => 
+            advancedBus.Consume<MyMessage>(queue, (message, messageRecievedInfo) => 
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("Got reply to address: {0}", message.Properties.ReplyTo);
@@ -146,7 +146,7 @@ namespace EasyNetQ.Tests.Integration
             exchange3.BindTo(exchange2, "route1");
             exchange2.BindTo(exchange1, "route1");
 
-            advancedBus.Subscribe<MyMessage>(queue, (message, messageRecievedInfo) =>
+            advancedBus.Consume<MyMessage>(queue, (message, messageRecievedInfo) =>
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("Got Message: {0}", message.Body.Text);
@@ -177,19 +177,19 @@ namespace EasyNetQ.Tests.Integration
             queue2.BindTo(exchange, "B.X");
             queue3.BindTo(exchange, "*.Y");
 
-            advancedBus.Subscribe<MyMessage>(queue1, (message, messageRecievedInfo) =>
+            advancedBus.Consume<MyMessage>(queue1, (message, messageRecievedInfo) =>
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("1 Got Message: {0}", messageRecievedInfo.RoutingKey);
                     countdownEvent.Signal();
                 }));
-            advancedBus.Subscribe<MyMessage>(queue2, (message, messageRecievedInfo) =>
+            advancedBus.Consume<MyMessage>(queue2, (message, messageRecievedInfo) =>
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("2 Got Message: {0}", messageRecievedInfo.RoutingKey);
                     countdownEvent.Signal();
                 }));
-            advancedBus.Subscribe<MyMessage>(queue3, (message, messageRecievedInfo) =>
+            advancedBus.Consume<MyMessage>(queue3, (message, messageRecievedInfo) =>
                 Task.Factory.StartNew(() =>
                 {
                     Console.WriteLine("3 Got Message: {0}", messageRecievedInfo.RoutingKey);
@@ -214,7 +214,7 @@ namespace EasyNetQ.Tests.Integration
 
             var queue = Queue.DeclareTransient();
 
-            advancedBus.Subscribe(queue, (message, properties, messageRecievedInfo) =>
+            advancedBus.Consume(queue, (message, properties, messageRecievedInfo) =>
                 Task.Factory.StartNew(() =>
                 {
                     var messageString = Encoding.UTF8.GetString(message);

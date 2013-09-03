@@ -27,17 +27,6 @@ namespace EasyNetQ
         void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure);
 
         /// <summary>
-        /// Publish raw bytes to the bus.
-        /// </summary>
-        /// <param name="exchange">The exchange to publish to</param>
-        /// <param name="routingKey">The routing key</param>
-        /// <param name="properties">The message properties</param>
-        /// <param name="messageBody">The message bytes to publish</param>
-        /// <param name="configure">Configure the publish</param>
-        /// <param name="topologyVisitor">Visitor to apply to the exchange</param>
-        void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure, ITopologyVisitor topologyVisitor);
-
-        /// <summary>
         /// Publish a message.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>

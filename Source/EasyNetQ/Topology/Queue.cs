@@ -97,23 +97,5 @@ namespace EasyNetQ.Topology
             var binding = new Binding(this, exchange, routingKeys);
             bindings.Add(binding);
         }
-
-        public void Visit(ITopologyVisitor visitor)
-        {
-            Preconditions.CheckNotNull(visitor, "visitor");
-
-            if (Name == null)
-            {
-                Name = visitor.CreateQueue();
-            }
-            else
-            {
-                visitor.CreateQueue(Name, durable, exclusive, autoDelete, arguments);
-            }
-            foreach (var binding in bindings)
-            {
-                binding.Visit(visitor);
-            }
-        }
     }
 }

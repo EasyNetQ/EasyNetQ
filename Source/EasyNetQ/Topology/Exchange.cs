@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,7 +6,7 @@ namespace EasyNetQ.Topology
 {
     public class Exchange : IExchange
     {
-        protected readonly IList<IBinding> bindings = new List<IBinding>();
+        protected readonly IList<IBinding> Bindings = new List<IBinding>();
         public string Name { get; private set; }
         public string ExchangeType { get; private set; }
         public bool Durable { get; private set; }
@@ -75,20 +74,6 @@ namespace EasyNetQ.Topology
             Arguments = arguments;
         }
 
-        public virtual void Visit(ITopologyVisitor visitor)
-        {
-            Preconditions.CheckNotNull(visitor, "visitor");
-
-            if (Name != string.Empty)
-            {
-                visitor.CreateExchange(Name, ExchangeType, Durable, AutoDelete, Arguments);
-                foreach (var binding in bindings)
-                {
-                    binding.Visit(visitor);
-                }
-            }
-        }
-
         public virtual void BindTo(IExchange exchange, params string[] routingKeys)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -96,7 +81,7 @@ namespace EasyNetQ.Topology
             Preconditions.CheckFalse(routingKeys.Any(string.IsNullOrEmpty), "routingKeys", "RoutingKey is null or empty");
 
             var binding = new Binding(this, exchange, routingKeys);
-            bindings.Add(binding);
+            Bindings.Add(binding);
         }
     }
 }

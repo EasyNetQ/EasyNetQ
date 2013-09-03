@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +53,7 @@ namespace EasyNetQ
             configure(configuration);
 
             var exchangeName = bus.Conventions.ExchangeNamingConvention(typeof(T));
-            var exchange = Exchange.DeclareTopic(exchangeName);
+            var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
             var easyNetQMessage = new Message<T>(message);
 
             // by default publish persistent messages
@@ -82,17 +81,12 @@ namespace EasyNetQ
             };
         }
 
-        public virtual void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
-        {
-            Request(request, onResponse, null);
-        }
-
-        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse, IDictionary<string, object> arguments)
+        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
         {
             Preconditions.CheckNotNull(onResponse, "onResponse");
             Preconditions.CheckNotNull(request, "request");
 
-            var returnQueueName = SubscribeToResponse(onResponse, arguments);
+            var returnQueueName = SubscribeToResponse(onResponse);
             RequestPublish(request, returnQueueName);
         }
 
@@ -102,18 +96,7 @@ namespace EasyNetQ
 
             var taskCompletionSource = new TaskCompletionSource<TResponse>();
 
-            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), null);
-
-            return taskCompletionSource.Task;
-        }
-
-        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, IDictionary<string, object> arguments)
-        {
-            Preconditions.CheckNotNull(request, "request");
-
-            var taskCompletionSource = new TaskCompletionSource<TResponse>();
-
-            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), arguments);
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response));
 
             return taskCompletionSource.Task;
         }
@@ -125,28 +108,15 @@ namespace EasyNetQ
             var taskCompletionSource = new TaskCompletionSource<TResponse>();
             token.Register(() => taskCompletionSource.TrySetCanceled());
 
-            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), null);
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response));
 
             return taskCompletionSource.Task;
         }
 
-        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, IDictionary<string, object> arguments, CancellationToken token)
+        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
         {
-            Preconditions.CheckNotNull(request, "request");
-
-            var taskCompletionSource = new TaskCompletionSource<TResponse>();
-            token.Register(() => taskCompletionSource.TrySetCanceled());
-
-            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response), arguments);
-
-            return taskCompletionSource.Task;
-        }
-
-        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse, IDictionary<string, object> arguments)
-        {
-            var queue = Queue.DeclareTransient("easynetq.response." + Guid.NewGuid().ToString(), arguments).SetAsSingleUse();
-
-            advancedBus.Subscribe<TResponse>(queue, (message, messageRecievedInfo) =>
+            var queue = advancedBus.QueueDeclare(conventions.RpcReturnQueueNamingConvention()).SetAsSingleUse();
+            advancedBus.Consume<TResponse>(queue, (message, messageRecievedInfo) =>
             {
                 var tcs = new TaskCompletionSource<object>();
 
@@ -168,7 +138,7 @@ namespace EasyNetQ
         private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
         {
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-            var exchange = Exchange.DeclareDirect(conventions.RpcExchangeNamingConvention());
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
 
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;

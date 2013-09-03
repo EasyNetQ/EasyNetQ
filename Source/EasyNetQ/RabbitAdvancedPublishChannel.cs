@@ -73,12 +73,7 @@ namespace EasyNetQ
             Publish(exchange, routingKey, message.Properties, messageBody, configure);
         }
 
-        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties,
-            byte[] messageBody, Action<IAdvancedPublishConfiguration> configure)
-        {
-            Publish(exchange, routingKey, properties, messageBody, configure, new TopologyBuilder(channel));
-        }
-        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure, ITopologyVisitor topologyVisitor)
+        public virtual void Publish(IExchange exchange, string routingKey, MessageProperties properties, byte[] messageBody, Action<IAdvancedPublishConfiguration> configure)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(routingKey, "routingKey");
@@ -112,8 +107,6 @@ namespace EasyNetQ
 
                 var defaultProperties = channel.CreateBasicProperties();
                 properties.CopyTo(defaultProperties);
-
-                exchange.Visit(topologyVisitor);
 
                 channel.BasicPublish(
                     exchange.Name,      // exchange

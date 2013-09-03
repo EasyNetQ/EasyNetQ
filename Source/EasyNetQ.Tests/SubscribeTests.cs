@@ -41,7 +41,9 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_create_a_new_channel_for_the_consumer()
         {
-            mockBuilder.Channels.Count.ShouldEqual(1);
+            // a channel is created, then disposed for the exchange, queue, and binding declares
+            // subscribe is called on the fourth channel.
+            mockBuilder.Channels.Count.ShouldEqual(4);
         }
 
         [Test]
@@ -59,27 +61,27 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_the_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
+            mockBuilder.Channels[1].AssertWasCalled(x => x.ExchangeDeclare(
                 typeName, "topic", true, false, null));
         }
 
         [Test]
         public void Should_bind_the_queue_and_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.QueueBind(queueName, typeName, "#"));
+            mockBuilder.Channels[2].AssertWasCalled(x => x.QueueBind(queueName, typeName, "#"));
         }
 
         [Test]
         public void Should_set_configured_prefetch_count()
         {
             var connectionConfiguration = new ConnectionConfiguration();
-            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicQos(0, connectionConfiguration.PrefetchCount, false));
+            mockBuilder.Channels[3].AssertWasCalled(x => x.BasicQos(0, connectionConfiguration.PrefetchCount, false));
         }
 
         [Test]
         public void Should_start_consuming()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[3].AssertWasCalled(x => 
                 x.BasicConsume(
                     Arg<string>.Is.Equal(queueName),
                     Arg<bool>.Is.Equal(false),
@@ -162,7 +164,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_ack_the_message()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+            mockBuilder.Channels[3].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
         }
 
         [Test]
@@ -251,7 +253,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_ack()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+            mockBuilder.Channels[3].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
         }
 
         [Test]
