@@ -147,7 +147,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LongRunningServer.js" />
+    <Content Include="Integration\LongRunningServer.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="FluentConfiguration\" />
