@@ -75,8 +75,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AutoSubscriberTests.cs" />
-    <Compile Include="Bugs\CannonCreateQueueExchangeUsingAdvancedAPI.cs" />
-    <Compile Include="Bugs\SubscriptionOnTransientQueueThrowsOnReconnect.cs" />
     <Compile Include="ExchangeQueueBindingTests.cs" />
     <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
@@ -103,7 +101,6 @@
     <Compile Include="Integration\PublishSubscribeWithTopicsTests.cs" />
     <Compile Include="PublishTests.cs" />
     <Compile Include="QueueingConsumerFactoryTests.cs" />
-    <Compile Include="Integration\RabbitAdvancedBusTests.cs" />
     <Compile Include="Integration\RequestResponseTests.cs" />
     <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
     <Compile Include="Sagas\RequestResponseSaga.cs" />

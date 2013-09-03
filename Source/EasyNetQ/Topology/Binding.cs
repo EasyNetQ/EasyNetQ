@@ -1,24 +1,20 @@
-﻿using System;
-using System.Linq;
-
-namespace EasyNetQ.Topology
+﻿namespace EasyNetQ.Topology
 {
     public class Binding : IBinding
     {
-        public Binding(IBindable bindable, IExchange exchange, params string[] routingKeys)
+        public Binding(IBindable bindable, IExchange exchange, string routingKey)
         {
             Preconditions.CheckNotNull(bindable, "bindable");
             Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckAny(routingKeys, "routingKeys", "There must be at least one routingKey");
-            Preconditions.CheckFalse(routingKeys.Any(string.IsNullOrEmpty), "routingKeys", "RoutingKey is null or empty");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
 
             Bindable = bindable;
             Exchange = exchange;
-            RoutingKeys = routingKeys;
+            RoutingKey = routingKey;
         }
 
         public IBindable Bindable { get; private set; }
         public IExchange Exchange { get; private set; }
-        public string[] RoutingKeys { get; private set; }
+        public string RoutingKey { get; private set; }
     }
 }

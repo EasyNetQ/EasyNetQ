@@ -77,12 +77,13 @@ namespace EasyNetQ.Scheduler
                 using(var channel = bus.Advanced.OpenPublishChannel())
                 {
                     var scheduledMessages = scheduleRepository.GetPending();
+                    
                     foreach (var scheduledMessage in scheduledMessages)
                     {
                         log.DebugWrite(string.Format(
                             "Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey));
 
-                        var exchange = Exchange.DeclareTopic(scheduledMessage.BindingKey);
+                        var exchange = bus.Advanced.ExchangeDeclare(scheduledMessage.BindingKey, ExchangeType.Topic);
                         channel.Publish(
                             exchange, 
                             scheduledMessage.BindingKey, 

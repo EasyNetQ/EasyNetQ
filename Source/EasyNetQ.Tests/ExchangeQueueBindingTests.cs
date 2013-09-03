@@ -65,7 +65,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            var queue = EasyNetQ.Topology.Queue.DeclareDurable("my_queue");
+            var queue = new Topology.Queue("my_queue");
             advancedBus.QueueDelete(queue);
         }
 
@@ -124,7 +124,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            var exchange = Exchange.DeclareDirect("my_exchange");
+            var exchange = new Exchange("my_exchange");
             advancedBus.ExchangeDelete(exchange);
         }
 
@@ -148,8 +148,8 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            var exchange = Exchange.DeclareDirect("my_exchange");
-            var queue = EasyNetQ.Topology.Queue.DeclareDurable("my_queue");
+            var exchange = new Exchange("my_exchange");
+            var queue = new Topology.Queue("my_queue");
 
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
         }
@@ -158,7 +158,7 @@ namespace EasyNetQ.Tests
         public void Should_create_a_binding_instance()
         {
             binding.ShouldNotBeNull();
-            binding.RoutingKeys[0].ShouldEqual("my_routing_key");
+            binding.RoutingKey.ShouldEqual("my_routing_key");
             binding.Exchange.Name.ShouldEqual("my_exchange");
             binding.Bindable.ShouldBe<IQueue>();
             ((IQueue) binding.Bindable).Name.ShouldEqual("my_queue");
@@ -185,9 +185,8 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            var exchange = Exchange.DeclareDirect("my_exchange");
-            var queue = EasyNetQ.Topology.Queue.DeclareDurable("my_queue");
-
+            var exchange = new Exchange("my_exchange");
+            var queue = new Topology.Queue("my_queue");
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
             advancedBus.BindingDelete(binding);
         }

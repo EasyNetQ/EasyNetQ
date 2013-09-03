@@ -49,7 +49,8 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_subscribe_to_error_messages()
         {
             var errorQueueName = new Conventions().ErrorQueueNamingConvention();
-            var queue = Queue.DeclareDurable(errorQueueName);
+
+            var queue = bus.Advanced.QueueDeclare(errorQueueName);
             var autoResetEvent = new AutoResetEvent(false);
 
             bus.Advanced.Consume<SystemMessages.Error>(queue, (message, info) =>

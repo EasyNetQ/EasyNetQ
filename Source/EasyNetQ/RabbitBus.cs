@@ -172,7 +172,7 @@ namespace EasyNetQ
 
                         using (var channel = advancedBus.OpenPublishChannel())
                         {
-                            channel.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, responseMessage, configuration => {});
+                            channel.Publish(new Exchange(""), requestMessage.Properties.ReplyTo, responseMessage, configuration => {});
                         }
                         tcs.SetResult(null);
                     }

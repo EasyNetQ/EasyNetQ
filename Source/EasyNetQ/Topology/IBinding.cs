@@ -4,6 +4,6 @@
     {
         IBindable Bindable { get; }
         IExchange Exchange { get; }
-        string[] RoutingKeys { get; }
+        string RoutingKey { get; }
     }
 }

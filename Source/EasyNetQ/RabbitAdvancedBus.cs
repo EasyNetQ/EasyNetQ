@@ -239,7 +239,7 @@ namespace EasyNetQ
                     model.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary)arguments);
                 }
 
-                return Topology.Queue.Declare(durable, exclusive, autoDelete, name, arguments);
+                return new Topology.Queue(name);
             }
         }
 
@@ -262,7 +262,7 @@ namespace EasyNetQ
             using (var model = connection.CreateModel())
             {
                 model.ExchangeDeclare(name, type, durable, autoDelete, null);
-                return new Exchange(name, type);
+                return new Exchange(name);
             }
         }
 
@@ -299,14 +299,14 @@ namespace EasyNetQ
                 var queue = binding.Bindable as IQueue;
                 if (queue != null)
                 {
-                    model.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKeys[0], null);
+                    model.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null);
                 }
                 else
                 {
                     var destination = binding.Bindable as IExchange;
                     if (destination != null)
                     {
-                        model.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKeys[0]);
+                        model.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey);
                     }
                 }
             }

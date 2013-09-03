@@ -118,7 +118,6 @@
     <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="Topology\Binding.cs" />
-    <Compile Include="Topology\DefaultExchange.cs" />
     <Compile Include="Topology\Exchange.cs" />
     <Compile Include="Topology\ExchangeType.cs" />
     <Compile Include="Topology\IBindable.cs" />
