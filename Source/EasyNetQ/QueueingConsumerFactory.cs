@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -70,7 +71,7 @@ namespace EasyNetQ
             }
             if (!subscriptions.ContainsKey(consumerTag))
             {
-                logger.ErrorWrite("No subscription for consumerTag: {0}", consumerTag);
+                logger.ErrorWrite("No subscription for ConsumerTag: {0}", consumerTag);
                 return;
             }
 
@@ -97,6 +98,12 @@ namespace EasyNetQ
                     basicDeliverEventArgs.RoutingKey,
                     basicDeliverEventArgs.BasicProperties, 
                     basicDeliverEventArgs.Body);
+
+                if (completionTask.Status == TaskStatus.Created)
+                {
+                    logger.ErrorWrite("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
+                        subscriptionInfo.Consumer.ConsumerTag);
+                }
 
                 completionTask.ContinueWith(task =>
                 {
@@ -215,8 +222,10 @@ namespace EasyNetQ
             bool modelIsSingleUse, 
             MessageCallback callback)
         {
-            var consumer = new EasyNetQConsumer(model, queue);
-            consumer.ConsumerTag = subscriptionAction.Id;
+            var consumer = new EasyNetQConsumer(model, queue)
+                {
+                    ConsumerTag = subscriptionAction.Id
+                };
 
             if (subscriptions.ContainsKey(consumer.ConsumerTag))
             {
@@ -224,9 +233,7 @@ namespace EasyNetQ
                 subscriptions.Remove(consumer.ConsumerTag);
             }
 
-            logger.DebugWrite("Adding subscription with ConsumerTag: " + consumer.ConsumerTag);
             subscriptions.Add(consumer.ConsumerTag, new SubscriptionInfo(subscriptionAction, consumer, callback, modelIsSingleUse, model));
-
             return consumer;
         }
 

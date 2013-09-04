@@ -58,7 +58,7 @@ namespace EasyNetQ
         /// avoid long running blocking IO operations. Consider using SubscribeAsync
         /// </param>
         /// <param name="configure">
-        /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
+        /// Fluent configuration e.g. x => x.WithTopic("uk.london")
         /// </param>
         void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure);
 

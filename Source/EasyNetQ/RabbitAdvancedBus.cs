@@ -166,8 +166,9 @@ namespace EasyNetQ
                     consumer.ConsumerTag,   // consumerTag
                     consumer);              // consumer
 
-                logger.DebugWrite("Declared Consumer. queue='{0}', prefetchcount={1}",
+                logger.DebugWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2}",
                     queue.Name,
+                    consumer.ConsumerTag,
                     connectionConfiguration.PrefetchCount);
             };
 

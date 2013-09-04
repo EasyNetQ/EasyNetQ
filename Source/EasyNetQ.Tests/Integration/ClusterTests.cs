@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_create_the_correct_connection_string()
         {
-            connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5673");
+            connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5673;requestedHeartbeat=1");
         }
 
         [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.Integration
 //            var count = 0;
 //            while (true)
 //            {
-//                Thread.Sleep(5 * 1000); // let's give it 5 minutes    
+//                Thread.Sleep(5 * 1000); // five seconds between each publish    
 //                using (var channel = bus.OpenPublishChannel())
 //                {
 //                    channel.Publish(new MyMessage { Text = "Hello " + count.ToString()});

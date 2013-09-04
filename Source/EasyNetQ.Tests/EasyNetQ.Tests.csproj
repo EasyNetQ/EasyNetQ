@@ -74,7 +74,11 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="AutoSubscriberTests.cs" />
+    <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
+    <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
+    <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="ExchangeQueueBindingTests.cs" />
     <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
