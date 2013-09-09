@@ -75,6 +75,12 @@ namespace EasyNetQ
         void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false);
 
         /// <summary>
+        /// Purget a queue
+        /// </summary>
+        /// <param name="queue">The queue to purge</param>
+        void QueuePurge(IQueue queue);
+
+        /// <summary>
         /// Declare an exchange
         /// </summary>
         /// <param name="name">The exchange name</param>

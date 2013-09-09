@@ -80,6 +80,7 @@
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="ExchangeQueueBindingTests.cs" />
+    <Compile Include="Integration\AdvancedApiPingPongTest.cs" />
     <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
     <Compile Include="Integration\ConnectionErrorConditionsTests.cs" />

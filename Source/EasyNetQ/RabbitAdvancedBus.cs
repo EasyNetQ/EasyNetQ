@@ -252,6 +252,14 @@ namespace EasyNetQ
             }
         }
 
+        public void QueuePurge(IQueue queue)
+        {
+            using (var model = connection.CreateModel())
+            {
+                model.QueuePurge(queue.Name);
+            }
+        }
+
         public IExchange ExchangeDeclare(
             string name, 
             string type, 
