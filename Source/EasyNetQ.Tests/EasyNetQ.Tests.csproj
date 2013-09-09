@@ -81,6 +81,8 @@
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="ExchangeQueueBindingTests.cs" />
     <Compile Include="Integration\AdvancedApiPingPongTest.cs" />
+    <Compile Include="Integration\AdvancedApiPingPongTest_with_transient_queue.cs" />
+    <Compile Include="Integration\AdvancedApiTransientQueueTests.cs" />
     <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
     <Compile Include="Integration\ConnectionErrorConditionsTests.cs" />

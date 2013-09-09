@@ -125,7 +125,7 @@ namespace EasyNetQ
             }
 
             var newConsumerTag = conventions.ConsumerTagConvention();
-            var subscriptionAction = new SubscriptionAction(newConsumerTag, logger, queue.IsSingleUse);
+            var subscriptionAction = new SubscriptionAction(newConsumerTag, logger, queue.IsSingleUse, queue.IsExclusive);
 
             subscriptionAction.Action = (isNewConnection) =>
             {
@@ -186,11 +186,11 @@ namespace EasyNetQ
 
         private void AddSubscriptionAction(SubscriptionAction subscriptionAction)
         {
-            if(subscriptionAction.IsMultiUse)
+            if(!subscriptionAction.IsExclusive)
             {
                 if (!subscribeActions.TryAdd(subscriptionAction.Id, subscriptionAction))
                 {
-                    throw new EasyNetQException("Failed remember subscription action");
+                    throw new EasyNetQException("Failed to store subscription action");
                 }
             }
 
@@ -240,7 +240,16 @@ namespace EasyNetQ
                     model.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary)arguments);
                 }
 
-                return new Topology.Queue(name);
+                return new Topology.Queue(name, exclusive);
+            }
+        }
+
+        public IQueue QueueDeclare()
+        {
+            using (var model = connection.CreateModel())
+            {
+                var queueDeclareOk = model.QueueDeclare();
+                return new Topology.Queue(queueDeclareOk.QueueName, true);
             }
         }
 
@@ -385,11 +394,19 @@ namespace EasyNetQ
 
     public class SubscriptionAction
     {
-        public SubscriptionAction(string id, IEasyNetQLogger logger, bool isSingleUse)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="id">The consumer tag</param>
+        /// <param name="logger">logger</param>
+        /// <param name="isSingleUse">The queue and channel should be deleted after a single message has been consumerd</param>
+        /// <param name="isExclusive">The queue should be deleted when the connection closes.</param>
+        public SubscriptionAction(string id, IEasyNetQLogger logger, bool isSingleUse, bool isExclusive)
         {
             this.logger = logger;
             Id = id;
             IsSingleUse = isSingleUse;
+            IsExclusive = isExclusive;
             ClearAction();
         }
 
@@ -397,8 +414,11 @@ namespace EasyNetQ
         public string Id { get; private set; }
         public Action<bool> Action { get; set; }
         public IModel Channel { get; set; }
+
         public bool IsSingleUse { get; private set; }
         public bool IsMultiUse { get { return !IsSingleUse; } }
+
+        public bool IsExclusive { get; private set; }
 
         public void ClearAction()
         {

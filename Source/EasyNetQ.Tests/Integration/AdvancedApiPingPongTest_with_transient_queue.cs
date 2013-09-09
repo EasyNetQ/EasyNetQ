@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     [Explicit]
-    public class AdvancedApiPingPongTest
+    public class AdvancedApiPingPongTest_with_transient_queue
     {
         private readonly IBus[] buses = new IBus[2];
         private readonly IQueue[] queues = new IQueue[2];
@@ -33,7 +33,10 @@ namespace EasyNetQ.Tests.Integration
                 var name = string.Format("advanced_ping_pong_{0}", i);
 
                 exchanges[i] = buses[i].Advanced.ExchangeDeclare(name, "direct");
-                queues[i] = buses[i].Advanced.QueueDeclare(name);
+
+                // declaring a queue without specifying the name creates a transient, server named queue.
+                queues[i] = buses[i].Advanced.QueueDeclare(); 
+
                 buses[i].Advanced.QueuePurge(queues[i]);
                 buses[i].Advanced.Bind(exchanges[i], queues[i], routingKey);
             }

@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
-        public void Should_ack_on_successful_message_handler_and_ignore_postExcaptionAckStrategy()
+        public void Should_ack_on_successful_message_handler_and_ignore_postExceptionAckStrategy()
         {
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldNackWithRequeue);
             var model = MockRepository.GenerateStub<IModel>();
@@ -131,12 +131,12 @@ namespace EasyNetQ.Tests
         public void Should_be_able_to_recreate_consumer_with_existing_consumerTag()
         {
             var model = MockRepository.GenerateStub<IModel>();
-            queueingConsumerFactory.CreateConsumer(new SubscriptionAction(consumerTag, null, false), model, false, null);
+            queueingConsumerFactory.CreateConsumer(new SubscriptionAction(consumerTag, null, false, false), model, false, null);
 
             bool succeeded;
             try
             {
-                queueingConsumerFactory.CreateConsumer(new SubscriptionAction(consumerTag, null, false), model, false,
+                queueingConsumerFactory.CreateConsumer(new SubscriptionAction(consumerTag, null, false, false), model, false,
                                                        null);
                 succeeded = true;
             }
@@ -151,7 +151,7 @@ namespace EasyNetQ.Tests
         private BasicDeliverEventArgs CreateBasicDeliverEventArgs(string consumerTag, ulong deliveryTag, IModel model, MessageCallback callback)
         {
             var consumer = queueingConsumerFactory.CreateConsumer(
-                new SubscriptionAction(consumerTag, null, false), model, false, callback);
+                new SubscriptionAction(consumerTag, null, false, false), model, false, callback);
 
             consumer.HandleBasicConsumeOk(consumer.ConsumerTag);
 
