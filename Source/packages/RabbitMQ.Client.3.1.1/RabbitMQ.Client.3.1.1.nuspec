@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>RabbitMQ.Client</id>
-    <version>3.0.4</version>
+    <version>3.1.1</version>
     <title>RabbitMQ.Client</title>
     <authors>SpringSource joefitzgerald</authors>
     <owners>SpringSource joefitzgerald</owners>
