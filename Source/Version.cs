@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.12.2.0")]
+[assembly: AssemblyVersion("0.12.3.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.12.3.0 Upgrade to RabbitMQ.Client 3.1.1
 // 0.12.2.0 Requested Heartbeat on by default
 // 0.12.1.0 Factored declares out of AdvancedBus publish and consume.
 // 0.11.1.0 New plugable validation strategy (IMessageValidationStrategy)
