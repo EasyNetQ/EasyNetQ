@@ -125,7 +125,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_set_default_requestHeartbeat()
         {
-            defaults.RequestedHeartbeat.ShouldEqual(0);
+            defaults.RequestedHeartbeat.ShouldEqual(10);
         }
 
         [Test]
