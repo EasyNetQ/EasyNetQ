@@ -5,7 +5,8 @@
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
-// 0.12.0.0 Factored declares out of AdvancedBus publish and consume.
+// 0.12.2.0 Requested Heartbeat on by default
+// 0.12.1.0 Factored declares out of AdvancedBus publish and consume.
 // 0.11.1.0 New plugable validation strategy (IMessageValidationStrategy)
 // 0.11.0.0 Exchange durability can be configured
 // 0.10.1.0 EasyNetQ.Trace
