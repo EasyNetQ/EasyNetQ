@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net.Security;
 using System.Reflection;
 using RabbitMQ.Client;
 
@@ -53,7 +51,7 @@ namespace EasyNetQ
             VirtualHost = "/";
             UserName = "guest";
             Password = "guest";
-            RequestedHeartbeat = 0;
+            RequestedHeartbeat = 10;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
