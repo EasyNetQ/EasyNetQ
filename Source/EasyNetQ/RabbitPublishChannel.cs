@@ -115,7 +115,13 @@ namespace EasyNetQ
 
         private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
         {
-            var queue = advancedBus.QueueDeclare(conventions.RpcReturnQueueNamingConvention()).SetAsSingleUse();
+            var queue = advancedBus.QueueDeclare(
+                conventions.RpcReturnQueueNamingConvention(), 
+                passive:false, 
+                durable:false, 
+                exclusive:true, 
+                autoDelete:true).SetAsSingleUse();
+
             advancedBus.Consume<TResponse>(queue, (message, messageRecievedInfo) =>
             {
                 var tcs = new TaskCompletionSource<object>();
