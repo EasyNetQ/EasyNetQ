@@ -124,10 +124,12 @@ namespace EasyNetQ.Tests
                 );
 
             var autoResetEvent = new AutoResetEvent(false);
+            var consumerFactory = (QueueingConsumerFactory)mockBuilder.ServiceProvider.Resolve<IConsumerFactory>();
+            consumerFactory.SynchronisationAction = () => autoResetEvent.Set();
+
             mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
             {
                 deliveredMessage = message;
-                autoResetEvent.Set();
             });
 
 
