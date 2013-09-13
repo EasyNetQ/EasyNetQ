@@ -1,7 +1,5 @@
-﻿using System.Collections.Concurrent;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
@@ -10,14 +8,10 @@ namespace EasyNetQ.Tests
     public class EasyNetQConsumerTest
     {
         private IModel channelMock;
-        private BlockingCollection<BasicDeliverEventArgs> queue;
 
         [SetUp]
         public void SetUp()
         {
-            // Objects
-            queue = new BlockingCollection<BasicDeliverEventArgs>();
-
             // Mocks
             channelMock = MockRepository.GenerateMock<IModel>();
         }
@@ -27,7 +21,7 @@ namespace EasyNetQ.Tests
         {
             // SetUp
             const string consumerTag = "consumerTag";
-            var consumer = new EasyNetQConsumer(channelMock, queue);
+            var consumer = new EasyNetQConsumer(channelMock, args => {});
 
             var receivedConsumerTag = string.Empty;
 

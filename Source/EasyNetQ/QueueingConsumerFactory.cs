@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -21,44 +20,22 @@ namespace EasyNetQ
     {
         private readonly IEasyNetQLogger logger;
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
-        private readonly BlockingCollection<BasicDeliverEventArgs> queue = 
-            new BlockingCollection<BasicDeliverEventArgs>(new ConcurrentQueue<BasicDeliverEventArgs>());
+        private readonly IConsumerDispatcherFactory consumerDispatcherFactory;
 
         private readonly IDictionary<string, SubscriptionInfo> subscriptions = 
             new ConcurrentDictionary<string, SubscriptionInfo>();
         
-        private readonly Thread subscriptionCallbackThread;
-
         // useful for testing, called when DoAck is called after a message is handled
         public Action SynchronisationAction { get; set; }
 
-        public QueueingConsumerFactory(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy)
+        public QueueingConsumerFactory(
+            IEasyNetQLogger logger, 
+            IConsumerErrorStrategy consumerErrorStrategy, 
+            IConsumerDispatcherFactory consumerDispatcherFactory)
         {
             this.logger = logger;
             this.consumerErrorStrategy = consumerErrorStrategy;
-
-            // start the subscription callback thread
-            // all subscription actions registered with Subscribe or Request
-            // run here.
-            subscriptionCallbackThread = new Thread(_ =>
-            {
-                try
-                {
-                    while(true)
-                    {
-                        if (disposed) break;
-
-                        HandleMessageDelivery(queue.Take());
-                    }
-                }
-                catch (InvalidOperationException ex)
-                {
-                    // InvalidOperationException is thrown when Take is called after 
-                    // queue.CompleteAdding(), this is signals that this class is being
-                    // disposed, so we allow the thread to complete.
-                }
-            });
-            subscriptionCallbackThread.Start();
+            this.consumerDispatcherFactory = consumerDispatcherFactory;
         }
 
         public void HandleMessageDelivery(BasicDeliverEventArgs basicDeliverEventArgs)
@@ -222,7 +199,12 @@ namespace EasyNetQ
             bool modelIsSingleUse, 
             MessageCallback callback)
         {
-            var consumer = new EasyNetQConsumer(model, queue)
+            var dispatcher = consumerDispatcherFactory.GetConsumerDispatcher();
+
+            var consumer = new EasyNetQConsumer(model, 
+                deliverEventArgs => 
+                    dispatcher.QueueAction(() => 
+                        HandleMessageDelivery(deliverEventArgs)))
                 {
                     ConsumerTag = subscriptionAction.Id
                 };
@@ -247,7 +229,7 @@ namespace EasyNetQ
         {
             if (disposed) return;
             consumerErrorStrategy.Dispose();
-            queue.CompleteAdding();
+            consumerDispatcherFactory.Dispose();
 
             foreach (var subscriptionInfo in subscriptions)
             {

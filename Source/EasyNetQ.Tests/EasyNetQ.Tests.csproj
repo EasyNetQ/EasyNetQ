@@ -74,6 +74,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ConsumerDispatcherFactoryTests.cs" />
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="AutoSubscriberTests.cs" />
     <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
@@ -128,6 +129,10 @@
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.Management.Client\EasyNetQ.Management.Client.csproj">
+      <Project>{9888950b-ef30-4763-9076-38b071cdb535}</Project>
+      <Name>EasyNetQ.Management.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj">
       <Project>{E7AF3836-8354-4CDE-A9E7-352569B65B1E}</Project>
       <Name>EasyNetQ.Tests.Messages</Name>

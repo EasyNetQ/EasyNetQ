@@ -23,6 +23,7 @@ namespace EasyNetQ
                 .Register<SerializeType>(x => TypeNameSerializer.Serialize)
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>(x => new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
+                .Register<IConsumerDispatcherFactory>(x => new ConsumerDispatcherFactory(x.Resolve<IEasyNetQLogger>()))
                 .Register<IConsumerErrorStrategy>(x => new DefaultConsumerErrorStrategy(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<ISerializer>(),
@@ -30,7 +31,8 @@ namespace EasyNetQ
                     x.Resolve<IConventions>()))
                 .Register<IConsumerFactory>(x => new QueueingConsumerFactory(
                     x.Resolve<IEasyNetQLogger>(),
-                    x.Resolve<IConsumerErrorStrategy>()))
+                    x.Resolve<IConsumerErrorStrategy>(),
+                    x.Resolve<IConsumerDispatcherFactory>()))
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))

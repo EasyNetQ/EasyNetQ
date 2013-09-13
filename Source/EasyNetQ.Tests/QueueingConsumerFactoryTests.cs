@@ -4,7 +4,6 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Loggers;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -27,10 +26,12 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             consumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
-            
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
             queueingConsumerFactory = new QueueingConsumerFactory(
-                MockRepository.GenerateStub<IEasyNetQLogger>(), 
-                consumerErrorStrategy);
+                logger, 
+                consumerErrorStrategy,
+                new ConsumerDispatcherFactory(logger));
 
             autoResetEvent = new AutoResetEvent(false);
             queueingConsumerFactory.SynchronisationAction = () => autoResetEvent.Set();

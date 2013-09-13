@@ -55,6 +55,8 @@
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="ConsumerAttribute.cs" />
+    <Compile Include="ConsumerDispatcher.cs" />
+    <Compile Include="ConsumerDispatcherFactory.cs" />
     <Compile Include="ConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
@@ -77,6 +79,8 @@
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IConsume.cs" />
     <Compile Include="IConsumerCancelNotifications.cs" />
+    <Compile Include="IConsumerDispatcher.cs" />
+    <Compile Include="IConsumerDispatcherFactory.cs" />
     <Compile Include="IConsumerErrorStrategy.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />

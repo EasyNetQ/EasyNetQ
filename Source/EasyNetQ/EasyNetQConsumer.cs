@@ -12,17 +12,12 @@ namespace EasyNetQ
     public class EasyNetQConsumer : DefaultBasicConsumer, IConsumerCancelNotifications
     {
         public event BasicCancelEventHandler BasicCancel;
-        private readonly BlockingCollection<BasicDeliverEventArgs> queue;
+        private readonly Action<BasicDeliverEventArgs> dispatch;
 
-        public BlockingCollection<BasicDeliverEventArgs> Queue
-        {
-            get { return queue; }
-        }
-
-        public EasyNetQConsumer(IModel model, BlockingCollection<BasicDeliverEventArgs> queue)
+        public EasyNetQConsumer(IModel model, Action<BasicDeliverEventArgs> dispatch)
             : base(model)
         {
-            this.queue = queue;
+            this.dispatch = dispatch;
         }
 
         /// <summary>
@@ -54,7 +49,7 @@ namespace EasyNetQ
         {
             try
             {
-                queue.Add(new BasicDeliverEventArgs()
+                dispatch(new BasicDeliverEventArgs()
                 {
                     ConsumerTag = consumerTag,
                     DeliveryTag = deliveryTag,
