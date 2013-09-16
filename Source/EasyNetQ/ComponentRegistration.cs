@@ -29,10 +29,13 @@ namespace EasyNetQ
                     x.Resolve<ISerializer>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConventions>()))
+                .Register<IHandlerExecutionContext>(x => new HandlerExecutionContext(
+                    x.Resolve<IEasyNetQLogger>(),
+                    x.Resolve<IConsumerErrorStrategy>()))
                 .Register<IConsumerFactory>(x => new QueueingConsumerFactory(
                     x.Resolve<IEasyNetQLogger>(),
-                    x.Resolve<IConsumerErrorStrategy>(),
-                    x.Resolve<IConsumerDispatcherFactory>()))
+                    x.Resolve<IConsumerDispatcherFactory>(),
+                    x.Resolve<IHandlerExecutionContext>()))
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))

@@ -71,6 +71,7 @@
     <Compile Include="FluentConfiguration\IChannelConfiguration.cs" />
     <Compile Include="FluentConfiguration\IPublishConfiguration.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
+    <Compile Include="HandlerExecutionContext.cs" />
     <Compile Include="IAdvancedBus.cs" />
     <Compile Include="IAdvancedPublishChannel.cs" />
     <Compile Include="IBus.cs" />

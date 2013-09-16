@@ -88,8 +88,8 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            var consumerFactory = (QueueingConsumerFactory)MockBuilder.ServiceProvider.Resolve<IConsumerFactory>();
-            consumerFactory.SynchronisationAction = () => autoResetEvent.Set();
+            var handlerExecutionContext = (HandlerExecutionContext)MockBuilder.ServiceProvider.Resolve<IHandlerExecutionContext>();
+            handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
             autoResetEvent.WaitOne(1000);
         }
     }

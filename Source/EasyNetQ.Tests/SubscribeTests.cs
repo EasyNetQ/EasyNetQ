@@ -124,8 +124,8 @@ namespace EasyNetQ.Tests
                 );
 
             var autoResetEvent = new AutoResetEvent(false);
-            var consumerFactory = (QueueingConsumerFactory)mockBuilder.ServiceProvider.Resolve<IConsumerFactory>();
-            consumerFactory.SynchronisationAction = () => autoResetEvent.Set();
+            var handlerExecutionContext = (HandlerExecutionContext)mockBuilder.ServiceProvider.Resolve<IHandlerExecutionContext>();
+            handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
 
             mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
             {
@@ -247,8 +247,8 @@ namespace EasyNetQ.Tests
 
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            var consumerFactory = (QueueingConsumerFactory) mockBuilder.ServiceProvider.Resolve<IConsumerFactory>();
-            consumerFactory.SynchronisationAction = () => autoResetEvent.Set();
+            var handlerExecutionContext = (HandlerExecutionContext)mockBuilder.ServiceProvider.Resolve<IHandlerExecutionContext>();
+            handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
             autoResetEvent.WaitOne(1000);
         }
 
