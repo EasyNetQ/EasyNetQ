@@ -35,7 +35,7 @@ namespace EasyNetQ
         /// equal keys exists, you will get round robin consumption of
         /// messages.
         /// </summary>
-        public Func<ConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
+        public Func<AutoSubscriberConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
 
         public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
         {
@@ -48,7 +48,7 @@ namespace EasyNetQ
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         }
 
-        protected virtual string DefaultSubscriptionIdGenerator(ConsumerInfo c)
+        protected virtual string DefaultSubscriptionIdGenerator(AutoSubscriberConsumerInfo c)
         {
             var r = new StringBuilder();
             var unique = string.Concat(SubscriptionIdPrefix, ":", c.ConcreteType.FullName, ":", c.MessageType.FullName);
@@ -113,24 +113,24 @@ namespace EasyNetQ
                     && m.Params[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<>)).Method;
         }
         
-        protected virtual ConsumerAttribute GetSubscriptionAttribute(ConsumerInfo consumerInfo)
+        protected virtual ConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
         {
             var consumeMethod = consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType });
 
             return consumeMethod.GetCustomAttributes(typeof(ConsumerAttribute), true).SingleOrDefault() as ConsumerAttribute;
         }
 
-        protected virtual IEnumerable<KeyValuePair<Type, ConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types)
+        protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types)
         {
             foreach (var concreteType in types.Where(t => t.IsClass))
             {
                 var subscriptionInfos = concreteType.GetInterfaces()
                     .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConsume<>))
-                    .Select(i => new ConsumerInfo(concreteType, i, i.GetGenericArguments()[0]))
+                    .Select(i => new AutoSubscriberConsumerInfo(concreteType, i, i.GetGenericArguments()[0]))
                     .ToArray();
 
                 if (subscriptionInfos.Any())
-                    yield return new KeyValuePair<Type, ConsumerInfo[]>(concreteType, subscriptionInfos);
+                    yield return new KeyValuePair<Type, AutoSubscriberConsumerInfo[]>(concreteType, subscriptionInfos);
             }
         }
     }

@@ -3,13 +3,13 @@ using System;
 namespace EasyNetQ
 {
     [Serializable]
-    public class ConsumerInfo
+    public class AutoSubscriberConsumerInfo
     {
         public readonly Type ConcreteType;
         public readonly Type InterfaceType;
         public readonly Type MessageType;
 
-        public ConsumerInfo(Type concreteType, Type interfaceType, Type messageType)
+        public AutoSubscriberConsumerInfo(Type concreteType, Type interfaceType, Type messageType)
         {
             Preconditions.CheckNotNull(concreteType, "concreteType");
             Preconditions.CheckNotNull(interfaceType, "interfaceType");
