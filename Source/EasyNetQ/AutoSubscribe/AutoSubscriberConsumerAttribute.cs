@@ -1,6 +1,6 @@
 using System;
 
-namespace EasyNetQ
+namespace EasyNetQ.AutoSubscribe
 {
     [Serializable]
     [AttributeUsage(AttributeTargets.Method)]

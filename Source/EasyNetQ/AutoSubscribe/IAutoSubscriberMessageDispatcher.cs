@@ -1,6 +1,6 @@
-namespace EasyNetQ
+namespace EasyNetQ.AutoSubscribe
 {
-    public interface IMessageDispatcher
+    public interface IAutoSubscriberMessageDispatcher
     {
         void Dispatch<TMessage, TConsumer>(TMessage message)
             where TMessage : class

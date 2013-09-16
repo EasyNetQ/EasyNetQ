@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.SimpleRequester
 
         private static long count = 0;
 
-        private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorderA();
+        private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorder();
         private const int publishIntervalMilliseconds = 10;
 
         static void Main(string[] args)

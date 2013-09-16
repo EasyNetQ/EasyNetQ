@@ -48,20 +48,19 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="AutoSubscriber.cs" />
+    <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
-    <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
-    <Compile Include="AutoSubscriberConsumerAttribute.cs" />
+    <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
     <Compile Include="ConsumerDispatcher.cs" />
     <Compile Include="ConsumerDispatcherFactory.cs" />
-    <Compile Include="AutoSubscriberConsumerInfo.cs" />
+    <Compile Include="AutoSubscribe\AutoSubscriberConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
-    <Compile Include="DefaultMessageDispatcher.cs" />
+    <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="DefaultMessageValidationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
@@ -78,7 +77,7 @@
     <Compile Include="IClusterHostSelectionStrategy.cs" />
     <Compile Include="IConnectionConfiguration.cs" />
     <Compile Include="IConnectionFactory.cs" />
-    <Compile Include="IConsume.cs" />
+    <Compile Include="AutoSubscribe\IConsume.cs" />
     <Compile Include="IConsumerCancelNotifications.cs" />
     <Compile Include="IConsumerDispatcher.cs" />
     <Compile Include="IConsumerDispatcherFactory.cs" />
@@ -86,7 +85,7 @@
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
     <Compile Include="IMessage.cs" />
-    <Compile Include="IMessageDispatcher.cs" />
+    <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="IPublishChannel.cs" />
     <Compile Include="IPublisherConfirms.cs" />
     <Compile Include="ISaga.cs" />

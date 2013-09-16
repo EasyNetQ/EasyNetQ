@@ -1,4 +1,6 @@
-using System;
+﻿using System;
+using System.Linq;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -6,58 +8,75 @@ namespace EasyNetQ.Tests.SimpleRequester
 {
     public class LatencyRecorder : ILatencyRecorder
     {
-        private ISet<long> currentSet = new HashSet<long>();
-        private ISet<long> previousSet = new HashSet<long>();
-        private readonly object responseSetLock = new object();
+        private readonly IDictionary<long, RequestRecord> requests = 
+            new ConcurrentDictionary<long, RequestRecord>();
+
         private readonly Timer reportTimer;
 
-        private const int reportIntervalSeconds = 10;
-        private const int milliseconds = 1000;
-        private const int reportIntervalMilliseconds = reportIntervalSeconds*milliseconds;
+        private readonly TimeSpan reportInterval;
 
         public LatencyRecorder()
         {
-            reportTimer = new Timer(x => Report(), null, reportIntervalMilliseconds, reportIntervalMilliseconds);
-        }
-
-        public void RegisterRequest(long requestId)
-        {
-            lock (responseSetLock)
-            {
-                currentSet.Add(requestId);
-            }
-        }
-
-        public void RegisterResponse(long responseId)
-        {
-            lock (responseSetLock)
-            {
-                if (!currentSet.Remove(responseId))
-                {
-                    if (!previousSet.Remove(responseId))
-                    {
-                        Console.WriteLine("Got late message {0}", responseId);
-                    }
-                }
-            }
-        }
-
-        public void Report()
-        {
-            lock (responseSetLock)
-            {
-                foreach (var timedoutId in previousSet)
-                {
-                    Console.WriteLine("Missing response from message {0}", timedoutId);
-                }
-                previousSet = currentSet;
-                currentSet = new ConcurrentHashSet<long>();
-            }
+            reportInterval = TimeSpan.FromSeconds(10);
+            reportTimer = new Timer(Report, null, reportInterval, reportInterval);
         }
 
         public void Dispose()
         {
             reportTimer.Dispose();
         }
+
+        public void RegisterRequest(long requestId)
+        {
+            requests.Add(requestId, new RequestRecord(requestId));
+        }
+
+        public void RegisterResponse(long responseId)
+        {
+            if (!requests.ContainsKey(responseId))
+            {
+                // see if it turns up
+                Thread.Sleep(100);
+                if (!requests.ContainsKey(responseId))
+                {
+                    Console.WriteLine("Response contains unknown key: {0}", responseId);
+                    return;
+                }
+            }
+            requests[responseId].Respond();
+        }
+
+        public void Report(object status)
+        {
+            var ticksTenSecondsAgo = DateTime.Now.AddSeconds(-10).Ticks;
+            var lateResponses = requests.Where(x => (!x.Value.HasResponded) && (x.Value.Ticks < ticksTenSecondsAgo));
+
+            var reponded = requests.Count(x => x.Value.HasResponded);
+
+            Console.WriteLine("Total: {0}, reponded: {1} over 10 seconds late: [{2}]", 
+                requests.Count,
+                reponded,
+                string.Join(",", lateResponses.Select(x => x.Value.Id.ToString())));
+        }
+    }
+
+    public class RequestRecord
+    {
+        public RequestRecord(long id)
+        {
+            Id = id;
+            Ticks = DateTime.Now.Ticks;
+        }
+
+        public void Respond()
+        {
+            HasResponded = true;
+            ResponseTimeTicks = DateTime.Now.Ticks - Ticks;
+        }
+
+        public long Id { get; private set; }
+        public long Ticks { get; private set; }
+        public bool HasResponded { get; private set; }
+        public long ResponseTimeTicks { get; private set; }
     }
 }

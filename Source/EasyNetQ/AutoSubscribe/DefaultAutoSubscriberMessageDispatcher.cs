@@ -1,8 +1,8 @@
 using System;
 
-namespace EasyNetQ
+namespace EasyNetQ.AutoSubscribe
 {
-    public class DefaultMessageDispatcher : IMessageDispatcher
+    public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDispatcher
     {
         public void Dispatch<TMessage, TConsumer>(TMessage message) 
             where TMessage : class

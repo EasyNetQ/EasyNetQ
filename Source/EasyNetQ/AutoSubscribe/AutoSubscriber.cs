@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace EasyNetQ
+namespace EasyNetQ.AutoSubscribe
 {
     /// <summary>
     /// Lets you scan assemblies for implementations of <see cref="IConsume{T}"/> so that
@@ -25,7 +25,7 @@ namespace EasyNetQ
         /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
-        public IMessageDispatcher MessageDispatcher { get; set; } 
+        public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; } 
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -44,7 +44,7 @@ namespace EasyNetQ
 
             this.bus = bus;
             SubscriptionIdPrefix = subscriptionIdPrefix;
-            MessageDispatcher = new DefaultMessageDispatcher();
+            AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         }
 
@@ -81,12 +81,12 @@ namespace EasyNetQ
             {
                 foreach (var subscriptionInfo in kv.Value)
                 {
-                    var dispatchMethod = MessageDispatcher.GetType()
+                    var dispatchMethod = AutoSubscriberMessageDispatcher.GetType()
                         .GetMethod(DispatchMethodName, BindingFlags.Instance | BindingFlags.Public)
                         .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
 
                     var dispatchMethodType = typeof(Action<>).MakeGenericType(subscriptionInfo.MessageType);
-                    var dispatchDelegate = Delegate.CreateDelegate(dispatchMethodType, MessageDispatcher, dispatchMethod);
+                    var dispatchDelegate = Delegate.CreateDelegate(dispatchMethodType, AutoSubscriberMessageDispatcher, dispatchMethod);
                     var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
                     var subscriptionId = subscriptionAttribute != null
                                              ? subscriptionAttribute.SubscriptionId

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
 
@@ -28,7 +29,7 @@ namespace EasyNetQ.Tests
             autoSubscriber.Subscribe(GetType().Assembly);
 
             interceptedSubscriptions.Count.ShouldEqual(4);
-            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultMessageDispatcher)).ShouldBeTrue();
+            interceptedSubscriptions.TrueForAll(i => i.Item2.Method.DeclaringType == typeof(DefaultAutoSubscriberMessageDispatcher)).ShouldBeTrue();
 
             CheckSubscriptionsContains<MessageA>(interceptedSubscriptions, "MyAppPrefix:e8afeaac27aeba31a42dea8e4d05308e");
             CheckSubscriptionsContains<MessageB>(interceptedSubscriptions, "MyExplicitId");
@@ -92,7 +93,7 @@ namespace EasyNetQ.Tests
 
             var autoSubscriber = new AutoSubscriber(busFake, "MyAppPrefix")
             {
-                MessageDispatcher = dispatcher
+                AutoSubscriberMessageDispatcher = dispatcher
             };
 
             autoSubscriber.Subscribe(GetType().Assembly);
@@ -199,7 +200,7 @@ namespace EasyNetQ.Tests
             public IAdvancedBus Advanced { get; private set; }
         }
 
-        private class CustomMessageDispatcher : IMessageDispatcher
+        private class CustomMessageDispatcher : IAutoSubscriberMessageDispatcher
         {
             public object DispatchedMessage { get; private set; }
 
