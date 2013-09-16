@@ -112,7 +112,7 @@ namespace EasyNetQ.Tests
                 // Console.Out.WriteLine("Message handled: '{0}'", message.Text);
             }
 
-            [Consumer(SubscriptionId = "MyExplicitId")]
+            [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
             public void Consume(MessageB message) { }
 
             public void Consume(MessageC message) { }

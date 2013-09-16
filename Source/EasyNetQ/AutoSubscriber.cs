@@ -67,7 +67,7 @@ namespace EasyNetQ
         /// Registers all consumers in passed assembly. The actual Subscriber instances is
         /// created using <seealso cref="CreateConsumer"/>. The SubscriptionId per consumer
         /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
-        /// is marked with <see cref="ConsumerAttribute"/> with a custom SubscriptionId.
+        /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
         /// </summary>
         /// <param name="assemblies">The assembleis to scan for consumers.</param>
         public virtual void Subscribe(params Assembly[] assemblies)
@@ -113,11 +113,11 @@ namespace EasyNetQ
                     && m.Params[1].ParameterType.GetGenericTypeDefinition() == typeof(Action<>)).Method;
         }
         
-        protected virtual ConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+        protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
         {
             var consumeMethod = consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType });
 
-            return consumeMethod.GetCustomAttributes(typeof(ConsumerAttribute), true).SingleOrDefault() as ConsumerAttribute;
+            return consumeMethod.GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true).SingleOrDefault() as AutoSubscriberConsumerAttribute;
         }
 
         protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types)

@@ -54,10 +54,10 @@
     <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
-    <Compile Include="ConsumerAttribute.cs" />
+    <Compile Include="AutoSubscriberConsumerAttribute.cs" />
     <Compile Include="ConsumerDispatcher.cs" />
     <Compile Include="ConsumerDispatcherFactory.cs" />
-    <Compile Include="ConsumerInfo.cs" />
+    <Compile Include="AutoSubscriberConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="DefaultConsumerErrorStrategy.cs" />
