@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.13.1.0")]
+[assembly: AssemblyVersion("0.14.0.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
-// 0.13.1.0 Big internal consumer rewrite
+// 0.14.0.0 Big internal consumer rewrite
 // 0.13.0.0 AutoSubscriber moved to EasyNetQ.AutoSubscribe namespace.
 // 0.12.4.0 Factored ConsumerDispatcher out of QueueingConsumerFactory.
 // 0.12.3.0 Upgrade to RabbitMQ.Client 3.1.1
