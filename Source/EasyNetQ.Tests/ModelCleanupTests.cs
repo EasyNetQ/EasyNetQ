@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -36,7 +37,7 @@ namespace EasyNetQ.Tests
             bus.Subscribe<TestMessage>("abc", mgs => {});
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Close());
+            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
@@ -45,21 +46,19 @@ namespace EasyNetQ.Tests
             bus.SubscribeAsync<TestMessage>("abc", msg => null);
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Close());
+            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_request_response_model()
         {
-            // TODO: Actually creates two IModel instances, should check that both get cleaned up
-
             using (var publishChannel = bus.OpenPublishChannel())
             {
                 publishChannel.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
             }
             bus.Dispose();
 
-            mockBuilder.Channels[2].AssertWasCalled(x => x.Close());
+            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
@@ -68,7 +67,7 @@ namespace EasyNetQ.Tests
             bus.Respond<TestRequestMessage, TestResponseMessage>(x => null);
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Close());
+            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
         }
     }
 }

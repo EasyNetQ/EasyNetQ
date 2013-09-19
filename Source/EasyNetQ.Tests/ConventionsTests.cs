@@ -191,21 +191,25 @@ namespace EasyNetQ.Tests
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
-            var deliverArgs = new BasicDeliverEventArgs
-            {
-                RoutingKey = "originalRoutingKey",
-                Exchange = "orginalExchange",
-                Body = originalMessageBody,
-                BasicProperties = new BasicProperties
-                {
-                    CorrelationId = string.Empty,
-                    AppId = string.Empty
-                }
-            };
+            var context = new ConsumerExecutionContext(
+                (bytes, properties, arg3) => null,
+                new MessageReceivedInfo
+                    {
+                        RoutingKey = "originalRoutingKey",
+                        Exchange = "orginalExchange",
+                    }, 
+                new MessageProperties
+                    {
+                        CorrelationId = string.Empty,
+                        AppId = string.Empty
+                    },
+                originalMessageBody,
+                MockRepository.GenerateStub<IBasicConsumer>()
+                );
 
             try
             {
-                errorStrategy.HandleConsumerError(deliverArgs, new Exception());
+                errorStrategy.HandleConsumerError(context, new Exception());
             }
             catch (Exception)
             {

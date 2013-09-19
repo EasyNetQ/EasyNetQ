@@ -7,8 +7,10 @@ using System.Threading;
 using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing.v0_9_1;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
 {
@@ -47,20 +49,25 @@ namespace EasyNetQ.Tests
             const string originalMessage = "{ Text:\"Hello World\"}";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
-            var deliverArgs = new BasicDeliverEventArgs
-            {
-                RoutingKey = "originalRoutingKey",
-                Exchange = "orginalExchange",
-                Body = originalMessageBody,
-                BasicProperties = new BasicProperties
+            var exception = new Exception("I just threw!");
+
+            var context = new ConsumerExecutionContext(
+                (bytes, properties, arg3) => null,
+                new MessageReceivedInfo
+                {
+                    RoutingKey = "originalRoutingKey",
+                    Exchange = "orginalExchange",
+                },
+                new MessageProperties
                 {
                     CorrelationId = "123",
                     AppId = "456"
-                }
-            };
-            var exception = new Exception("I just threw!");
+                },
+                originalMessageBody,
+                MockRepository.GenerateStub<IBasicConsumer>()
+                );
 
-            consumerErrorStrategy.HandleConsumerError(deliverArgs, exception);
+            consumerErrorStrategy.HandleConsumerError(context, exception);
 
             Thread.Sleep(100);
 
@@ -77,13 +84,13 @@ namespace EasyNetQ.Tests
                 {
                     var message = serializer.BytesToMessage<Error>(getArgs.Body);
 
-                    message.RoutingKey.ShouldEqual(deliverArgs.RoutingKey);
-                    message.Exchange.ShouldEqual(deliverArgs.Exchange);
+                    message.RoutingKey.ShouldEqual(context.Info.RoutingKey);
+                    message.Exchange.ShouldEqual(context.Info.Exchange);
                     message.Message.ShouldEqual(originalMessage);
                     message.Exception.ShouldEqual("System.Exception: I just threw!");
                     message.DateTime.Date.ShouldEqual(DateTime.Now.Date);
-                    message.BasicProperties.CorrelationId.ShouldEqual(deliverArgs.BasicProperties.CorrelationId);
-                    message.BasicProperties.AppId.ShouldEqual(deliverArgs.BasicProperties.AppId);
+                    message.BasicProperties.CorrelationId.ShouldEqual(context.Properties.CorrelationId);
+                    message.BasicProperties.AppId.ShouldEqual(context.Properties.AppId);
                 }
             }
         }

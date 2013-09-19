@@ -1,11 +1,14 @@
 ﻿using System;
-using RabbitMQ.Client;
+using System.Threading.Tasks;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
     public interface IConsumerFactory : IDisposable
     {
-        DefaultBasicConsumer CreateConsumer(SubscriptionAction subscriptionAction, IModel model, bool modelIsSingleUse, MessageCallback callback);
-        void ClearConsumers();
+        IConsumer CreateConsumer(
+            IQueue queue, 
+            Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
+            IPersistentConnection connection);
     }
 }

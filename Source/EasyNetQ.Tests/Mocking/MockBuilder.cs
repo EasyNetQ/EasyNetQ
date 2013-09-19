@@ -42,6 +42,8 @@ namespace EasyNetQ.Tests.Mocking
             
             connection.Stub(x => x.CreateModel()).WhenCalled(i =>
                 {
+                    // Console.Out.WriteLine("\n\nMockBuilder - creating model\n{0}\n\n\n", new System.Diagnostics.StackTrace().ToString());
+                    // Console.Out.WriteLine("MockBuilder - creating model");
                     var channel = MockRepository.GenerateStub<IModel>();
                     i.ReturnValue = channel;
                     channels.Add(channel);
@@ -51,7 +53,7 @@ namespace EasyNetQ.Tests.Mocking
                         .WhenCalled(consumeInvokation =>
                         {
                             var consumerTag = (string)consumeInvokation.Arguments[2];
-                            var consumer = (DefaultBasicConsumer)consumeInvokation.Arguments[3];
+                            var consumer = (IBasicConsumer)consumeInvokation.Arguments[3];
 
                             consumer.HandleBasicConsumeOk(consumerTag);
                             consumers.Add(consumer);

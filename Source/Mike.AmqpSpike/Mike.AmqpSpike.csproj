@@ -69,6 +69,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublisherConfirms.cs" />
     <Compile Include="PublishSubscribe.cs" />
+    <Compile Include="SecondChannelOpenTest.cs" />
     <Compile Include="SecurityZoneSpike.cs" />
     <Compile Include="TaskCompletionSourceSpike.cs" />
     <Compile Include="ThreadLocalSpike.cs" />

@@ -29,13 +29,16 @@ namespace EasyNetQ
                     x.Resolve<ISerializer>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConventions>()))
-                .Register<IHandlerExecutionContext>(x => new HandlerExecutionContext(
+                .Register<IHandlerRunner>(x => new HandlerRunner(
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConsumerErrorStrategy>()))
-                .Register<IConsumerFactory>(x => new QueueingConsumerFactory(
+                .Register<IInternalConsumerFactory>(x => new InternalConsumerFactory(
+                    x.Resolve<IHandlerRunner>(),
                     x.Resolve<IEasyNetQLogger>(),
-                    x.Resolve<IConsumerDispatcherFactory>(),
-                    x.Resolve<IHandlerExecutionContext>()))
+                    x.Resolve<IConventions>(),
+                    x.Resolve<IConnectionConfiguration>(),
+                    x.Resolve<IConsumerDispatcherFactory>()))
+                .Register<IConsumerFactory>(x => new PersistentConsumerFactory(x.Resolve<IInternalConsumerFactory>()))
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))
@@ -43,14 +46,12 @@ namespace EasyNetQ
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<SerializeType>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
-                    x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),
                     x.Resolve<ISerializer>(),
                     x.Resolve<IConsumerFactory>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<Func<string>>(),
-                    x.Resolve<IConventions>(),
                     x.Resolve<IMessageValidationStrategy>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),

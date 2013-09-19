@@ -1,11 +1,15 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Text;
 using System.Threading.Tasks;
+using EasyNetQ.Loggers;
+using EasyNetQ.Management.Client;
 using EasyNetQ.Topology;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -20,16 +24,22 @@ namespace EasyNetQ.Tests.Integration
         private const string routingKey = "x";
         private const string messageText = "Hello World:0";
 
-        private const long rallyLength = 1000;
+        private const long rallyLength = 10000;
         private long rallyCount;
 
         [SetUp]
         public void SetUp()
         {
+            var loggers = new[]
+                {
+                    new ConsoleLogger(), 
+                    MockRepository.GenerateStub<IEasyNetQLogger>()
+                };
+
             rallyCount = 0;
             for (int i = 0; i < 2; i++)
             {
-                buses[i] = RabbitHutch.CreateBus("host=localhost");
+                buses[i] = RabbitHutch.CreateBus("host=localhost", x => x.Register(_ => loggers[i]));
                 var name = string.Format("advanced_ping_pong_{0}", i);
 
                 exchanges[i] = buses[i].Advanced.ExchangeDeclare(name, "direct");
@@ -48,9 +58,11 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit]
-        public void Ping_pong_with_advances_consumers()
+        [Test, Explicit("Requires a RabbitMQ instance on localhost.")]
+        public void Ping_pong_with_advanced_consumers()
         {
+            IntermittentDisconnection();
+
             Consume(0, 1);
             Consume(1, 0);
 
@@ -59,7 +71,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 var properties = new MessageProperties
                     {
-                        CorrelationId = "ping pong test"
+                        CorrelationId = "0"
                     };
                 var body = Encoding.UTF8.GetBytes(messageText);
                 channel.Publish(exchanges[1], routingKey, properties, body);
@@ -75,30 +87,90 @@ namespace EasyNetQ.Tests.Integration
         {
             buses[from].Advanced.Consume(queues[from], (body, properties, info) => Task.Factory.StartNew(() =>
                 {
-                    using (var channel = buses[from].Advanced.OpenPublishChannel())
-                    {
-                        Console.Out.WriteLine("Consumer {0}: '{1}'", from, Encoding.UTF8.GetString(body));
-                        Thread.Sleep(500);
-                        var publishProperties = new MessageProperties
-                            {
-                                CorrelationId = properties.CorrelationId ?? "no id present"
-                            };
-                        var publishBody = GenerateNextMessage(body);
-                        channel.Publish(exchanges[to], routingKey, publishProperties, publishBody);
+                    Console.Out.WriteLine("Consumer {0}: '{1}'", from, Encoding.UTF8.GetString(body));
+                    Thread.Sleep(1000);
+                    var nextMessage = GenerateNextMessage(body);
 
-                        Interlocked.Increment(ref rallyCount);
+                    if (IsDuplicateMessage(nextMessage.CorrelationId))
+                    {
+                        Console.Out.WriteLine("\n>>>>>>>> DUPLICATE MESSAGE DETECTED: {0} <<<<<<<<<<\n", 
+                            nextMessage.CorrelationId);
+                        return;
                     }
+
+                    var publishProperties = new MessageProperties
+                        {
+                            CorrelationId = nextMessage.CorrelationId.ToString()
+                        };
+
+                    var published = false;
+                    while (!published)
+                    {
+                        try
+                        {
+                            using (var channel = buses[from].Advanced.OpenPublishChannel())
+                            {
+                                channel.Publish(exchanges[to], routingKey, publishProperties, nextMessage.Body);
+                            }
+                            published = true;
+                        }
+                        catch (Exception)
+                        {
+                            Console.Out.WriteLine("\n>>>>>>>> PUBLISH FAILED, RETRYING <<<<<<<<<<\n");
+                            Thread.Sleep(100);
+                            // retry if connection fails
+                        }
+                    }
+                    Interlocked.Increment(ref rallyCount);
                 }));
         }
 
-        public byte[] GenerateNextMessage(byte[] previousMessageBody)
+        private class Message
+        {
+            public Message(byte[] body, int correlationId)
+            {
+                Body = body;
+                CorrelationId = correlationId;
+            }
+
+            public byte[] Body { get; private set; }
+            public int CorrelationId { get; private set; }
+        }
+
+        private Message GenerateNextMessage(byte[] previousMessageBody)
         {
             var bodyText = Encoding.UTF8.GetString(previousMessageBody);
             var bodyElements = bodyText.Split(':');
             var textPart = bodyElements[0];
             var count = int.Parse(bodyElements[1]);
             var nextBodyText = textPart + ":" + (++count);
-            return Encoding.UTF8.GetBytes(nextBodyText);
+            return new Message(Encoding.UTF8.GetBytes(nextBodyText), count);
+        }
+
+        private readonly ConcurrentDictionary<int, object> correlationIds = new ConcurrentDictionary<int, object>();
+
+        private bool IsDuplicateMessage(int correlationId)
+        {
+            return !correlationIds.TryAdd(correlationId, null);
+        }
+
+        private void IntermittentDisconnection()
+        {
+            const int secondsBetweenDisconnection = 2;
+
+            Task.Factory.StartNew(() =>
+                {
+                    var client = new ManagementClient("http://localhost", "guest", "guest", 15672);
+                    while (true)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(secondsBetweenDisconnection)); 
+                        var connections = client.GetConnections();
+                        foreach (var connection in connections)
+                        {
+                            client.CloseConnection(connection);
+                        }
+                    }
+                }, TaskCreationOptions.LongRunning);
         }
     }
 }

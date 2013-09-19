@@ -70,11 +70,14 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_write_debug_message()
         {
-            MockBuilder.Logger.AssertWasCalled(x => 
-                                               x.DebugWrite("Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'",
-                                                            "the_routing_key",
-                                                            "the_correlation_id",
-                                                            ConsumerTag));
+            MockBuilder.Logger.AssertWasCalled(x =>
+                x.DebugWrite("Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
+                    "\n\tDeliveryTag: {3}\n\tRedelivered: {4}",
+                            "the_routing_key",
+                            "the_correlation_id",
+                            ConsumerTag,
+                            DeliverTag,
+                            false));
         }
     }
 }

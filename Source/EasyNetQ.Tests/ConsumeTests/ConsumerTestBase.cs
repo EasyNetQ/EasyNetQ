@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
@@ -37,9 +38,9 @@ namespace EasyNetQ.Tests.ConsumeTests
                     ConsumerTagConvention = () => ConsumerTag
                 };
             MockBuilder = new MockBuilder(x => x
-                                                   .Register(_ => conventions)
-                                                   .Register(_ => ConsumerErrorStrategy)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                    .Register(_ => conventions)
+                    .Register(_ => ConsumerErrorStrategy)
+                    //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
                 );
 
             AdditionalSetUp();
@@ -88,7 +89,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            var handlerExecutionContext = (HandlerExecutionContext)MockBuilder.ServiceProvider.Resolve<IHandlerExecutionContext>();
+            var handlerExecutionContext = (HandlerRunner)MockBuilder.ServiceProvider.Resolve<IHandlerRunner>();
             handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
             autoResetEvent.WaitOne(1000);
         }

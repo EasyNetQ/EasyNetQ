@@ -36,9 +36,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_invoke_the_error_strategy()
         {
             ConsumerErrorStrategy.AssertWasCalled(x => x.HandleConsumerError(
-                Arg<BasicDeliverEventArgs>.Matches(args => args.ConsumerTag == ConsumerTag &&
-                                                           args.DeliveryTag == DeliverTag &&
-                                                           args.Exchange == "the_exchange" &&
+                Arg<ConsumerExecutionContext>.Matches(args => args.Info.ConsumerTag == ConsumerTag &&
+                                                           args.Info.DeliverTag == DeliverTag &&
+                                                           args.Info.Exchange == "the_exchange" &&
                                                            args.Body == OriginalBody),
                 Arg<Exception>.Matches(ex => ex.InnerException == exception)
                 ));

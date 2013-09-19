@@ -3,10 +3,10 @@
 using System;
 using System.Collections;
 using System.Threading;
+using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
 
@@ -124,7 +124,7 @@ namespace EasyNetQ.Tests
                 );
 
             var autoResetEvent = new AutoResetEvent(false);
-            var handlerExecutionContext = (HandlerExecutionContext)mockBuilder.ServiceProvider.Resolve<IHandlerExecutionContext>();
+            var handlerExecutionContext = (HandlerRunner)mockBuilder.ServiceProvider.Resolve<IHandlerRunner>();
             handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
 
             mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
@@ -172,10 +172,12 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_write_debug_message()
         {
-            const string expectedMessageFormat = "Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'";
+            const string expectedMessageFormat = 
+                "Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
+                "\n\tDeliveryTag: {3}\n\tRedelivered: {4}";
 
             mockBuilder.Logger.AssertWasCalled(
-                x => x.DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag));
+                x => x.DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag, deliveryTag, false));
         }
     }
 
@@ -193,7 +195,7 @@ namespace EasyNetQ.Tests
 
         private MyMessage originalMessage;
         private readonly Exception originalException = new Exception("Some exception message");
-        private BasicDeliverEventArgs basicDeliverEventArgs;
+        private ConsumerExecutionContext basicDeliverEventArgs;
         private Exception raisedException;
 
         [SetUp]
@@ -209,7 +211,7 @@ namespace EasyNetQ.Tests
                 .IgnoreArguments()
                 .WhenCalled(i =>
                 {
-                    basicDeliverEventArgs = (BasicDeliverEventArgs) i.Arguments[0];
+                    basicDeliverEventArgs = (ConsumerExecutionContext)i.Arguments[0];
                     raisedException = (Exception) i.Arguments[1];
                 });
             consumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldAck);
@@ -247,7 +249,7 @@ namespace EasyNetQ.Tests
 
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            var handlerExecutionContext = (HandlerExecutionContext)mockBuilder.ServiceProvider.Resolve<IHandlerExecutionContext>();
+            var handlerExecutionContext = (HandlerRunner)mockBuilder.ServiceProvider.Resolve<IHandlerRunner>();
             handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
             autoResetEvent.WaitOne(1000);
         }
@@ -269,7 +271,7 @@ namespace EasyNetQ.Tests
         public void Should_invoke_the_consumer_error_strategy()
         {
             consumerErrorStrategy.AssertWasCalled(x => 
-                x.HandleConsumerError(Arg<BasicDeliverEventArgs>.Is.Anything, Arg<Exception>.Is.Anything));
+                x.HandleConsumerError(Arg<ConsumerExecutionContext>.Is.Anything, Arg<Exception>.Is.Anything));
         }
 
         [Test]
@@ -284,9 +286,9 @@ namespace EasyNetQ.Tests
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
             basicDeliverEventArgs.ShouldNotBeNull();
-            basicDeliverEventArgs.ConsumerTag.ShouldEqual(consumerTag);
-            basicDeliverEventArgs.DeliveryTag.ShouldEqual(deliveryTag);
-            basicDeliverEventArgs.RoutingKey.ShouldEqual("#");
+            basicDeliverEventArgs.Info.ConsumerTag.ShouldEqual(consumerTag);
+            basicDeliverEventArgs.Info.DeliverTag.ShouldEqual(deliveryTag);
+            basicDeliverEventArgs.Info.RoutingKey.ShouldEqual("#");
         }
     }
 }

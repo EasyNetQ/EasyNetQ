@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
@@ -84,7 +82,7 @@ namespace EasyNetQ
             return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, originalRoutingKey);
         }
 
-        public virtual void HandleConsumerError(BasicDeliverEventArgs deliverArgs, Exception exception)
+        public virtual void HandleConsumerError(ConsumerExecutionContext context, Exception exception)
         {
             try
             {
@@ -92,14 +90,14 @@ namespace EasyNetQ
 
                 using (var model = connection.CreateModel())
                 {
-                    var errorExchange = DeclareErrorExchangeQueueStructure(model, deliverArgs.RoutingKey);
+                    var errorExchange = DeclareErrorExchangeQueueStructure(model, context.Info.RoutingKey);
 
-                    var messageBody = CreateErrorMessage(deliverArgs, exception);
+                    var messageBody = CreateErrorMessage(context, exception);
                     var properties = model.CreateBasicProperties();
                     properties.SetPersistent(true);
                     properties.Type = TypeNameSerializer.Serialize(typeof (Error));
 
-                    model.BasicPublish(errorExchange, deliverArgs.RoutingKey, properties, messageBody);
+                    model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
                 }
             }
             catch (BrokerUnreachableException)
@@ -128,17 +126,18 @@ namespace EasyNetQ
             return EasyNetQ.PostExceptionAckStrategy.ShouldAck;
         }
 
-        private byte[] CreateErrorMessage(BasicDeliverEventArgs deliverArgs, Exception exception)
+        private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
-            var messageAsString = Encoding.UTF8.GetString(deliverArgs.Body);
+            var messageAsString = Encoding.UTF8.GetString(context.Body);
             var error = new Error
             {
-                RoutingKey = deliverArgs.RoutingKey,
-                Exchange = deliverArgs.Exchange,
+                RoutingKey = context.Info.RoutingKey,
+                Exchange = context.Info.Exchange,
                 Exception = exception.ToString(),
                 Message = messageAsString,
                 DateTime = DateTime.Now,
-                BasicProperties = new MessageBasicProperties(deliverArgs.BasicProperties)
+                // TODO:
+                // BasicProperties = context.Properties
             };
 
             return serializer.MessageToBytes(error);
@@ -155,6 +154,7 @@ namespace EasyNetQ
         }
 
         private bool disposed = false;
+
         public virtual void Dispose()
         {
             if (disposed) return;
