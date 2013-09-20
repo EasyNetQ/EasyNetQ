@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 
@@ -41,7 +40,7 @@ namespace EasyNetQ
         /// recipt is Ack'd. All onMessage delegates are processed on a single thread so you should
         /// avoid long running blocking IO operations. Consider using SubscribeAsync
         /// </param>
-        void Subscribe<T>(string subscriptionId, Action<T> onMessage);
+        void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class;
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -60,7 +59,8 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithTopic("uk.london")
         /// </param>
-        void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure);
+        void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
+            where T : class;
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -77,7 +77,7 @@ namespace EasyNetQ
         /// then continue processing asynchronously. When the Task completes the message will be
         /// Ack'd.
         /// </param>
-        void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage);
+        void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class;
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -96,7 +96,8 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
         /// </param>
-        void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure);
+        void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
+            where T : class;
 
         /// <summary>
         /// Responds to an RPC request.
@@ -106,7 +107,9 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received. It should return the response.
         /// </param>
-        void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder);
+        void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+            where TRequest : class
+            where TResponse : class;
 
         /// <summary>
         /// Responds to an RPC request asynchronously.
@@ -116,7 +119,9 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received.
         /// </param>
-        void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder);
+        void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+            where TRequest : class
+            where TResponse : class;
 
         /// <summary>
         /// Fires once the bus has connected to a RabbitMQ server.

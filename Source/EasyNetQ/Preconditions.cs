@@ -25,7 +25,7 @@ namespace EasyNetQ
         /// <exception cref="ArgumentException">
         /// Thrown if <paramref name="name"/> is blank.
         /// </exception>
-        public static void CheckNotNull(object value, string name)
+        public static void CheckNotNull<T>(T value, string name) where T : class
         {
             CheckNotNull(value, name, string.Format("{0} must not be blank", name));
         }
@@ -51,7 +51,7 @@ namespace EasyNetQ
         /// Thrown if <paramref name="name"/> or <paramref name="message"/> are
         /// blank.
         /// </exception>
-        public static void CheckNotNull(object value, string name, string message)
+        public static void CheckNotNull<T>(T value, string name, string message) where T : class 
         {
             CheckNotBlank(name, "name", "name must not be blank");
             CheckNotBlank(message, "message", "message must not be blank");

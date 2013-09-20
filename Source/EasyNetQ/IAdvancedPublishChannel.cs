@@ -14,7 +14,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="message">The message to publish</param>
         /// <param name="configure">Configure the publish</param>
-        void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure);
+        void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure) where T : class;
 
         /// <summary>
         /// Publish raw bytes to the bus.
@@ -33,7 +33,7 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to publish to</param>
         /// <param name="routingKey">The routing key</param>
         /// <param name="message">The message to publish</param>
-        void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message);
+        void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message) where T : class;
 
         /// <summary>
         /// Publish raw bytes to the bus.

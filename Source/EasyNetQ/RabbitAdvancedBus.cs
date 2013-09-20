@@ -73,7 +73,7 @@ namespace EasyNetQ
             get { return getCorrelationId; }
         }
 
-        public virtual void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
+        public virtual void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -110,6 +110,7 @@ namespace EasyNetQ
 
         public virtual IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
         {
+            Preconditions.CheckNotNull(configure, "configure");
             return new RabbitAdvancedPublishChannel(this, configure);
         }
 
@@ -124,6 +125,8 @@ namespace EasyNetQ
             uint perQueueTtl = UInt32.MaxValue, 
             uint expires = UInt32.MaxValue)
         {
+            Preconditions.CheckNotNull(name, "name");
+
             using (var model = connection.CreateModel())
             {
                 IDictionary<string, object> arguments = new Dictionary<string, object>();
@@ -184,6 +187,8 @@ namespace EasyNetQ
 
         public void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)
         {
+            Preconditions.CheckNotNull(queue, "queue");
+
             using (var model = connection.CreateModel())
             {
                 model.QueueDelete(queue.Name, ifUnused, ifEmpty);
@@ -193,6 +198,8 @@ namespace EasyNetQ
 
         public void QueuePurge(IQueue queue)
         {
+            Preconditions.CheckNotNull(queue, "queue");
+
             using (var model = connection.CreateModel())
             {
                 model.QueuePurge(queue.Name);
@@ -208,6 +215,9 @@ namespace EasyNetQ
             bool autoDelete = false,
             bool @internal = false)
         {
+            Preconditions.CheckNotNull(name, "name");
+            Preconditions.CheckNotNull(type, "type");
+
             using (var model = connection.CreateModel())
             {
                 model.ExchangeDeclare(name, type, durable, autoDelete, null);
@@ -219,6 +229,8 @@ namespace EasyNetQ
 
         public void ExchangeDelete(IExchange exchange, bool ifUnused = false)
         {
+            Preconditions.CheckNotNull(exchange, "exchange");
+
             using (var model = connection.CreateModel())
             {
                 model.ExchangeDelete(exchange.Name, ifUnused);
@@ -228,6 +240,10 @@ namespace EasyNetQ
 
         public IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
         {
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
+
             using (var model = connection.CreateModel())
             {
                 model.QueueBind(queue.Name, exchange.Name, routingKey);
@@ -239,6 +255,10 @@ namespace EasyNetQ
 
         public IBinding Bind(IExchange source, IExchange destination, string routingKey)
         {
+            Preconditions.CheckNotNull(source, "source");
+            Preconditions.CheckNotNull(destination, "destination");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
+
             using (var model = connection.CreateModel())
             {
                 model.ExchangeBind(destination.Name, source.Name, routingKey);
@@ -250,6 +270,8 @@ namespace EasyNetQ
 
         public void BindingDelete(IBinding binding)
         {
+            Preconditions.CheckNotNull(binding, "binding");
+
             using (var model = connection.CreateModel())
             {
                 var queue = binding.Bindable as IQueue;

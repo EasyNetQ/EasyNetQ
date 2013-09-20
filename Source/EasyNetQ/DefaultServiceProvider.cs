@@ -23,6 +23,8 @@ namespace EasyNetQ
 
         public virtual IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
         {
+            Preconditions.CheckNotNull(serviceCreator, "serviceCreator");
+
             // first to register wins
             if (components.ContainsKey(typeof(TService))) return this;
 

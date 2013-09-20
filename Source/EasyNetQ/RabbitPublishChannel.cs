@@ -31,6 +31,8 @@ namespace EasyNetQ
 
         public RabbitPublishChannel(RabbitBus bus, Action<IChannelConfiguration> configure, IConventions conventions)
         {
+            Preconditions.CheckNotNull(bus, "bus");
+            Preconditions.CheckNotNull(configure, "configure");
             Preconditions.CheckNotNull(conventions, "conventions");
 
             this.bus = bus;
@@ -39,12 +41,12 @@ namespace EasyNetQ
             advancedPublishChannel = advancedBus.OpenPublishChannel(configure);
         }
 
-        public virtual void Publish<T>(T message)
+        public virtual void Publish<T>(T message) where T : class
         {
             Publish(message, x => {});
         }
 
-        public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure)
+        public virtual void Publish<T>(T message, Action<IPublishConfiguration<T>> configure) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
@@ -81,7 +83,9 @@ namespace EasyNetQ
             };
         }
 
-        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse) 
+            where TRequest : class
+            where TResponse : class
         {
             Preconditions.CheckNotNull(onResponse, "onResponse");
             Preconditions.CheckNotNull(request, "request");
@@ -90,7 +94,9 @@ namespace EasyNetQ
             RequestPublish(request, returnQueueName);
         }
 
-        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request) 
+            where TRequest : class
+            where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
 
@@ -101,7 +107,9 @@ namespace EasyNetQ
             return taskCompletionSource.Task;
         }
 
-        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token)
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token) 
+            where TRequest : class
+            where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
 
@@ -113,7 +121,8 @@ namespace EasyNetQ
             return taskCompletionSource.Task;
         }
 
-        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
+        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse) 
+            where TResponse : class
         {
             var queue = advancedBus.QueueDeclare(
                 conventions.RpcReturnQueueNamingConvention(), 
@@ -141,7 +150,7 @@ namespace EasyNetQ
             return queue.Name;
         }
 
-        private void RequestPublish<TRequest>(TRequest request, string returnQueueName)
+        private void RequestPublish<TRequest>(TRequest request, string returnQueueName) where TRequest : class
         {
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);

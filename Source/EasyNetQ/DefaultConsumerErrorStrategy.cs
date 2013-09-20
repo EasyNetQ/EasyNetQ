@@ -35,6 +35,9 @@ namespace EasyNetQ
             IEasyNetQLogger logger,
             IConventions conventions)
         {
+            Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
+            Preconditions.CheckNotNull(serializer, "serializer");
+            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
 
             this.connectionFactory = connectionFactory;
@@ -84,6 +87,9 @@ namespace EasyNetQ
 
         public virtual void HandleConsumerError(ConsumerExecutionContext context, Exception exception)
         {
+            Preconditions.CheckNotNull(context, "context");
+            Preconditions.CheckNotNull(exception, "exception");
+
             try
             {
                 Connect();

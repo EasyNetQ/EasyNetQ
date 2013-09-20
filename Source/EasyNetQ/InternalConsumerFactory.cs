@@ -20,6 +20,12 @@
             IConnectionConfiguration connectionConfiguration, 
             IConsumerDispatcherFactory consumerDispatcherFactory)
         {
+            Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
+            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(consumerDispatcherFactory, "consumerDispatcherFactory");
+
             this.handlerRunner = handlerRunner;
             this.logger = logger;
             this.conventions = conventions;

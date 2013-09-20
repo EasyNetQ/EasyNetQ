@@ -13,7 +13,7 @@ namespace EasyNetQ
         /// <param name="publishChannel">The publish channel to publish the future message on</param>
         /// <param name="timeToRespond">The time at which the message should be sent (UTC)</param>
         /// <param name="message">The message to response with</param>
-        public static void FuturePublish<T>(this IPublishChannel publishChannel, DateTime timeToRespond, T message)
+        public static void FuturePublish<T>(this IPublishChannel publishChannel, DateTime timeToRespond, T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
 

@@ -12,6 +12,8 @@ namespace EasyNetQ
 
         public ConsumerDispatcherFactory(IEasyNetQLogger logger)
         {
+            Preconditions.CheckNotNull(logger, "logger");
+            
             dispatcher = new Lazy<IConsumerDispatcher>(() => new ConsumerDispatcher(logger));
         }
 
@@ -19,7 +21,7 @@ namespace EasyNetQ
         {
             return dispatcher.Value;
         }
-
+        
         public void Dispose()
         {
             if (dispatcher.IsValueCreated)

@@ -39,6 +39,12 @@ namespace EasyNetQ
             IConventions conventions, 
             IConnectionConfiguration connectionConfiguration)
         {
+            Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
+            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
+            Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+
             this.handlerRunner = handlerRunner;
             this.logger = logger;
             this.consumerDispatcher = consumerDispatcher;
@@ -51,6 +57,10 @@ namespace EasyNetQ
             IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
+            Preconditions.CheckNotNull(connection, "connection");
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+
             this.queue = queue;
             this.onMessage = onMessage;
             var consumerTag = conventions.ConsumerTagConvention();
@@ -147,14 +157,7 @@ namespace EasyNetQ
                 return;
             }
 
-            var messageRecievedInfo = new MessageReceivedInfo
-                {
-                    ConsumerTag = consumerTag,
-                    DeliverTag = deliveryTag,
-                    Redelivered = redelivered,
-                    Exchange = exchange,
-                    RoutingKey = routingKey
-                };
+            var messageRecievedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey);
             var messsageProperties = new MessageProperties(properties);
             var context = new ConsumerExecutionContext(onMessage, messageRecievedInfo, messsageProperties, body, this);
 

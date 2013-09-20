@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
                     Type = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"
                 };
 
-            var info = new MessageReceivedInfo();
+            var info = new MessageReceivedInfo("consumerTag", 0, false, "exchange", "routingKey");
 
             messageValidationStrategy.CheckMessageType<MyMessage>(body, properties, info);
         }
@@ -43,7 +43,7 @@ namespace EasyNetQ.Tests
                 Type = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests_XXX"
             };
 
-            var info = new MessageReceivedInfo();
+            var info = new MessageReceivedInfo("consumerTag", 0, false, "exchange", "routingKey");
 
             messageValidationStrategy.CheckMessageType<MyMessage>(body, properties, info);
         }

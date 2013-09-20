@@ -26,6 +26,9 @@ namespace EasyNetQ
 
         public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger)
         {
+            Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
+            Preconditions.CheckNotNull(logger, "logger");
+
             this.connectionFactory = connectionFactory;
             this.logger = logger;
 

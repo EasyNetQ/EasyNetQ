@@ -18,7 +18,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
-        void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage);
+        void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class;
 
         /// <summary>
         /// Consume raw bytes from the queue.

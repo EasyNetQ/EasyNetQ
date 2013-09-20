@@ -193,11 +193,7 @@ namespace EasyNetQ.Tests
 
             var context = new ConsumerExecutionContext(
                 (bytes, properties, arg3) => null,
-                new MessageReceivedInfo
-                    {
-                        RoutingKey = "originalRoutingKey",
-                        Exchange = "orginalExchange",
-                    }, 
+                new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey"),
                 new MessageProperties
                     {
                         CorrelationId = string.Empty,

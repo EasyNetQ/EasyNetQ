@@ -153,43 +153,33 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
-            public void Subscribe<T>(string subscriptionId, Action<T> onMessage)
+            public void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
             {
                 if (InterceptSubscribe != null)
                     InterceptSubscribe(subscriptionId, onMessage);
             }
 
-            public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure)
+            public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
             {
                 throw new NotImplementedException();
             }
 
-            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage)
+            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
             {
                 throw new NotImplementedException();
             }
 
-            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure)
+            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
             {
                 throw new NotImplementedException();
             }
 
-            public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
+            public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) where TRequest : class where TResponse : class
             {
                 throw new NotImplementedException();
             }
 
-            public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, IDictionary<string, object> arguments)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IDictionary<string, object> arguments)
+            public void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) where TRequest : class where TResponse : class
             {
                 throw new NotImplementedException();
             }

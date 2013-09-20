@@ -18,6 +18,8 @@ namespace EasyNetQ
 
         public void CopyFrom(IBasicProperties basicProperties)
         {
+            Preconditions.CheckNotNull(basicProperties, "basicProperties");
+
             if (basicProperties.IsContentTypePresent())         ContentType         = basicProperties.ContentType;
             if (basicProperties.IsContentEncodingPresent())     ContentEncoding     = basicProperties.ContentEncoding;
             if (basicProperties.IsDeliveryModePresent())        DeliveryMode        = basicProperties.DeliveryMode;
@@ -43,6 +45,8 @@ namespace EasyNetQ
 
         public void CopyTo(IBasicProperties basicProperties)
         {
+            Preconditions.CheckNotNull(basicProperties, "basicProperties");
+
             if(contentTypePresent)      basicProperties.ContentType      =  ContentType; 
             if(contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding; 
             if(deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode; 

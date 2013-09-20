@@ -13,6 +13,8 @@ namespace EasyNetQ
 
         public PersistentConsumerFactory(IInternalConsumerFactory internalConsumerFactory)
         {
+            Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
+
             this.internalConsumerFactory = internalConsumerFactory;
         }
 

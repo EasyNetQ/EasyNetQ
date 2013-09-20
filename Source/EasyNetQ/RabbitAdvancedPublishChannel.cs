@@ -16,6 +16,7 @@ namespace EasyNetQ
         public RabbitAdvancedPublishChannel(RabbitAdvancedBus advancedBus, Action<IChannelConfiguration> configure)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
+            Preconditions.CheckNotNull(configure, "configure");
 
             if (!advancedBus.Connection.IsConnected)
             {
@@ -54,7 +55,7 @@ namespace EasyNetQ
             disposed = true;
         }
 
-        public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure)
+        public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message, Action<IAdvancedPublishConfiguration> configure) where T : class
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(routingKey, "routingKey");
@@ -127,7 +128,7 @@ namespace EasyNetQ
             }
         }
 
-        public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message)
+        public virtual void Publish<T>(IExchange exchange, string routingKey, IMessage<T> message) where T : class
         {
             Publish(exchange, routingKey, message, configuration => { });
         }

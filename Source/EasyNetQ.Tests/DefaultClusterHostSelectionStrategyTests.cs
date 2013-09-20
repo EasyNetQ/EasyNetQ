@@ -8,18 +8,18 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class DefaultClusterHostSelectionStrategyTests
     {
-        private IClusterHostSelectionStrategy<int> defaultClusterHostSelectionStrategy;
+        private IClusterHostSelectionStrategy<string> defaultClusterHostSelectionStrategy;
         private StringWriter writer;    
 
         [SetUp]
         public void SetUp()
         {
-            defaultClusterHostSelectionStrategy = new DefaultClusterHostSelectionStrategy<int>
+            defaultClusterHostSelectionStrategy = new DefaultClusterHostSelectionStrategy<string>
             {
-                0,
-                1,
-                2,
-                3,
+                "0",
+                "1",
+                "2",
+                "3",
             };
 
             writer = new StringWriter();

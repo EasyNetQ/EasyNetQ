@@ -12,6 +12,8 @@ namespace EasyNetQ
 
         public ConsumerDispatcher(IEasyNetQLogger logger)
         {
+            Preconditions.CheckNotNull(logger, "logger");
+
             dispatchThread = new Thread(_ =>
                 {
                     try
@@ -39,6 +41,7 @@ namespace EasyNetQ
 
         public void QueueAction(Action action)
         {
+            Preconditions.CheckNotNull(action, "action");
             queue.Add(action);
         }
 

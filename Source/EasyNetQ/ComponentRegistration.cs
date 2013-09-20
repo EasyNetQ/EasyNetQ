@@ -7,6 +7,8 @@ namespace EasyNetQ
     {
         public static IServiceProvider CreateServiceProvider(Action<IServiceRegister> registerServices)
         {
+            Preconditions.CheckNotNull(registerServices, "registerServices");
+
             var serviceProvider = new DefaultServiceProvider();
             registerServices(serviceProvider);
 
