@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public class ConsumerExecutionContext
     {

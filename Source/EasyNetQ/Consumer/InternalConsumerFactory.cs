@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ
+﻿namespace EasyNetQ.Consumer
 {
     public interface IInternalConsumerFactory
     {

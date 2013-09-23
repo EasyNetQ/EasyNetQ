@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Threading;
+using EasyNetQ.Consumer;
 using NUnit.Framework;
 using Rhino.Mocks;
 

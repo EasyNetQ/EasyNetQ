@@ -54,19 +54,19 @@
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
-    <Compile Include="ConsumerExecutionContext.cs" />
-    <Compile Include="PersistentConsumerFactory.cs" />
-    <Compile Include="IConsumer.cs" />
-    <Compile Include="IConsumerFactory.cs" />
-    <Compile Include="InternalConsumer.cs" />
-    <Compile Include="InternalConsumerFactory.cs" />
-    <Compile Include="PersistentConsumer.cs" />
-    <Compile Include="ConsumerDispatcher.cs" />
-    <Compile Include="ConsumerDispatcherFactory.cs" />
+    <Compile Include="Consumer\ConsumerExecutionContext.cs" />
+    <Compile Include="Consumer\ConsumerFactory.cs" />
+    <Compile Include="Consumer\IConsumer.cs" />
+    <Compile Include="Consumer\IConsumerFactory.cs" />
+    <Compile Include="Consumer\InternalConsumer.cs" />
+    <Compile Include="Consumer\InternalConsumerFactory.cs" />
+    <Compile Include="Consumer\PersistentConsumer.cs" />
+    <Compile Include="Consumer\ConsumerDispatcher.cs" />
+    <Compile Include="Consumer\ConsumerDispatcherFactory.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="CorrelationIdGenerator.cs" />
-    <Compile Include="DefaultConsumerErrorStrategy.cs" />
+    <Compile Include="Consumer\DefaultConsumerErrorStrategy.cs" />
     <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="DefaultMessageValidationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
@@ -76,7 +76,7 @@
     <Compile Include="FluentConfiguration\IChannelConfiguration.cs" />
     <Compile Include="FluentConfiguration\IPublishConfiguration.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
-    <Compile Include="HandlerRunner.cs" />
+    <Compile Include="Consumer\HandlerRunner.cs" />
     <Compile Include="IAdvancedBus.cs" />
     <Compile Include="IAdvancedPublishChannel.cs" />
     <Compile Include="IBus.cs" />
@@ -84,9 +84,9 @@
     <Compile Include="IConnectionConfiguration.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="AutoSubscribe\IConsume.cs" />
-    <Compile Include="IConsumerDispatcher.cs" />
-    <Compile Include="IConsumerDispatcherFactory.cs" />
-    <Compile Include="IConsumerErrorStrategy.cs" />
+    <Compile Include="Consumer\IConsumerDispatcher.cs" />
+    <Compile Include="Consumer\IConsumerDispatcherFactory.cs" />
+    <Compile Include="Consumer\IConsumerErrorStrategy.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
@@ -110,6 +110,7 @@
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitPublishChannel.cs" />
+    <Compile Include="Consumer\SingleUseConsumer.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
     <Compile Include="Sprache\Input.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="Topology\IQueue.cs" />
     <Compile Include="Topology\Queue.cs" />
     <Compile Include="DefaultClusterHostSelectionStrategy.cs" />
+    <Compile Include="Consumer\TransientConsumer.cs" />
     <Compile Include="TypeNameSerializer.cs" />
     <Compile Include="Preconditions.cs" />
   </ItemGroup>

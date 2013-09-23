@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     /// <summary>
     /// The default ConsumerDispatcherFactory. It creates a single dispatch

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public interface IConsumerFactory : IDisposable
     {

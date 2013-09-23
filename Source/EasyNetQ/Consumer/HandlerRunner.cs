@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public interface IHandlerRunner : IDisposable
     {

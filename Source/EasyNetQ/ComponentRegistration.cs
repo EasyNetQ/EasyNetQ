@@ -1,4 +1,5 @@
 ﻿using System;
+using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 
 namespace EasyNetQ
@@ -40,7 +41,7 @@ namespace EasyNetQ
                     x.Resolve<IConventions>(),
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IConsumerDispatcherFactory>()))
-                .Register<IConsumerFactory>(x => new PersistentConsumerFactory(x.Resolve<IInternalConsumerFactory>()))
+                .Register<IConsumerFactory>(x => new ConsumerFactory(x.Resolve<IInternalConsumerFactory>()))
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public class PersistentConsumer : IConsumer
     {
@@ -15,6 +15,8 @@ namespace EasyNetQ
 
         private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = 
             new ConcurrentDictionary<IInternalConsumer, object>();
+
+        public event Action<IConsumer> RemoveMeFromList;
 
         public PersistentConsumer(
             IQueue queue, 
@@ -52,9 +54,9 @@ namespace EasyNetQ
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
 
-            object value; // cruft from using a ConcurrentDictionary
             internalConsumer.Cancelled += consumer =>
                 {
+                    object value; // cruft from using a ConcurrentDictionary
                     internalConsumers.TryRemove(consumer, out value);
                     StartConsumingInternal();
                 };

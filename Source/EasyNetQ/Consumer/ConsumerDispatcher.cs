@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public class ConsumerDispatcher : IConsumerDispatcher
     {

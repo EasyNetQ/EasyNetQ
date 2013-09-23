@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.Consumer;
 using NUnit.Framework;
 using RabbitMQ.Client.Events;
 using Rhino.Mocks;

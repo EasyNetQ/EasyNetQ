@@ -5,7 +5,7 @@ using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     /// <summary>
     /// A strategy for dealing with failed messages. When a message consumer thows, HandleConsumerError is invoked.
@@ -129,7 +129,7 @@ namespace EasyNetQ
 
         public virtual PostExceptionAckStrategy PostExceptionAckStrategy()
         {
-            return EasyNetQ.PostExceptionAckStrategy.ShouldAck;
+            return Consumer.PostExceptionAckStrategy.ShouldAck;
         }
 
         private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)

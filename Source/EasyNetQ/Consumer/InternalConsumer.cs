@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public interface IInternalConsumer : IDisposable
     {

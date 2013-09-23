@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;

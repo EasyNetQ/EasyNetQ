@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EasyNetQ
+namespace EasyNetQ.Consumer
 {
     public interface IConsumerDispatcherFactory : IDisposable
     {
