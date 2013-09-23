@@ -117,14 +117,6 @@ namespace EasyNetQ
             Cancel();
             logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
                              "Recreating queue and queue listener. Consumer tag: " + consumerTag);
-
-            // According to: http://www.rabbitmq.com/releases/rabbitmq-dotnet-client/v3.1.4/rabbitmq-dotnet-client-3.1.4-user-guide.pdf section 2.9.
-            // All IBasicConsumer methods are dispatched by single background thread 
-            // and MUST NOT invoke blocking AMQP operations: IModel.QueueDeclare, IModel.BasicCancel or IModel.BasicPublish...
-            // For this reason we are recreating queues and queue listeners on separate thread.
-            // Which is disposed after we are done.
-            // TODO:
-            //ThreadPool.QueueUserWorkItem(state => StartConsuming());
         }
 
         public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
@@ -162,8 +154,6 @@ namespace EasyNetQ
             var context = new ConsumerExecutionContext(onMessage, messageRecievedInfo, messsageProperties, body, this);
 
             consumerDispatcher.QueueAction(() => handlerRunner.InvokeUserMessageHandler(context));
-
-            // TODO: single use consumer
         }
 
         public void Dispose()

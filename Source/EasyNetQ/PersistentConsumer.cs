@@ -13,8 +13,6 @@ namespace EasyNetQ
 
         private readonly IInternalConsumerFactory internalConsumerFactory;
 
-        public bool ModelIsSingleUse { get { return queue.IsSingleUse; } }
-
         private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = 
             new ConcurrentDictionary<IInternalConsumer, object>();
 
@@ -45,11 +43,21 @@ namespace EasyNetQ
 
         private void StartConsumingInternal()
         {
+            if(!connection.IsConnected)
+            {
+                // connection is not connected, so just ignore this call. A consumer will
+                // be created and start consuming when the connection reconnects.
+            }
+
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
 
             object value; // cruft from using a ConcurrentDictionary
-            internalConsumer.Cancelled += consumer => internalConsumers.TryRemove(consumer, out value);
+            internalConsumer.Cancelled += consumer =>
+                {
+                    internalConsumers.TryRemove(consumer, out value);
+                    StartConsumingInternal();
+                };
 
             internalConsumer.StartConsuming(
                 connection, 
@@ -59,6 +67,7 @@ namespace EasyNetQ
 
         private void ConnectionOnDisconnected()
         {
+            internalConsumers.Clear();
         }
 
         private void ConnectionOnConnected()
