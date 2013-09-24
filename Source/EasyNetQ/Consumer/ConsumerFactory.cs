@@ -70,6 +70,7 @@ namespace EasyNetQ.Consumer
             {
                 consumer.Dispose();
             }
+            internalConsumerFactory.Dispose();
         }
     }
 }

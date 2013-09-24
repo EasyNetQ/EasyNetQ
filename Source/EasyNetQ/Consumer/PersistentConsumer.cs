@@ -56,6 +56,8 @@ namespace EasyNetQ.Consumer
 
             internalConsumer.Cancelled += consumer =>
                 {
+                    if (disposed) return;
+
                     object value; // cruft from using a ConcurrentDictionary
                     internalConsumers.TryRemove(consumer, out value);
                     StartConsumingInternal();
@@ -77,8 +79,12 @@ namespace EasyNetQ.Consumer
             StartConsumingInternal();
         }
 
+        private bool disposed = false;
+
         public void Dispose()
         {
+            disposed = true;
+
             connection.Connected -= ConnectionOnConnected;
             connection.Disconnected -= ConnectionOnDisconnected;
 
