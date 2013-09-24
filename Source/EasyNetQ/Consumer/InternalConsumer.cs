@@ -13,6 +13,7 @@ namespace EasyNetQ.Consumer
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         event Action<IInternalConsumer> Cancelled;
+        event Action<ConsumerExecutionContext> AckOrNackWasSent;
     }
 
     public class InternalConsumer : IBasicConsumer, IInternalConsumer
@@ -31,6 +32,7 @@ namespace EasyNetQ.Consumer
         public string ConsumerTag { get; private set; }
 
         public event Action<IInternalConsumer> Cancelled;
+        public event Action<ConsumerExecutionContext> AckOrNackWasSent;
 
         public InternalConsumer(
             IHandlerRunner handlerRunner, 
@@ -101,6 +103,12 @@ namespace EasyNetQ.Consumer
             if(cancelled != null) cancelled(this);
         }
 
+        private void AckOrNackSent(ConsumerExecutionContext context)
+        {
+            var ackOrNackWasSent = AckOrNackWasSent;
+            if (ackOrNackWasSent != null) ackOrNackWasSent(context);
+        }
+
         public void HandleBasicConsumeOk(string consumerTag)
         {
             ConsumerTag = consumerTag;
@@ -145,13 +153,17 @@ namespace EasyNetQ.Consumer
 
             if (onMessage == null)
             {
-                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'", ConsumerTag);
+                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'." + 
+                    "Please call InternalConsumer.StartConsuming before passing the consumer to basic.consume", 
+                    ConsumerTag);
                 return;
             }
 
             var messageRecievedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey);
             var messsageProperties = new MessageProperties(properties);
             var context = new ConsumerExecutionContext(onMessage, messageRecievedInfo, messsageProperties, body, this);
+
+            context.SetPostAckCallback(() => AckOrNackSent(context));
 
             consumerDispatcher.QueueAction(() => handlerRunner.InvokeUserMessageHandler(context));
         }

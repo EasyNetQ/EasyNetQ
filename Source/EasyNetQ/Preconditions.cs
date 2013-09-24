@@ -27,7 +27,7 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckNotNull<T>(T value, string name) where T : class
         {
-            CheckNotNull(value, name, string.Format("{0} must not be blank", name));
+            CheckNotNull(value, name, string.Format("{0} must not be null", name));
         }
 
         /// <summary>

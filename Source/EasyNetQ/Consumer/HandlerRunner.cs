@@ -98,24 +98,42 @@ namespace EasyNetQ.Consumer
 
             try
             {
+                Preconditions.CheckNotNull(context.Consumer.Model, "context.Consumer.Model");
+
                 ackStrategy(context.Consumer.Model, context.Info.DeliverTag);
             }
             catch (AlreadyClosedException alreadyClosedException)
             {
-                logger.InfoWrite(failedToAckMessage, 
-                    alreadyClosedException.Message,
-                    context.Info.ConsumerTag,
-                    context.Info.DeliverTag);
+                logger.InfoWrite(failedToAckMessage,
+                                 alreadyClosedException.Message,
+                                 context.Info.ConsumerTag,
+                                 context.Info.DeliverTag);
             }
             catch (IOException ioException)
             {
                 logger.InfoWrite(failedToAckMessage,
-                    ioException.Message,
-                    context.Info.ConsumerTag,
-                    context.Info.DeliverTag);
+                                 ioException.Message,
+                                 context.Info.ConsumerTag,
+                                 context.Info.DeliverTag);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorWrite("Unexpected exception when attempting to ACK or NACK\n{0}", exception);
             }
             finally
             {
+                try
+                {
+                    foreach (var postAckCallback in context.PostAckCallbacks)
+                    {
+                        postAckCallback();
+                    }
+                }
+                catch (Exception exception)
+                {
+                    logger.ErrorWrite("Exception in PostAckCallback:\n{0}", exception);
+                }
+
                 if (SynchronisationAction != null)
                 {
                     SynchronisationAction();

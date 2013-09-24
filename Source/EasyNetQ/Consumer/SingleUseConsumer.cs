@@ -38,7 +38,11 @@ namespace EasyNetQ.Consumer
 
             internalConsumer.Cancelled += consumer => OnRemoveMeFromList();
 
-            // TODO: cancel after single consume
+            internalConsumer.AckOrNackWasSent += context =>
+                {
+                    OnRemoveMeFromList();
+                    Dispose();
+                };
 
             internalConsumer.StartConsuming(
                 connection,
