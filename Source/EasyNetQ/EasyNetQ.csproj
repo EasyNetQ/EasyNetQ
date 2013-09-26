@@ -97,6 +97,7 @@
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="IMessageValidationStrategy.cs" />
     <Compile Include="JsonSerializer.cs" />
+    <Compile Include="LinqExtensions.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Loggers\DelegateLogger.cs" />
     <Compile Include="Message.cs" />

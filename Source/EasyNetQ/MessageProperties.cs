@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
+using System.Text;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -234,6 +236,42 @@ namespace EasyNetQ
         {
             get { return clusterId; }
             set { clusterId = value; clusterIdPresent = true; }
+        }
+
+        public void AppendPropertyDebugStringTo(StringBuilder stringBuilder)
+        {
+            GetType()
+                .GetProperties()
+                .Select(x => string.Format("{0}={1}", x.Name, GetValueString(x.GetValue(this, null))))
+                .Intersperse(", ")
+                .Aggregate(stringBuilder, (sb, x) =>
+                {
+                    sb.Append(x);
+                    return sb;
+                });
+        }
+
+        private string GetValueString(object value)
+        {
+            if (value == null) return "NULL";
+
+            var dictionary = value as IDictionary;
+            if (dictionary == null) return value.ToString();
+
+            var stringBuilder = new StringBuilder();
+
+            dictionary
+                .EnumerateDictionary()
+                .Select(x => string.Format("{0}={1}", x.Key, x.Value))
+                .Intersperse(", ")
+                .SurroundWith("[", "]")
+                .Aggregate(stringBuilder, (sb, x) =>
+                    {
+                        sb.Append(x);
+                        return sb;
+                    });
+
+            return stringBuilder.ToString();
         }
     }
 }
