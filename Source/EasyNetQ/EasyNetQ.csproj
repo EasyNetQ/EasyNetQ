@@ -123,7 +123,6 @@
     <Compile Include="Sprache\ResultHelper.cs" />
     <Compile Include="Sprache\Success.cs" />
     <Compile Include="SystemMessages\Error.cs" />
-    <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="Topology\Binding.cs" />
     <Compile Include="Topology\Exchange.cs" />

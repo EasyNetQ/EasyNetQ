@@ -58,10 +58,10 @@ namespace EasyNetQ.Tests
                 }
             };
 
-            var messageBasicProperties = new MessageBasicProperties(originalProperties);
+            var messageBasicProperties = new MessageProperties(originalProperties);
 
             var binaryMessage = serializer.MessageToBytes(messageBasicProperties);
-            var deserializedMessageBasicProperties = serializer.BytesToMessage<MessageBasicProperties>(binaryMessage);
+            var deserializedMessageBasicProperties = serializer.BytesToMessage<MessageProperties>(binaryMessage);
 
             var newProperties = new BasicProperties();
             deserializedMessageBasicProperties.CopyTo(newProperties);
