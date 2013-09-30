@@ -48,6 +48,8 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AmqpExceptions\AmpqExceptionGrammar.cs" />
+    <Compile Include="AmqpExceptions\AmqpException.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
@@ -103,7 +105,11 @@
     <Compile Include="MessageReceivedInfo.cs" />
     <Compile Include="MessageProperties.cs" />
     <Compile Include="PersistentConnection.cs" />
+    <Compile Include="Producer\ClientCommandDispatcher.cs" />
+    <Compile Include="Producer\ClientCommandDispatcherSingleton.cs" />
     <Compile Include="Producer\IClientCommandDispatcher.cs" />
+    <Compile Include="Producer\IPersistentChannel.cs" />
+    <Compile Include="Producer\PersistentChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublisherConfirms.cs" />
     <Compile Include="RabbitAdvancedBus.cs" />

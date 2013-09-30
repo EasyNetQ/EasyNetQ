@@ -153,6 +153,8 @@ namespace EasyNetQ
         /// </summary>
         SerializeType SerializeType { get; }
 
+        IPersistentConnection Connection { get; }
+
         /// <summary>
         /// Event fires when the bus connects
         /// </summary>

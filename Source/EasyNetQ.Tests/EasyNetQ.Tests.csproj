@@ -74,6 +74,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AmqpExceptionParserTests.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="AutoSubscriberTests.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="DefaultMessageConsumerTests.cs" />
     <Compile Include="DefaultMessageValidationStrategyTests.cs" />
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
+    <Compile Include="Integration\PersistentChannelTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="ModelCleanupTests.cs" />
