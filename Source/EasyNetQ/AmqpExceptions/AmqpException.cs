@@ -22,6 +22,8 @@ namespace EasyNetQ.AmqpExceptions
         public int Code { get { return GetElement<AmqpExceptionCodeElement>(); } }
         public int ClassId { get { return GetElement<AmqpExceptionClassIdElement>(); } }
         public int MethodId { get { return GetElement<AmqpExceptionMethodIdElement>(); } }
+
+        public static int ConnectionClosed = 320;
     }
 
     public class AmapExceptionPreface

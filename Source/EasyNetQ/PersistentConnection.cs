@@ -40,10 +40,6 @@ namespace EasyNetQ
 
         public IModel CreateModel()
         {
-            if(!IsConnected)
-            {
-                throw new EasyNetQException("Rabbit server is not connected.");
-            }
             return connection.CreateModel();
         }
 

@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
@@ -40,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
         [Test]
-        public void Should_recover_from_failure()
+        public void Should_allow_non_disconnect_Amqp_exception_to_bubble_up()
         {
             // run test above first
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic"));
@@ -49,15 +50,26 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_reconnect_if_connection_goes_away()
         {
-            // close the connection
+            CloseConnection();
+
+            // now try to declare an exchange
+            persistentChannel.InvokeChannelAction(x =>
+                {
+                    Console.Out.WriteLine("Running exchange declare");
+                    x.ExchangeDeclare("myExchange", "direct");
+                    Console.Out.WriteLine("Ran exchange declare");
+                });
+
+            Thread.Sleep(1000);
+        }
+
+        private static void CloseConnection()
+        {
             var client = new ManagementClient("http://localhost", "guest", "guest", 15672);
             foreach (var clientConnection in client.GetConnections())
             {
                 client.CloseConnection(clientConnection);
             }
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct"));
-
-            Thread.Sleep(1000);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
 using NUnit.Framework;
 using EasyNetQ.AmqpExceptions;
 
@@ -16,7 +15,7 @@ namespace EasyNetQ.Tests
                 "The AMQP operation was interrupted: AMQP close-reason, initiated by Peer, code=320, " +
                 "text=\"CONNECTION_FORCED - Closed via management plugin\", classId=0, methodId=0, cause=";
 
-            var amqpException = AmpqExceptionGrammar.AmqpExceptionGrammar.ParseExceptionString(originalException);
+            var amqpException = AmqpExceptionGrammar.ParseExceptionString(originalException);
 
             amqpException.Preface.Text.ShouldEqual("The AMQP operation was interrupted");
             amqpException.Code.ShouldEqual(320);
@@ -32,7 +31,7 @@ namespace EasyNetQ.Tests
                 "text=\"PRECONDITION_FAILED - cannot redeclare exchange 'myExchange' in vhost '/' " +
                 "with different type, durable, internal or autodelete value\", classId=40, methodId=10, cause=";
 
-            var amqpException = AmpqExceptionGrammar.AmqpExceptionGrammar.ParseExceptionString(originalException);
+            var amqpException = AmqpExceptionGrammar.ParseExceptionString(originalException);
 
             amqpException.Preface.Text.ShouldEqual("The AMQP operation was interrupted");
             amqpException.Code.ShouldEqual(406);
@@ -46,7 +45,7 @@ namespace EasyNetQ.Tests
         {
             const string originalException = "Do be do od be do do = something else, that I don't know=hello";
 
-            AmpqExceptionGrammar.AmqpExceptionGrammar.ParseExceptionString(originalException);
+            AmqpExceptionGrammar.ParseExceptionString(originalException);
         }
     }
 }
