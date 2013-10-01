@@ -75,6 +75,8 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AmqpExceptionParserTests.cs" />
+    <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
+    <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="AutoSubscriberTests.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="Integration\AdvancedApiPingPongTest.cs" />
     <Compile Include="Integration\AdvancedApiPingPongTest_with_transient_queue.cs" />
     <Compile Include="Integration\AdvancedApiTransientQueueTests.cs" />
+    <Compile Include="Integration\ClientCommandDispatcherTests.cs" />
     <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
     <Compile Include="Integration\ConnectionErrorConditionsTests.cs" />
@@ -100,6 +103,7 @@
     <Compile Include="DefaultMessageConsumerTests.cs" />
     <Compile Include="DefaultMessageValidationStrategyTests.cs" />
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
+    <Compile Include="Integration\Helpers.cs" />
     <Compile Include="Integration\PersistentChannelTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />

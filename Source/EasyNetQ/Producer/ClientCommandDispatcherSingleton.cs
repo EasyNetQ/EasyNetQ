@@ -12,16 +12,16 @@ namespace EasyNetQ.Producer
         private readonly BlockingCollection<Action<IModel>> queue = new BlockingCollection<Action<IModel>>(queueSize);
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
 
-        private readonly IPersistentConnection connection;
-        private readonly IEasyNetQLogger logger;
+        private readonly IPersistentChannel persistentChannel;
 
-        public ClientCommandDispatcherSingleton(IPersistentConnection connection, IEasyNetQLogger logger)
+        public ClientCommandDispatcherSingleton(
+            IPersistentConnection connection,
+            IPersistentChannelFactory persistentChannelFactory)
         {
             Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
-            this.connection = connection;
-            this.logger = logger;
+            persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
 
             StartDispatcherThread();
         }
@@ -47,15 +47,7 @@ namespace EasyNetQ.Producer
 
         private void Execute(Action<IModel> channelAction)
         {
-            try
-            {
-                // execute the channel action here.
-            }
-            catch (Exception)
-            {
-                
-                throw;
-            }
+            persistentChannel.InvokeChannelAction(channelAction);
         }
 
         public Task<T> Invoke<T>(Func<IModel, T> channelAction)
@@ -90,9 +82,23 @@ namespace EasyNetQ.Producer
             return tcs.Task;
         }
 
+        public Task Invoke(Action<IModel> channelAction)
+        {
+            Preconditions.CheckNotNull(channelAction, "channelAction");
+
+            return Invoke(x =>
+                {
+                    channelAction(x);
+                    return new NoContentStruct();
+                });
+        }
+
         public void Dispose()
         {
             cancellation.Cancel();
+            persistentChannel.Dispose();
         }
+
+        private struct NoContentStruct {}
     }
 }

@@ -12,16 +12,22 @@ namespace EasyNetQ.Producer
     {
         private readonly Lazy<IClientCommandDispatcher> dispatcher;
 
-        public ClientCommandDispatcher(IPersistentConnection connection, IEasyNetQLogger logger)
+        public ClientCommandDispatcher(IPersistentConnection connection, IPersistentChannelFactory persistentChannelFactory)
         {
             Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
-            dispatcher = new Lazy<IClientCommandDispatcher>(() =>
-                                                            new ClientCommandDispatcherSingleton(connection, logger));
+            dispatcher = new Lazy<IClientCommandDispatcher>(
+                () => new ClientCommandDispatcherSingleton(connection, persistentChannelFactory));
         }
 
         public Task<T> Invoke<T>(Func<IModel, T> channelAction)
+        {
+            Preconditions.CheckNotNull(channelAction, "channelAction");
+            return dispatcher.Value.Invoke(channelAction);
+        }
+
+        public Task Invoke(Action<IModel> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
             return dispatcher.Value.Invoke(channelAction);

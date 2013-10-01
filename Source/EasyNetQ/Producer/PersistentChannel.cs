@@ -20,6 +20,10 @@ namespace EasyNetQ.Producer
             IEasyNetQLogger logger, 
             IConnectionConfiguration configuration)
         {
+            Preconditions.CheckNotNull(connection, "connection");
+            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(configuration, "configuration");
+
             this.connection = connection;
 
             this.connection.Disconnected += () => 
@@ -49,7 +53,12 @@ namespace EasyNetQ.Producer
         {
             get
             {
-                if (channel == null || !channel.IsOpen)
+                if (channel != null && !channel.IsOpen)
+                {
+                    channel.Dispose();
+                    channel = null;
+                }
+                if (channel == null)
                 {
                     channel = connection.CreateModel();
                     disconnected = false;
@@ -60,11 +69,16 @@ namespace EasyNetQ.Producer
 
         public void Dispose()
         {
-            if(channel != null) channel.Dispose();
+            if(channel != null)
+            {
+                channel.Dispose();
+                logger.DebugWrite("Persistent connection disposed.");
+            }
         }
 
         public void InvokeChannelAction(Action<IModel> channelAction)
         {
+            Preconditions.CheckNotNull(channelAction, "channelAction");
             InvokeChannelActionInternal(channelAction, DateTime.Now);
         }
 

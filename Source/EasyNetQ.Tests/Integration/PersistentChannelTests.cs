@@ -4,7 +4,6 @@ using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
-using EasyNetQ.Management.Client;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 
@@ -50,7 +49,7 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_reconnect_if_connection_goes_away()
         {
-            CloseConnection();
+            Helpers.CloseConnection();
 
             // now try to declare an exchange
             persistentChannel.InvokeChannelAction(x =>
@@ -61,15 +60,6 @@ namespace EasyNetQ.Tests.Integration
                 });
 
             Thread.Sleep(1000);
-        }
-
-        private static void CloseConnection()
-        {
-            var client = new ManagementClient("http://localhost", "guest", "guest", 15672);
-            foreach (var clientConnection in client.GetConnections())
-            {
-                client.CloseConnection(clientConnection);
-            }
         }
     }
 }
