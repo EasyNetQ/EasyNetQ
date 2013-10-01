@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -23,7 +22,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var configuration = new ConnectionConfiguration();
 
             persistentConnection.Stub(x => x.CreateModel()).Return(channel);
-            var logger = new ConsoleLogger();
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration);
 

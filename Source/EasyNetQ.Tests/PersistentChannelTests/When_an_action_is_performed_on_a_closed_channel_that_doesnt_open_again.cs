@@ -2,7 +2,6 @@
 
 using System;
 using EasyNetQ.AmqpExceptions;
-using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -37,7 +36,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                     throw exception;
                 });
 
-            var logger = new ConsoleLogger();
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration);
 
