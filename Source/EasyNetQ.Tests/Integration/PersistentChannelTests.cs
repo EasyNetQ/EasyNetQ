@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
             var hostSelectionStrategy = new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>();
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
             connection = new PersistentConnection(connectionFactory, logger);
-            persistentChannel = new PersistentChannel(connection, logger);
+            persistentChannel = new PersistentChannel(connection, logger, configuration);
         }
 
         [TearDown]

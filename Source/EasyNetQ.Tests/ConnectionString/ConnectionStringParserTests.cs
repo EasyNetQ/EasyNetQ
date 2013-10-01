@@ -36,6 +36,14 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.PrefetchCount.ShouldEqual(2);
         }
 
+        [Test]
+        public void Should_parse_global_timeout()
+        {
+            const string connectionStringWithTimeout = "host=localhost;timeout=13";
+            var connectionConfiguration = connectionStringParser.Parse(connectionStringWithTimeout);
+
+            connectionConfiguration.Timeout.ShouldEqual(13);
+        }
 
         [Test]
         public void Should_Throw_Exception_OnInvalidAmqp()

@@ -10,11 +10,15 @@ namespace EasyNetQ.Producer
     {
         private readonly IPersistentConnection connection;
         private readonly IEasyNetQLogger logger;
+        private readonly IConnectionConfiguration configuration;
 
         private IModel channel;
         private bool disconnected = true;
 
-        public PersistentChannel(IPersistentConnection connection, IEasyNetQLogger logger)
+        public PersistentChannel(
+            IPersistentConnection connection, 
+            IEasyNetQLogger logger, 
+            IConnectionConfiguration configuration)
         {
             this.connection = connection;
 
@@ -38,6 +42,7 @@ namespace EasyNetQ.Producer
                 };
 
             this.logger = logger;
+            this.configuration = configuration;
         }
 
         public IModel Channel
@@ -60,6 +65,16 @@ namespace EasyNetQ.Producer
 
         public void InvokeChannelAction(Action<IModel> channelAction)
         {
+            InvokeChannelActionInternal(channelAction, DateTime.Now);
+        }
+
+        private void InvokeChannelActionInternal(Action<IModel> channelAction, DateTime startTime)
+        {
+            if (IsTimedOut(startTime))
+            {
+                logger.ErrorWrite("Channel action timed out. Throwing exception to client.");
+                throw new TimeoutException("The operation requested on PersistentChannel could not be completed.");
+            }            
             try
             {
                 channelAction(Channel);
@@ -71,8 +86,8 @@ namespace EasyNetQ.Producer
                     var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
                     if (amqpException.Code == AmqpException.ConnectionClosed)
                     {
-                        WaitForReconnection();
-                        InvokeChannelAction(channelAction);
+                        WaitForReconnectionOrTimeout(startTime);
+                        InvokeChannelActionInternal(channelAction, startTime);
                     }
                     else
                     {
@@ -86,14 +101,18 @@ namespace EasyNetQ.Producer
             }
         }
 
-        private void WaitForReconnection()
+        private void WaitForReconnectionOrTimeout(DateTime startTime)
         {
-            // TODO: timeout
             logger.DebugWrite("Persistent channel operation failed. Waiting for reconnection.");
-            while (disconnected)
+            while (disconnected && !IsTimedOut(startTime))
             {
                 Thread.Sleep(100);
             }
+        }
+
+        private bool IsTimedOut(DateTime startTime)
+        {
+            return startTime.AddSeconds(configuration.Timeout) < DateTime.Now;
         }
     }
 }

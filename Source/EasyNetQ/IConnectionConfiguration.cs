@@ -21,6 +21,7 @@ namespace EasyNetQ
         IEnumerable<IHostConfiguration> Hosts { get; }
 
         SslOption Ssl { get; }
+        ushort Timeout { get; }
     }
 
     public interface IHostConfiguration
@@ -43,6 +44,7 @@ namespace EasyNetQ
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
         public SslOption Ssl { get; private set; }
+        public ushort Timeout { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -52,6 +54,7 @@ namespace EasyNetQ
             UserName = "guest";
             Password = "guest";
             RequestedHeartbeat = 10;
+            Timeout = 10;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
