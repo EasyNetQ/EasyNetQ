@@ -140,9 +140,32 @@ namespace EasyNetQ
                 }).Wait();
         }
 
+        public virtual void Publish<T>(
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            bool immediate,
+            IMessage<T> message) where T : class
+        {
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckNotNull(message, "message");
+
+            var typeName = SerializeType(typeof(T));
+            var messageBody = Serializer.MessageToBytes(message.Body);
+
+            message.Properties.Type = typeName;
+            message.Properties.CorrelationId =
+                string.IsNullOrEmpty(message.Properties.CorrelationId) ?
+                GetCorrelationId() :
+                message.Properties.CorrelationId;
+
+            Publish(exchange, routingKey, mandatory, immediate, message.Properties, messageBody);
+        }
+
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
 
-        public IQueue QueueDeclare(
+        public virtual IQueue QueueDeclare(
             string name, 
             bool passive = false, 
             bool durable = true, 
@@ -201,7 +224,7 @@ namespace EasyNetQ
             return builder.ToString();
         }
 
-        public IQueue QueueDeclare()
+        public virtual IQueue QueueDeclare()
         {
             var task = clientCommandDispatcher.Invoke(x => x.QueueDeclare());
             task.Wait();
@@ -210,7 +233,7 @@ namespace EasyNetQ
             return new Topology.Queue(queueDeclareOk.QueueName, true);
         }
 
-        public void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)
+        public virtual void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)
         {
             Preconditions.CheckNotNull(queue, "queue");
 
@@ -219,7 +242,7 @@ namespace EasyNetQ
             logger.DebugWrite("Deleted Queue: {0}", queue.Name);
         }
 
-        public void QueuePurge(IQueue queue)
+        public virtual void QueuePurge(IQueue queue)
         {
             Preconditions.CheckNotNull(queue, "queue");
 
@@ -228,7 +251,7 @@ namespace EasyNetQ
             logger.DebugWrite("Purged Queue: {0}", queue.Name);
         }
 
-        public IExchange ExchangeDeclare(
+        public virtual IExchange ExchangeDeclare(
             string name, 
             string type, 
             bool passive = false, 
@@ -245,7 +268,7 @@ namespace EasyNetQ
             return new Exchange(name);
         }
 
-        public void ExchangeDelete(IExchange exchange, bool ifUnused = false)
+        public virtual void ExchangeDelete(IExchange exchange, bool ifUnused = false)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
 
@@ -253,7 +276,7 @@ namespace EasyNetQ
             logger.DebugWrite("Deleted Exchange: {0}", exchange.Name);
         }
 
-        public IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
+        public virtual IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
@@ -265,7 +288,7 @@ namespace EasyNetQ
             return new Binding(queue, exchange, routingKey);
         }
 
-        public IBinding Bind(IExchange source, IExchange destination, string routingKey)
+        public virtual IBinding Bind(IExchange source, IExchange destination, string routingKey)
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
@@ -278,7 +301,7 @@ namespace EasyNetQ
             return new Binding(destination, source, routingKey);
         }
 
-        public void BindingDelete(IBinding binding)
+        public virtual void BindingDelete(IBinding binding)
         {
             Preconditions.CheckNotNull(binding, "binding");
 
