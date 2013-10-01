@@ -1,6 +1,7 @@
 ﻿using System;
 using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ
 {
@@ -48,6 +49,11 @@ namespace EasyNetQ
                 .Register<IMessageValidationStrategy>(x => new DefaultMessageValidationStrategy(
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<SerializeType>()))
+                .Register<IPersistentChannelFactory>(x => new PersistentChannelFactory(
+                    x.Resolve<IEasyNetQLogger>(), 
+                    x.Resolve<IConnectionConfiguration>()))
+                .Register<IClientCommandDispatcherFactory>(x => new ClientCommandDispatcherFactory(
+                    x.Resolve<IPersistentChannelFactory>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),
@@ -55,7 +61,8 @@ namespace EasyNetQ
                     x.Resolve<IConsumerFactory>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<Func<string>>(),
-                    x.Resolve<IMessageValidationStrategy>()))
+                    x.Resolve<IMessageValidationStrategy>(),
+                    x.Resolve<IClientCommandDispatcherFactory>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),

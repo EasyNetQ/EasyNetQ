@@ -108,6 +108,7 @@
     <Compile Include="Producer\ClientCommandDispatcher.cs" />
     <Compile Include="Producer\ClientCommandDispatcherSingleton.cs" />
     <Compile Include="Producer\IClientCommandDispatcher.cs" />
+    <Compile Include="Producer\IClientCommandDispatcherFactory.cs" />
     <Compile Include="Producer\IPersistentChannel.cs" />
     <Compile Include="Producer\IPersistentChannelFactory.cs" />
     <Compile Include="Producer\PersistentChannel.cs" />

@@ -56,34 +56,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             }
         }
 
-        [Serializable]
-        private class CrazyTestOnlyException : Exception
-        {
-            //
-            // For guidelines regarding the creation of new exception types, see
-            //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
-            // and
-            //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
-            //
-
-            public CrazyTestOnlyException()
-            {
-            }
-
-            public CrazyTestOnlyException(string message) : base(message)
-            {
-            }
-
-            public CrazyTestOnlyException(string message, Exception inner) : base(message, inner)
-            {
-            }
-
-            protected CrazyTestOnlyException(
-                SerializationInfo info,
-                StreamingContext context) : base(info, context)
-            {
-            }
-        }
+        private class CrazyTestOnlyException : Exception { }
     }
 }
 

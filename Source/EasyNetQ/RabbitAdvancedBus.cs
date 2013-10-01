@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -17,8 +18,8 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly Func<string> getCorrelationId;
         private readonly IMessageValidationStrategy messageValidationStrategy;
-
         private readonly IPersistentConnection connection;
+        private readonly IClientCommandDispatcher clientCommandDispatcher;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -27,7 +28,8 @@ namespace EasyNetQ
             IConsumerFactory consumerFactory,
             IEasyNetQLogger logger, 
             Func<string> getCorrelationId, 
-            IMessageValidationStrategy messageValidationStrategy)
+            IMessageValidationStrategy messageValidationStrategy, 
+            IClientCommandDispatcherFactory clientCommandDispatcherFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializeType, "serializeType");
@@ -47,6 +49,8 @@ namespace EasyNetQ
             connection = new PersistentConnection(connectionFactory, logger);
             connection.Connected += OnConnected;
             connection.Disconnected += OnDisconnected;
+
+            clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }
 
         public virtual SerializeType SerializeType
@@ -115,6 +119,27 @@ namespace EasyNetQ
             return new RabbitAdvancedPublishChannel(this, configure);
         }
 
+        public virtual void Publish(
+            IExchange exchange, 
+            string routingKey, 
+            bool mandatory, 
+            bool immediate, 
+            MessageProperties messageProperties, 
+            byte[] body)
+        {
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckNotNull(messageProperties, "messageProperties");
+            Preconditions.CheckNotNull(body, "body");
+
+            clientCommandDispatcher.Invoke(x =>
+                {
+                    var properties = x.CreateBasicProperties();
+                    messageProperties.CopyTo(properties);
+                    x.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body);
+                }).Wait();
+        }
+
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
 
         public IQueue QueueDeclare(
@@ -128,33 +153,33 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(name, "name");
 
-            using (var model = connection.CreateModel())
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            if (passive)
             {
-                IDictionary<string, object> arguments = new Dictionary<string, object>();
-                if (passive)
-                {
-                    model.QueueDeclarePassive(name);
-                }
-                else
-                {
-                    if (perQueueTtl != uint.MaxValue)
-                    {
-                        arguments.Add("x-message-ttl", perQueueTtl);
-                    }
-
-                    if (expires != uint.MaxValue)
-                    {
-                        arguments.Add("x-expires", expires);
-                    }
-
-                    model.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary)arguments);
-
-                    logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelte:{3}, args:{4}",
-                        name, durable, exclusive, autoDelete, WriteArguments(arguments));
-                }
-
-                return new Topology.Queue(name, exclusive);
+                clientCommandDispatcher.Invoke(
+                    x => x.QueueDeclarePassive(name)).Wait();
             }
+            else
+            {
+                if (perQueueTtl != uint.MaxValue)
+                {
+                    arguments.Add("x-message-ttl", perQueueTtl);
+                }
+
+                if (expires != uint.MaxValue)
+                {
+                    arguments.Add("x-expires", expires);
+                }
+
+                clientCommandDispatcher.Invoke(
+                    x => x.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary) arguments)
+                    ).Wait();
+
+                logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelte:{3}, args:{4}",
+                    name, durable, exclusive, autoDelete, WriteArguments(arguments));
+            }
+
+            return new Topology.Queue(name, exclusive);
         }
 
         private string WriteArguments(IEnumerable<KeyValuePair<string, object>> arguments)
@@ -178,34 +203,29 @@ namespace EasyNetQ
 
         public IQueue QueueDeclare()
         {
-            using (var model = connection.CreateModel())
-            {
-                var queueDeclareOk = model.QueueDeclare();
-                logger.DebugWrite("Declared Server Generted Queue '{0}'", queueDeclareOk.QueueName);
-                return new Topology.Queue(queueDeclareOk.QueueName, true);
-            }
+            var task = clientCommandDispatcher.Invoke(x => x.QueueDeclare());
+            task.Wait();
+            var queueDeclareOk = task.Result;
+            logger.DebugWrite("Declared Server Generted Queue '{0}'", queueDeclareOk.QueueName);
+            return new Topology.Queue(queueDeclareOk.QueueName, true);
         }
 
         public void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)
         {
             Preconditions.CheckNotNull(queue, "queue");
 
-            using (var model = connection.CreateModel())
-            {
-                model.QueueDelete(queue.Name, ifUnused, ifEmpty);
-                logger.DebugWrite("Deleted Queue: {0}", queue.Name);
-            }
+            clientCommandDispatcher.Invoke(x => x.QueueDelete(queue.Name, ifUnused, ifEmpty)).Wait();
+
+            logger.DebugWrite("Deleted Queue: {0}", queue.Name);
         }
 
         public void QueuePurge(IQueue queue)
         {
             Preconditions.CheckNotNull(queue, "queue");
 
-            using (var model = connection.CreateModel())
-            {
-                model.QueuePurge(queue.Name);
-                logger.DebugWrite("Purged Queue: {0}", queue.Name);
-            }
+            clientCommandDispatcher.Invoke(x => x.QueuePurge(queue.Name)).Wait();
+
+            logger.DebugWrite("Purged Queue: {0}", queue.Name);
         }
 
         public IExchange ExchangeDeclare(
@@ -219,24 +239,18 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(name, "name");
             Preconditions.CheckNotNull(type, "type");
 
-            using (var model = connection.CreateModel())
-            {
-                model.ExchangeDeclare(name, type, durable, autoDelete, null);
-                logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
-                    name, type, durable, autoDelete);
-                return new Exchange(name);
-            }
+            clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, null)).Wait();
+            logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
+                name, type, durable, autoDelete);
+            return new Exchange(name);
         }
 
         public void ExchangeDelete(IExchange exchange, bool ifUnused = false)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
 
-            using (var model = connection.CreateModel())
-            {
-                model.ExchangeDelete(exchange.Name, ifUnused);
-                logger.DebugWrite("Deleted Exchange: {0}", exchange.Name);
-            }
+            clientCommandDispatcher.Invoke(x => x.ExchangeDelete(exchange.Name, ifUnused)).Wait();
+            logger.DebugWrite("Deleted Exchange: {0}", exchange.Name);
         }
 
         public IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
@@ -245,13 +259,10 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(routingKey, "routingKey");
 
-            using (var model = connection.CreateModel())
-            {
-                model.QueueBind(queue.Name, exchange.Name, routingKey);
-                logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",
-                    queue.Name, exchange.Name, routingKey);
-                return new Binding(queue, exchange, routingKey);
-            }
+            clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey)).Wait();
+            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",
+                queue.Name, exchange.Name, routingKey);
+            return new Binding(queue, exchange, routingKey);
         }
 
         public IBinding Bind(IExchange source, IExchange destination, string routingKey)
@@ -260,37 +271,38 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckNotNull(routingKey, "routingKey");
 
-            using (var model = connection.CreateModel())
-            {
-                model.ExchangeBind(destination.Name, source.Name, routingKey);
-                logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}",
-                    destination.Name, source.Name, routingKey);
-                return new Binding(destination, source, routingKey);
-            }
+            clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey)).Wait();
+
+            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}",
+                destination.Name, source.Name, routingKey);
+            return new Binding(destination, source, routingKey);
         }
 
         public void BindingDelete(IBinding binding)
         {
             Preconditions.CheckNotNull(binding, "binding");
 
-            using (var model = connection.CreateModel())
+            var queue = binding.Bindable as IQueue;
+            if (queue != null)
             {
-                var queue = binding.Bindable as IQueue;
-                if (queue != null)
+                clientCommandDispatcher.Invoke(
+                    x => x.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null)
+                    ).Wait();
+
+                logger.DebugWrite("Unbound queue {0} from exchange {1} with routing key {2}",
+                    queue.Name, binding.Exchange.Name, binding.RoutingKey);
+            }
+            else
+            {
+                var destination = binding.Bindable as IExchange;
+                if (destination != null)
                 {
-                    model.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null);
-                    logger.DebugWrite("Unbound queue {0} from exchange {1} with routing key {2}",
-                        queue.Name, binding.Exchange.Name, binding.RoutingKey);
-                }
-                else
-                {
-                    var destination = binding.Bindable as IExchange;
-                    if (destination != null)
-                    {
-                        model.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey);
-                        logger.DebugWrite("Unbound destination exchange {0} from source exchange {1} with routing key {2}",
-                            destination.Name, binding.Exchange.Name, binding.RoutingKey);
-                    }
+                    clientCommandDispatcher.Invoke(
+                        x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey)
+                        ).Wait();
+
+                    logger.DebugWrite("Unbound destination exchange {0} from source exchange {1} with routing key {2}",
+                        destination.Name, binding.Exchange.Name, binding.RoutingKey);
                 }
             }
         }
@@ -322,6 +334,7 @@ namespace EasyNetQ
             if (disposed) return;
 
             consumerFactory.Dispose();
+            clientCommandDispatcher.Dispose();
             connection.Dispose();
 
             disposed = true;
