@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
@@ -153,6 +154,16 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
+            public void Publish<T>(T message) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Publish<T>(T message, string topic) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
             public void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
             {
                 if (InterceptSubscribe != null)
@@ -170,6 +181,21 @@ namespace EasyNetQ.Tests
             }
 
             public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse) where TRequest : class where TResponse : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token) where TRequest : class where TResponse : class
             {
                 throw new NotImplementedException();
             }

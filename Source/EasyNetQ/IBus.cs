@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 
@@ -25,6 +26,21 @@ namespace EasyNetQ
         /// </param>
         /// <returns>An IPublishChannel</returns>
         IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure);
+
+        /// <summary>
+        /// Publishes a message.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="message">The message to publish</param>
+        void Publish<T>(T message) where T : class;
+
+        /// <summary>
+        /// Publishes a message with a topic
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="message">The message to publish</param>
+        /// <param name="topic">The topic string</param>
+        void Publish<T>(T message, string topic) where T : class;
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -98,6 +114,39 @@ namespace EasyNetQ
         /// </param>
         void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
             where T : class;
+
+        /// <summary>
+        /// Makes an RPC style asynchronous request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        /// <param name="onResponse">The action to run when the response is received.</param>
+        void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Makes an RPC style request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Makes an RPC style request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        /// <param name="token">token that will cancel the RPC</param>
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token)
+            where TRequest : class
+            where TResponse : class;
+
 
         /// <summary>
         /// Responds to an RPC request.

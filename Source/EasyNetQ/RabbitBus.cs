@@ -60,6 +60,28 @@ namespace EasyNetQ
             return new RabbitPublishChannel(this, configure, conventions);
         }
 
+        public void Publish<T>(T message) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+
+            Publish(message, conventions.TopicNamingConvention(typeof(T)));
+        }
+
+        public void Publish<T>(T message, string topic) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(topic, "topic");
+
+            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
+            var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
+            var easyNetQMessage = new Message<T>(message);
+
+            // by default publish persistent messages
+            easyNetQMessage.Properties.DeliveryMode = 2;
+
+            advancedBus.Publish(exchange, topic, false, false, easyNetQMessage);
+        }
+
         public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
         {
             Subscribe(subscriptionId, onMessage, x => { });
@@ -132,6 +154,85 @@ namespace EasyNetQ
         {
             return conventions.QueueNamingConvention(typeof(T), subscriptionId);
         }
+
+        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(onResponse, "onResponse");
+            Preconditions.CheckNotNull(request, "request");
+
+            var returnQueueName = SubscribeToResponse(onResponse);
+            RequestPublish(request, returnQueueName);
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response));
+
+            return taskCompletionSource.Task;
+        }
+
+        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            var taskCompletionSource = new TaskCompletionSource<TResponse>();
+            token.Register(() => taskCompletionSource.TrySetCanceled());
+
+            Request<TRequest, TResponse>(request, response => taskCompletionSource.TrySetResult(response));
+
+            return taskCompletionSource.Task;
+        }
+
+        private string SubscribeToResponse<TResponse>(Action<TResponse> onResponse)
+            where TResponse : class
+        {
+            var queue = advancedBus.QueueDeclare(
+                conventions.RpcReturnQueueNamingConvention(),
+                passive: false,
+                durable: false,
+                exclusive: true,
+                autoDelete: true).SetAsSingleUse();
+
+            advancedBus.Consume<TResponse>(queue, (message, messageRecievedInfo) =>
+            {
+                var tcs = new TaskCompletionSource<object>();
+
+                try
+                {
+                    onResponse(message.Body);
+                    tcs.SetResult(null);
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            });
+
+            return queue.Name;
+        }
+
+        private void RequestPublish<TRequest>(TRequest request, string returnQueueName) where TRequest : class
+        {
+            var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+
+            var requestMessage = new Message<TRequest>(request);
+            requestMessage.Properties.ReplyTo = returnQueueName;
+
+            advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
+        }
+
 
         public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
             where TRequest : class
