@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests
                 AppId = "some app id",
                 ClusterId = "cluster id",
                 ContentEncoding = "content encoding",
-                ContentType = "content type",
+                //ContentType = "content type",
                 CorrelationId = "correlation id",
                 DeliveryMode = 4,
                 Expiration = "expiration",
@@ -61,6 +61,10 @@ namespace EasyNetQ.Tests
             var messageBasicProperties = new MessageProperties(originalProperties);
 
             var binaryMessage = serializer.MessageToBytes(messageBasicProperties);
+
+            var jsonMessage = Encoding.UTF8.GetString(binaryMessage);
+            Console.Out.WriteLine(jsonMessage);
+
             var deserializedMessageBasicProperties = serializer.BytesToMessage<MessageProperties>(binaryMessage);
 
             var newProperties = new BasicProperties();

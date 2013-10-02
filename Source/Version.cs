@@ -6,6 +6,7 @@
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
 // 0.15.0.0 Removed IPublishChannel and IAdvancedPublishChannel API. Publish now back on IBus.
+// 0.14.2.0 MessageProperties serialization fix
 // 0.14.1.0 Fixed missing properties in error message
 // 0.14.0.0 Big internal consumer rewrite
 // 0.13.0.0 AutoSubscriber moved to EasyNetQ.AutoSubscribe namespace.

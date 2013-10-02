@@ -238,10 +238,95 @@ namespace EasyNetQ
             set { clusterId = value; clusterIdPresent = true; }
         }
 
+        public bool ContentTypePresent
+        {
+            get { return contentTypePresent; }
+            set { contentTypePresent = value; }
+        }
+
+        public bool ContentEncodingPresent
+        {
+            get { return contentEncodingPresent; }
+            set { contentEncodingPresent = value; }
+        }
+
+        public bool HeadersPresent
+        {
+            get { return headersPresent; }
+            set { headersPresent = value; }
+        }
+
+        public bool DeliveryModePresent
+        {
+            get { return deliveryModePresent; }
+            set { deliveryModePresent = value; }
+        }
+
+        public bool PriorityPresent
+        {
+            get { return priorityPresent; }
+            set { priorityPresent = value; }
+        }
+
+        public bool CorrelationIdPresent
+        {
+            get { return correlationIdPresent; }
+            set { correlationIdPresent = value; }
+        }
+
+        public bool ReplyToPresent
+        {
+            get { return replyToPresent; }
+            set { replyToPresent = value; }
+        }
+
+        public bool ExpirationPresent
+        {
+            get { return expirationPresent; }
+            set { expirationPresent = value; }
+        }
+
+        public bool MessageIdPresent
+        {
+            get { return messageIdPresent; }
+            set { messageIdPresent = value; }
+        }
+
+        public bool TimestampPresent
+        {
+            get { return timestampPresent; }
+            set { timestampPresent = value; }
+        }
+
+        public bool TypePresent
+        {
+            get { return typePresent; }
+            set { typePresent = value; }
+        }
+
+        public bool UserIdPresent
+        {
+            get { return userIdPresent; }
+            set { userIdPresent = value; }
+        }
+
+        public bool AppIdPresent
+        {
+            get { return appIdPresent; }
+            set { appIdPresent = value; }
+        }
+
+        public bool ClusterIdPresent
+        {
+            get { return clusterIdPresent; }
+            set { clusterIdPresent = value; }
+        }
+
         public void AppendPropertyDebugStringTo(StringBuilder stringBuilder)
         {
             GetType()
                 .GetProperties()
+                .Where(x => !x.Name.EndsWith("Present"))
                 .Select(x => string.Format("{0}={1}", x.Name, GetValueString(x.GetValue(this, null))))
                 .Intersperse(", ")
                 .Aggregate(stringBuilder, (sb, x) =>
