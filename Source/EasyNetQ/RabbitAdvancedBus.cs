@@ -78,6 +78,8 @@ namespace EasyNetQ
             get { return getCorrelationId; }
         }
 
+        // ---------------------------------- consume --------------------------------------
+
         public virtual void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -107,6 +109,8 @@ namespace EasyNetQ
             var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection);
             consumer.StartConsuming();
         }
+
+        // -------------------------------- publish ---------------------------------------------
 
         public virtual IAdvancedPublishChannel OpenPublishChannel()
         {
