@@ -31,21 +31,6 @@ namespace EasyNetQ
         void Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
-        /// Return a channel for publishing.
-        /// </summary>
-        /// <returns>IAdvancedPublishChannel</returns>
-        IAdvancedPublishChannel OpenPublishChannel();
-
-        /// <summary>
-        /// Return a channel for publishing.
-        /// </summary>
-        /// <param name="configure">
-        /// Channel configuration e.g. x => x.WithPublisherConfirms()
-        /// </param>
-        /// <returns>IAdvancedPublishChannel</returns>
-        IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure);
-
-        /// <summary>
         /// Publish a message as a byte array
         /// </summary>
         /// <param name="exchange">The exchange to publish to</param>

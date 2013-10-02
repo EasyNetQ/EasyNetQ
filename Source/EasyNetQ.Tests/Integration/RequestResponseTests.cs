@@ -32,17 +32,14 @@ namespace EasyNetQ.Tests.Integration
             var countdownEvent = new CountdownEvent(10);
             for (int i = 0; i < 10; i++)
             {
-                using (var publishChannel = bus.OpenPublishChannel())
-                {
-                    publishChannel.Request<TestRequestMessage, TestResponseMessage>(
-                        new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
-                        response =>
-                            {
-                                Console.WriteLine("Got response: " + response.Text);
-                                countdownEvent.Signal();
-                            }
-                        );
-                }
+                bus.Request<TestRequestMessage, TestResponseMessage>(
+                    new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
+                    response =>
+                        {
+                            Console.WriteLine("Got response: " + response.Text);
+                            countdownEvent.Signal();
+                        }
+                    );
             }
 
             countdownEvent.Wait(1000);
@@ -60,14 +57,11 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestRequestMessage {Text = "Hello from the client! "};
 
             Console.WriteLine("Making request");
-            using (var publishChannel = bus.OpenPublishChannel())
+            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
             {
-                publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                {
-                    Console.WriteLine("Got response: '{0}'", response.Text);
-                    autoResetEvent.Set();
-                });
-            }
+                Console.WriteLine("Got response: '{0}'", response.Text);
+                autoResetEvent.Set();
+            });
 
             autoResetEvent.WaitOne(1000);
         }
@@ -86,15 +80,12 @@ namespace EasyNetQ.Tests.Integration
             for (int i = 0; i < numberOfCalls; i++)
             {
                 var request = new TestRequestMessage { Text = "Hello from the client! " + i.ToString() };
-                using (var publishChannel = bus.OpenPublishChannel())
+                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
-                    publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                    {
-                        Console.WriteLine("Got response: '{0}'", response.Text);
-                        count++;
-                        countdownEvent.Signal();
-                    });
-                }
+                    Console.WriteLine("Got response: '{0}'", response.Text);
+                    count++;
+                    countdownEvent.Signal();
+                });
             }
 
             countdownEvent.Wait(15000);
@@ -111,15 +102,12 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestAsyncRequestMessage {Text = "Hello async from the client!"};
 
             Console.Out.WriteLine("Making request");
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
-                    response =>
-                    {
-                        Console.Out.WriteLine("response = {0}", response.Text);
-                        autoResetEvent.Set();
-                    });
-            }
+            bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
+                response =>
+                {
+                    Console.Out.WriteLine("response = {0}", response.Text);
+                    autoResetEvent.Set();
+                });
 
             autoResetEvent.WaitOne(2000);
         }
@@ -138,16 +126,13 @@ namespace EasyNetQ.Tests.Integration
             {
                 var request = new TestAsyncRequestMessage { Text = "Hello async from the client! " + i };
 
-                using (var publishChannel = bus.OpenPublishChannel())
-                {
-                    publishChannel.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
-                        response =>
-                        {
-                            Console.Out.WriteLine("response = {0}", response.Text);
-                            Interlocked.Increment(ref count);
-                            countdownEvent.Signal();
-                        });
-                }
+                bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
+                    response =>
+                    {
+                        Console.Out.WriteLine("response = {0}", response.Text);
+                        Interlocked.Increment(ref count);
+                        countdownEvent.Signal();
+                    });
             }
             countdownEvent.Wait(10000);
             count.ShouldEqual(numberOfCalls);
@@ -215,11 +200,8 @@ namespace EasyNetQ.Tests.Integration
             };
 
             Console.WriteLine("Making request");
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                    Console.WriteLine("Got response: '{0}'", response.Text));
-            }
+            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                Console.WriteLine("Got response: '{0}'", response.Text));
 
             Thread.Sleep(500);
         }
@@ -235,15 +217,12 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestRequestMessage { Text = "Hello from the client! " };
 
             Console.WriteLine("Making request");
-            using (var publishChannel = bus.OpenPublishChannel())
+            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
             {
-                publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                {
-                    Console.WriteLine("Got response: '{0}'", response.Text);
-                    autoResetEvent.Set();
-                    throw new SomeRandomException("Something very bad just happened!");
-                });
-            }
+                Console.WriteLine("Got response: '{0}'", response.Text);
+                autoResetEvent.Set();
+                throw new SomeRandomException("Something very bad just happened!");
+            });
 
             autoResetEvent.WaitOne(1000);
         }
@@ -263,14 +242,11 @@ namespace EasyNetQ.Tests.Integration
             };
 
             Console.WriteLine("Making request");
-            using (var publishChannel = bus.OpenPublishChannel())
+            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
             {
-                publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                {
-                    Console.WriteLine("Got response: '{0}'", response.Text);
-                    autoResetEvent.Set();
-                });
-            }
+                Console.WriteLine("Got response: '{0}'", response.Text);
+                autoResetEvent.Set();
+            });
 
             autoResetEvent.WaitOne(10000);
         }

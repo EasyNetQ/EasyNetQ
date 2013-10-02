@@ -23,10 +23,8 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_cleanup_publish_model()
         {
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(new TestMessage());
-            }
+            bus.Publish(new TestMessage());
+            bus.Dispose();
 
             mockBuilder.Channels[0].AssertWasCalled(x => x.Dispose());
         }
@@ -37,7 +35,7 @@ namespace EasyNetQ.Tests
             bus.Subscribe<TestMessage>("abc", mgs => {});
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
@@ -46,19 +44,16 @@ namespace EasyNetQ.Tests
             bus.SubscribeAsync<TestMessage>("abc", msg => null);
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_request_response_model()
         {
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
-            }
+            bus.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
@@ -67,7 +62,7 @@ namespace EasyNetQ.Tests
             bus.Respond<TestRequestMessage, TestResponseMessage>(x => null);
             bus.Dispose();
 
-            mockBuilder.Channels[3].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
     }
 }

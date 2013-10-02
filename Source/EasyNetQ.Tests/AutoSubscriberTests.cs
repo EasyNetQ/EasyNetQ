@@ -144,16 +144,6 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
-            public IPublishChannel OpenPublishChannel()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
-            {
-                throw new NotImplementedException();
-            }
-
             public void Publish<T>(T message) where T : class
             {
                 throw new NotImplementedException();

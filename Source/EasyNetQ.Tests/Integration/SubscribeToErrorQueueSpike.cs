@@ -3,7 +3,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Topology;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
@@ -34,10 +33,7 @@ namespace EasyNetQ.Tests.Integration
                 throw new Exception("Something bad happened!");
             });
 
-            using (var channel = bus.OpenPublishChannel())
-            {
-                channel.Publish(new MyMessage{ Text = "this will inevitably fail"});
-            }
+            bus.Publish(new MyMessage{ Text = "this will inevitably fail"});
 
             // allow time for the subscription exception to throw and the 
             // error message to get written.

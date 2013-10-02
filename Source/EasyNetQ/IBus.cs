@@ -11,23 +11,6 @@ namespace EasyNetQ
     public interface IBus : IDisposable
     {
         /// <summary>
-        /// Opens and returns a new IPublishChannel. Note that IPublishChannel implements IDisposable
-        /// and must be disposed.
-        /// </summary>
-        /// <returns>An IPublishChannel</returns>
-        IPublishChannel OpenPublishChannel();
-
-        /// <summary>
-        /// Opens and returns a new IPublishChannel. Note that IPublishChannel implements IDisposable
-        /// and must be disposed.
-        /// </summary>
-        /// <param name="configure">
-        /// Channel configuration e.g. x => x.WithPublisherConfirms()
-        /// </param>
-        /// <returns>An IPublishChannel</returns>
-        IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure);
-
-        /// <summary>
         /// Publishes a message.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>

@@ -35,13 +35,7 @@ namespace EasyNetQ.Tests.Integration
 
             for (int i = 0; i < 10; i++)
             {
-                var thread = new Thread(x =>
-                {
-                    using(var publishChannel = bus.OpenPublishChannel())
-                    {
-                        publishChannel.Publish(new MyMessage());
-                    }
-                });
+                var thread = new Thread(x => bus.Publish(new MyMessage()));
                 threads.Add(thread);
                 thread.Start();
             }
@@ -62,12 +56,9 @@ namespace EasyNetQ.Tests.Integration
             {
                 var thread = new Thread(x =>
                 {
-                    using (var publishChannel = bus.OpenPublishChannel())
-                    {
-                        publishChannel.Request<TestRequestMessage, TestResponseMessage>(
-                            new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
-                            response => Console.WriteLine(response.Text));
-                    }
+                    bus.Request<TestRequestMessage, TestResponseMessage>(
+                        new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
+                        response => Console.WriteLine(response.Text));
                 });
                 threads.Add(thread);
                 thread.Start();

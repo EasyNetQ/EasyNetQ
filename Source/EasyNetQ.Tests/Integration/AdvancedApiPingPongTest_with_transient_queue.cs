@@ -58,15 +58,12 @@ namespace EasyNetQ.Tests.Integration
             Consume(1, 0);
 
             // kick off
-            using (var channel = buses[1].Advanced.OpenPublishChannel())
-            {
-                var properties = new MessageProperties
-                    {
-                        CorrelationId = "ping pong test"
-                    };
-                var body = Encoding.UTF8.GetBytes(messageText);
-                channel.Publish(exchanges[1], routingKey, properties, body);
-            }
+            var properties = new MessageProperties
+                {
+                    CorrelationId = "ping pong test"
+                };
+            var body = Encoding.UTF8.GetBytes(messageText);
+            buses[1].Advanced.Publish(exchanges[1], routingKey, false, false, properties, body);
 
             while (Interlocked.Read(ref rallyCount) < rallyLength)
             {
@@ -78,19 +75,16 @@ namespace EasyNetQ.Tests.Integration
         {
             buses[from].Advanced.Consume(queues[from], (body, properties, info) => Task.Factory.StartNew(() =>
                 {
-                    using (var channel = buses[from].Advanced.OpenPublishChannel())
-                    {
-                        Console.Out.WriteLine("Consumer {0}: '{1}'", from, Encoding.UTF8.GetString(body));
-                        Thread.Sleep(500);
-                        var publishProperties = new MessageProperties
-                            {
-                                CorrelationId = properties.CorrelationId ?? "no id present"
-                            };
-                        var publishBody = GenerateNextMessage(body);
-                        channel.Publish(exchanges[to], routingKey, publishProperties, publishBody);
+                    Console.Out.WriteLine("Consumer {0}: '{1}'", from, Encoding.UTF8.GetString(body));
+                    Thread.Sleep(500);
+                    var publishProperties = new MessageProperties
+                        {
+                            CorrelationId = properties.CorrelationId ?? "no id present"
+                        };
+                    var publishBody = GenerateNextMessage(body);
+                    buses[from].Advanced.Publish(exchanges[to], routingKey, false, false, publishProperties, publishBody);
 
-                        Interlocked.Increment(ref rallyCount);
-                    }
+                    Interlocked.Increment(ref rallyCount);
                 }));
         }
 

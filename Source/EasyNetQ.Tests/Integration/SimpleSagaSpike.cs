@@ -26,10 +26,7 @@ namespace EasyNetQ.Tests.Integration
                 Text = "Hello Saga! "
             };
 
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(startMessage);
-            }
+            bus.Publish(startMessage);
 
             // give the message time to run through the process
             autoResetEvent.WaitOne(1000);
@@ -47,19 +44,13 @@ namespace EasyNetQ.Tests.Integration
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
                 var request = new TestRequestMessage { Text = firstProcessedMessage };
 
-                using (var publishChannel = bus.OpenPublishChannel())
+                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
                 {
-                    publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                    {
-                        Console.WriteLine("Saga got Response: {0}", response.Text);
-                        var secondProcessedMessage = response.Text + " - final process ";
-                        var endMessage = new EndMessage {Text = secondProcessedMessage};
-                        using (var publishChannel2 = bus.OpenPublishChannel())
-                        {
-                            publishChannel2.Publish(endMessage);
-                        }
-                    });
-                }
+                    Console.WriteLine("Saga got Response: {0}", response.Text);
+                    var secondProcessedMessage = response.Text + " - final process ";
+                    var endMessage = new EndMessage {Text = secondProcessedMessage};
+                    bus.Publish(endMessage);
+                });
             });
             
             // setup the RPC endpoint
@@ -81,10 +72,7 @@ namespace EasyNetQ.Tests.Integration
 
             // now kick it off
             Console.WriteLine("Test is publishing StartMessage");
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(new StartMessage { Text = "Hello Saga!! " });
-            }
+            bus.Publish(new StartMessage { Text = "Hello Saga!! " });
 
             // give the message time to run through the process
             autoResetEvent.WaitOne(1000);

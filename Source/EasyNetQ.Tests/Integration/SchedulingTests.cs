@@ -53,10 +53,7 @@ namespace EasyNetQ.Tests.Integration
                 Date = new DateTime(2011, 5, 24)
             };
             
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
-            }
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
 
             autoResetEvent.WaitOne(10000);
         }
@@ -84,10 +81,7 @@ namespace EasyNetQ.Tests.Integration
                     Date = new DateTime(2011, 5, 24)
                 };
 
-                using (var publishChannel = bus.OpenPublishChannel())
-                {
-                    publishChannel.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
-                }
+                bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
                 Thread.Sleep(1);
             }
         }

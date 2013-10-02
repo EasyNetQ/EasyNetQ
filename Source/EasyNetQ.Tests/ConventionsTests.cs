@@ -88,17 +88,13 @@ namespace EasyNetQ.Tests
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
-
-		    using (var publishChannel = mockBuilder.Bus.OpenPublishChannel())
-		    {
-                publishChannel.Publish(new TestMessage());
-		    }
+            mockBuilder.Bus.Publish(new TestMessage());
 		}
 
 		[Test]
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
-            mockBuilder.Channels[1].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.ExchangeDeclare("CustomExchangeNamingConvention", "topic", true, false, null));
 		}
 
@@ -109,6 +105,8 @@ namespace EasyNetQ.Tests
                 x.BasicPublish(
                     Arg<string>.Is.Equal("CustomExchangeNamingConvention"), 
                     Arg<string>.Is.Anything, 
+                    Arg<bool>.Is.Equal(false),
+                    Arg<bool>.Is.Equal(false),
                     Arg<IBasicProperties>.Is.Anything,
                     Arg<byte[]>.Is.Anything));
 		}
@@ -120,6 +118,8 @@ namespace EasyNetQ.Tests
                 x.BasicPublish(
                     Arg<string>.Is.Anything,
                     Arg<string>.Is.Equal("CustomTopicNamingConvention"),
+                    Arg<bool>.Is.Equal(false),
+                    Arg<bool>.Is.Equal(false),
                     Arg<IBasicProperties>.Is.Anything,
                     Arg<byte[]>.Is.Anything));
         }
@@ -147,7 +147,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_correctly_bind_using_new_conventions()
         {
-            mockBuilder.Channels[2].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.QueueBind(
                     "CustomRpcRoutingKeyName",
                     "CustomRpcExchangeName",

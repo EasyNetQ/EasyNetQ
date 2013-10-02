@@ -194,7 +194,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_unbind_the_exchange()
         {
-            mockBuilder.Channels[1].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.QueueUnbind("my_queue", "my_exchange", "my_routing_key", null));
         }
     }

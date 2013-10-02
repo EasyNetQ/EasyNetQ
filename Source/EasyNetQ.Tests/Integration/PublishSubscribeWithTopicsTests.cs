@@ -31,12 +31,9 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_some_messages_with_topics()
         {
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(CreateMessage(), x => x.WithTopic("X.A"));
-                publishChannel.Publish(CreateMessage(), x => x.WithTopic("X.B"));
-                publishChannel.Publish(CreateMessage(), x => x.WithTopic("Y.A"));
-            }
+            bus.Publish(CreateMessage(), "X.A");
+            bus.Publish(CreateMessage(), "X.B");
+            bus.Publish(CreateMessage(), "Y.A");
         }
 
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
@@ -81,10 +78,7 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_a_messages_without_a_topic()
         {
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(CreateMessage());
-            }
+            bus.Publish(CreateMessage());
         }
     }
 }

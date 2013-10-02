@@ -42,16 +42,13 @@ namespace EasyNetQ.Tests.SimpleRequester
             {
                 lock (requestLock)
                 {
-                    using (var publishChannel = bus.OpenPublishChannel())
-                    {
-                        publishChannel.Request<TestRequestMessage, TestResponseMessage>(
-                            new TestRequestMessage
-                            {
-                                Id = count,
-                                Text = string.Format("Hello from client number: {0}! ", count)
-                            },
-                            ResponseHandler);
-                    }
+                    bus.Request<TestRequestMessage, TestResponseMessage>(
+                        new TestRequestMessage
+                        {
+                            Id = count,
+                            Text = string.Format("Hello from client number: {0}! ", count)
+                        },
+                        ResponseHandler);
                     latencyRecorder.RegisterRequest(count);
                     count++;
                 }

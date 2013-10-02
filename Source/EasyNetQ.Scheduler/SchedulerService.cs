@@ -74,7 +74,6 @@ namespace EasyNetQ.Scheduler
             try
             {
                 using(var scope = new TransactionScope())
-                using(var channel = bus.Advanced.OpenPublishChannel())
                 {
                     var scheduledMessages = scheduleRepository.GetPending();
                     
@@ -84,9 +83,11 @@ namespace EasyNetQ.Scheduler
                             "Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey));
 
                         var exchange = bus.Advanced.ExchangeDeclare(scheduledMessage.BindingKey, ExchangeType.Topic);
-                        channel.Publish(
+                        bus.Advanced.Publish(
                             exchange, 
                             scheduledMessage.BindingKey, 
+                            false,
+                            false,
                             new MessageProperties{ Type = scheduledMessage.BindingKey }, 
                             scheduledMessage.InnerMessage);
                     }

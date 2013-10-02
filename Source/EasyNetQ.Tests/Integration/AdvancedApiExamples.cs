@@ -53,11 +53,8 @@ namespace EasyNetQ.Tests.Integration
         {
             var exchange = new Exchange("my_exchange");
 
-            using (var channel = advancedBus.OpenPublishChannel())
-            {
-                var body = Encoding.UTF8.GetBytes("Hello World!");
-                channel.Publish(exchange, "routing_key", new MessageProperties(), body);
-            }
+            var body = Encoding.UTF8.GetBytes("Hello World!");
+            advancedBus.Publish(exchange, "routing_key", false, false, new MessageProperties(), body);
 
             Thread.Sleep(500);
         }

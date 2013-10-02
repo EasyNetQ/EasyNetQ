@@ -48,18 +48,6 @@ namespace EasyNetQ
             advancedBus.Disconnected += OnDisconnected;
         }
 
-        public virtual IPublishChannel OpenPublishChannel()
-        {
-            return OpenPublishChannel(x => { });
-        }
-
-        public virtual IPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
-        {
-            Preconditions.CheckNotNull(configure, "configure");
-
-            return new RabbitPublishChannel(this, configure, conventions);
-        }
-
         public void Publish<T>(T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
@@ -283,10 +271,7 @@ namespace EasyNetQ
                         var responseMessage = new Message<TResponse>(task.Result);
                         responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
 
-                        using (var channel = advancedBus.OpenPublishChannel())
-                        {
-                            channel.Publish(new Exchange(""), requestMessage.Properties.ReplyTo, responseMessage, configuration => {});
-                        }
+                        advancedBus.Publish(new Exchange(""), requestMessage.Properties.ReplyTo, false, false, responseMessage);
                         tcs.SetResult(null);
                     }
                 });

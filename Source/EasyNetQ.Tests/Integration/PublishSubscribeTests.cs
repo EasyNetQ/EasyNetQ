@@ -48,10 +48,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_publish()
         {
             var message = new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) };
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(message);
-            }
+            bus.Publish(message);
             Console.Out.WriteLine("message.Text = {0}", message.Text);
         }
 
@@ -102,14 +99,11 @@ namespace EasyNetQ.Tests.Integration
                 countdownEvent.Signal();
             });
 
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
-                publishChannel.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
 
-                publishChannel.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
-                publishChannel.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
-            }
+            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
 
             // allow time for messages to be consumed
             countdownEvent.Wait(1000);
@@ -172,24 +166,15 @@ namespace EasyNetQ.Tests.Integration
             var subscribeBus2 = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
 
             // first set up the subscribers
-            subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message =>
-                {
-                    Console.WriteLine("Subscriber 1: {0}", message.Text);
-                    //Thread.Sleep(20);
-                });
-            subscribeBus2.Subscribe<MyMessage>("roundRobinTest", message =>
-                {
-                    Console.WriteLine("Subscriber 2: {0}", message.Text);
-                    //Thread.Sleep(1);
-                });
+            subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message => 
+                Console.WriteLine("Subscriber 1: {0}", message.Text));
+            subscribeBus2.Subscribe<MyMessage>("roundRobinTest", message => 
+                Console.WriteLine("Subscriber 2: {0}", message.Text));
 
             // now publish some messages
-            using (var channel = publishBus.OpenPublishChannel())
+            for (int i = 0; i < 50; i++)
             {
-                for (int i = 0; i < 50; i++)
-                {
-                    channel.Publish(new MyMessage{ Text = string.Format("Message{0}", i)});
-                }
+                publishBus.Publish(new MyMessage { Text = string.Format("Message{0}", i) });
             }
 
             Thread.Sleep(1000);

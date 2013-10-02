@@ -112,12 +112,9 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_a_test_message_for_subscribe_async()
         {
-            using (var channel = bus.OpenPublishChannel())
+            for (var i = 0; i < 10; i++)
             {
-                for (var i = 0; i < 10; i++)
-                {
-                    channel.Publish(new MyMessage { Text = "Hi from the publisher " + i });
-                }
+                bus.Publish(new MyMessage { Text = "Hi from the publisher " + i });
             }
         }
 

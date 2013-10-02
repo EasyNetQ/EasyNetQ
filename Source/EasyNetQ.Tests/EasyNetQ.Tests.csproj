@@ -118,15 +118,10 @@
     <Compile Include="PersistentConsumerTests\When_disposed_and_internal_consumer_is_cancelled.cs" />
     <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PublisherConfirmsTests.cs" />
     <Compile Include="Integration\PublishSubscribeTests.cs" />
-    <Compile Include="Integration\PublishSubscribeWithPublisherConfirms.cs" />
     <Compile Include="Integration\PublishSubscribeWithTopicsTests.cs" />
     <Compile Include="PublishTests.cs" />
     <Compile Include="Integration\RequestResponseTests.cs" />
-    <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
-    <Compile Include="Sagas\RequestResponseSaga.cs" />
-    <Compile Include="Sagas\SubscribePublishSaga.cs" />
     <Compile Include="Integration\SchedulingTests.cs" />
     <Compile Include="DefaultServiceProviderTests.cs" />
     <Compile Include="Integration\SimpleSagaSpike.cs" />

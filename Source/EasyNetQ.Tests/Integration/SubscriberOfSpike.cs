@@ -13,11 +13,8 @@ namespace EasyNetQ.Tests.Integration
 
             AutoRegisterSubscribers(bus, Assembly.GetExecutingAssembly());
 
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(new MyAutoSubscribedMessage{ Text = "Hello Message!"});
-                publishChannel.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
-            }
+            bus.Publish(new MyAutoSubscribedMessage { Text = "Hello Message!" });
+            bus.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
         }
 
         private void AutoRegisterSubscribers(IBus bus, Assembly assembly)

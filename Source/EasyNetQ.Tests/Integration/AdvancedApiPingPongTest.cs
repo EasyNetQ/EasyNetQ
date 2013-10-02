@@ -67,15 +67,12 @@ namespace EasyNetQ.Tests.Integration
             Consume(1, 0);
 
             // kick off
-            using (var channel = buses[1].Advanced.OpenPublishChannel())
-            {
-                var properties = new MessageProperties
-                    {
-                        CorrelationId = "0"
-                    };
-                var body = Encoding.UTF8.GetBytes(messageText);
-                channel.Publish(exchanges[1], routingKey, properties, body);
-            }
+            var properties = new MessageProperties
+                {
+                    CorrelationId = "0"
+                };
+            var body = Encoding.UTF8.GetBytes(messageText);
+            buses[1].Advanced.Publish(exchanges[1], routingKey, false, false, properties, body);
 
             while (Interlocked.Read(ref rallyCount) < rallyLength)
             {
@@ -108,10 +105,7 @@ namespace EasyNetQ.Tests.Integration
                     {
                         try
                         {
-                            using (var channel = buses[from].Advanced.OpenPublishChannel())
-                            {
-                                channel.Publish(exchanges[to], routingKey, publishProperties, nextMessage.Body);
-                            }
+                            buses[from].Advanced.Publish(exchanges[to], routingKey, false, false, publishProperties, nextMessage.Body);
                             published = true;
                         }
                         catch (Exception)

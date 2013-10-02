@@ -39,19 +39,13 @@ namespace EasyNetQ.Tests.Integration
 
             Thread.Sleep(5000);
 
-            using (var channel = bus.Advanced.OpenPublishChannel())
-            {
-                var body = Encoding.UTF8.GetBytes("Publish 1");
-                channel.Publish(Exchange.GetDefault(), queue.Name, new MessageProperties(), body);
-            }
+            var body1 = Encoding.UTF8.GetBytes("Publish 1");
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, new MessageProperties(), body1);
 
             Thread.Sleep(5000);
 
-            using (var channel = bus.Advanced.OpenPublishChannel())
-            {
-                var body = Encoding.UTF8.GetBytes("Publish 2");
-                channel.Publish(Exchange.GetDefault(), queue.Name, new MessageProperties(), body);
-            }
+            var body2 = Encoding.UTF8.GetBytes("Publish 2");
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, new MessageProperties(), body2);
 
             Thread.Sleep(1000);
         }

@@ -112,17 +112,6 @@ namespace EasyNetQ
 
         // -------------------------------- publish ---------------------------------------------
 
-        public virtual IAdvancedPublishChannel OpenPublishChannel()
-        {
-            return OpenPublishChannel(x => { });
-        }
-
-        public virtual IAdvancedPublishChannel OpenPublishChannel(Action<IChannelConfiguration> configure)
-        {
-            Preconditions.CheckNotNull(configure, "configure");
-            return new RabbitAdvancedPublishChannel(this, configure);
-        }
-
         public virtual void Publish(
             IExchange exchange, 
             string routingKey, 
@@ -142,6 +131,9 @@ namespace EasyNetQ
                     messageProperties.CopyTo(properties);
                     x.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body);
                 }).Wait();
+
+            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
+                exchange.Name, routingKey, messageProperties.CorrelationId);
         }
 
         public virtual void Publish<T>(

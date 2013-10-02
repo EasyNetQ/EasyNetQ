@@ -5,7 +5,6 @@ using System.Text;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
@@ -25,28 +24,25 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder(x => 
                 x.Register<Func<string>>(_ => () => correlationId));
 
-            using (var channel = mockBuilder.Bus.OpenPublishChannel())
-            {
-                mockBuilder.Channels[0].Stub(x =>
-                    x.BasicPublish(null, null, null, null))
-                        .IgnoreArguments()
-                        .Callback<string, string, IBasicProperties, byte[]>((e, r, p, b) =>
-                        {
-                            body = b;
-                            properties = p;
-                            return true;
-                        });
+            mockBuilder.NextModel.Stub(x =>
+                x.BasicPublish(null, null, false, false, null, null))
+                    .IgnoreArguments()
+                    .Callback<string, string, bool, bool, IBasicProperties, byte[]>((e, r, m, i, p, b) =>
+                    {
+                        body = b;
+                        properties = p;
+                        return true;
+                    });
 
-                var message = new MyMessage { Text = "Hiya!" };
-                channel.Publish(message);
-            }
+            var message = new MyMessage { Text = "Hiya!" };
+            mockBuilder.Bus.Publish(message);
         }
 
         [Test]
         public void Should_create_a_channel_to_publish_on()
         {
             // a channel is also created then disposed to declare the exchange.
-            mockBuilder.Channels.Count.ShouldEqual(2);
+            mockBuilder.Channels.Count.ShouldEqual(1);
         }
 
         [Test]
@@ -56,6 +52,8 @@ namespace EasyNetQ.Tests
                 x.BasicPublish(
                     Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"), 
                     Arg<string>.Is.Equal(""), 
+                    Arg<bool>.Is.Equal(false),
+                    Arg<bool>.Is.Equal(false),
                     Arg<IBasicProperties>.Is.Equal(mockBuilder.BasicProperties), 
                     Arg<byte[]>.Is.Anything));
 
@@ -84,14 +82,8 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_exchange()
         {
-            mockBuilder.Channels[1].AssertWasCalled(x => x.ExchangeDeclare(
+            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
                 "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests", "topic", true, false, null));
-        }
-
-        [Test]
-        public void Should_close_channel()
-        {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
@@ -115,11 +107,8 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            using (var channel = mockBuilder.Bus.OpenPublishChannel())
-            {
-                var message = new MyMessage { Text = "Hiya!" };
-                channel.Publish(message, x => x.WithTopic("X.A"));
-            }
+            var message = new MyMessage { Text = "Hiya!" };
+            mockBuilder.Bus.Publish(message, "X.A");
         }
 
         [Test]
@@ -129,61 +118,10 @@ namespace EasyNetQ.Tests
                 x.BasicPublish(
                     Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"),
                     Arg<string>.Is.Equal("X.A"),
+                    Arg<bool>.Is.Equal(false),
+                    Arg<bool>.Is.Equal(false),
                     Arg<IBasicProperties>.Is.Equal(mockBuilder.BasicProperties),
                     Arg<byte[]>.Is.Anything));
-        }
-    }
-
-    [TestFixture]
-    public class When_publish_with_confirms_is_called
-    {
-        private MockBuilder mockBuilder;
-        private bool success;
-        private bool failure;
-
-        [SetUp]
-        public void SetUp()
-        {
-            success = false;
-            failure = false;
-            mockBuilder = new MockBuilder();
-
-            Action successAction = () =>
-                {
-                    success = true;
-                };
-            Action failureAction = () =>
-                {
-                    failure = true;
-                };
-
-            using (var channel = mockBuilder.Bus.OpenPublishChannel(x => x.WithPublisherConfirms()))
-            {
-                mockBuilder.Channels[0].AssertWasCalled(x => x.BasicAcks += Arg<BasicAckEventHandler>.Is.Anything);
-                mockBuilder.Channels[0].AssertWasCalled(x => x.BasicNacks += Arg<BasicNackEventHandler>.Is.Anything);
-
-                var message = new MyMessage { Text = "Hiya!" };
-                channel.Publish(message, x => x
-                    .OnSuccess(successAction)
-                    .OnFailure(failureAction));
-            }
-
-        }
-
-        [Test]
-        public void Should_call_success_callback_when_acked()
-        {
-            mockBuilder.Channels[0].Raise(x => x.BasicAcks += null, mockBuilder.Channels[0], new BasicAckEventArgs());
-            success.ShouldBeTrue();
-            failure.ShouldBeFalse();
-        }
-
-        [Test]
-        public void Should_call_failure_callback_when_nacked()
-        {
-            mockBuilder.Channels[0].Raise(x => x.BasicNacks += null, mockBuilder.Channels[0], new BasicNackEventArgs());
-            success.ShouldBeFalse();
-            failure.ShouldBeTrue();
         }
     }
 }
