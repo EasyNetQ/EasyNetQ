@@ -142,8 +142,7 @@ namespace EasyNetQ.Consumer
                 Exception = exception.ToString(),
                 Message = messageAsString,
                 DateTime = DateTime.Now,
-                // TODO:
-                // BasicProperties = context.Properties
+                BasicProperties = context.Properties
             };
 
             return serializer.MessageToBytes(error);

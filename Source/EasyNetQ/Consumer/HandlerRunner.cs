@@ -172,8 +172,7 @@ namespace EasyNetQ.Consumer
             var propertiesMessage = new StringBuilder();
             if (properties != null)
             {
-                // TODO:
-                // properties.AppendPropertyDebugStringTo(propertiesMessage);
+                properties.AppendPropertyDebugStringTo(propertiesMessage);
             }
 
             return "Exception thrown by subscription calback.\n" +

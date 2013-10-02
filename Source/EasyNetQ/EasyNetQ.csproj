@@ -99,6 +99,7 @@
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="IMessageValidationStrategy.cs" />
     <Compile Include="JsonSerializer.cs" />
+    <Compile Include="LinqExtensions.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Loggers\DelegateLogger.cs" />
     <Compile Include="Message.cs" />
@@ -131,7 +132,6 @@
     <Compile Include="Sprache\ResultHelper.cs" />
     <Compile Include="Sprache\Success.cs" />
     <Compile Include="SystemMessages\Error.cs" />
-    <Compile Include="SystemMessages\MessageBasicProperties.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="Topology\Binding.cs" />
     <Compile Include="Topology\Exchange.cs" />

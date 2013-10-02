@@ -43,7 +43,7 @@ namespace EasyNetQ.Hosepipe.Tests
                     Exchange = "", // default exchange
                     RoutingKey = "hosepipe.test",
                     Message = "Hosepipe test message",
-                    BasicProperties = new MessageBasicProperties()
+                    BasicProperties = new MessageProperties()
                 };
             var parameters = new QueueParameters
             {
