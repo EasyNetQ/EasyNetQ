@@ -44,6 +44,7 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             consumerDispatcherFactory.Dispose();
+            handlerRunner.Dispose();
         }
     }
 }
