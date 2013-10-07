@@ -3,7 +3,6 @@
 using System;
 using EasyNetQ.Consumer;
 using NUnit.Framework;
-using RabbitMQ.Client.Events;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -49,6 +48,14 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_ack()
         {
             MockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(DeliverTag, false));
+        }
+
+        [Test]
+        public void Should_dispose_of_the_consumer_error_strategy_when_the_bus_is_disposed()
+        {
+            MockBuilder.Bus.Dispose();
+
+            ConsumerErrorStrategy.AssertWasCalled(x => x.Dispose());
         }
     }
 }
