@@ -24,7 +24,11 @@ namespace EasyNetQ.Tests.Mocking
 
         public MockBuilder() : this(register => {}){}
 
-        public MockBuilder(Action<IServiceRegister> registerServices)
+        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices){}
+
+        public MockBuilder(string connectionString) : this(connectionString, register => {}){}
+
+        public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
             for (int i = 0; i < 10; i++)
             {
@@ -41,7 +45,7 @@ namespace EasyNetQ.Tests.Mocking
             });
             connectionFactory.Stub(x => x.Configuration).Return(new ConnectionConfiguration
             {
-                VirtualHost = VirtualHost
+                VirtualHost = VirtualHost,
             });
 
             connection.Stub(x => x.IsOpen).Return(true);
@@ -67,7 +71,7 @@ namespace EasyNetQ.Tests.Mocking
                         }).Return("");
                 });
 
-            bus = RabbitHutch.CreateBus("host=localhost", x =>
+            bus = RabbitHutch.CreateBus(connectionString, x =>
                 {
                     registerServices(x);
                     x.Register(sp => 

@@ -88,7 +88,7 @@ namespace EasyNetQ.Producer
             {
                 logger.ErrorWrite("Channel action timed out. Throwing exception to client.");
                 throw new TimeoutException("The operation requested on PersistentChannel could not be completed.");
-            }            
+            }
             try
             {
                 channelAction(Channel);
@@ -100,6 +100,7 @@ namespace EasyNetQ.Producer
                     var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
                     if (amqpException.Code == AmqpException.ConnectionClosed)
                     {
+                        disconnected = true;
                         WaitForReconnectionOrTimeout(startTime);
                         InvokeChannelActionInternal(channelAction, startTime);
                     }

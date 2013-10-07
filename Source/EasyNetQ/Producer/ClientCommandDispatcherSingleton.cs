@@ -9,7 +9,7 @@ namespace EasyNetQ.Producer
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
         private const int queueSize = 1;
-        private readonly BlockingCollection<Action<IModel>> queue = new BlockingCollection<Action<IModel>>(queueSize);
+        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
 
         private readonly IPersistentChannel persistentChannel;
@@ -35,7 +35,7 @@ namespace EasyNetQ.Producer
                         try
                         {
                             var channelAction = queue.Take(cancellation.Token);
-                            Execute(channelAction);
+                            channelAction();
                         }
                         catch (OperationCanceledException)
                         {
@@ -43,11 +43,6 @@ namespace EasyNetQ.Producer
                         }
                     }
                 }) {Name = "Client Command Dispatcher Thread"}.Start();
-        }
-
-        private void Execute(Action<IModel> channelAction)
-        {
-            persistentChannel.InvokeChannelAction(channelAction);
         }
 
         public Task<T> Invoke<T>(Func<IModel, T> channelAction)
@@ -58,7 +53,7 @@ namespace EasyNetQ.Producer
 
             try
             {
-                queue.Add(x =>
+                queue.Add(() =>
                     {
                         if (cancellation.IsCancellationRequested)
                         {
@@ -67,7 +62,7 @@ namespace EasyNetQ.Producer
                         }
                         try
                         {
-                            tcs.SetResult(channelAction(x));
+                            persistentChannel.InvokeChannelAction(channel => tcs.SetResult(channelAction(channel)));
                         }
                         catch (Exception e)
                         {

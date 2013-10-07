@@ -13,6 +13,10 @@ namespace EasyNetQ
         string VirtualHost { get; }
         string UserName { get; }
         string Password { get; }
+
+        /// <summary>
+        /// Heartbeat interval seconds. (default is 10)
+        /// </summary>
         ushort RequestedHeartbeat { get; }
         ushort PrefetchCount { get; }
         Uri AMQPConnectionString { get; }
@@ -21,6 +25,10 @@ namespace EasyNetQ
         IEnumerable<IHostConfiguration> Hosts { get; }
 
         SslOption Ssl { get; }
+
+        /// <summary>
+        /// Operation timeout seconds. (default is 10)
+        /// </summary>
         ushort Timeout { get; }
     }
 
@@ -54,7 +62,7 @@ namespace EasyNetQ
             UserName = "guest";
             Password = "guest";
             RequestedHeartbeat = 10;
-            Timeout = 10;
+            Timeout = 10; // seconds
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
