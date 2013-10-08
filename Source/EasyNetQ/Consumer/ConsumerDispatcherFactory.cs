@@ -21,7 +21,15 @@ namespace EasyNetQ.Consumer
         {
             return dispatcher.Value;
         }
-        
+
+        public void OnDisconnected()
+        {
+            if (dispatcher.IsValueCreated)
+            {
+                dispatcher.Value.OnDisconnected();
+            }
+        }
+
         public void Dispose()
         {
             if (dispatcher.IsValueCreated)

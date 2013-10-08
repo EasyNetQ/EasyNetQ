@@ -45,10 +45,13 @@ namespace EasyNetQ.Consumer
 
         private void StartConsumingInternal()
         {
+            if (disposed) return;
+
             if(!connection.IsConnected)
             {
                 // connection is not connected, so just ignore this call. A consumer will
                 // be created and start consuming when the connection reconnects.
+                return;
             }
 
             var internalConsumer = internalConsumerFactory.CreateConsumer();
@@ -56,11 +59,12 @@ namespace EasyNetQ.Consumer
 
             internalConsumer.Cancelled += consumer =>
                 {
-                    if (disposed) return;
-
-                    object value; // cruft from using a ConcurrentDictionary
-                    internalConsumers.TryRemove(consumer, out value);
-                    StartConsumingInternal();
+//                    Console.Out.WriteLine(">>>>>>>> internalConsumer.Cancelled");
+//                    if (disposed) return;
+//
+//                    object value; // cruft from using a ConcurrentDictionary
+//                    internalConsumers.TryRemove(consumer, out value);
+//                    StartConsumingInternal();
                 };
 
             internalConsumer.StartConsuming(
@@ -71,6 +75,7 @@ namespace EasyNetQ.Consumer
 
         private void ConnectionOnDisconnected()
         {
+            internalConsumerFactory.OnDisconnected();
             internalConsumers.Clear();
         }
 

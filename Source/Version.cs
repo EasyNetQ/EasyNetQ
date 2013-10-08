@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.14.3.0")]
+[assembly: AssemblyVersion("0.14.4.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.14.4.0 Consumer dispatcher queue cleared after connection lost.
 // 0.14.3.0 IConsumerErrorStrategy not being disposed fix
 // 0.14.2.0 MessageProperties serialization fix
 // 0.14.1.0 Fixed missing properties in error message

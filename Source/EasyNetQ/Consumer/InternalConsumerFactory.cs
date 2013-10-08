@@ -5,6 +5,7 @@ namespace EasyNetQ.Consumer
     public interface IInternalConsumerFactory : IDisposable
     {
         IInternalConsumer CreateConsumer();
+        void OnDisconnected();
     }
 
     public class InternalConsumerFactory : IInternalConsumerFactory
@@ -41,10 +42,17 @@ namespace EasyNetQ.Consumer
             return new InternalConsumer(handlerRunner, logger, dispatcher, conventions, connectionConfiguration);
         }
 
+        public void OnDisconnected()
+        {
+            consumerDispatcherFactory.OnDisconnected();
+        }
+
         public void Dispose()
         {
             consumerDispatcherFactory.Dispose();
             handlerRunner.Dispose();
         }
+
+
     }
 }
