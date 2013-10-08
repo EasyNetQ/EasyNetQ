@@ -25,55 +25,49 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(configuration, "configuration");
 
             this.connection = connection;
-
-            this.connection.Disconnected += () => 
-                {
-                    channel = null;
-                    disconnected = true;
-                };
-
-            this.connection.Connected += () =>
-                {
-                    try
-                    {
-                        channel = connection.CreateModel();
-                        disconnected = false;
-                    }
-                    catch (Exception e)
-                    {
-                        logger.ErrorWrite(e);
-                    }
-                };
-
             this.logger = logger;
             this.configuration = configuration;
+
+            WireUpEvents();
+        }
+
+        private void WireUpEvents()
+        {
+            connection.Disconnected += OnConnectionDisconnected;
+        }
+
+        private void UnwireEvents()
+        {
+            connection.Disconnected -= OnConnectionDisconnected;
+        }
+
+        private void OnConnectionDisconnected()
+        {
+            if (!disconnected)
+            {
+                disconnected = true;
+                channel = null;
+                logger.DebugWrite("Persistent channel disconnected.");
+            }
         }
 
         public IModel Channel
         {
             get
             {
-                if (channel != null && !channel.IsOpen)
-                {
-                    channel.Dispose();
-                    channel = null;
-                }
                 if (channel == null)
                 {
-                    channel = connection.CreateModel();
-                    disconnected = false;
+                    OpenChannel();
                 }
                 return channel;
             }
         }
 
-        public void Dispose()
+        private void OpenChannel()
         {
-            if(channel != null)
-            {
-                channel.Dispose();
-                logger.DebugWrite("Persistent connection disposed.");
-            }
+            channel = connection.CreateModel();
+            disconnected = false;
+            logger.DebugWrite("Persistent channel connected.");
         }
 
         public void InvokeChannelAction(Action<IModel> channelAction)
@@ -87,7 +81,7 @@ namespace EasyNetQ.Producer
             if (IsTimedOut(startTime))
             {
                 logger.ErrorWrite("Channel action timed out. Throwing exception to client.");
-                throw new TimeoutException("The operation requested on PersistentChannel could not be completed.");
+                throw new TimeoutException("The operation requested on PersistentChannel timed out.");
             }
             try
             {
@@ -100,7 +94,7 @@ namespace EasyNetQ.Producer
                     var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
                     if (amqpException.Code == AmqpException.ConnectionClosed)
                     {
-                        disconnected = true;
+                        OnConnectionDisconnected();
                         WaitForReconnectionOrTimeout(startTime);
                         InvokeChannelActionInternal(channelAction, startTime);
                     }
@@ -119,15 +113,36 @@ namespace EasyNetQ.Producer
         private void WaitForReconnectionOrTimeout(DateTime startTime)
         {
             logger.DebugWrite("Persistent channel operation failed. Waiting for reconnection.");
+            var delayMilliseconds = 10;
+
             while (disconnected && !IsTimedOut(startTime))
             {
-                Thread.Sleep(100);
+                Thread.Sleep(delayMilliseconds);
+                delayMilliseconds *= 2; // back off exponentially
+                try
+                {
+                    OpenChannel();
+                }
+                catch (OperationInterruptedException)
+                {
+                }
             }
         }
 
         private bool IsTimedOut(DateTime startTime)
         {
             return startTime.AddSeconds(configuration.Timeout) < DateTime.Now;
+        }
+
+        public void Dispose()
+        {
+            UnwireEvents();
+
+            if (channel != null)
+            {
+                channel.Dispose();
+                logger.DebugWrite("Persistent channel disposed.");
+            }
         }
     }
 }
