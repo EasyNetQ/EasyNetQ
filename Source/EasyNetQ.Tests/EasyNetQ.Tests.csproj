@@ -115,7 +115,6 @@
     <Compile Include="PersistentConsumerTests\Given_a_PersistentConsumer.cs" />
     <Compile Include="PersistentConsumerTests\When_a_Persistent_consumer_is_created.cs" />
     <Compile Include="PersistentConsumerTests\When_disposed.cs" />
-    <Compile Include="PersistentConsumerTests\When_disposed_and_internal_consumer_is_cancelled.cs" />
     <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
     <Compile Include="ProducerTests\When_IModel_throws.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

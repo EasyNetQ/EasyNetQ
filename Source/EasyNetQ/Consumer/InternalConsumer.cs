@@ -96,8 +96,9 @@ namespace EasyNetQ.Consumer
 
         private void Cancel()
         {
+            logger.DebugWrite("Consumer {0} cancelled", ConsumerTag);
             IsRunning = false;
-            
+
             // copy to temp variable to be thread safe.
             var cancelled = Cancelled;
             if(cancelled != null) cancelled(this);
@@ -143,6 +144,8 @@ namespace EasyNetQ.Consumer
             IBasicProperties properties,
             byte[] body)
         {
+            logger.DebugWrite("HandleBasicDeliver on consumer: {0}, deliveryTag: {1}", consumerTag, deliveryTag);
+
             if (!IsRunning)
             {
                 // this message's consumer has stopped, so just return

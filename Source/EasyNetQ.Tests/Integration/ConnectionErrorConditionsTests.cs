@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.Integration
         {
             RabbitHutch.CreateBus("host=localhost;password=wrong_password");
             Thread.Sleep(2000);
-        } 
+        }
     }
 }
 
