@@ -116,6 +116,7 @@
     <Compile Include="PersistentConsumerTests\When_a_Persistent_consumer_is_created.cs" />
     <Compile Include="PersistentConsumerTests\When_disposed.cs" />
     <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
+    <Compile Include="ProducerTests\PublishExchangeDeclareStrategyTests.cs" />
     <Compile Include="ProducerTests\When_IModel_throws.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Integration\PublishSubscribeTests.cs" />

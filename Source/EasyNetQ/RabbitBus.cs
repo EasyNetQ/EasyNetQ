@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -12,6 +13,7 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
+        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         
         public SerializeType SerializeType
         {
@@ -32,17 +34,20 @@ namespace EasyNetQ
             SerializeType serializeType,
             IEasyNetQLogger logger,
             IConventions conventions,
-            IAdvancedBus advancedBus)
+            IAdvancedBus advancedBus, 
+            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy)
         {
             Preconditions.CheckNotNull(serializeType, "serializeType");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
+            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
 
             this.serializeType = serializeType;
             this.logger = logger;
             this.conventions = conventions;
             this.advancedBus = advancedBus;
+            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
 
             advancedBus.Connected += OnConnected;
             advancedBus.Disconnected += OnDisconnected;
@@ -61,7 +66,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(topic, "topic");
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
-            var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName);
             var easyNetQMessage = new Message<T>(message);
 
             // by default publish persistent messages

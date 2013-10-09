@@ -28,6 +28,7 @@ namespace EasyNetQ
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>(x => new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
                 .Register<IConsumerDispatcherFactory>(x => new ConsumerDispatcherFactory(x.Resolve<IEasyNetQLogger>()))
+                .Register<IPublishExchangeDeclareStrategy>(x => new PublishExchangeDeclareStrategy())
                 .Register<IConsumerErrorStrategy>(x => new DefaultConsumerErrorStrategy(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<ISerializer>(),
@@ -67,7 +68,8 @@ namespace EasyNetQ
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConventions>(),
-                    x.Resolve<IAdvancedBus>()
+                    x.Resolve<IAdvancedBus>(),
+                    x.Resolve<IPublishExchangeDeclareStrategy>()
                 ));
 
             return serviceProvider;
