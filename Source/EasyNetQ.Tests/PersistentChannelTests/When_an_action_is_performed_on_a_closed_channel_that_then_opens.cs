@@ -54,6 +54,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [Test]
         public void Should_run_action_on_channel()
         {
+            Thread.Sleep(100);
             channel.AssertWasCalled(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
     }

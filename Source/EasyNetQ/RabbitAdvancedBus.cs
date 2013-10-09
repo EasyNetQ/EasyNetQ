@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -121,7 +120,7 @@ namespace EasyNetQ
             byte[] body)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
 
@@ -144,7 +143,7 @@ namespace EasyNetQ
             IMessage<T> message) where T : class
         {
             Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
             var typeName = SerializeType(typeof(T));
@@ -256,7 +255,7 @@ namespace EasyNetQ
             bool @internal = false)
         {
             Preconditions.CheckNotNull(name, "name");
-            Preconditions.CheckNotNull(type, "type");
+            Preconditions.CheckShortString(type, "type");
 
             clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, null)).Wait();
             logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
@@ -276,7 +275,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckShortString(routingKey, "routingKey");
 
             clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey)).Wait();
             logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",
@@ -288,7 +287,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
-            Preconditions.CheckNotNull(routingKey, "routingKey");
+            Preconditions.CheckShortString(routingKey, "routingKey");
 
             clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey)).Wait();
 

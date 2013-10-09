@@ -204,5 +204,14 @@ namespace EasyNetQ
                 throw new ArgumentException(message, name);
             }
         }
+
+        public static void CheckShortString(string value, string name)
+        {
+            CheckNotNull(value, name);
+            if (value.Length > 255)
+            {
+                throw new ArgumentException(string.Format("Argument {0} must be less than or equal to 255 characters."));
+            }
+        }
     }
 }
