@@ -134,7 +134,20 @@ namespace EasyNetQ
         {
             if (disposed) return;
             disposed = true;
-            if (connection != null) connection.Dispose();
+            if (connection != null)
+            {
+                try
+                {
+                    connection.Dispose();
+                }
+                catch (System.IO.IOException exception)
+                {
+                    logger.DebugWrite(
+                        "IOException thrown on connection dispose. Message: '{0}'. " + 
+                        "This is not normally a cause for concern.", 
+                        exception.Message);
+                }
+            }
         }
     }
 }
