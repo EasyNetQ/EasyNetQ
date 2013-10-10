@@ -48,8 +48,8 @@ namespace EasyNetQ.Tests
                     Arg<bool>.Is.Equal(true),
                     Arg<bool>.Is.Equal(true),
                     Arg<IDictionary>.Matches(args => 
-                        ((uint)args["x-message-ttl"] == 1000) &&
-                        ((uint)args["x-expires"] == 2000))));
+                        ((int)args["x-message-ttl"] == 1000) &&
+                        ((int)args["x-expires"] == 2000))));
         }
     }
 
