@@ -123,8 +123,8 @@ namespace EasyNetQ
             bool durable = true, 
             bool exclusive = false,
             bool autoDelete = false, 
-            uint perQueueTtl = UInt32.MaxValue, 
-            uint expires = UInt32.MaxValue)
+            int perQueueTtl = int.MaxValue, 
+            int expires = int.MaxValue)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -132,25 +132,18 @@ namespace EasyNetQ
             {
                 IDictionary<string, object> arguments = new Dictionary<string, object>();
                 if (passive)
-                {
                     model.QueueDeclarePassive(name);
-                }
                 else
                 {
-                    if (perQueueTtl != uint.MaxValue)
-                    {
+                    if (perQueueTtl != int.MaxValue)
                         arguments.Add("x-message-ttl", perQueueTtl);
-                    }
 
-                    if (expires != uint.MaxValue)
-                    {
+                    if (expires != int.MaxValue)
                         arguments.Add("x-expires", expires);
-                    }
 
-                    model.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary)arguments);
+                    model.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary) arguments);
 
-                    logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelte:{3}, args:{4}",
-                        name, durable, exclusive, autoDelete, WriteArguments(arguments));
+                    logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelte:{3}, args:{4}", name, durable, exclusive, autoDelete, WriteArguments(arguments));
                 }
 
                 return new Topology.Queue(name, exclusive);
