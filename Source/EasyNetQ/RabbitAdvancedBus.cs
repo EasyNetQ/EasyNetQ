@@ -147,7 +147,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
 
             var typeName = SerializeType(typeof(T));
-            var messageBody = Serializer.MessageToBytes(message.Body);
+            var messageBody = serializer.MessageToBytes(message.Body);
 
             message.Properties.Type = typeName;
             message.Properties.CorrelationId =
