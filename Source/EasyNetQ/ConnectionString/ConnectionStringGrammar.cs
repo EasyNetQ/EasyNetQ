@@ -14,6 +14,9 @@ namespace EasyNetQ.ConnectionString
         public static Parser<string> Text = Parse.CharExcept(';').Many().Text();
         public static Parser<ushort> Number = Parse.Number.Select(ushort.Parse);
 
+        public static Parser<bool> Bool =
+            (Parse.String("true").Or(Parse.String("false"))).Text().Select(x => x == "true");
+
         public static Parser<IHostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
             from port in Parse.Char(':').Then(_ => Number).Or(Parse.Return((ushort)0))
@@ -35,7 +38,8 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("username", Text, c => c.UserName),
             BuildKeyValueParser("password", Text, c => c.Password),
             BuildKeyValueParser("prefetchcount", Number, c => c.PrefetchCount),
-            BuildKeyValueParser("timeout", Number, c => c.Timeout)
+            BuildKeyValueParser("timeout", Number, c => c.Timeout),
+            BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms)
         }.Aggregate((a, b) => a.Or(b));
 
         public static Parser<UpdateConfiguration> AMQPAlone =

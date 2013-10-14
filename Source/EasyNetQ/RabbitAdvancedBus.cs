@@ -124,12 +124,14 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
 
-            clientCommandDispatcher.Invoke(x =>
+            var task = clientCommandDispatcher.Invoke(x =>
                 {
                     var properties = x.CreateBasicProperties();
                     messageProperties.CopyTo(properties);
                     x.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body);
-                }).Wait();
+                });
+
+            task.Wait();
 
             logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
                 exchange.Name, routingKey, messageProperties.CorrelationId);

@@ -30,6 +30,8 @@ namespace EasyNetQ
         /// Operation timeout seconds. (default is 10)
         /// </summary>
         ushort Timeout { get; }
+
+        bool PublisherConfirms { get; }
     }
 
     public interface IHostConfiguration
@@ -53,6 +55,7 @@ namespace EasyNetQ
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
         public SslOption Ssl { get; private set; }
         public ushort Timeout { get; set; }
+        public bool PublisherConfirms { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -63,6 +66,7 @@ namespace EasyNetQ
             Password = "guest";
             RequestedHeartbeat = 10;
             Timeout = 10; // seconds
+            PublisherConfirms = false;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -92,7 +96,9 @@ namespace EasyNetQ
             clientProperties.Add("machine_name", hostname);
             clientProperties.Add("user", UserName);
             clientProperties.Add("connected", DateTime.Now.ToString("MM/dd/yy HH:mm:ss"));
-
+            clientProperties.Add("requested_heartbeat", RequestedHeartbeat.ToString());
+            clientProperties.Add("timeout", Timeout.ToString());
+            clientProperties.Add("publisher_confirms", PublisherConfirms.ToString());
         }
 
         public void Validate()
