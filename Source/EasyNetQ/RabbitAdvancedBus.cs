@@ -19,6 +19,7 @@ namespace EasyNetQ
         private readonly IMessageValidationStrategy messageValidationStrategy;
         private readonly IPersistentConnection connection;
         private readonly IClientCommandDispatcher clientCommandDispatcher;
+        private readonly IPublisherConfirms publisherConfirms;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -28,7 +29,8 @@ namespace EasyNetQ
             IEasyNetQLogger logger, 
             Func<string> getCorrelationId, 
             IMessageValidationStrategy messageValidationStrategy, 
-            IClientCommandDispatcherFactory clientCommandDispatcherFactory)
+            IClientCommandDispatcherFactory clientCommandDispatcherFactory, 
+            IPublisherConfirms publisherConfirms)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializeType, "serializeType");
@@ -37,6 +39,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
             Preconditions.CheckNotNull(messageValidationStrategy, "messageValidationStrategy");
+            Preconditions.CheckNotNull(publisherConfirms, "publisherConfirms");
 
             this.serializeType = serializeType;
             this.serializer = serializer;
@@ -44,6 +47,7 @@ namespace EasyNetQ
             this.logger = logger;
             this.getCorrelationId = getCorrelationId;
             this.messageValidationStrategy = messageValidationStrategy;
+            this.publisherConfirms = publisherConfirms;
 
             connection = new PersistentConnection(connectionFactory, logger);
             connection.Connected += OnConnected;
@@ -128,8 +132,10 @@ namespace EasyNetQ
                 {
                     var properties = x.CreateBasicProperties();
                     messageProperties.CopyTo(properties);
-                    x.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body);
-                });
+
+                    return publisherConfirms.PublishWithConfirm(x,
+                        m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body));
+                }).Unwrap();
 
             task.Wait();
 

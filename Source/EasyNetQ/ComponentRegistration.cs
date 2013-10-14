@@ -19,6 +19,8 @@ namespace EasyNetQ
             var serializer = new JsonSerializer();
             var conventions = new Conventions();
 
+            // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
+
             // default service registration
             serviceProvider
                 .Register<IEasyNetQLogger>(x => logger)
@@ -55,6 +57,9 @@ namespace EasyNetQ
                     x.Resolve<IConnectionConfiguration>()))
                 .Register<IClientCommandDispatcherFactory>(x => new ClientCommandDispatcherFactory(
                     x.Resolve<IPersistentChannelFactory>()))
+                .Register<IPublisherConfirms>(x => new PublisherConfirms(
+                    x.Resolve<IConnectionConfiguration>(),
+                    x.Resolve<IEasyNetQLogger>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),
@@ -63,7 +68,8 @@ namespace EasyNetQ
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<Func<string>>(),
                     x.Resolve<IMessageValidationStrategy>(),
-                    x.Resolve<IClientCommandDispatcherFactory>()))
+                    x.Resolve<IClientCommandDispatcherFactory>(),
+                    x.Resolve<IPublisherConfirms>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),

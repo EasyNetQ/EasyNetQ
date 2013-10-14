@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
