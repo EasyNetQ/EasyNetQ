@@ -215,9 +215,13 @@ namespace EasyNetQ
             using (var model = connection.CreateModel())
             {
                 if (passive)
+                {
                     model.ExchangeDeclarePassive(name);
+                }
                 else
-	                model.ExchangeDeclare(name, type, durable, autoDelete, null);
+                {
+                    model.ExchangeDeclare(name, type, durable, autoDelete, null);
+                }
                 logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
                     name, type, durable, autoDelete);
                 return new Exchange(name);

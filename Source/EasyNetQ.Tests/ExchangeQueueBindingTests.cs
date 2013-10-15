@@ -113,6 +113,37 @@ namespace EasyNetQ.Tests
     }
 
     [TestFixture]
+    public class When_an_exchange_is_declared_passively
+    {
+        private MockBuilder mockBuilder;
+        private IAdvancedBus advancedBus;
+        private IExchange exchange;
+
+        [SetUp]
+        public void SetUp()
+        {
+            mockBuilder = new MockBuilder();
+            advancedBus = mockBuilder.Bus.Advanced;
+
+            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive:true);
+        }
+
+        [Test]
+        public void Should_return_an_exchange_instance()
+        {
+            exchange.ShouldNotBeNull();
+            exchange.Name.ShouldEqual("my_exchange");
+        }
+
+        [Test]
+        public void Should_passively_declare_exchange()
+        {
+            mockBuilder.Channels[0].AssertWasCalled(x =>
+                x.ExchangeDeclarePassive(Arg<string>.Is.Equal("my_exchange")));
+        }
+    }
+
+    [TestFixture]
     public class When_an_exchange_is_deleted
     {
         private MockBuilder mockBuilder;
