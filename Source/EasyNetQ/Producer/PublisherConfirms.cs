@@ -103,7 +103,7 @@ namespace EasyNetQ.Producer
                         dictionary.Remove(sequenceNumber);
                         tcs.SetException(new TimeoutException());
                     }
-                }, null, configuration.Timeout, Timeout.Infinite);
+                }, null, configuration.Timeout * 1000, Timeout.Infinite);
 
             dictionary.Add(sequenceNumber, new ConfirmActions
                 {

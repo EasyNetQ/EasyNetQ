@@ -75,8 +75,6 @@ namespace EasyNetQ
             PrefetchCount = 50;
             
             Hosts = new List<IHostConfiguration>();
-            ClientProperties = new Dictionary<string, string>();
-            SetDefaultClientProperties(ClientProperties);
 
             Ssl = new SslOption();
         }
@@ -120,6 +118,9 @@ namespace EasyNetQ
                     ((HostConfiguration)hostConfiguration).Port = Port;
                 }
             }
+
+            ClientProperties = new Dictionary<string, string>();
+            SetDefaultClientProperties(ClientProperties);
         }
     }
 

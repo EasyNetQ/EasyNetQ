@@ -173,8 +173,8 @@ namespace EasyNetQ
             bool passive = false, 
             bool durable = true, 
             bool exclusive = false,
-            bool autoDelete = false, 
-            int perQueueTtl = int.MaxValue, 
+            bool autoDelete = false,
+            int perQueueTtl = int.MaxValue,
             int expires = int.MaxValue)
         {
             Preconditions.CheckNotNull(name, "name");
@@ -187,12 +187,12 @@ namespace EasyNetQ
             }
             else
             {
-                if (perQueueTtl != uint.MaxValue)
+                if (perQueueTtl != int.MaxValue)
                 {
                     arguments.Add("x-message-ttl", perQueueTtl);
                 }
 
-                if (expires != uint.MaxValue)
+                if (expires != int.MaxValue)
                 {
                     arguments.Add("x-expires", expires);
                 }
