@@ -35,6 +35,21 @@ namespace EasyNetQ.Tests.Integration
 
         }
 
+        [Test,Explicit]
+        public void DeclareTopologyAndCheckPassive()
+        {
+            var queue = advancedBus.QueueDeclare("my_queue");
+            var exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct);
+            advancedBus.Bind(exchange, queue, "routing_key");
+            advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
+        }
+
+        [Test, Explicit]
+        public void DeclareWithTtlAndExpire()
+        {
+            advancedBus.QueueDeclare("my_queue", perQueueTtl: 500, expires: 500);
+        }
+
         [Test, Explicit]
         public void ConsumeFromAQueue()
         {

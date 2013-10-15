@@ -174,8 +174,8 @@ namespace EasyNetQ
             bool durable = true, 
             bool exclusive = false,
             bool autoDelete = false, 
-            uint perQueueTtl = UInt32.MaxValue, 
-            uint expires = UInt32.MaxValue)
+            int perQueueTtl = int.MaxValue, 
+            int expires = int.MaxValue)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -265,9 +265,20 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(name, "name");
             Preconditions.CheckShortString(type, "type");
 
-            clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, null)).Wait();
+            if (passive)
+            {
+                clientCommandDispatcher.Invoke(x => x.ExchangeDeclarePassive(name));
+            }
+            else
+            {
+                clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, null)).Wait();
+                logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
+                    name, type, durable, autoDelete);
+            }
+
             logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
                 name, type, durable, autoDelete);
+
             return new Exchange(name);
         }
 

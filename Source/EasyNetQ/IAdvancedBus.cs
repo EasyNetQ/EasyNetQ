@@ -90,19 +90,12 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
         /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
-        /// and are deleted when that connection closes.</param>
+        ///     and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
         /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
         /// <returns>The queue</returns>
-        IQueue QueueDeclare(
-            string name,
-            bool passive = false,
-            bool durable = true,
-            bool exclusive = false,
-            bool autoDelete = false,
-            uint perQueueTtl = uint.MaxValue,
-            uint expires = uint.MaxValue);
+        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue);
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
