@@ -115,7 +115,7 @@ namespace EasyNetQ
 
         // -------------------------------- publish ---------------------------------------------
 
-        public virtual void Publish(
+        public virtual Task PublishAsync(
             IExchange exchange, 
             string routingKey, 
             bool mandatory, 
@@ -137,13 +137,13 @@ namespace EasyNetQ
                         m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body));
                 }).Unwrap();
 
-            task.Wait();
-
             logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
                 exchange.Name, routingKey, messageProperties.CorrelationId);
+
+            return task;
         }
 
-        public virtual void Publish<T>(
+        public virtual Task PublishAsync<T>(
             IExchange exchange,
             string routingKey,
             bool mandatory,
@@ -163,7 +163,18 @@ namespace EasyNetQ
                 GetCorrelationId() :
                 message.Properties.CorrelationId;
 
-            Publish(exchange, routingKey, mandatory, immediate, message.Properties, messageBody);
+            return PublishAsync(exchange, routingKey, mandatory, immediate, message.Properties, messageBody);
+        }
+
+        public void Publish(IExchange exchange, string routingKey, bool mandatory, bool immediate,
+                                 MessageProperties messageProperties, byte[] body)
+        {
+            PublishAsync(exchange, routingKey, mandatory, immediate, messageProperties, body).Wait();
+        }
+
+        public void Publish<T>(IExchange exchange, string routingKey, bool mandatory, bool immediate, IMessage<T> message) where T : class
+        {
+            PublishAsync(exchange, routingKey, mandatory, immediate, message).Wait();
         }
 
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
