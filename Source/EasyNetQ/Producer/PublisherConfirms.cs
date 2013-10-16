@@ -19,10 +19,12 @@ namespace EasyNetQ.Producer
         private readonly IDictionary<ulong, ConfirmActions> dictionary = new Dictionary<ulong, ConfirmActions>();
 
         private IModel cachedModel;
+        private readonly int timeoutSeconds;
 
         public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger)
         {
             this.configuration = configuration;
+            timeoutSeconds = configuration.Timeout;
             this.logger = logger;
         }
 
@@ -101,9 +103,12 @@ namespace EasyNetQ.Producer
                         if (tcs.Task.IsCompleted) return;
                         logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
                         dictionary.Remove(sequenceNumber);
-                        tcs.SetException(new TimeoutException());
+                        tcs.SetException(new TimeoutException(string.Format(
+                            "Pubisher confirms timed out after {0} seconds " + 
+                            "waiting for ACK or NACK from sequence number {1}",
+                            timeoutSeconds, sequenceNumber)));
                     }
-                }, null, configuration.Timeout * 1000, Timeout.Infinite);
+                }, null, timeoutSeconds * 1000, Timeout.Infinite);
 
             dictionary.Add(sequenceNumber, new ConfirmActions
                 {

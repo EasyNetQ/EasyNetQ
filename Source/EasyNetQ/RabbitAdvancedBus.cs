@@ -169,12 +169,26 @@ namespace EasyNetQ
         public void Publish(IExchange exchange, string routingKey, bool mandatory, bool immediate,
                                  MessageProperties messageProperties, byte[] body)
         {
-            PublishAsync(exchange, routingKey, mandatory, immediate, messageProperties, body).Wait();
+            try
+            {
+                PublishAsync(exchange, routingKey, mandatory, immediate, messageProperties, body).Wait();
+            }
+            catch (AggregateException aggregateException)
+            {
+                throw aggregateException.InnerException;
+            }
         }
 
         public void Publish<T>(IExchange exchange, string routingKey, bool mandatory, bool immediate, IMessage<T> message) where T : class
         {
-            PublishAsync(exchange, routingKey, mandatory, immediate, message).Wait();
+            try
+            {
+                PublishAsync(exchange, routingKey, mandatory, immediate, message).Wait();
+            }
+            catch (AggregateException aggregateException)
+            {
+                throw aggregateException.InnerException;
+            }
         }
 
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------

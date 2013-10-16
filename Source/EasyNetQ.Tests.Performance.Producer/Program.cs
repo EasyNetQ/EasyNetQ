@@ -22,10 +22,10 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10",
+            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;heartbeat=5",
                 x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
 
-            int messageCount = 0;
+            var messageCount = 0;
             var messageRateTimer = new Timer(state =>
             {
                 Console.Out.WriteLine("messages per second = {0}", messageCount);
