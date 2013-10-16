@@ -162,7 +162,7 @@ namespace EasyNetQ.Consumer
                 return;
             }
 
-            var messageRecievedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey);
+            var messageRecievedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
             var messsageProperties = new MessageProperties(properties);
             var context = new ConsumerExecutionContext(onMessage, messageRecievedInfo, messsageProperties, body, this);
 
