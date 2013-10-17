@@ -142,6 +142,52 @@ namespace EasyNetQ.Tests.ProducerTests
             taskWasExecuted.ShouldBeTrue();
         }        
     }
+
+    [TestFixture]
+    public class PublisherConfirmsTests_when_channel_reconnects
+    {
+        private IPublisherConfirms publisherConfirms;
+
+        [SetUp]
+        public void SetUp()
+        {
+            var connectionConfiguration = new ConnectionConfiguration
+            {
+                PublisherConfirms = true,
+                Timeout = 1000
+            };
+
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger);
+        }
+
+        [Test]
+        public void Should_complete_task_when_new_model_acks()
+        {
+            var channel1 = MockRepository.GenerateStub<IModel>();
+            var channel2 = MockRepository.GenerateStub<IModel>();
+
+            var modelsUsedInPublish = new List<IModel>();
+
+            // do the publish, this should be retried against the new model after it reconnects.
+            var task = publisherConfirms.PublishWithConfirm(channel1, modelsUsedInPublish.Add);
+
+            // new channel connects
+            publisherConfirms.OnChannelConnected(channel2);
+
+            // new channel ACKs (sequence number is 0)
+            channel2.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
+
+            // wait for task to complete
+            task.Wait();
+
+            // should have published on both channels:
+            modelsUsedInPublish.Count.ShouldEqual(2);
+            modelsUsedInPublish[0].ShouldBeTheSameAs(channel1);
+            modelsUsedInPublish[1].ShouldBeTheSameAs(channel2);
+        }
+    }
 }
 
 // ReSharper restore InconsistentNaming

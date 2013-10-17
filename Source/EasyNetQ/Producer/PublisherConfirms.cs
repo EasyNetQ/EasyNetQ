@@ -28,18 +28,38 @@ namespace EasyNetQ.Producer
             this.logger = logger;
         }
 
+        // TODO: how to get the model to here? PublisherConfirms currently referenced by 
+        // RabbitAdvancedBus which has no knowledge of the model. This needs to be accessed
+        // by the persistentChannel.
+        // Would a library-wide event bus help here? Where all significant events could be 
+        // published on an internal bus. Any component that cares about them could then update
+        // itself without having to worry about direct calls being made?
+        public void OnChannelConnected(IModel model)
+        {
+            var outstandingConfirms = new List<ConfirmActions>(dictionary.Values);
+
+            foreach (var outstandingConfirm in outstandingConfirms)
+            {
+                outstandingConfirm.Cancel();
+                PublishWithConfirmInternal(
+                    model, 
+                    outstandingConfirm.PublishAction, 
+                    outstandingConfirm.TaskCompletionSource);
+            }
+        }
+
         private void SetModel(IModel model)
         {
             // we only need to set up the channel once, but the persistent channel can change
             // the IModel instance underneath us, so check on each publish.
             if (cachedModel == model) return;
 
-            // the old model has been closed and we're now using a new model, so remove
-            // any existing callback entries in the dictionary
-            dictionary.Clear();
-
             if (cachedModel != null)
             {
+                // the old model has been closed and we're now using a new model, so remove
+                // any existing callback entries in the dictionary
+                dictionary.Clear();
+
                 cachedModel.BasicAcks -= ModelOnBasicAcks;
                 cachedModel.BasicNacks -= ModelOnBasicNacks;
             }
@@ -77,6 +97,12 @@ namespace EasyNetQ.Producer
 
         public Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
         {
+            var tcs = new TaskCompletionSource<NullStruct>();
+            return PublishWithConfirmInternal(model, publishAction, tcs);
+        }
+
+        private Task PublishWithConfirmInternal(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
+        {
             if (!configuration.PublisherConfirms)
             {
                 return ExecutePublishActionDirectly(model, publishAction);
@@ -84,13 +110,12 @@ namespace EasyNetQ.Producer
 
             SetModel(model);
 
-            var tcs = new TaskCompletionSource<NullStruct>();
             var sequenceNumber = model.NextPublishSeqNo;
+
+            publishAction(model);
 
             // make sure we don't get a race condition when the ack/nack and timeout
             // occur at the same time.
-            publishAction(model);
-
             var responseLock = new object();
 
             // there are three possible outcomes from a publish with confirms:
@@ -134,7 +159,13 @@ namespace EasyNetQ.Producer
                                 tcs.SetException(new PublishNackedException(string.Format(
                                     "Broker has signalled that publish {0} was unsuccessful", sequenceNumber)));
                             }
-                        }
+                        },
+
+                    Cancel = () => timer.Dispose(),
+
+                    PublishAction = publishAction,
+
+                    TaskCompletionSource = tcs
                 }); 
             
             return tcs.Task;
@@ -154,6 +185,9 @@ namespace EasyNetQ.Producer
         {
             public Action OnAck { get; set; }
             public Action OnNack { get; set; }
+            public Action Cancel { get; set; }
+            public Action<IModel> PublishAction { get; set; }
+            public TaskCompletionSource<NullStruct> TaskCompletionSource { get; set; } 
         }
     }
 }
