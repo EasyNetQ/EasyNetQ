@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Consumer
@@ -12,6 +13,7 @@ namespace EasyNetQ.Consumer
         private readonly IPersistentConnection connection;
 
         private readonly IInternalConsumerFactory internalConsumerFactory;
+        private readonly IEventBus eventBus;
 
         private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = 
             new ConcurrentDictionary<IInternalConsumer, object>();
@@ -22,23 +24,26 @@ namespace EasyNetQ.Consumer
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
             IPersistentConnection connection, 
-            IInternalConsumerFactory internalConsumerFactory)
+            IInternalConsumerFactory internalConsumerFactory,
+            IEventBus eventBus)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
             this.internalConsumerFactory = internalConsumerFactory;
+            this.eventBus = eventBus;
         }
 
         public void StartConsuming()
         {
-            connection.Connected += ConnectionOnConnected;
-            connection.Disconnected += ConnectionOnDisconnected;
+            eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected());
+            eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected());
 
             StartConsumingInternal();
         }
@@ -89,9 +94,6 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             disposed = true;
-
-            connection.Connected -= ConnectionOnConnected;
-            connection.Disconnected -= ConnectionOnDisconnected;
 
             foreach (var internalConsumer in internalConsumers.Keys)
             {

@@ -138,6 +138,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_passively_declare_exchange()
         {
+            mockBuilder.Channels.Count.ShouldEqual(1);
             mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.ExchangeDeclarePassive(Arg<string>.Is.Equal("my_exchange")));
         }

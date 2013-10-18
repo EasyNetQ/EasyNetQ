@@ -74,6 +74,9 @@
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
+    <Compile Include="Events\ConnectionCreatedEvent.cs" />
+    <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
+    <Compile Include="Events\PublishChannelCreatedEvent.cs" />
     <Compile Include="FluentConfiguration\IAdvancedPublishConfiguration.cs" />
     <Compile Include="FluentConfiguration\IChannelConfiguration.cs" />
     <Compile Include="FluentConfiguration\IPublishConfiguration.cs" />
@@ -89,6 +92,7 @@
     <Compile Include="Consumer\IConsumerDispatcherFactory.cs" />
     <Compile Include="Consumer\IConsumerErrorStrategy.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
+    <Compile Include="IEventBus.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="ISaga.cs" />
@@ -148,6 +152,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

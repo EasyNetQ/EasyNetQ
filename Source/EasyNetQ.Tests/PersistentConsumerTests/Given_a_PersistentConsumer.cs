@@ -22,6 +22,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         protected IQueue queue;
         protected IPersistentConnection persistentConnection;
+        protected IEventBus eventBus;
 
         protected const string queueName = "my_queue";
         protected int createConsumerCalled;
@@ -29,6 +30,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [SetUp]
         public void SetUp()
         {
+            eventBus = new EventBus();
             internalConsumers = new List<IInternalConsumer>();
 
             createConsumerCalled = 0;
@@ -53,7 +55,8 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                 queue,
                 onMessage,
                 persistentConnection,
-                internalConsumerFactory);
+                internalConsumerFactory, 
+                eventBus);
 
             AdditionalSetup();
         }

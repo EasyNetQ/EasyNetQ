@@ -83,6 +83,7 @@
     <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
+    <Compile Include="EventBusTests.cs" />
     <Compile Include="ExchangeQueueBindingTests.cs" />
     <Compile Include="HandlerRunnerTests\When_a_user_handler_is_executed.cs" />
     <Compile Include="Integration\AdvancedApiExamples.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
     <Compile Include="Integration\Helpers.cs" />
     <Compile Include="Integration\PersistentChannelTests.cs" />
+    <Compile Include="Integration\PublisherConfirmsIntegrationTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="ModelCleanupTests.cs" />

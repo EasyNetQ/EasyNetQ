@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.15.1.0")]
+[assembly: AssemblyVersion("0.15.2.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.15.2.0 Internal event bus
 // 0.15.1.0 PublishExchangeDeclareStrategy. Only one declare now rather than once per publish.
 // 0.15.0.0 Removed IPublishChannel and IAdvancedPublishChannel API. Publish now back on IBus.
 // 0.14.4.0 Consumer dispatcher queue cleared after connection lost.

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -11,41 +12,49 @@ namespace EasyNetQ.Producer
     /// Handles publisher confirms.
     /// http://www.rabbitmq.com/blog/2011/02/10/introducing-publisher-confirms/
     /// http://www.rabbitmq.com/confirms.html
+    /// 
+    /// Note, this class is designed to be called sequentially from a single thread. It is NOT
+    /// thread safe.
     /// </summary>
     public class PublisherConfirms : IPublisherConfirms
     {
         private readonly IConnectionConfiguration configuration;
         private readonly IEasyNetQLogger logger;
+        private readonly IEventBus eventBus;
         private readonly IDictionary<ulong, ConfirmActions> dictionary = new Dictionary<ulong, ConfirmActions>();
 
         private IModel cachedModel;
         private readonly int timeoutSeconds;
 
-        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger)
+        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
+            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
+
             this.configuration = configuration;
             timeoutSeconds = configuration.Timeout;
             this.logger = logger;
+            this.eventBus = eventBus;
+
+            eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated);
         }
 
-        // TODO: how to get the model to here? PublisherConfirms currently referenced by 
-        // RabbitAdvancedBus which has no knowledge of the model. This needs to be accessed
-        // by the persistentChannel.
-        // Would a library-wide event bus help here? Where all significant events could be 
-        // published on an internal bus. Any component that cares about them could then update
-        // itself without having to worry about direct calls being made?
-        public void OnChannelConnected(IModel model)
+        private void OnPublishChannelCreated(PublishChannelCreatedEvent publishChannelCreatedEvent)
         {
+            Preconditions.CheckNotNull(publishChannelCreatedEvent.Channel, "model");
+
             var outstandingConfirms = new List<ConfirmActions>(dictionary.Values);
 
             foreach (var outstandingConfirm in outstandingConfirms)
             {
                 outstandingConfirm.Cancel();
                 PublishWithConfirmInternal(
-                    model, 
-                    outstandingConfirm.PublishAction, 
+                    publishChannelCreatedEvent.Channel,
+                    outstandingConfirm.PublishAction,
                     outstandingConfirm.TaskCompletionSource);
             }
+            
         }
 
         private void SetModel(IModel model)
@@ -88,11 +97,14 @@ namespace EasyNetQ.Producer
             if (!dictionary.ContainsKey(sequenceNumber))
             {
                 // timed out and removed so just return
+                //Console.Out.WriteLine("Sequence number {0} not found", sequenceNumber);
                 return;
             }
 
             confirmAction(dictionary[sequenceNumber]);
             dictionary.Remove(sequenceNumber);
+
+            //Console.Out.WriteLine("{0} ACK", sequenceNumber);
         }
 
         public Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
@@ -111,8 +123,6 @@ namespace EasyNetQ.Producer
             SetModel(model);
 
             var sequenceNumber = model.NextPublishSeqNo;
-
-            publishAction(model);
 
             // make sure we don't get a race condition when the ack/nack and timeout
             // occur at the same time.
@@ -166,8 +176,10 @@ namespace EasyNetQ.Producer
                     PublishAction = publishAction,
 
                     TaskCompletionSource = tcs
-                }); 
-            
+                });
+
+            publishAction(model);
+
             return tcs.Task;
         }
 

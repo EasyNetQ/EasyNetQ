@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -7,8 +8,6 @@ namespace EasyNetQ
 {
     public interface IPersistentConnection : IDisposable
     {
-        event Action Connected;
-        event Action Disconnected;
         bool IsConnected { get; }
         IModel CreateModel();
     }
@@ -22,21 +21,21 @@ namespace EasyNetQ
 
         private readonly IConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
+        private readonly IEventBus eventBus;
         private IConnection connection;
 
-        public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger)
+        public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(logger, "logger");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.connectionFactory = connectionFactory;
             this.logger = logger;
+            this.eventBus = eventBus;
 
             TryToConnect(null);
         }
-
-        public event Action Connected;
-        public event Action Disconnected;
 
         public IModel CreateModel()
         {
@@ -121,12 +120,12 @@ namespace EasyNetQ
         public void OnConnected()
         {
             logger.DebugWrite("OnConnected event fired");
-            if (Connected != null) Connected();
+            eventBus.Publish(new ConnectionCreatedEvent());
         }
 
         public void OnDisconnected()
         {
-            if (Disconnected != null) Disconnected();
+            eventBus.Publish(new ConnectionDisconnectedEvent());
         }
 
         private bool disposed = false;

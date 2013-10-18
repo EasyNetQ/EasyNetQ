@@ -22,13 +22,14 @@ namespace EasyNetQ.Tests.Integration
         [SetUp]
         public void SetUp()
         {
+            var eventBus = new EventBus();
             var logger = new ConsoleLogger();
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
             var hostSelectionStrategy = new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>();
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
-            connection = new PersistentConnection(connectionFactory, logger);
-            var persistentChannelFactory = new PersistentChannelFactory(logger, configuration);
+            connection = new PersistentConnection(connectionFactory, logger, eventBus);
+            var persistentChannelFactory = new PersistentChannelFactory(logger, configuration, eventBus);
 
             dispatcher = new ClientCommandDispatcher(connection, persistentChannelFactory);
         }

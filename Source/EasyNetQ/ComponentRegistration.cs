@@ -18,6 +18,7 @@ namespace EasyNetQ
             var logger = new ConsoleLogger();
             var serializer = new JsonSerializer();
             var conventions = new Conventions();
+            var eventBus = new EventBus();
 
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
 
@@ -26,6 +27,7 @@ namespace EasyNetQ
                 .Register<IEasyNetQLogger>(x => logger)
                 .Register<ISerializer>(x => serializer)
                 .Register<IConventions>(x => conventions)
+                .Register<IEventBus>(x => eventBus)
                 .Register<SerializeType>(x => TypeNameSerializer.Serialize)
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>(x => new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
@@ -45,7 +47,9 @@ namespace EasyNetQ
                     x.Resolve<IConventions>(),
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IConsumerDispatcherFactory>()))
-                .Register<IConsumerFactory>(x => new ConsumerFactory(x.Resolve<IInternalConsumerFactory>()))
+                .Register<IConsumerFactory>(x => new ConsumerFactory(
+                    x.Resolve<IInternalConsumerFactory>(),
+                    x.Resolve<IEventBus>()))
                 .Register<IConnectionFactory>(x => new ConnectionFactoryWrapper(
                     x.Resolve<IConnectionConfiguration>(),
                     x.Resolve<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>()))
@@ -54,12 +58,14 @@ namespace EasyNetQ
                     x.Resolve<SerializeType>()))
                 .Register<IPersistentChannelFactory>(x => new PersistentChannelFactory(
                     x.Resolve<IEasyNetQLogger>(), 
-                    x.Resolve<IConnectionConfiguration>()))
+                    x.Resolve<IConnectionConfiguration>(),
+                    x.Resolve<IEventBus>()))
                 .Register<IClientCommandDispatcherFactory>(x => new ClientCommandDispatcherFactory(
                     x.Resolve<IPersistentChannelFactory>()))
                 .Register<IPublisherConfirms>(x => new PublisherConfirms(
                     x.Resolve<IConnectionConfiguration>(),
-                    x.Resolve<IEasyNetQLogger>()))
+                    x.Resolve<IEasyNetQLogger>(),
+                    x.Resolve<IEventBus>()))
                 .Register<IAdvancedBus>(x => new RabbitAdvancedBus(
                     x.Resolve<IConnectionFactory>(),
                     x.Resolve<SerializeType>(),
@@ -69,7 +75,8 @@ namespace EasyNetQ
                     x.Resolve<Func<string>>(),
                     x.Resolve<IMessageValidationStrategy>(),
                     x.Resolve<IClientCommandDispatcherFactory>(),
-                    x.Resolve<IPublisherConfirms>()))
+                    x.Resolve<IPublisherConfirms>(),
+                    x.Resolve<IEventBus>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),

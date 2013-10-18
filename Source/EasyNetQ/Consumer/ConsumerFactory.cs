@@ -8,14 +8,16 @@ namespace EasyNetQ.Consumer
     public class ConsumerFactory : IConsumerFactory
     {
         private readonly IInternalConsumerFactory internalConsumerFactory;
+        private readonly IEventBus eventBus;
 
         private readonly ConcurrentDictionary<IConsumer, object> consumers = new ConcurrentDictionary<IConsumer, object>();
 
-        public ConsumerFactory(IInternalConsumerFactory internalConsumerFactory)
+        public ConsumerFactory(IInternalConsumerFactory internalConsumerFactory, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
 
             this.internalConsumerFactory = internalConsumerFactory;
+            this.eventBus = eventBus;
         }
 
         public IConsumer CreateConsumer(
@@ -61,7 +63,7 @@ namespace EasyNetQ.Consumer
                 return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory);
             }
 
-            return new PersistentConsumer(queue, onMessage, connection, internalConsumerFactory);
+            return new PersistentConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);
         }
 
         public void Dispose()

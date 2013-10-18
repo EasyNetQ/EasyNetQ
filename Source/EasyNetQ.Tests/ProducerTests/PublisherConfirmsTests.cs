@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -16,22 +17,23 @@ namespace EasyNetQ.Tests.ProducerTests
     {
         private IPublisherConfirms publisherConfirms;
         IModel channel;
-
+        private IEventBus eventBus;
 
         [SetUp]
         public void SetUp()
         {
             channel = MockRepository.GenerateStub<IModel>();
+            eventBus = MockRepository.GenerateStub<IEventBus>();
 
             var connectionConfiguration = new ConnectionConfiguration
                 {
                     PublisherConfirms = true,
-                    Timeout = 100
+                    Timeout = 1
                 };
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger);
+            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -116,11 +118,13 @@ namespace EasyNetQ.Tests.ProducerTests
     {
         private IPublisherConfirms publisherConfirms;
         IModel channel;
+        private IEventBus eventBus;
 
         [SetUp]
         public void SetUp()
         {
             channel = MockRepository.GenerateStub<IModel>();
+            eventBus = MockRepository.GenerateStub<IEventBus>();
 
             var connectionConfiguration = new ConnectionConfiguration
             {
@@ -130,7 +134,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger);
+            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -147,10 +151,13 @@ namespace EasyNetQ.Tests.ProducerTests
     public class PublisherConfirmsTests_when_channel_reconnects
     {
         private IPublisherConfirms publisherConfirms;
+        private IEventBus eventBus;
 
         [SetUp]
         public void SetUp()
         {
+            eventBus = new EventBus();
+
             var connectionConfiguration = new ConnectionConfiguration
             {
                 PublisherConfirms = true,
@@ -159,7 +166,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger);
+            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -174,7 +181,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var task = publisherConfirms.PublishWithConfirm(channel1, modelsUsedInPublish.Add);
 
             // new channel connects
-            publisherConfirms.OnChannelConnected(channel2);
+            eventBus.Publish(new PublishChannelCreatedEvent(channel2));
 
             // new channel ACKs (sequence number is 0)
             channel2.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());

@@ -20,6 +20,8 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         public void SetUp()
         {
             persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
+            var eventBus = MockRepository.GenerateStub<IEventBus>();
+
             var configuration = new ConnectionConfiguration
                 {
                     Timeout = 1
@@ -38,7 +40,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration);
+            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 
         }
 

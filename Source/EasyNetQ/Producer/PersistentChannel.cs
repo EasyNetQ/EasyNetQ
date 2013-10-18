@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using EasyNetQ.AmqpExceptions;
+using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -11,6 +12,7 @@ namespace EasyNetQ.Producer
         private readonly IPersistentConnection connection;
         private readonly IEasyNetQLogger logger;
         private readonly IConnectionConfiguration configuration;
+        private readonly IEventBus eventBus;
 
         private IModel channel;
         private bool disconnected = true;
@@ -18,30 +20,29 @@ namespace EasyNetQ.Producer
         public PersistentChannel(
             IPersistentConnection connection, 
             IEasyNetQLogger logger, 
-            IConnectionConfiguration configuration)
+            IConnectionConfiguration configuration,
+            IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.connection = connection;
             this.logger = logger;
             this.configuration = configuration;
+            this.eventBus = eventBus;
 
             WireUpEvents();
         }
 
         private void WireUpEvents()
         {
-            connection.Disconnected += OnConnectionDisconnected;
+            eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected);
+            eventBus.Subscribe<ConnectionCreatedEvent>(ConnectionOnConnected);
         }
 
-        private void UnwireEvents()
-        {
-            connection.Disconnected -= OnConnectionDisconnected;
-        }
-
-        private void OnConnectionDisconnected()
+        private void OnConnectionDisconnected(ConnectionDisconnectedEvent @event)
         {
             if (!disconnected)
             {
@@ -49,6 +50,11 @@ namespace EasyNetQ.Producer
                 channel = null;
                 logger.DebugWrite("Persistent channel disconnected.");
             }
+        }
+
+        private void ConnectionOnConnected(ConnectionCreatedEvent @event)
+        {
+            OpenChannel();
         }
 
         public IModel Channel
@@ -67,6 +73,7 @@ namespace EasyNetQ.Producer
         {
             channel = connection.CreateModel();
             disconnected = false;
+            eventBus.Publish(new PublishChannelCreatedEvent(channel));
             logger.DebugWrite("Persistent channel connected.");
         }
 
@@ -94,7 +101,7 @@ namespace EasyNetQ.Producer
                     var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
                     if (amqpException.Code == AmqpException.ConnectionClosed)
                     {
-                        OnConnectionDisconnected();
+                        OnConnectionDisconnected(null);
                         WaitForReconnectionOrTimeout(startTime);
                         InvokeChannelActionInternal(channelAction, startTime);
                     }
@@ -136,8 +143,6 @@ namespace EasyNetQ.Producer
 
         public void Dispose()
         {
-            UnwireEvents();
-
             if (channel != null)
             {
                 channel.Dispose();

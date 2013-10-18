@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            connectionFactory = new ConnectionFactoryWrapper(new ConnectionConfiguration
+            var configuration = new ConnectionConfiguration
             {
                 Hosts = new List<IHostConfiguration>
                 {
@@ -34,7 +34,11 @@ namespace EasyNetQ.Tests
                 },
                 UserName = "guest",
                 Password = "guest"
-            }, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>());
+            };
+
+            configuration.Validate();
+
+            connectionFactory = new ConnectionFactoryWrapper(configuration, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>());
             serializer = new JsonSerializer();
             conventions = new Conventions();
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger(), conventions);

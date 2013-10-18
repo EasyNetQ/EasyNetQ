@@ -2,6 +2,7 @@
 
 using System.Threading;
 using EasyNetQ.AmqpExceptions;
+using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -22,6 +23,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         {
             persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
             channel = MockRepository.GenerateStub<IModel>();
+            var eventBus = new EventBus();
             var configuration = new ConnectionConfiguration();
 
             var shutdownArgs = new ShutdownEventArgs(
@@ -43,10 +45,9 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration);
+            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 
-            new Timer(_ => 
-                persistentConnection.Raise(x => x.Connected += () => { })).Change(10, Timeout.Infinite);
+            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent())).Change(10, Timeout.Infinite);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }

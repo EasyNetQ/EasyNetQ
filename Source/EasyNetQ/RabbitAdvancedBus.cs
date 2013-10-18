@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -20,6 +21,7 @@ namespace EasyNetQ
         private readonly IPersistentConnection connection;
         private readonly IClientCommandDispatcher clientCommandDispatcher;
         private readonly IPublisherConfirms publisherConfirms;
+        private readonly IEventBus eventBus;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -30,7 +32,8 @@ namespace EasyNetQ
             Func<string> getCorrelationId, 
             IMessageValidationStrategy messageValidationStrategy, 
             IClientCommandDispatcherFactory clientCommandDispatcherFactory, 
-            IPublisherConfirms publisherConfirms)
+            IPublisherConfirms publisherConfirms,
+            IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializeType, "serializeType");
@@ -40,6 +43,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
             Preconditions.CheckNotNull(messageValidationStrategy, "messageValidationStrategy");
             Preconditions.CheckNotNull(publisherConfirms, "publisherConfirms");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.serializeType = serializeType;
             this.serializer = serializer;
@@ -48,10 +52,12 @@ namespace EasyNetQ
             this.getCorrelationId = getCorrelationId;
             this.messageValidationStrategy = messageValidationStrategy;
             this.publisherConfirms = publisherConfirms;
+            this.eventBus = eventBus;
 
-            connection = new PersistentConnection(connectionFactory, logger);
-            connection.Connected += OnConnected;
-            connection.Disconnected += OnDisconnected;
+            connection = new PersistentConnection(connectionFactory, logger, eventBus);
+
+            eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
+            eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }
@@ -292,7 +298,7 @@ namespace EasyNetQ
 
             if (passive)
             {
-                clientCommandDispatcher.Invoke(x => x.ExchangeDeclarePassive(name));
+                clientCommandDispatcher.Invoke(x => x.ExchangeDeclarePassive(name)).Wait();
             }
             else
             {

@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Events;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -12,7 +13,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         {
             persistentConnection.Stub(x => x.IsConnected).Return(true);
             consumer.StartConsuming();
-            persistentConnection.Raise(x => x.Connected += () => {});
+            eventBus.Publish(new ConnectionCreatedEvent());
         }
 
         [Test]
