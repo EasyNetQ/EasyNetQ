@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ

@@ -77,9 +77,6 @@
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />
-    <Compile Include="FluentConfiguration\IAdvancedPublishConfiguration.cs" />
-    <Compile Include="FluentConfiguration\IChannelConfiguration.cs" />
-    <Compile Include="FluentConfiguration\IPublishConfiguration.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
     <Compile Include="Consumer\HandlerRunner.cs" />
     <Compile Include="IAdvancedBus.cs" />
