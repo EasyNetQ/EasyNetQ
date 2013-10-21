@@ -57,10 +57,25 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
 
-            Publish(message, conventions.TopicNamingConvention(typeof(T)));
+            PublishAsync(message).Wait();
         }
 
         public void Publish<T>(T message, string topic) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(topic, "topic");
+
+            PublishAsync(message, topic).Wait();
+        }
+
+        public Task PublishAsync<T>(T message) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+
+            return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
+        }
+
+        public Task PublishAsync<T>(T message, string topic) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
@@ -72,7 +87,7 @@ namespace EasyNetQ
             // by default publish persistent messages
             easyNetQMessage.Properties.DeliveryMode = 2;
 
-            advancedBus.Publish(exchange, topic, false, false, easyNetQMessage);
+            return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
         }
 
         public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class

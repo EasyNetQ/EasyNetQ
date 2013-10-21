@@ -154,6 +154,16 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
+            public Task PublishAsync<T>(T message) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishAsync<T>(T message, string topic) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
             public void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
             {
                 if (InterceptSubscribe != null)

@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading;
 using EasyNetQ.Loggers;
 using NUnit.Framework;
 
@@ -24,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
 
             var logger = new ConsoleLogger();
 
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10", 
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=20", 
                 x => x.Register<IEasyNetQLogger>(_ => dlogger));
         }
 
@@ -32,6 +33,12 @@ namespace EasyNetQ.Tests.Integration
         public void TearDown()
         {
             bus.Dispose();
+        }
+
+        [Test]
+        public void Subscribe()
+        {
+            bus.Subscribe<MyMessage>("publish_confirms", message => {});
         }
 
         [Test]
@@ -47,6 +54,34 @@ namespace EasyNetQ.Tests.Integration
                         Text = "Hello World!"
                     });
             }
+        }
+
+        [Test]
+        public void Should_be_able_to_publish_asynchronously()
+        {
+            var count = 0;
+            while ((count++) < 10000)
+            {
+                bus.PublishAsync(new MyMessage
+                    {
+                        Text = string.Format("Message {0}", count)
+                    }).ContinueWith(task =>
+                        {
+                            if (task.IsCompleted)
+                            {
+                                //Console.Out.WriteLine("{0} Completed", count);
+                            }
+                            if (task.IsFaulted)
+                            {
+                                Console.Out.WriteLine("\n\n");
+                                Console.Out.WriteLine(task.Exception);
+                                Console.Out.WriteLine("\n\n");
+                            }
+                        });
+                //Thread.Sleep(1);
+            }
+
+            Thread.Sleep(10000);
         }
     }
 }
