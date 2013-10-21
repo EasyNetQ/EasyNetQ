@@ -8,6 +8,7 @@
 // 0.15.2.0 Internal event bus
 // 0.15.1.0 PublishExchangeDeclareStrategy. Only one declare now rather than once per publish.
 // 0.15.0.0 Removed IPublishChannel and IAdvancedPublishChannel API. Publish now back on IBus.
+// 0.14.5.0 Upgrade to RabbitMQ.Client 3.1.5
 // 0.14.4.0 Consumer dispatcher queue cleared after connection lost.
 // 0.14.3.0 IConsumerErrorStrategy not being disposed fix
 // 0.14.2.0 MessageProperties serialization fix

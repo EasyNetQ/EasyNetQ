@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             {
                 CorrelationId = "correlation_id"
             };
-        readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 123, false, "exchange", "routingKey");
+        readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 123, false, "exchange", "routingKey", "queue");
         readonly byte[] messageBody = new byte[0];
 
         private IModel channel;
