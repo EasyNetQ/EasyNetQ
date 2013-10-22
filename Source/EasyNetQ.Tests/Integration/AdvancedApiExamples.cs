@@ -87,6 +87,20 @@ namespace EasyNetQ.Tests.Integration
             advancedBus.ExchangeDelete(exchange);
             advancedBus.QueueDelete(queue);
         }
+
+        [Test, Explicit]
+        public void Should_consume_a_message()
+        {
+            var queue = advancedBus.QueueDeclare("consume_test");
+            advancedBus.Consume<MyMessage>(queue, (message, info) => 
+                Task.Factory.StartNew(() => 
+                    Console.WriteLine("Got message {0}", message.Body.Text)));
+
+            advancedBus.Publish(Exchange.GetDefault(), "consume_test", false, false, 
+                new Message<MyMessage>(new MyMessage{ Text = "Wotcha!"}));
+
+            Thread.Sleep(1000);
+        }
     }
 }
 

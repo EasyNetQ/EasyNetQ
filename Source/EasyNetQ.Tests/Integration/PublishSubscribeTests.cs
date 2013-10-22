@@ -1,8 +1,10 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Text;
 using System.Threading;
 using EasyNetQ.Loggers;
+using EasyNetQ.Topology;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
@@ -182,6 +184,26 @@ namespace EasyNetQ.Tests.Integration
             publishBus.Dispose();
             subscribeBus1.Dispose();
             subscribeBus2.Dispose();
+        }
+
+        public static void SetImmediateToTrue()
+        {
+            var bus = RabbitHutch.CreateBus("host=localhost");
+
+            var properties = new MessageProperties();
+            var body = Encoding.UTF8.GetBytes("Test");
+
+            var message =
+            new Message<MyMessage>(new MyMessage()
+            {
+                Text = "Hello"
+            });
+
+            bus.Advanced.Publish(Exchange.GetDefault(), "test_queue", true, true, message);
+
+            //bus.Advanced.Publish(Exchange.GetDefault(), "test_queue", true, true, properties, body);
+
+            bus.Dispose();
         }
     }
 }
