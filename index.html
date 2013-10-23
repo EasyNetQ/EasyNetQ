@@ -101,22 +101,19 @@
           <p>We designed EasyNetQ to be as simple as possible. Get started publishing and subscribing with RabbitMQ with just a few lines of code:</p>
           <p>To connect to a RabbitMQ broker...</p>
           <pre><code>
-  var bus = RabbitHutch.CreateBus("host=localhost");
+var bus = RabbitHutch.CreateBus("host=localhost");
           </code></pre>
 
           <p>To publish...</p>
 
           <pre><code>
-  using (var publishChannel = bus.OpenPublishChannel())
-  {
-      publishChannel.Publish(message);
-  }
+bus.Publish(message);
           </code></pre>
 
           <p>To subscribe...</p>
 
           <pre><code>
-  bus.Subscribe&lt;MyMessage&gt;("my_subscription_id", msg =&gt; 
+bus.Subscribe&lt;MyMessage&gt;("my_subscription_id", msg =&gt; 
       Console.WriteLine(msg.Text));
           </code></pre> 
 
