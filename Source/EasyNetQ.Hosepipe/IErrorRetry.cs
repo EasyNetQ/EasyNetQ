@@ -4,6 +4,6 @@ namespace EasyNetQ.Hosepipe
 {
     public interface IErrorRetry
     {
-        void RetryErrors(IEnumerable<string> rawErrorMessages, QueueParameters parameters);
+        void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters);
     }
 }

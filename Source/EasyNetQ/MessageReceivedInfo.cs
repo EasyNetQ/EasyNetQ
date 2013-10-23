@@ -2,12 +2,14 @@
 {
     public class MessageReceivedInfo
     {
-        public string ConsumerTag { get; private set; }
-        public ulong DeliverTag { get; private set; }
-        public bool Redelivered { get; private set; }
-        public string Exchange { get; private set; }
-        public string RoutingKey { get; private set; }
-        public string Queue { get; private set; }
+        public string ConsumerTag { get; set; }
+        public ulong DeliverTag { get; set; }
+        public bool Redelivered { get; set; }
+        public string Exchange { get; set; }
+        public string RoutingKey { get; set; }
+        public string Queue { get; set; }
+
+        public MessageReceivedInfo() {}
 
         public MessageReceivedInfo(
             string consumerTag, 

@@ -76,12 +76,8 @@ namespace EasyNetQ.Hosepipe
                     parameters.QueueName = a.Value;
                     Dump(parameters);
                 }).FailWith(messsage("No Queue Name given")));
-            
-                arguments.At(0, "insert", () => arguments.WithKey("q", a =>
-                {
-                    parameters.QueueName = a.Value;
-                    Insert(parameters);
-                }).FailWith(messsage("No Queue Name given")));
+
+                arguments.At(0, "insert", () => Insert(parameters));
 
                 arguments.At(0, "err", () => ErrorDump(parameters));
 
@@ -145,7 +141,7 @@ namespace EasyNetQ.Hosepipe
                 count, parameters.MessageFilePath);
         }
 
-        private IEnumerable<string> WithEach(IEnumerable<string> messages, Action action)
+        private IEnumerable<HosepipeMessage> WithEach(IEnumerable<HosepipeMessage> messages, Action action)
         {
             foreach (var message in messages)
             {

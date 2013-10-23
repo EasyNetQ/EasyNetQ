@@ -63,7 +63,7 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         private readonly string expectedInsertOutput = 
-            "2 Messages from directory '" + Environment.CurrentDirectory + "'\r\ninserted into queue 'test'\r\n";
+            "2 Messages from directory '" + Environment.CurrentDirectory + "'\r\ninserted into queue ''\r\n";
 
         [Test]
         public void Should_insert_messages_with_insert()
@@ -71,8 +71,7 @@ namespace EasyNetQ.Hosepipe.Tests
             var args = new[]
             {
                 "insert",
-                "s:localhost",
-                "q:test"
+                "s:localhost"
             };
 
             var writer = new StringWriter();
@@ -82,7 +81,6 @@ namespace EasyNetQ.Hosepipe.Tests
 
             writer.GetStringBuilder().ToString().ShouldEqual(expectedInsertOutput);
 
-            messageReader.Parameters.QueueName.ShouldEqual("test");
             messageReader.Parameters.HostName.ShouldEqual("localhost");
         }
 
@@ -114,7 +112,7 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         public QueueParameters Parameters { get; set; }
 
-        public void Write(IEnumerable<string> messages, QueueParameters queueParameters)
+        public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters queueParameters)
         {
             Parameters = queueParameters;
             foreach (var message in messages)
@@ -126,10 +124,10 @@ namespace EasyNetQ.Hosepipe.Tests
 
     public class MockQueueRetrieval : IQueueRetreival
     {
-        public IEnumerable<string> GetMessagesFromQueue(QueueParameters parameters)
+        public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
         {
-            yield return "some message";
-            yield return "some message";
+            yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageRecievedInfo());
+            yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageRecievedInfo());
         }
     }
 
@@ -137,14 +135,14 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         public QueueParameters Parameters { get; set; }
 
-        public IEnumerable<string> ReadMessages(QueueParameters parameters)
+        public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
         {
             Parameters = parameters;
-            yield return "some message";
-            yield return "some message";
+            yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageRecievedInfo());
+            yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageRecievedInfo());
         }
 
-        public IEnumerable<string> ReadMessages(QueueParameters parameters, string messageName)
+        public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
         {
             return ReadMessages(parameters);
         }
@@ -152,7 +150,7 @@ namespace EasyNetQ.Hosepipe.Tests
 
     public class MockQueueInsertion : IQueueInsertion
     {
-        public void PublishMessagesToQueue(IEnumerable<string> messages, QueueParameters parameters)
+        public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
         {
             foreach (var message in messages)
             {
@@ -163,7 +161,7 @@ namespace EasyNetQ.Hosepipe.Tests
 
     public class MockErrorRetry : IErrorRetry
     {
-        public void RetryErrors(IEnumerable<string> rawErrorMessages, QueueParameters parameters)
+        public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
         {
             foreach (var rawErrorMessage in rawErrorMessages)
             {

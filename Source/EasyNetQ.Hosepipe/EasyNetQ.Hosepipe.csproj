@@ -53,6 +53,7 @@
     <Compile Include="ErrorRetry.cs" />
     <Compile Include="HosepipeConnection.cs" />
     <Compile Include="FileMessageWriter.cs" />
+    <Compile Include="HosepipeMessage.cs" />
     <Compile Include="IErrorRetry.cs" />
     <Compile Include="IMessageReader.cs" />
     <Compile Include="IMessageWriter.cs" />
