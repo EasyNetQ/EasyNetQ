@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,8 +22,8 @@ namespace EasyNetQ.Producer
     {
         private readonly IConnectionConfiguration configuration;
         private readonly IEasyNetQLogger logger;
-        private readonly IEventBus eventBus;
-        private readonly IDictionary<ulong, ConfirmActions> dictionary = new Dictionary<ulong, ConfirmActions>();
+        private readonly IDictionary<ulong, ConfirmActions> dictionary = 
+            new ConcurrentDictionary<ulong, ConfirmActions>();
 
         private IModel cachedModel;
         private readonly int timeoutSeconds;
@@ -35,7 +37,6 @@ namespace EasyNetQ.Producer
             this.configuration = configuration;
             timeoutSeconds = configuration.Timeout;
             this.logger = logger;
-            this.eventBus = eventBus;
 
             eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated);
         }
@@ -84,27 +85,34 @@ namespace EasyNetQ.Producer
 
         private void ModelOnBasicNacks(IModel model, BasicNackEventArgs args)
         {
-            HandleConfirm(args.DeliveryTag, x => x.OnNack());
+            HandleConfirm(args.DeliveryTag, args.Multiple, x => x.OnNack());
         }
 
         private void ModelOnBasicAcks(IModel model, BasicAckEventArgs args)
         {
-            HandleConfirm(args.DeliveryTag, x => x.OnAck());
+            HandleConfirm(args.DeliveryTag, args.Multiple, x => x.OnAck());
         }
 
-        private void HandleConfirm(ulong sequenceNumber, Action<ConfirmActions> confirmAction)
+        private void HandleConfirm(ulong sequenceNumber, bool multiple, Action<ConfirmActions> confirmAction)
         {
-            if (!dictionary.ContainsKey(sequenceNumber))
+            if(multiple)
             {
-                // timed out and removed so just return
-                //Console.Out.WriteLine("Sequence number {0} not found", sequenceNumber);
-                return;
+                //Console.Out.WriteLine(">>>>>>>>>>>>> multiple {0}", sequenceNumber);
+                foreach (var match in dictionary.Keys.Where(key => key <= sequenceNumber))
+                {
+                    confirmAction(dictionary[match]);
+                    dictionary.Remove(match);
+                }
+            }
+            else
+            {
+                if(dictionary.ContainsKey(sequenceNumber))
+                {
+                    confirmAction(dictionary[sequenceNumber]);
+                    dictionary.Remove(sequenceNumber);
+                }
             }
 
-            confirmAction(dictionary[sequenceNumber]);
-            dictionary.Remove(sequenceNumber);
-
-            //Console.Out.WriteLine("{0} ACK", sequenceNumber);
         }
 
         public Task PublishWithConfirm(IModel model, Action<IModel> publishAction)

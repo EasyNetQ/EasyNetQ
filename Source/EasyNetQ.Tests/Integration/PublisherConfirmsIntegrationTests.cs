@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
 
             var logger = new ConsoleLogger();
 
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=20", 
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10", 
                 x => x.Register<IEasyNetQLogger>(_ => dlogger));
         }
 
