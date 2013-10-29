@@ -50,6 +50,7 @@
     <Compile Include="AmqpExceptions\AmpqExceptionGrammar.cs" />
     <Compile Include="AmqpExceptions\AmqpException.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
+    <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
