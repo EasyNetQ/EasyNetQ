@@ -125,7 +125,7 @@ namespace EasyNetQ.Consumer
         {
             Cancel();
             logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
-                             "Recreating queue and queue listener. Consumer tag: " + consumerTag);
+                             "Consumer tag: " + consumerTag);
         }
 
         public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
