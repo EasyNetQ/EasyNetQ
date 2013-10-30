@@ -56,9 +56,9 @@ namespace EasyNetQ.Tests.Integration
             {
                 var thread = new Thread(x =>
                 {
-                    bus.Request<TestRequestMessage, TestResponseMessage>(
-                        new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
-                        response => Console.WriteLine(response.Text));
+                    bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                        new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) })
+                        .ContinueWith(response => Console.WriteLine(response.Result.Text));
                 });
                 threads.Add(thread);
                 thread.Start();

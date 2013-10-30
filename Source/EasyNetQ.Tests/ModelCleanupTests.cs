@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_cleanup_request_response_model()
         {
-            bus.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
+            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             bus.Dispose();
 
             mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());

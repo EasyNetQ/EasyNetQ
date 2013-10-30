@@ -166,21 +166,6 @@ namespace EasyNetQ
             return conventions.QueueNamingConvention(typeof(T), subscriptionId);
         }
 
-        public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse)
-            where TRequest : class
-            where TResponse : class
-        {
-            Preconditions.CheckNotNull(onResponse, "onResponse");
-            Preconditions.CheckNotNull(request, "request");
-
-            RequestAsync<TRequest, TResponse>(request).ContinueWith(t =>
-                {
-                    if (t.IsCompleted) onResponse(t.Result);
-
-                    // TODO: handle cancellation and faults
-                });
-        }
-
         public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class

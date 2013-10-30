@@ -44,11 +44,11 @@ namespace EasyNetQ.Tests.Integration
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
                 var request = new TestRequestMessage { Text = firstProcessedMessage };
 
-                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
                 {
-                    Console.WriteLine("Saga got Response: {0}", response.Text);
-                    var secondProcessedMessage = response.Text + " - final process ";
-                    var endMessage = new EndMessage {Text = secondProcessedMessage};
+                    Console.WriteLine("Saga got Response: {0}", response.Result.Text);
+                    var secondProcessedMessage = response.Result.Text + " - final process ";
+                    var endMessage = new EndMessage { Text = secondProcessedMessage };
                     bus.Publish(endMessage);
                 });
             });
