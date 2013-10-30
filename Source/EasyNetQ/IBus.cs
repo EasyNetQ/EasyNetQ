@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 
@@ -139,18 +138,6 @@ namespace EasyNetQ
         Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class;
-
-        /// <summary>
-        /// Makes an RPC style request.
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="request">The request message.</param>
-        /// <param name="token">token that will cancel the RPC</param>
-        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token)
-            where TRequest : class
-            where TResponse : class;
-
 
         /// <summary>
         /// Responds to an RPC request.

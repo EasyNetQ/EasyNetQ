@@ -112,6 +112,7 @@
     <Compile Include="Producer\IPersistentChannelFactory.cs" />
     <Compile Include="Producer\IPublisherConfirms.cs" />
     <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
+    <Compile Include="Producer\IRpc.cs" />
     <Compile Include="Producer\PersistentChannel.cs" />
     <Compile Include="Producer\PublisherConfirms.cs" />
     <Compile Include="Producer\PublishExchangeDeclareStrategy.cs" />

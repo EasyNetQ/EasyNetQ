@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.16.0.0")]
+[assembly: AssemblyVersion("0.17.0.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.17.0.0 Request synchronous. Removed callback API.
 // 0.16.0.0 Added DispatchAsync method to IAutoSubscriberMessageDispatcher
 // 0.15.3.0 Handle multiple=true on publisher confirm ack.
 // 0.15.2.0 Internal event bus

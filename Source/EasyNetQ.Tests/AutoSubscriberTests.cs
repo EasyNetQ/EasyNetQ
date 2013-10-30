@@ -250,11 +250,6 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
-            public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, CancellationToken token) where TRequest : class where TResponse : class
-            {
-                throw new NotImplementedException();
-            }
-
             public void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) where TRequest : class where TResponse : class
             {
                 throw new NotImplementedException();

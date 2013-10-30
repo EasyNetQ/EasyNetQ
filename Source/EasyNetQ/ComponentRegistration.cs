@@ -5,6 +5,9 @@ using EasyNetQ.Producer;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    /// Registers the default EasyNetQ components in our internal super-simple IoC container.
+    /// </summary>
     public class ComponentRegistration
     {
         public static IServiceProvider CreateServiceProvider(Action<IServiceRegister> registerServices)
@@ -14,20 +17,14 @@ namespace EasyNetQ
             var serviceProvider = new DefaultServiceProvider();
             registerServices(serviceProvider);
 
-            // we only want single instances of these shared services, so instantiate them here
-            var logger = new ConsoleLogger();
-            var serializer = new JsonSerializer();
-            var conventions = new Conventions();
-            var eventBus = new EventBus();
-
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
 
             // default service registration
             serviceProvider
-                .Register<IEasyNetQLogger>(x => logger)
-                .Register<ISerializer>(x => serializer)
-                .Register<IConventions>(x => conventions)
-                .Register<IEventBus>(x => eventBus)
+                .Register<IEasyNetQLogger>(x => new ConsoleLogger())
+                .Register<ISerializer>(x => new JsonSerializer())
+                .Register<IConventions>(x => new Conventions())
+                .Register<IEventBus>(x => new EventBus())
                 .Register<SerializeType>(x => TypeNameSerializer.Serialize)
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>>(x => new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>())
@@ -77,12 +74,17 @@ namespace EasyNetQ
                     x.Resolve<IClientCommandDispatcherFactory>(),
                     x.Resolve<IPublisherConfirms>(),
                     x.Resolve<IEventBus>()))
+                .Register<IRpc>(x => new Rpc(
+                    x.Resolve<IAdvancedBus>(),
+                    x.Resolve<IEventBus>(),
+                    x.Resolve<IConventions>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),
                     x.Resolve<IConventions>(),
                     x.Resolve<IAdvancedBus>(),
-                    x.Resolve<IPublishExchangeDeclareStrategy>()
+                    x.Resolve<IPublishExchangeDeclareStrategy>(),
+                    x.Resolve<IRpc>()
                 ));
 
             return serviceProvider;
