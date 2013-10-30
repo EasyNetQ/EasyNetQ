@@ -240,6 +240,11 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
+            public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
+            {
+                throw new NotImplementedException();
+            }
+
             public void Request<TRequest, TResponse>(TRequest request, Action<TResponse> onResponse) where TRequest : class where TResponse : class
             {
                 throw new NotImplementedException();

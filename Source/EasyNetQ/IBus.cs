@@ -119,11 +119,23 @@ namespace EasyNetQ
             where T : class;
 
         /// <summary>
+        /// Makes an RPC style request
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        /// <returns>The response</returns>
+        TResponse Request<TRequest, TResponse>(TRequest request)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
         /// Makes an RPC style request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
         /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="request">The request message.</param>
+        /// <returns>A task that completes when the response returns</returns>
         Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class;

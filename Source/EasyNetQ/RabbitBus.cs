@@ -166,6 +166,13 @@ namespace EasyNetQ
             return conventions.QueueNamingConvention(typeof(T), subscriptionId);
         }
 
+        public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
+        {
+            var task = RequestAsync<TRequest, TResponse>(request);
+            task.Wait();
+            return task.Result;
+        }
+
         public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
