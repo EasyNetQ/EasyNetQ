@@ -78,7 +78,8 @@ namespace EasyNetQ
                     x.Resolve<IAdvancedBus>(),
                     x.Resolve<IEventBus>(),
                     x.Resolve<IConventions>(),
-                    x.Resolve<IPublishExchangeDeclareStrategy>()))
+                    x.Resolve<IPublishExchangeDeclareStrategy>(),
+                    x.Resolve<IConnectionConfiguration>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),

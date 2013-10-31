@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
@@ -12,21 +13,47 @@ namespace EasyNetQ.Producer
     public class Rpc : IRpc
     {
         private readonly IAdvancedBus advancedBus;
-        private readonly IEventBus eventBus;
         private readonly IConventions conventions;
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private readonly IConnectionConfiguration configuration;
 
-        public Rpc(IAdvancedBus advancedBus, IEventBus eventBus, IConventions conventions, IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy)
+        private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
+        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
+
+        private readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
+
+        public Rpc(
+            IAdvancedBus advancedBus, 
+            IEventBus eventBus, 
+            IConventions conventions, 
+            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy, 
+            IConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(configuration, "configuration");
 
             this.advancedBus = advancedBus;
-            this.eventBus = eventBus;
             this.conventions = conventions;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.configuration = configuration;
+
+            eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
+        }
+
+        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        {
+            var copyOfResponseActions = responseActions.Values;
+            responseActions.Clear();
+            responseQueues.Clear();
+
+            // retry in-flight requests.
+            foreach (var responseAction in copyOfResponseActions)
+            {
+                responseAction.OnFailure();
+            }
         }
 
         public Task<TResponse> Request<TRequest, TResponse>(TRequest request) 
@@ -37,25 +64,43 @@ namespace EasyNetQ.Producer
 
             var correlationId = Guid.NewGuid();
 
-            var result = SubscribeToResponse<TRequest, TResponse>(correlationId);
-            RequestPublish(request, result.Item2, correlationId);
-
-            return result.Item1;
-        }
-
-        private Tuple<Task<TResponse>, string> SubscribeToResponse<TRequest, TResponse>(Guid correlationId)
-            where TResponse : class
-        {
             var tcs = new TaskCompletionSource<TResponse>();
-
-            responseActions.TryAdd(correlationId.ToString(), new ResponseAction
+            var timer = new Timer(state =>
                 {
-                    OnSuccess = message => tcs.SetResult(((Message<TResponse>)message).Body)
+                    ((Timer) state).Dispose();
+                    tcs.TrySetException(new TimeoutException(
+                        string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 });
 
+            timer.Change(TimeSpan.FromSeconds(configuration.Timeout), disablePeriodicSignaling);
+
+            responseActions.TryAdd(correlationId.ToString(), new ResponseAction
+            {
+                OnSuccess = message =>
+                    {
+                        timer.Dispose();
+                        tcs.TrySetResult(((Message<TResponse>) message).Body);
+                    },
+                OnFailure = () =>
+                    {
+                        timer.Dispose();
+                        tcs.TrySetException(new EasyNetQException(
+                            "Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
+                    }
+            });
+
+            var queueName = SubscribeToResponse<TRequest, TResponse>();
+            RequestPublish(request, queueName, correlationId);
+
+            return tcs.Task;
+        }
+
+        private string SubscribeToResponse<TRequest, TResponse>()
+            where TResponse : class
+        {
             var rpcKey = new RpcKey {Request = typeof (TRequest), Response = typeof (TResponse)};
 
-            rpcKeys.AddOrUpdate(rpcKey,
+            responseQueues.AddOrUpdate(rpcKey,
                 key =>
                     {
                         var queue = advancedBus.QueueDeclare(
@@ -67,21 +112,19 @@ namespace EasyNetQ.Producer
 
                         advancedBus.Consume<TResponse>(queue, (message, messageRecievedInfo) => Task.Factory.StartNew(() =>
                             {
-                                if(responseActions.ContainsKey(message.Properties.CorrelationId))
+                                ResponseAction responseAction;
+                                if(responseActions.TryRemove(message.Properties.CorrelationId, out responseAction))
                                 {
-                                    responseActions[message.Properties.CorrelationId].OnSuccess(message);
+                                    responseAction.OnSuccess(message);
                                 }
                             }));
 
                         return queue.Name;
                     },
-                (key, queueName) => queueName);
+                (_, queueName) => queueName);
 
-            return new Tuple<Task<TResponse>, string>(tcs.Task, rpcKeys[rpcKey]);
+            return responseQueues[rpcKey];
         }
-
-        private readonly ConcurrentDictionary<RpcKey, string> rpcKeys = new ConcurrentDictionary<RpcKey, string>();
-        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
 
         private struct RpcKey
         {
@@ -92,6 +135,7 @@ namespace EasyNetQ.Producer
         private class ResponseAction
         {
             public Action<object> OnSuccess { get; set; }
+            public Action OnFailure { get; set; }
         }
 
         private void RequestPublish<TRequest>(TRequest request, string returnQueueName, Guid correlationId) where TRequest : class
