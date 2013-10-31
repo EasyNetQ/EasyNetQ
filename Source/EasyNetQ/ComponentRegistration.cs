@@ -77,7 +77,8 @@ namespace EasyNetQ
                 .Register<IRpc>(x => new Rpc(
                     x.Resolve<IAdvancedBus>(),
                     x.Resolve<IEventBus>(),
-                    x.Resolve<IConventions>()))
+                    x.Resolve<IConventions>(),
+                    x.Resolve<IPublishExchangeDeclareStrategy>()))
                 .Register<IBus>(x => new RabbitBus(
                     x.Resolve<SerializeType>(),
                     x.Resolve<IEasyNetQLogger>(),

@@ -60,6 +60,7 @@ namespace EasyNetQ.Tests.SimpleRequester
 
         static void ResponseHandler(TestResponseMessage response)
         {
+            Console.WriteLine("Response: {0}", response.Text);
             latencyRecorder.RegisterResponse(response.Id);
         }
     }

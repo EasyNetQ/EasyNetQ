@@ -8,11 +8,11 @@ namespace EasyNetQ.Producer
         private readonly ConcurrentDictionary<string, IExchange> exchangeNames =
             new ConcurrentDictionary<string, IExchange>();
 
-        public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName)
+        public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
         {
             return exchangeNames.AddOrUpdate(
                 exchangeName,
-                name => advancedBus.ExchangeDeclare(name, ExchangeType.Topic),
+                name => advancedBus.ExchangeDeclare(name, exchangeType),
                 (_, exchange) => exchange);
         }
     }

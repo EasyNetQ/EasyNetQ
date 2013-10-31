@@ -84,7 +84,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(topic, "topic");
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
             var easyNetQMessage = new Message<T>(message);
 
             // by default publish persistent messages
@@ -135,39 +135,24 @@ namespace EasyNetQ
             var configuration = new SubscriptionConfiguration<T>();
             configure(configuration);
 
-            var queueName = GetQueueName<T>(subscriptionId);
-            var exchangeName = GetExchangeName<T>();
+            var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
+            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
             var queue = advancedBus.QueueDeclare(queueName);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
-            if(configuration.Topics.Count == 0)
+            foreach (var topic in configuration.Topics.AtLeastOneWithDefault("#"))
             {
-                advancedBus.Bind(exchange, queue, "#");
-            }
-            else
-            {
-                foreach (var topic in configuration.Topics)
-                {
-                    advancedBus.Bind(exchange, queue, topic);
-                }
+                advancedBus.Bind(exchange, queue, topic);
             }
 
             advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
 
-        private string GetExchangeName<T>()
-        {
-            return conventions.ExchangeNamingConvention(typeof(T));
-        }
-
-        private string GetQueueName<T>(string subscriptionId)
-        {
-            return conventions.QueueNamingConvention(typeof(T), subscriptionId);
-        }
-
         public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
         {
+            Preconditions.CheckNotNull(request, "request");
+
             var task = RequestAsync<TRequest, TResponse>(request);
             task.Wait();
             return task.Result;

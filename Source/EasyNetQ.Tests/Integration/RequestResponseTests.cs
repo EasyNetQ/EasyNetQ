@@ -53,18 +53,12 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response()
         {
-            var autoResetEvent = new AutoResetEvent(false);
-
             var request = new TestRequestMessage {Text = "Hello from the client! "};
 
             Console.WriteLine("Making request");
-            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
-            {
-                Console.WriteLine("Got response: '{0}'", response.Result.Text);
-                autoResetEvent.Set();
-            });
+            var response = bus.Request<TestRequestMessage, TestResponseMessage>(request);
 
-            autoResetEvent.WaitOne(1000);
+            Console.WriteLine("Got response: '{0}'", response.Text);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -73,7 +67,7 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
         {
-            const int numberOfCalls = 1000;
+            const int numberOfCalls = 5000;
 
             var countdownEvent = new CountdownEvent(numberOfCalls);
             var count = 0;
