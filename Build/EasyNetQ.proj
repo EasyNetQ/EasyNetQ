@@ -50,6 +50,7 @@
         <Delete Files="@(FilesToDelete)" />
     
         <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
+        <Copy SourceFiles="$(OutputDir)\EasyNetQ.xml" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
         
         <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.dll">
             <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
