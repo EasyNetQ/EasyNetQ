@@ -29,8 +29,10 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Large_number_of_request_calls_should_not_create_a_large_number_of_open_channels()
         {
-            var countdownEvent = new CountdownEvent(10);
-            for (int i = 0; i < 10; i++)
+            const int numberOfCalls = 100;
+
+            var countdownEvent = new CountdownEvent(numberOfCalls);
+            for (int i = 0; i < numberOfCalls; i++)
             {
                 bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
                     new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)})

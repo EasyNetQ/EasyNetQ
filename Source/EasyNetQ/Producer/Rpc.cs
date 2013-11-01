@@ -108,7 +108,7 @@ namespace EasyNetQ.Producer
                             passive: false,
                             durable: false,
                             exclusive: true,
-                            autoDelete: true).SetAsSingleUse();
+                            autoDelete: true);
 
                         advancedBus.Consume<TResponse>(queue, (message, messageRecievedInfo) => Task.Factory.StartNew(() =>
                             {

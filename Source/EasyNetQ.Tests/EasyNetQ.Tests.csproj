@@ -120,6 +120,8 @@
     <Compile Include="ProducerTests\PublisherConfirmsTests.cs" />
     <Compile Include="ProducerTests\PublishExchangeDeclareStrategyTests.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent.cs" />
+    <Compile Include="ProducerTests\When_a_request_is_sent_but_no_reply_is_received.cs" />
+    <Compile Include="ProducerTests\When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received.cs" />
     <Compile Include="ProducerTests\When_IModel_throws.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Integration\PublishSubscribeTests.cs" />
