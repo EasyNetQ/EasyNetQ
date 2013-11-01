@@ -22,12 +22,23 @@ namespace EasyNetQ
     public interface IServiceRegister
     {
         /// <summary>
-        /// Register a service. Note that the first registration wins. All subsequent registrations
+        /// Register a service with a factory method. Note that the first registration wins. All subsequent registrations
         /// will be ignored.
         /// </summary>
         /// <typeparam name="TService">The type of the service to be registered</typeparam>
         /// <param name="serviceCreator">A function that can create an instance of the service</param>
         /// <returns>itself for nice fluent composition</returns>
         IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class;
+
+        /// <summary>
+        /// Register a service. Note that the first registration wins. All subsequent registrations
+        /// will be ignored.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service to be registered</typeparam>
+        /// <typeparam name="TImplementation">The implementation type</typeparam>
+        /// <returns>itself for nice fluent composition</returns>
+        IServiceRegister Register<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService;
     }
 }

@@ -39,5 +39,10 @@ namespace EasyNetQ.Consumer
         {
             postAckCallbacks.Add(callback);
         }
+
+        public IList<Action> PostAckCallbacks
+        {
+            get { return postAckCallbacks; }
+        }
     }
 }

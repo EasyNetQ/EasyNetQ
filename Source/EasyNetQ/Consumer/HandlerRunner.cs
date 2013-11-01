@@ -122,6 +122,18 @@ namespace EasyNetQ.Consumer
             }
             finally
             {
+                try
+                {
+                    foreach (var postAckCallback in context.PostAckCallbacks)
+                    {
+                        postAckCallback();
+                    }
+                }
+                catch (Exception exception)
+                {
+                    logger.ErrorWrite("Exception in PostAckCallback:\n{0}", exception);
+                }
+
                 if (SynchronisationAction != null)
                 {
                     SynchronisationAction();
