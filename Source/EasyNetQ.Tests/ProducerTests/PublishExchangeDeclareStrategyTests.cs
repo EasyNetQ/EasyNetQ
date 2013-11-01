@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_declare_exchange_the_first_time_declare_is_called()
         {
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName);
+            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
 
             advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
             declaredExchange.ShouldBeTheSameAs(exchange);
@@ -43,8 +43,8 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_not_declare_exchange_the_second_time_declare_is_called()
         {
-            var _ = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName);
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName);
+            var _ = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
 
             advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
             declaredExchange.ShouldBeTheSameAs(exchange);

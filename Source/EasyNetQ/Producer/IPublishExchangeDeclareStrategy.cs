@@ -4,6 +4,6 @@ namespace EasyNetQ.Producer
 {
     public interface IPublishExchangeDeclareStrategy
     {
-        IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName);
+        IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType);
     }
 }

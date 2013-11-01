@@ -37,5 +37,19 @@ namespace EasyNetQ
             }
             yield return last;
         }
+
+        public static IEnumerable<T> AtLeastOneWithDefault<T>(this IEnumerable<T> items, T @default)
+        {
+            var zeroItems = true;
+            foreach (var item in items)
+            {
+                yield return item;
+                zeroItems = false;
+            }
+            if (zeroItems)
+            {
+                yield return @default;
+            }
+        }
     }
 }

@@ -113,10 +113,12 @@
     <Compile Include="Producer\IPersistentChannelFactory.cs" />
     <Compile Include="Producer\IPublisherConfirms.cs" />
     <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
+    <Compile Include="Producer\IRpc.cs" />
     <Compile Include="Producer\PersistentChannel.cs" />
     <Compile Include="Producer\PublisherConfirms.cs" />
     <Compile Include="Producer\PublishExchangeDeclareStrategy.cs" />
     <Compile Include="Producer\PublishNackedException.cs" />
+    <Compile Include="Producer\Rpc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitAdvancedBus.cs" />
     <Compile Include="RabbitBus.cs" />

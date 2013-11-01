@@ -97,6 +97,7 @@ namespace EasyNetQ.Consumer
         private void Cancel()
         {
             logger.DebugWrite("Consumer {0} cancelled", ConsumerTag);
+            //logger.DebugWrite(Environment.StackTrace);
             IsRunning = false;
 
             // copy to temp variable to be thread safe.
@@ -149,7 +150,7 @@ namespace EasyNetQ.Consumer
             if (!IsRunning)
             {
                 // this message's consumer has stopped, so just return
-                logger.DebugWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message", 
+                logger.InfoWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message", 
                     ConsumerTag, queue.Name);
                 return;
             }

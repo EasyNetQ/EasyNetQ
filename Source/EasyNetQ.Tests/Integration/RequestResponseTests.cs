@@ -29,16 +29,19 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Large_number_of_request_calls_should_not_create_a_large_number_of_open_channels()
         {
-            var countdownEvent = new CountdownEvent(10);
-            for (int i = 0; i < 10; i++)
+            const int numberOfCalls = 100;
+
+            var countdownEvent = new CountdownEvent(numberOfCalls);
+            for (int i = 0; i < numberOfCalls; i++)
             {
-                bus.Request<TestRequestMessage, TestResponseMessage>(
-                    new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)},
-                    response =>
-                        {
-                            Console.WriteLine("Got response: " + response.Text);
-                            countdownEvent.Signal();
-                        }
+                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                    new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)})
+                    .ContinueWith(
+                        response =>
+                            {
+                                Console.WriteLine("Got response: " + response.Result.Text);
+                                countdownEvent.Signal();
+                            }
                     );
             }
 
@@ -52,18 +55,12 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response()
         {
-            var autoResetEvent = new AutoResetEvent(false);
-
             var request = new TestRequestMessage {Text = "Hello from the client! "};
 
             Console.WriteLine("Making request");
-            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-            {
-                Console.WriteLine("Got response: '{0}'", response.Text);
-                autoResetEvent.Set();
-            });
+            var response = bus.Request<TestRequestMessage, TestResponseMessage>(request);
 
-            autoResetEvent.WaitOne(1000);
+            Console.WriteLine("Got response: '{0}'", response.Text);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -72,7 +69,7 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
         {
-            const int numberOfCalls = 1000;
+            const int numberOfCalls = 5000;
 
             var countdownEvent = new CountdownEvent(numberOfCalls);
             var count = 0;
@@ -80,9 +77,9 @@ namespace EasyNetQ.Tests.Integration
             for (int i = 0; i < numberOfCalls; i++)
             {
                 var request = new TestRequestMessage { Text = "Hello from the client! " + i.ToString() };
-                bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
                 {
-                    Console.WriteLine("Got response: '{0}'", response.Text);
+                    Console.WriteLine("Got response: '{0}'", response.Result.Text);
                     count++;
                     countdownEvent.Signal();
                 });
@@ -102,12 +99,11 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestAsyncRequestMessage {Text = "Hello async from the client!"};
 
             Console.Out.WriteLine("Making request");
-            bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
-                response =>
-                {
-                    Console.Out.WriteLine("response = {0}", response.Text);
-                    autoResetEvent.Set();
-                });
+            bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
+            {
+                Console.Out.WriteLine("response = {0}", response.Result.Text);
+                autoResetEvent.Set();
+            });
 
             autoResetEvent.WaitOne(2000);
         }
@@ -126,13 +122,12 @@ namespace EasyNetQ.Tests.Integration
             {
                 var request = new TestAsyncRequestMessage { Text = "Hello async from the client! " + i };
 
-                bus.Request<TestAsyncRequestMessage, TestAsyncResponseMessage>(request,
-                    response =>
-                    {
-                        Console.Out.WriteLine("response = {0}", response.Text);
-                        Interlocked.Increment(ref count);
-                        countdownEvent.Signal();
-                    });
+                bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
+                {
+                    Console.Out.WriteLine("response = {0}", response.Result.Text);
+                    Interlocked.Increment(ref count);
+                    countdownEvent.Signal();
+                });
             }
             countdownEvent.Wait(10000);
             count.ShouldEqual(numberOfCalls);
@@ -200,8 +195,8 @@ namespace EasyNetQ.Tests.Integration
             };
 
             Console.WriteLine("Making request");
-            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-                Console.WriteLine("Got response: '{0}'", response.Text));
+            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
+                Console.WriteLine("Got response: '{0}'", response.Result.Text));
 
             Thread.Sleep(500);
         }
@@ -217,9 +212,9 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestRequestMessage { Text = "Hello from the client! " };
 
             Console.WriteLine("Making request");
-            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
             {
-                Console.WriteLine("Got response: '{0}'", response.Text);
+                Console.WriteLine("Got response: '{0}'", response.Result.Text);
                 autoResetEvent.Set();
                 throw new SomeRandomException("Something very bad just happened!");
             });
@@ -242,9 +237,9 @@ namespace EasyNetQ.Tests.Integration
             };
 
             Console.WriteLine("Making request");
-            bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
+            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
             {
-                Console.WriteLine("Got response: '{0}'", response.Text);
+                Console.WriteLine("Got response: '{0}'", response.Result.Text);
                 autoResetEvent.Set();
             });
 

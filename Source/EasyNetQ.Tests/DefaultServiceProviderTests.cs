@@ -7,6 +7,77 @@ using Rhino.Mocks;
 namespace EasyNetQ.Tests
 {
     [TestFixture]
+    public class DefaultServiceProviderTestsX
+    {
+        private interface IRoot
+        {
+             IChild Child { get; }
+        }
+
+        private class Root : IRoot
+        {
+            public IChild Child { get; private set; }
+
+            public Root(IChild child)
+            {
+                Child = child;
+            }
+        }
+
+        private interface IChild
+        {
+            IGrandChild GrandChild { get; }
+            IGrandChild Second { get; }
+        }
+
+        private class Child : IChild
+        {
+            public IGrandChild GrandChild { get; private set; }
+            public IGrandChild Second { get; private set; }
+
+            public Child(IGrandChild grandChild, IGrandChild second)
+            {
+                GrandChild = grandChild;
+                Second = second;
+            }
+        }
+
+        private interface IGrandChild
+        {
+        }
+
+        private class GrandChild : IGrandChild
+        {
+        }
+
+        private DefaultServiceProvider serviceProvider;
+
+        [SetUp]
+        public void SetUp()
+        {
+            serviceProvider = new DefaultServiceProvider();
+
+            serviceProvider.Register<IRoot, Root>();
+            serviceProvider.Register<IChild, Child>();
+            serviceProvider.Register<IGrandChild, GrandChild>();
+        }
+
+        [Test]
+        public void Should_resolve_class_with_dependencies()
+        {
+            var service = (IRoot)serviceProvider.Resolve(typeof (IRoot));
+
+            service.ShouldNotBeNull();
+            service.Child.ShouldNotBeNull();
+            service.Child.GrandChild.ShouldNotBeNull();
+            service.Child.Second.ShouldNotBeNull();
+
+            service.Child.GrandChild.ShouldBeTheSameAs(service.Child.Second);
+        }
+    }
+
+
+    [TestFixture]
     public class DefaultServiceProviderTests
     {
         private IServiceProvider serviceProvider;

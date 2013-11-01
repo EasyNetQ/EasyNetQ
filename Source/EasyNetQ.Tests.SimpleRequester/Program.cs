@@ -42,13 +42,12 @@ namespace EasyNetQ.Tests.SimpleRequester
             {
                 lock (requestLock)
                 {
-                    bus.Request<TestRequestMessage, TestResponseMessage>(
+                    bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
                         new TestRequestMessage
                         {
                             Id = count,
                             Text = string.Format("Hello from client number: {0}! ", count)
-                        },
-                        ResponseHandler);
+                        }).ContinueWith(t => ResponseHandler(t.Result));
                     latencyRecorder.RegisterRequest(count);
                     count++;
                 }
@@ -61,6 +60,7 @@ namespace EasyNetQ.Tests.SimpleRequester
 
         static void ResponseHandler(TestResponseMessage response)
         {
+            Console.WriteLine("Response: {0}", response.Text);
             latencyRecorder.RegisterResponse(response.Id);
         }
     }

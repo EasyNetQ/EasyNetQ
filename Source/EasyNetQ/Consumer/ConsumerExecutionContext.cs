@@ -40,6 +40,9 @@ namespace EasyNetQ.Consumer
             postAckCallbacks.Add(callback);
         }
 
-        public IEnumerable<Action> PostAckCallbacks { get { return postAckCallbacks; } } 
+        public IList<Action> PostAckCallbacks
+        {
+            get { return postAckCallbacks; }
+        }
     }
 }
