@@ -14,8 +14,9 @@ namespace EasyNetQ.Hosepipe.Tests
         [SetUp]
         public void SetUp()
         {
-            conventions = new Conventions(new TypeNameSerializer());
-            errorRetry = new ErrorRetry(new JsonSerializer());
+            var typeNameSerializer = new TypeNameSerializer();
+            conventions = new Conventions(typeNameSerializer);
+            errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer));
         }
 
         [Test, Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]

@@ -12,13 +12,14 @@ namespace EasyNetQ.Hosepipe.Tests
     [TestFixture]
     public class ErrorMessageRepublishSpike
     {
+        readonly ISerializer serializer = new JsonSerializer(new TypeNameSerializer());
+
         [SetUp]
         public void SetUp() {}
 
         [Test]
         public void Should_deserialise_error_message_correctly()
         {
-            var serializer = new JsonSerializer();
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));
 
             error.RoutingKey.ShouldEqual("originalRoutingKey");
@@ -29,7 +30,6 @@ namespace EasyNetQ.Hosepipe.Tests
         public void Should_fail_to_deseralize_some_other_random_message()
         {
             const string randomMessage = "{\"Text\":\"Hello World\"}";
-            var serializer = new JsonSerializer();
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(randomMessage));
             error.Message.ShouldBeNull();
         }
@@ -37,7 +37,6 @@ namespace EasyNetQ.Hosepipe.Tests
         [Test, Explicit("Requires a localhost instance of RabbitMQ to run")]
         public void Should_be_able_to_republish_message()
         {
-            var serializer = new JsonSerializer();
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));
 
             var connectionFactory = new ConnectionFactory

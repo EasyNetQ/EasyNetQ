@@ -29,8 +29,23 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(properties, "properties");
             Preconditions.CheckNotNull(messageReceivedInfo, "messageReceivedInfo");
 
+            Type messageType = null;
             var typeName = typeNameSerializer.Serialize(typeof(TMessage));
-            if (properties.Type != typeName)
+
+            try
+            {
+                messageType = typeNameSerializer.DeSerialize(properties.Type);
+            }
+            catch (EasyNetQException easyNetQException)
+            {
+                logger.ErrorWrite(easyNetQException.Message);
+
+                throw new EasyNetQInvalidMessageTypeException(easyNetQException.Message);
+            }
+
+            var consumeType = typeof (TMessage);
+
+            if (!consumeType.IsAssignableFrom(messageType))
             {
                 logger.ErrorWrite("Message type is incorrect. Expected '{0}', but was '{1}'",
                                   typeName, properties.Type);

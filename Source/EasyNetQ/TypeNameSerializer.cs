@@ -19,10 +19,17 @@ namespace EasyNetQ
                     "type name {0}, is not a valid EasyNetQ type name. Expected Type:Assembly", 
                     typeName);
             }
-            return Type.GetType(nameParts[0]);
+            var type = Type.GetType(nameParts[0] + ", " + nameParts[1]);
+            if (type == null)
+            {
+                throw new EasyNetQException(
+                    "Cannot find type {0}",
+                    typeName);
+            }
+            return type;
         }
 
-        string ITypeNameSerializer.Serialize(Type type)
+        public string Serialize(Type type)
         {
             Preconditions.CheckNotNull(type, "type");
             return type.FullName + ":" + type.Assembly.GetName().Name;

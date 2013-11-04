@@ -187,7 +187,7 @@ namespace EasyNetQ.Tests
 
             errorStrategy = new DefaultConsumerErrorStrategy(
                 mockBuilder.ConnectionFactory, 
-                new JsonSerializer(), 
+                new JsonSerializer(new TypeNameSerializer()), 
                 MockRepository.GenerateStub<IEasyNetQLogger>(), 
                 customConventions,
                 new TypeNameSerializer());

@@ -98,7 +98,7 @@ namespace EasyNetQ
             {
                 messageValidationStrategy.CheckMessageType<T>(body, properties, messageRecievedInfo);
 
-                var messageBody = serializer.BytesToMessage<T>(body);
+                var messageBody = (T)serializer.BytesToMessage(properties.Type, body);
                 var message = new Message<T>(messageBody);
                 message.SetProperties(properties);
                 return onMessage(message, messageRecievedInfo);

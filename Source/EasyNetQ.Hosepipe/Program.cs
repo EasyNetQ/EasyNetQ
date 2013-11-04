@@ -36,6 +36,8 @@ namespace EasyNetQ.Hosepipe
 
         public static void Main(string[] args)
         {
+            var typeNameSerializer = new TypeNameSerializer();
+
             // poor man's dependency injection FTW ;)
             var program = new Program(
                 new ArgParser(), 
@@ -43,8 +45,8 @@ namespace EasyNetQ.Hosepipe
                 new FileMessageWriter(),
                 new MessageReader(), 
                 new QueueInsertion(),
-                new ErrorRetry(new JsonSerializer()),
-                new Conventions(new TypeNameSerializer()));
+                new ErrorRetry(new JsonSerializer(typeNameSerializer)),
+                new Conventions(typeNameSerializer));
             program.Start(args);
         }
 
