@@ -8,18 +8,12 @@ namespace EasyNetQ
 {
     public class RabbitBus : IBus
     {
-        private readonly SerializeType serializeType;
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IRpc rpc;
         
-        public SerializeType SerializeType
-        {
-            get { return serializeType; }
-        }
-
         public IEasyNetQLogger Logger
         {
             get { return logger; }
@@ -31,21 +25,18 @@ namespace EasyNetQ
         }
 
         public RabbitBus(
-            SerializeType serializeType,
             IEasyNetQLogger logger,
             IConventions conventions,
             IAdvancedBus advancedBus, 
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy, 
             IRpc rpc)
         {
-            Preconditions.CheckNotNull(serializeType, "serializeType");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(rpc, "rpc");
 
-            this.serializeType = serializeType;
             this.logger = logger;
             this.conventions = conventions;
             this.advancedBus = advancedBus;

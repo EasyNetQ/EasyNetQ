@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
             messageValidationStrategy = 
-                new DefaultMessageValidationStrategy(logger, TypeNameSerializer.Serialize);
+                new DefaultMessageValidationStrategy(logger, new TypeNameSerializer());
         }
 
         [Test]
@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
             var body = new byte[0];
             var properties = new MessageProperties
                 {
-                    Type = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"
+                    Type = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"
                 };
 
             var info = new MessageReceivedInfo("consumerTag", 0, false, "exchange", "routingKey", "queue");
@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
             var body = new byte[0];
             var properties = new MessageProperties
             {
-                Type = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests_XXX"
+                Type = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests.XXX"
             };
 
             var info = new MessageReceivedInfo("consumerTag", 0, false, "exchange", "routingKey", "queue");

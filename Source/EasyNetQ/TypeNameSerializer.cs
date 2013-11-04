@@ -2,12 +2,30 @@ using System;
 
 namespace EasyNetQ
 {
-    public class TypeNameSerializer
+    public interface ITypeNameSerializer
     {
-        public static string Serialize(Type type)
+        string Serialize(Type type);
+        Type DeSerialize(string typeName);
+    }
+
+    public class TypeNameSerializer : ITypeNameSerializer
+    {
+        public Type DeSerialize(string typeName)
+        {
+            var nameParts = typeName.Split(':');
+            if (nameParts.Length != 2)
+            {
+                throw new EasyNetQException(
+                    "type name {0}, is not a valid EasyNetQ type name. Expected Type:Assembly", 
+                    typeName);
+            }
+            return Type.GetType(nameParts[0]);
+        }
+
+        string ITypeNameSerializer.Serialize(Type type)
         {
             Preconditions.CheckNotNull(type, "type");
-            return type.FullName.Replace('.', '_') + ":" + type.Assembly.GetName().Name.Replace('.', '_');
+            return type.FullName + ":" + type.Assembly.GetName().Name;
         }
     }
 }

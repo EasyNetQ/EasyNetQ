@@ -40,8 +40,13 @@ namespace EasyNetQ.Tests
 
             connectionFactory = new ConnectionFactoryWrapper(configuration, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>());
             serializer = new JsonSerializer();
-            conventions = new Conventions();
-            consumerErrorStrategy = new DefaultConsumerErrorStrategy(connectionFactory, serializer, new ConsoleLogger(), conventions);
+            conventions = new Conventions(new TypeNameSerializer());
+            consumerErrorStrategy = new DefaultConsumerErrorStrategy(
+                connectionFactory, 
+                serializer, 
+                new ConsoleLogger(), 
+                conventions,
+                new TypeNameSerializer());
          
         }
 

@@ -14,7 +14,7 @@ namespace EasyNetQ.Hosepipe.Tests
         [SetUp]
         public void SetUp()
         {
-            conventions = new Conventions();
+            conventions = new Conventions(new TypeNameSerializer());
             messageReader = new MessageReader();
         }
 

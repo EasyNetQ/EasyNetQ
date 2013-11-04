@@ -33,18 +33,20 @@ namespace EasyNetQ
 
 	public class Conventions : IConventions
 	{
-		public Conventions()
+		public Conventions(ITypeNameSerializer typeNameSerializer)
 		{
-			// Establish default conventions.
-			ExchangeNamingConvention = TypeNameSerializer.Serialize;
+		    Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+
+		    // Establish default conventions.
+			ExchangeNamingConvention = typeNameSerializer.Serialize;
 			TopicNamingConvention = messageType => "";
 			QueueNamingConvention =
 					(messageType, subscriptionId) =>
 					{
-						var typeName = TypeNameSerializer.Serialize(messageType);
+                        var typeName = typeNameSerializer.Serialize(messageType);
 						return string.Format("{0}_{1}", typeName, subscriptionId);
 					};
-            RpcRoutingKeyNamingConvention = TypeNameSerializer.Serialize;
+            RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
             ErrorQueueNamingConvention = () => "EasyNetQ_Default_Error_Queue";
             ErrorExchangeNamingConvention = (originalRoutingKey) => "ErrorExchange_" + originalRoutingKey;

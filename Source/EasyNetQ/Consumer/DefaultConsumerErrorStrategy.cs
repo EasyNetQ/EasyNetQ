@@ -25,25 +25,30 @@ namespace EasyNetQ.Consumer
         private readonly ISerializer serializer;
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
+        private readonly ITypeNameSerializer typeNameSerializer;
+
         private IConnection connection;
-        private bool errorQueueDeclared = false;
+        private bool errorQueueDeclared;
         private readonly ConcurrentDictionary<string, string> errorExchanges = new ConcurrentDictionary<string, string>();
 
         public DefaultConsumerErrorStrategy(
             IConnectionFactory connectionFactory, 
             ISerializer serializer,
             IEasyNetQLogger logger,
-            IConventions conventions)
+            IConventions conventions, 
+            ITypeNameSerializer typeNameSerializer)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializer, "serializer");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             this.connectionFactory = connectionFactory;
             this.serializer = serializer;
             this.logger = logger;
             this.conventions = conventions;
+            this.typeNameSerializer = typeNameSerializer;
         }
 
         private void Connect()
@@ -101,7 +106,7 @@ namespace EasyNetQ.Consumer
                     var messageBody = CreateErrorMessage(context, exception);
                     var properties = model.CreateBasicProperties();
                     properties.SetPersistent(true);
-                    properties.Type = TypeNameSerializer.Serialize(typeof (Error));
+                    properties.Type = typeNameSerializer.Serialize(typeof (Error));
 
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
                 }

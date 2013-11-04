@@ -27,7 +27,7 @@ namespace EasyNetQ
                 .Register<ISerializer, JsonSerializer>()
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
-                .Register<SerializeType>(x => TypeNameSerializer.Serialize)
+                .Register<ITypeNameSerializer, TypeNameSerializer>()
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()

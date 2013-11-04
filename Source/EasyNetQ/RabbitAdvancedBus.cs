@@ -12,7 +12,6 @@ namespace EasyNetQ
 {
     public class RabbitAdvancedBus : IAdvancedBus
     {
-        private readonly SerializeType serializeType;
         private readonly ISerializer serializer;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
@@ -22,10 +21,10 @@ namespace EasyNetQ
         private readonly IClientCommandDispatcher clientCommandDispatcher;
         private readonly IPublisherConfirms publisherConfirms;
         private readonly IEventBus eventBus;
+        private readonly ITypeNameSerializer typeNameSerializer;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
-            SerializeType serializeType, 
             ISerializer serializer, 
             IConsumerFactory consumerFactory,
             IEasyNetQLogger logger, 
@@ -33,10 +32,10 @@ namespace EasyNetQ
             IMessageValidationStrategy messageValidationStrategy, 
             IClientCommandDispatcherFactory clientCommandDispatcherFactory, 
             IPublisherConfirms publisherConfirms,
-            IEventBus eventBus)
+            IEventBus eventBus, 
+            ITypeNameSerializer typeNameSerializer)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
-            Preconditions.CheckNotNull(serializeType, "serializeType");
             Preconditions.CheckNotNull(serializer, "serializer");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
             Preconditions.CheckNotNull(logger, "logger");
@@ -44,8 +43,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageValidationStrategy, "messageValidationStrategy");
             Preconditions.CheckNotNull(publisherConfirms, "publisherConfirms");
             Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
-            this.serializeType = serializeType;
             this.serializer = serializer;
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -53,6 +52,7 @@ namespace EasyNetQ
             this.messageValidationStrategy = messageValidationStrategy;
             this.publisherConfirms = publisherConfirms;
             this.eventBus = eventBus;
+            this.typeNameSerializer = typeNameSerializer;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -60,11 +60,6 @@ namespace EasyNetQ
             eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
-        }
-
-        public virtual SerializeType SerializeType
-        {
-            get { return serializeType; }
         }
 
         public virtual ISerializer Serializer
@@ -75,6 +70,11 @@ namespace EasyNetQ
         public IPersistentConnection Connection
         {
             get { return connection; }
+        }
+
+        public ITypeNameSerializer TypeNameSerializer 
+        {
+            get { return typeNameSerializer; }
         }
 
         public IEasyNetQLogger Logger
@@ -160,7 +160,7 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
-            var typeName = SerializeType(typeof(T));
+            var typeName = typeNameSerializer.Serialize(typeof(T));
             var messageBody = serializer.MessageToBytes(message.Body);
 
             message.Properties.Type = typeName;

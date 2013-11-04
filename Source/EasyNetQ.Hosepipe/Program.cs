@@ -44,7 +44,7 @@ namespace EasyNetQ.Hosepipe
                 new MessageReader(), 
                 new QueueInsertion(),
                 new ErrorRetry(new JsonSerializer()),
-                new Conventions());
+                new Conventions(new TypeNameSerializer()));
             program.Start(args);
         }
 

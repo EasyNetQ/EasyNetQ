@@ -238,11 +238,11 @@ namespace EasyNetQ
         ISerializer Serializer { get; }
 
         /// <summary>
-        /// How EasyNetQ stringifies the message type
+        /// The connection EasyNetQ maintains to RabbitMQ
         /// </summary>
-        SerializeType SerializeType { get; }
-
         IPersistentConnection Connection { get; }
+
+        ITypeNameSerializer TypeNameSerializer { get; }
 
         /// <summary>
         /// Event fires when the bus connects

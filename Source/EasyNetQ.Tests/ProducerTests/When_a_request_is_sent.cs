@@ -55,7 +55,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             mockBuilder.Channels[0].AssertWasCalled(x => x.BasicPublish(
                 Arg<string>.Is.Equal("easy_net_q_rpc"),
-                Arg<string>.Is.Equal("EasyNetQ_Tests_TestRequestMessage:EasyNetQ_Tests_Messages"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Messages"),
                 Arg<bool>.Is.Equal(false),
                 Arg<bool>.Is.Equal(false),
                 Arg<IBasicProperties>.Is.Anything,
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             var properties = new BasicProperties
             {
-                Type = "EasyNetQ_Tests_TestResponseMessage:EasyNetQ_Tests_Messages",
+                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Messages",
                 CorrelationId = correlationId
             };
             var body = Encoding.UTF8.GetBytes("{ Id:12, Text:\"Hello World\"}");

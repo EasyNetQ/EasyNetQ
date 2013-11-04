@@ -14,18 +14,20 @@ namespace EasyNetQ.Tests
 	public class When_using_default_conventions
 	{
 		private Conventions conventions;
+	    private ITypeNameSerializer typeNameSerializer;
 
 		[SetUp]
 		public void SetUp()
 		{
-			conventions = new Conventions();
+            typeNameSerializer = new TypeNameSerializer();
+			conventions = new Conventions(typeNameSerializer);
 		}
 
 		[Test]
 		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
 		{
 			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
-			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)));
+            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
 		}
 
 		[Test]
@@ -40,7 +42,7 @@ namespace EasyNetQ.Tests
 		{
 			const string subscriptionId = "test";
 			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
-			result.ShouldEqual(TypeNameSerializer.Serialize(typeof (TestMessage)) + "_" + subscriptionId);
+            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
 		}
 
         [Test]
@@ -68,7 +70,7 @@ namespace EasyNetQ.Tests
         public void The_default_rpc_routingkey_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
         {
             var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
-            result.ShouldEqual(TypeNameSerializer.Serialize(typeof(TestMessage)));
+            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
         }
 	}
 
@@ -76,11 +78,13 @@ namespace EasyNetQ.Tests
 	public class When_publishing_a_message
 	{
         private MockBuilder mockBuilder;
+	    private ITypeNameSerializer typeNameSerializer;
 
 		[SetUp]
 		public void SetUp()
 		{
-            var customConventions = new Conventions
+            typeNameSerializer = new TypeNameSerializer();
+            var customConventions = new Conventions(typeNameSerializer)
             {
                 ExchangeNamingConvention = x => "CustomExchangeNamingConvention",
                 QueueNamingConvention = (x, y) => "CustomQueueNamingConvention",
@@ -133,7 +137,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            var customConventions = new Conventions
+            var customConventions = new Conventions(new TypeNameSerializer())
             {
                 RpcExchangeNamingConvention = () => "CustomRpcExchangeName",
                 RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
@@ -173,7 +177,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            var customConventions = new Conventions
+            var customConventions = new Conventions(new TypeNameSerializer())
             {
                 ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = originalRoutingKey => "CustomErrorExchangePrefixName." + originalRoutingKey
@@ -185,7 +189,8 @@ namespace EasyNetQ.Tests
                 mockBuilder.ConnectionFactory, 
                 new JsonSerializer(), 
                 MockRepository.GenerateStub<IEasyNetQLogger>(), 
-                customConventions);
+                customConventions,
+                new TypeNameSerializer());
 
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);

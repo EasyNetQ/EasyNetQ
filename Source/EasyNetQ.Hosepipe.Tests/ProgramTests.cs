@@ -26,7 +26,7 @@ namespace EasyNetQ.Hosepipe.Tests
             messageReader = new MockMessageReader();
             queueInsertion = new MockQueueInsertion();
             errorRetry = new MockErrorRetry();
-            conventions = new Conventions();
+            conventions = new Conventions(new TypeNameSerializer());
 
             program = new Program(
                 new ArgParser(), 

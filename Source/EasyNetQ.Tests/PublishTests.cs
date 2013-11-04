@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.BasicPublish(
-                    Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"), 
+                    Arg<string>.Is.Equal("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"), 
                     Arg<string>.Is.Equal(""), 
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(false),
@@ -70,7 +70,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_put_message_type_in_message_type_field()
         {
-            properties.Type.ShouldEqual("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests");
+            properties.Type.ShouldEqual("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests");
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests
         public void Should_declare_exchange()
         {
             mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests", "topic", true, false, null));
+                "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests", "topic", true, false, null));
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Logger.AssertWasCalled(x => x.DebugWrite(
                 "Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
-                "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests",
+                "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests",
                 "",
                 correlationId));
         }
@@ -116,7 +116,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.BasicPublish(
-                    Arg<string>.Is.Equal("EasyNetQ_Tests_MyMessage:EasyNetQ_Tests"),
+                    Arg<string>.Is.Equal("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
                     Arg<string>.Is.Equal("X.A"),
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(false),

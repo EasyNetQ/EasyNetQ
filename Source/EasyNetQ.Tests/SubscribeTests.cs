@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        private const string typeName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string queueName = typeName + "_" + subscriptionId;
         private const string consumerTag = "the_consumer_tag";
@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            var conventions = new Conventions
+            var conventions = new Conventions(new TypeNameSerializer())
                 {
                     ConsumerTagConvention = () => consumerTag
                 };
@@ -102,7 +102,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        private const string typeName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
@@ -114,7 +114,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            var conventions = new Conventions
+            var conventions = new Conventions(new TypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
@@ -188,7 +188,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IConsumerErrorStrategy consumerErrorStrategy;
 
-        private const string typeName = "EasyNetQ_Tests_MyMessage:EasyNetQ_Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
@@ -202,7 +202,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            var conventions = new Conventions
+            var conventions = new Conventions(new TypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };

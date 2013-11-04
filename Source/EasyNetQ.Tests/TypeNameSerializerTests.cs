@@ -7,28 +7,43 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class TypeNameSerializerTests
     {
-        const string expectedTypeName = "System_String:mscorlib";
+        const string expectedTypeName = "System.String:mscorlib";
+        private const string expectedCustomTypeName = "EasyNetQ.TypeNameSerializer:EasyNetQ";
+
+        private ITypeNameSerializer typeNameSerializer;
+
+        [SetUp]
+        public void SetUp()
+        {
+            typeNameSerializer = new TypeNameSerializer();
+        }
 
         [Test]
         public void Should_serialize_a_type_name()
         {
-            var typeName = TypeNameSerializer.Serialize(typeof (string));
+            var typeName = typeNameSerializer.Serialize(typeof(string));
             typeName.ShouldEqual(expectedTypeName);
         }
-
-        private const string expectedCustomTypeName = "EasyNetQ_TypeNameSerializer:EasyNetQ";
 
         [Test]
         public void Should_serialize_a_custom_type()
         {
-            var typeName = TypeNameSerializer.Serialize(typeof (TypeNameSerializer));
+            var typeName = typeNameSerializer.Serialize(typeof(TypeNameSerializer));
             typeName.ShouldEqual(expectedCustomTypeName);
         }
 
-        public void GetTypeSpike()
+        [Test]
+        public void Should_deserialize_a_type_name()
         {
-            var type = Type.GetType("EasyNetQ.Tests.MyCustomType");
-            type.ShouldNotBeNull();
+            var type = typeNameSerializer.DeSerialize(expectedTypeName);
+            type.ShouldEqual(typeof (string));
+        }
+
+        [Test]
+        public void Should_deserialize_a_custom_type()
+        {
+            var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
+            type.ShouldEqual(typeof (TypeNameSerializer));
         }
     }
 }
