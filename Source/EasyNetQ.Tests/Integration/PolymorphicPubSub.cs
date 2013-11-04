@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests.Integration
                     }
                     else
                     {
-                        Console.Out.WriteLine("message was null");
+                        Console.Out.WriteLine("message was not a dog or a cat");
                     }
                 });
 
