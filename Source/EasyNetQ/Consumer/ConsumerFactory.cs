@@ -53,11 +53,6 @@ namespace EasyNetQ.Consumer
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
             IPersistentConnection connection)
         {
-            if (queue.IsSingleUse)
-            {
-                return new SingleUseConsumer(queue, onMessage, connection, internalConsumerFactory);
-            }
-
             if (queue.IsExclusive)
             {
                 return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory);

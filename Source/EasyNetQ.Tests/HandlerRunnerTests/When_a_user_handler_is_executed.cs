@@ -29,13 +29,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 
         private IModel channel;
 
-        private bool postAckCallbackWasRun;
-
         [SetUp]
         public void SetUp()
         {
-            postAckCallbackWasRun = false;
-
             //var logger = new ConsoleLogger();
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
             var consumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
@@ -56,8 +52,6 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 
             var context = new ConsumerExecutionContext(
                 userHandler, messageInfo, messageProperties, messageBody, consumer);
-
-            context.SetPostAckCallback(() => postAckCallbackWasRun = true);
 
             var autoResetEvent = new AutoResetEvent(false);
             ((HandlerRunner) handlerRunner).SynchronisationAction = () => autoResetEvent.Set();
@@ -89,12 +83,6 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public void Should_ACK_message()
         {
             channel.AssertWasCalled(x => x.BasicAck(123, false));
-        }
-
-        [Test]
-        public void Should_run_PostAckCallback()
-        {
-            postAckCallbackWasRun.ShouldBeTrue();
         }
     }
 }

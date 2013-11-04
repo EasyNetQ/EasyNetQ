@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -31,18 +30,6 @@ namespace EasyNetQ.Consumer
             Properties = properties;
             Body = body;
             Consumer = consumer;
-        }
-
-        private readonly IList<Action> postAckCallbacks = new List<Action>();
-
-        public void SetPostAckCallback(Action callback)
-        {
-            postAckCallbacks.Add(callback);
-        }
-
-        public IList<Action> PostAckCallbacks
-        {
-            get { return postAckCallbacks; }
         }
     }
 }
