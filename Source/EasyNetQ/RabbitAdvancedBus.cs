@@ -160,7 +160,7 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
-            var typeName = typeNameSerializer.Serialize(typeof(T));
+            var typeName = typeNameSerializer.Serialize(message.Body.GetType());
             var messageBody = serializer.MessageToBytes(message.Body);
 
             message.Properties.Type = typeName;
@@ -306,9 +306,6 @@ namespace EasyNetQ
                 logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
                     name, type, durable, autoDelete);
             }
-
-            logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
-                name, type, durable, autoDelete);
 
             return new Exchange(name);
         }

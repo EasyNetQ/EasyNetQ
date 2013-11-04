@@ -106,6 +106,7 @@
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
     <Compile Include="Integration\Helpers.cs" />
     <Compile Include="Integration\PersistentChannelTests.cs" />
+    <Compile Include="Integration\PolymorphicPubSub.cs" />
     <Compile Include="Integration\PublisherConfirmsIntegrationTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
     <Compile Include="ProducerTests\PublisherConfirmsTests.cs" />
     <Compile Include="ProducerTests\PublishExchangeDeclareStrategyTests.cs" />
+    <Compile Include="ProducerTests\When_a_ploymorphic_message_is_sent.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent_but_no_reply_is_received.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received.cs" />

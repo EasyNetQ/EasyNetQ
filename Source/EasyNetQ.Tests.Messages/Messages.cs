@@ -47,4 +47,21 @@ namespace EasyNetQ.Tests
     {
         public string Text { get; set; }
     }
+
+    public interface IAnimal
+    {
+        string Name { get; set; }
+    }
+
+    public class Cat : IAnimal
+    {
+        public string Name { get; set; }
+        public string Meow { get; set; }
+    }
+
+    public class Dog : IAnimal
+    {
+        public string Name { get; set; }
+        public string Bark { get; set; }
+    }
 }
