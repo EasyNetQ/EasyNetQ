@@ -38,7 +38,7 @@ namespace EasyNetQ
 
             var type = typeNameSerializer.DeSerialize(typeName);
 
-            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type);
+            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type, serializerSettings);
         }
     }
 }
