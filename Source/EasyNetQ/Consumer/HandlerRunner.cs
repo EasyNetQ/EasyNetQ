@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -16,17 +17,17 @@ namespace EasyNetQ.Consumer
     {
         private readonly IEasyNetQLogger logger;
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
+        private readonly IEventBus eventBus;
 
-        // useful for testing, called when DoAck is called after a message is handled
-        public Action SynchronisationAction { get; set; }
-
-        public HandlerRunner(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy)
+        public HandlerRunner(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(consumerErrorStrategy, "consumerErrorStrategy");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.logger = logger;
             this.consumerErrorStrategy = consumerErrorStrategy;
+            this.eventBus = eventBus;
         }
 
         public void InvokeUserMessageHandler(ConsumerExecutionContext context)
@@ -89,18 +90,20 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private void DoAck(ConsumerExecutionContext context , Action<IModel, ulong> ackStrategy)
+        private void DoAck(ConsumerExecutionContext context , Func<IModel, ulong, AckResult> ackStrategy)
         {
             const string failedToAckMessage = 
                 "Basic ack failed because channel was closed with message '{0}'." +
                 " Message remains on RabbitMQ and will be retried." + 
                 " ConsumerTag: {1}, DeliveryTag: {2}";
 
+            var ackResult = AckResult.Exception;
+
             try
             {
                 Preconditions.CheckNotNull(context.Consumer.Model, "context.Consumer.Model");
 
-                ackStrategy(context.Consumer.Model, context.Info.DeliverTag);
+                ackResult = ackStrategy(context.Consumer.Model, context.Info.DeliverTag);
             }
             catch (AlreadyClosedException alreadyClosedException)
             {
@@ -122,33 +125,33 @@ namespace EasyNetQ.Consumer
             }
             finally
             {
-                if (SynchronisationAction != null)
-                {
-                    SynchronisationAction();
-                }
+                eventBus.Publish(new AckEvent(context, ackResult));
             }
         }
 
-        private void SuccessAckStrategy(IModel model, ulong deliveryTag)
+        private AckResult SuccessAckStrategy(IModel model, ulong deliveryTag)
         {
             model.BasicAck(deliveryTag, false);
+            return AckResult.Ack;
         }
 
-        private void ExceptionAckStrategy(IModel model, ulong deliveryTag)
+        private AckResult ExceptionAckStrategy(IModel model, ulong deliveryTag)
         {
             switch (consumerErrorStrategy.PostExceptionAckStrategy())
             {
                 case PostExceptionAckStrategy.ShouldAck:
                     model.BasicAck(deliveryTag, false);
-                    break;
+                    return AckResult.Ack;
                 case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
                     model.BasicNack(deliveryTag, false, false);
-                    break;
+                    return AckResult.Nack;
                 case PostExceptionAckStrategy.ShouldNackWithRequeue:
                     model.BasicNack(deliveryTag, false, true);
-                    break;
+                    return AckResult.Nack;
                 case PostExceptionAckStrategy.DoNothing:
-                    break;
+                    return AckResult.Nothing;
+                default:
+                    return AckResult.Nothing;
             }
         }
 

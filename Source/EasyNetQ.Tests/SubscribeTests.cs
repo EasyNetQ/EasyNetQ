@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Threading;
 using EasyNetQ.Consumer;
+using EasyNetQ.Events;
 using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
@@ -125,8 +126,7 @@ namespace EasyNetQ.Tests
                 );
 
             var autoResetEvent = new AutoResetEvent(false);
-            var handlerExecutionContext = (HandlerRunner)mockBuilder.ServiceProvider.Resolve<IHandlerRunner>();
-            handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
 
             mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
             {
@@ -250,8 +250,7 @@ namespace EasyNetQ.Tests
 
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            var handlerExecutionContext = (HandlerRunner)mockBuilder.ServiceProvider.Resolve<IHandlerRunner>();
-            handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
             autoResetEvent.WaitOne(1000);
         }
 

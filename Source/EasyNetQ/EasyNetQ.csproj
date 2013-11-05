@@ -75,6 +75,7 @@
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
+    <Compile Include="Events\AckEvent.cs" />
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />

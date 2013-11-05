@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Events;
 using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
@@ -90,8 +91,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            var handlerExecutionContext = (HandlerRunner)MockBuilder.ServiceProvider.Resolve<IHandlerRunner>();
-            handlerExecutionContext.SynchronisationAction = () => autoResetEvent.Set();
+            MockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
             autoResetEvent.WaitOne(1000);
         }
     }

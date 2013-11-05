@@ -127,5 +127,10 @@ namespace EasyNetQ.Tests.Mocking
         {
             get { return channelPool.Peek(); }
         }
+
+        public IEventBus EventBus
+        {
+            get { return serviceProvider.Resolve<IEventBus>(); }
+        }
     }
 }
