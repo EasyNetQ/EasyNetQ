@@ -51,17 +51,7 @@ The annoucement blog post is [here](http://mikehadlow.blogspot.co.uk/2012/11/a-c
 
 ## Some blog posts about EasyNetQ ...
 
-http://mikehadlow.blogspot.com/2011/05/easynetq-simple-net-api-for-rabbitmq.html
-
-http://mikehadlow.blogspot.com/2011/05/futurepublish-with-easynetq-rabbitmq.html
-
-http://mikehadlow.blogspot.com/2011/06/rabbitmq-subscription-and-bouncing.html
-
-http://mikehadlow.blogspot.com/2011/07/rabbitmq-subscriptions-with-dotnet.html
-
-http://mikehadlow.blogspot.com/2011/07/easynetq-how-should-messaging-client.html
-
-http://mikehadlow.blogspot.co.uk/2012/05/easynetq-breaking-change.html
+http://mikehadlow.blogspot.co.uk/search/label/EasyNetQ
 
 ## Getting started
 
