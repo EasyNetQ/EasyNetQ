@@ -89,6 +89,17 @@ namespace EasyNetQ.Tests
 
             Assert.IsInstanceOf<B>(result.AorB);
         }
+
+        [Test]
+        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties_when_using_TypeNameSerializer()
+        {
+            var typeName = new TypeNameSerializer().Serialize(typeof (PolyMessage));
+
+            var bytes = serializer.MessageToBytes(new PolyMessage { AorB = new B() });
+            var result = (PolyMessage)serializer.BytesToMessage(typeName, bytes);
+
+            Assert.IsInstanceOf<B>(result.AorB);
+        }
     }
 }
 
