@@ -34,7 +34,10 @@ namespace EasyNetQ.Consumer
             consumer.RemoveMeFromList += theConsumer =>
                 {
                     object value;
-                    consumers.TryRemove(theConsumer, out value);
+                    if (consumers.TryRemove(theConsumer, out value))
+                    {
+                        theConsumer.Dispose();
+                    }
                 };
 
             consumers.TryAdd(consumer, null);
