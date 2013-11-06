@@ -52,8 +52,14 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler)
         {
-            ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);
+
+            StartConsumer(handler, queue);
+        }
+
+        protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler, Queue queue)
+        {
+            ConsumerWasInvoked = false;
             MockBuilder.Bus.Advanced.Consume(queue, (body, properties, messageInfo) => Task.Factory.StartNew(() =>
                 {
                     DeliveredMessageBody = body;

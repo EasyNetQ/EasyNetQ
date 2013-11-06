@@ -164,8 +164,17 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
-            Model.Dispose();
-            Cancel();
+            var model = Model;
+            if (model != null)
+            {
+                // Queued because calling dipose directly will hang the connection.
+                consumerDispatcher.QueueAction(model.Dispose);
+            }
+
+            if (IsRunning)
+            {
+                Cancel();
+            }
         }
     }
 }

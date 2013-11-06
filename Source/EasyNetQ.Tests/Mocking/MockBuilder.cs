@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
@@ -12,7 +13,7 @@ namespace EasyNetQ.Tests.Mocking
         readonly IConnection connection = MockRepository.GenerateStub<IConnection>();
         readonly List<IModel> channels = new List<IModel>();
         readonly Stack<IModel> channelPool = new Stack<IModel>();
-        readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>(); 
+        readonly Dictionary<string, IBasicConsumer> consumers = new Dictionary<string, IBasicConsumer>();
         readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IEasyNetQLogger logger = MockRepository.GenerateStub<IEasyNetQLogger>();
         private readonly IBus bus;
@@ -67,8 +68,17 @@ namespace EasyNetQ.Tests.Mocking
                             var consumer = (IBasicConsumer)consumeInvokation.Arguments[3];
 
                             consumer.HandleBasicConsumeOk(consumerTag);
-                            consumers.Add(consumer);
+                            consumers[consumerTag] = consumer;
                         }).Return("");
+                    channel.Stub(x => x.BasicCancel(null))
+                        .IgnoreArguments()
+                        .WhenCalled(cancelInvokation =>
+                        {
+                            var consumerTag = (string)cancelInvokation.Arguments[0];
+                            var consumer = consumers[consumerTag];
+
+                            consumer.HandleBasicCancel(consumerTag);
+                        });
                 });
 
             bus = RabbitHutch.CreateBus(connectionString, x =>
@@ -100,7 +110,7 @@ namespace EasyNetQ.Tests.Mocking
 
         public List<IBasicConsumer> Consumers
         {
-            get { return consumers; }
+            get { return consumers.Values.ToList(); }
         }
 
         public IBasicProperties BasicProperties
