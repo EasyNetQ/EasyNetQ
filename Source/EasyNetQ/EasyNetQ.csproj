@@ -57,6 +57,7 @@
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
+    <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />
+    <Compile Include="Events\StoppedConsumingEvent.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
     <Compile Include="Consumer\HandlerRunner.cs" />
     <Compile Include="IAdvancedBus.cs" />

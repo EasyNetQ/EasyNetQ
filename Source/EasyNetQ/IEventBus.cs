@@ -10,7 +10,7 @@ namespace EasyNetQ
     public interface IEventBus
     {
         void Publish<TEvent>(TEvent @event);
-        void Subscribe<TEvent>(Action<TEvent> eventHandler);
+        CancelSubscription Subscribe<TEvent>(Action<TEvent> eventHandler);
     }
 
     public class EventBus : IEventBus
@@ -27,16 +27,28 @@ namespace EasyNetQ
             }
         }
 
-        public void Subscribe<TEvent>(Action<TEvent> eventHandler)
+        public CancelSubscription Subscribe<TEvent>(Action<TEvent> eventHandler)
         {
+            CancelSubscription cancelSubscription = null;
+
             subscriptions.AddOrUpdate(typeof(TEvent),
-                    t => new List<object> { eventHandler },
+                    t =>
+                    {
+                        var l = new List<object> {eventHandler};
+                        cancelSubscription = () => l.Remove(eventHandler);
+                        return l;
+                    },
                     (t, l) =>
                     {
                         l.Add(eventHandler);
+                        cancelSubscription = () => l.Remove(eventHandler);
                         return l;
                     }
                 );
+
+            return cancelSubscription;
         }
     }
+
+    public delegate void CancelSubscription();
 }

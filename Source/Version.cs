@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.18.1.0")]
+[assembly: AssemblyVersion("0.19.0.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.19.0.0 Consumer cancellation
 // 0.18.1.0 JsonSerializerSettings not passed when using TypeNameSerializer
 // 0.18.0.0 Publish/Subscribe polymorphism. Exchange/Queue naming conventions changed.
 // 0.17.0.0 Request synchronous. Removed callback API.

@@ -89,12 +89,12 @@ namespace EasyNetQ
 
         // ---------------------------------- consume --------------------------------------
 
-        public virtual void Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
+        public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
-            Consume(queue, (body, properties, messageRecievedInfo) =>
+            return Consume(queue, (body, properties, messageRecievedInfo) =>
             {
                 messageValidationStrategy.CheckMessageType<T>(body, properties, messageRecievedInfo);
 
@@ -104,8 +104,8 @@ namespace EasyNetQ
                 return onMessage(message, messageRecievedInfo);
             });
         }
- 
-        public virtual void Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+
+        public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {      
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -116,7 +116,7 @@ namespace EasyNetQ
             }
 
             var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection);
-            consumer.StartConsuming();
+            return consumer.StartConsuming();
         }
 
         // -------------------------------- publish ---------------------------------------------

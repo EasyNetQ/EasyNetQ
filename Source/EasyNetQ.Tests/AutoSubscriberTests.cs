@@ -218,24 +218,28 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
-            public void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
+            public IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
             {
                 if (InterceptSubscribe != null)
                     InterceptSubscribe(subscriptionId, onMessage);
+
+                return null;
             }
 
-            public void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+            public IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
             {
                 throw new NotImplementedException();
             }
 
-            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
+            public IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
             {
                 if (InterceptSubscribe != null)
                     InterceptSubscribe(subscriptionId, onMessage);
+
+                return null;
             }
 
-            public void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+            public IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
             {
                 throw new NotImplementedException();
             }

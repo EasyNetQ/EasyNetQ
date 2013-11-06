@@ -59,7 +59,7 @@ namespace EasyNetQ
         /// recipt is Ack'd. All onMessage delegates are processed on a single thread so you should
         /// avoid long running blocking IO operations. Consider using SubscribeAsync
         /// </param>
-        void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class;
+        IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class;
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -78,7 +78,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithTopic("uk.london")
         /// </param>
-        void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
+        IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
             where T : class;
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace EasyNetQ
         /// then continue processing asynchronously. When the Task completes the message will be
         /// Ack'd.
         /// </param>
-        void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class;
+        IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class;
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -115,7 +115,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
         /// </param>
-        void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
+        IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) 
             where T : class;
 
         /// <summary>

@@ -84,18 +84,18 @@ namespace EasyNetQ
             return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
         }
 
-        public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
+        public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
         {
-            Subscribe(subscriptionId, onMessage, x => { });
+            return Subscribe(subscriptionId, onMessage, x => { });
         }
 
-        public virtual void Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+        public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            SubscribeAsync(subscriptionId, msg =>
+            return SubscribeAsync(subscriptionId, msg =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
@@ -112,12 +112,12 @@ namespace EasyNetQ
             configure);
         }
 
-        public virtual void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
+        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
         {
-            SubscribeAsync(subscriptionId, onMessage, x => { });
+            return SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
-        public virtual void SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -137,7 +137,7 @@ namespace EasyNetQ
                 advancedBus.Bind(exchange, queue, topic);
             }
 
-            advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
+            return advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
 
         public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class

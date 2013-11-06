@@ -1,5 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests
@@ -48,6 +50,24 @@ namespace EasyNetQ.Tests
             eventBus.Publish(publishedEvent);
 
             capturedEvent.ShouldBeNull();
+        }
+
+        [Test]
+        public void Should_be_able_to_cancel_an_event()
+        {
+            var stringsPublished = new List<string>();
+
+            var cancelSubscription = eventBus.Subscribe<string>(stringsPublished.Add);
+            cancelSubscription.ShouldNotBeNull();
+
+            eventBus.Publish("Before cancellation");
+
+            cancelSubscription();
+
+            eventBus.Publish("Hello World");
+
+            stringsPublished.Count.ShouldEqual(1);
+            stringsPublished[0].ShouldEqual("Before cancellation");
         }
 
         private class Event1

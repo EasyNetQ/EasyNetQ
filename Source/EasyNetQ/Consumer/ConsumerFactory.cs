@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Consumer
@@ -18,6 +19,12 @@ namespace EasyNetQ.Consumer
 
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
+
+            eventBus.Subscribe<StoppedConsumingEvent>(stoppedConsumingEvent =>
+                {
+                    object value;
+                    consumers.TryRemove(stoppedConsumingEvent.Consumer, out value);
+                });
         }
 
         public IConsumer CreateConsumer(
@@ -30,13 +37,6 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(connection, "connection");
 
             var consumer = CreateConsumerInstance(queue, onMessage, connection);
-
-            consumer.RemoveMeFromList += theConsumer =>
-                {
-                    object value;
-                    consumers.TryRemove(theConsumer, out value);
-                };
-
             consumers.TryAdd(consumer, null);
             return consumer;
         }
@@ -55,7 +55,7 @@ namespace EasyNetQ.Consumer
         {
             if (queue.IsExclusive)
             {
-                return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory);
+                return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);
             }
 
             return new PersistentConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);

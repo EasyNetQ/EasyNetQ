@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -18,7 +19,7 @@ namespace EasyNetQ.Consumer
         private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = 
             new ConcurrentDictionary<IInternalConsumer, object>();
 
-        public event Action<IConsumer> RemoveMeFromList;
+        private readonly IList<CancelSubscription> eventCancellations = new List<CancelSubscription>();
 
         public PersistentConsumer(
             IQueue queue, 
@@ -40,12 +41,14 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
-        public void StartConsuming()
+        public IDisposable StartConsuming()
         {
-            eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected());
-            eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected());
+            eventCancellations.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
+            eventCancellations.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
 
             StartConsumingInternal();
+
+            return new ConsumerCancellation(Dispose);
         }
 
         private void StartConsumingInternal()
@@ -62,15 +65,7 @@ namespace EasyNetQ.Consumer
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
 
-            internalConsumer.Cancelled += consumer =>
-                {
-//                    Console.Out.WriteLine(">>>>>>>> internalConsumer.Cancelled");
-//                    if (disposed) return;
-//
-//                    object value; // cruft from using a ConcurrentDictionary
-//                    internalConsumers.TryRemove(consumer, out value);
-//                    StartConsumingInternal();
-                };
+            internalConsumer.Cancelled += consumer => Dispose();
 
             internalConsumer.StartConsuming(
                 connection, 
@@ -93,7 +88,16 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
+            if (disposed) return;
+
             disposed = true;
+
+            eventBus.Publish(new StoppedConsumingEvent(this));
+
+            foreach (var cancelSubscription in eventCancellations)
+            {
+                cancelSubscription();
+            }
 
             foreach (var internalConsumer in internalConsumers.Keys)
             {

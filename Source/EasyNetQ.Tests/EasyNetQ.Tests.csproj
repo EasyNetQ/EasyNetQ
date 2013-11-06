@@ -80,6 +80,8 @@
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="AutoSubscriberTests.cs" />
     <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
+    <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_broker.cs" />
+    <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_user.cs" />
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
@@ -103,6 +105,7 @@
     <Compile Include="Integration\DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />
     <Compile Include="DefaultMessageValidationStrategyTests.cs" />
+    <Compile Include="Integration\DeleteQueueWhileConsuming.cs" />
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
     <Compile Include="Integration\Helpers.cs" />
     <Compile Include="Integration\PersistentChannelTests.cs" />
