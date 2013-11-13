@@ -16,12 +16,12 @@ namespace EasyNetQ
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
         private readonly Func<string> getCorrelationId;
-        private readonly IMessageValidationStrategy messageValidationStrategy;
         private readonly IPersistentConnection connection;
         private readonly IClientCommandDispatcher clientCommandDispatcher;
         private readonly IPublisherConfirms publisherConfirms;
         private readonly IEventBus eventBus;
         private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly IHandlerCollectionFactory handlerCollectionFactory;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -29,30 +29,30 @@ namespace EasyNetQ
             IConsumerFactory consumerFactory,
             IEasyNetQLogger logger, 
             Func<string> getCorrelationId, 
-            IMessageValidationStrategy messageValidationStrategy, 
             IClientCommandDispatcherFactory clientCommandDispatcherFactory, 
             IPublisherConfirms publisherConfirms,
             IEventBus eventBus, 
-            ITypeNameSerializer typeNameSerializer)
+            ITypeNameSerializer typeNameSerializer, 
+            IHandlerCollectionFactory handlerCollectionFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializer, "serializer");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
-            Preconditions.CheckNotNull(messageValidationStrategy, "messageValidationStrategy");
             Preconditions.CheckNotNull(publisherConfirms, "publisherConfirms");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
 
             this.serializer = serializer;
             this.consumerFactory = consumerFactory;
             this.logger = logger;
             this.getCorrelationId = getCorrelationId;
-            this.messageValidationStrategy = messageValidationStrategy;
             this.publisherConfirms = publisherConfirms;
             this.eventBus = eventBus;
             this.typeNameSerializer = typeNameSerializer;
+            this.handlerCollectionFactory = handlerCollectionFactory;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -89,19 +89,40 @@ namespace EasyNetQ
 
         // ---------------------------------- consume --------------------------------------
 
-        public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
+        public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
+            return Consume<T>(queue, (message, info) => TaskHelpers.ExecuteSynchronously(() => onMessage(message, info)));
+        }
+
+        public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) 
+            where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+
+            return Consume(queue, x => x.Add(onMessage));
+        }
+
+        public virtual IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers) 
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(addHandlers, "addHandlers");
+
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
+            addHandlers(handlerCollection);
+
             return Consume(queue, (body, properties, messageRecievedInfo) =>
             {
-                messageValidationStrategy.CheckMessageType<T>(body, properties, messageRecievedInfo);
+                var messageType = typeNameSerializer.DeSerialize(properties.Type);
+                var handler = handlerCollection.GetHandler(messageType);
 
-                var messageBody = (T)serializer.BytesToMessage(properties.Type, body);
-                var message = new Message<T>(messageBody);
+                var messageBody = serializer.BytesToMessage(properties.Type, body);
+                var message = Message.CreateInstance(messageType, messageBody);
                 message.SetProperties(properties);
-                return onMessage(message, messageRecievedInfo);
+                return handler(message, messageRecievedInfo);
             });
         }
 

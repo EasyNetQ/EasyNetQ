@@ -2,6 +2,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;

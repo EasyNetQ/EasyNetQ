@@ -38,9 +38,9 @@ namespace EasyNetQ
                 .Register<IInternalConsumerFactory, InternalConsumerFactory>()
                 .Register<IConsumerFactory, ConsumerFactory>()
                 .Register<IConnectionFactory, ConnectionFactoryWrapper>()
-                .Register<IMessageValidationStrategy, DefaultMessageValidationStrategy>()
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
                 .Register<IClientCommandDispatcherFactory, ClientCommandDispatcherFactory>()
+                .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IRpc, Rpc>()
                 .Register<IBus, RabbitBus>();

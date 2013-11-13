@@ -54,6 +54,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -77,9 +78,11 @@
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />
+    <Compile Include="ConsumeTests\HandlerCollectionTests.cs" />
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="AutoSubscriberTests.cs" />
     <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
+    <Compile Include="ConsumeTests\When_a_consumer_has_multiple_handlers.cs" />
     <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_broker.cs" />
     <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_user.cs" />
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
@@ -93,7 +96,6 @@
     <Compile Include="Integration\AdvancedApiPingPongTest_with_transient_queue.cs" />
     <Compile Include="Integration\AdvancedApiTransientQueueTests.cs" />
     <Compile Include="Integration\ClientCommandDispatcherTests.cs" />
-    <Compile Include="Integration\DefaultMessageValidationStrategyIntegrationTests.cs" />
     <Compile Include="Integration\ClusterTests.cs" />
     <Compile Include="Integration\ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
@@ -104,10 +106,10 @@
     <Compile Include="ConventionsTests.cs" />
     <Compile Include="Integration\DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />
-    <Compile Include="DefaultMessageValidationStrategyTests.cs" />
     <Compile Include="Integration\DeleteQueueWhileConsuming.cs" />
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
     <Compile Include="Integration\Helpers.cs" />
+    <Compile Include="Integration\MultipleHandlerPerConsumerTests.cs" />
     <Compile Include="Integration\PersistentChannelTests.cs" />
     <Compile Include="Integration\PolymorphicPubSub.cs" />
     <Compile Include="Integration\PublisherConfirmsIntegrationTests.cs" />

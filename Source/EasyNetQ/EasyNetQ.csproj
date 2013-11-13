@@ -33,6 +33,7 @@
     <DocumentationFile>bin\Release\EasyNetQ.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -60,8 +61,12 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
+    <Compile Include="Consumer\HandlerCollection.cs" />
+    <Compile Include="Consumer\HandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
     <Compile Include="Consumer\IConsumerFactory.cs" />
+    <Compile Include="Consumer\IHandlerCollectionFactory.cs" />
+    <Compile Include="Consumer\IHandlerRegistration.cs" />
     <Compile Include="Consumer\InternalConsumer.cs" />
     <Compile Include="Consumer\InternalConsumerFactory.cs" />
     <Compile Include="Consumer\PersistentConsumer.cs" />
@@ -72,7 +77,6 @@
     <Compile Include="CorrelationIdGenerator.cs" />
     <Compile Include="Consumer\DefaultConsumerErrorStrategy.cs" />
     <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
-    <Compile Include="DefaultMessageValidationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="EasyNetQException.cs" />
@@ -99,7 +103,6 @@
     <Compile Include="ISaga.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
-    <Compile Include="IMessageValidationStrategy.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
@@ -139,6 +142,7 @@
     <Compile Include="Sprache\Success.cs" />
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
+    <Compile Include="TaskHelpers.cs" />
     <Compile Include="Topology\Binding.cs" />
     <Compile Include="Topology\Exchange.cs" />
     <Compile Include="Topology\ExchangeType.cs" />
