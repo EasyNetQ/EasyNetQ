@@ -165,6 +165,34 @@ namespace EasyNetQ
             where TResponse : class;
 
         /// <summary>
+        /// Send a message directly to a queue
+        /// </summary>
+        /// <typeparam name="T">The type of message to send</typeparam>
+        /// <param name="queue">The queue to send to</param>
+        /// <param name="message">The message</param>
+        void Send<T>(string queue, T message) where T : class;
+
+        /// <summary>
+        /// Receive messages from a queue.
+        /// Multiple calls to Receive for the same queue, but with different message types
+        /// will add multiple message handlers to the same consumer.
+        /// </summary>
+        /// <typeparam name="T">The type of message to receive</typeparam>
+        /// <param name="queue">The queue to receive from</param>
+        /// <param name="onMessage">The message handler</param>
+        IDisposable Receive<T>(string queue, Action<T> onMessage) where T : class;
+
+        /// <summary>
+        /// Receive messages from a queue.
+        /// Multiple calls to Receive for the same queue, but with different message types
+        /// will add multiple message handlers to the same consumer.
+        /// </summary>
+        /// <typeparam name="T">The type of message to receive</typeparam>
+        /// <param name="queue">The queue to receive from</param>
+        /// <param name="onMessage">The asychronous message handler</param>
+        IDisposable Receive<T>(string queue, Func<T, Task> onMessage) where T : class;
+
+        /// <summary>
         /// Fires once the bus has connected to a RabbitMQ server.
         /// </summary>
         event Action Connected;

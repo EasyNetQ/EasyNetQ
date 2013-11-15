@@ -269,6 +269,21 @@ namespace EasyNetQ.Tests
                 throw new NotImplementedException();
             }
 
+            public void Send<T>(string queue, T message) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDisposable Receive<T>(string queue, Action<T> onMessage) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDisposable Receive<T>(string queue, Func<T, Task> onMessage) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
             public event Action Connected;
             public event Action Disconnected;
             public bool IsConnected { get; private set; }
