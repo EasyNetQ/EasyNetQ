@@ -147,6 +147,7 @@ namespace EasyNetQ.Producer
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;
             requestMessage.Properties.CorrelationId = correlationId.ToString();
+            requestMessage.Properties.Expiration = (configuration.Timeout*1000).ToString();
 
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
