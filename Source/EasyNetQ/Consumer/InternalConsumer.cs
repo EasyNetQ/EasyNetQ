@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 
@@ -22,6 +23,7 @@ namespace EasyNetQ.Consumer
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
         private readonly IConnectionConfiguration connectionConfiguration;
+        private readonly IEventBus eventBus;
 
         private Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private IQueue queue;
@@ -36,19 +38,22 @@ namespace EasyNetQ.Consumer
             IEasyNetQLogger logger, 
             IConsumerDispatcher consumerDispatcher, 
             IConventions conventions, 
-            IConnectionConfiguration connectionConfiguration)
+            IConnectionConfiguration connectionConfiguration, 
+            IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.handlerRunner = handlerRunner;
             this.logger = logger;
             this.consumerDispatcher = consumerDispatcher;
             this.conventions = conventions;
             this.connectionConfiguration = connectionConfiguration;
+            this.eventBus = eventBus;
         }
 
         public void StartConsuming(
@@ -166,7 +171,11 @@ namespace EasyNetQ.Consumer
             if (model != null)
             {
                 // Queued because we may be on the RabbitMQ.Client dispatch thread.
-                consumerDispatcher.QueueAction(() => Model.Dispose());
+                consumerDispatcher.QueueAction(() =>
+                    {
+                        Model.Dispose();
+                        eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTag));
+                    });
             }
         }
     }

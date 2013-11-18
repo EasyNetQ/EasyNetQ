@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_write_an_error_message_to_the_log()
         {
-            const string errorMessage = "Exception thrown by subscription calback.";
+            const string errorMessage = "Exception thrown by subscription callback.";
 
             MockBuilder.Logger.AssertWasCalled(x => x.ErrorWrite(
                 Arg<string>.Matches(msg => msg.StartsWith(errorMessage)),

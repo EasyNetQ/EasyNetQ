@@ -15,6 +15,7 @@ namespace EasyNetQ
         private readonly IAdvancedBus advancedBus;
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IRpc rpc;
+        private readonly ISendReceive sendReceive;
         
         public IEasyNetQLogger Logger
         {
@@ -31,19 +32,22 @@ namespace EasyNetQ
             IConventions conventions,
             IAdvancedBus advancedBus, 
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy, 
-            IRpc rpc)
+            IRpc rpc, 
+            ISendReceive sendReceive)
         {
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
             this.logger = logger;
             this.conventions = conventions;
             this.advancedBus = advancedBus;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
             this.rpc = rpc;
+            this.sendReceive = sendReceive;
 
             advancedBus.Connected += OnConnected;
             advancedBus.Disconnected += OnDisconnected;
@@ -184,43 +188,19 @@ namespace EasyNetQ
         public void Send<T>(string queue, T message)
             where T : class
         {
-            advancedBus.Publish(Exchange.GetDefault(), queue, false, false, new Message<T>(message));
+            sendReceive.Send(queue, message);
         }
-
-        private readonly ConcurrentDictionary<string, Tuple<IHandlerRegistration, IDisposable>> handlerCollections =
-            new ConcurrentDictionary<string, Tuple<IHandlerRegistration, IDisposable>>(); 
 
         public IDisposable Receive<T>(string queue, Action<T> onMessage)
             where T : class
         {
-            return Receive<T>(queue, message => TaskHelpers.ExecuteSynchronously(() => onMessage(message)));
+            return sendReceive.Receive(queue, onMessage);
         }
 
         public IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
             where T : class
         {
-            IDisposable disposable = null;
-            handlerCollections.AddOrUpdate(
-                queue,
-                key =>
-                    {
-                        var declaredQueue = advancedBus.QueueDeclare(queue);
-                        IHandlerRegistration handlerRegistration = null;
-                        disposable = advancedBus.Consume(declaredQueue, registration =>
-                            {
-                                registration.Add<T>((message, info) => onMessage(message.Body));
-                                handlerRegistration = registration;
-                            });
-                        return new Tuple<IHandlerRegistration, IDisposable>(handlerRegistration, disposable);
-                    },
-                (key, value) =>
-                    {
-                        var registration = value.Item1;
-                        disposable = value.Item2;
-                        registration.Add<T>((message, info) => onMessage(message.Body));
-                        return value;
-                    });
-            return disposable;
+            return sendReceive.Receive(queue, onMessage);
         }
 
         public virtual event Action Connected;

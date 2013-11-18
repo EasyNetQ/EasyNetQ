@@ -43,6 +43,7 @@ namespace EasyNetQ
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IRpc, Rpc>()
+                .Register<ISendReceive, SendReceive>()
                 .Register<IBus, RabbitBus>();
 
             return serviceProvider;

@@ -166,7 +166,7 @@ namespace EasyNetQ.Consumer
                 properties.AppendPropertyDebugStringTo(propertiesMessage);
             }
 
-            return "Exception thrown by subscription calback.\n" +
+            return "Exception thrown by subscription callback.\n" +
                    string.Format("\tExchange:    '{0}'\n", context.Info.Exchange) +
                    string.Format("\tRouting Key: '{0}'\n", context.Info.RoutingKey) +
                    string.Format("\tRedelivered: '{0}'\n", context.Info.Redelivered) +

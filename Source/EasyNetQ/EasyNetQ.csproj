@@ -83,6 +83,7 @@
     <Compile Include="Events\AckEvent.cs" />
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
+    <Compile Include="Events\ConsumerModelDisposedEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />
     <Compile Include="Events\StoppedConsumingEvent.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
@@ -121,11 +122,13 @@
     <Compile Include="Producer\IPublisherConfirms.cs" />
     <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
     <Compile Include="Producer\IRpc.cs" />
+    <Compile Include="Producer\ISendReceive.cs" />
     <Compile Include="Producer\PersistentChannel.cs" />
     <Compile Include="Producer\PublisherConfirms.cs" />
     <Compile Include="Producer\PublishExchangeDeclareStrategy.cs" />
     <Compile Include="Producer\PublishNackedException.cs" />
     <Compile Include="Producer\Rpc.cs" />
+    <Compile Include="Producer\SendReceive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitAdvancedBus.cs" />
     <Compile Include="RabbitBus.cs" />

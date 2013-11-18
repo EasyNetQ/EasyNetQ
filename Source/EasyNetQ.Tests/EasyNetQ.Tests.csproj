@@ -86,6 +86,7 @@
     <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_broker.cs" />
     <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_user.cs" />
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
+    <Compile Include="ConsumeTests\When_a_message_is_received.cs" />
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="EventBusTests.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
     <Compile Include="ProducerTests\PublisherConfirmsTests.cs" />
     <Compile Include="ProducerTests\PublishExchangeDeclareStrategyTests.cs" />
+    <Compile Include="ProducerTests\When_a_message_is_sent.cs" />
     <Compile Include="ProducerTests\When_a_ploymorphic_message_is_sent.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent_but_no_reply_is_received.cs" />

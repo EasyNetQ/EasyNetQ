@@ -1,6 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading;
+using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -33,7 +35,11 @@ namespace EasyNetQ.Tests
         public void Should_cleanup_subscribe_model()
         {
             bus.Subscribe<TestMessage>("abc", mgs => {});
+            var are = WaitForConsumerModelDisposedMessage();
+
             bus.Dispose();
+
+            are.WaitOne();
 
             mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
@@ -42,7 +48,11 @@ namespace EasyNetQ.Tests
         public void Should_cleanup_subscribe_async_model()
         {
             bus.SubscribeAsync<TestMessage>("abc", msg => null);
+            var are = WaitForConsumerModelDisposedMessage();
+
             bus.Dispose();
+
+            are.WaitOne();
 
             mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
@@ -51,7 +61,11 @@ namespace EasyNetQ.Tests
         public void Should_cleanup_request_response_model()
         {
             bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            var are = WaitForConsumerModelDisposedMessage();
+
             bus.Dispose();
+
+            are.WaitOne();
 
             mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
@@ -60,9 +74,22 @@ namespace EasyNetQ.Tests
         public void Should_cleanup_respond_model()
         {
             bus.Respond<TestRequestMessage, TestResponseMessage>(x => null);
+            var are = WaitForConsumerModelDisposedMessage();
+
             bus.Dispose();
 
+            are.WaitOne();
+
             mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
+        }
+
+        private AutoResetEvent WaitForConsumerModelDisposedMessage()
+        {
+            var are = new AutoResetEvent(false);
+
+            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+
+            return are;
         }
     }
 }
