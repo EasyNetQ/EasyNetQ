@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
+using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
 
@@ -280,6 +281,11 @@ namespace EasyNetQ.Tests
             }
 
             public IDisposable Receive<T>(string queue, Func<T, Task> onMessage) where T : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
             {
                 throw new NotImplementedException();
             }

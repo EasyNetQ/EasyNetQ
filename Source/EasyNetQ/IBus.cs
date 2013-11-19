@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
 
 namespace EasyNetQ
@@ -191,6 +192,14 @@ namespace EasyNetQ
         /// <param name="queue">The queue to receive from</param>
         /// <param name="onMessage">The asychronous message handler</param>
         IDisposable Receive<T>(string queue, Func<T, Task> onMessage) where T : class;
+
+        /// <summary>
+        /// Receive a message from the specified queue. Dispatch them to the given handlers
+        /// </summary>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="addHandlers">A function to add handlers</param>
+        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
+        IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers);
 
         /// <summary>
         /// Fires once the bus has connected to a RabbitMQ server.

@@ -24,15 +24,9 @@ namespace EasyNetQ.Tests.ConsumeTests
             //mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
             mockBuilder = new MockBuilder();
 
-            mockBuilder.Bus.Receive<MyMessage>("the_queue", message =>
-                {
-                    deliveredMyMessage = message;
-                });
-
-            mockBuilder.Bus.Receive<MyOtherMessage>("the_queue", message =>
-                {
-                    deliveredMyOtherMessage = message;
-                });
+            mockBuilder.Bus.Receive("the_queue", x => x
+                .Add<MyMessage>(message => deliveredMyMessage = message)
+                .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
             DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests");
             DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage:EasyNetQ.Tests");

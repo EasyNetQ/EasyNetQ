@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Producer
 {
@@ -30,5 +31,13 @@ namespace EasyNetQ.Producer
         /// <param name="onMessage">The asynchronous function that handles the message</param>
         /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
         IDisposable Receive<T>(string queue, Func<T, Task> onMessage) where T : class;
+
+        /// <summary>
+        /// Receive a message from the specified queue. Dispatch them to the given handlers
+        /// </summary>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="addHandlers">A function to add handlers</param>
+        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
+        IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers);
     }
 }

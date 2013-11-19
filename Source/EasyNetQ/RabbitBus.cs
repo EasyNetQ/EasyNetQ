@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
@@ -201,6 +200,11 @@ namespace EasyNetQ
             where T : class
         {
             return sendReceive.Receive(queue, onMessage);
+        }
+
+        public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
+        {
+            return sendReceive.Receive(queue, addHandlers);
         }
 
         public virtual event Action Connected;

@@ -10,9 +10,6 @@ namespace EasyNetQ.Producer
     {
         private readonly IAdvancedBus advancedBus;
 
-        private readonly ConcurrentDictionary<string, Tuple<IHandlerRegistration, IDisposable>> handlerCollections =
-            new ConcurrentDictionary<string, Tuple<IHandlerRegistration, IDisposable>>();
-
         private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>(); 
 
         public SendReceive(IAdvancedBus advancedBus)
@@ -47,28 +44,14 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
-            IDisposable disposable = null;
-            handlerCollections.AddOrUpdate(
-                queue,
-                key =>
-                    {
-                        var declaredQueue = DeclareQueue(queue);
-                        IHandlerRegistration handlerRegistration = null;
-                        disposable = advancedBus.Consume(declaredQueue, registration =>
-                            {
-                                registration.Add<T>((message, info) => onMessage(message.Body));
-                                handlerRegistration = registration;
-                            });
-                        return new Tuple<IHandlerRegistration, IDisposable>(handlerRegistration, disposable);
-                    },
-                (key, value) =>
-                    {
-                        var registration = value.Item1;
-                        disposable = value.Item2;
-                        registration.Add<T>((message, info) => onMessage(message.Body));
-                        return value;
-                    });
-            return disposable;
+            var declaredQueue = DeclareQueue(queue);
+            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body));
+        }
+
+        public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
+        {
+            var declaredQueue = DeclareQueue(queue);
+            return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)));
         }
 
         private IQueue DeclareQueue(string queueName)
@@ -80,6 +63,28 @@ namespace EasyNetQ.Producer
                 (key, value) => queue = value);
 
             return queue;
+        }
+
+        private class HandlerAdder : IReceiveRegistration
+        {
+            private readonly IHandlerRegistration handlerRegistration;
+
+            public HandlerAdder(IHandlerRegistration handlerRegistration)
+            {
+                this.handlerRegistration = handlerRegistration;
+            }
+
+            public IReceiveRegistration Add<T>(Func<T, Task> onMessage) where T : class
+            {
+                handlerRegistration.Add<T>((message, info) => onMessage(message.Body));
+                return this;
+            }
+
+            public IReceiveRegistration Add<T>(Action<T> onMessage) where T : class
+            {
+                handlerRegistration.Add<T>((message, info) => onMessage(message.Body));
+                return this;
+            }
         }
     }
 }

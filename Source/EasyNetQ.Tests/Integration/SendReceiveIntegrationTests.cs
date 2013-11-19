@@ -29,15 +29,14 @@ namespace EasyNetQ.Tests.Integration
         {
             const string queue = "send_receive_test";
 
-            bus.Receive<MyMessage>(queue, message => Console.WriteLine("MyMessage: {0}", message.Text));
-            var cancel = bus.Receive<MyOtherMessage>(queue, message => Console.WriteLine("MyOtherMessage: {0}", message.Text));
+            bus.Receive(queue, x => x
+                .Add<MyMessage>(message => Console.WriteLine("MyMessage: {0}", message.Text))
+                .Add<MyOtherMessage>(message => Console.WriteLine("MyOtherMessage: {0}", message.Text)));
 
-            bus.Send(queue, new MyMessage{ Text = "Hello Widgets!" });
             bus.Send(queue, new MyOtherMessage { Text = "Hello Gadgets!" });
+            bus.Send(queue, new MyMessage { Text = "Hello Widgets!" });
 
             Thread.Sleep(500);
-
-            cancel.Dispose();
         }
     }
 }

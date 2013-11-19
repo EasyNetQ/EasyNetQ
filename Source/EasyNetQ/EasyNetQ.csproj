@@ -69,6 +69,7 @@
     <Compile Include="Consumer\IHandlerRegistration.cs" />
     <Compile Include="Consumer\InternalConsumer.cs" />
     <Compile Include="Consumer\InternalConsumerFactory.cs" />
+    <Compile Include="Consumer\IReceiveRegistration.cs" />
     <Compile Include="Consumer\PersistentConsumer.cs" />
     <Compile Include="Consumer\ConsumerDispatcher.cs" />
     <Compile Include="Consumer\ConsumerDispatcherFactory.cs" />
