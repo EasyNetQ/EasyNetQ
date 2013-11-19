@@ -39,6 +39,8 @@ namespace EasyNetQ
 
         public IModel CreateModel()
         {
+            if(!IsConnected) throw new EasyNetQException("Not connected");
+
             return connection.CreateModel();
         }
 

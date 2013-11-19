@@ -115,6 +115,13 @@ namespace EasyNetQ.Producer
                     throw exception;
                 }
             }
+            catch (EasyNetQException)
+            {
+                OnConnectionDisconnected(null);
+                WaitForReconnectionOrTimeout(startTime);
+                InvokeChannelActionInternal(channelAction, startTime);
+            }
+
         }
 
         private void WaitForReconnectionOrTimeout(DateTime startTime)
@@ -131,8 +138,9 @@ namespace EasyNetQ.Producer
                     OpenChannel();
                 }
                 catch (OperationInterruptedException)
-                {
-                }
+                {}
+                catch (EasyNetQException)
+                {}
             }
         }
 
