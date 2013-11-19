@@ -9,7 +9,7 @@ namespace EasyNetQ
     public delegate string RpcRoutingKeyNamingConvention(Type messageType);
 
     public delegate string ErrorQueueNameConvention();
-    public delegate string ErrorExchangeNameConvention(string  originalRoutingKey);
+    public delegate string ErrorExchangeNameConvention(MessageReceivedInfo info);
     public delegate string RpcExchangeNameConvention();
 
     public delegate string RpcReturnQueueNamingConvention();
@@ -49,7 +49,7 @@ namespace EasyNetQ
             RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
             ErrorQueueNamingConvention = () => "EasyNetQ_Default_Error_Queue";
-            ErrorExchangeNamingConvention = (originalRoutingKey) => "ErrorExchange_" + originalRoutingKey;
+		    ErrorExchangeNamingConvention = info => "ErrorExchange_" + info.RoutingKey;
             RpcExchangeNamingConvention = () => "easy_net_q_rpc";
 		    RpcReturnQueueNamingConvention = () => "easynetq.response." + Guid.NewGuid().ToString();
 

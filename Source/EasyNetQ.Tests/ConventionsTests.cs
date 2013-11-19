@@ -55,7 +55,9 @@ namespace EasyNetQ.Tests
         [Test]
         public void The_default_error_exchange_name_should_be()
         {
-            var result = conventions.ErrorExchangeNamingConvention("routingKey");
+            var info = new MessageReceivedInfo("consumer_tag", 0, false, "exchange", "routingKey", "queue");
+
+            var result = conventions.ErrorExchangeNamingConvention(info);
             result.ShouldEqual("ErrorExchange_routingKey");
         }
 
@@ -180,7 +182,7 @@ namespace EasyNetQ.Tests
             var customConventions = new Conventions(new TypeNameSerializer())
             {
                 ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
-                ErrorExchangeNamingConvention = originalRoutingKey => "CustomErrorExchangePrefixName." + originalRoutingKey
+                ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 
             mockBuilder = new MockBuilder();

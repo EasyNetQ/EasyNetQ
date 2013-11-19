@@ -73,21 +73,23 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private string DeclareErrorExchangeAndBindToDefaultErrorQueue(IModel model, string originalRoutingKey)
+        private string DeclareErrorExchangeAndBindToDefaultErrorQueue(IModel model, ConsumerExecutionContext context)
         {
+            var originalRoutingKey = context.Info.RoutingKey;
+
             return errorExchanges.GetOrAdd(originalRoutingKey, _ =>
             {
-                var exchangeName = conventions.ErrorExchangeNamingConvention(originalRoutingKey);
+                var exchangeName = conventions.ErrorExchangeNamingConvention(context.Info);
                 model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
                 model.QueueBind(conventions.ErrorQueueNamingConvention(), exchangeName, originalRoutingKey);
                 return exchangeName;
             });
         }
 
-        private string DeclareErrorExchangeQueueStructure(IModel model, string originalRoutingKey)
+        private string DeclareErrorExchangeQueueStructure(IModel model, ConsumerExecutionContext context)
         {
             DeclareDefaultErrorQueue(model);
-            return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, originalRoutingKey);
+            return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, context);
         }
 
         public virtual void HandleConsumerError(ConsumerExecutionContext context, Exception exception)
@@ -101,7 +103,7 @@ namespace EasyNetQ.Consumer
 
                 using (var model = connection.CreateModel())
                 {
-                    var errorExchange = DeclareErrorExchangeQueueStructure(model, context.Info.RoutingKey);
+                    var errorExchange = DeclareErrorExchangeQueueStructure(model, context);
 
                     var messageBody = CreateErrorMessage(context, exception);
                     var properties = model.CreateBasicProperties();
