@@ -3,7 +3,6 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.NonGenerics;
 using EasyNetQ.Topology;
 using FluentAssertions;
-using Logger.Infrastructure;
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
