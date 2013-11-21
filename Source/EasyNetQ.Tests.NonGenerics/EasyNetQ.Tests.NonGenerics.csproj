@@ -60,10 +60,6 @@
       <Project>{61ce35d5-2c09-4ce5-b805-601746846821}</Project>
       <Name>Logger</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ.NonGenerics\EasyNetQ.NonGenerics.csproj">
-      <Project>{c87894f9-077e-4000-bc12-300138ec490e}</Project>
-      <Name>EasyNetQ.NonGenerics</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj">
       <Project>{b8def709-5168-48f1-b8d3-ad44e4a4a22b}</Project>
       <Name>EasyNetQ</Name>

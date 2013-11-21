@@ -64,8 +64,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Trace", "EasyNetQ.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.NonGenerics", "EasyNetQ.Tests.NonGenerics\EasyNetQ.Tests.NonGenerics.csproj", "{0013D415-1167-4916-9B37-49F87F55621C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.NonGenerics", "EasyNetQ.NonGenerics\EasyNetQ.NonGenerics.csproj", "{C87894F9-077E-4000-BC12-300138EC490E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -286,16 +284,6 @@ Global
 		{0013D415-1167-4916-9B37-49F87F55621C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0013D415-1167-4916-9B37-49F87F55621C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0013D415-1167-4916-9B37-49F87F55621C}.Release|x86.ActiveCfg = Release|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{C87894F9-077E-4000-BC12-300138EC490E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
