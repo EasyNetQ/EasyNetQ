@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.NonGenerics
 {
-    public static class IBusNonGenericsExtensions
+    public static class EasyNetQNonGenericsExtensions
     {
         public static void Subscribe(this IBus bus, Type messageType, string subscriptionId, Action<object> onMessage, Action<SubscriptionConfiguration<object>> configure = null)
         {
