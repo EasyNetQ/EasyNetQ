@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mike.AmqpSpike", "Mike.AmqpSpike\Mike.AmqpSpike.csproj", "{54108F8D-F949-4280-B59D-82EB4A317C32}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ", "EasyNetQ\EasyNetQ.csproj", "{B8DEF709-5168-48F1-B8D3-AD44E4A4A22B}"
@@ -59,6 +61,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Monitor.Tests", "EasyNetQ.Monitor.Tests\EasyNetQ.Monitor.Tests.csproj", "{185C7912-C7FB-475D-8489-E9F8BABE78D5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Trace", "EasyNetQ.Trace\EasyNetQ.Trace.csproj", "{11DF08A9-3D14-44CC-A65E-5933121D3D63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.NonGenerics", "EasyNetQ.Tests.NonGenerics\EasyNetQ.Tests.NonGenerics.csproj", "{0013D415-1167-4916-9B37-49F87F55621C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.NonGenerics", "EasyNetQ.NonGenerics\EasyNetQ.NonGenerics.csproj", "{C87894F9-077E-4000-BC12-300138EC490E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -270,6 +276,26 @@ Global
 		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Release|x86.ActiveCfg = Release|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0013D415-1167-4916-9B37-49F87F55621C}.Release|x86.ActiveCfg = Release|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C87894F9-077E-4000-BC12-300138EC490E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
