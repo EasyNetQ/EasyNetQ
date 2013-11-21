@@ -17,14 +17,11 @@ Goals:
 
 To connect to a RabbitMQ broker...
 
-	var bus = RabbitHutch.CreateBus("host=localhost");
+    var bus = RabbitHutch.CreateBus("host=localhost");
 
 To publish a message...
 
-    using (var publishChannel = bus.OpenPublishChannel())
-    {
-        publishChannel.Publish(message);
-    }
+    bus.Publish(message);
 
 To subscribe to a message...
 
@@ -33,15 +30,12 @@ To subscribe to a message...
 Remote procedure call...
 
     var request = new TestRequestMessage {Text = "Hello from the client! "};
-    using (var publishChannel = bus.OpenPublishChannel())
-    {
-		publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response => 
-			Console.WriteLine("Got response: '{0}'", response.Text));
-	}
+    bus.Request<TestRequestMessage, TestResponseMessage>(request, response => 
+        Console.WriteLine("Got response: '{0}'", response.Text));
 
 RPC server...
 
-	bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
+    bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
 		new TestResponseMessage{ Text = request.Text + " all done!" });
 	
 
