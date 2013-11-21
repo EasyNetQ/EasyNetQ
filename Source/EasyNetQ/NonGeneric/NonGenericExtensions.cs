@@ -59,7 +59,7 @@ namespace EasyNetQ.NonGeneric
             }
 
             var subscribeMethod = subscribeMethodOpen.MakeGenericMethod(messageType);
-            return (IDisposable)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage });
+            return (IDisposable)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configure });
         }
 
         private static bool HasCorrectParameters(MethodInfo methodInfo)
@@ -67,9 +67,10 @@ namespace EasyNetQ.NonGeneric
             var parameters = methodInfo.GetParameters();
 
             return 
-                (parameters.Length == 2) && 
+                (parameters.Length == 3) && 
                 (parameters[0].ParameterType == typeof(string) &&
-                parameters[1].ParameterType.Name == "Func`2");
+                parameters[1].ParameterType.Name == "Func`2") &&
+                parameters[2].ParameterType == typeof(Action<ISubscriptionConfiguration>);
         }
     }
 }
