@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests.NonGenerics
     [TestFixture]
     public class EasyNetQNonGenericsExtensionsTests
     {
-        internal static string ConnectionString = "host=127.0.0.1";
+        internal static string ConnectionString = "host=192.168.4.5";
 
         public class MyMessage
         {
