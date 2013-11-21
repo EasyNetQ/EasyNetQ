@@ -94,13 +94,13 @@ namespace EasyNetQ
             return Subscribe(subscriptionId, onMessage, x => { });
         }
 
-        public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+        public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            return SubscribeAsync(subscriptionId, msg =>
+            return SubscribeAsync<T>(subscriptionId, msg =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
@@ -122,13 +122,13 @@ namespace EasyNetQ
             return SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
-        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var configuration = new SubscriptionConfiguration<T>();
+            var configuration = new SubscriptionConfiguration();
             configure(configuration);
 
             var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);

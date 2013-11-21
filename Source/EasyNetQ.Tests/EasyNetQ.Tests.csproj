@@ -111,6 +111,7 @@
     <Compile Include="Integration\ExceptionConditionsTests.cs" />
     <Compile Include="Integration\Helpers.cs" />
     <Compile Include="Integration\MultipleHandlerPerConsumerTests.cs" />
+    <Compile Include="Integration\NonGenericExtensionsIntegrationTests.cs" />
     <Compile Include="Integration\PersistentChannelTests.cs" />
     <Compile Include="Integration\PolymorphicPubSub.cs" />
     <Compile Include="Integration\PublisherConfirmsIntegrationTests.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Mocking\MockBuilder.cs" />
     <Compile Include="ModelCleanupTests.cs" />
     <Compile Include="Integration\MultiThreadedPublisherTests.cs" />
+    <Compile Include="NonGeneric\NonGenericExtensionsTests.cs" />
     <Compile Include="PersistentChannelTests\When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again.cs" />
     <Compile Include="PersistentChannelTests\When_an_action_is_performed_on_a_closed_channel_that_then_opens.cs" />
     <Compile Include="PersistentChannelTests\When_a_channel_action_is_invoked.cs" />

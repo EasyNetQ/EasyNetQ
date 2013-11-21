@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.23.0.0")]
+[assembly: AssemblyVersion("0.24.0.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.24.0.0 Non-Generic extension methods. Includes change to ISubscriptionConfiguration (removing generic type argument)
 // 0.23.0.0 ErrorExchangeNameConvention now takes a MessageReceivedInfo argument
 // 0.22.1.0 Fixed problem when executing channel actions on a non-open connection
 // 0.22.0.0 Send-Receive pattern fixed.

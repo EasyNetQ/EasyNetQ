@@ -227,7 +227,7 @@ namespace EasyNetQ.Tests
                 return null;
             }
 
-            public IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+            public IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
             {
                 throw new NotImplementedException();
             }
@@ -240,7 +240,7 @@ namespace EasyNetQ.Tests
                 return null;
             }
 
-            public IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration<T>> configure) where T : class
+            public IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
             {
                 throw new NotImplementedException();
             }

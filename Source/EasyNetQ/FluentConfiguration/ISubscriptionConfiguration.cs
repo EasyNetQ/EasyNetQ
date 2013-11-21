@@ -9,17 +9,17 @@ namespace EasyNetQ.FluentConfiguration
     /// x => x.WithTopic("*.brighton")
     /// </summary>
     /// <typeparam name="T">The message type to be published</typeparam>
-    public interface ISubscriptionConfiguration<T>
+    public interface ISubscriptionConfiguration
     {
         /// <summary>
         /// Add a topic for the queue binding
         /// </summary>
         /// <param name="topic">The topic to add</param>
         /// <returns></returns>
-        ISubscriptionConfiguration<T> WithTopic(string topic);
+        ISubscriptionConfiguration WithTopic(string topic);
     }
 
-    public class SubscriptionConfiguration<T> : ISubscriptionConfiguration<T>
+    public class SubscriptionConfiguration : ISubscriptionConfiguration
     {
         public IList<string> Topics { get; private set; }
 
@@ -28,7 +28,7 @@ namespace EasyNetQ.FluentConfiguration
             Topics = new List<string>();
         }
 
-        public ISubscriptionConfiguration<T> WithTopic(string topic)
+        public ISubscriptionConfiguration WithTopic(string topic)
         {
             Topics.Add(topic);
             return this;
