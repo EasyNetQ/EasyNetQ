@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading;
 using EasyNetQ.SystemMessages;
 
@@ -45,7 +46,7 @@ namespace EasyNetQ.Scheduler
         public IList<ScheduleMe> GetPending()
         {
             var scheduledMessages = new List<ScheduleMe>();
-            var scheuldeMessageIds = new List<int>();
+            var scheduleMessageIds = new List<int>();
 
             WithStoredProcedureCommand(selectSql, command =>
             {
@@ -63,17 +64,17 @@ namespace EasyNetQ.Scheduler
                             InnerMessage = reader.GetSqlBinary(4).Value
                         });
 
-                        scheuldeMessageIds.Add(reader.GetInt32(0));
+                        scheduleMessageIds.Add(reader.GetInt32(0));
                     }
                 }
             });
 
-            MarkItemsForPurge(scheuldeMessageIds);
+            MarkItemsForPurge(scheduleMessageIds);
 
             return scheduledMessages;
         }
 
-        public void MarkItemsForPurge(IEnumerable<int> scheuldeMessageIds)
+        public void MarkItemsForPurge(IEnumerable<int> scheduleMessageIds)
         {
             // mark items for purge on a background thread.
             ThreadPool.QueueUserWorkItem(state => 
@@ -84,7 +85,7 @@ namespace EasyNetQ.Scheduler
                     command.Parameters.AddWithValue("@purgeDate", purgeDate);
                     var idParameter = command.Parameters.Add("@ID", SqlDbType.Int);
 
-                    foreach (var scheduleMessageId in scheuldeMessageIds)
+                    foreach (var scheduleMessageId in scheduleMessageIds)
                     {
                         idParameter.Value = scheduleMessageId;
                         command.ExecuteNonQuery();
@@ -106,13 +107,21 @@ namespace EasyNetQ.Scheduler
         private void WithStoredProcedureCommand(string storedProcedureName, Action<SqlCommand> commandAction)
         {
             using (var connection = new SqlConnection(configuration.ConnectionString))
-            using (var command = new SqlCommand(storedProcedureName, connection))
+            using (var command = new SqlCommand(FormatWithSchemaName(storedProcedureName), connection))
             {
                 connection.Open();
                 command.CommandType = CommandType.StoredProcedure;
 
                 commandAction(command);
             }
+        }
+
+        private string FormatWithSchemaName(string storedProcedureName)
+        {
+            if (string.IsNullOrWhiteSpace(configuration.SchemaName)) 
+                return storedProcedureName;
+            
+            return string.Format("[{0}].{1}", configuration.SchemaName.TrimStart('[').TrimEnd('.', ']'), storedProcedureName);
         }
     }
 }
