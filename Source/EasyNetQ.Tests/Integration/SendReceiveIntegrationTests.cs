@@ -38,6 +38,33 @@ namespace EasyNetQ.Tests.Integration
 
             Thread.Sleep(500);
         }
+
+        [Test]
+        public void Should_be_able_to_handle_a_long_running_consumer()
+        {
+            const string queue = "send_receive_test";
+            var are = new AutoResetEvent(false);
+
+            bus.Receive(queue, x => x.Add<MyMessage>(message =>
+                {
+                    Console.Out.WriteLine("Got message {0}, now working");
+                    Thread.Sleep(TimeSpan.FromMinutes(1));
+                    Console.Out.WriteLine("Completed working, should be sending ACK");
+                    are.Set();
+                }));
+
+//            bus.Receive<MyMessage>(queue, message =>
+//                {
+//                    Console.Out.WriteLine("Got message {0}, now working");
+//                    Thread.Sleep(TimeSpan.FromMinutes(1));
+//                    Console.Out.WriteLine("Completed working, should be sending ACK");
+//                    are.Set();
+//                });
+
+            bus.Send(queue, new MyMessage { Text = "Hello Widgets!" });
+
+            are.WaitOne();
+        }
     }
 }
 
