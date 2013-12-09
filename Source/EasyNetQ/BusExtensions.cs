@@ -18,8 +18,12 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
 
             var advancedBus = bus.Advanced;
-            var typeName = advancedBus.TypeNameSerializer.Serialize(typeof(T));
-            var messageBody = advancedBus.Serializer.MessageToBytes(message);
+
+            var typeNameSerializer = advancedBus.Container.Resolve<ITypeNameSerializer>();
+            var serializer = advancedBus.Container.Resolve<ISerializer>();
+
+            var typeName = typeNameSerializer.Serialize(typeof(T));
+            var messageBody = serializer.MessageToBytes(message);
 
             bus.Publish(new ScheduleMe
             {

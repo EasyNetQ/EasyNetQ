@@ -253,18 +253,6 @@ namespace EasyNetQ
         bool IsConnected { get; }
 
         /// <summary>
-        /// The message serializer
-        /// </summary>
-        ISerializer Serializer { get; }
-
-        /// <summary>
-        /// The connection EasyNetQ maintains to RabbitMQ
-        /// </summary>
-        IPersistentConnection Connection { get; }
-
-        ITypeNameSerializer TypeNameSerializer { get; }
-
-        /// <summary>
         /// Event fires when the bus connects
         /// </summary>
         event Action Connected;
@@ -273,5 +261,10 @@ namespace EasyNetQ
         /// Event fires when the bus disconnects
         /// </summary>
         event Action Disconnected;
+
+        /// <summary>
+        /// The IoC container that EasyNetQ uses to resolve it's services.
+        /// </summary>
+        IContainer Container { get; }
     }
 }

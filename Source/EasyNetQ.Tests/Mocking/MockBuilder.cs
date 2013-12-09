@@ -16,7 +16,6 @@ namespace EasyNetQ.Tests.Mocking
         readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IEasyNetQLogger logger = MockRepository.GenerateStub<IEasyNetQLogger>();
         private readonly IBus bus;
-        private IServiceProvider serviceProvider;
 
         public const string Host = "my_host";
         public const string VirtualHost = "my_virtual_host";
@@ -74,13 +73,13 @@ namespace EasyNetQ.Tests.Mocking
             bus = RabbitHutch.CreateBus(connectionString, x =>
                 {
                     registerServices(x);
-                    x.Register(sp => 
-                    {
-                        serviceProvider = sp;
-                        return connectionFactory;
-                    });
+                    x.Register(_ => connectionFactory);
                     x.Register(_ => logger);
                 });
+
+            bus.ShouldNotBeNull();
+            bus.Advanced.ShouldNotBeNull();
+            bus.Advanced.Container.ShouldNotBeNull();
         }
 
         public IConnectionFactory ConnectionFactory
@@ -120,7 +119,7 @@ namespace EasyNetQ.Tests.Mocking
 
         public IServiceProvider ServiceProvider
         {
-            get { return serviceProvider; }
+            get { return bus.Advanced.Container; }
         }
 
         public IModel NextModel
@@ -130,7 +129,7 @@ namespace EasyNetQ.Tests.Mocking
 
         public IEventBus EventBus
         {
-            get { return serviceProvider.Resolve<IEventBus>(); }
+            get { return ServiceProvider.Resolve<IEventBus>(); }
         }
     }
 }

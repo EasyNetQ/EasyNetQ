@@ -148,6 +148,7 @@
     <Compile Include="Integration\SubscriberOfSpike.cs" />
     <Compile Include="MessagePropertiesTests.cs" />
     <Compile Include="Integration\SubscribeToErrorQueueSpike.cs" />
+    <Compile Include="RabbitHutchTests.cs" />
     <Compile Include="SubscribeTests.cs" />
     <Compile Include="TaskExtensions.cs" />
     <Compile Include="TestExtensions.cs" />

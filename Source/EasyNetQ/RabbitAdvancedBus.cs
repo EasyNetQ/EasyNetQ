@@ -22,6 +22,7 @@ namespace EasyNetQ
         private readonly IEventBus eventBus;
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
+        private readonly IContainer container;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -33,7 +34,8 @@ namespace EasyNetQ
             IPublisherConfirms publisherConfirms,
             IEventBus eventBus, 
             ITypeNameSerializer typeNameSerializer, 
-            IHandlerCollectionFactory handlerCollectionFactory)
+            IHandlerCollectionFactory handlerCollectionFactory,
+            IContainer container)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializer, "serializer");
@@ -44,6 +46,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
+            Preconditions.CheckNotNull(container, "container");
 
             this.serializer = serializer;
             this.consumerFactory = consumerFactory;
@@ -53,6 +56,7 @@ namespace EasyNetQ
             this.eventBus = eventBus;
             this.typeNameSerializer = typeNameSerializer;
             this.handlerCollectionFactory = handlerCollectionFactory;
+            this.container = container;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -62,30 +66,7 @@ namespace EasyNetQ
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }
 
-        public virtual ISerializer Serializer
-        {
-            get { return serializer; }
-        }
 
-        public IPersistentConnection Connection
-        {
-            get { return connection; }
-        }
-
-        public ITypeNameSerializer TypeNameSerializer 
-        {
-            get { return typeNameSerializer; }
-        }
-
-        public IEasyNetQLogger Logger
-        {
-            get { return logger; }
-        }
-
-        public Func<string> GetCorrelationId
-        {
-            get { return getCorrelationId; }
-        }
 
         // ---------------------------------- consume --------------------------------------
 
@@ -187,7 +168,7 @@ namespace EasyNetQ
             message.Properties.Type = typeName;
             message.Properties.CorrelationId =
                 string.IsNullOrEmpty(message.Properties.CorrelationId) ?
-                GetCorrelationId() :
+                getCorrelationId() :
                 message.Properties.CorrelationId;
 
             return PublishAsync(exchange, routingKey, mandatory, immediate, message.Properties, messageBody);
@@ -403,7 +384,7 @@ namespace EasyNetQ
         }
 
         public virtual event Action Disconnected;
-
+        
         protected void OnDisconnected()
         {
             if (Disconnected != null) Disconnected();
@@ -412,6 +393,11 @@ namespace EasyNetQ
         public virtual bool IsConnected
         {
             get { return connection.IsConnected; }
+        }
+
+        public IContainer Container
+        {
+            get { return container; }
         }
 
         private bool disposed = false;

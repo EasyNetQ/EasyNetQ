@@ -133,7 +133,6 @@ namespace EasyNetQ.Tests
                 deliveredMessage = message;
             });
 
-
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
@@ -155,6 +154,12 @@ namespace EasyNetQ.Tests
 
             // wait for the subscription thread to handle the message ...
             autoResetEvent.WaitOne(1000);
+        }
+
+        [Test]
+        public void Should_build_bus_successfully()
+        {
+            // just want to run SetUp()
         }
 
         [Test]

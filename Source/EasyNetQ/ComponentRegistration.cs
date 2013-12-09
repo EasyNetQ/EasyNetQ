@@ -10,19 +10,15 @@ namespace EasyNetQ
     /// </summary>
     public class ComponentRegistration
     {
-        public static IServiceProvider CreateServiceProvider(Action<IServiceRegister> registerServices)
+        public static void RegisterServices(IContainer container)
         {
-            Preconditions.CheckNotNull(registerServices, "registerServices");
-
-            var serviceProvider = new DefaultServiceProvider();
-
-            // gives the user a chance to register alternative service implementations.
-            registerServices(serviceProvider);
+            Preconditions.CheckNotNull(container, "container");
 
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
 
             // default service registration
-            serviceProvider
+            container
+                .Register(_ => container)
                 .Register<IEasyNetQLogger, ConsoleLogger>()
                 .Register<ISerializer, JsonSerializer>()
                 .Register<IConventions, Conventions>()
@@ -45,8 +41,6 @@ namespace EasyNetQ
                 .Register<IRpc, Rpc>()
                 .Register<ISendReceive, SendReceive>()
                 .Register<IBus, RabbitBus>();
-
-            return serviceProvider;
         }
          
     }

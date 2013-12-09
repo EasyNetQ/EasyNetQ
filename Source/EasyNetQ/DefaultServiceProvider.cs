@@ -10,7 +10,7 @@ namespace EasyNetQ
     /// 
     /// Note all components are singletons. Only one instance of each will be created.
     /// </summary>
-    public class DefaultServiceProvider : IServiceProvider, IServiceRegister
+    public class DefaultServiceProvider : IContainer
     {
         private readonly IDictionary<Type, object> factories = new Dictionary<Type, object>();
         private readonly IDictionary<Type, Type> registrations = new Dictionary<Type, Type>();

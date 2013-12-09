@@ -3,6 +3,15 @@
 namespace EasyNetQ
 {
     /// <summary>
+    /// Combines IServiceProvider and IServiceRegister.
+    /// Represents an implementation of an IoC container. Implement this interface
+    /// To wrap your favorite IoC container to work with EasyNetQ. Not all service instances
+    /// should be defined as singletons.
+    /// </summary>
+    public interface IContainer : IServiceProvider, IServiceRegister
+    {}
+
+    /// <summary>
     /// Provides service instances
     /// </summary>
     public interface IServiceProvider
