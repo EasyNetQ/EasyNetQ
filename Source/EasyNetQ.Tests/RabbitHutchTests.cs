@@ -10,33 +10,6 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class RabbitHutchTests
     {
-        private const string expectedRegisteredComponets =
-@"IConnectionConfiguration => factory
-IContainer => factory
-IEasyNetQLogger => ConsoleLogger
-ISerializer => JsonSerializer
-IConventions => Conventions
-IEventBus => EventBus
-ITypeNameSerializer => TypeNameSerializer
-Func`1 => factory
-IClusterHostSelectionStrategy`1 => DefaultClusterHostSelectionStrategy`1
-IConsumerDispatcherFactory => ConsumerDispatcherFactory
-IPublishExchangeDeclareStrategy => PublishExchangeDeclareStrategy
-IPublisherConfirms => PublisherConfirms
-IConsumerErrorStrategy => DefaultConsumerErrorStrategy
-IHandlerRunner => HandlerRunner
-IInternalConsumerFactory => InternalConsumerFactory
-IConsumerFactory => ConsumerFactory
-IConnectionFactory => ConnectionFactoryWrapper
-IPersistentChannelFactory => PersistentChannelFactory
-IClientCommandDispatcherFactory => ClientCommandDispatcherFactory
-IHandlerCollectionFactory => HandlerCollectionFactory
-IAdvancedBus => RabbitAdvancedBus
-IRpc => Rpc
-ISendReceive => SendReceive
-IBus => RabbitBus
-";
-
         [Test]
         public void Should_be_able_to_replace_default_service_provider()
         {
@@ -52,8 +25,6 @@ IBus => RabbitBus
                 resolvedBus.ShouldBeTheSameAs(bus);
 
 //                Console.Out.WriteLine(container.RegisteredComponents);
-
-                container.RegisteredComponents.ShouldEqual(expectedRegisteredComponets);
             }
             finally
             {
