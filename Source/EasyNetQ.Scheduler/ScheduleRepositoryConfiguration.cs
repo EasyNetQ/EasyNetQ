@@ -5,8 +5,12 @@ namespace EasyNetQ.Scheduler
     public class ScheduleRepositoryConfiguration : ConfigurationBase
     {
         private const string connectionStringKey = "scheduleDb";
+        private const string connectionStringNameKey = "scheduleDbConnectionStringName";
+        private const string schemaNameKey = "SchemaName";
 
+        public string SchemaName { get; set; }
         public string ConnectionString { get; set; }
+        public string ConnectionStringName { get; set; }
         public int PurgeBatchSize { get; set; }
         public int MaximumScheduleMessagesToReturn { get; set; }
 
@@ -17,12 +21,14 @@ namespace EasyNetQ.Scheduler
 
         public static ScheduleRepositoryConfiguration FromConfigFile()
         {
+            var connectionStringName = ConfigurationManager.AppSettings[connectionStringNameKey] ?? connectionStringKey;
             return new ScheduleRepositoryConfiguration
             {
-                ConnectionString = ConfigurationManager.ConnectionStrings[connectionStringKey].ConnectionString,
+                ConnectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString,
                 PurgeBatchSize = GetIntAppSetting("PurgeBatchSize"),
                 PurgeDelayDays = GetIntAppSetting("PurgeDelayDays"),
-                MaximumScheduleMessagesToReturn = GetIntAppSetting("MaximumScheduleMessagesToReturn")
+                MaximumScheduleMessagesToReturn = GetIntAppSetting("MaximumScheduleMessagesToReturn"),
+                SchemaName = ConfigurationManager.AppSettings[schemaNameKey]
             };
         }
     }
