@@ -82,7 +82,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             {
             }
 
-            public void Consume(MessageC message)
+            void IConsume<MessageC>.Consume(MessageC message)
             {
             }
         }

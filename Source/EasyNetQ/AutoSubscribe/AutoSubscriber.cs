@@ -136,9 +136,16 @@ namespace EasyNetQ.AutoSubscribe
 
         protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
         {
-            var consumeMethod = consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType });
+            var consumeMethod = consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType }) ??
+                                GetExplicitlyDeclaredInterfaceMethod(consumerInfo.MessageType);
 
             return consumeMethod.GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true).SingleOrDefault() as AutoSubscriberConsumerAttribute;
+        }
+
+        private MethodInfo GetExplicitlyDeclaredInterfaceMethod(Type messageType)
+        {
+            var interfaceType = typeof (IConsume<>).MakeGenericType(messageType);
+            return interfaceType.GetMethod(ConsumeMethodName);
         }
 
         protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types,Type interfaceType)
