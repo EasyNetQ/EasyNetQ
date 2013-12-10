@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.25.0.0")]
+[assembly: AssemblyVersion("0.25.1.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.25.1.0 Autosubscriber explict interface implementation bug fix.
 // 0.25.0.0 SetContainerFactory on RabbitHutch, allows replacement of EasyNetQ's internal IoC container
 // 0.24.0.0 Non-Generic extension methods. Includes change to ISubscriptionConfiguration (removing generic type argument)
 // 0.23.0.0 ErrorExchangeNameConvention now takes a MessageReceivedInfo argument
