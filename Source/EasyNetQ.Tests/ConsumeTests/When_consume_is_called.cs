@@ -1,5 +1,7 @@
 // ReSharper disable InconsistentNaming
 
+using System.Threading.Tasks;
+using EasyNetQ.AutoSubscribe;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using Rhino.Mocks;
@@ -11,7 +13,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => {});
+            StartConsumer((body, properties, info) => { });
         }
 
         [Test]
@@ -39,11 +41,12 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_write_debug_message()
         {
-            MockBuilder.Logger.AssertWasCalled(x => 
-                x.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2}",
-                    "my_queue",
-                    ConsumerTag,
-                    (ushort)50));
+            MockBuilder.Logger.AssertWasCalled(x =>
+                                               x.InfoWrite(
+                                                   "Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2}",
+                                                   "my_queue",
+                                                   ConsumerTag,
+                                                   (ushort) 50));
         }
     }
 }

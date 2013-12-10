@@ -75,12 +75,12 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AmqpExceptionParserTests.cs" />
+    <Compile Include="AutoSubscriberTests\When_autosubscribing.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />
     <Compile Include="ConsumeTests\HandlerCollectionTests.cs" />
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
-    <Compile Include="AutoSubscriberTests.cs" />
     <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
     <Compile Include="ConsumeTests\When_a_consumer_has_multiple_handlers.cs" />
     <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_broker.cs" />
