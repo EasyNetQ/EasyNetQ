@@ -163,7 +163,7 @@ namespace EasyNetQ
             return rpc.Request<TRequest, TResponse>(request);
         }
 
-        public virtual void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
             where TRequest : class
             where TResponse : class
         {
@@ -172,16 +172,16 @@ namespace EasyNetQ
             Func<TRequest, Task<TResponse>> taskResponder =
                 request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
 
-            RespondAsync(taskResponder);
+            return RespondAsync(taskResponder);
         }
 
-        public virtual void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
             where TRequest : class
             where TResponse : class
         {
             Preconditions.CheckNotNull(responder, "responder");
             
-            rpc.Respond(responder);
+            return rpc.Respond(responder);
         }
 
         public void Send<T>(string queue, T message)

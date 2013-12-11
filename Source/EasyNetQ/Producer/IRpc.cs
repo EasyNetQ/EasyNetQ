@@ -25,7 +25,7 @@ namespace EasyNetQ.Producer
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="responder">A function that performs the response</param>
-        void Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class;
     }

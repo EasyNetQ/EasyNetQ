@@ -88,6 +88,7 @@
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_a_message_is_received.cs" />
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
+    <Compile Include="ConsumeTests\When_a_requester_is_disposed.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="EventBusTests.cs" />
     <Compile Include="ExchangeQueueBindingTests.cs" />

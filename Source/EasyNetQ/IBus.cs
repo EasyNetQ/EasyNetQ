@@ -149,7 +149,7 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received. It should return the response.
         /// </param>
-        void Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
             where TRequest : class
             where TResponse : class;
 
@@ -161,7 +161,7 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received.
         /// </param>
-        void RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
             where TRequest : class
             where TResponse : class;
 

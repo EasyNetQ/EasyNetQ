@@ -152,7 +152,7 @@ namespace EasyNetQ.Producer
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
 
-        public void Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
             where TRequest : class 
             where TResponse : class
         {
@@ -164,7 +164,7 @@ namespace EasyNetQ.Producer
             var queue = advancedBus.QueueDeclare(routingKey);
             advancedBus.Bind(exchange, queue, routingKey);
 
-            advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) =>
+            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) =>
                 {
                     var tcs = new TaskCompletionSource<object>();
 
