@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Castle.Windsor</id>
+    <version>3.2.1</version>
+    <title>Castle Windsor</title>
+    <authors>Castle Project Contributors</authors>
+    <owners>Castle Project Contributors</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+    <projectUrl>http://docs.castleproject.org/Windsor.MainPage.ashx</projectUrl>
+    <iconUrl>http://docs.castleproject.org/GetFile.aspx?File=/windsorLogo100px.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Castle Windsor is best of breed, mature Inversion of Control container available for .NET and Silverlight.</description>
+    <copyright>Copyright 2004-2013 Castle Project - http://www.castleproject.org/</copyright>
+    <tags>castle windsor inversionOfControl DependencyInjection</tags>
+    <dependencies>
+      <dependency id="Castle.Core" version="3.2.0" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.0-Client" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.0-Client" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework3.5" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework3.5" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="Silverlight4.0" />
+      <frameworkAssembly assemblyName="System.Windows" targetFramework="Silverlight4.0" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="Silverlight5.0" />
+      <frameworkAssembly assemblyName="System.Windows" targetFramework="Silverlight5.0" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

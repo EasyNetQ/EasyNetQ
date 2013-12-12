@@ -1,37 +1,44 @@
 ﻿using Castle.Windsor;
+using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 
 namespace EasyNetQ.DI.Tests
 {
+    /// <summary>
+    /// EasyNetQ expects that the DI container will follow a first-to-register-wins
+    /// policy. The internal DefaultServiceProvider works this way, as does Windsor.
+    /// However, Ninject doesn't allow more than one registration of a service, it 
+    /// throws an exception, and StructureMap has a last-to-register-wins policy.
+    /// </summary>
     [TestFixture]
     public class WindsorAdapterTests
     {
-        private IWindsorContainer _container;
-        private IBus _bus;
+        private IWindsorContainer container;
+        private IBus bus;
 
         [SetUp]
         public void SetUp()
         {
-            _container = new WindsorContainer();
+            container = new WindsorContainer();
 
-            _container.RegisterAsEasyNetQContainerFactory();
+            container.RegisterAsEasyNetQContainerFactory();
 
-            _bus = RabbitHutch.CreateBus("host=localhost");
+            bus = new MockBuilder().Bus;
         }
 
         [Test]
         public void Should_create_bus_with_windsor_adapter()
         {
-            Assert.IsNotNull(_bus);
+            Assert.IsNotNull(bus);
         }
 
         [TearDown]
         public void TearDown()
         {
-            if (_bus != null)
+            if (bus != null)
             {
-                _bus.Dispose();
-                ((WindsorAdapter)_bus.Advanced.Container).Dispose();
+                bus.Dispose();
+                ((WindsorAdapter)bus.Advanced.Container).Dispose();
             }
             RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());
         }

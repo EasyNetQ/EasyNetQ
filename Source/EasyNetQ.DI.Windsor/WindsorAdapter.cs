@@ -6,22 +6,22 @@ namespace EasyNetQ.DI
 {
     public class WindsorAdapter : IContainer, IDisposable
     {
-        private readonly IWindsorContainer _windsorContainer;
+        private readonly IWindsorContainer windsorContainer;
 
         public WindsorAdapter(IWindsorContainer windsorContainer)
         {
-            _windsorContainer = windsorContainer;
+            this.windsorContainer = windsorContainer;
         }
 
         public TService Resolve<TService>() where TService : class
         {
-            return _windsorContainer.Resolve<TService>();
+            return windsorContainer.Resolve<TService>();
         }
 
         public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator)
             where TService : class
         {
-            _windsorContainer.Register(
+            windsorContainer.Register(
                 Component.For<TService>().UsingFactoryMethod(() => serviceCreator(this)).LifeStyle.Singleton
                 );
             return this;
@@ -31,7 +31,7 @@ namespace EasyNetQ.DI
             where TService : class
             where TImplementation : class, TService
         {
-            _windsorContainer.Register(
+            windsorContainer.Register(
                 Component.For<TService>().ImplementedBy<TImplementation>().LifeStyle.Singleton
                 );
             return this;
@@ -39,7 +39,7 @@ namespace EasyNetQ.DI
 
         public void Dispose()
         {
-            _windsorContainer.Dispose();
+            windsorContainer.Dispose();
         }
     }
 }
