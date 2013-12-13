@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
@@ -21,6 +22,9 @@ namespace EasyNetQ.Producer
         private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
 
         private readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
+
+        private const string IsFaultedKey = "IsFaulted";
+        private const string ExceptionMessageKey = "ExceptionMessage";
 
         public Rpc(
             IAdvancedBus advancedBus, 
@@ -79,7 +83,31 @@ namespace EasyNetQ.Producer
                 OnSuccess = message =>
                     {
                         timer.Dispose();
-                        tcs.TrySetResult(((Message<TResponse>) message).Body);
+
+                        var msg = ((Message<TResponse>)message);
+
+                        bool isFaulted = false;
+                        string exceptionMessage = "The exception message has not been specified.";
+                        if (msg.Properties.HeadersPresent)
+                        {
+                            if (msg.Properties.Headers.Contains(IsFaultedKey))
+                            {
+                                isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
+                            }
+                            if (msg.Properties.Headers.Contains(ExceptionMessageKey))
+                            {
+                                exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[ExceptionMessageKey]);
+                            }
+                        }
+
+                        if (isFaulted)
+                        {
+                            tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
+                        }
+                        else
+                        {
+                            tcs.TrySetResult(msg.Body);
+                        }
                     },
                 OnFailure = () =>
                     {
@@ -174,6 +202,13 @@ namespace EasyNetQ.Producer
                             {
                                 if (task.Exception != null)
                                 {
+                                    var body = Activator.CreateInstance<TResponse>();
+                                    var responseMessage = new Message<TResponse>(body);
+                                    responseMessage.Properties.Headers.Add(IsFaultedKey, true);
+                                    responseMessage.Properties.Headers.Add(ExceptionMessageKey, task.Exception.InnerException.Message);
+                                    responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
+                                    advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
                                     tcs.SetException(task.Exception);
                                 }
                             }
