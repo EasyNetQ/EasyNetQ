@@ -203,6 +203,32 @@ namespace EasyNetQ.Tests.Integration
 
         // First start the EasyNetQ.Tests.SimpleService console app.
         // Run this test. You should see the SimpleService report that it's
+        // Thrown, a new error message in the error queue and an EasyNetQResponderException
+        // exception should be thrown by the consumer as a response.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [ExpectedException(ExpectedException = typeof(EasyNetQResponderException), ExpectedMessage = "This should be the original exception message!")]
+        public void Should_throw_an_exception_at_consumer_on_simple_request_response_that_throws_on_server()
+        {
+            var request = new TestRequestMessage
+            {
+                Text = "Hello from the client! ",
+                CausesExceptionInServer = true,
+                ExceptionInServerMessage = "This should be the original exception message!"
+            };
+
+            Console.WriteLine("Making request");
+            try
+            {
+                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).Wait(1000);
+            }
+            catch (AggregateException e)
+            {
+                throw e.InnerException;
+            }
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
         // responding and the response should appear here with an exception report.
         // you should also see a new error message in the error queue.
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]

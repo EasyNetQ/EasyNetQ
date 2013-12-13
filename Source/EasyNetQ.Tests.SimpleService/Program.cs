@@ -50,6 +50,8 @@ namespace EasyNetQ.Tests.SimpleService
             }
             if (request.CausesExceptionInServer)
             {
+                if (request.ExceptionInServerMessage != null)
+                    throw new SomeRandomException(request.ExceptionInServerMessage);
                 throw new SomeRandomException("Something terrible has just happened!");
             }
             return new TestResponseMessage{ Id = request.Id, Text = request.Text + " all done!" };
