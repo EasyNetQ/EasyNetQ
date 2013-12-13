@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Collections;
+using System.Collections.Specialized;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
@@ -82,6 +83,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
+        private IDictionary arguments= new ListDictionary(){{"Key","Value"}};
 
         [SetUp]
         public void SetUp()
@@ -89,7 +91,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, false, false, true, true);
+            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, false, false, true, true, arguments);
         }
 
         [Test]
@@ -108,7 +110,7 @@ namespace EasyNetQ.Tests
                     Arg<string>.Is.Equal("direct"),
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary>.Is.Anything));
+                    Arg<IDictionary>.Is.Equal(arguments)));
         }
     }
 
@@ -125,7 +127,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive:true);
+            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
         [Test]
