@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.25.3.0")]
+[assembly: AssemblyVersion("0.25.4.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.25.4.0 Exchange declare accepts alternate-exchange parameter
 // 0.25.3.0 StructureMap and Windsor Container implementations
 // 0.25.2.0 Can cancel Respond.
 // 0.25.1.0 Autosubscriber explict interface implementation bug fix.

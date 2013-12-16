@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
-        private IDictionary arguments= new ListDictionary(){{"Key","Value"}};
+        private IDictionary arguments;
 
         [SetUp]
         public void SetUp()
@@ -91,7 +91,21 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, false, false, true, true, arguments);
+            mockBuilder.NextModel.Stub(x => x.ExchangeDeclare(null, null, false, false, null))
+                .IgnoreArguments()
+                .WhenCalled(x =>
+                    {
+                        arguments = x.Arguments[4] as IDictionary;
+                    });
+
+            exchange = advancedBus.ExchangeDeclare(
+                "my_exchange", 
+                ExchangeType.Direct, 
+                false, 
+                false, 
+                true, 
+                true, 
+                "my.alternate.exchange");
         }
 
         [Test]
@@ -110,7 +124,14 @@ namespace EasyNetQ.Tests
                     Arg<string>.Is.Equal("direct"),
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary>.Is.Equal(arguments)));
+                    Arg<IDictionary>.Is.Anything));
+        }
+
+        [Test]
+        public void Should_add_correct_arguments()
+        {
+            arguments.ShouldNotBeNull();
+            arguments["alternate-exchange"].ShouldEqual("my.alternate.exchange");
         }
     }
 

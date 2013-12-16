@@ -51,6 +51,22 @@ namespace EasyNetQ.Tests.Integration
         }
 
         [Test, Explicit]
+        public void DeclareExchangeWithAlternate()
+        {
+            const string alternate = "alternate";
+            const string bindingKey = "the-binding-key";
+
+            var alternateExchange = advancedBus.ExchangeDeclare(alternate, ExchangeType.Direct);
+            var originalExchange = advancedBus.ExchangeDeclare("original", ExchangeType.Direct, alternateExchange: alternate);
+            var queue = advancedBus.QueueDeclare("my_queue");
+
+            advancedBus.Bind(alternateExchange, queue, bindingKey);
+
+            var message = Encoding.UTF8.GetBytes("Some message");
+            advancedBus.Publish(originalExchange, bindingKey, false, false, new MessageProperties(), message);
+        }
+
+        [Test, Explicit]
         public void ConsumeFromAQueue()
         {
             var queue = new Queue("my_queue", false);

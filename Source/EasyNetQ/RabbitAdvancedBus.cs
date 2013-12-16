@@ -287,7 +287,14 @@ namespace EasyNetQ
             logger.DebugWrite("Purged Queue: {0}", queue.Name);
         }
 
-        public virtual IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, IDictionary arguments = null)
+        public virtual IExchange ExchangeDeclare(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false,
+            string alternateExchange = null)
         {
             Preconditions.CheckNotNull(name, "name");
             Preconditions.CheckShortString(type, "type");
@@ -298,6 +305,12 @@ namespace EasyNetQ
             }
             else
             {
+                IDictionary arguments = null;
+                if (alternateExchange != null)
+                {
+                    arguments = new Hashtable {{"alternate-exchange", alternateExchange}};
+                }
+
                 clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments)).Wait();
                 logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
                     name, type, durable, autoDelete);

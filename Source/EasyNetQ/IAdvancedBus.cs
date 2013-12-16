@@ -208,9 +208,9 @@ namespace EasyNetQ
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
         /// <param name="internal">If set, the exchange may not be used directly by publishers, 
         ///     but only when bound to other exchanges.</param>
-        /// <param name="arguments">If set, extra parameters for the exchange</param>
+        /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <returns>The exchange</returns>
-        IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, IDictionary arguments=null);
+        IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
 
         /// <summary>
         /// Delete an exchange
