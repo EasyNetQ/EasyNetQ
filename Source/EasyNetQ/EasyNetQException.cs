@@ -25,4 +25,14 @@ namespace EasyNetQ
         public EasyNetQInvalidMessageTypeException(string message, Exception inner) : base(message, inner) {}
         protected EasyNetQInvalidMessageTypeException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
+
+    [Serializable]
+    public class EasyNetQResponderException : EasyNetQException
+    {
+        public EasyNetQResponderException() { }
+        public EasyNetQResponderException(string message) : base(message) { }
+        public EasyNetQResponderException(string format, params string[] args) : base(format, args) { }
+        public EasyNetQResponderException(string message, Exception inner) : base(message, inner) { }
+        protected EasyNetQResponderException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }

@@ -5,6 +5,7 @@
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.26.0.0 Request now throws exception if the responder throws on server. Requests will not timeout anymore on responder exception.
 // 0.25.4.0 Exchange declare accepts alternate-exchange parameter
 // 0.25.3.0 StructureMap and Windsor Container implementations
 // 0.25.2.0 Can cancel Respond.
