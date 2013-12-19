@@ -562,6 +562,8 @@ namespace EasyNetQ.Management.Client.Tests
         public void Should_be_able_to_create_policies()
         {
             var policyName = "asamplepolicy";
+            var haMode = HaMode.All;
+            var haSyncMode = HaSyncMode.Automatic;
             managementClient.CreatePolicy(new Policy
             {
                 Name = policyName,
@@ -569,11 +571,168 @@ namespace EasyNetQ.Management.Client.Tests
                 Vhost = "/",
                 Definition = new PolicyDefinition
                 {
-                    HaMode = HaMode.All,
-                    HaSyncMode = HaSyncMode.Automatic
+                    HaMode = haMode,
+                    HaSyncMode = haSyncMode
                 }
             });
-            Assert.AreEqual(1, managementClient.GetPolicies().Count(p => p.Name == policyName && p.Vhost == "/"));
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Definition.HaMode == haMode
+                     && p.Definition.HaSyncMode == haSyncMode));
+        }
+
+        [Test]
+        public void Should_be_able_to_create_alternate_exchange_policy()
+        {
+            var policyName = "a-sample-alternate-exchange-policy";
+            var alternateExchange = "a-sample-alternate-exchange";
+            managementClient.CreatePolicy(new Policy
+            {
+                Name = policyName,
+                Pattern = "averyuncommonpattern",
+                Vhost = "/",
+                Definition = new PolicyDefinition
+                {
+                    AlternateExchange = alternateExchange
+                }
+            });
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Definition.AlternateExchange == alternateExchange));
+        }
+
+        [Test]
+        public void Should_be_able_to_create_dead_letter_exchange_policy()
+        {
+            var policyName = "a-sample-dead-letter-exchange";
+            var deadLetterExchange = "a-sample-dead-letter-exchange";
+            var deadLetterRoutingKey = "a-sample-dead-letter-exchange-key";
+            managementClient.CreatePolicy(new Policy
+            {
+                Name = policyName,
+                Pattern = "averyuncommonpattern",
+                Vhost = "/",
+                Definition = new PolicyDefinition
+                {
+                    DeadLetterExchange = deadLetterExchange,
+                    DeadLetterRoutingKey = deadLetterRoutingKey
+                }
+            });
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Definition.DeadLetterExchange == deadLetterExchange
+                     && p.Definition.DeadLetterRoutingKey == deadLetterRoutingKey));
+        }
+
+        [Test]
+        public void Should_be_able_to_create_message_ttl_policy()
+        {
+            var policyName = "a-sample-message-ttl";
+            uint messageTtl = 5000;
+            managementClient.CreatePolicy(new Policy
+            {
+                Name = policyName,
+                Pattern = "averyuncommonpattern",
+                Vhost = "/",
+                Definition = new PolicyDefinition
+                {
+                    MessageTtl = messageTtl
+                }
+            });
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Definition.MessageTtl == messageTtl));
+        }
+
+        [Test]
+        public void Should_be_able_to_create_expires_policy()
+        {
+            var policyName = "a-sample-expires";
+            uint expires = 10000;
+            managementClient.CreatePolicy(new Policy
+            {
+                Name = policyName,
+                Pattern = "averyuncommonpattern",
+                Vhost = "/",
+                Definition = new PolicyDefinition
+                {
+                    Expires = expires
+                }
+            });
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Definition.Expires == expires));
+        }
+
+        [Test]
+        public void Should_be_able_to_create_max_length_policy()
+        {
+            var policyName = "a-sample-max-length";
+            uint maxLength = 500;
+            managementClient.CreatePolicy(new Policy
+            {
+                Name = policyName,
+                Pattern = "averyuncommonpattern",
+                Vhost = "/",
+                Definition = new PolicyDefinition
+                {
+                    MaxLength = maxLength
+                }
+            });
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Definition.MaxLength == maxLength));
+        }
+
+        [Test]
+        public void Should_be_able_to_create_all_the_defitions_in_a_policy()
+        {
+            var policyName = "a-sample-all-definitions-in-a-policy";
+            var priority = 999;
+            var haMode = HaMode.All;
+            var haSyncMode = HaSyncMode.Automatic;
+            var alternateExchange = "a-sample-alternate-exchange";
+            var deadLetterExchange = "a-sample-dead-letter-exchange";
+            var deadLetterRoutingKey = "a-sample-dead-letter-exchange-key";
+            uint messageTtl = 5000;
+            uint expires = 10000;
+            uint maxLength = 500;
+            managementClient.CreatePolicy(new Policy
+            {
+                Name = policyName,
+                Pattern = "averyuncommonpattern",
+                Vhost = "/",
+                Definition = new PolicyDefinition
+                {
+                    HaMode = haMode,
+                    HaSyncMode = haSyncMode,
+                    AlternateExchange = alternateExchange,
+                    DeadLetterExchange = deadLetterExchange,
+                    DeadLetterRoutingKey = deadLetterRoutingKey,
+                    MessageTtl = messageTtl,
+                    Expires = expires,
+                    MaxLength = maxLength
+                },
+                Priority = priority
+            });
+            Assert.AreEqual(1, managementClient.GetPolicies().Count(
+                p => p.Name == policyName
+                     && p.Vhost == "/"
+                     && p.Priority == priority
+                     && p.Definition.HaMode == haMode
+                     && p.Definition.HaSyncMode == haSyncMode
+                     && p.Definition.AlternateExchange == alternateExchange
+                     && p.Definition.DeadLetterExchange == deadLetterExchange
+                     && p.Definition.DeadLetterRoutingKey == deadLetterRoutingKey
+                     && p.Definition.MessageTtl == messageTtl
+                     && p.Definition.Expires == expires
+                     && p.Definition.MaxLength == maxLength));
         }
 
         [Test]
