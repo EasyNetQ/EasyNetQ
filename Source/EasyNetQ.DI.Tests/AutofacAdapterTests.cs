@@ -19,10 +19,7 @@ namespace EasyNetQ.DI.Tests
         {
             builder = new ContainerBuilder();
             builder.Register(c => new MockBuilder().Bus).As<IBus>();
-            autofacAdapter = new AutofacAdapter(builder);
-
-            RabbitHutch.SetContainerFactory(() => autofacAdapter);
-            container = autofacAdapter.Container;
+            container = builder.RegisterAsEasyNetQContainerFactory();
             bus = container.Resolve<IBus>();
         }
 
@@ -36,7 +33,6 @@ namespace EasyNetQ.DI.Tests
         private ContainerBuilder builder;
         private IBus bus;
         private Autofac.IContainer container;
-        private AutofacAdapter autofacAdapter;
 
         [Test]
         public void Should_create_bus_with_autofac_module()
