@@ -46,6 +46,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AutofacMessageDispatcher.cs" />
     <Compile Include="InjectionExtensions.cs" />
     <Compile Include="AutofacAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
