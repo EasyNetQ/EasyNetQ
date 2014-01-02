@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Collections;
+using System.Collections.Specialized;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
@@ -82,6 +83,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
+        private IDictionary arguments;
 
         [SetUp]
         public void SetUp()
@@ -89,7 +91,21 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, false, false, true, true);
+            mockBuilder.NextModel.Stub(x => x.ExchangeDeclare(null, null, false, false, null))
+                .IgnoreArguments()
+                .WhenCalled(x =>
+                    {
+                        arguments = x.Arguments[4] as IDictionary;
+                    });
+
+            exchange = advancedBus.ExchangeDeclare(
+                "my_exchange", 
+                ExchangeType.Direct, 
+                false, 
+                false, 
+                true, 
+                true, 
+                "my.alternate.exchange");
         }
 
         [Test]
@@ -110,6 +126,13 @@ namespace EasyNetQ.Tests
                     Arg<bool>.Is.Equal(true),
                     Arg<IDictionary>.Is.Anything));
         }
+
+        [Test]
+        public void Should_add_correct_arguments()
+        {
+            arguments.ShouldNotBeNull();
+            arguments["alternate-exchange"].ShouldEqual("my.alternate.exchange");
+        }
     }
 
     [TestFixture]
@@ -125,7 +148,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive:true);
+            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
         [Test]

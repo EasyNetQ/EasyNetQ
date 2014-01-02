@@ -14,6 +14,7 @@ namespace EasyNetQ.Tests
         public long Id { get; set; }
         public string Text { get; set; }
         public bool CausesExceptionInServer { get; set; }
+        public string ExceptionInServerMessage { get; set; }
         public bool CausesServerToTakeALongTimeToRespond { get; set; }
     }
 

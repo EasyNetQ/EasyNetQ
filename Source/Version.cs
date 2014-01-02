@@ -1,10 +1,13 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.25.3.0")]
+[assembly: AssemblyVersion("0.26.1.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.26.1.0 New policy definitions: alternate-exchange, dead-letter-exchange, dead-letter-routing-key, message-ttl, expires, max-length. Add nullability on HaMode and HaSyncMode, to let add a policy without them.
+// 0.26.0.0 Request now throws exception if the responder throws on server. Requests will not timeout anymore on responder exception.
+// 0.25.4.0 Exchange declare accepts alternate-exchange parameter
 // 0.25.3.0 StructureMap and Windsor Container implementations
 // 0.25.2.0 Can cancel Respond.
 // 0.25.1.0 Autosubscriber explict interface implementation bug fix.

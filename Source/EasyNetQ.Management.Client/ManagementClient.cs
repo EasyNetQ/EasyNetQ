@@ -533,18 +533,10 @@ namespace EasyNetQ.Management.Client
             var request = CreateRequestForPath(path);
             request.Method = "DELETE";
 
-            try
+            var response = request.GetHttpResponse();
+            if (response.StatusCode != HttpStatusCode.NoContent)
             {
-                var response = request.GetHttpResponse();
-                if (response.StatusCode != HttpStatusCode.NoContent)
-                {
-                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
-                }
-            }
-            catch (WebException webException)
-            {
-                throw new EasyNetQManagementException("Unexpected status code: {0}",
-                    ((HttpWebResponse)webException.Response).StatusCode);
+                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
         }
 
@@ -554,19 +546,10 @@ namespace EasyNetQ.Management.Client
             request.Method = "PUT";
             request.ContentType = "application/json";
 
-            try
+            var response = request.GetHttpResponse();
+            if (response.StatusCode != HttpStatusCode.NoContent)
             {
-                var response = request.GetHttpResponse();
-                if (response.StatusCode != HttpStatusCode.NoContent)
-                {
-                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
-                }
-            }
-            catch (WebException webException)
-            {
-                // GetBodyFromResponse((HttpWebResponse)webException.Response);
-                throw new EasyNetQManagementException("Unexpected status code: {0}",
-                    ((HttpWebResponse)webException.Response).StatusCode);
+                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
         }
 
@@ -577,19 +560,10 @@ namespace EasyNetQ.Management.Client
 
             InsertRequestBody(request, item);
 
-            try
+            var response = request.GetHttpResponse();
+            if (response.StatusCode != HttpStatusCode.NoContent)
             {
-                var response = request.GetHttpResponse();
-                if (response.StatusCode != HttpStatusCode.NoContent)
-                {
-                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
-                }
-            }
-            catch (WebException webException)
-            {
-                // GetBodyFromResponse((HttpWebResponse)webException.Response);
-                throw new EasyNetQManagementException("Unexpected status code: {0}",
-                    ((HttpWebResponse)webException.Response).StatusCode);
+                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
             }
         }
 
