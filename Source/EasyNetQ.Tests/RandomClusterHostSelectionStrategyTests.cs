@@ -11,13 +11,13 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class RandomClusterHostSelectionStrategyTests
     {
-        private IClusterHostSelectionStrategy<string> defaultClusterHostSelectionStrategy;
+        private IClusterHostSelectionStrategy<string> clusterHostSelectionStrategy;
         private HashSet<string> hosts;
 
         [SetUp]
         public void SetUp()
         {
-            defaultClusterHostSelectionStrategy = new RandomClusterHostSelectionStrategy<string>
+            clusterHostSelectionStrategy = new RandomClusterHostSelectionStrategy<string>
             {
                 "0",
                 "1",
@@ -32,15 +32,28 @@ namespace EasyNetQ.Tests
         {
             do
             {
-                var item = defaultClusterHostSelectionStrategy.Current();
+                var item = clusterHostSelectionStrategy.Current();
                 hosts.Add(item);
-            } while (defaultClusterHostSelectionStrategy.Next());
+            } while (clusterHostSelectionStrategy.Next());
 
             Assert.IsTrue(hosts.Contains("0"));
             Assert.IsTrue(hosts.Contains("1"));
             Assert.IsTrue(hosts.Contains("2"));
             Assert.IsTrue(hosts.Contains("3"));
-            defaultClusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
+            clusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
+        }
+
+        [Test]
+        public void Should_forget_success_after_reset()
+        {
+            do
+            {
+                clusterHostSelectionStrategy.Current();
+                clusterHostSelectionStrategy.Success();
+            } while (clusterHostSelectionStrategy.Next());
+            clusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
+            clusterHostSelectionStrategy.Reset();
+            clusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
         }
 
         [Test]
@@ -49,15 +62,15 @@ namespace EasyNetQ.Tests
             var count = 0;
             do
             {
-                var item = defaultClusterHostSelectionStrategy.Current();
+                var item = clusterHostSelectionStrategy.Current();
                 hosts.Add(item);
       
                 count++;
-                if (count == 2) defaultClusterHostSelectionStrategy.Success();
+                if (count == 2) clusterHostSelectionStrategy.Success();
 
-            } while (defaultClusterHostSelectionStrategy.Next());
+            } while (clusterHostSelectionStrategy.Next());
 
-            defaultClusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
+            clusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
         }
 
     }

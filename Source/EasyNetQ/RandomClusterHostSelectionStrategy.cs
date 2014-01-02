@@ -15,6 +15,11 @@ namespace EasyNetQ
             get { return items.Count - 1; }
         }
 
+        public RandomClusterHostSelectionStrategy()
+        {
+            Succeeded = false;
+        }
+
         public void Add(T item)
         {
             Preconditions.CheckNotNull(item, "item");
@@ -51,6 +56,7 @@ namespace EasyNetQ
         public void Reset()
         {
             items.Shuffle();
+            Succeeded = false;
             CurrentIndex = 0;
         }
 
