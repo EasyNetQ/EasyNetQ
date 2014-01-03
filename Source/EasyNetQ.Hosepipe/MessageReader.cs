@@ -23,8 +23,11 @@ namespace EasyNetQ.Hosepipe
 
             foreach (var file in Directory.GetFiles(parameters.MessageFilePath, bodyPattern))
             {
-                var propertiesFileName = file.Replace("message", "properties");
-                var infoFileName = file.Replace("message", "info");
+                const string messageTag = ".message.";
+                var directoryName = Path.GetDirectoryName(file);
+                var fileName = Path.GetFileName(file);
+                var propertiesFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".properties."));
+                var infoFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".info."));
 
                 var body = File.ReadAllText(file);
 
