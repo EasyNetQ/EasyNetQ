@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
@@ -29,8 +30,8 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [SetUp]
         public void SetUp()
         {
-            mockBuilder = new MockBuilder();
-//            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
+//            mockBuilder = new MockBuilder();
+            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
 
@@ -52,6 +53,22 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             assertQueueDeclared(expectedQueueName1);
             assertQueueDeclared(expectedQueueName2);
             assertQueueDeclared(expectedQueueName3);
+        }
+
+        [Test]
+        public void Should_have_bound_to_queues()
+        {
+            Action<int, string, string> assertConsumerStarted = (channelIndex, queueName, topicName) =>
+                                                        mockBuilder.Channels[0].AssertWasCalled(x =>
+                                                x.QueueBind(
+                                                Arg<string>.Is.Equal(queueName),
+                                                Arg<string>.Is.Anything,
+                                                Arg<string>.Is.Equal(topicName))
+                                                );
+          
+            assertConsumerStarted(1, expectedQueueName1, "#");
+            assertConsumerStarted(2, expectedQueueName2, "#");
+            assertConsumerStarted(3, expectedQueueName3, "Important");
         }
 
         [Test]
@@ -82,12 +99,14 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             {
             }
 
-            void IConsume<MessageC>.Consume(MessageC message)
+            [ForTopicAttribute("Important")]
+            public void Consume(MessageC message)
             {
             }
+          
         }
 
-        // Discovered by reflection over test assembly, do not remove.
+        //Discovered by reflection over test assembly, do not remove.
         private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
         {
             public Task Consume(MessageA message)

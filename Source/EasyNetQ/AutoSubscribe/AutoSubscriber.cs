@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 
 namespace EasyNetQ.AutoSubscribe
 {
@@ -114,10 +115,43 @@ namespace EasyNetQ.AutoSubscribe
                     var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
                     var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
                     var busSubscribeMethod = genericBusSubscribeMethod.MakeGenericMethod(subscriptionInfo.MessageType);
-                    busSubscribeMethod.Invoke(bus, new object[] {subscriptionId, dispatchDelegate});
+                    Action<ISubscriptionConfiguration> topicInfo = TopicInfo(subscriptionInfo);
+                    busSubscribeMethod.Invoke(bus, new object[] {subscriptionId, dispatchDelegate, topicInfo});
                 }
             }
         }
+
+        private Action<ISubscriptionConfiguration> TopicInfo(AutoSubscriberConsumerInfo subscriptionInfo)
+        {
+            var topics = GetTopAttributeValues(subscriptionInfo);
+            if (topics.Count() != 0)
+            {
+                return GenerateConfigurationFromTopics(topics);
+            }
+            return configuration => configuration.WithTopic("#");
+        }
+
+        private Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(IEnumerable<string> topics)
+        {
+            return configuration =>
+                {
+                    foreach (var topic in topics)
+                    {
+                        configuration.WithTopic(topic);
+                    }
+                };
+        }
+
+        private IEnumerable<string> GetTopAttributeValues(AutoSubscriberConsumerInfo subscriptionInfo)
+        {
+            var consumeMethod = ConsumeMethod(subscriptionInfo);
+            object[] customAttributes = consumeMethod.GetCustomAttributes(typeof(ForTopicAttribute), true);
+            Console.WriteLine("Attributes for {0} have count {1}",  consumeMethod.Name ,  customAttributes.Count());
+            return customAttributes
+                             .OfType<ForTopicAttribute>()
+                             .Select(a => a.Topic);
+        }
+
 
         protected virtual bool IsValidMarkerType(Type markerType)
         {
@@ -129,17 +163,24 @@ namespace EasyNetQ.AutoSubscribe
             return bus.GetType().GetMethods()
                 .Where(m => m.Name == methodName)
                 .Select(m => new { Method = m, Params = m.GetParameters() })
-                .Single(m => m.Params.Length == 2
+                .Single(m => m.Params.Length == 3
                     && m.Params[0].ParameterType == typeof(string)
-                    && m.Params[1].ParameterType.GetGenericTypeDefinition() == parmType).Method;
+                    && m.Params[1].ParameterType.GetGenericTypeDefinition() == parmType
+                    && m.Params[2].ParameterType == typeof(Action<ISubscriptionConfiguration>)
+                   ).Method;
         }
 
         protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
         {
-            var consumeMethod = consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType }) ??
-                                GetExplicitlyDeclaredInterfaceMethod(consumerInfo.MessageType);
+            var consumeMethod = ConsumeMethod(consumerInfo);
 
             return consumeMethod.GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true).SingleOrDefault() as AutoSubscriberConsumerAttribute;
+        }
+
+        private MethodInfo ConsumeMethod(AutoSubscriberConsumerInfo consumerInfo)
+        {
+            return consumerInfo.ConcreteType.GetMethod(ConsumeMethodName, new[] { consumerInfo.MessageType }) ??
+                   GetExplicitlyDeclaredInterfaceMethod(consumerInfo.MessageType);
         }
 
         private MethodInfo GetExplicitlyDeclaredInterfaceMethod(Type messageType)

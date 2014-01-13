@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Sprache</id>
+    <version>1.10.0.12</version>
+    <title>Sprache</title>
+    <authors>Nicholas Blumhardt</authors>
+    <owners>Nicholas Blumhardt</owners>
+    <licenseUrl>https://github.com/sprache/Sprache/blob/master/licence.txt</licenseUrl>
+    <projectUrl>https://github.com/sprache/Sprache</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Sprache is a simple, lightweight library for constructing parsers directly in C# code.</description>
+    <releaseNotes />
+    <copyright>Copyright Nicholas Blumhardt 2012</copyright>
+    <tags>Parser Parsers Monad</tags>
+  </metadata>
+</package>
