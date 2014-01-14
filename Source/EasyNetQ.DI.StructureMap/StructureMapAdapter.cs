@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using StructureMap;
 
 namespace EasyNetQ.DI
 {
@@ -18,6 +20,7 @@ namespace EasyNetQ.DI
 
         public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
         {
+            if (ServiceRegistered<TService>()) return this;
             structureMapContainer.Configure(
                 c => c.For<TService>().Singleton().Use(() => serviceCreator(this))
                 );
@@ -28,10 +31,34 @@ namespace EasyNetQ.DI
             where TService : class
             where TImplementation : class, TService
         {
+            if (ServiceRegistered<TService>()) return this;
             structureMapContainer.Configure(
                 c => c.For<TService>().Singleton().Use(ctx => ctx.GetInstance<TImplementation>())
                 );
             return this;
+        }
+
+        private bool ServiceRegistered<T>()
+        {
+            var instance = structureMapContainer.TryGetInstance(typeof(T));
+            var d = instance as Delegate;
+            if (d != null)
+            {
+                try
+                {
+                    d.DynamicInvoke();
+                }
+                catch (TargetInvocationException ex)
+                {
+                    var inner = ex.InnerException as StructureMapException;
+                    if (inner == null)
+                        throw;
+                    if (inner.ErrorCode == 202)
+                        return false;
+                    throw;
+                }
+            }
+            return instance != null;
         }
 
         public void Dispose()
