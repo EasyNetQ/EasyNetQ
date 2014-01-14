@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
+using System.Data.Common;
 using System.Threading;
 using EasyNetQ.SystemMessages;
 
@@ -17,27 +16,24 @@ namespace EasyNetQ.Scheduler
 
     public class ScheduleRepository : IScheduleRepository
     {
-        private const string insertSql = "uspAddNewMessageToScheduler";
-        private const string selectSql = "uspGetNextBatchOfMessages";
-        private const string purgeSql = "uspWorkItemsSelfPurge";
-        private const string markForPurgeSql = "uspMarkWorkItemForPurge";
-
         private readonly ScheduleRepositoryConfiguration configuration;
         private readonly Func<DateTime> now;
+        private readonly ISqlDialect dialect;
 
         public ScheduleRepository(ScheduleRepositoryConfiguration configuration, Func<DateTime> now)
         {
             this.configuration = configuration;
             this.now = now;
+            this.dialect = SqlDialectResolver.Resolve(configuration.ProviderName);
         }
 
         public void Store(ScheduleMe scheduleMe)
         {
-            WithStoredProcedureCommand(insertSql, command =>
+            WithStoredProcedureCommand(dialect.InsertProcedureName, command =>
             {
-                command.Parameters.AddWithValue("@WakeTime", scheduleMe.WakeTime);
-                command.Parameters.AddWithValue("@BindingKey", scheduleMe.BindingKey);
-                command.Parameters.AddWithValue("@Message", scheduleMe.InnerMessage);
+                AddParameter(command, dialect.WakeTimeParameterName, scheduleMe.WakeTime, DbType.DateTime);
+                AddParameter(command, dialect.BindingKeyParameterName, scheduleMe.BindingKey, DbType.String);
+                AddParameter(command, dialect.MessageParameterName, scheduleMe.InnerMessage, DbType.Binary);
 
                 command.ExecuteNonQuery();
             });
@@ -48,10 +44,11 @@ namespace EasyNetQ.Scheduler
             var scheduledMessages = new List<ScheduleMe>();
             var scheduleMessageIds = new List<int>();
 
-            WithStoredProcedureCommand(selectSql, command =>
+            WithStoredProcedureCommand(dialect.SelectProcedureName, command =>
             {
-                command.Parameters.AddWithValue("@WakeTime", now());
-                command.Parameters.AddWithValue("@rows", configuration.MaximumScheduleMessagesToReturn);
+                AddParameter(command, dialect.RowsParameterName, configuration.MaximumScheduleMessagesToReturn, DbType.Int32);
+                AddParameter(command, dialect.StatusParameterName, 0, DbType.Byte);
+                AddParameter(command, dialect.WakeTimeParameterName, now(), DbType.DateTime);
 
                 using (var reader = command.ExecuteReader())
                 {
@@ -61,7 +58,7 @@ namespace EasyNetQ.Scheduler
                         {
                             WakeTime = reader.GetDateTime(2),
                             BindingKey = reader.GetString(3),
-                            InnerMessage = reader.GetSqlBinary(4).Value
+                            InnerMessage = (byte[])reader.GetValue(4)
                         });
 
                         scheduleMessageIds.Add(reader.GetInt32(0));
@@ -78,12 +75,12 @@ namespace EasyNetQ.Scheduler
         {
             // mark items for purge on a background thread.
             ThreadPool.QueueUserWorkItem(state =>
-                WithStoredProcedureCommand(markForPurgeSql, command =>
+                WithStoredProcedureCommand(dialect.MarkForPurgeProcedureName, command =>
                 {
                     var purgeDate = now().AddDays(configuration.PurgeDelayDays);
 
-                    command.Parameters.AddWithValue("@purgeDate", purgeDate);
-                    var idParameter = command.Parameters.Add("@ID", SqlDbType.Int);
+                    var idParameter = AddParameter(command, dialect.IdParameterName, DbType.Int32);
+                    AddParameter(command, dialect.PurgeDateParameterName, purgeDate, DbType.DateTime);
 
                     foreach (var scheduleMessageId in scheduleMessageIds)
                     {
@@ -96,25 +93,21 @@ namespace EasyNetQ.Scheduler
 
         public void Purge()
         {
-            WithStoredProcedureCommand(purgeSql, command =>
+            WithStoredProcedureCommand(dialect.PurgeProcedureName, command =>
                 {
-                    var purgeDate = now();
-
-                    command.Parameters.AddWithValue("@rows", configuration.PurgeBatchSize);
-                    command.Parameters.AddWithValue("@purgeDate", purgeDate);
+                    AddParameter(command, dialect.RowsParameterName, configuration.PurgeBatchSize, DbType.Byte);
+                    AddParameter(command, dialect.PurgeDateParameterName, now(), DbType.DateTime);
 
                     command.ExecuteNonQuery();
                 });
         }
 
-        private void WithStoredProcedureCommand(string storedProcedureName, Action<SqlCommand> commandAction)
+        private void WithStoredProcedureCommand(string storedProcedureName, Action<IDbCommand> commandAction)
         {
-            using (var connection = new SqlConnection(configuration.ConnectionString))
-            using (var command = new SqlCommand(FormatWithSchemaName(storedProcedureName), connection))
+            using (var connection = GetConnection())
+            using (var command = CreateCommand(connection, FormatWithSchemaName(storedProcedureName)))
             {
-                connection.Open();
                 command.CommandType = CommandType.StoredProcedure;
-
                 commandAction(command);
             }
         }
@@ -125,6 +118,40 @@ namespace EasyNetQ.Scheduler
                 return storedProcedureName;
 
             return string.Format("[{0}].{1}", configuration.SchemaName.TrimStart('[').TrimEnd('.', ']'), storedProcedureName);
+        }
+
+        private IDbConnection GetConnection()
+        {
+            var factory = DbProviderFactories.GetFactory(configuration.ProviderName);
+            var connection = factory.CreateConnection();
+            connection.ConnectionString = configuration.ConnectionString;
+            connection.Open();
+            return connection;
+        }
+
+        private IDbCommand CreateCommand(IDbConnection connection, string commandText)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = commandText;
+            return command;
+        }
+
+        private void AddParameter(IDbCommand command, string parameterName, object value, DbType dbType)
+        {
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = parameterName;
+            parameter.Value = value;
+            parameter.DbType = dbType;
+            command.Parameters.Add(parameter);
+        }
+
+        private IDbDataParameter AddParameter(IDbCommand command, string parameterName, DbType dbType)
+        {
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = parameterName;
+            parameter.DbType = dbType;
+            command.Parameters.Add(parameter);
+            return parameter;
         }
     }
 }

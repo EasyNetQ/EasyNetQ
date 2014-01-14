@@ -17,7 +17,7 @@ namespace EasyNetQ.Scheduler.Tests
         {
             var configuration = new ScheduleRepositoryConfiguration
             {
-                ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
+                ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQScheduler;Integrated Security=SSPI;",
                 PurgeBatchSize = 100
             };
             scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);

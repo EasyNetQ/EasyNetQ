@@ -41,13 +41,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DatabaseScripts", "DatabaseScripts", "{896B72E7-50D5-49B9-987B-4250092E39BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler", "{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}"
-	ProjectSection(SolutionItems) = preProject
-		..\DatabaseScripts\EasyNetQ.Scheduler\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\CreateWorkTables.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\uspAddNewMessageToSchedule.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspAddNewMessageToSchedule.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\uspGetNextBatchOfMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspGetNextBatchOfMessages.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\uspMarkWorkItemForPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspMarkWorkItemForPurge.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\uspWorkItemsSelfPurge.sql
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.SimpleRequester", "EasyNetQ.Tests.SimpleRequester\EasyNetQ.Tests.SimpleRequester.csproj", "{5EDAA7BF-CD00-440C-9697-D24F7B37CFFA}"
 EndProject
@@ -72,6 +65,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8B9F31
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mssql", "mssql", "{F11F4058-9B0E-40B5-800F-628BC884A783}"
+	ProjectSection(SolutionItems) = preProject
+		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\CreateWorkTables.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspAddNewMessageToSchedule.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspAddNewMessageToSchedule.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspGetNextBatchOfMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspGetNextBatchOfMessages.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspMarkWorkItemForPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspMarkWorkItemForPurge.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspWorkItemsSelfPurge.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postgres", "postgres", "{CD6358E2-E182-4771-BF73-45704B05237D}"
+	ProjectSection(SolutionItems) = preProject
+		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\CreateWorkTables.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspAddNewMessageToSchedule.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspAddNewMessageToSchedule.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspGetNextBatchOfMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspGetNextBatchOfMessages.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspMarkWorkItemForPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspMarkWorkItemForPurge.sql
+		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspWorkItemsSelfPurge.sql
 	EndProjectSection
 EndProject
 Global
@@ -300,5 +311,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2} = {896B72E7-50D5-49B9-987B-4250092E39BB}
+		{F11F4058-9B0E-40B5-800F-628BC884A783} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
+		{CD6358E2-E182-4771-BF73-45704B05237D} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
 	EndGlobalSection
 EndGlobal
