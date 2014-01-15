@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\packages\Autofac.3.2.0\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.2.2\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
@@ -58,12 +61,17 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AutofacAdapterTests.cs" />
     <Compile Include="NinjectAdapterTests.cs" />
     <Compile Include="StructureMapAdapterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj">
+      <Project>{74fb0a3d-2c72-462c-b498-15c0ae615d35}</Project>
+      <Name>EasyNetQ.DI.Autofac</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj">
       <Project>{c76da6ea-78f0-4918-8e0a-7a1cad31e702}</Project>
       <Name>EasyNetQ.DI.Ninject</Name>
@@ -86,7 +94,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
