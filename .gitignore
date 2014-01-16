@@ -26,3 +26,6 @@ Package/EasyNetQ.Management.Client/lib
 
 *.userprefs
 test-results
+
+# NuGet Packages Directory
+packages
