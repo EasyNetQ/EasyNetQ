@@ -17,8 +17,6 @@ CREATE Procedure [dbo].[uspWorkItemsSelfPurge] @rows TinyINT = 5, @purgeDate Dat
 
 AS
 
-IF @purgeDate is NULL SET @purgeDate=getdate()
-
 -- Only execute if there is work to do and continue 
 -- until all records with a PurgeDate <= now are deleted
 WHILE EXISTS(SELECT * FROM WorkItemStatus WHERE PurgeDate <= @purgeDate) 

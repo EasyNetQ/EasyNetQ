@@ -23,7 +23,7 @@ namespace EasyNetQ.Scheduler
         private const string markForPurgeSql = "uspMarkWorkItemForPurge";
 
         private readonly ScheduleRepositoryConfiguration configuration;
-        private readonly Func<DateTime> now; 
+        private readonly Func<DateTime> now;
 
         public ScheduleRepository(ScheduleRepositoryConfiguration configuration, Func<DateTime> now)
         {
@@ -53,7 +53,7 @@ namespace EasyNetQ.Scheduler
                 command.Parameters.AddWithValue("@WakeTime", now());
                 command.Parameters.AddWithValue("@rows", configuration.MaximumScheduleMessagesToReturn);
 
-                using(var reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -77,7 +77,7 @@ namespace EasyNetQ.Scheduler
         public void MarkItemsForPurge(IEnumerable<int> scheduleMessageIds)
         {
             // mark items for purge on a background thread.
-            ThreadPool.QueueUserWorkItem(state => 
+            ThreadPool.QueueUserWorkItem(state =>
                 WithStoredProcedureCommand(markForPurgeSql, command =>
                 {
                     var purgeDate = now().AddDays(configuration.PurgeDelayDays);
@@ -97,11 +97,14 @@ namespace EasyNetQ.Scheduler
         public void Purge()
         {
             WithStoredProcedureCommand(purgeSql, command =>
-            {
-                command.Parameters.AddWithValue("@rows", configuration.PurgeBatchSize);
+                {
+                    var purgeDate = now();
 
-                command.ExecuteNonQuery();
-            });
+                    command.Parameters.AddWithValue("@rows", configuration.PurgeBatchSize);
+                    command.Parameters.AddWithValue("@purgeDate", purgeDate);
+
+                    command.ExecuteNonQuery();
+                });
         }
 
         private void WithStoredProcedureCommand(string storedProcedureName, Action<SqlCommand> commandAction)
@@ -118,9 +121,9 @@ namespace EasyNetQ.Scheduler
 
         private string FormatWithSchemaName(string storedProcedureName)
         {
-            if (string.IsNullOrWhiteSpace(configuration.SchemaName)) 
+            if (string.IsNullOrWhiteSpace(configuration.SchemaName))
                 return storedProcedureName;
-            
+
             return string.Format("[{0}].{1}", configuration.SchemaName.TrimStart('[').TrimEnd('.', ']'), storedProcedureName);
         }
     }
