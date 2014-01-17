@@ -18,9 +18,6 @@ CREATE PROCEDURE [dbo].[uspMarkWorkItemForPurge]
 
 AS
 
--- Set default purgeDate to Now
-IF @purgeDate is NULL SET @purgeDate=getdate()
-
 -- Performs the UPDATE and OUTPUTs the INSERTED. fields to the calling app
 UPDATE WorkItemStatus
 SET PurgeDate = @purgeDate
