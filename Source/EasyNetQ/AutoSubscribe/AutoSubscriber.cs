@@ -146,7 +146,6 @@ namespace EasyNetQ.AutoSubscribe
         {
             var consumeMethod = ConsumeMethod(subscriptionInfo);
             object[] customAttributes = consumeMethod.GetCustomAttributes(typeof(ForTopicAttribute), true);
-            Console.WriteLine("Attributes for {0} have count {1}",  consumeMethod.Name ,  customAttributes.Count());
             return customAttributes
                              .OfType<ForTopicAttribute>()
                              .Select(a => a.Topic);

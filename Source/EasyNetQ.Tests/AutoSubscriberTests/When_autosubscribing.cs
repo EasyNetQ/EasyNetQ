@@ -30,8 +30,8 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [SetUp]
         public void SetUp()
         {
-//            mockBuilder = new MockBuilder();
-            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
+            mockBuilder = new MockBuilder();
+//            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
 

@@ -9,6 +9,7 @@ using NUnit.Framework;
 namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
+    [Explicit("Requires a RabbitMQ broker on localhost.")]
     public class AutoSubscriberIntegrationTests
     {
         private IBus bus;
@@ -31,12 +32,14 @@ namespace EasyNetQ.Tests.Integration
         }
 
         [Test]
+        [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithTopic()
         {
             bus.Publish(new AutoSubMessage{ Text = "With topic" }, "mytopic");
         }
 
         [Test]
+        [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithoutTopic()
         {
             bus.Publish(new AutoSubMessage{ Text = "Without topic" });
