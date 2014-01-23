@@ -2,8 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Management.Client.Model;
-using EasyNetQ.Tests.Integration;
+using EasyNetQ.Loggers;
 using EasyNetQ.Management.Client;
 
 namespace EasyNetQ.Tests
@@ -49,8 +48,7 @@ namespace EasyNetQ.Tests
         /// </summary>
         public void Server_goes_away_and_comes_back_during_subscription()
         {
-            var client = new ManagementClient("http://localhost", "guest", "guest", 15672);
-            Task.Factory.StartNew(() => OccasionallyKillConnections(client), TaskCreationOptions.LongRunning);
+            //Task.Factory.StartNew(OccasionallyKillConnections, TaskCreationOptions.LongRunning);
 
             Console.WriteLine("Creating busses");
             using (var busA = RabbitHutch.CreateBus("host=localhost"))
@@ -69,6 +67,35 @@ namespace EasyNetQ.Tests
                 while (true)
                 {
                     Thread.Sleep(2000);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Simulates a consumer with many messages queued up in the internal consumer queue.
+        /// </summary>
+        public void Long_running_consumer_survives_broker_restart()
+        {
+            using (var publishBus = RabbitHutch.CreateBus("host=localhost;timeout=60", register => 
+                register.Register<IEasyNetQLogger>(_ => new NullLogger())))
+            using (var subscribeBus = RabbitHutch.CreateBus("host=localhost"))
+            {
+                subscribeBus.Subscribe<MyMessage>("longRunner", message =>
+                    {
+                        Console.Out.WriteLine("Got message: {0}", message.Text);
+                        Thread.Sleep(2000);
+                        Console.Out.WriteLine("Completed  : {0}", message.Text);
+                    });
+
+                var counter = 0;
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    publishBus.Publish(new MyMessage
+                        {
+                            Text = string.Format("Hello <{0}>", counter)
+                        });
+                    counter++;
                 }
             }
         }
@@ -93,6 +120,11 @@ namespace EasyNetQ.Tests
                     client.DeleteExchange(exchange);
                 }
             }            
+        }
+
+        public void OccasionallyKillConnections()
+        {
+            OccasionallyKillConnections(new ManagementClient("http://localhost", "guest", "guest", 15672));
         }
 
         public void OccasionallyKillConnections(IManagementClient client)

@@ -7,7 +7,6 @@ namespace EasyNetQ.Consumer
     public class ConsumerDispatcher : IConsumerDispatcher
     {
         private readonly Thread dispatchThread;
-        private readonly ConcurrentQueue<Action> internalQueue; 
         private readonly BlockingCollection<Action> queue;
         private bool disposed;
 
@@ -15,8 +14,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(logger, "logger");
 
-            internalQueue = new ConcurrentQueue<Action>();
-            queue = new BlockingCollection<Action>(internalQueue);
+            queue = new BlockingCollection<Action>();
 
             dispatchThread = new Thread(_ =>
                 {
@@ -54,7 +52,7 @@ namespace EasyNetQ.Consumer
             // throw away any queued actions. RabbitMQ will redeliver any in-flight
             // messages that have not been acked when the connection is lost.
             Action result;
-            while(internalQueue.TryDequeue(out result)) {}
+            while(queue.TryTake(out result)) {}
         }
 
         public void Dispose()
