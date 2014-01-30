@@ -34,8 +34,6 @@ namespace EasyNetQ.FluentConfiguration
         public IList<string> Topics { get; private set; }
 
         public bool Durable { get; set; }
-
-        public bool HighAvailable { get; set; }
         
         public bool AutoDelete { get; set; }
 
@@ -43,7 +41,6 @@ namespace EasyNetQ.FluentConfiguration
         {
             Topics = new List<string>();
             Durable = true;
-            HighAvailable = false;
             AutoDelete = false;
         }
 
