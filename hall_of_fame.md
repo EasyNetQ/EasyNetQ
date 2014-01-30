@@ -1,6 +1,8 @@
 #The EasyNetQ Hall Of Fame
 
-A list of all the people who contributed code to the project.
+A list of all the people who contributed code to the project. Generated from Git logs:
+
+    git shortlog -s -n
 
 No particular order. Don't forget to add your name with your pull request.
 
