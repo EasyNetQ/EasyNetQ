@@ -90,7 +90,6 @@
     <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_a_message_is_received.cs" />
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
-    <Compile Include="ConsumeTests\When_a_requester_is_disposed.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="Integration\AutoSubscriberIntegrationTests.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent_but_an_exception_is_thrown_by_responder.cs" />
