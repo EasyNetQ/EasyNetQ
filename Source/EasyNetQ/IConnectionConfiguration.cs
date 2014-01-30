@@ -32,6 +32,7 @@ namespace EasyNetQ
         ushort Timeout { get; }
 
         bool PublisherConfirms { get; }
+        bool PersistentMessages { get; set; }
     }
 
     public interface IHostConfiguration
@@ -56,6 +57,7 @@ namespace EasyNetQ
         public SslOption Ssl { get; private set; }
         public ushort Timeout { get; set; }
         public bool PublisherConfirms { get; set; }
+        public bool PersistentMessages { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -67,6 +69,7 @@ namespace EasyNetQ
             RequestedHeartbeat = 10;
             Timeout = 10; // seconds
             PublisherConfirms = false;
+            PersistentMessages = true;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -97,6 +100,7 @@ namespace EasyNetQ
             clientProperties.Add("requested_heartbeat", RequestedHeartbeat.ToString());
             clientProperties.Add("timeout", Timeout.ToString());
             clientProperties.Add("publisher_confirms", PublisherConfirms.ToString());
+            clientProperties.Add("persistent_messages", PersistentMessages.ToString());
         }
 
         public void Validate()

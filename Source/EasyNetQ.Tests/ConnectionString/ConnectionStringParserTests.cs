@@ -49,6 +49,15 @@ namespace EasyNetQ.Tests.ConnectionString
         }
 
         [Test]
+        public void Should_parse_global_persistentMessages()
+        {
+            const string connectionStringWithPersistenMessages = "host=localhost;persistentMessages=false";
+            var connectionConfiguration = connectionStringParser.Parse(connectionStringWithPersistenMessages);
+
+            connectionConfiguration.PersistentMessages.ShouldBeFalse();
+        }
+
+        [Test]
         public void Should_Throw_Exception_OnInvalidAmqp()
         {
             Assert.That(() => connectionStringParser.Parse("amqp=Foo"), Throws.InstanceOf<EasyNetQException>());
