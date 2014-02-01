@@ -20,7 +20,7 @@ namespace EasyNetQ.AutoSubscribe
         protected const string DispatchAsyncMethodName = "DispatchAsync";
         protected readonly IBus bus;
 
-        public Action<ISubscriptionConfiguration> SubscriptionConfiguration { get; set;}
+        public Action<ISubscriptionConfiguration, AutoSubscriberConsumerInfo> SubscriptionConfiguration { get; set; }
 
         /// <summary>
         /// Used when generating the unique SubscriptionId checksum.
@@ -51,7 +51,7 @@ namespace EasyNetQ.AutoSubscribe
             SubscriptionIdPrefix = subscriptionIdPrefix;
             AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
-            SubscriptionConfiguration = configuration => { };
+            SubscriptionConfiguration = (configuration, subscriber) => { };
         }
 
         protected virtual string DefaultSubscriptionIdGenerator(AutoSubscriberConsumerInfo c)
@@ -134,7 +134,7 @@ namespace EasyNetQ.AutoSubscribe
             return configuration =>
             {
                 configuration.WithTopic("#");
-                SubscriptionConfiguration(configuration);
+                SubscriptionConfiguration(configuration, subscriptionInfo);
             };
         }
 

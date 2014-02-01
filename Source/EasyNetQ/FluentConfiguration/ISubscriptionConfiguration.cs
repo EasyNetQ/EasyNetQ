@@ -8,7 +8,6 @@ namespace EasyNetQ.FluentConfiguration
     /// e.g.
     /// x => x.WithTopic("*.brighton")
     /// </summary>
-    /// <typeparam name="T">The message type to be published</typeparam>
     public interface ISubscriptionConfiguration
     {
         /// <summary>
