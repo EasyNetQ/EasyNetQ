@@ -20,6 +20,8 @@ namespace EasyNetQ.AutoSubscribe
         protected const string DispatchAsyncMethodName = "DispatchAsync";
         protected readonly IBus bus;
 
+        public Action<ISubscriptionConfiguration, AutoSubscriberConsumerInfo> SubscriptionConfiguration { get; set; }
+
         /// <summary>
         /// Used when generating the unique SubscriptionId checksum.
         /// </summary>
@@ -49,6 +51,7 @@ namespace EasyNetQ.AutoSubscribe
             SubscriptionIdPrefix = subscriptionIdPrefix;
             AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
+            SubscriptionConfiguration = (configuration, subscriber) => { };
         }
 
         protected virtual string DefaultSubscriptionIdGenerator(AutoSubscriberConsumerInfo c)
@@ -80,7 +83,7 @@ namespace EasyNetQ.AutoSubscribe
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus("Subscribe",typeof(Action<>));
             var subscriptionInfos = GetSubscriptionInfos(assemblies.SelectMany(a => a.GetTypes()), typeof(IConsume<>));
 
-            InvokeMethods(subscriptionInfos,DispatchMethodName, genericBusSubscribeMethod, messageType => typeof(Action<>).MakeGenericType(messageType));
+            InvokeMethods(subscriptionInfos, DispatchMethodName, genericBusSubscribeMethod, messageType => typeof(Action<>).MakeGenericType(messageType));
         }
 
         /// <summary>
@@ -128,7 +131,11 @@ namespace EasyNetQ.AutoSubscribe
             {
                 return GenerateConfigurationFromTopics(topics);
             }
-            return configuration => configuration.WithTopic("#");
+            return configuration =>
+            {
+                configuration.WithTopic("#");
+                SubscriptionConfiguration(configuration, subscriptionInfo);
+            };
         }
 
         private Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(IEnumerable<string> topics)
