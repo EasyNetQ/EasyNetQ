@@ -126,11 +126,11 @@ namespace EasyNetQ.Consumer
                     string.Format("Message was: '{0}'\n", interruptedException.Message) +
                     CreateConnectionCheckMessage());                
             }
-            catch (Exception unexpecctedException)
+            catch (Exception unexpectedException)
             {
                 // Something else unexpected has gone wrong :(
                 logger.ErrorWrite("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n"
-                    + unexpecctedException);
+                    + unexpectedException);
             }
             return Consumer.PostExceptionAckStrategy.ShouldAck;
         }
