@@ -16,7 +16,7 @@ namespace EasyNetQ
         private readonly IRpc rpc;
         private readonly ISendReceive sendReceive;
         private readonly IConnectionConfiguration connectionConfiguration;
-        
+
         public IEasyNetQLogger Logger
         {
             get { return logger; }
@@ -30,10 +30,10 @@ namespace EasyNetQ
         public RabbitBus(
             IEasyNetQLogger logger,
             IConventions conventions,
-            IAdvancedBus advancedBus, 
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy, 
-            IRpc rpc, 
-            ISendReceive sendReceive, 
+            IAdvancedBus advancedBus,
+            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IRpc rpc,
+            ISendReceive sendReceive,
             IConnectionConfiguration connectionConfiguration)
         {
             Preconditions.CheckNotNull(logger, "logger");
@@ -56,61 +56,41 @@ namespace EasyNetQ
             advancedBus.Disconnected += OnDisconnected;
         }
 
-        #region Publish
-
-        public void Publish(Type messageType, object message)
+        public void Publish<T>(T message) where T : class
         {
-            PublishAsync(messageType, message).Wait();
+            Preconditions.CheckNotNull(message, "message");
+
+            PublishAsync(message).Wait();
         }
 
-        public void Publish(Type messageType, object message, string topic)
-        {
-            PublishAsync(message, topic).Wait();
-        }
-
-        public Task PublishAsync(Type messageType, object message)
-        {
-            return PublishAsync(messageType, message, conventions.TopicNamingConvention(messageType));
-        }
-
-        public Task PublishAsync(Type messageType, object message, string topic)
+        public void Publish<T>(T message, string topic) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
-            Preconditions.CheckNotNull(messageType, "messageType");
-            Preconditions.CheckTypeMatches(messageType, message, "message", "message must be of type " + messageType);
 
-            var exchangeName = conventions.ExchangeNamingConvention(messageType);
+            PublishAsync(message, topic).Wait();
+        }
+
+        public Task PublishAsync<T>(T message) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+
+            return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
+        }
+
+        public Task PublishAsync<T>(T message, string topic) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(topic, "topic");
+
+            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
-            var easyNetQMessage = Message.CreateInstance(messageType, message);
+            var easyNetQMessage = new Message<T>(message);
 
             easyNetQMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
 
             return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
         }
-
-        public void Publish<T>(T message) where T : class
-        {
-            Publish(typeof(T), message);
-        }
-
-        public void Publish<T>(T message, string topic) where T : class
-        {
-            Publish(typeof(T), message, topic);
-        }
-
-        public Task PublishAsync<T>(T message) where T : class
-        {
-            return PublishAsync(typeof(T), message);
-        }
-
-        public Task PublishAsync<T>(T message, string topic) where T : class
-        {
-            return PublishAsync(typeof(T), message, topic);
-        } 
-        #endregion
-
-        #region Subscribe
 
         public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
         {
@@ -166,10 +146,11 @@ namespace EasyNetQ
             }
 
             return advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
-        } 
-        #endregion
+        }
 
-        public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
+        public TResponse Request<TRequest, TResponse>(TRequest request)
+            where TRequest : class
+            where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
 
@@ -187,7 +168,7 @@ namespace EasyNetQ
             return rpc.Request<TRequest, TResponse>(request);
         }
 
-        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
             where TRequest : class
             where TResponse : class
         {
@@ -199,12 +180,12 @@ namespace EasyNetQ
             return RespondAsync(taskResponder);
         }
 
-        public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class
         {
             Preconditions.CheckNotNull(responder, "responder");
-            
+
             return rpc.Respond(responder);
         }
 

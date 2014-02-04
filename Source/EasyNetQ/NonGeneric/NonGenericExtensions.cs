@@ -3,12 +3,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Producer;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ.NonGeneric
 {
     public static class NonGenericExtensions
     {
-        #region Subscriptions
         public static IDisposable Subscribe(this IBus bus, Type messageType, string subscriptionId, Action<object> onMessage)
         {
             return Subscribe(bus, messageType, subscriptionId, onMessage, configuration => { });
@@ -62,7 +63,43 @@ namespace EasyNetQ.NonGeneric
             var subscribeMethod = subscribeMethodOpen.MakeGenericMethod(messageType);
             return (IDisposable)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configure });
         } 
-        #endregion
+
+        public static void Publish(this IBus bus, Type messageType, object message)
+        {
+            PublishAsync(bus, messageType, message).Wait();
+        }
+
+        public static void Publish(this IBus bus, Type messageType, object message, string topic)
+        {
+            PublishAsync(bus, messageType, message, topic).Wait();
+        }
+
+        public static Task PublishAsync(this IBus bus, Type messageType, object message)
+        {
+            var conventions = bus.Advanced.Container.Resolve<IConventions>();
+            return PublishAsync(bus, messageType, message, conventions.TopicNamingConvention(messageType));
+        }
+
+        public static Task PublishAsync(this IBus bus, Type messageType, object message, string topic)
+        {
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckTypeMatches(messageType, message, "message", "message must be of type " + messageType);
+
+            var conventions = bus.Advanced.Container.Resolve<IConventions>();
+            var advancedBus = bus.Advanced.Container.Resolve<IAdvancedBus>();
+            var publishExchangeDeclareStrategy = bus.Advanced.Container.Resolve<IPublishExchangeDeclareStrategy>();
+            var connectionConfiguration = bus.Advanced.Container.Resolve<IConnectionConfiguration>();
+
+            var exchangeName = conventions.ExchangeNamingConvention(messageType);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+            var easyNetQMessage = Message.CreateInstance(messageType, message);
+
+            easyNetQMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
+
+            return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
+        }
 
         private static bool HasCorrectParameters(MethodInfo methodInfo)
         {
