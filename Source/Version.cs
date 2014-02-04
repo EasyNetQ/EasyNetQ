@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.26.3.0")]
+[assembly: AssemblyVersion("0.26.4.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.26.4.0 IConsumerErrorStrategy interface change.
 // 0.26.3.0 Added persistentMessages configuration option.
 // 0.26.2.0 Fixed failed reconection issue. Bug fix.
 // 0.26.1.0 New policy definitions: alternate-exchange, dead-letter-exchange, dead-letter-routing-key, message-ttl, expires, max-length. Add nullability on HaMode and HaSyncMode, to let add a policy without them.
