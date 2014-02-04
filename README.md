@@ -4,18 +4,17 @@ A Nice .NET API for RabbitMQ
 
 Development is sponsored by travel industry experts [15below](http://15below.com/)
 
-**[Homepage](http://easynetq.com)**
+* **[Homepage](http://easynetq.com)**
 
-**[Documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Introduction)**
+* **[Documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Introduction)**
 
-**[NuGet](http://nuget.org/List/Packages/EasyNetQ)**
+* **[NuGet](http://nuget.org/List/Packages/EasyNetQ)**
 
-**[Discussion Group](https://groups.google.com/group/easynetq)**
+* **[Discussion Group](https://groups.google.com/group/easynetq)**
 
 Goals:
 
-1. Zero or at least minimal configuration.
-2. Simple API
+1. To make working with RabbitMQ on .NET as easy as possible.
 
 To connect to a RabbitMQ broker...
 
