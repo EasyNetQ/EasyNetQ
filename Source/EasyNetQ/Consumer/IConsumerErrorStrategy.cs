@@ -10,14 +10,7 @@ namespace EasyNetQ.Consumer
         /// </summary>
         /// <param name="context">The consumer execution context.</param>
         /// <param name="exception">The exception</param>
-        void HandleConsumerError(ConsumerExecutionContext context, Exception exception);
-
-        /// <summary>
-        /// Should the message be ack'd after HandleConsumerError has been run. Return
-        /// true if it should be ack'd, false if it shouldn't
-        /// </summary>
-        /// <returns></returns>
-        PostExceptionAckStrategy PostExceptionAckStrategy();
+        PostExceptionAckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception);
     }
 
     public enum PostExceptionAckStrategy

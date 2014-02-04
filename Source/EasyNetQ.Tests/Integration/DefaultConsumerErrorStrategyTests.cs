@@ -9,8 +9,6 @@ using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
@@ -100,13 +98,6 @@ namespace EasyNetQ.Tests
                     message.BasicProperties.AppId.ShouldEqual(context.Properties.AppId);
                 }
             }
-        }
-
-        [Test]
-        public void Should_ack_after_exception_is_handled()
-        {
-            consumerErrorStrategy.PostExceptionAckStrategy()
-                .ShouldEqual(PostExceptionAckStrategy.ShouldAck);
         }
     }
 }
