@@ -60,25 +60,16 @@ namespace EasyNetQ
 
         public void Publish(Type messageType, object message)
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(messageType, "messageType");
             PublishAsync(messageType, message).Wait();
         }
 
         public void Publish(Type messageType, object message, string topic)
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(topic, "topic");
-            Preconditions.CheckNotNull(messageType, "messageType");
-
             PublishAsync(message, topic).Wait();
         }
 
         public Task PublishAsync(Type messageType, object message)
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(messageType, "messageType");
-
             return PublishAsync(messageType, message, conventions.TopicNamingConvention(messageType));
         }
 
@@ -87,6 +78,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
             Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckTypeMatches(messageType, message, "message", "message must be of type " + messageType);
 
             var exchangeName = conventions.ExchangeNamingConvention(messageType);
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
