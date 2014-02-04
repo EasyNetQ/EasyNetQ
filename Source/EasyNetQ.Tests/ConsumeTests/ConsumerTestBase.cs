@@ -33,7 +33,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected void SetUp()
         {
             ConsumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
-            ConsumerErrorStrategy.Stub(x => x.PostExceptionAckStrategy()).Return(PostExceptionAckStrategy.ShouldAck);
 
             IConventions conventions = new Conventions(new TypeNameSerializer())
                 {
