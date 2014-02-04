@@ -8,16 +8,17 @@ namespace EasyNetQ.NonGeneric
 {
     public static class NonGenericExtensions
     {
+        #region Subscriptions
         public static IDisposable Subscribe(this IBus bus, Type messageType, string subscriptionId, Action<object> onMessage)
         {
             return Subscribe(bus, messageType, subscriptionId, onMessage, configuration => { });
         }
 
         public static IDisposable Subscribe(
-            this IBus bus, 
-            Type messageType, 
-            string subscriptionId, 
-            Action<object> onMessage, 
+            this IBus bus,
+            Type messageType,
+            string subscriptionId,
+            Action<object> onMessage,
             Action<ISubscriptionConfiguration> configure)
         {
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -37,10 +38,10 @@ namespace EasyNetQ.NonGeneric
         }
 
         public static IDisposable SubscribeAsync(
-            this IBus bus, 
-            Type messageType, 
-            string subscriptionId, 
-            Func<object, Task> onMessage, 
+            this IBus bus,
+            Type messageType,
+            string subscriptionId,
+            Func<object, Task> onMessage,
             Action<ISubscriptionConfiguration> configure)
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -60,7 +61,8 @@ namespace EasyNetQ.NonGeneric
 
             var subscribeMethod = subscribeMethodOpen.MakeGenericMethod(messageType);
             return (IDisposable)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configure });
-        }
+        } 
+        #endregion
 
         private static bool HasCorrectParameters(MethodInfo methodInfo)
         {

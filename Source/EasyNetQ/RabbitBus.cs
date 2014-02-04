@@ -56,41 +56,69 @@ namespace EasyNetQ
             advancedBus.Disconnected += OnDisconnected;
         }
 
-        public void Publish<T>(T message) where T : class
+        #region Publish
+
+        public void Publish(Type messageType, object message)
         {
             Preconditions.CheckNotNull(message, "message");
-
-            PublishAsync(message).Wait();
+            Preconditions.CheckNotNull(messageType, "messageType");
+            PublishAsync(messageType, message).Wait();
         }
 
-        public void Publish<T>(T message, string topic) where T : class
+        public void Publish(Type messageType, object message, string topic)
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(messageType, "messageType");
 
             PublishAsync(message, topic).Wait();
         }
 
-        public Task PublishAsync<T>(T message) where T : class
+        public Task PublishAsync(Type messageType, object message)
         {
             Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(messageType, "messageType");
 
-            return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
+            return PublishAsync(messageType, message, conventions.TopicNamingConvention(messageType));
         }
 
-        public Task PublishAsync<T>(T message, string topic) where T : class
+        public Task PublishAsync(Type messageType, object message, string topic)
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(messageType, "messageType");
 
-            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
+            var exchangeName = conventions.ExchangeNamingConvention(messageType);
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
-            var easyNetQMessage = new Message<T>(message);
+            var easyNetQMessage = Message.CreateInstance(messageType, message);
 
             easyNetQMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
 
             return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
         }
+
+        public void Publish<T>(T message) where T : class
+        {
+            Publish(typeof(T), message);
+        }
+
+        public void Publish<T>(T message, string topic) where T : class
+        {
+            Publish(typeof(T), message, topic);
+        }
+
+        public Task PublishAsync<T>(T message) where T : class
+        {
+            return PublishAsync(typeof(T), message);
+        }
+
+        public Task PublishAsync<T>(T message, string topic) where T : class
+        {
+            return PublishAsync(typeof(T), message, topic);
+        } 
+        #endregion
+
+        #region Subscribe
 
         public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
         {
@@ -146,7 +174,8 @@ namespace EasyNetQ
             }
 
             return advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
-        }
+        } 
+        #endregion
 
         public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
         {
