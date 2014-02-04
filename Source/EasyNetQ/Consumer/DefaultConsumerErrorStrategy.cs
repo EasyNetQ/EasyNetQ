@@ -92,7 +92,7 @@ namespace EasyNetQ.Consumer
             return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, context);
         }
 
-        public virtual void HandleConsumerError(ConsumerExecutionContext context, Exception exception)
+        public virtual PostExceptionAckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception)
         {
             Preconditions.CheckNotNull(context, "context");
             Preconditions.CheckNotNull(exception, "exception");
@@ -126,16 +126,12 @@ namespace EasyNetQ.Consumer
                     string.Format("Message was: '{0}'\n", interruptedException.Message) +
                     CreateConnectionCheckMessage());                
             }
-            catch (Exception unexpecctedException)
+            catch (Exception unexpectedException)
             {
                 // Something else unexpected has gone wrong :(
                 logger.ErrorWrite("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n"
-                    + unexpecctedException);
+                    + unexpectedException);
             }
-        }
-
-        public virtual PostExceptionAckStrategy PostExceptionAckStrategy()
-        {
             return Consumer.PostExceptionAckStrategy.ShouldAck;
         }
 

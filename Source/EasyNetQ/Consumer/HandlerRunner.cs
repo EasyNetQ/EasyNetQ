@@ -80,8 +80,8 @@ namespace EasyNetQ.Consumer
             logger.ErrorWrite(BuildErrorMessage(context, exception));
             try
             {
-                consumerErrorStrategy.HandleConsumerError(context, exception);
-                DoAck(context, ExceptionAckStrategy);
+                var strategy = consumerErrorStrategy.HandleConsumerError(context, exception);
+                DoAck(context, (model, deliveryTag) => ExceptionAckStrategy(model, deliveryTag, strategy));
             }
             catch (Exception consumerErrorStrategyError)
             {
@@ -90,7 +90,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private void DoAck(ConsumerExecutionContext context , Func<IModel, ulong, AckResult> ackStrategy)
+        private void DoAck(ConsumerExecutionContext context, Func<IModel, ulong, AckResult> ackStrategy)
         {
             const string failedToAckMessage = 
                 "Basic ack failed because channel was closed with message '{0}'." +
@@ -135,9 +135,9 @@ namespace EasyNetQ.Consumer
             return AckResult.Ack;
         }
 
-        private AckResult ExceptionAckStrategy(IModel model, ulong deliveryTag)
+        private AckResult ExceptionAckStrategy(IModel model, ulong deliveryTag, PostExceptionAckStrategy strategy)
         {
-            switch (consumerErrorStrategy.PostExceptionAckStrategy())
+            switch (strategy)
             {
                 case PostExceptionAckStrategy.ShouldAck:
                     model.BasicAck(deliveryTag, false);
