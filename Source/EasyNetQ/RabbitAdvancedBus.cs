@@ -296,7 +296,7 @@ namespace EasyNetQ
             bool @internal = false,
             string alternateExchange = null)
         {
-            Preconditions.CheckNotNull(name, "name");
+            Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
 
             if (passive)
