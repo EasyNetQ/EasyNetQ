@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Threading;
 using RabbitMQ.Client;
 
@@ -22,7 +23,7 @@ namespace EasyNetQ.Tests.Integration
             WithChannel(x => x.ExchangeDeclare(longString, "direct"));
         }
 
-        public void BasicPropertiesType()
+        public void BasicProperties()
         {
             /*
              * failed: Unable to read data from the transport connection: 
@@ -43,6 +44,21 @@ namespace EasyNetQ.Tests.Integration
 //                    properties.ClusterId = longString;
 //                    properties.ContentEncoding = longString;
 //                    properties.ContentType = longString;
+
+                    x.BasicPublish("", "", properties, new byte[32]);
+                });
+        }
+
+        public void Headers()
+        {
+            // Headers hashtable will cause publish to throw when its size
+            // exceeds 128K
+            WithChannel(x =>
+                {
+                    var properties = x.CreateBasicProperties();
+
+                    properties.Headers = new Hashtable();
+                    properties.Headers.Add("key", new string('*', 1024 * 127));
 
                     x.BasicPublish("", "", properties, new byte[32]);
                 });
