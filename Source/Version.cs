@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.26.5.0")]
+[assembly: AssemblyVersion("0.26.6.0")]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.26.6.0 Better bounds checking on basic properties
 // 0.26.5.0 Added non-generic publish methods
 // 0.26.4.0 IConsumerErrorStrategy interface change.
 // 0.26.3.0 Added persistentMessages configuration option.
