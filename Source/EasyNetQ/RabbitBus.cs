@@ -16,7 +16,7 @@ namespace EasyNetQ
         private readonly IRpc rpc;
         private readonly ISendReceive sendReceive;
         private readonly IConnectionConfiguration connectionConfiguration;
-        
+
         public IEasyNetQLogger Logger
         {
             get { return logger; }
@@ -30,10 +30,10 @@ namespace EasyNetQ
         public RabbitBus(
             IEasyNetQLogger logger,
             IConventions conventions,
-            IAdvancedBus advancedBus, 
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy, 
-            IRpc rpc, 
-            ISendReceive sendReceive, 
+            IAdvancedBus advancedBus,
+            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IRpc rpc,
+            ISendReceive sendReceive,
             IConnectionConfiguration connectionConfiguration)
         {
             Preconditions.CheckNotNull(logger, "logger");
@@ -137,7 +137,7 @@ namespace EasyNetQ
             var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
-            var queue = advancedBus.QueueDeclare(queueName);
+            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.AtLeastOneWithDefault("#"))
@@ -148,7 +148,9 @@ namespace EasyNetQ
             return advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
         }
 
-        public TResponse Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
+        public TResponse Request<TRequest, TResponse>(TRequest request)
+            where TRequest : class
+            where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
 
@@ -166,7 +168,7 @@ namespace EasyNetQ
             return rpc.Request<TRequest, TResponse>(request);
         }
 
-        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
             where TRequest : class
             where TResponse : class
         {
@@ -178,12 +180,12 @@ namespace EasyNetQ
             return RespondAsync(taskResponder);
         }
 
-        public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class
         {
             Preconditions.CheckNotNull(responder, "responder");
-            
+
             return rpc.Respond(responder);
         }
 
