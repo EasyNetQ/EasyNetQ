@@ -1,10 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests.ProducerTests
+namespace EasyNetQ.Tests.Integration
 {
     [TestFixture]
     public class When_a_message_with_a_long_type_name_is_published
@@ -35,16 +34,6 @@ namespace EasyNetQ.Tests.ProducerTests
             bus.Publish(message);            
         }         
     }
-}
-
-namespace EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening
-{
-    public class
-        MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes
-    {
-        public string Text { get; set; }
-    }
-
 }
 
 // ReSharper restore InconsistentNaming
