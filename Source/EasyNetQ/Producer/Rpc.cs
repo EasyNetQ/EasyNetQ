@@ -90,11 +90,11 @@ namespace EasyNetQ.Producer
                         string exceptionMessage = "The exception message has not been specified.";
                         if (msg.Properties.HeadersPresent)
                         {
-                            if (msg.Properties.Headers.Contains(IsFaultedKey))
+                            if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
                             {
                                 isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
                             }
-                            if (msg.Properties.Headers.Contains(ExceptionMessageKey))
+                            if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
                             {
                                 exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[ExceptionMessageKey]);
                             }

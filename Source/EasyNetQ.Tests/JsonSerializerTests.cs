@@ -1,7 +1,6 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System;
-using System.Collections;
 using System.Text;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -49,7 +48,7 @@ namespace EasyNetQ.Tests
                 Timestamp = new AmqpTimestamp(123344044),
                 Type = "Type",
                 UserId = "user id",
-                Headers = new Hashtable
+                Headers = new Dictionary<string, object>
                 {
                     {"one", "header one"},
                     {"two", "header two"}

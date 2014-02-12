@@ -1,7 +1,6 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System.Collections;
-using System.Collections.Specialized;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
@@ -48,7 +47,7 @@ namespace EasyNetQ.Tests
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(true),
                     Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary>.Matches(args => 
+                    Arg<IDictionary<string, object>>.Matches(args => 
                         ((int)args["x-message-ttl"] == 1000) &&
                         ((int)args["x-expires"] == 2000))));
         }
@@ -124,7 +123,7 @@ namespace EasyNetQ.Tests
                     Arg<string>.Is.Equal("direct"),
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary>.Is.Anything));
+                    Arg<IDictionary<string, object>>.Is.Anything));
         }
 
         [Test]

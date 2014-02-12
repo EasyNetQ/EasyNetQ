@@ -1,6 +1,5 @@
-﻿// ReSharper disable InconsistentNaming
-
-using System.Collections;
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
@@ -72,7 +71,7 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Messages",
                 CorrelationId = correlationId,
-                Headers = new Hashtable
+                Headers = new Dictionary<string, object>
                 {
                     { "IsFaulted", true }
                 }

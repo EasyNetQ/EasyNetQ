@@ -55,7 +55,7 @@ namespace EasyNetQ
                     connectionFactory.Ssl = Configuration.Ssl;
 
                 connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
-                connectionFactory.ClientProperties = ConvertToHashtable(Configuration.ClientProperties);
+                connectionFactory.ClientProperties = Configuration.ClientProperties;
                 clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));
             }
         }

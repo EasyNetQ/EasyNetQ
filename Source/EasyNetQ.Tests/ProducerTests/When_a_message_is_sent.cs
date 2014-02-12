@@ -1,5 +1,5 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg<bool>.Is.Equal(true),
                 Arg<bool>.Is.Equal(false),
                 Arg<bool>.Is.Equal(false),
-                Arg<IDictionary>.Is.Anything));
+                Arg<IDictionary<string, object>>.Is.Anything));
         }
     }
 }

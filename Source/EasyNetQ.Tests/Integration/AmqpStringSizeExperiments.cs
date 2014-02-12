@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Threading;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Integration
@@ -57,7 +56,7 @@ namespace EasyNetQ.Tests.Integration
                 {
                     var properties = x.CreateBasicProperties();
 
-                    properties.Headers = new Hashtable();
+                    properties.Headers = new Dictionary<string, object>();
                     properties.Headers.Add("key", new string('*', 1024 * 127));
 
                     x.BasicPublish("", "", properties, new byte[32]);

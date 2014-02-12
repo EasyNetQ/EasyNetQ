@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Consumer
 {
@@ -29,6 +30,7 @@ namespace EasyNetQ.Consumer
         private IQueue queue;
 
         public IModel Model { get; private set; }
+        public event ConsumerCancelledEventHandler ConsumerCancelled;
         public string ConsumerTag { get; private set; }
 
         public event Action<IInternalConsumer> Cancelled;
@@ -101,6 +103,9 @@ namespace EasyNetQ.Consumer
             // copy to temp variable to be thread safe.
             var cancelled = Cancelled;
             if(cancelled != null) cancelled(this);
+
+            var consumerCancelled = ConsumerCancelled;
+            if(consumerCancelled != null) consumerCancelled(this, new ConsumerEventArgs(ConsumerTag));
         }
 
         public void HandleBasicConsumeOk(string consumerTag)
