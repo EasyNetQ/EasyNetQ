@@ -1,10 +1,13 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.27.0.0")]
+[assembly: AssemblyVersion("0.27.1.0")]
+[assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.27.1.0 CLS-Compliant
 // 0.27.0.0 RabbitMQ.Client version 3.2.1
 // 0.26.7.0 Type name size checking (pending a better strategy for creating AMQP object names)
 // 0.26.6.0 Better bounds checking on basic properties
