@@ -1,11 +1,9 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System;
-using System.Collections;
 using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -57,7 +55,7 @@ namespace EasyNetQ.Tests
                     Arg<bool>.Is.Equal(true),  // durable
                     Arg<bool>.Is.Equal(false), // exclusive
                     Arg<bool>.Is.Equal(false), // autoDelete
-                    Arg<IDictionary>.Is.Anything));
+                    Arg<IDictionary<string, object>>.Is.Anything));
         }
 
         [Test]

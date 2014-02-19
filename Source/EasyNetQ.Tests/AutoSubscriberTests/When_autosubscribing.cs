@@ -1,11 +1,8 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System;
-using System.Collections;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
-using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -47,7 +44,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                     Arg<bool>.Is.Equal(true),
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(false),
-                    Arg<IDictionary>.Is.Anything
+                    Arg<IDictionary<string, object>>.Is.Anything
                     ));
 
             assertQueueDeclared(expectedQueueName1);

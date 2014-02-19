@@ -111,7 +111,7 @@ namespace EasyNetQ.Trace
             var connectionFactory = new ConnectionFactory
                 {
                     Uri = connectionString,
-                    ClientProperties = new Dictionary<string, string>
+                    ClientProperties = new Dictionary<string, object>
                         {
                             { "Client", "EasyNetQ.Trace" },
                             { "Host", Environment.MachineName }
@@ -172,7 +172,7 @@ namespace EasyNetQ.Trace
         {
             if (basicDeliverEventArgs == null) return;
 
-            Func<string, object> getHeader = key => basicDeliverEventArgs.BasicProperties.Headers.Contains(key)
+            Func<string, object> getHeader = key => basicDeliverEventArgs.BasicProperties.Headers.ContainsKey(key)
                 ? basicDeliverEventArgs.BasicProperties.Headers[key]
                 : null;
 

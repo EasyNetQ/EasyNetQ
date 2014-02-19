@@ -1,6 +1,5 @@
-﻿// ReSharper disable InconsistentNaming
-
-using System.Collections;
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System.Text;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
@@ -70,7 +69,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg<string>.Is.Equal("direct"),
                 Arg<bool>.Is.Equal(true),
                 Arg<bool>.Is.Equal(false),
-                Arg<IDictionary>.Is.Anything));
+                Arg<IDictionary<string, object>>.Is.Anything));
         }
 
         [Test]
@@ -81,7 +80,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg<bool>.Is.Equal(false),
                 Arg<bool>.Is.Equal(true),
                 Arg<bool>.Is.Equal(true),
-                Arg<IDictionary>.Is.Anything));
+                Arg<IDictionary<string, object>>.Is.Anything));
         }
 
         protected void DeliverMessage(string correlationId)

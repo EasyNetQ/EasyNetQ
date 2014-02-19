@@ -231,7 +231,7 @@ namespace EasyNetQ
                 }
 
                 clientCommandDispatcher.Invoke(
-                    x => x.QueueDeclare(name, durable, exclusive, autoDelete, (IDictionary) arguments)
+                    x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)
                     ).Wait();
 
                 logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelte:{3}, args:{4}",
@@ -305,10 +305,10 @@ namespace EasyNetQ
             }
             else
             {
-                IDictionary arguments = null;
+                IDictionary<string, object> arguments = null;
                 if (alternateExchange != null)
                 {
-                    arguments = new Hashtable {{"alternate-exchange", alternateExchange}};
+                    arguments = new Dictionary<string, object>{{"alternate-exchange", alternateExchange}};
                 }
 
                 clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments)).Wait();

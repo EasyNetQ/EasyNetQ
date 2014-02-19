@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Collections;
 using System.Text;
 using RabbitMQ.Client;
@@ -9,7 +10,7 @@ namespace EasyNetQ
     {
         public MessageProperties()
         {
-            Headers = new Hashtable();
+            Headers = new Dictionary<string, object>();
         }
 
         public MessageProperties(IBasicProperties basicProperties)
@@ -38,7 +39,7 @@ namespace EasyNetQ
 
             if (basicProperties.IsHeadersPresent())
             {
-                foreach (DictionaryEntry header in basicProperties.Headers)
+                foreach (var header in basicProperties.Headers)
                 {
                     Headers.Add(header.Key, header.Value);
                 }
@@ -65,7 +66,7 @@ namespace EasyNetQ
 
             if (headersPresent)
             {
-                basicProperties.Headers = new Hashtable(Headers);
+                basicProperties.Headers = new Dictionary<string, object>(Headers);
             }
         }
 
@@ -106,12 +107,12 @@ namespace EasyNetQ
             set { contentEncoding = CheckShortString(value, "ContentEncoding"); contentEncodingPresent = true; }
         }
 
-        private IDictionary headers;
+        private IDictionary<string, object> headers;
 
         /// <summary>
         /// message header field table 
         /// </summary>
-        public IDictionary Headers
+        public IDictionary<string, object> Headers
         {
             get { return headers; }
             set { headers = value; headersPresent = true; }
@@ -340,7 +341,7 @@ namespace EasyNetQ
         {
             if (value == null) return "NULL";
 
-            var dictionary = value as IDictionary;
+            var dictionary = value as IDictionary<string, object>;
             if (dictionary == null) return value.ToString();
 
             var stringBuilder = new StringBuilder();

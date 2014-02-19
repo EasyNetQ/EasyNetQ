@@ -1,8 +1,7 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System;
 using System.Linq;
-using System.Collections;
 using System.Reflection;
 using System.Text;
 using NUnit.Framework;
@@ -56,7 +55,7 @@ namespace EasyNetQ.Tests
                 "UserId=userid, AppId=app_id, ClusterId=cluster_id";
 
             var stringBuilder = new StringBuilder();
-            var headers = new Hashtable
+            var headers = new Dictionary<string, object>
                 {
                     {"key1", "value1"},
                     {"key2", "value2"}

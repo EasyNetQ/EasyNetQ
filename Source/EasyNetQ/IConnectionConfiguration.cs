@@ -20,7 +20,7 @@ namespace EasyNetQ
         ushort RequestedHeartbeat { get; }
         ushort PrefetchCount { get; }
         Uri AMQPConnectionString { get; }
-        IDictionary<string, string> ClientProperties { get; }
+        IDictionary<string, object> ClientProperties { get; }
         
         IEnumerable<IHostConfiguration> Hosts { get; }
 
@@ -51,7 +51,7 @@ namespace EasyNetQ
         public ushort RequestedHeartbeat { get; set; }
         public ushort PrefetchCount { get; set; }
         public Uri AMQPConnectionString { get; set; }
-        public IDictionary<string, string> ClientProperties { get; private set; } 
+        public IDictionary<string, object> ClientProperties { get; private set; } 
 
         public IEnumerable<IHostConfiguration> Hosts { get; set; }
         public SslOption Ssl { get; private set; }
@@ -82,7 +82,7 @@ namespace EasyNetQ
             Ssl = new SslOption();
         }
 
-        private void SetDefaultClientProperties(IDictionary<string, string> clientProperties)
+        private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
@@ -123,7 +123,7 @@ namespace EasyNetQ
                 }
             }
 
-            ClientProperties = new Dictionary<string, string>();
+            ClientProperties = new Dictionary<string, object>();
             SetDefaultClientProperties(ClientProperties);
         }
     }
