@@ -49,7 +49,7 @@ namespace EasyNetQ.DI
                 .Register(c => serviceCreator(this))
                 .SingleInstance();
 
-            if (container != null)
+            if (container != null && !container.IsRegistered<TService>())
                 builder.Update(container);
 
             return this;
@@ -66,9 +66,9 @@ namespace EasyNetQ.DI
                 .As<TService>()
                 .SingleInstance();
 
-            if (container != null)
+            if (container != null && !container.IsRegistered<TService>())
                 builder.Update(container);
-
+            
             return this;
         }
 

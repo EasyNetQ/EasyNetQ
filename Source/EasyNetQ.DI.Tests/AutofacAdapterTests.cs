@@ -18,9 +18,10 @@ namespace EasyNetQ.DI.Tests
         public void SetUp()
         {
             builder = new ContainerBuilder();
-            builder.Register(c => new MockBuilder().Bus).As<IBus>();
+            builder.RegisterType<TestConventions>().As<IConventions>();
+            
             container = builder.RegisterAsEasyNetQContainerFactory();
-            bus = container.Resolve<IBus>();
+            bus = new MockBuilder().Bus;
         }
 
         [TearDown]
@@ -38,6 +39,31 @@ namespace EasyNetQ.DI.Tests
         public void Should_create_bus_with_autofac_module()
         {
             Assert.IsNotNull(bus);
+        }
+
+        [Test]
+        public void Should_resolve_autosubscriber()
+        {
+            Assert.IsNotNull(bus);
+
+            Assert.IsTrue(bus is RabbitBus);
+
+            var rabbitBus = (RabbitBus)bus;
+
+            Assert.IsTrue(rabbitBus.Conventions is TestConventions);
+        }
+    }
+
+    public class TestConventions : Conventions
+    {
+        public TestConventions(ITypeNameSerializer typeNameSerializer) : base(typeNameSerializer)
+        {
+            QueueNamingConvention = (messageType, subscriptionId) =>
+            {
+                var typeName = typeNameSerializer.Serialize(messageType);
+                return string.Format("{0}_{1}", typeName, subscriptionId);
+            };
+
         }
     }
 }

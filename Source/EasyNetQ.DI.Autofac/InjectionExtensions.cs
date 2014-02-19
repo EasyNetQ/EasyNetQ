@@ -7,7 +7,9 @@ namespace EasyNetQ.DI
         public static Autofac.IContainer RegisterAsEasyNetQContainerFactory(this ContainerBuilder builder)
         {
             var autofacAdapter = new AutofacAdapter(builder);
+            
             RabbitHutch.SetContainerFactory(() => autofacAdapter);
+            
             return autofacAdapter.Container;
         }
     }

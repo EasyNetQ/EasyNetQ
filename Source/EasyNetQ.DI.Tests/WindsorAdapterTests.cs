@@ -23,13 +23,25 @@ namespace EasyNetQ.DI.Tests
 
             container.RegisterAsEasyNetQContainerFactory();
 
-            bus = new MockBuilder().Bus;
+            bus = new MockBuilder(register => 
+                register.Register<IConventions>(r => new TestConventions(new TypeNameSerializer())
+            )).Bus;
         }
 
         [Test]
         public void Should_create_bus_with_windsor_adapter()
         {
             Assert.IsNotNull(bus);
+        }
+
+        [Test]
+        public void Should_resolve_test_conventions()
+        {
+            Assert.IsNotNull(bus);
+
+            var rabbitBus = (RabbitBus)bus;
+
+            Assert.IsTrue(rabbitBus.Conventions is TestConventions);
         }
 
         [TearDown]
