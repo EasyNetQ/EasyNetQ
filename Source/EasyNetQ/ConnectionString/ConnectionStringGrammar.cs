@@ -40,7 +40,9 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("prefetchcount", Number, c => c.PrefetchCount),
             BuildKeyValueParser("timeout", Number, c => c.Timeout),
             BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
-            BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages)
+            BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
+            BuildKeyValueParser("product", Text, c => c.Product),
+            BuildKeyValueParser("platform", Text, c => c.Platform)
         }.Aggregate((a, b) => a.Or(b));
 
         public static Parser<UpdateConfiguration> AMQPAlone =

@@ -58,6 +58,8 @@ namespace EasyNetQ
         public ushort Timeout { get; set; }
         public bool PublisherConfirms { get; set; }
         public bool PersistentMessages { get; set; }
+        public string Product { get; set; }
+        public string Platform { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -89,10 +91,12 @@ namespace EasyNetQ
             var applicationName = Path.GetFileName(applicationNameAndPath);
             var applicationPath = Path.GetDirectoryName(applicationNameAndPath);
             var hostname = Environment.MachineName;
+            var product = Product ?? applicationName;
+            var platform = Platform ?? hostname;
 
             clientProperties.Add("client_api", "EasyNetQ");
-            clientProperties.Add("product", applicationName);
-            clientProperties.Add("platform", "EasyNetQ");
+            clientProperties.Add("product", product);
+            clientProperties.Add("platform", platform);
             clientProperties.Add("version", version);
             clientProperties.Add("easynetq_version", version);
             clientProperties.Add("application", applicationName);
