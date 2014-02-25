@@ -91,6 +91,9 @@ namespace EasyNetQ
             var hostname = Environment.MachineName;
 
             clientProperties.Add("client_api", "EasyNetQ");
+            clientProperties.Add("product", applicationName);
+            clientProperties.Add("platform", "EasyNetQ");
+            clientProperties.Add("version", version);
             clientProperties.Add("easynetq_version", version);
             clientProperties.Add("application", applicationName);
             clientProperties.Add("application_location", applicationPath);
