@@ -128,6 +128,7 @@ namespace EasyNetQ
                 Password = password,
                 RequestedHeartbeat = requestedHeartbeat
             };
+            connectionConfiguration.Validate();
 
             return CreateBus(connectionConfiguration, registerServices);
         }
