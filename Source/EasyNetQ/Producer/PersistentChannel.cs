@@ -4,6 +4,7 @@ using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using RabbitMQ.Client.Framing.Impl.v0_8;
 
 namespace EasyNetQ.Producer
 {
@@ -70,7 +71,7 @@ namespace EasyNetQ.Producer
         }
 
         private void OpenChannel()
-        {
+        {            
             channel = connection.CreateModel();
             disconnected = false;
             eventBus.Publish(new PublishChannelCreatedEvent(channel));
@@ -107,6 +108,10 @@ namespace EasyNetQ.Producer
                     }
                     else
                     {
+                        // Restore channel
+                        logger.DebugWrite("Channel error, restoring channel");
+                        channel.Dispose();
+                        OpenChannel();
                         throw;
                     }
                 }
