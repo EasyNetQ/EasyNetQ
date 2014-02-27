@@ -12,6 +12,7 @@ namespace EasyNetQ.Consumer
         private readonly IPersistentConnection connection;
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IEventBus eventBus;
+        private readonly Action onCancel;
 
         private IInternalConsumer internalConsumer;
 
@@ -20,26 +21,34 @@ namespace EasyNetQ.Consumer
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
             IPersistentConnection connection, 
             IInternalConsumerFactory internalConsumerFactory, 
-            IEventBus eventBus)
+            IEventBus eventBus,
+            Action onCancel
+            )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(onCancel, "onShutdown");
 
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
+            this.onCancel = onCancel;
         }
 
         public IDisposable StartConsuming()
         {
             internalConsumer = internalConsumerFactory.CreateConsumer();
 
-            internalConsumer.Cancelled += consumer => Dispose();
+            internalConsumer.Cancelled += consumer =>
+            {
+                onCancel();
+                Dispose();
+            };            
 
             internalConsumer.StartConsuming(
                 connection,

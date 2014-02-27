@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                 onMessage,
                 persistentConnection,
                 internalConsumerFactory, 
-                eventBus);
+                eventBus, () => { });
 
             AdditionalSetup();
         }

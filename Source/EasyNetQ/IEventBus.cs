@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EasyNetQ
 {
@@ -21,7 +22,7 @@ namespace EasyNetQ
         public void Publish<TEvent>(TEvent @event)
         {
             if (!subscriptions.ContainsKey(typeof (TEvent))) return;
-            foreach (var eventHandler in subscriptions[typeof(TEvent)])
+            foreach (var eventHandler in subscriptions[typeof(TEvent)].ToList())
             {
                 ((Action<TEvent>) eventHandler)(@event);
             }

@@ -51,6 +51,19 @@ namespace EasyNetQ
         IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the 
+        /// receive context. Returns a Task.
+        /// </param>
+        /// <param name="onCancel">Handler which called when consumer cancelled by broker, blocking, you must not try to redeclare consumer here</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Action onCancel);
+
+        /// <summary>
         /// Publish a message as a byte array
         /// </summary>
         /// <param name="exchange">The exchange to publish to</param>

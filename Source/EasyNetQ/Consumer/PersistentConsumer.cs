@@ -20,25 +20,30 @@ namespace EasyNetQ.Consumer
             new ConcurrentDictionary<IInternalConsumer, object>();
 
         private readonly IList<CancelSubscription> eventCancellations = new List<CancelSubscription>();
+        private readonly Action onCancel;
 
         public PersistentConsumer(
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
             IPersistentConnection connection, 
             IInternalConsumerFactory internalConsumerFactory,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            Action onCancel
+            )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(onCancel, "onShutdown");
 
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
+            this.onCancel = onCancel;
         }
 
         public IDisposable StartConsuming()
@@ -65,7 +70,11 @@ namespace EasyNetQ.Consumer
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
 
-            internalConsumer.Cancelled += consumer => Dispose();
+            internalConsumer.Cancelled += consumer =>
+            {
+                onCancel();
+                Dispose();
+            };            
 
             internalConsumer.StartConsuming(
                 connection, 
