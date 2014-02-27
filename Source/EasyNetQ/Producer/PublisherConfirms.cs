@@ -147,7 +147,7 @@ namespace EasyNetQ.Producer
                         logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
                         dictionary.Remove(sequenceNumber);
                         tcs.SetException(new TimeoutException(string.Format(
-                            "Pubisher confirms timed out after {0} seconds " + 
+                            "Publisher confirms timed out after {0} seconds " + 
                             "waiting for ACK or NACK from sequence number {1}",
                             timeoutSeconds, sequenceNumber)));
                     }

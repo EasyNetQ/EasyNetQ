@@ -175,12 +175,13 @@ namespace EasyNetQ
             {
                 throw new EasyNetQException(
                     "Could not find a connection string for RabbitMQ. " +
-                    "Please add a connection string in the <ConnectionStrings> secion" +
+                    "Please add a connection string in the <ConnectionStrings> section" +
                     "of the application's configuration file. For example: " +
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
 
             return CreateBus(rabbitConnectionString.ConnectionString);
         }
+
     }
 }
