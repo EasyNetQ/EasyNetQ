@@ -108,6 +108,11 @@ namespace EasyNetQ
         }
 
         public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+        {
+            return Consume(queue, onMessage, () => { });
+        }
+
+        public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action onCancel)
         {      
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -117,7 +122,16 @@ namespace EasyNetQ
                 throw new EasyNetQException("This bus has been disposed");
             }
 
-            var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection);
+            var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection, () =>
+            {
+                try
+                {
+                    onCancel();
+                }
+                catch
+                {
+                }
+            });
             return consumer.StartConsuming();
         }
 

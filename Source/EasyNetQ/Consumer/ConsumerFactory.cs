@@ -28,15 +28,17 @@ namespace EasyNetQ.Consumer
         }
 
         public IConsumer CreateConsumer(
-            IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
-            IPersistentConnection connection)
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            IPersistentConnection connection,
+            Action onShutdown
+            )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(connection, "connection");
 
-            var consumer = CreateConsumerInstance(queue, onMessage, connection);
+            var consumer = CreateConsumerInstance(queue, onMessage, connection, onShutdown);
             consumers.TryAdd(consumer, null);
             return consumer;
         }
@@ -47,18 +49,21 @@ namespace EasyNetQ.Consumer
         /// <param name="queue"></param>
         /// <param name="onMessage"></param>
         /// <param name="connection"></param>
+        /// <param name="onShutdown"></param>
         /// <returns></returns>
         private IConsumer CreateConsumerInstance(
-            IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
-            IPersistentConnection connection)
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            IPersistentConnection connection,
+            Action onShutdown
+            )
         {
             if (queue.IsExclusive)
             {
-                return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);
+                return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus, onShutdown);
             }
 
-            return new PersistentConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);
+            return new PersistentConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus, onShutdown);
         }
 
         public void Dispose()
