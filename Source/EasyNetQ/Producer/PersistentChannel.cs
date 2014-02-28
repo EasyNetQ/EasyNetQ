@@ -107,6 +107,7 @@ namespace EasyNetQ.Producer
                     }
                     else
                     {
+                        OpenChannel();
                         throw;
                     }
                 }
