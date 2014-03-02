@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
@@ -23,6 +22,17 @@ namespace EasyNetQ
         IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class;
 
         /// <summary>
+        /// Consume a stream of messages
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure) where T : class;
+
+        /// <summary>
         /// Consume a stream of messages asynchronously
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
@@ -31,6 +41,18 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class;
 
+
+        /// <summary>
+        /// Consume a stream of messages asynchronously
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class;
+
         /// <summary>
         /// Consume a stream of messages. Dispatch them to the given handlers
         /// </summary>
@@ -38,6 +60,17 @@ namespace EasyNetQ
         /// <param name="addHandlers">A function to add handlers to the consumer</param>
         /// <returns>A disposable to cancel the consumer</returns>
         IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers);
+
+        /// <summary>
+        /// Consume a stream of messages. Dispatch them to the given handlers
+        /// </summary>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="addHandlers">A function to add handlers to the consumer</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure);
+
 
         /// <summary>
         /// Consume raw bytes from the queue.
@@ -49,6 +82,19 @@ namespace EasyNetQ
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
         IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
+
+        /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the 
+        /// receive context. Returns a Task.
+        /// </param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Publish a message as a byte array

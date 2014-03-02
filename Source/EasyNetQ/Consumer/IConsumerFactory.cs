@@ -9,6 +9,8 @@ namespace EasyNetQ.Consumer
         IConsumer CreateConsumer(
             IQueue queue, 
             Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
-            IPersistentConnection connection);
+            IPersistentConnection connection,
+            IConsumerConfiguration configuration
+            );
     }
 }

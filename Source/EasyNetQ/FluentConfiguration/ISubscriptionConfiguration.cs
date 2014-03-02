@@ -23,22 +23,37 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
+
+
+        /// <summary>
+        /// Configures the consumer's priority
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithPriority(int priority);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
     {
         public IList<string> Topics { get; private set; }
         public bool AutoDelete { get; private set; }
+        public int Priority { get; private set; }
 
         public SubscriptionConfiguration()
         {
             Topics = new List<string>();
             AutoDelete = false;
+            Priority = 0;
         }
 
         public ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true)
         {
             AutoDelete = autoDelete;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithPriority(int priority)
+        {
+            Priority = priority;
             return this;
         }
 

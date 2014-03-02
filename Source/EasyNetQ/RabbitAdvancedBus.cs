@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,25 +71,43 @@ namespace EasyNetQ
 
         public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
         {
+            return Consume<T>(queue, onMessage, x => { });
+        }
+
+        public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configure, "configure");
 
-            return Consume<T>(queue, (message, info) => TaskHelpers.ExecuteSynchronously(() => onMessage(message, info)));
+            return Consume<T>(queue, (message, info) => TaskHelpers.ExecuteSynchronously(() => onMessage(message, info)), configure);
         }
 
         public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) 
             where T : class
         {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-
-            return Consume(queue, x => x.Add(onMessage));
+            return Consume(queue, onMessage, x => { });
         }
 
-        public virtual IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers) 
+        public IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            return Consume(queue, x => x.Add(onMessage), configure);
+        }
+
+        public virtual IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers)
+        {
+            return Consume(queue, addHandlers, x => { });
+        }
+
+        public IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(addHandlers, "addHandlers");
+            Preconditions.CheckNotNull(configure, "configure");
 
             var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
             addHandlers(handlerCollection);
@@ -104,20 +121,27 @@ namespace EasyNetQ
                 var message = Message.CreateInstance(messageType, messageBody);
                 message.SetProperties(properties);
                 return handler(message, messageRecievedInfo);
-            });
+            }, configure);
         }
 
-        public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+        public IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+        {
+            return Consume(queue, onMessage, x => { });
+        }
+
+        public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
         {      
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configure, "configure");
 
             if (disposed)
             {
                 throw new EasyNetQException("This bus has been disposed");
             }
-
-            var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection);
+            var consumerConfiguration = new ConsumerConfiguration();
+            configure(consumerConfiguration);
+            var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection, consumerConfiguration);
             return consumer.StartConsuming();
         }
 
