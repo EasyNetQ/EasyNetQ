@@ -30,13 +30,15 @@ namespace EasyNetQ.Consumer
         public IConsumer CreateConsumer(
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
-            IPersistentConnection connection)
+            IPersistentConnection connection, 
+            IConsumerConfiguration configuration
+            )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(connection, "connection");
 
-            var consumer = CreateConsumerInstance(queue, onMessage, connection);
+            var consumer = CreateConsumerInstance(queue, onMessage, connection, configuration);
             consumers.TryAdd(consumer, null);
             return consumer;
         }
@@ -47,18 +49,20 @@ namespace EasyNetQ.Consumer
         /// <param name="queue"></param>
         /// <param name="onMessage"></param>
         /// <param name="connection"></param>
+        /// <param name="configuration"></param>
         /// <returns></returns>
         private IConsumer CreateConsumerInstance(
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
-            IPersistentConnection connection)
+            IPersistentConnection connection,
+            IConsumerConfiguration configuration)
         {
             if (queue.IsExclusive)
             {
-                return new TransientConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);
+                return new TransientConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
             }
 
-            return new PersistentConsumer(queue, onMessage, connection, internalConsumerFactory, eventBus);
+            return new PersistentConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
         }
 
         public void Dispose()

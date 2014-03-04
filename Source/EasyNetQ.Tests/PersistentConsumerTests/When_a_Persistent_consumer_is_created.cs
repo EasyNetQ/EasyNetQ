@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [Test]
         public void Should_ask_the_internal_consumer_to_start_consuming()
         {
-            internalConsumers[0].AssertWasCalled(x => x.StartConsuming(persistentConnection, queue, onMessage));
+            internalConsumers[0].AssertWasCalled(x => x.StartConsuming(persistentConnection, queue, onMessage, configuration));
         }
     }
 }
