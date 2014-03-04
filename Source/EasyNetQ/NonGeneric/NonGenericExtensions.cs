@@ -86,14 +86,12 @@ namespace EasyNetQ.NonGeneric
             Preconditions.CheckNotNull(topic, "topic");
             Preconditions.CheckNotNull(messageType, "messageType");
             Preconditions.CheckTypeMatches(messageType, message, "message", "message must be of type " + messageType);
-
-            var conventions = bus.Advanced.Container.Resolve<IConventions>();
+            
             var advancedBus = bus.Advanced.Container.Resolve<IAdvancedBus>();
             var publishExchangeDeclareStrategy = bus.Advanced.Container.Resolve<IPublishExchangeDeclareStrategy>();
             var connectionConfiguration = bus.Advanced.Container.Resolve<IConnectionConfiguration>();
-
-            var exchangeName = conventions.ExchangeNamingConvention(messageType);
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+            
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
             var easyNetQMessage = Message.CreateInstance(messageType, message);
 
             easyNetQMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
