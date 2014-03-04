@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
 using NUnit.Framework;
@@ -35,6 +36,10 @@ namespace EasyNetQ.Tests.ConsumeTests
                 Arg<string>.Is.Equal("my_queue"),
                 Arg<bool>.Is.Equal(false), // NoAck
                 Arg<string>.Is.Equal(ConsumerTag),
+                Arg<IDictionary<string, object>>.Is.Equal(new Dictionary<string, object>
+                    {
+                        {"x-priority", 0}
+                    }),
                 Arg<IBasicConsumer>.Is.Same(MockBuilder.Consumers[0])));
         }
 
@@ -43,10 +48,11 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             MockBuilder.Logger.AssertWasCalled(x =>
                                                x.InfoWrite(
-                                                   "Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2}",
+                                                   "Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
                                                    "my_queue",
                                                    ConsumerTag,
-                                                   (ushort) 50));
+                                                   (ushort) 50, 
+                                                   0));
         }
     }
 }

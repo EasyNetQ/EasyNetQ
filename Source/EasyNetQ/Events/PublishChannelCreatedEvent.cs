@@ -11,4 +11,4 @@ namespace EasyNetQ.Events
             Channel = channel;
         }
     }
-}
+}   

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -12,7 +13,9 @@ namespace EasyNetQ.Consumer
         void StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            IConsumerConfiguration configuration
+            );
 
         event Action<IInternalConsumer> Cancelled;
     }
@@ -61,16 +64,22 @@ namespace EasyNetQ.Consumer
         public void StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            IConsumerConfiguration configuration
+            )
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configuration, "configuration");
 
             this.queue = queue;
             this.onMessage = onMessage;
             var consumerTag = conventions.ConsumerTagConvention();
-
+            IDictionary<string, object> arguments = new Dictionary<string, object>
+                {
+                    {"x-priority", configuration.Priority}
+                };
             try
             {
                 Model = connection.CreateModel();
@@ -81,10 +90,11 @@ namespace EasyNetQ.Consumer
                     queue.Name,         // queue
                     false,              // noAck 
                     consumerTag,        // consumerTag
+                    arguments,          // arguments
                     this);              // consumer
 
-                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2}",
-                                  queue.Name, consumerTag, connectionConfiguration.PrefetchCount);
+                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
+                                  queue.Name, consumerTag, connectionConfiguration.PrefetchCount, configuration.Priority);
             }
             catch (Exception exception)
             {
