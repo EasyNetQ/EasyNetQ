@@ -22,28 +22,23 @@ namespace EasyNetQ.Consumer
 
     public class InternalConsumer : IBasicConsumer, IInternalConsumer
     {
-        private readonly IHandlerRunner handlerRunner;
-        private readonly IEasyNetQLogger logger;
+        private readonly IConnectionConfiguration connectionConfiguration;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
-        private readonly IConnectionConfiguration connectionConfiguration;
         private readonly IEventBus eventBus;
+        private readonly IHandlerRunner handlerRunner;
+        private readonly IEasyNetQLogger logger;
+        private bool disposed;
 
         private Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private IQueue queue;
 
-        public IModel Model { get; private set; }
-        public event ConsumerCancelledEventHandler ConsumerCancelled;
-        public string ConsumerTag { get; private set; }
-
-        public event Action<IInternalConsumer> Cancelled;
-
         public InternalConsumer(
-            IHandlerRunner handlerRunner, 
-            IEasyNetQLogger logger, 
-            IConsumerDispatcher consumerDispatcher, 
-            IConventions conventions, 
-            IConnectionConfiguration connectionConfiguration, 
+            IHandlerRunner handlerRunner,
+            IEasyNetQLogger logger,
+            IConsumerDispatcher consumerDispatcher,
+            IConventions conventions,
+            IConnectionConfiguration connectionConfiguration,
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
@@ -61,62 +56,10 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
-        public void StartConsuming(
-            IPersistentConnection connection,
-            IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
-            IConsumerConfiguration configuration
-            )
-        {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configuration, "configuration");
+        public string ConsumerTag { get; private set; }
 
-            this.queue = queue;
-            this.onMessage = onMessage;
-            var consumerTag = conventions.ConsumerTagConvention();
-            IDictionary<string, object> arguments = new Dictionary<string, object>
-                {
-                    {"x-priority", configuration.Priority}
-                };
-            try
-            {
-                Model = connection.CreateModel();
-
-                Model.BasicQos(0, connectionConfiguration.PrefetchCount, false);
-
-                Model.BasicConsume(
-                    queue.Name,         // queue
-                    false,              // noAck 
-                    consumerTag,        // consumerTag
-                    arguments,          // arguments
-                    this);              // consumer
-
-                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
-                                  queue.Name, consumerTag, connectionConfiguration.PrefetchCount, configuration.Priority);
-            }
-            catch (Exception exception)
-            {
-                logger.InfoWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
-                                 queue.Name, consumerTag, exception.Message);
-            }
-        }
-
-        /// <summary>
-        /// Cancel means that an external signal has requested that this consumer should
-        /// be cancelled. This is _not_ the same as when an internal consumer stops consuming
-        /// because it has lost its channel/connection.
-        /// </summary>
-        private void Cancel()
-        {
-            // copy to temp variable to be thread safe.
-            var cancelled = Cancelled;
-            if(cancelled != null) cancelled(this);
-
-            var consumerCancelled = ConsumerCancelled;
-            if(consumerCancelled != null) consumerCancelled(this, new ConsumerEventArgs(ConsumerTag));
-        }
+        public IModel Model { get; private set; }
+        public event ConsumerCancelledEventHandler ConsumerCancelled;
 
         public void HandleBasicConsumeOk(string consumerTag)
         {
@@ -155,16 +98,16 @@ namespace EasyNetQ.Consumer
             if (disposed)
             {
                 // this message's consumer has stopped, so just return
-                logger.InfoWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message", 
-                    ConsumerTag, queue.Name);
+                logger.InfoWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message",
+                                 ConsumerTag, queue.Name);
                 return;
             }
 
             if (onMessage == null)
             {
-                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'." + 
-                    "Please call InternalConsumer.StartConsuming before passing the consumer to basic.consume", 
-                    ConsumerTag);
+                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'." +
+                                  "Please call InternalConsumer.StartConsuming before passing the consumer to basic.consume",
+                                  ConsumerTag);
                 return;
             }
 
@@ -175,7 +118,51 @@ namespace EasyNetQ.Consumer
             consumerDispatcher.QueueAction(() => handlerRunner.InvokeUserMessageHandler(context));
         }
 
-        private bool disposed;
+        public event Action<IInternalConsumer> Cancelled;
+
+        public void StartConsuming(
+            IPersistentConnection connection,
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            IConsumerConfiguration configuration
+            )
+        {
+            Preconditions.CheckNotNull(connection, "connection");
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configuration, "configuration");
+
+            this.queue = queue;
+            this.onMessage = onMessage;
+            var consumerTag = conventions.ConsumerTagConvention();
+            IDictionary<string, object> arguments = new Dictionary<string, object>
+                {
+                    {"x-priority", configuration.Priority}
+                };
+            try
+            {
+                Model = connection.CreateModel();
+
+                Model.BasicQos(0, connectionConfiguration.PrefetchCount, false);
+
+                Model.BasicConsume(
+                    queue.Name, // queue
+                    false, // noAck 
+                    consumerTag, // consumerTag
+                    false, // noLocal
+                    configuration.IsExclusive, // exclusive
+                    arguments, // arguments
+                    this); // consumer
+
+                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
+                                 queue.Name, consumerTag, connectionConfiguration.PrefetchCount, configuration.Priority);
+            }
+            catch (Exception exception)
+            {
+                logger.InfoWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
+                                 queue.Name, consumerTag, exception.Message);
+            }
+        }
 
         public void Dispose()
         {
@@ -192,6 +179,21 @@ namespace EasyNetQ.Consumer
                         eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTag));
                     });
             }
+        }
+
+        /// <summary>
+        /// Cancel means that an external signal has requested that this consumer should
+        /// be cancelled. This is _not_ the same as when an internal consumer stops consuming
+        /// because it has lost its channel/connection.
+        /// </summary>
+        private void Cancel()
+        {
+            // copy to temp variable to be thread safe.
+            var cancelled = Cancelled;
+            if (cancelled != null) cancelled(this);
+
+            var consumerCancelled = ConsumerCancelled;
+            if (consumerCancelled != null) consumerCancelled(this, new ConsumerEventArgs(ConsumerTag));
         }
     }
 }
