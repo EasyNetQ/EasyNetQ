@@ -29,3 +29,8 @@ test-results
 
 # NuGet Packages Directory
 packages
+
+# Visual Studio Files
+*.jmconfig
+*.nunit
+*.VisualState.xml
