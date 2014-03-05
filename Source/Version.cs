@@ -2,11 +2,14 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.27.4.0")]
+[assembly: AssemblyVersion("0.28.1.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.28.1.0 Made Send method respect the PersistentMessages configuration option
+// 0.28.0.0 Consumer priority
+// 0.27.5.0 Fixed PersistentChannel issue where model invalid after exception thrown. Bug fix.
 // 0.27.4.0 Fixed broken non-connection string RabbitHutch.Create method
 // 0.27.3.0 Can set product/platfrom info (that displays in Management UI) in connection string
 // 0.27.2.0 Client information now displayed in Management UI Connections list

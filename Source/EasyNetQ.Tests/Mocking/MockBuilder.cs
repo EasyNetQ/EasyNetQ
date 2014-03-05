@@ -58,12 +58,12 @@ namespace EasyNetQ.Tests.Mocking
                     channels.Add(channel);
                     channel.Stub(x => x.CreateBasicProperties()).Return(basicProperties);
                     channel.Stub(x => x.IsOpen).Return(true);
-                    channel.Stub(x => x.BasicConsume(null, false, null, null))
+                    channel.Stub(x => x.BasicConsume(null, false, null, null, null))
                         .IgnoreArguments()
                         .WhenCalled(consumeInvokation =>
                         {
                             var consumerTag = (string)consumeInvokation.Arguments[2];
-                            var consumer = (IBasicConsumer)consumeInvokation.Arguments[3];
+                            var consumer = (IBasicConsumer)consumeInvokation.Arguments[4];
 
                             consumer.HandleBasicConsumeOk(consumerTag);
                             consumers.Add(consumer);

@@ -86,6 +86,7 @@ namespace EasyNetQ.Tests
                     Arg<string>.Is.Equal(queueName),
                     Arg<bool>.Is.Equal(false),
                     Arg<string>.Is.Anything,
+                    Arg<IDictionary<string, object>>.Is.Anything,
                     Arg<IBasicConsumer>.Is.Anything));
         }
 

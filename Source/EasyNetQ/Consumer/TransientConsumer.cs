@@ -10,6 +10,7 @@ namespace EasyNetQ.Consumer
         private readonly IQueue queue;
         private readonly Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private readonly IPersistentConnection connection;
+        private readonly IConsumerConfiguration configuration;
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IEventBus eventBus;
 
@@ -19,6 +20,7 @@ namespace EasyNetQ.Consumer
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
             IPersistentConnection connection, 
+            IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory, 
             IEventBus eventBus)
         {
@@ -27,10 +29,12 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(configuration, "configuration");
 
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
+            this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
         }
@@ -44,7 +48,8 @@ namespace EasyNetQ.Consumer
             internalConsumer.StartConsuming(
                 connection,
                 queue,
-                onMessage);
+                onMessage,
+                configuration);
 
             return new ConsumerCancellation(Dispose);
         }

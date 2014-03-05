@@ -76,6 +76,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                     Arg<string>.Is.Equal(queueName),
                     Arg<bool>.Is.Equal(false), // NoAck
                     Arg<string>.Is.Anything,
+                    Arg<IDictionary<string, object>>.Is.Anything,
                     Arg<IBasicConsumer>.Is.Anything));
 
             assertConsumerStarted(1, expectedQueueName1);

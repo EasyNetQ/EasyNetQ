@@ -23,10 +23,11 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected IQueue queue;
         protected IPersistentConnection persistentConnection;
         protected IEventBus eventBus;
+        protected IConsumerConfiguration configuration;
 
         protected const string queueName = "my_queue";
         protected int createConsumerCalled;
-
+        
         [SetUp]
         public void SetUp()
         {
@@ -50,11 +51,12 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                     createConsumerCalled++;
                     x.ReturnValue = internalConsumer;
                 }).Repeat.Any();
-
+            configuration = new ConsumerConfiguration();
             consumer = new PersistentConsumer(
                 queue,
                 onMessage,
                 persistentConnection,
+                configuration,
                 internalConsumerFactory, 
                 eventBus);
 

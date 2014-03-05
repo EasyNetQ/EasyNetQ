@@ -144,7 +144,7 @@ namespace EasyNetQ
                 advancedBus.Bind(exchange, queue, topic);
             }
 
-            return advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body));
+            return advancedBus.Consume<T>(queue, (message, messageRecievedInfo) => onMessage(message.Body), x => x.WithPriority(configuration.Priority));
         }
 
         public TResponse Request<TRequest, TResponse>(TRequest request)
