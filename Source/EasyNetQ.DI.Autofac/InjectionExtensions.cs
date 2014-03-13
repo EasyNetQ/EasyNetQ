@@ -7,15 +7,18 @@ namespace EasyNetQ.DI
     {
         public static Autofac.IContainer RegisterAsEasyNetQContainerFactory(this ContainerBuilder builder, Func<IBus> busCreator)
         {
-            var autofacAdapter = new AutofacAdapter(builder);
+            var adapter = new AutofacAdapter(builder);
             
-            RabbitHutch.SetContainerFactory(() => autofacAdapter);
+            RabbitHutch.SetContainerFactory(() => adapter);
 
-            IBus bus = busCreator();
+            var container = adapter.Container;
 
-            autofacAdapter.Register(provider => bus);
+            var bus = busCreator();
 
-            return autofacAdapter.Container;
+            adapter.Register(provider => bus);
+
+            return container;
         }
+
     }
 }
