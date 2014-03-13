@@ -19,7 +19,7 @@ GO
 
 CREATE TABLE [dbo].[WorkItemStatus] (
 	[WorkItemID]  [int] NOT NULL,
-	[Status] [tinyint] NULL,
+	[Status] [smallint] NULL,
 	[WakeTime] [datetime] NULL,
 	[ClientID] [tinyint] NULL,
 	[PurgeDate] [smalldatetime] NULL
