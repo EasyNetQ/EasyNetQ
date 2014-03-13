@@ -20,8 +20,8 @@ namespace EasyNetQ.DI.Tests
             builder = new ContainerBuilder();
             builder.RegisterType<TestConventions>().As<IConventions>();
             
-            container = builder.RegisterAsEasyNetQContainerFactory();
-            bus = new MockBuilder().Bus;
+            container = builder.RegisterAsEasyNetQContainerFactory(() => bus = new MockBuilder().Bus);
+            //bus = container.Resolve<IBus>();
         }
 
         [TearDown]
