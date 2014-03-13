@@ -47,7 +47,7 @@ namespace EasyNetQ.Scheduler
             WithStoredProcedureCommand(dialect.SelectProcedureName, command =>
             {
                 AddParameter(command, dialect.RowsParameterName, configuration.MaximumScheduleMessagesToReturn, DbType.Int32);
-                AddParameter(command, dialect.StatusParameterName, 0, DbType.Byte);
+                AddParameter(command, dialect.StatusParameterName, 0, DbType.Int16);
                 AddParameter(command, dialect.WakeTimeParameterName, now(), DbType.DateTime);
 
                 using (var reader = command.ExecuteReader())
@@ -95,7 +95,7 @@ namespace EasyNetQ.Scheduler
         {
             WithStoredProcedureCommand(dialect.PurgeProcedureName, command =>
                 {
-                    AddParameter(command, dialect.RowsParameterName, configuration.PurgeBatchSize, DbType.Byte);
+                    AddParameter(command, dialect.RowsParameterName, configuration.PurgeBatchSize, DbType.Int16);
                     AddParameter(command, dialect.PurgeDateParameterName, now(), DbType.DateTime);
 
                     command.ExecuteNonQuery();
