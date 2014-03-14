@@ -13,7 +13,7 @@ namespace EasyNetQ.Scheduler
         public string ConnectionStringName { get; set; }
         public string SchemaName { get; set; }
 
-        public int PurgeBatchSize { get; set; }
+        public short PurgeBatchSize { get; set; }
         public int MaximumScheduleMessagesToReturn { get; set; }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace EasyNetQ.Scheduler
             {
                 ProviderName = string.IsNullOrEmpty(providerName) ? "System.Data.SqlClient" : providerName,
                 ConnectionString = connectionString.ConnectionString,
-                PurgeBatchSize = GetIntAppSetting("PurgeBatchSize"),
+                PurgeBatchSize = GetShortAppSetting("PurgeBatchSize"),
                 PurgeDelayDays = GetIntAppSetting("PurgeDelayDays"),
                 MaximumScheduleMessagesToReturn = GetIntAppSetting("MaximumScheduleMessagesToReturn"),
                 SchemaName = ConfigurationManager.AppSettings[schemaNameKey]
