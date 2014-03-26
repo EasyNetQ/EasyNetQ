@@ -68,6 +68,7 @@
     <Compile Include="NinjectAdapterTests.cs" />
     <Compile Include="StructureMapAdapterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StructureMapAdapterWithRegistryTests.cs" />
     <Compile Include="WindsorAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
