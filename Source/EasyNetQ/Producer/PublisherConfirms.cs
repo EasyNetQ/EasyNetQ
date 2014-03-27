@@ -132,25 +132,21 @@ namespace EasyNetQ.Producer
 
             var sequenceNumber = model.NextPublishSeqNo;
 
-            // make sure we don't get a race condition when the ack/nack and timeout
-            // occur at the same time.
-            var responseLock = new object();
-
             // there are three possible outcomes from a publish with confirms:
 
             // 1. We time out without an ack or a nack being received. Throw a timeout exception.
-            var timer = new Timer(state =>
+            Timer timer = null;
+            timer = new Timer(state =>
                 {
-                    lock (responseLock)
-                    {
-                        if (tcs.Task.IsCompleted) return;
-                        logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
-                        dictionary.Remove(sequenceNumber);
-                        tcs.SetException(new TimeoutException(string.Format(
-                            "Publisher confirms timed out after {0} seconds " + 
-                            "waiting for ACK or NACK from sequence number {1}",
-                            timeoutSeconds, sequenceNumber)));
-                    }
+                    var set = tcs.TrySetException(new TimeoutException(string.Format(
+                        "Publisher confirms timed out after {0} seconds " + 
+                        "waiting for ACK or NACK from sequence number {1}",
+                        timeoutSeconds, sequenceNumber)));
+
+                    if (!set) return;
+                    this.logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
+                    this.dictionary.Remove(sequenceNumber);
+                    timer.Dispose();
                 }, null, timeoutSeconds * 1000, Timeout.Infinite);
 
             dictionary.Add(sequenceNumber, new ConfirmActions
@@ -158,25 +154,16 @@ namespace EasyNetQ.Producer
                     // 2. An ack is received, so complete normally.
                     OnAck = () =>
                         {
-                            lock (responseLock)
-                            {
-                                if (tcs.Task.IsCompleted) return;
-                                timer.Dispose();
-                                tcs.SetResult(new NullStruct());
-                            }
+                            timer.Dispose();
+                            Task.Factory.StartNew(() => tcs.TrySetResult(new NullStruct()));
                         },
 
                     // 3. A Nack is received, so throw an exception.
                     OnNack = () =>
                         {
-                            lock (responseLock)
-                            {
-                                if (tcs.Task.IsCompleted) return;
-                                timer.Dispose();
-                                logger.ErrorWrite("Publish was nacked by broker. Sequence number: {0}", sequenceNumber);
-                                tcs.SetException(new PublishNackedException(string.Format(
-                                    "Broker has signalled that publish {0} was unsuccessful", sequenceNumber)));
-                            }
+                            timer.Dispose();
+                            logger.ErrorWrite("Publish was nacked by broker. Sequence number: {0}", sequenceNumber);
+                            Task.Factory.StartNew(() => tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", sequenceNumber))));
                         },
 
                     Cancel = () => timer.Dispose(),
