@@ -20,5 +20,6 @@ namespace EasyNetQ.Management.Client.Model
             public DateTime Connected { get { return GetPropertyOrDefault<DateTime>("Connected"); } }
             public string EasynetqVersion { get { return GetPropertyOrDefault<String>("EasynetqVersion"); } }
             public string MachineName { get { return GetPropertyOrDefault<String>("MachineName"); } }            
+            public IDictionary<String, Object> PropertiesDictionary { get { return Properties; } }
         }
 }

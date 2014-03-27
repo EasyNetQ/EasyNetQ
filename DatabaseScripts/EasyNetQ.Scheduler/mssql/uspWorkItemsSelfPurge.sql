@@ -13,7 +13,7 @@ GO
 PRINT 'Creating procedure [dbo].[uspWorkItemsSelfPurge]'
 GO
 
-CREATE Procedure [dbo].[uspWorkItemsSelfPurge] @rows TinyINT = 5, @purgeDate DateTime = NULL 
+CREATE Procedure [dbo].[uspWorkItemsSelfPurge] @rows SmallINT = 5, @purgeDate DateTime = NULL 
 
 AS
 
