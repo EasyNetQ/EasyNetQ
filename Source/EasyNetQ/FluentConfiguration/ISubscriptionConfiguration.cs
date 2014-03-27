@@ -30,6 +30,13 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithPriority(int priority);
+
+
+        /// <summary>
+        /// Configures is consumer exclusive or not
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration AsExclusive();
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -37,12 +44,14 @@ namespace EasyNetQ.FluentConfiguration
         public IList<string> Topics { get; private set; }
         public bool AutoDelete { get; private set; }
         public int Priority { get; private set; }
+        public bool IsExclusive { get; private set; }
 
         public SubscriptionConfiguration()
         {
             Topics = new List<string>();
             AutoDelete = false;
             Priority = 0;
+            IsExclusive = false;
         }
 
         public ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true)
@@ -54,6 +63,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithPriority(int priority)
         {
             Priority = priority;
+            return this;
+        }
+
+        public ISubscriptionConfiguration AsExclusive()
+        {
+            IsExclusive = true;
             return this;
         }
 
