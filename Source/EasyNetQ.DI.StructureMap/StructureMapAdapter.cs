@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Reflection;
-using StructureMap;
+using System.Linq;
 
 namespace EasyNetQ.DI
 {
@@ -40,25 +39,7 @@ namespace EasyNetQ.DI
 
         private bool ServiceRegistered<T>()
         {
-            var instance = structureMapContainer.TryGetInstance(typeof(T));
-            var d = instance as Delegate;
-            if (d != null)
-            {
-                try
-                {
-                    d.DynamicInvoke();
-                }
-                catch (TargetInvocationException ex)
-                {
-                    var inner = ex.InnerException as StructureMapException;
-                    if (inner == null)
-                        throw;
-                    if (inner.ErrorCode == 202)
-                        return false;
-                    throw;
-                }
-            }
-            return instance != null;
+            return structureMapContainer.Model.AllInstances.Any(x=>x.PluginType == typeof(T));           
         }
 
         public void Dispose()
