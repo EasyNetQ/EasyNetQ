@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.28.3.0")]
+[assembly: AssemblyVersion("0.28.4.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.28.4.0 Support for queue name that contains plus char (+) when using Management Client.
 // 0.28.3.0 RabbitMQ.Client version 3.2.4
 // 0.28.1.0 Made Send method respect the PersistentMessages configuration option
 // 0.28.0.0 Consumer priority

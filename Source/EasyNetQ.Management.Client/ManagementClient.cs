@@ -131,7 +131,7 @@ namespace EasyNetQ.Management.Client
         public Queue GetQueue(string queueName, Vhost vhost)
         {
             return Get<Queue>(string.Format("queues/{0}/{1}",
-                SanitiseVhostName(vhost.Name), queueName));
+                SanitiseVhostName(vhost.Name), SanitiseQueueName(queueName)));
         }
 
         public Exchange CreateExchange(ExchangeInfo exchangeInfo, Vhost vhost)
@@ -212,7 +212,7 @@ namespace EasyNetQ.Management.Client
                 throw new ArgumentNullException("vhost");
             }
 
-            Put(string.Format("queues/{0}/{1}", SanitiseVhostName(vhost.Name), queueInfo.GetName()), queueInfo);
+            Put(string.Format("queues/{0}/{1}", SanitiseVhostName(vhost.Name), SanitiseQueueName(queueInfo.GetName())), queueInfo);
 
             return GetQueue(queueInfo.GetName(), vhost);
         }
@@ -224,7 +224,7 @@ namespace EasyNetQ.Management.Client
                 throw new ArgumentNullException("queue");
             }
 
-            Delete(string.Format("queues/{0}/{1}", SanitiseVhostName(queue.Vhost), queue.Name));
+            Delete(string.Format("queues/{0}/{1}", SanitiseVhostName(queue.Vhost), SanitiseQueueName(queue.Name)));
         }
 
         public IEnumerable<Binding> GetBindingsForQueue(Queue queue)
@@ -235,7 +235,7 @@ namespace EasyNetQ.Management.Client
             }
 
             return Get<IEnumerable<Binding>>(
-                string.Format("queues/{0}/{1}/bindings", SanitiseVhostName(queue.Vhost), queue.Name));
+                string.Format("queues/{0}/{1}/bindings", SanitiseVhostName(queue.Vhost), SanitiseQueueName(queue.Name)));
         }
 
         public void Purge(Queue queue)
@@ -245,7 +245,7 @@ namespace EasyNetQ.Management.Client
                 throw new ArgumentNullException("queue");
             }
 
-            Delete(string.Format("queues/{0}/{1}/contents", SanitiseVhostName(queue.Vhost), queue.Name));
+            Delete(string.Format("queues/{0}/{1}/contents", SanitiseVhostName(queue.Vhost), SanitiseQueueName(queue.Name)));
         }
 
         public IEnumerable<Message> GetMessagesFromQueue(Queue queue, GetMessagesCriteria criteria)
@@ -256,7 +256,7 @@ namespace EasyNetQ.Management.Client
             }
 
             return Post<GetMessagesCriteria, IEnumerable<Message>>(
-                string.Format("queues/{0}/{1}/get", SanitiseVhostName(queue.Vhost), queue.Name),
+                string.Format("queues/{0}/{1}/get", SanitiseVhostName(queue.Vhost), SanitiseQueueName(queue.Name)),
                 criteria);
         }
 
@@ -281,7 +281,7 @@ namespace EasyNetQ.Management.Client
             }
 
             Post<BindingInfo, object>(
-                string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.Vhost), exchange.Name, queue.Name),
+                string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.Vhost), exchange.Name, SanitiseQueueName(queue.Name)),
                 bindingInfo);
         }
 
@@ -318,7 +318,7 @@ namespace EasyNetQ.Management.Client
 
             return Get<IEnumerable<Binding>>(
                 string.Format("bindings/{0}/e/{1}/q/{2}", SanitiseVhostName(queue.Vhost),
-                    exchange.Name, queue.Name));
+                    exchange.Name, SanitiseQueueName(queue.Name)));
         }
 
         public void DeleteBinding(Binding binding)
@@ -617,6 +617,11 @@ namespace EasyNetQ.Management.Client
         private string SanitiseVhostName(string vhostName)
         {
             return vhostName.Replace("/", "%2f");
+        }
+
+        private string SanitiseQueueName(string queueName)
+        {
+            return queueName.Replace("+", "%2B");
         }
 
         private string RecodeBindingPropertiesKey(string propertiesKey)
