@@ -258,7 +258,7 @@ namespace EasyNetQ
                     x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)
                     ).Wait();
 
-                logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelte:{3}, args:{4}",
+                logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
                     name, durable, exclusive, autoDelete, WriteArguments(arguments));
             }
 
