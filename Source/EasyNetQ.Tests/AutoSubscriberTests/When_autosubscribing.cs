@@ -124,6 +124,16 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             }
         }
 
+        //Discovered by reflection over test assembly, do not remove.
+        private abstract class MyGenericAbstractConsumer<TMessage> : IConsume<TMessage>
+          where TMessage : class
+        {
+            public virtual void Consume(TMessage message)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         private class MessageA
         {
             public string Text { get; set; }
