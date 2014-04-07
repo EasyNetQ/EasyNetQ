@@ -190,10 +190,10 @@ namespace EasyNetQ.AutoSubscribe
 
         protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types,Type interfaceType)
         {
-            foreach (var concreteType in types.Where(t => t.IsClass))
+            foreach (var concreteType in types.Where(t => t.IsClass && !t.IsAbstract))
             {
                 var subscriptionInfos = concreteType.GetInterfaces()
-                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceType)
+                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceType && !i.GetGenericArguments()[0].IsGenericParameter)
                     .Select(i => new AutoSubscriberConsumerInfo(concreteType, i, i.GetGenericArguments()[0]))
                     .ToArray();
 
