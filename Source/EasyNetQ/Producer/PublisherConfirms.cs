@@ -118,11 +118,6 @@ namespace EasyNetQ.Producer
         public Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
         {
             var tcs = new TaskCompletionSource<NullStruct>();
-            return PublishWithConfirmInternal(model, publishAction, tcs);
-        }
-
-        private Task PublishWithConfirmInternal(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
-        {
             return !configuration.PublisherConfirms ? ExecutePublishActionDirectly(model, publishAction, tcs) : ExecutePublishWithConfirmation(model, publishAction, tcs);
         }
 
