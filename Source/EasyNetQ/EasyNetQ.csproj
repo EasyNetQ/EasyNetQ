@@ -91,6 +91,7 @@
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
     <Compile Include="Events\ConsumerModelDisposedEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />
+    <Compile Include="Events\ReturnedMessageEvent.cs" />
     <Compile Include="Events\StoppedConsumingEvent.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
     <Compile Include="Consumer\HandlerRunner.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Message.cs" />
     <Compile Include="MessageReceivedInfo.cs" />
     <Compile Include="MessageProperties.cs" />
+    <Compile Include="MessageReturnedInfo.cs" />
     <Compile Include="NonGeneric\NonGenericExtensions.cs" />
     <Compile Include="PersistentConnection.cs" />
     <Compile Include="Producer\ClientCommandDispatcher.cs" />

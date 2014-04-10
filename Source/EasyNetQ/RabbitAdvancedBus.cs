@@ -61,6 +61,7 @@ namespace EasyNetQ
 
             eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
+            eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }
@@ -419,6 +420,13 @@ namespace EasyNetQ
         protected void OnDisconnected()
         {
             if (Disconnected != null) Disconnected();
+        }
+
+        public event Action<byte[], MessageProperties, MessageReturnedInfo> MessageReturned;
+
+        protected void OnMessageReturned(ReturnedMessageEvent args)
+        {
+            if (MessageReturned != null) MessageReturned(args.Body, args.Properties, args.Info);
         }
 
         public virtual bool IsConnected
