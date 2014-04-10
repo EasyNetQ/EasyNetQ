@@ -50,7 +50,7 @@ namespace EasyNetQ.Producer
             foreach (var outstandingConfirm in outstandingConfirms)
             {
                 outstandingConfirm.Cancel();
-                PublishWithConfirmInternal(
+                ExecutePublishWithConfirmation(
                     publishChannelCreatedEvent.Channel,
                     outstandingConfirm.PublishAction,
                     outstandingConfirm.TaskCompletionSource);
