@@ -123,11 +123,11 @@ namespace EasyNetQ.Producer
 
         private Task PublishWithConfirmInternal(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
         {
-            if (!configuration.PublisherConfirms)
-            {
-                return ExecutePublishActionDirectly(model, publishAction);
-            }
+            return !configuration.PublisherConfirms ? ExecutePublishActionDirectly(model, publishAction) : ExecutePublishWithConfirmation(model, publishAction, tcs);
+        }
 
+        private Task ExecutePublishWithConfirmation(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
+        {
             SetModel(model);
 
             var sequenceNumber = model.NextPublishSeqNo;
@@ -139,7 +139,7 @@ namespace EasyNetQ.Producer
             timer = new Timer(state =>
                 {
                     var set = tcs.TrySetException(new TimeoutException(string.Format(
-                        "Publisher confirms timed out after {0} seconds " + 
+                        "Publisher confirms timed out after {0} seconds " +
                         "waiting for ACK or NACK from sequence number {1}",
                         timeoutSeconds, sequenceNumber)));
 
@@ -147,7 +147,7 @@ namespace EasyNetQ.Producer
                     this.logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
                     this.dictionary.Remove(sequenceNumber);
                     timer.Dispose();
-                }, null, timeoutSeconds * 1000, Timeout.Infinite);
+                }, null, timeoutSeconds*1000, Timeout.Infinite);
 
             dictionary.Add(sequenceNumber, new ConfirmActions
                 {
@@ -163,13 +163,14 @@ namespace EasyNetQ.Producer
                         {
                             timer.Dispose();
                             logger.ErrorWrite("Publish was nacked by broker. Sequence number: {0}", sequenceNumber);
-                            Task.Factory.StartNew(() => tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", sequenceNumber))));
+                            Task.Factory.StartNew(
+                                () =>
+                                tcs.TrySetException(
+                                    new PublishNackedException(
+                                        string.Format("Broker has signalled that publish {0} was unsuccessful", sequenceNumber))));
                         },
-
                     Cancel = () => timer.Dispose(),
-
                     PublishAction = publishAction,
-
                     TaskCompletionSource = tcs
                 });
 
