@@ -32,7 +32,7 @@ namespace EasyNetQ.Producer
             this.eventBus = eventBus;
         }
 
-        private void SetModel(IModel model)
+        protected void SetModel(IModel model)
         {
             // we only need to set up the channel once, but the persistent channel can change
             // the IModel instance underneath us, so check on each publish.
@@ -40,14 +40,24 @@ namespace EasyNetQ.Producer
 
             if (cachedModel != null)
             {
-                cachedModel.BasicReturn -= ModelOnBasicReturn;
+                OnChannelClosed(cachedModel);
             }
 
             cachedModel = model;
 
-            model.BasicReturn += ModelOnBasicReturn;
+            OnChannelOpened(model);
         }
-        
+
+        protected virtual void OnChannelOpened(IModel newModel)
+        {
+            newModel.BasicReturn += ModelOnBasicReturn;
+        }
+
+        protected virtual void OnChannelClosed(IModel oldModel)
+        {
+            oldModel.BasicReturn -= ModelOnBasicReturn;
+        }
+
         public virtual Task Publish(IModel model, Action<IModel> publishAction)
         {
             SetModel(model);
@@ -83,7 +93,6 @@ namespace EasyNetQ.Producer
         private readonly IDictionary<ulong, ConfirmActions> dictionary = 
             new ConcurrentDictionary<ulong, ConfirmActions>();
 
-        private IModel cachedModel;
         private readonly int timeoutSeconds;
 
         public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus) : base (eventBus)
@@ -100,7 +109,7 @@ namespace EasyNetQ.Producer
 
         private void OnPublishChannelCreated(PublishChannelCreatedEvent publishChannelCreatedEvent)
         {
-            Preconditions.CheckNotNull(publishChannelCreatedEvent.Channel, "model");
+            Preconditions.CheckNotNull(publishChannelCreatedEvent.Channel, "oldModel");
 
             var outstandingConfirms = new List<ConfirmActions>(dictionary.Values);
 
@@ -115,31 +124,25 @@ namespace EasyNetQ.Producer
             
         }
 
-        private void SetModel(IModel model)
+        protected override void OnChannelOpened(IModel newModel)
         {
-            // we only need to set up the channel once, but the persistent channel can change
-            // the IModel instance underneath us, so check on each publish.
-            if (cachedModel == model) return;
-
-            if (cachedModel != null)
-            {
-                // the old model has been closed and we're now using a new model, so remove
-                // any existing callback entries in the dictionary
-                dictionary.Clear();
-
-                cachedModel.BasicAcks -= ModelOnBasicAcks;
-                cachedModel.BasicNacks -= ModelOnBasicNacks;
-                cachedModel.BasicReturn -= ModelOnBasicReturn;
-            }
-
-            cachedModel = model;
-
             // switch channel to confirms mode.
-            model.ConfirmSelect();
+            newModel.ConfirmSelect();
 
-            model.BasicAcks += ModelOnBasicAcks;
-            model.BasicNacks += ModelOnBasicNacks;
-            model.BasicReturn += ModelOnBasicReturn;
+            newModel.BasicAcks += ModelOnBasicAcks;
+            newModel.BasicNacks += ModelOnBasicNacks;
+            base.OnChannelOpened(newModel);
+        }
+
+        protected override void OnChannelClosed(IModel oldModel)
+        {
+            // the old model has been closed and we're now using a new model, so remove
+            // any existing callback entries in the dictionary
+            dictionary.Clear();
+
+            oldModel.BasicAcks -= ModelOnBasicAcks;
+            oldModel.BasicNacks -= ModelOnBasicNacks;
+            base.OnChannelClosed(oldModel);
         }
 
         private void ModelOnBasicNacks(IModel model, BasicNackEventArgs args)
