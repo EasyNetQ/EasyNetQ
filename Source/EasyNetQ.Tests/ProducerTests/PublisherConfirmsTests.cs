@@ -95,13 +95,12 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var connectionConfiguration = new ConnectionConfiguration
                 {
-                    PublisherConfirms = true,
                     Timeout = 1
                 };
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -179,40 +178,6 @@ namespace EasyNetQ.Tests.ProducerTests
 
             Task.WaitAll(tasks.ToArray());
         }
-    }
-
-    [TestFixture]
-    public class PublisherConfirmsTests_when_publisher_confirms_are_disabled
-    {
-        private IPublisherConfirms publisherConfirms;
-        IModel channel;
-        private IEventBus eventBus;
-
-        [SetUp]
-        public void SetUp()
-        {
-            channel = MockRepository.GenerateStub<IModel>();
-            eventBus = MockRepository.GenerateStub<IEventBus>();
-
-            var connectionConfiguration = new ConnectionConfiguration
-            {
-                PublisherConfirms = false,
-                Timeout = 100
-            };
-
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
-
-            publisherConfirms = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
-        }
-
-        [Test]
-        public void Should_complete_task_immediately_without_waiting_for_ack()
-        {
-            var taskWasExecuted = false;
-            var task = publisherConfirms.PublishWithConfirm(channel, model => taskWasExecuted = true);
-            task.Wait();
-            taskWasExecuted.ShouldBeTrue();
-        }        
     }
 
     [TestFixture]

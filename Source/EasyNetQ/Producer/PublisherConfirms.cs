@@ -47,7 +47,6 @@ namespace EasyNetQ.Producer
     /// </summary>
     public class PublisherConfirms : PublisherBase
     {
-        private readonly IConnectionConfiguration configuration;
         private readonly IEasyNetQLogger logger;
         private readonly IDictionary<ulong, ConfirmActions> dictionary = 
             new ConcurrentDictionary<ulong, ConfirmActions>();
@@ -61,7 +60,6 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
-            this.configuration = configuration;
             timeoutSeconds = configuration.Timeout;
             this.logger = logger;
 
@@ -145,7 +143,7 @@ namespace EasyNetQ.Producer
         public override Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
         {
             var tcs = new TaskCompletionSource<NullStruct>();
-            return !configuration.PublisherConfirms ? ExecutePublishActionDirectly(model, publishAction, tcs) : ExecutePublishWithConfirmation(model, publishAction, tcs);
+            return ExecutePublishWithConfirmation(model, publishAction, tcs);
         }
 
         private Task ExecutePublishWithConfirmation(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
