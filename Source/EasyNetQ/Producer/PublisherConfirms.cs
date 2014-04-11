@@ -39,7 +39,9 @@ namespace EasyNetQ.Producer
     {
         public static IPublisherConfirms CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
-            return new PublisherConfirms(configuration, logger, eventBus);
+            return configuration.PublisherConfirms
+                       ? new PublisherConfirms(configuration, logger, eventBus)
+                       : new PublisherBase();
         }
 
         private readonly IConnectionConfiguration configuration;

@@ -37,6 +37,50 @@ namespace EasyNetQ.Tests.ProducerTests
     }
 
     [TestFixture]
+    public class PublisherConfirmsFactoryTests_when_publisher_confirms_enabled
+    {
+        private IPublisherConfirms publisher;
+
+        [Test]
+        public void Should_return_instance_of_publisher_confirms()
+        {
+            var eventBus = MockRepository.GenerateStub<IEventBus>();
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            var connectionConfiguration = new ConnectionConfiguration
+                {
+                    PublisherConfirms = true
+                };
+
+            publisher = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+
+            Assert.IsAssignableFrom<PublisherConfirms>(publisher);
+        }
+    }
+
+    [TestFixture]
+    public class PublisherConfirmsFactoryTests_when_publisher_confirms_disabled
+    {
+        private IPublisherConfirms publisher;
+
+        [Test]
+        public void Should_return_instance_of_publisher_base()
+        {
+            var eventBus = MockRepository.GenerateStub<IEventBus>();
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            var connectionConfiguration = new ConnectionConfiguration
+            {
+                PublisherConfirms = false
+            };
+
+            publisher = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+
+            Assert.IsAssignableFrom<PublisherBase>(publisher);
+        }
+    }
+
+    [TestFixture]
     public class PublisherConfirmsTests
     {
         private IPublisherConfirms publisherConfirms;
