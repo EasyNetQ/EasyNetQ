@@ -33,16 +33,20 @@ namespace EasyNetQ.Producer
 
         public virtual Task Publish(IModel model, Action<IModel> publishAction)
         {
-            model.BasicReturn += (sender, args) =>
-                eventBus.Publish(new ReturnedMessageEvent(args.Body,
-                    new MessageProperties(args.BasicProperties),
-                    new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)));
+            model.BasicReturn += ModelOnBasicReturn;
             
             publishAction(model);
 
             var tcs = new TaskCompletionSource<NullStruct>();
             tcs.SetResult(new NullStruct());
             return tcs.Task;
+        }
+
+        protected void ModelOnBasicReturn(IModel model, BasicReturnEventArgs args)
+        {
+            eventBus.Publish(new ReturnedMessageEvent(args.Body,
+                             new MessageProperties(args.BasicProperties),
+                             new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)));
         }
 
         protected struct NullStruct { }
@@ -117,6 +121,7 @@ namespace EasyNetQ.Producer
 
             model.BasicAcks += ModelOnBasicAcks;
             model.BasicNacks += ModelOnBasicNacks;
+            model.BasicReturn += ModelOnBasicReturn;
         }
 
         private void ModelOnBasicNacks(IModel model, BasicNackEventArgs args)

@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_register_for_message_returns()
         {
-            publisher.Publish(channel, model => { }).Wait();
+             publisher.Publish(channel, model => { }).Wait();
 
             channel.AssertWasCalled(x => x.BasicReturn += Arg<BasicReturnEventHandler>.Is.Anything);
         }
@@ -165,6 +165,17 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Test]
+        public void Should_register_for_message_returns()
+        {
+            var task = publisherConfirms.Publish(channel, model => { });
+
+            channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
+            task.Wait();
+
+            channel.AssertWasCalled(x => x.BasicReturn += Arg<BasicReturnEventHandler>.Is.Anything);
+        }
+
+        [Test]
         public void Should_register_for_publisher_confirms()
         {
             var task = publisherConfirms.Publish(channel, model => { });
@@ -238,6 +249,64 @@ namespace EasyNetQ.Tests.ProducerTests
             }
 
             Task.WaitAll(tasks.ToArray());
+        }
+    }
+
+    [TestFixture]
+    public class PublisherConfirmsTests_when_message_returned
+    {
+        private IPublisher publisherConfirms;
+        private IEventBus eventBus;
+        private IModel channel;
+
+        [SetUp]
+        public void SetUp()
+        {
+            channel = MockRepository.GenerateStub<IModel>();
+            eventBus = MockRepository.GenerateStub<IEventBus>();
+
+            var connectionConfiguration = new ConnectionConfiguration
+            {
+                Timeout = 1
+            };
+
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
+        }
+
+        [Test]
+        public void Should_raise_message_returned_event_when_message_returned()
+        {
+            const string exchange = "the exchange";
+            const string replyText = "reply text";
+            const string routingKey = "routing key";
+            var body = new byte[0];
+            var properties = new BasicProperties();
+
+            var task = publisherConfirms.Publish(channel, model => { });
+
+            channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
+            channel.Raise(x => x.BasicReturn += null, null, new BasicReturnEventArgs
+            {
+                Body = body,
+                Exchange = exchange,
+                ReplyText = replyText,
+                RoutingKey = routingKey,
+                BasicProperties = properties
+            });
+
+            task.Wait();
+
+            var arg = eventBus.GetArgumentsForCallsMadeOn(x => x.Publish(Arg<ReturnedMessageEvent>.Is.Anything))[0][0];
+
+            var messageEvent = arg as ReturnedMessageEvent;
+            Assert.NotNull(messageEvent);
+            Assert.AreSame(body, messageEvent.Body);
+            Assert.NotNull(messageEvent.Properties);
+            Assert.AreEqual(exchange, messageEvent.Info.Exchange);
+            Assert.AreEqual(replyText, messageEvent.Info.ReturnReason);
+            Assert.AreEqual(routingKey, messageEvent.Info.RoutingKey);
         }
     }
 
