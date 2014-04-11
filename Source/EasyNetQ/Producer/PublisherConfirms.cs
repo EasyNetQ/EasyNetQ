@@ -23,6 +23,7 @@ namespace EasyNetQ.Producer
     public class PublisherBase : IPublisher
     {
         private readonly IEventBus eventBus;
+        private IModel cachedModel;
 
         public PublisherBase(IEventBus eventBus)
         {
@@ -31,12 +32,28 @@ namespace EasyNetQ.Producer
             this.eventBus = eventBus;
         }
 
+        private void SetModel(IModel model)
+        {
+            // we only need to set up the channel once, but the persistent channel can change
+            // the IModel instance underneath us, so check on each publish.
+            if (cachedModel == model) return;
+
+            if (cachedModel != null)
+            {
+                cachedModel.BasicReturn -= ModelOnBasicReturn;
+            }
+
+            cachedModel = model;
+
+            model.BasicReturn += ModelOnBasicReturn;
+        }
+        
         public virtual Task Publish(IModel model, Action<IModel> publishAction)
         {
-            model.BasicReturn += ModelOnBasicReturn;
+            SetModel(model);
             
             publishAction(model);
-
+            
             var tcs = new TaskCompletionSource<NullStruct>();
             tcs.SetResult(new NullStruct());
             return tcs.Task;
@@ -112,6 +129,7 @@ namespace EasyNetQ.Producer
 
                 cachedModel.BasicAcks -= ModelOnBasicAcks;
                 cachedModel.BasicNacks -= ModelOnBasicNacks;
+                cachedModel.BasicReturn -= ModelOnBasicReturn;
             }
 
             cachedModel = model;

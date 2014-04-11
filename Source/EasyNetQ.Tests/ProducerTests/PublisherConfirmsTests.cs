@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ProducerTests
              publisher.Publish(channel, model => { }).Wait();
 
             channel.AssertWasCalled(x => x.BasicReturn += Arg<BasicReturnEventHandler>.Is.Anything);
-        }
+        }      
 
         [Test]
         public void Should_complete_task_immediately_without_waiting_for_ack()
@@ -95,6 +95,34 @@ namespace EasyNetQ.Tests.ProducerTests
             Assert.AreEqual(routingKey, messageEvent.Info.RoutingKey);
         }
 
+    }
+
+    [TestFixture]
+    public class PublisherBaseTests_when_channel_reconnects
+    {
+        private IPublisher publisher;
+        private IEventBus eventBus;
+
+        [SetUp]
+        public void SetUp()
+        {
+            eventBus = new EventBus();
+
+            publisher = new PublisherBase(eventBus);
+        }
+
+        [Test]
+        public void Should_remove_event_handler_from_old_channel()
+        {
+            var channel1 = MockRepository.GenerateStub<IModel>();
+            var channel2 = MockRepository.GenerateStub<IModel>();
+
+            publisher.Publish(channel1, model => { }).Wait();
+            eventBus.Publish(new PublishChannelCreatedEvent(channel2));
+            publisher.Publish(channel2, model => { }).Wait();
+
+            channel1.AssertWasCalled(x => x.BasicReturn -= Arg<BasicReturnEventHandler>.Is.Anything);
+        }
     }
 
     [TestFixture]
@@ -356,6 +384,29 @@ namespace EasyNetQ.Tests.ProducerTests
             modelsUsedInPublish.Count.ShouldEqual(2);
             modelsUsedInPublish[0].ShouldBeTheSameAs(channel1);
             modelsUsedInPublish[1].ShouldBeTheSameAs(channel2);
+        }
+    
+        [Test]
+        public void Should_remove_event_handler_from_old_channel()
+        {
+            var channel1 = MockRepository.GenerateStub<IModel>();
+            var channel2 = MockRepository.GenerateStub<IModel>();
+
+            // do the publish, this should be retried against the new model after it reconnects.
+            var task = publisherConfirms.Publish(channel1, model => { });
+
+            // new channel connects
+            eventBus.Publish(new PublishChannelCreatedEvent(channel2));
+
+            // new channel ACKs (sequence number is 0)
+            channel2.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
+
+            // wait for task to complete
+            task.Wait();
+
+            channel1.AssertWasCalled(x => x.BasicAcks -= Arg<BasicAckEventHandler>.Is.Anything);
+            channel1.AssertWasCalled(x => x.BasicNacks -= Arg<BasicNackEventHandler>.Is.Anything);
+            channel1.AssertWasCalled(x => x.BasicReturn -= Arg<BasicReturnEventHandler>.Is.Anything);
         }
     }
 }
