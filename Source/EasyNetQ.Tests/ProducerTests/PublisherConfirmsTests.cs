@@ -13,6 +13,30 @@ using Rhino.Mocks;
 namespace EasyNetQ.Tests.ProducerTests
 {
     [TestFixture]
+    public class PublisherBaseTests
+    {
+        private IPublisherConfirms publisherConfirms;
+        IModel channel;
+
+        [SetUp]
+        public void SetUp()
+        {
+            channel = MockRepository.GenerateStub<IModel>();
+
+            publisherConfirms = new PublisherBase();
+        }
+
+        [Test]
+        public void Should_complete_task_immediately_without_waiting_for_ack()
+        {
+            var taskWasExecuted = false;
+            var task = publisherConfirms.PublishWithConfirm(channel, model => taskWasExecuted = true);
+            task.Wait();
+            taskWasExecuted.ShouldBeTrue();
+        }
+    }
+
+    [TestFixture]
     public class PublisherConfirmsTests
     {
         private IPublisherConfirms publisherConfirms;

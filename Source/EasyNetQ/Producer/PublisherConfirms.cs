@@ -10,6 +10,23 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Producer
 {
+    public class PublisherBase : IPublisherConfirms
+    {
+        public virtual Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
+        {
+            return ExecutePublishActionDirectly(model, publishAction, new TaskCompletionSource<NullStruct>());
+        }
+
+        protected Task ExecutePublishActionDirectly(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
+        {
+            publishAction(model);
+            tcs.SetResult(new NullStruct());
+            return tcs.Task;
+        }
+
+        protected struct NullStruct { }
+    }
+
     /// <summary>
     /// Handles publisher confirms.
     /// http://www.rabbitmq.com/blog/2011/02/10/introducing-publisher-confirms/
@@ -18,7 +35,7 @@ namespace EasyNetQ.Producer
     /// Note, this class is designed to be called sequentially from a single thread. It is NOT
     /// thread safe.
     /// </summary>
-    public class PublisherConfirms : IPublisherConfirms
+    public class PublisherConfirms : PublisherBase
     {
         public static IPublisherConfirms CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
@@ -120,7 +137,7 @@ namespace EasyNetQ.Producer
 
         }
 
-        public Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
+        public override Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
         {
             var tcs = new TaskCompletionSource<NullStruct>();
             return !configuration.PublisherConfirms ? ExecutePublishActionDirectly(model, publishAction, tcs) : ExecutePublishWithConfirmation(model, publishAction, tcs);
@@ -178,16 +195,7 @@ namespace EasyNetQ.Producer
 
             return tcs.Task;
         }
-
-        private Task ExecutePublishActionDirectly(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
-        {
-            publishAction(model);
-            tcs.SetResult(new NullStruct());
-            return tcs.Task;
-        }
-
-        private struct NullStruct { }
-
+        
         private class ConfirmActions
         {
             public Action OnAck { get; set; }
