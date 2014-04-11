@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
 {
-    public interface IPublisherConfirms
+    public interface IPublisher
     {
         Task Publish(IModel model, Action<IModel> publishAction);
     }

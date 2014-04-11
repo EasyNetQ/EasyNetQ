@@ -128,7 +128,7 @@
     <Compile Include="Producer\IClientCommandDispatcherFactory.cs" />
     <Compile Include="Producer\IPersistentChannel.cs" />
     <Compile Include="Producer\IPersistentChannelFactory.cs" />
-    <Compile Include="Producer\IPublisherConfirms.cs" />
+    <Compile Include="Producer\IPublisher.cs" />
     <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
     <Compile Include="Producer\IRpc.cs" />
     <Compile Include="Producer\ISendReceive.cs" />

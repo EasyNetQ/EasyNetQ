@@ -17,7 +17,7 @@ namespace EasyNetQ
         private readonly Func<string> getCorrelationId;
         private readonly IPersistentConnection connection;
         private readonly IClientCommandDispatcher clientCommandDispatcher;
-        private readonly IPublisherConfirms publisherConfirms;
+        private readonly IPublisher _publisher;
         private readonly IEventBus eventBus;
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
@@ -30,7 +30,7 @@ namespace EasyNetQ
             IEasyNetQLogger logger, 
             Func<string> getCorrelationId, 
             IClientCommandDispatcherFactory clientCommandDispatcherFactory, 
-            IPublisherConfirms publisherConfirms,
+            IPublisher _publisher,
             IEventBus eventBus, 
             ITypeNameSerializer typeNameSerializer, 
             IHandlerCollectionFactory handlerCollectionFactory,
@@ -41,7 +41,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
-            Preconditions.CheckNotNull(publisherConfirms, "publisherConfirms");
+            Preconditions.CheckNotNull(_publisher, "_publisher");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
@@ -51,7 +51,7 @@ namespace EasyNetQ
             this.consumerFactory = consumerFactory;
             this.logger = logger;
             this.getCorrelationId = getCorrelationId;
-            this.publisherConfirms = publisherConfirms;
+            this._publisher = _publisher;
             this.eventBus = eventBus;
             this.typeNameSerializer = typeNameSerializer;
             this.handlerCollectionFactory = handlerCollectionFactory;
@@ -166,7 +166,7 @@ namespace EasyNetQ
                     var properties = x.CreateBasicProperties();
                     messageProperties.CopyTo(properties);
 
-                    return publisherConfirms.Publish(x,
+                    return _publisher.Publish(x,
                         m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body));
                 }).Unwrap();
 

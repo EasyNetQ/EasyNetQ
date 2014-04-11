@@ -12,7 +12,7 @@ namespace EasyNetQ.Producer
 {
     public static class PublisherConfirmsFactory
     {
-        public static IPublisherConfirms CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
+        public static IPublisher CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
             return configuration.PublisherConfirms
                        ? new PublisherConfirms(configuration, logger, eventBus)
@@ -20,7 +20,7 @@ namespace EasyNetQ.Producer
         }
     }
 
-    public class PublisherBase : IPublisherConfirms
+    public class PublisherBase : IPublisher
     {
         public virtual Task Publish(IModel model, Action<IModel> publishAction)
         {

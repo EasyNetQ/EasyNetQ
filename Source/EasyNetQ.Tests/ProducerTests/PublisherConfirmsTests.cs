@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.ProducerTests
     [TestFixture]
     public class PublisherBaseTests
     {
-        private IPublisherConfirms publisherConfirms;
+        private IPublisher publisher;
         IModel channel;
 
         [SetUp]
@@ -23,14 +23,14 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             channel = MockRepository.GenerateStub<IModel>();
 
-            publisherConfirms = new PublisherBase();
+            publisher = new PublisherBase();
         }
 
         [Test]
         public void Should_complete_task_immediately_without_waiting_for_ack()
         {
             var taskWasExecuted = false;
-            var task = publisherConfirms.Publish(channel, model => taskWasExecuted = true);
+            var task = publisher.Publish(channel, model => taskWasExecuted = true);
             task.Wait();
             taskWasExecuted.ShouldBeTrue();
         }
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.ProducerTests
     [TestFixture]
     public class PublisherConfirmsFactoryTests_when_publisher_confirms_enabled
     {
-        private IPublisherConfirms publisher;
+        private IPublisher publisher;
 
         [Test]
         public void Should_return_instance_of_publisher_confirms()
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests.ProducerTests
     [TestFixture]
     public class PublisherConfirmsFactoryTests_when_publisher_confirms_disabled
     {
-        private IPublisherConfirms publisher;
+        private IPublisher publisher;
 
         [Test]
         public void Should_return_instance_of_publisher_base()
@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests.ProducerTests
     [TestFixture]
     public class PublisherConfirmsTests
     {
-        private IPublisherConfirms publisherConfirms;
+        private IPublisher publisherConfirms;
         IModel channel;
         private IEventBus eventBus;
 
@@ -183,7 +183,7 @@ namespace EasyNetQ.Tests.ProducerTests
     [TestFixture]
     public class PublisherConfirmsTests_when_channel_reconnects
     {
-        private IPublisherConfirms publisherConfirms;
+        private IPublisher publisherConfirms;
         private IEventBus eventBus;
 
         [SetUp]
