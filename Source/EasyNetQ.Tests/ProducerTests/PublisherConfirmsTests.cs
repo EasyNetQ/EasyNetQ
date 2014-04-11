@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -134,7 +134,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -166,7 +166,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = new PublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]

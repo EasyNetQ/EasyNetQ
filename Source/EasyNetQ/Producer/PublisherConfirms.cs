@@ -20,6 +20,11 @@ namespace EasyNetQ.Producer
     /// </summary>
     public class PublisherConfirms : IPublisherConfirms
     {
+        public static IPublisherConfirms CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
+        {
+            return new PublisherConfirms(configuration, logger, eventBus);
+        }
+
         private readonly IConnectionConfiguration configuration;
         private readonly IEasyNetQLogger logger;
         private readonly IDictionary<ulong, ConfirmActions> dictionary = 
@@ -28,7 +33,7 @@ namespace EasyNetQ.Producer
         private IModel cachedModel;
         private readonly int timeoutSeconds;
 
-        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
+        private PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(logger, "logger");
