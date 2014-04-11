@@ -166,7 +166,7 @@ namespace EasyNetQ
                     var properties = x.CreateBasicProperties();
                     messageProperties.CopyTo(properties);
 
-                    return publisherConfirms.PublishWithConfirm(x,
+                    return publisherConfirms.Publish(x,
                         m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body));
                 }).Unwrap();
 

@@ -22,7 +22,7 @@ namespace EasyNetQ.Producer
 
     public class PublisherBase : IPublisherConfirms
     {
-        public virtual Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
+        public virtual Task Publish(IModel model, Action<IModel> publishAction)
         {
             return ExecutePublishActionDirectly(model, publishAction, new TaskCompletionSource<NullStruct>());
         }
@@ -140,7 +140,7 @@ namespace EasyNetQ.Producer
 
         }
 
-        public override Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
+        public override Task Publish(IModel model, Action<IModel> publishAction)
         {
             var tcs = new TaskCompletionSource<NullStruct>();
             return ExecutePublishWithConfirmation(model, publishAction, tcs);

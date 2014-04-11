@@ -6,6 +6,6 @@ namespace EasyNetQ.Producer
 {
     public interface IPublisherConfirms
     {
-        Task PublishWithConfirm(IModel model, Action<IModel> publishAction);
+        Task Publish(IModel model, Action<IModel> publishAction);
     }
 }
