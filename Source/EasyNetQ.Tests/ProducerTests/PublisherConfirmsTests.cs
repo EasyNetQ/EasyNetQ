@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests.ProducerTests
                     PublisherConfirms = true
                 };
 
-            publisher = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisher = PublisherConfirmsFactory.CreatePublisher(connectionConfiguration, logger, eventBus);
 
             Assert.IsAssignableFrom<PublisherConfirms>(publisher);
         }
@@ -74,7 +74,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 PublisherConfirms = false
             };
 
-            publisher = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisher = PublisherConfirmsFactory.CreatePublisher(connectionConfiguration, logger, eventBus);
 
             Assert.IsAssignableFrom<PublisherBase>(publisher);
         }
@@ -199,7 +199,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirmsFactory.CreatePublisher(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
