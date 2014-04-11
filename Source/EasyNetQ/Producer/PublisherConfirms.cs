@@ -10,6 +10,16 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Producer
 {
+    public static class PublisherConfirmsFactory
+    {
+        public static IPublisherConfirms CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
+        {
+            return configuration.PublisherConfirms
+                       ? new PublisherConfirms(configuration, logger, eventBus)
+                       : new PublisherBase();
+        }
+    }
+
     public class PublisherBase : IPublisherConfirms
     {
         public virtual Task PublishWithConfirm(IModel model, Action<IModel> publishAction)
@@ -37,13 +47,6 @@ namespace EasyNetQ.Producer
     /// </summary>
     public class PublisherConfirms : PublisherBase
     {
-        public static IPublisherConfirms CreatePublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
-        {
-            return configuration.PublisherConfirms
-                       ? new PublisherConfirms(configuration, logger, eventBus)
-                       : new PublisherBase();
-        }
-
         private readonly IConnectionConfiguration configuration;
         private readonly IEasyNetQLogger logger;
         private readonly IDictionary<ulong, ConfirmActions> dictionary = 
@@ -52,7 +55,7 @@ namespace EasyNetQ.Producer
         private IModel cachedModel;
         private readonly int timeoutSeconds;
 
-        private PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
+        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(logger, "logger");

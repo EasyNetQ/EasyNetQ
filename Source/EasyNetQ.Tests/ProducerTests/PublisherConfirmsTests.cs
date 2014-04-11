@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests.ProducerTests
                     PublisherConfirms = true
                 };
 
-            publisher = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisher = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
 
             Assert.IsAssignableFrom<PublisherConfirms>(publisher);
         }
@@ -74,7 +74,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 PublisherConfirms = false
             };
 
-            publisher = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisher = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
 
             Assert.IsAssignableFrom<PublisherBase>(publisher);
         }
@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -202,7 +202,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
@@ -234,7 +234,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            publisherConfirms = PublisherConfirms.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
+            publisherConfirms = PublisherConfirmsFactory.CreatePublisherConfirms(connectionConfiguration, logger, eventBus);
         }
 
         [Test]
