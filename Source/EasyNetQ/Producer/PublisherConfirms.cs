@@ -16,20 +16,31 @@ namespace EasyNetQ.Producer
         {
             return configuration.PublisherConfirms
                        ? new PublisherConfirms(configuration, logger, eventBus)
-                       : new PublisherBase();
+                       : new PublisherBase(eventBus);
         }
     }
 
     public class PublisherBase : IPublisher
     {
-        public virtual Task Publish(IModel model, Action<IModel> publishAction)
+        private readonly IEventBus eventBus;
+
+        public PublisherBase(IEventBus eventBus)
         {
-            return ExecutePublishActionDirectly(model, publishAction, new TaskCompletionSource<NullStruct>());
+            Preconditions.CheckNotNull(eventBus, "eventBus");
+            
+            this.eventBus = eventBus;
         }
 
-        protected Task ExecutePublishActionDirectly(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
+        public virtual Task Publish(IModel model, Action<IModel> publishAction)
         {
+            model.BasicReturn += (sender, args) =>
+                eventBus.Publish(new ReturnedMessageEvent(args.Body,
+                    new MessageProperties(args.BasicProperties),
+                    new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)));
+            
             publishAction(model);
+
+            var tcs = new TaskCompletionSource<NullStruct>();
             tcs.SetResult(new NullStruct());
             return tcs.Task;
         }
@@ -54,7 +65,7 @@ namespace EasyNetQ.Producer
         private IModel cachedModel;
         private readonly int timeoutSeconds;
 
-        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
+        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus) : base (eventBus)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(logger, "logger");

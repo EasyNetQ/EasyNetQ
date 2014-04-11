@@ -2,12 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests.ProducerTests
@@ -16,14 +18,24 @@ namespace EasyNetQ.Tests.ProducerTests
     public class PublisherBaseTests
     {
         private IPublisher publisher;
+        private IEventBus eventBus;
         IModel channel;
-
+        
         [SetUp]
         public void SetUp()
         {
             channel = MockRepository.GenerateStub<IModel>();
+            eventBus = MockRepository.GenerateStub<IEventBus>();
 
-            publisher = new PublisherBase();
+            publisher = new PublisherBase(eventBus);
+        }
+
+        [Test]
+        public void Should_register_for_message_returns()
+        {
+            publisher.Publish(channel, model => { }).Wait();
+
+            channel.AssertWasCalled(x => x.BasicReturn += Arg<BasicReturnEventHandler>.Is.Anything);
         }
 
         [Test]
@@ -34,6 +46,55 @@ namespace EasyNetQ.Tests.ProducerTests
             task.Wait();
             taskWasExecuted.ShouldBeTrue();
         }
+    }
+
+    [TestFixture]
+    public class PublisherBaseTests_when_message_returned
+    {
+        private IPublisher publisher;
+        private IEventBus eventBus;
+        private IModel channelMock;
+
+        [SetUp]
+        public void SetUp()
+        {
+            channelMock = MockRepository.GenerateStub<IModel>();
+            eventBus = MockRepository.GenerateStub<IEventBus>();
+            
+            publisher = new PublisherBase(eventBus);
+        }
+
+        [Test]
+        public void Should_raise_message_returned_event_when_message_returned()
+        {
+            const string exchange = "the exchange";
+            const string replyText = "reply text";
+            const string routingKey = "routing key";
+            var body = new byte[0];
+            var properties = new BasicProperties();
+            
+            publisher.Publish(channelMock, model => { }).Wait();
+            
+            channelMock.Raise(x => x.BasicReturn += null, null, new BasicReturnEventArgs
+                {
+                    Body = body,
+                    Exchange = exchange,
+                    ReplyText = replyText,
+                    RoutingKey = routingKey,
+                    BasicProperties = properties
+                });
+
+            var arg = eventBus.GetArgumentsForCallsMadeOn(x => x.Publish(Arg<ReturnedMessageEvent>.Is.Anything))[0][0];
+
+            var messageEvent = arg as ReturnedMessageEvent;
+            Assert.NotNull(messageEvent);
+            Assert.AreSame(body, messageEvent.Body);
+            Assert.NotNull(messageEvent.Properties);
+            Assert.AreEqual(exchange, messageEvent.Info.Exchange);
+            Assert.AreEqual(replyText, messageEvent.Info.ReturnReason);
+            Assert.AreEqual(routingKey, messageEvent.Info.RoutingKey);
+        }
+
     }
 
     [TestFixture]
