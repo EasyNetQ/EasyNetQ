@@ -10,7 +10,7 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Producer
 {
-    public static class PublisherConfirmsFactory
+    public static class PublisherFactory
     {
         public static IPublisher CreatePublisher(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
