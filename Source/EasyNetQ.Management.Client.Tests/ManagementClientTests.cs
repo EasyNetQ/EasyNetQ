@@ -559,6 +559,19 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_change_the_password_of_a_user()
+        {
+            var userInfo = new UserInfo(testUser, "topSecret").AddTag("monitoring").AddTag("management");
+            var user = managementClient.CreateUser(userInfo);
+
+            var updatedUser = managementClient.ChangeUserPassword(testUser, "newPassword");
+
+            updatedUser.Name.ShouldEqual(user.Name);
+            updatedUser.Tags.ShouldEqual(user.Tags);
+            updatedUser.PasswordHash.ShouldNotEqual(user.PasswordHash);
+        }
+
+        [Test]
         public void Should_check_that_the_broker_is_alive()
         {
             var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.Name == testVHost);
