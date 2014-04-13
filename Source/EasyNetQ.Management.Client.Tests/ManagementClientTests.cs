@@ -217,6 +217,7 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         private const string testQueue = "management_api_test_queue";
+        private const string testQueueWithPlusChar = "management_api_test_queue+plus+test";
 
         [Test]
         public void Should_get_queues()
@@ -238,12 +239,29 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_get_a_queue_by_name_with_plus_char()
+        {
+            var vhost = new Vhost { Name = "/" };
+            var queue = managementClient.GetQueue(testQueueWithPlusChar, vhost);
+            queue.Name.ShouldEqual(testQueueWithPlusChar);
+        }
+
+        [Test]
         public void Should_be_able_to_create_a_queue()
         {
             var vhost = managementClient.GetVhost("/");
             var queueInfo = new QueueInfo(testQueue);
             var queue = managementClient.CreateQueue(queueInfo, vhost);
             queue.Name.ShouldEqual(testQueue);
+        }
+
+        [Test]
+        public void Should_be_able_to_create_a_queue_with_plus_char_in_the_name()
+        {
+            var vhost = managementClient.GetVhost("/");
+            var queueInfo = new QueueInfo(testQueueWithPlusChar);
+            var queue = managementClient.CreateQueue(queueInfo, vhost);
+            queue.Name.ShouldEqual(testQueueWithPlusChar);
         }
 
         [Test]
