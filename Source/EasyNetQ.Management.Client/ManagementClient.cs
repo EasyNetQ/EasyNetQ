@@ -455,7 +455,6 @@ namespace EasyNetQ.Management.Client
             Delete(string.Format("users/{0}", user.Name));
         }
 
-
         public IEnumerable<Permission> GetPermissions()
         {
             return Get<IEnumerable<Permission>>("permissions");
@@ -484,6 +483,18 @@ namespace EasyNetQ.Management.Client
             Delete(string.Format("permissions/{0}/{1}",
                 permission.Vhost,
                 permission.User));
+        }
+
+        public User ChangeUserPassword(string userName, string newPassword)
+        {
+            var user = GetUser(userName);
+            var tags = user.Tags.Split(',');
+            var userInfo = new UserInfo(userName, newPassword);
+            foreach (var tag in tags)
+            {
+                userInfo.AddTag(tag.Trim());
+            }
+            return CreateUser(userInfo);
         }
 
         public bool IsAlive(Vhost vhost)
