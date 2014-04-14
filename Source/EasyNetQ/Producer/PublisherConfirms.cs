@@ -15,17 +15,17 @@ namespace EasyNetQ.Producer
         public static IPublisher CreatePublisher(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus)
         {
             return configuration.PublisherConfirms
-                       ? new PublisherConfirms(configuration, logger, eventBus)
-                       : new PublisherBase(eventBus);
+                       ? (IPublisher) new PublisherConfirms(configuration, logger, eventBus)
+                       : new PublisherBasic(eventBus);
         }
     }
 
-    public class PublisherBase : IPublisher
+    public abstract class PublisherBase : IPublisher
     {
         private readonly IEventBus eventBus;
         private IModel cachedModel;
 
-        public PublisherBase(IEventBus eventBus)
+        protected PublisherBase(IEventBus eventBus)
         {
             Preconditions.CheckNotNull(eventBus, "eventBus");
             
@@ -58,16 +58,7 @@ namespace EasyNetQ.Producer
             oldModel.BasicReturn -= ModelOnBasicReturn;
         }
 
-        public virtual Task Publish(IModel model, Action<IModel> publishAction)
-        {
-            SetModel(model);
-            
-            publishAction(model);
-            
-            var tcs = new TaskCompletionSource<NullStruct>();
-            tcs.SetResult(new NullStruct());
-            return tcs.Task;
-        }
+        public abstract Task Publish(IModel model, Action<IModel> publishAction);
 
         protected void ModelOnBasicReturn(IModel model, BasicReturnEventArgs args)
         {
@@ -77,6 +68,24 @@ namespace EasyNetQ.Producer
         }
 
         protected struct NullStruct { }
+    }
+
+    public class PublisherBasic : PublisherBase
+    {
+        public PublisherBasic(IEventBus eventBus) : base(eventBus)
+        {
+        }
+
+        public override Task Publish(IModel model, Action<IModel> publishAction)
+        {
+            SetModel(model);
+            
+            publishAction(model);
+            
+            var tcs = new TaskCompletionSource<NullStruct>();
+            tcs.SetResult(new NullStruct());
+            return tcs.Task;
+        }
     }
 
     /// <summary>

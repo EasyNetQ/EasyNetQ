@@ -15,7 +15,7 @@ using Rhino.Mocks;
 namespace EasyNetQ.Tests.ProducerTests
 {
     [TestFixture]
-    public class PublisherBaseTests
+    public class PublisherBasicTests
     {
         private IPublisher publisher;
         private IEventBus eventBus;
@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.ProducerTests
             channel = MockRepository.GenerateStub<IModel>();
             eventBus = MockRepository.GenerateStub<IEventBus>();
 
-            publisher = new PublisherBase(eventBus);
+            publisher = new PublisherBasic(eventBus);
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests.ProducerTests
     }
 
     [TestFixture]
-    public class PublisherBaseTests_when_message_returned
+    public class PublisherBasicTests_when_message_returned
     {
         private IPublisher publisher;
         private IEventBus eventBus;
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests.ProducerTests
             channelMock = MockRepository.GenerateStub<IModel>();
             eventBus = MockRepository.GenerateStub<IEventBus>();
             
-            publisher = new PublisherBase(eventBus);
+            publisher = new PublisherBasic(eventBus);
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace EasyNetQ.Tests.ProducerTests
     }
 
     [TestFixture]
-    public class PublisherBaseTests_when_channel_reconnects
+    public class PublisherBasicTests_when_channel_reconnects
     {
         private IPublisher publisher;
         private IEventBus eventBus;
@@ -108,7 +108,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             eventBus = new EventBus();
 
-            publisher = new PublisherBase(eventBus);
+            publisher = new PublisherBasic(eventBus);
         }
 
         [Test]
@@ -153,7 +153,7 @@ namespace EasyNetQ.Tests.ProducerTests
         private IPublisher publisher;
 
         [Test]
-        public void Should_return_instance_of_publisher_base()
+        public void Should_return_instance_of_publisher_basic()
         {
             var eventBus = MockRepository.GenerateStub<IEventBus>();
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
@@ -165,7 +165,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             publisher = PublisherFactory.CreatePublisher(connectionConfiguration, logger, eventBus);
 
-            Assert.IsAssignableFrom<PublisherBase>(publisher);
+            Assert.IsAssignableFrom<PublisherBasic>(publisher);
         }
     }
 
