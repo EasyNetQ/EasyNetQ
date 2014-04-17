@@ -7,11 +7,13 @@ namespace EasyNetQ.Scheduler
     {
         bool IsDialectFor(string providerName);
         string InsertProcedureName { get; }
+        string CancelProcedureName { get; }
         string SelectProcedureName { get; }
         string PurgeProcedureName { get; }
         string MarkForPurgeProcedureName { get; }
         string WakeTimeParameterName { get; }
         string BindingKeyParameterName { get; }
+        string CancellationKeyParameterName { get; }
         string MessageParameterName { get; }
         string PurgeDateParameterName { get; }
         string RowsParameterName { get; }
@@ -41,11 +43,13 @@ namespace EasyNetQ.Scheduler
         public MssqlDialect()
         {
             InsertProcedureName = "uspAddNewMessageToScheduler";
+            CancelProcedureName = "uspCancelScheduledMessages";
             SelectProcedureName = "uspGetNextBatchOfMessages";
             PurgeProcedureName = "uspWorkItemsSelfPurge";
             MarkForPurgeProcedureName = "uspMarkWorkItemForPurge";
             WakeTimeParameterName = "@WakeTime";
             BindingKeyParameterName = "@BindingKey";
+            CancellationKeyParameterName = "@CancellationKey";
             MessageParameterName = "@Message";
             PurgeDateParameterName = "@purgeDate";
             RowsParameterName = "@rows";
@@ -59,11 +63,13 @@ namespace EasyNetQ.Scheduler
         }
 
         public string InsertProcedureName { get; private set; }
+        public string CancelProcedureName { get; private set; }
         public string SelectProcedureName { get; private set; }
         public string PurgeProcedureName { get; private set; }
         public string MarkForPurgeProcedureName { get; private set; }
         public string WakeTimeParameterName { get; private set; }
         public string BindingKeyParameterName { get; private set; }
+        public string CancellationKeyParameterName { get; private set; }
         public string MessageParameterName { get; private set; }
         public string PurgeDateParameterName { get; private set; }
         public string RowsParameterName { get; private set; }
@@ -76,11 +82,13 @@ namespace EasyNetQ.Scheduler
         public PostgreSqlDialect()
         {
             InsertProcedureName = "\"uspAddNewMessageToScheduler\"";
+            CancelProcedureName = "\"uspCancelScheduledMessages\"";
             SelectProcedureName = "\"uspGetNextBatchOfMessages\"";
             PurgeProcedureName = "\"uspWorkItemsSelfPurge\"";
             MarkForPurgeProcedureName = "\"uspMarkWorkItemForPurge\"";
             WakeTimeParameterName = "p_wakeTime";
             BindingKeyParameterName = "p_bindingKey";
+            CancellationKeyParameterName = "p_cancellationKey";
             MessageParameterName = "p_message";
             PurgeDateParameterName = "p_purgeDate";
             RowsParameterName = "p_rows";
@@ -96,11 +104,13 @@ namespace EasyNetQ.Scheduler
         }
 
         public string InsertProcedureName { get; private set; }
+        public string CancelProcedureName { get; private set; }
         public string SelectProcedureName { get; private set; }
         public string PurgeProcedureName { get; private set; }
         public string MarkForPurgeProcedureName { get; private set; }
         public string WakeTimeParameterName { get; private set; }
         public string BindingKeyParameterName { get; private set; }
+        public string CancellationKeyParameterName { get; private set; }
         public string MessageParameterName { get; private set; }
         public string PurgeDateParameterName { get; private set; }
         public string RowsParameterName { get; private set; }
