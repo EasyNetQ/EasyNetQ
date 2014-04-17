@@ -10,6 +10,7 @@ namespace EasyNetQ.Scheduler
     public interface IScheduleRepository
     {
         void Store(ScheduleMe scheduleMe);
+        void Cancel(UnscheduleMe unscheduleMe);
         IList<ScheduleMe> GetPending();
         void Purge();
     }
@@ -33,10 +34,23 @@ namespace EasyNetQ.Scheduler
             {
                 AddParameter(command, dialect.WakeTimeParameterName, scheduleMe.WakeTime, DbType.DateTime);
                 AddParameter(command, dialect.BindingKeyParameterName, scheduleMe.BindingKey, DbType.String);
+                AddParameter(command, dialect.CancellationKeyParameterName, scheduleMe.CancellationKey, DbType.String);
                 AddParameter(command, dialect.MessageParameterName, scheduleMe.InnerMessage, DbType.Binary);
 
                 command.ExecuteNonQuery();
             });
+        }
+
+        public void Cancel(UnscheduleMe unscheduleMe)
+        {
+            ThreadPool.QueueUserWorkItem(state =>
+                WithStoredProcedureCommand(dialect.CancelProcedureName, command =>
+                {
+                    AddParameter(command, dialect.CancellationKeyParameterName, unscheduleMe.CancellationKey, DbType.String);
+    
+                    command.ExecuteNonQuery();
+                })
+            );
         }
 
         public IList<ScheduleMe> GetPending()

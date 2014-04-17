@@ -6,6 +6,7 @@ GO
 CREATE TABLE [dbo].[WorkItems] (
     [WorkItemID]   INT             IDENTITY (1, 1) NOT NULL,
     [BindingKey]   NVARCHAR (1000) NOT NULL,
+    [CancellationKey]   NVARCHAR (255) NULL,
     [InnerMessage] VARBINARY (MAX) NOT NULL,
     [TextData]     NVARCHAR (MAX)  NULL
 );
@@ -31,6 +32,11 @@ ALTER TABLE [dbo].[WorkItemStatus]
     ADD CONSTRAINT [PK_WorkItemStatus] PRIMARY KEY CLUSTERED ([WorkItemID] ASC) WITH (ALLOW_PAGE_LOCKS = ON, ALLOW_ROW_LOCKS = ON, PAD_INDEX = OFF, IGNORE_DUP_KEY = OFF, STATISTICS_NORECOMPUTE = OFF);
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_workItems_cancellationKey] 
+ON [dbo].[WorkItems] 
+	([CancellationKey] ASC)
+WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON)
 
 CREATE NONCLUSTERED INDEX [IX_workItemStatus_purgeDate] 
 ON [dbo].[WorkItemStatus] 
