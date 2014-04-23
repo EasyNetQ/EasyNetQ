@@ -16,6 +16,7 @@ GO
 CREATE PROCEDURE [dbo].[uspAddNewMessageToScheduler] 
 	@WakeTime DATETIME,
 	@BindingKey NVARCHAR(1000),
+	@CancellationKey NVARCHAR(255) = NULL,
 	@Message VARBINARY(MAX)
 AS
 
@@ -23,8 +24,8 @@ DECLARE @NewID INT
 
 BEGIN TRANSACTION
 
-INSERT INTO WorkItems (BindingKey, InnerMessage)
-VALUES (@BindingKey,@Message )
+INSERT INTO WorkItems (BindingKey, CancellationKey, InnerMessage)
+VALUES (@BindingKey, @CancellationKey, @Message)
 -- get the ID of the inserted record for use in the child table
 SELECT @NewID = SCOPE_IDENTITY()
 IF @@ERROR > 0

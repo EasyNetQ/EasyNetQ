@@ -40,6 +40,7 @@ namespace EasyNetQ.Scheduler
         {
             log.DebugWrite("Starting SchedulerService");
             bus.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
+            bus.Subscribe<UnscheduleMe>(schedulerSubscriptionId, OnMessage);
 
             publishTimer = new System.Threading.Timer(OnPublishTimerTick, null, 0, configuration.PublishIntervalSeconds * 1000);
             purgeTimer = new System.Threading.Timer(OnPurgeTimerTick, null, 0, configuration.PurgeIntervalSeconds * 1000);
@@ -66,6 +67,12 @@ namespace EasyNetQ.Scheduler
         {
             log.DebugWrite("Got Schedule Message");
             scheduleRepository.Store(scheduleMe);
+        }
+
+        public void OnMessage(UnscheduleMe unscheduleMe)
+        {
+            log.DebugWrite("Got Unschedule Message");
+            scheduleRepository.Cancel(unscheduleMe);
         }
 
         public void OnPublishTimerTick(object state)

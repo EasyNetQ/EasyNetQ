@@ -59,6 +59,38 @@ namespace EasyNetQ.Tests.Integration
         }
 
         /// <summary>
+        /// Based on Should_be_able_to_schedule_a_message(), but publishes 3 messages.
+        /// The second message has a different cancellation key than the others. The other messages are cancelled,
+        /// so the second message is the only one that should arrive.
+        /// </summary>
+        [Test]
+        [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
+        public void Should_be_able_to_cancel_a_message()
+        {
+            var messagesReceived = 0;
+
+            bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
+            {
+                Console.WriteLine("Got scheduled message: {0}", message.Text);
+                messagesReceived++;
+            });
+
+            var invitation = new PartyInvitation
+            {
+                Text = "Please come to my party",
+                Date = new DateTime(2011, 5, 24)
+            };
+
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), "my_cancellation_key", invitation);
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), "my_cancellation_key", invitation);
+            bus.CancelFuturePublish("my_cancellation_key");
+
+            Thread.Sleep(5000);
+            Assert.AreEqual(1, messagesReceived);
+        }
+
+        /// <summary>
         /// Schedule thousands of messages
         /// 1. First run EasyNetQ.Scheduler.exe
         /// 2. Run this test.

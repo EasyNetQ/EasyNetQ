@@ -20,7 +20,7 @@ namespace EasyNetQ.Management.Client.Model
         }
         private readonly ISet<string> allowedTags = new HashSet<string>
         {
-            "administrator", "monitoring", "management"
+            "administrator", "monitoring", "management", "policymaker"
         };
 
         private readonly ISet<string> tagList = new HashSet<string>();
@@ -40,6 +40,13 @@ namespace EasyNetQ.Management.Client.Model
             this.Password = password;
         }
 
+        /// <summary>
+        /// administrator: User can do everything monitoring can do, manage users, vhosts and permissions, close other user's connections, and manage policies and parameters for all vhosts.
+        /// monitoring: User can access the management plugin and see all connections and channels as well as node-related information.
+        /// management: User can access the management plugin
+        /// policymaker: User can access the management plugin and manage policies and parameters for the vhosts they have access to.
+        /// </summary>
+        /// <param name="tag">One of the following tags: administrator, monitoring, management, policymaker</param>
         public UserInfo AddTag(string tag)
         {
             if (string.IsNullOrEmpty(tag))

@@ -13,6 +13,11 @@ namespace EasyNetQ.Scheduler.Tests
             throw new NotImplementedException();
         }
 
+        public void Cancel(UnscheduleMe unscheduleMe)
+        {
+            throw new NotImplementedException();
+        }
+
         public IList<ScheduleMe> GetPending()
         {
             return (GetPendingDelegate != null)

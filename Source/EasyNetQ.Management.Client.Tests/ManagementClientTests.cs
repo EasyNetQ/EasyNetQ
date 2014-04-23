@@ -504,6 +504,15 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_create_a_user_with_the_policymaker_tag()
+        {
+            var userInfo = new UserInfo(testUser, "topSecret").AddTag("policymaker");
+
+            var user = managementClient.CreateUser(userInfo);
+            user.Name.ShouldEqual(testUser);
+        }
+
+        [Test]
         public void Should_be_able_to_delete_a_user()
         {
             var user = managementClient.GetUser(testUser);
@@ -556,6 +565,19 @@ namespace EasyNetQ.Management.Client.Tests
             }
 
             managementClient.DeletePermission(permission);
+        }
+
+        [Test]
+        public void Should_be_able_to_change_the_password_of_a_user()
+        {
+            var userInfo = new UserInfo(testUser, "topSecret").AddTag("monitoring").AddTag("management");
+            var user = managementClient.CreateUser(userInfo);
+
+            var updatedUser = managementClient.ChangeUserPassword(testUser, "newPassword");
+
+            updatedUser.Name.ShouldEqual(user.Name);
+            updatedUser.Tags.ShouldEqual(user.Tags);
+            updatedUser.PasswordHash.ShouldNotEqual(user.PasswordHash);
         }
 
         [Test]

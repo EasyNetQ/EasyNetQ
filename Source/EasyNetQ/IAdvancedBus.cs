@@ -205,9 +205,7 @@ namespace EasyNetQ
             bool mandatory,
             bool immediate,
             IMessage<T> message) where T : class;
-
-
-
+       
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
         /// </summary>
@@ -303,6 +301,11 @@ namespace EasyNetQ
         /// Event fires when the bus disconnects
         /// </summary>
         event Action Disconnected;
+
+        /// <summary>
+        /// Event fires when a mandatory or immediate message is returned as un-routable
+        /// </summary>
+        event Action<byte[], MessageProperties, MessageReturnedInfo> MessageReturned;
 
         /// <summary>
         /// The IoC container that EasyNetQ uses to resolve it's services.

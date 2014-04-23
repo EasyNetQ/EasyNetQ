@@ -240,6 +240,13 @@ namespace EasyNetQ.Management.Client
         void DeletePermission(Permission permission);
 
         /// <summary>
+        /// Update the password of an user.
+        /// </summary>
+        /// <param name="userName">The name of a user</param>
+        /// <param name="newPassword">The new password to set</param>
+        User ChangeUserPassword(string userName, string newPassword);
+
+        /// <summary>
         /// Declares a test queue, then publishes and consumes a message. Intended for use 
         /// by monitoring tools. If everything is working correctly, will return true.
         /// Note: the test queue will not be deleted (to to prevent queue churn if this 
