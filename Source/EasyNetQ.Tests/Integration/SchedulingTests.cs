@@ -86,7 +86,7 @@ namespace EasyNetQ.Tests.Integration
             bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), "my_cancellation_key", invitation);
             bus.CancelFuturePublish("my_cancellation_key");
 
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
             Assert.AreEqual(1, messagesReceived);
         }
 
