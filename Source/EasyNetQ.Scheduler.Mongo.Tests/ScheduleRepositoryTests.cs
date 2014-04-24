@@ -16,7 +16,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         {
             var configuration = new ScheduleRepositoryConfiguration
                 {
-                    ConnectionString = "mongodb://localhost:27017/?w=1&amp;readPreference=primary&amp;uuidRepresentation=csharpLegacy",
+                    ConnectionString = "mongodb://localhost:27017/?w=1&readPreference=primary&uuidRepresentation=csharpLegacy",
                     CollectionName = "Schedules",
                     DatabaseName = "EasyNetQ",
                     DeleteTimeout = TimeSpan.FromMinutes(5),
