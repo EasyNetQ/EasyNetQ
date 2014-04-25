@@ -7,6 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.30.1.0 Added FuturePublishAsync
 // 0.30.0.0 Added CancelFuturePublish functionality
 // 0.29.0.0 Support returned immediate/mandatory messages
 // 0.28.5.0 Added ChangeUserPassword method to the Management Client. Added the 'policymaker' to the allowed user tags.
