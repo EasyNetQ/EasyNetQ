@@ -2,7 +2,7 @@
 {
     public static class Helper
     {
-        public static MessageReceivedInfo CreateMessageRecievedInfo()
+        public static MessageReceivedInfo CreateMessageReceivedInfo()
         {
             return new MessageReceivedInfo(
                 "consumer_tag",
@@ -12,6 +12,6 @@
                 "routing_key",
                 "queue_name"
                 );
-        } 
+        }
     }
 }

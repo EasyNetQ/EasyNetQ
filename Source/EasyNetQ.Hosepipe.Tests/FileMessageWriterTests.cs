@@ -25,7 +25,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
 
             var properties = new MessageProperties();
-            var info = Helper.CreateMessageRecievedInfo();
+            var info = Helper.CreateMessageReceivedInfo();
             var writer = new FileMessageWriter();
             var messages = new List<HosepipeMessage>
             {

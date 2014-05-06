@@ -34,7 +34,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(context, "context");
 
-            logger.DebugWrite("Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
+            logger.DebugWrite("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
                 "\n\tDeliveryTag: {3}\n\tRedelivered: {4}",
                 context.Info.RoutingKey,
                 context.Properties.CorrelationId,
@@ -85,16 +85,16 @@ namespace EasyNetQ.Consumer
             }
             catch (Exception consumerErrorStrategyError)
             {
-                logger.ErrorWrite("Exception in ConsumerErrorStrategy:\n{0}", 
+                logger.ErrorWrite("Exception in ConsumerErrorStrategy:\n{0}",
                     consumerErrorStrategyError);
             }
         }
 
         private void DoAck(ConsumerExecutionContext context, Func<IModel, ulong, AckResult> ackStrategy)
         {
-            const string failedToAckMessage = 
+            const string failedToAckMessage =
                 "Basic ack failed because channel was closed with message '{0}'." +
-                " Message remains on RabbitMQ and will be retried." + 
+                " Message remains on RabbitMQ and will be retried." +
                 " ConsumerTag: {1}, DeliveryTag: {2}";
 
             var ackResult = AckResult.Exception;

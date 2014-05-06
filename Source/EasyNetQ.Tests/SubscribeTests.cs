@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.QueueDeclare(
-                    Arg<string>.Is.Equal(queueName), 
+                    Arg<string>.Is.Equal(queueName),
                     Arg<bool>.Is.Equal(true),  // durable
                     Arg<bool>.Is.Equal(false), // exclusive
                     Arg<bool>.Is.Equal(false), // autoDelete
@@ -81,7 +81,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_start_consuming()
         {
-            mockBuilder.Channels[1].AssertWasCalled(x => 
+            mockBuilder.Channels[1].AssertWasCalled(x =>
                 x.BasicConsume(
                     Arg<string>.Is.Equal(queueName),
                     Arg<bool>.Is.Equal(false),
@@ -177,8 +177,8 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_write_debug_message()
         {
-            const string expectedMessageFormat = 
-                "Recieved \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
+            const string expectedMessageFormat =
+                "Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
                 "\n\tDeliveryTag: {3}\n\tRedelivered: {4}";
 
             mockBuilder.Logger.AssertWasCalled(
@@ -218,7 +218,7 @@ namespace EasyNetQ.Tests
                 {
                     basicDeliverEventArgs = (ConsumerExecutionContext)i.Arguments[0];
                     raisedException = (Exception) i.Arguments[1];
-                }).Return(PostExceptionAckStrategy.ShouldAck); 
+                }).Return(PostExceptionAckStrategy.ShouldAck);
 
             mockBuilder = new MockBuilder(x => x
                 .Register<IConventions>(_ => conventions)
@@ -273,7 +273,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_invoke_the_consumer_error_strategy()
         {
-            consumerErrorStrategy.AssertWasCalled(x => 
+            consumerErrorStrategy.AssertWasCalled(x =>
                 x.HandleConsumerError(Arg<ConsumerExecutionContext>.Is.Anything, Arg<Exception>.Is.Anything));
         }
 

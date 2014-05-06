@@ -24,8 +24,8 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             var messages = new[]
             {
-                new HosepipeMessage("{\"Text\":\"I am message one\"}", new MessageProperties(), Helper.CreateMessageRecievedInfo()), 
-                new HosepipeMessage("{\"Text\":\"I am message two\"}", new MessageProperties(), Helper.CreateMessageRecievedInfo())
+                new HosepipeMessage("{\"Text\":\"I am message one\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo()),
+                new HosepipeMessage("{\"Text\":\"I am message two\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo())
             };
 
             var parameters = new QueueParameters
