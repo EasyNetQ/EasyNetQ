@@ -121,7 +121,7 @@ namespace EasyNetQ
                 var messageBody = serializer.BytesToMessage(properties.Type, body);
                 var message = Message.CreateInstance(messageType, messageBody);
                 message.SetProperties(properties);
-                return handler(message, messageRecievedInfo);
+                return handler(message, messageReceivedInfo);
             }, configure);
         }
 
