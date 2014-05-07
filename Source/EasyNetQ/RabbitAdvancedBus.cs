@@ -25,14 +25,14 @@ namespace EasyNetQ
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
-            ISerializer serializer, 
+            ISerializer serializer,
             IConsumerFactory consumerFactory,
-            IEasyNetQLogger logger, 
-            Func<string> getCorrelationId, 
-            IClientCommandDispatcherFactory clientCommandDispatcherFactory, 
+            IEasyNetQLogger logger,
+            Func<string> getCorrelationId,
+            IClientCommandDispatcherFactory clientCommandDispatcherFactory,
             IPublisher _publisher,
-            IEventBus eventBus, 
-            ITypeNameSerializer typeNameSerializer, 
+            IEventBus eventBus,
+            ITypeNameSerializer typeNameSerializer,
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container)
         {
@@ -84,7 +84,7 @@ namespace EasyNetQ
             return Consume<T>(queue, (message, info) => TaskHelpers.ExecuteSynchronously(() => onMessage(message, info)), configure);
         }
 
-        public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) 
+        public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
             where T : class
         {
             return Consume(queue, onMessage, x => { });
@@ -113,7 +113,7 @@ namespace EasyNetQ
             var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
             addHandlers(handlerCollection);
 
-            return Consume(queue, (body, properties, messageRecievedInfo) =>
+            return Consume(queue, (body, properties, messageReceivedInfo) =>
             {
                 var messageType = typeNameSerializer.DeSerialize(properties.Type);
                 var handler = handlerCollection.GetHandler(messageType);
@@ -131,7 +131,7 @@ namespace EasyNetQ
         }
 
         public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
-        {      
+        {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
@@ -149,11 +149,11 @@ namespace EasyNetQ
         // -------------------------------- publish ---------------------------------------------
 
         public virtual Task PublishAsync(
-            IExchange exchange, 
-            string routingKey, 
-            bool mandatory, 
-            bool immediate, 
-            MessageProperties messageProperties, 
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            bool immediate,
+            MessageProperties messageProperties,
             byte[] body)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -227,9 +227,9 @@ namespace EasyNetQ
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
 
         public virtual IQueue QueueDeclare(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
+            string name,
+            bool passive = false,
+            bool durable = true,
             bool exclusive = false,
             bool autoDelete = false,
             int perQueueTtl = int.MaxValue,
@@ -313,11 +313,11 @@ namespace EasyNetQ
         }
 
         public virtual IExchange ExchangeDeclare(
-            string name, 
-            string type, 
-            bool passive = false, 
-            bool durable = true, 
-            bool autoDelete = false, 
+            string name,
+            string type,
+            bool passive = false,
+            bool durable = true,
+            bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null)
         {
@@ -416,7 +416,7 @@ namespace EasyNetQ
         }
 
         public virtual event Action Disconnected;
-        
+
         protected void OnDisconnected()
         {
             if (Disconnected != null) Disconnected();

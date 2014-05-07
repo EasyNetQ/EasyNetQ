@@ -27,10 +27,10 @@ namespace EasyNetQ.Producer
         private const string ExceptionMessageKey = "ExceptionMessage";
 
         public Rpc(
-            IAdvancedBus advancedBus, 
-            IEventBus eventBus, 
-            IConventions conventions, 
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy, 
+            IAdvancedBus advancedBus,
+            IEventBus eventBus,
+            IConventions conventions,
+            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
@@ -60,8 +60,8 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public Task<TResponse> Request<TRequest, TResponse>(TRequest request) 
-            where TRequest : class 
+        public Task<TResponse> Request<TRequest, TResponse>(TRequest request)
+            where TRequest : class
             where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
@@ -138,7 +138,7 @@ namespace EasyNetQ.Producer
                             exclusive: true,
                             autoDelete: true);
 
-                        advancedBus.Consume<TResponse>(queue, (message, messageRecievedInfo) => Task.Factory.StartNew(() =>
+                        advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                             {
                                 ResponseAction responseAction;
                                 if(responseActions.TryRemove(message.Properties.CorrelationId, out responseAction))
@@ -180,8 +180,8 @@ namespace EasyNetQ.Producer
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
 
-        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
-            where TRequest : class 
+        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
+            where TRequest : class
             where TResponse : class
         {
             Preconditions.CheckNotNull(responder, "responder");

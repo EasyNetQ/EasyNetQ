@@ -39,11 +39,11 @@ namespace EasyNetQ.Consumer
         public event Action<IInternalConsumer> Cancelled;
 
         public InternalConsumer(
-            IHandlerRunner handlerRunner, 
-            IEasyNetQLogger logger, 
-            IConsumerDispatcher consumerDispatcher, 
-            IConventions conventions, 
-            IConnectionConfiguration connectionConfiguration, 
+            IHandlerRunner handlerRunner,
+            IEasyNetQLogger logger,
+            IConsumerDispatcher consumerDispatcher,
+            IConventions conventions,
+            IConnectionConfiguration connectionConfiguration,
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
@@ -88,7 +88,7 @@ namespace EasyNetQ.Consumer
 
                 Model.BasicConsume(
                     queue.Name,         // queue
-                    false,              // noAck 
+                    false,              // noAck
                     consumerTag,        // consumerTag
                     arguments,          // arguments
                     this);              // consumer
@@ -155,22 +155,22 @@ namespace EasyNetQ.Consumer
             if (disposed)
             {
                 // this message's consumer has stopped, so just return
-                logger.InfoWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message", 
+                logger.InfoWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message",
                     ConsumerTag, queue.Name);
                 return;
             }
 
             if (onMessage == null)
             {
-                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'." + 
-                    "Please call InternalConsumer.StartConsuming before passing the consumer to basic.consume", 
+                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'." +
+                    "Please call InternalConsumer.StartConsuming before passing the consumer to basic.consume",
                     ConsumerTag);
                 return;
             }
 
-            var messageRecievedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
+            var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
             var messsageProperties = new MessageProperties(properties);
-            var context = new ConsumerExecutionContext(onMessage, messageRecievedInfo, messsageProperties, body, this);
+            var context = new ConsumerExecutionContext(onMessage, messageReceivedInfo, messsageProperties, body, this);
 
             consumerDispatcher.QueueAction(() => handlerRunner.InvokeUserMessageHandler(context));
         }
