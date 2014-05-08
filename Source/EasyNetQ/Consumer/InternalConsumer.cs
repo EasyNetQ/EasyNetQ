@@ -78,7 +78,8 @@ namespace EasyNetQ.Consumer
             var consumerTag = conventions.ConsumerTagConvention();
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
-                    {"x-priority", configuration.Priority}
+                    {"x-priority", configuration.Priority},
+                    {"x-cancel-on-ha-failover", true}
                 };
             try
             {

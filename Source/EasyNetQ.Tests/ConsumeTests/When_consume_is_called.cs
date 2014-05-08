@@ -38,7 +38,8 @@ namespace EasyNetQ.Tests.ConsumeTests
                 Arg<string>.Is.Equal(ConsumerTag),
                 Arg<IDictionary<string, object>>.Is.Equal(new Dictionary<string, object>
                     {
-                        {"x-priority", 0}
+                        {"x-priority", 0},
+                        {"x-cancel-on-ha-failover", true}
                     }),
                 Arg<IBasicConsumer>.Is.Same(MockBuilder.Consumers[0])));
         }
