@@ -4,6 +4,7 @@ using NUnit.Framework;
 namespace EasyNetQ.Management.Client.Tests
 {
     [TestFixture]
+    [Explicit("Requires a broker on localhost, and to be running on the Mono CLR")]
     public class ManagementClientMonoTests
     {
 		private const string hostUrl = "http://localhost";
