@@ -6,12 +6,11 @@ using System.Reflection;
 using EasyNetQ.Management.Client.Model;
 using EasyNetQ.Management.Client.Serialization;
 using Newtonsoft.Json;
+using System.Diagnostics.Contracts;
+using Newtonsoft.Json.Converters;
 
 namespace EasyNetQ.Management.Client
 {
-    using System.Diagnostics.Contracts;
-    using Newtonsoft.Json.Converters;
-
     public class ManagementClient : IManagementClient
     {
         private readonly string hostUrl;
@@ -19,6 +18,8 @@ namespace EasyNetQ.Management.Client
         private readonly string password;
         private readonly int portNumber;
         public static readonly JsonSerializerSettings Settings;
+
+        private bool runningOnMono;
 
         public ManagementClient(
             string hostUrl,
@@ -57,7 +58,7 @@ namespace EasyNetQ.Management.Client
             get { return portNumber; }
         }
 
-        public ManagementClient(string hostUrl, string username, string password, int portNumber)
+        public ManagementClient(string hostUrl, string username, string password, int portNumber, bool runningOnMono = false)
         {
             if (string.IsNullOrEmpty(hostUrl))
             {
@@ -77,9 +78,11 @@ namespace EasyNetQ.Management.Client
             this.password = password;
             this.portNumber = portNumber;
 
-            
-
-            LeaveDotsAndSlashesEscaped();
+            this.runningOnMono = runningOnMono;
+			if (!runningOnMono) 
+			{
+	            LeaveDotsAndSlashesEscaped();
+			}
         }
 
         public Overview GetOverview()
@@ -615,10 +618,30 @@ namespace EasyNetQ.Management.Client
 
         private HttpWebRequest CreateRequestForPath(string path)
         {
-            var request = (HttpWebRequest)WebRequest.Create(BuildEndpointAddress(path));
+			var endpointAddress = BuildEndpointAddress (path);
+			Console.WriteLine (endpointAddress);
+
+			var uri = new Uri (endpointAddress);
+
+			if (runningOnMono) {
+				// unsightly hack to fix path. 
+				// The default vHost in RabbitMQ is named '/' which causes all sorts of problems :(
+				// We need to escape it to %2f, but System.Uri then unescapes it back to '/'
+				// The horrible fix is to reset the path field to the original path value, after it's
+				// been set.
+				var pathField = typeof(Uri).GetField ("path", BindingFlags.Instance | BindingFlags.NonPublic);
+				if (pathField == null) {
+					throw new ApplicationException ("Could not resolve path field");
+				}
+				pathField.SetValue (uri, "/api/" + path);
+			}
+
+			var request = (HttpWebRequest)WebRequest.Create(uri);
             request.Credentials = new NetworkCredential(username, password);
+			Console.WriteLine (request.RequestUri.PathAndQuery);
             return request;
         }
+
 
         private string BuildEndpointAddress(string path)
         {
