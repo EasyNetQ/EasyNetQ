@@ -7,20 +7,27 @@ namespace EasyNetQ
 {
     public static class BusExtensions
     {
-        public static void FuturePublish<T>(this IBus bus, TimeSpan messageOffset, T message) where T : class
+        /// <summary>
+        /// Schedule a message to be published at some time in the future.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="messageDelay">The delay time for message to publish in future</param>
+        /// <param name="message">The message to response with</param>
+        public static void FuturePublish<T>(this IBus bus, TimeSpan messageDelay, T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
 
             var advancedBus = bus.Advanced;
             var conventions = advancedBus.Container.Resolve<IConventions>();
             var connectionConfiguration = advancedBus.Container.Resolve<IConnectionConfiguration>();
-            var offset = Round(messageOffset);
-            var offsetString = offset.ToString(@"hh\_mm\_ss");
+            var delay = Round(messageDelay);
+            var delayString = delay.ToString(@"hh\_mm\_ss");
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
-            var futureExchangeName = exchangeName + "_" + offsetString;
-            var futureQueueName = conventions.QueueNamingConvention(typeof (T), offsetString);
+            var futureExchangeName = exchangeName + "_" + delayString;
+            var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
             var futureExchange = advancedBus.ExchangeDeclare(futureExchangeName, ExchangeType.Topic);
-            var futureQueue = advancedBus.QueueDeclare(futureQueueName, perQueueTtl: (int) offset.TotalMilliseconds, deadLetterExchange: exchangeName);
+            var futureQueue = advancedBus.QueueDeclare(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName);
             advancedBus.Bind(futureExchange, futureQueue, "#");
             var easyNetQMessage = new Message<T>(message)
                 {
