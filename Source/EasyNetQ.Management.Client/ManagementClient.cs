@@ -619,7 +619,6 @@ namespace EasyNetQ.Management.Client
         private HttpWebRequest CreateRequestForPath(string path)
         {
 			var endpointAddress = BuildEndpointAddress (path);
-			Console.WriteLine (endpointAddress);
 
 			var uri = new Uri (endpointAddress);
 
@@ -638,7 +637,6 @@ namespace EasyNetQ.Management.Client
 
 			var request = (HttpWebRequest)WebRequest.Create(uri);
             request.Credentials = new NetworkCredential(username, password);
-			Console.WriteLine (request.RequestUri.PathAndQuery);
             return request;
         }
 
