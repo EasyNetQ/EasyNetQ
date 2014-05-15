@@ -62,31 +62,29 @@ namespace EasyNetQ.Consumer
             
             completionTask.ContinueWith(task =>
                 {
+                    var ackStrategy = AckStrategies.Ack;
                     if (task.IsFaulted)
                     {
-                        var exception = task.Exception;
-                        HandleErrorInSubscriptionHandler(context, exception);
+                        ackStrategy = GetStrategyFromErrorInSubscriptionHandler(context, task.Exception);
                     }
-                    else
-                    {
-                        DoAck(context, AckStrategies.Ack);
-                    }
+                    
+                    DoAck(context, ackStrategy);
                 });
         }
 
-        private void HandleErrorInSubscriptionHandler(ConsumerExecutionContext context,
+        private AckStrategy GetStrategyFromErrorInSubscriptionHandler(ConsumerExecutionContext context,
             Exception exception)
         {
             logger.ErrorWrite(BuildErrorMessage(context, exception));
             try
             {
-                AckStrategy handleConsumerError = consumerErrorStrategy.HandleConsumerError(context, exception);
-                DoAck(context, handleConsumerError);
+                return consumerErrorStrategy.HandleConsumerError(context, exception);
             }
             catch (Exception consumerErrorStrategyError)
             {
                 logger.ErrorWrite("Exception in ConsumerErrorStrategy:\n{0}",
                     consumerErrorStrategyError);
+                return AckStrategies.Nothing;
             }
         }
 
