@@ -60,34 +60,33 @@ namespace EasyNetQ.Consumer
                 return;
             }
             
-            completionTask.ContinueWith(task =>
-                {
-                    var ackStrategy = AckStrategies.Ack;
-                    if (task.IsFaulted)
-                    {
-                        ackStrategy = GetStrategyFromErrorInSubscriptionHandler(context, task.Exception);
-                    }
-                    
-                    DoAck(context, ackStrategy);
-                });
+            completionTask.ContinueWith(task => DoAck(context, GetAckStrategy(context, task)));
         }
 
-        private AckStrategy GetStrategyFromErrorInSubscriptionHandler(ConsumerExecutionContext context,
-            Exception exception)
+        private AckStrategy GetAckStrategy(ConsumerExecutionContext context, Task task)
         {
-            logger.ErrorWrite(BuildErrorMessage(context, exception));
+            var ackStrategy = AckStrategies.Ack;
             try
             {
-                return consumerErrorStrategy.HandleConsumerError(context, exception);
+                if (task.IsFaulted)
+                {
+                    logger.ErrorWrite(BuildErrorMessage(context, task.Exception));
+                    ackStrategy = consumerErrorStrategy.HandleConsumerError(context, task.Exception);
+                }
+                else if (task.IsCanceled)
+                {
+                    ackStrategy = consumerErrorStrategy.HandleConsumerCancelled(context);
+                }
             }
             catch (Exception consumerErrorStrategyError)
             {
                 logger.ErrorWrite("Exception in ConsumerErrorStrategy:\n{0}",
-                    consumerErrorStrategyError);
+                                  consumerErrorStrategyError);
                 return AckStrategies.Nothing;
             }
+            return ackStrategy;
         }
-
+        
         private void DoAck(ConsumerExecutionContext context, AckStrategy ackStrategy)
         {
             const string failedToAckMessage =
