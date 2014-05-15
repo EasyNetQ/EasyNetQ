@@ -62,7 +62,7 @@ namespace EasyNetQ.Consumer
                         }
                         else
                         {
-                            DoAck(context, SuccessAckStrategy);
+                            DoAck(context, AckStrategies.Ack);
                         }
                     });
                 }
@@ -90,7 +90,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private void DoAck(ConsumerExecutionContext context, Func<IModel, ulong, AckResult> ackStrategy)
+        private void DoAck(ConsumerExecutionContext context, AckStrategy ackStrategy)
         {
             const string failedToAckMessage =
                 "Basic ack failed because channel was closed with message '{0}'." +
@@ -129,29 +129,18 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private AckResult SuccessAckStrategy(IModel model, ulong deliveryTag)
-        {
-            model.BasicAck(deliveryTag, false);
-            return AckResult.Ack;
-        }
-
         private AckResult ExceptionAckStrategy(IModel model, ulong deliveryTag, PostExceptionAckStrategy strategy)
         {
             switch (strategy)
             {
                 case PostExceptionAckStrategy.ShouldAck:
-                    model.BasicAck(deliveryTag, false);
-                    return AckResult.Ack;
+                    return AckStrategies.Ack(model, deliveryTag);
                 case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
-                    model.BasicNack(deliveryTag, false, false);
-                    return AckResult.Nack;
+                    return AckStrategies.NackWithRequeue(model, deliveryTag);
                 case PostExceptionAckStrategy.ShouldNackWithRequeue:
-                    model.BasicNack(deliveryTag, false, true);
-                    return AckResult.Nack;
-                case PostExceptionAckStrategy.DoNothing:
-                    return AckResult.Nothing;
+                    return AckStrategies.NackWithRequeue(model, deliveryTag);
                 default:
-                    return AckResult.Nothing;
+                    return AckStrategies.Nothing(model, deliveryTag);
             }
         }
 
@@ -180,4 +169,5 @@ namespace EasyNetQ.Consumer
             consumerErrorStrategy.Dispose();
         }
     }
+
 }

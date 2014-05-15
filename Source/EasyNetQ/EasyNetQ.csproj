@@ -62,6 +62,7 @@
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
+    <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
