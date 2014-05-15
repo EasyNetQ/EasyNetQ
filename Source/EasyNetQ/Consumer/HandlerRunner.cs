@@ -80,8 +80,7 @@ namespace EasyNetQ.Consumer
             logger.ErrorWrite(BuildErrorMessage(context, exception));
             try
             {
-                var strategy = consumerErrorStrategy.HandleConsumerError(context, exception);
-                DoAck(context, (model, deliveryTag) => ExceptionAckStrategy(model, deliveryTag, strategy));
+                DoAck(context, consumerErrorStrategy.HandleConsumerError(context, exception));
             }
             catch (Exception consumerErrorStrategyError)
             {
@@ -126,21 +125,6 @@ namespace EasyNetQ.Consumer
             finally
             {
                 eventBus.Publish(new AckEvent(context, ackResult));
-            }
-        }
-
-        private AckResult ExceptionAckStrategy(IModel model, ulong deliveryTag, PostExceptionAckStrategy strategy)
-        {
-            switch (strategy)
-            {
-                case PostExceptionAckStrategy.ShouldAck:
-                    return AckStrategies.Ack(model, deliveryTag);
-                case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
-                    return AckStrategies.NackWithRequeue(model, deliveryTag);
-                case PostExceptionAckStrategy.ShouldNackWithRequeue:
-                    return AckStrategies.NackWithRequeue(model, deliveryTag);
-                default:
-                    return AckStrategies.Nothing(model, deliveryTag);
             }
         }
 

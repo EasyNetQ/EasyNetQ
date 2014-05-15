@@ -10,14 +10,6 @@ namespace EasyNetQ.Consumer
         /// </summary>
         /// <param name="context">The consumer execution context.</param>
         /// <param name="exception">The exception</param>
-        PostExceptionAckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception);
-    }
-
-    public enum PostExceptionAckStrategy
-    {
-        ShouldAck,
-        ShouldNackWithoutRequeue,
-        ShouldNackWithRequeue,
-        DoNothing
+        AckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception);
     }
 }
