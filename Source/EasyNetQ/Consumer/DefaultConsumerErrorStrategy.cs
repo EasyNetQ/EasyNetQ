@@ -135,6 +135,11 @@ namespace EasyNetQ.Consumer
             return AckStrategies.Ack;
         }
 
+        public AckStrategy HandleConsumerCancelled(ConsumerExecutionContext context)
+        {
+            return AckStrategies.Ack;
+        }
+
         private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
             var messageAsString = Encoding.UTF8.GetString(context.Body);
