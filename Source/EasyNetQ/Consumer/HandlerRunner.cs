@@ -42,36 +42,36 @@ namespace EasyNetQ.Consumer
                 context.Info.DeliverTag,
                 context.Info.Redelivered);
 
+            Task completionTask;
+            
             try
             {
-                var completionTask = context.UserHandler(context.Body, context.Properties, context.Info);
-
-                if (completionTask.Status == TaskStatus.Created)
-                {
-                    logger.ErrorWrite("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
-                        context.Info.ConsumerTag);
-                }
-                else
-                {
-                    completionTask.ContinueWith(task =>
-                    {
-                        if (task.IsFaulted)
-                        {
-                            var exception = task.Exception;
-                            HandleErrorInSubscriptionHandler(context, exception);
-                        }
-                        else
-                        {
-                            DoAck(context, AckStrategies.Ack);
-                        }
-                    });
-                }
+                completionTask = context.UserHandler(context.Body, context.Properties, context.Info);
             }
             catch (Exception exception)
             {
-                HandleErrorInSubscriptionHandler(context, exception);
+                completionTask = TaskHelpers.FromException(exception);
             }
-
+            
+            if (completionTask.Status == TaskStatus.Created)
+            {
+                logger.ErrorWrite("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
+                    context.Info.ConsumerTag);
+                return;
+            }
+            
+            completionTask.ContinueWith(task =>
+                {
+                    if (task.IsFaulted)
+                    {
+                        var exception = task.Exception;
+                        HandleErrorInSubscriptionHandler(context, exception);
+                    }
+                    else
+                    {
+                        DoAck(context, AckStrategies.Ack);
+                    }
+                });
         }
 
         private void HandleErrorInSubscriptionHandler(ConsumerExecutionContext context,
@@ -80,7 +80,8 @@ namespace EasyNetQ.Consumer
             logger.ErrorWrite(BuildErrorMessage(context, exception));
             try
             {
-                DoAck(context, consumerErrorStrategy.HandleConsumerError(context, exception));
+                AckStrategy handleConsumerError = consumerErrorStrategy.HandleConsumerError(context, exception);
+                DoAck(context, handleConsumerError);
             }
             catch (Exception consumerErrorStrategyError)
             {
