@@ -142,6 +142,7 @@
     <Compile Include="Producer\Rpc.cs" />
     <Compile Include="Producer\SendReceive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueAttribute.cs" />
     <Compile Include="RabbitAdvancedBus.cs" />
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
