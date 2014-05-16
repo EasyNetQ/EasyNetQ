@@ -56,6 +56,7 @@
     <Compile Include="Model\PermissionInfoTests.cs" />
     <Compile Include="Model\PolicySerializationTests.cs" />
     <Compile Include="Model\PublishInfoTests.cs" />
+    <Compile Include="Model\QueueSerializationTests.cs" />
     <Compile Include="Model\UserInfoTests.cs" />
     <Compile Include="ResourceLoader.cs" />
     <Compile Include="ManagementClientTests.cs" />

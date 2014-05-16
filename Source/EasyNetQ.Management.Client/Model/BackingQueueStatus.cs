@@ -14,7 +14,7 @@ namespace EasyNetQ.Management.Client.Model
         public string TargetRamCount { get; set; }
         public int RamMsgCount { get; set; }
         public int RamAckCount { get; set; }
-        public int NextSeqId { get; set; }
+        public long NextSeqId { get; set; }
         public int PersistentCount { get; set; }
         public double AvgIngressRate { get; set; }
         public double AvgEgressRate { get; set; }
