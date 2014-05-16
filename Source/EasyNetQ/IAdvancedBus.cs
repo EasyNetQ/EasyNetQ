@@ -217,8 +217,9 @@ namespace EasyNetQ
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
         /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
+        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
         /// <returns>The queue</returns>
-        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue);
+        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null);
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the

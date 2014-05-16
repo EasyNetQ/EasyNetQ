@@ -41,12 +41,12 @@ namespace EasyNetQ
             var messageBody = serializer.MessageToBytes(message);
 
             bus.Publish(new ScheduleMe
-            {
-                WakeTime = futurePublishDate,
-                BindingKey = typeName,
-                CancellationKey = cancellationKey,
-                InnerMessage = messageBody
-            });
+                {
+                    WakeTime = futurePublishDate,
+                    BindingKey = typeName,
+                    CancellationKey = cancellationKey,
+                    InnerMessage = messageBody
+                });
         }
 
         /// <summary>
@@ -57,9 +57,9 @@ namespace EasyNetQ
         public static void CancelFuturePublish(this IBus bus, string cancellationKey)
         {
             bus.Publish(new UnscheduleMe
-            {
-                CancellationKey = cancellationKey
-            });
+                {
+                    CancellationKey = cancellationKey
+                });
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace EasyNetQ
         /// <param name="message">The message to response with</param>
         public static Task FuturePublishAsync<T>(this IBus bus, DateTime futurePublishDate, T message) where T : class
         {
-            return FuturePublishAsync<T>(bus, futurePublishDate, null, message);
+            return FuturePublishAsync(bus, futurePublishDate, null, message);
         }
 
         /// <summary>
@@ -97,12 +97,12 @@ namespace EasyNetQ
             var messageBody = serializer.MessageToBytes(message);
 
             return bus.PublishAsync(new ScheduleMe
-            {
-                WakeTime = futurePublishDate,
-                BindingKey = typeName,
-                CancellationKey = cancellationKey,
-                InnerMessage = messageBody
-            });
+                {
+                    WakeTime = futurePublishDate,
+                    BindingKey = typeName,
+                    CancellationKey = cancellationKey,
+                    InnerMessage = messageBody
+                });
         }
 
         /// <summary>
@@ -113,9 +113,9 @@ namespace EasyNetQ
         public static Task CancelFuturePublishAsync(this IBus bus, string cancellationKey)
         {
             return bus.PublishAsync(new UnscheduleMe
-            {
-                CancellationKey = cancellationKey
-            });
+                {
+                    CancellationKey = cancellationKey
+                });
         }
     }
 }
