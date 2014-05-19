@@ -233,7 +233,8 @@ namespace EasyNetQ
             bool exclusive = false,
             bool autoDelete = false,
             int perQueueTtl = int.MaxValue,
-            int expires = int.MaxValue)
+            int expires = int.MaxValue,
+            string deadLetterExchange = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -254,7 +255,10 @@ namespace EasyNetQ
                 {
                     arguments.Add("x-expires", expires);
                 }
-
+                if (! string.IsNullOrEmpty(deadLetterExchange))
+                {
+                    arguments.Add("x-dead-letter-exchange", deadLetterExchange);
+                }
                 clientCommandDispatcher.Invoke(
                     x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)
                     ).Wait();
@@ -291,7 +295,7 @@ namespace EasyNetQ
             task.Wait();
             var queueDeclareOk = task.Result;
             logger.DebugWrite("Declared Server Generted Queue '{0}'", queueDeclareOk.QueueName);
-            return new Topology.Queue(queueDeclareOk.QueueName, true);
+            return new Queue(queueDeclareOk.QueueName, true);
         }
 
         public virtual void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)

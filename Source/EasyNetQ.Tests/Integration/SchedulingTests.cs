@@ -27,6 +27,53 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
+        [Test]
+        [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
+        public void Should_be_able_to_schedule_a_message_2()
+        {
+            var autoResetEvent = new AutoResetEvent(false);
+
+            bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
+            {
+                Console.WriteLine("Got scheduled message: {0}", message.Text);
+                autoResetEvent.Set();
+            });
+            var invitation = new PartyInvitation
+            {
+                Text = "Please come to my party",
+                Date = new DateTime(2011, 5, 24)
+            };
+
+            bus.FuturePublish(TimeSpan.FromSeconds(3), invitation);
+
+            if(! autoResetEvent.WaitOne(100000))
+                Assert.Fail();
+        }
+
+        [Test]
+        [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
+        public void High_volume_scheduling_test_2()
+        {
+            logger.Debug = false;
+
+            bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
+                Console.WriteLine("Got scheduled message: {0}", message.Text));
+
+            var count = 0;
+            while (true)
+            {
+                var invitation = new PartyInvitation
+                {
+                    Text = string.Format("Invitation {0}", count++),
+                    Date = new DateTime(2011, 5, 24)
+                };
+
+                bus.FuturePublish(TimeSpan.FromSeconds(3), invitation);
+                Thread.Sleep(1);
+            }
+        }
+
+
         /// <summary>
         /// Tests the EasyNetQ.Scheduler.
         /// 1. First run EasyNetQ.Scheduler.exe

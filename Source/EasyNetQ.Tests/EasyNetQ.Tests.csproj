@@ -203,9 +203,7 @@
   <ItemGroup>
     <Content Include="Integration\LongRunningServer.js" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FluentConfiguration\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
