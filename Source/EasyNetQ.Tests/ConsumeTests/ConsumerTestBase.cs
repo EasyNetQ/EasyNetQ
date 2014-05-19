@@ -23,6 +23,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected MessageProperties DeliveredMessageProperties;
         protected MessageReceivedInfo DeliveredMessageInfo;
         protected bool ConsumerWasInvoked;
+        protected CancellationTokenSource Cancellation;
 
         // populated when a message is delivered
         protected IBasicProperties OriginalProperties;
@@ -32,8 +33,10 @@ namespace EasyNetQ.Tests.ConsumeTests
         [SetUp]
         protected void SetUp()
         {
-            ConsumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            Cancellation = new CancellationTokenSource();
 
+            ConsumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            
             IConventions conventions = new Conventions(new TypeNameSerializer())
                 {
                     ConsumerTagConvention = () => ConsumerTag
@@ -61,7 +64,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
                     handler(body, properties, messageInfo);
                     ConsumerWasInvoked = true;
-                }));
+                }, Cancellation.Token));
         }
 
         protected void DeliverMessage()
