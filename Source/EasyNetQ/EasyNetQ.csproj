@@ -122,6 +122,10 @@
     <Compile Include="MessageReceivedInfo.cs" />
     <Compile Include="MessageProperties.cs" />
     <Compile Include="MessageReturnedInfo.cs" />
+    <Compile Include="MessageVersioning\ISupersede.cs" />
+    <Compile Include="MessageVersioning\MessageTypeProperties.cs" />
+    <Compile Include="MessageVersioning\MessageVersioningExtensions.cs" />
+    <Compile Include="MessageVersioning\MessageVersionStack.cs" />
     <Compile Include="NonGeneric\NonGenericExtensions.cs" />
     <Compile Include="PersistentConnection.cs" />
     <Compile Include="Producer\ClientCommandDispatcher.cs" />
@@ -143,6 +147,7 @@
     <Compile Include="Producer\PublishNackedException.cs" />
     <Compile Include="Producer\Rpc.cs" />
     <Compile Include="Producer\SendReceive.cs" />
+    <Compile Include="MessageVersioning\VersionedPublishExchangeDeclareStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitAdvancedBus.cs" />
     <Compile Include="RabbitBus.cs" />
@@ -174,6 +179,7 @@
     <Compile Include="Consumer\TransientConsumer.cs" />
     <Compile Include="TypeNameSerializer.cs" />
     <Compile Include="Preconditions.cs" />
+    <Compile Include="MessageVersioning\VersionedMessageSerializationStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
