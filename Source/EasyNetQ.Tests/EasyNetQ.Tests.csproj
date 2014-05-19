@@ -82,6 +82,8 @@
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />
+    <Compile Include="ConsumeTests\AckStrategyTests.cs" />
+    <Compile Include="ConsumeTests\When_cancellation_of_message_handler_occurs.cs" />
     <Compile Include="ConsumeTests\HandlerCollectionTests.cs" />
     <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
     <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
