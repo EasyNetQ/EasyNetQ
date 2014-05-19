@@ -218,7 +218,7 @@ namespace EasyNetQ.Tests
                 {
                     basicDeliverEventArgs = (ConsumerExecutionContext)i.Arguments[0];
                     raisedException = (Exception) i.Arguments[1];
-                }).Return(PostExceptionAckStrategy.ShouldAck);
+                }).Return(AckStrategies.Ack);
 
             mockBuilder = new MockBuilder(x => x
                 .Register<IConventions>(_ => conventions)

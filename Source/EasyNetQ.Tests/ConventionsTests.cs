@@ -227,6 +227,8 @@ namespace EasyNetQ.Tests
     {
         private DefaultConsumerErrorStrategy errorStrategy;
         private MockBuilder mockBuilder;
+        private AckStrategy errorAckStrategy;
+        private AckStrategy cancelAckStrategy;
 
         [SetUp]
         public void SetUp()
@@ -263,7 +265,8 @@ namespace EasyNetQ.Tests
 
             try
             {
-                errorStrategy.HandleConsumerError(context, new Exception());
+                errorAckStrategy = errorStrategy.HandleConsumerError(context, new Exception());
+                cancelAckStrategy = errorStrategy.HandleConsumerCancelled(context);
             }
             catch (Exception)
             {
@@ -283,6 +286,18 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[0].AssertWasCalled(x => 
                 x.QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null));
+        }
+
+        [Test]
+        public void Should_Ack_failed_message()
+        {
+            Assert.AreSame(AckStrategies.Ack, errorAckStrategy);
+        }
+        
+        [Test]
+        public void Should_Ack_canceled_message()
+        {
+            Assert.AreSame(AckStrategies.Ack, cancelAckStrategy);
         }
     }
 }

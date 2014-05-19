@@ -42,55 +42,52 @@ namespace EasyNetQ.Consumer
                 context.Info.DeliverTag,
                 context.Info.Redelivered);
 
+            Task completionTask;
+            
             try
             {
-                var completionTask = context.UserHandler(context.Body, context.Properties, context.Info);
-
-                if (completionTask.Status == TaskStatus.Created)
-                {
-                    logger.ErrorWrite("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
-                        context.Info.ConsumerTag);
-                }
-                else
-                {
-                    completionTask.ContinueWith(task =>
-                    {
-                        if (task.IsFaulted)
-                        {
-                            var exception = task.Exception;
-                            HandleErrorInSubscriptionHandler(context, exception);
-                        }
-                        else
-                        {
-                            DoAck(context, SuccessAckStrategy);
-                        }
-                    });
-                }
+                completionTask = context.UserHandler(context.Body, context.Properties, context.Info);
             }
             catch (Exception exception)
             {
-                HandleErrorInSubscriptionHandler(context, exception);
+                completionTask = TaskHelpers.FromException(exception);
             }
-
+            
+            if (completionTask.Status == TaskStatus.Created)
+            {
+                logger.ErrorWrite("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
+                    context.Info.ConsumerTag);
+                return;
+            }
+            
+            completionTask.ContinueWith(task => DoAck(context, GetAckStrategy(context, task)));
         }
 
-        private void HandleErrorInSubscriptionHandler(ConsumerExecutionContext context,
-            Exception exception)
+        private AckStrategy GetAckStrategy(ConsumerExecutionContext context, Task task)
         {
-            logger.ErrorWrite(BuildErrorMessage(context, exception));
+            var ackStrategy = AckStrategies.Ack;
             try
             {
-                var strategy = consumerErrorStrategy.HandleConsumerError(context, exception);
-                DoAck(context, (model, deliveryTag) => ExceptionAckStrategy(model, deliveryTag, strategy));
+                if (task.IsFaulted)
+                {
+                    logger.ErrorWrite(BuildErrorMessage(context, task.Exception));
+                    ackStrategy = consumerErrorStrategy.HandleConsumerError(context, task.Exception);
+                }
+                else if (task.IsCanceled)
+                {
+                    ackStrategy = consumerErrorStrategy.HandleConsumerCancelled(context);
+                }
             }
             catch (Exception consumerErrorStrategyError)
             {
                 logger.ErrorWrite("Exception in ConsumerErrorStrategy:\n{0}",
-                    consumerErrorStrategyError);
+                                  consumerErrorStrategyError);
+                return AckStrategies.Nothing;
             }
+            return ackStrategy;
         }
-
-        private void DoAck(ConsumerExecutionContext context, Func<IModel, ulong, AckResult> ackStrategy)
+        
+        private void DoAck(ConsumerExecutionContext context, AckStrategy ackStrategy)
         {
             const string failedToAckMessage =
                 "Basic ack failed because channel was closed with message '{0}'." +
@@ -129,32 +126,6 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private AckResult SuccessAckStrategy(IModel model, ulong deliveryTag)
-        {
-            model.BasicAck(deliveryTag, false);
-            return AckResult.Ack;
-        }
-
-        private AckResult ExceptionAckStrategy(IModel model, ulong deliveryTag, PostExceptionAckStrategy strategy)
-        {
-            switch (strategy)
-            {
-                case PostExceptionAckStrategy.ShouldAck:
-                    model.BasicAck(deliveryTag, false);
-                    return AckResult.Ack;
-                case PostExceptionAckStrategy.ShouldNackWithoutRequeue:
-                    model.BasicNack(deliveryTag, false, false);
-                    return AckResult.Nack;
-                case PostExceptionAckStrategy.ShouldNackWithRequeue:
-                    model.BasicNack(deliveryTag, false, true);
-                    return AckResult.Nack;
-                case PostExceptionAckStrategy.DoNothing:
-                    return AckResult.Nothing;
-                default:
-                    return AckResult.Nothing;
-            }
-        }
-
         private string BuildErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
             var message = Encoding.UTF8.GetString(context.Body);
@@ -180,4 +151,5 @@ namespace EasyNetQ.Consumer
             consumerErrorStrategy.Dispose();
         }
     }
+
 }
