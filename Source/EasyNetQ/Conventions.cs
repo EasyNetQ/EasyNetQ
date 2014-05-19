@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 
 namespace EasyNetQ
@@ -38,13 +39,31 @@ namespace EasyNetQ
 		    Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
 		    // Establish default conventions.
-			ExchangeNamingConvention = typeNameSerializer.Serialize;
-			TopicNamingConvention = messageType => "";
-			QueueNamingConvention =
+            ExchangeNamingConvention = messageType =>
+            {
+                var attr = GetQueueAttribute(messageType);
+
+                return string.IsNullOrEmpty(attr.ExchangeName)
+                    ? typeNameSerializer.Serialize(messageType)
+                    : attr.ExchangeName;
+            };
+			
+            TopicNamingConvention = messageType => "";
+			
+            QueueNamingConvention =
 					(messageType, subscriptionId) =>
 					{
-                        var typeName = typeNameSerializer.Serialize(messageType);
-						return string.Format("{0}_{1}", typeName, subscriptionId);
+                        var attr = GetQueueAttribute(messageType);
+
+                        if (string.IsNullOrEmpty(attr.QueueName))
+                        {
+                            var typeName = typeNameSerializer.Serialize(messageType);
+                            return string.Format("{0}_{1}", typeName, subscriptionId);
+                        }
+
+                        return string.IsNullOrEmpty(subscriptionId)
+                            ? attr.QueueName
+                            : string.Format("{0}_{1}", attr.QueueName, subscriptionId);
 					};
             RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
@@ -55,6 +74,13 @@ namespace EasyNetQ
 
             ConsumerTagConvention = () => Guid.NewGuid().ToString();
 		}
+
+        private QueueAttribute GetQueueAttribute(Type messageType)
+        {
+            var attr = messageType.GetCustomAttributes(typeof(QueueAttribute), true).FirstOrDefault() as QueueAttribute;
+
+            return attr ?? new QueueAttribute(string.Empty);
+        }
 
 		public ExchangeNameConvention ExchangeNamingConvention { get; set; }
 		public TopicNameConvention TopicNamingConvention { get; set; }
