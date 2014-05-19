@@ -84,7 +84,7 @@
          "target_ram_count":"infinity",
          "ram_msg_count":0,
          "ram_ack_count":0,
-         "next_seq_id":0,
+         "next_seq_id":2147483648,
          "persistent_count":0,
          "avg_ingress_rate":0.0,
          "avg_egress_rate":0.0,
