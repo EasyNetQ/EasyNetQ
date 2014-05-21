@@ -21,7 +21,7 @@ namespace EasyNetQ.MessageVersioning
 
 		public bool IsEmpty()
 		{
-			return _messageVersions.Any();
+			return !_messageVersions.Any();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()

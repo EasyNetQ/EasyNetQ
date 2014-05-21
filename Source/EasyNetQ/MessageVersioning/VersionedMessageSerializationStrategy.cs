@@ -19,7 +19,7 @@ namespace EasyNetQ.MessageVersioning
 		{
 			var messageBody = _serializer.MessageToBytes(message.Body);
 
-			var messageTypeProperties = MessageTypeProperties.CreateForMessageType( message.Body.GetType(), _typeNameSerializer );
+			var messageTypeProperties = MessageTypeProperty.CreateForMessageType( message.Body.GetType(), _typeNameSerializer );
 			var messageProperties = message.Properties;
 			messageTypeProperties.AppendTo( messageProperties );
 			if (string.IsNullOrEmpty(messageProperties.CorrelationId))
@@ -30,14 +30,16 @@ namespace EasyNetQ.MessageVersioning
 
 		public DeserializedMessage DeserializeMessage(MessageProperties properties, byte[] body)
 		{
-			var messageTypeProperties = MessageTypeProperties.ExtractFromProperties( properties, _typeNameSerializer );
-			var messageType = messageTypeProperties.GetMessageType();
+			var messageTypeProperty = MessageTypeProperty.ExtractFromProperties( properties, _typeNameSerializer );
+			var messageType = messageTypeProperty.GetMessageType();
 
-			var messageBody = _serializer.BytesToMessage(properties.Type, body);
-			var message = Message.CreateInstance(messageType, messageBody);
-			message.SetProperties(properties);
+			var messageBody = _serializer.BytesToMessage( messageType.TypeString, body );
+			var message = Message.CreateInstance( messageType.Type, messageBody );
+			// Replace the raw message type property data with our deserialised version
+			messageTypeProperty.AppendTo( properties );
+			message.SetProperties( properties );
 
-			return new DeserializedMessage(messageType, message);
+			return new DeserializedMessage( messageType.Type, message );
 		}	
 	}
 }
