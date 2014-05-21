@@ -120,6 +120,11 @@ namespace EasyNetQ.Management.Client
             return Get<IEnumerable<Channel>>("channels");
         }
 
+		public Channel GetChannel (string channelName)
+		{
+			return Get<Channel> (string.Format("channels/{0}", channelName));
+		}
+
         public IEnumerable<Exchange> GetExchanges()
         {
             return Get<IEnumerable<Exchange>>("exchanges");
@@ -632,7 +637,11 @@ namespace EasyNetQ.Management.Client
 				if (pathField == null) {
 					throw new ApplicationException ("Could not resolve path field");
 				}
-				pathField.SetValue (uri, "/api/" + path);
+				var alteredPath = (string)pathField.GetValue (uri);
+				alteredPath = alteredPath.Replace (@"///", @"/%2f/");
+				alteredPath = alteredPath.Replace (@"//", @"/%2f");
+				alteredPath = alteredPath.Replace ("+", "%2b");
+				pathField.SetValue (uri, alteredPath);
 			}
 
 			var request = (HttpWebRequest)WebRequest.Create(uri);

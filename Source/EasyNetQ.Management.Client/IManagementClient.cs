@@ -52,6 +52,13 @@ namespace EasyNetQ.Management.Client
         /// <returns></returns>
         IEnumerable<Channel> GetChannels();
 
+		/// <summary>
+		/// Gets the channel. This returns more detail, including consumers than the GetChannels method.
+		/// </summary>
+		/// <returns>The channel.</returns>
+		/// <param name="channelName">Channel name.</param>
+		Channel GetChannel (string channelName);
+
         /// <summary>
         /// A list of all exchanges.
         /// </summary>
