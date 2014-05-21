@@ -96,6 +96,11 @@
     <Compile Include="Integration\AmqpStringSizeExperiments.cs" />
     <Compile Include="Integration\AutoSubscriberIntegrationTests.cs" />
     <Compile Include="Integration\ChannelExceptionBug.cs" />
+    <Compile Include="MessageVersioningTests\MessageTypePropertyTests.cs" />
+    <Compile Include="MessageVersioningTests\MessageVersioningExtensionsTests.cs" />
+    <Compile Include="MessageVersioningTests\MessageVersionStackTests.cs" />
+    <Compile Include="MessageVersioningTests\MyMessageV2.cs" />
+    <Compile Include="MessageVersioningTests\VersionedPublishExchangeDeclareStrategyTests.cs" />
     <Compile Include="MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes.cs" />
     <Compile Include="Integration\When_a_message_with_a_long_type_name_is_published.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent_but_an_exception_is_thrown_by_responder.cs" />
@@ -167,6 +172,7 @@
     <Compile Include="TestMessage.cs" />
     <Compile Include="DefaultClusterHostSelectionStrategyTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
+    <Compile Include="MessageVersioningTests\VersionedMessageSerializationStrategyTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ.Management.Client\EasyNetQ.Management.Client.csproj">

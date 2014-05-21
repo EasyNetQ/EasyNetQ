@@ -7,11 +7,11 @@ namespace EasyNetQ.MessageVersioning
 {
 	public class VersionedPublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
 	{
-		private readonly ConcurrentDictionary<string, IExchange> exchangeNames = new ConcurrentDictionary<string, IExchange>();
+		private readonly ConcurrentDictionary<string, IExchange> _exchangeNames = new ConcurrentDictionary<string, IExchange>();
 
 		public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
 		{
-			return exchangeNames.AddOrUpdate(
+			return _exchangeNames.AddOrUpdate(
 				exchangeName,
 				name => advancedBus.ExchangeDeclare(name, exchangeType),
 				(_, exchange) => exchange);
@@ -28,19 +28,19 @@ namespace EasyNetQ.MessageVersioning
 		private IExchange DeclareVersionedExchanges( IAdvancedBus advancedBus, IConventions conventions, MessageVersionStack messageVersions, string exchangeType )
 		{
 			// This works because the message version stack is LIFO from most superseded message type to the actual message type 
-			IExchange sourceExchange = null;
+			IExchange destinationExchange = null;
 			while( !messageVersions.IsEmpty() )
 			{
 				var messageType = messageVersions.Pop();
 				var exchangeName = conventions.ExchangeNamingConvention( messageType );
-				var destinationExchange = DeclareExchange( advancedBus, exchangeName, exchangeType );
+				var sourceExchange = DeclareExchange( advancedBus, exchangeName, exchangeType );
 
-				if( sourceExchange != null )
+				if( destinationExchange != null )
 					advancedBus.Bind( sourceExchange, destinationExchange, "#" );
 
-				sourceExchange = destinationExchange;
+				destinationExchange = sourceExchange;
 			}
-			return sourceExchange;
+			return destinationExchange;
 		}
 	}
 }

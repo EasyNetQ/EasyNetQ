@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EasyNetQ.MessageVersioning
 {
-	public class MessageTypeProperties
+	public class MessageTypeProperty
 	{
 		private const string AlternativeMessageTypesHeaderKey = "Alternative-Message-Types";
 		private const string AlternativeMessageTypeSeparator = ";";
@@ -14,7 +14,7 @@ namespace EasyNetQ.MessageVersioning
 		private readonly string _messageType;
 		private readonly List<string> _alternativeTypes;
 
-		private MessageTypeProperties( ITypeNameSerializer typeNameSerializer, Type messageType )
+		private MessageTypeProperty( ITypeNameSerializer typeNameSerializer, Type messageType )
 		{
 			_typeNameSerializer = typeNameSerializer;
 			var messageVersions = new MessageVersionStack( messageType );
@@ -28,7 +28,7 @@ namespace EasyNetQ.MessageVersioning
 			_alternativeTypes.RemoveAt( 0 );
 		}
 
-		private MessageTypeProperties( ITypeNameSerializer typeNameSerializer, string messageType, string alternativeTypesHeader )
+		private MessageTypeProperty( ITypeNameSerializer typeNameSerializer, string messageType, string alternativeTypesHeader )
 		{
 			_typeNameSerializer = typeNameSerializer;
 			_messageType = messageType;
@@ -45,40 +45,41 @@ namespace EasyNetQ.MessageVersioning
 			messageProperties.Type = _messageType;
 
 			if( _alternativeTypes.Any() )
-				messageProperties.Headers.Add( AlternativeMessageTypesHeaderKey,
-				                               string.Join( AlternativeMessageTypeSeparator, _alternativeTypes ) );
+				messageProperties.Headers[ AlternativeMessageTypesHeaderKey ] = string.Join( AlternativeMessageTypeSeparator, _alternativeTypes );
 		}
 
-		public Type GetMessageType()
+		public MessageType GetMessageType()
 		{
 			Type messageType;
 			if( TryGetType( _messageType, out messageType ) )
-				return messageType;
+				return new MessageType {Type = messageType, TypeString = _messageType};
 
-			var messageTypeFound = _alternativeTypes.Select( t => TryGetType( t, out messageType ) ).FirstOrDefault();
-			if( messageTypeFound )
-				return messageType;
+			foreach( var alternativeType in _alternativeTypes )
+			{
+				if( TryGetType( alternativeType, out messageType ) )
+					return new MessageType {Type = messageType, TypeString = alternativeType};
+			}
 
 			throw new EasyNetQException("Cannot find declared message type {0} or any of the specified alternative types {1}", _messageType, string.Join( AlternativeMessageTypeSeparator, _alternativeTypes));
 		}
 
-		public static MessageTypeProperties CreateForMessageType(Type messageType, ITypeNameSerializer typeNameSerializer)
+		public static MessageTypeProperty CreateForMessageType(Type messageType, ITypeNameSerializer typeNameSerializer)
 		{
-			return new MessageTypeProperties( typeNameSerializer, messageType );
+			return new MessageTypeProperty( typeNameSerializer, messageType );
 		}
 
-		public static MessageTypeProperties ExtractFromProperties( MessageProperties messageProperties, ITypeNameSerializer typeNameSerializer )
+		public static MessageTypeProperty ExtractFromProperties( MessageProperties messageProperties, ITypeNameSerializer typeNameSerializer )
 		{
 			var messageType = messageProperties.Type;
 			if( !messageProperties.HeadersPresent || !messageProperties.Headers.ContainsKey( AlternativeMessageTypesHeaderKey ) )
-				return new MessageTypeProperties( typeNameSerializer, messageType, null );
+				return new MessageTypeProperty( typeNameSerializer, messageType, null );
 
 			var rawHeader = messageProperties.Headers[ AlternativeMessageTypesHeaderKey ] as byte[];
 			if( rawHeader == null )
 				throw new EasyNetQException( "{0} header was present but contained no data or was not encoded as a byte[].", AlternativeMessageTypesHeaderKey );
 
 			var alternativeTypesHeader = Encoding.UTF8.GetString( rawHeader );
-			return new MessageTypeProperties( typeNameSerializer, messageType, alternativeTypesHeader );
+			return new MessageTypeProperty( typeNameSerializer, messageType, alternativeTypesHeader );
 		}
 
 		private bool TryGetType(string typeString, out Type messageType)

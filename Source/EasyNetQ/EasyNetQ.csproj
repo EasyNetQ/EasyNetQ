@@ -123,7 +123,8 @@
     <Compile Include="MessageProperties.cs" />
     <Compile Include="MessageReturnedInfo.cs" />
     <Compile Include="MessageVersioning\ISupersede.cs" />
-    <Compile Include="MessageVersioning\MessageTypeProperties.cs" />
+    <Compile Include="MessageVersioning\MessageType.cs" />
+    <Compile Include="MessageVersioning\MessageTypeProperty.cs" />
     <Compile Include="MessageVersioning\MessageVersioningExtensions.cs" />
     <Compile Include="MessageVersioning\MessageVersionStack.cs" />
     <Compile Include="NonGeneric\NonGenericExtensions.cs" />
