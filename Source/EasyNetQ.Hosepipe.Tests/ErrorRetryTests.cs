@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -13,8 +14,9 @@ namespace EasyNetQ.Hosepipe.Tests
         [SetUp]
         public void SetUp()
         {
-            conventions = new Conventions();
-            errorRetry = new ErrorRetry(new JsonSerializer());
+            var typeNameSerializer = new TypeNameSerializer();
+            conventions = new Conventions(typeNameSerializer);
+            errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer));
         }
 
         [Test, Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]
@@ -32,6 +34,27 @@ namespace EasyNetQ.Hosepipe.Tests
                 .ReadMessages(parameters, conventions.ErrorQueueNamingConvention());
 
             errorRetry.RetryErrors(rawErrorMessages, parameters);
+        }
+
+        [Test, Explicit("Requires a RabbitMQ instance")]
+        public void Should_republish_to_default_exchange()
+        {
+            var error = new Error
+                {
+                    Exchange = "", // default exchange
+                    RoutingKey = "hosepipe.test",
+                    Message = "Hosepipe test message",
+                    BasicProperties = new MessageProperties()
+                };
+            var parameters = new QueueParameters
+            {
+                HostName = "localhost",
+                Username = "guest",
+                Password = "guest",
+                MessageFilePath = @"C:\temp\MessageOutput"
+            };
+
+            errorRetry.RepublishError(error, parameters);
         }
     }
 }

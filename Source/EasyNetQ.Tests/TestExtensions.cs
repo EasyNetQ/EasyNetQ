@@ -81,5 +81,10 @@ namespace EasyNetQ.Tests
             Assert.AreEqual(collection.Count(), 0,
             string.Format("Expected collection to be empty, but had {0} items", collection.Count()));
         }
+
+        public static void ShouldBeOfType<T>(this object actual)
+        {
+            Assert.IsInstanceOf<T>(actual);
+        }
     }
 }

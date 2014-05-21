@@ -6,45 +6,58 @@ namespace EasyNetQ.FluentConfiguration
     /// Allows configuration to be fluently extended without adding overloads to IBus
     /// 
     /// e.g.
-    /// x => x.WithArgument("x-ha-policy", "all").WithTopic("*.brighton")
+    /// x => x.WithTopic("*.brighton")
     /// </summary>
     /// <typeparam name="T">The message type to be published</typeparam>
-    public interface ISubscriptionConfiguration<T>
+    public interface ISubscriptionConfiguration
     {
-        /// <summary>
-        /// Add an AMQP argument for the subscription consumer
-        /// </summary>
-        /// <param name="key">Argument key</param>
-        /// <param name="value">Argument value</param>
-        /// <returns></returns>
-        ISubscriptionConfiguration<T> WithArgument(string key, object value);
-
         /// <summary>
         /// Add a topic for the queue binding
         /// </summary>
         /// <param name="topic">The topic to add</param>
         /// <returns></returns>
-        ISubscriptionConfiguration<T> WithTopic(string topic);
+        ISubscriptionConfiguration WithTopic(string topic);
+
+        /// <summary>
+        /// Configures the queue's durability
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
+
+
+        /// <summary>
+        /// Configures the consumer's priority
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithPriority(int priority);
     }
 
-    public class SubscriptionConfiguration<T> : ISubscriptionConfiguration<T>
+    public class SubscriptionConfiguration : ISubscriptionConfiguration
     {
-        public IDictionary<string, object> Arguments { get; private set; }
         public IList<string> Topics { get; private set; }
+        public bool AutoDelete { get; private set; }
+        public int Priority { get; private set; }
 
         public SubscriptionConfiguration()
         {
-            Arguments = new Dictionary<string, object>();
             Topics = new List<string>();
+            AutoDelete = false;
+            Priority = 0;
         }
 
-        public ISubscriptionConfiguration<T> WithArgument(string key, object value)
+        public ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true)
         {
-            Arguments.Add(key, value);
+            AutoDelete = autoDelete;
             return this;
         }
 
-        public ISubscriptionConfiguration<T> WithTopic(string topic)
+        public ISubscriptionConfiguration WithPriority(int priority)
+        {
+            Priority = priority;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithTopic(string topic)
         {
             Topics.Add(topic);
             return this;

@@ -10,9 +10,27 @@ Usage:
 
 Commands
 	dump	Dump all the messages in a queue to the given directory
-	insert	Insert all the messages in a directory in the given queue
-	err	Dump all the EasyNetQ error messages to the given directory
+			Note: this creates three files for each message:
+
+			The message body:
+			<queue_name>.n.message.txt
+
+			The basic properties for the message:
+			<queue_name>.n.properties.txt
+
+			The infomation needed to republish the message, including the exchange name
+			and routing key:
+			<queue_name>.n.info.txt
+
+	insert	Republish all the messages in a given directory
+
+	err		Dump all the EasyNetQ error messages to the given directory
+
 	retry	Retry any EasyNetQ error messages in the given directory
+			Note this ignores the *.message.txt and *.info.txt files
+			because the properties and info are contained in the error message
+			itself
+
 	?	Output this usage message
 
 Options
@@ -22,6 +40,7 @@ Options
 	p	the password to connect with. Default is 'guest'
 	q	the queue name to take messages from, or publish them to.
 	o	the directory to output messages to. Default is current directory.
+	n	the maximum number of messages to retrieve. Default is 1000.
 
 Examples
 	
@@ -30,19 +49,16 @@ Examples
 
 	EasyNetQ.Hosepipe.exe dump s:localhost u:guest p:guest q:my_queue o:C:\temp\messages
 
-	2. To insert all the messages in directory 'C:\temp\messages' into queue
-	   'my_queue':
+	2. To insert (re-publish) all the messages in directory 'C:\temp\messages':
 	
-	EasyNetQ.Hosepipe.exe insert s:localhost u:guest p:guest q:my_queue o:C:\temp\messages
+	EasyNetQ.Hosepipe.exe insert s:localhost u:guest p:guest o:C:\temp\messages
 
 	3. Dump all the EasyNetQ messages queued in the broker localhost to a directory
 	   'C:\temp\messages'
 
 	EasyNetQ.Hosepipe.exe err s:localhost o:C:\temp\messages
 
-	4. An EasyNetQ error message contains all the information required to republish the
-	   errored message. 
-	   To re-publish all error messages in directory 'C:\temp\messages':
+	4. To re-publish all error messages in directory 'C:\temp\messages':
 
 	EasyNetQ.Hosepipe.exe retry s:localhost u:guest p:guest o:C:\temp\messages
 
@@ -54,9 +70,3 @@ Notes
 	queue first (using the RabbitMQ management interface), because if the messages fail 
 	again, they too will result in new error messages being published to the error queue 
 	and it is possible that	duplicate messages could be created.
-
-	Insert is not safe. It is very easy to publish messages of the wrong type to a
-	queue. This can result in unexpected errors in subscribers. Always take care that
-	the message you are inserting in a queue is the correct type. EasyNetQ.Hosepipe
-	names message files on disk after the queue they are retrieved from, so typically
-	you would want to insert them back onto the same named queue.

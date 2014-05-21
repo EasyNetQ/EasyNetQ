@@ -3,12 +3,13 @@
   <metadata>
     <id>EasyNetQ</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.9.1.0</version>
+    <version>0.28.3.0</version>
     <title>EasyNetQ</title>
     <authors>Mike Hadlow, Chris Edwards, A Hazelwood</authors>
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/mikehadlow/EasyNetQ/blob/master/licence.txt</licenseUrl>
     <projectUrl>http://easynetq.com/</projectUrl>
+    <iconUrl>https://raw.github.com/mikehadlow/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>EasyNetQ is a simple, opinionated .NET API for RabbitMQ</description>
     <releaseNotes>
@@ -16,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2012</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-      <dependency id="RabbitMQ.Client" version="[3.0.2.0]" />
+      <dependency id="RabbitMQ.Client" version="[3.3.0]" />
       <dependency id="Newtonsoft.Json" version="4.5" />
     </dependencies>
   </metadata>

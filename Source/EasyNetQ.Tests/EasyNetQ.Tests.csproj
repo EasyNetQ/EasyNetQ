@@ -33,6 +33,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,15 +56,16 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.0.2.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+    <Reference Include="RabbitMQ.Client, Version=3.3.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RabbitMQ.Client.3.0.2\lib\net30\RabbitMQ.Client.dll</HintPath>
+      <HintPath>..\packages\RabbitMQ.Client.3.3.0\lib\net30\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="Rhino.Mocks">
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
@@ -74,67 +77,102 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="AutoSubscriberTests.cs" />
-    <Compile Include="Bugs\CannonCreateQueueExchangeUsingAdvancedAPI.cs" />
-    <Compile Include="Bugs\SubscriptionOnTransientQueueThrowsOnReconnect.cs" />
-    <Compile Include="ClusterTests.cs" />
-    <Compile Include="ComponentRegistrationTests.cs" />
-    <Compile Include="ConnectionErrorConditionsTests.cs" />
+    <Compile Include="AmqpExceptionParserTests.cs" />
+    <Compile Include="AutoSubscriberTests\When_autosubscribing.cs" />
+    <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
+    <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
+    <Compile Include="ConsumerDispatcherFactoryTests.cs" />
+    <Compile Include="ConsumeTests\AckStrategyTests.cs" />
+    <Compile Include="ConsumeTests\When_cancellation_of_message_handler_occurs.cs" />
+    <Compile Include="ConsumeTests\HandlerCollectionTests.cs" />
+    <Compile Include="ConsumeTests\When_an_error_occurs_in_the_message_handler.cs" />
+    <Compile Include="ConsumeTests\ConsumerTestBase.cs" />
+    <Compile Include="ConsumeTests\When_a_consumer_has_multiple_handlers.cs" />
+    <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_broker.cs" />
+    <Compile Include="ConsumeTests\When_a_consumer_is_cancelled_by_the_user.cs" />
+    <Compile Include="ConsumeTests\When_a_message_is_delivered_to_the_consumer.cs" />
+    <Compile Include="ConsumeTests\When_a_message_is_received.cs" />
+    <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
+    <Compile Include="ConsumeTests\When_consume_is_called.cs" />
+    <Compile Include="Integration\AmqpStringSizeExperiments.cs" />
+    <Compile Include="Integration\AutoSubscriberIntegrationTests.cs" />
+    <Compile Include="Integration\ChannelExceptionBug.cs" />
+    <Compile Include="MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes.cs" />
+    <Compile Include="Integration\When_a_message_with_a_long_type_name_is_published.cs" />
+    <Compile Include="ProducerTests\When_a_request_is_sent_but_an_exception_is_thrown_by_responder.cs" />
+    <Compile Include="RandomClusterHostSelectionStrategyTests.cs" />
+    <Compile Include="EventBusTests.cs" />
+    <Compile Include="ExchangeQueueBindingTests.cs" />
+    <Compile Include="HandlerRunnerTests\When_a_user_handler_is_executed.cs" />
+    <Compile Include="Integration\AdvancedApiExamples.cs" />
+    <Compile Include="Integration\AdvancedApiPingPongTest.cs" />
+    <Compile Include="Integration\AdvancedApiPingPongTest_with_transient_queue.cs" />
+    <Compile Include="Integration\AdvancedApiTransientQueueTests.cs" />
+    <Compile Include="Integration\ClientCommandDispatcherTests.cs" />
+    <Compile Include="Integration\ClusterTests.cs" />
+    <Compile Include="Integration\ConnectionErrorConditionsTests.cs" />
     <Compile Include="ConnectionStringTests.cs" />
     <Compile Include="ConnectionFactoryWrapperTests.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammarTests.cs" />
     <Compile Include="ConnectionString\ConnectionStringParserTests.cs" />
-    <Compile Include="ConsumerErrorConditionsTests.cs" />
+    <Compile Include="Integration\ConsumerErrorConditionsTests.cs" />
     <Compile Include="ConventionsTests.cs" />
-    <Compile Include="CorrelationIdTests.cs" />
-    <Compile Include="DefaultConsumerErrorStrategyTests.cs" />
+    <Compile Include="Integration\ConsumerShutdownTests.cs" />
+    <Compile Include="Integration\DefaultConsumerErrorStrategyTests.cs" />
     <Compile Include="DefaultMessageConsumerTests.cs" />
-    <Compile Include="ExceptionConditionsTests.cs" />
-    <Compile Include="FluentConfiguration\SubscriptionConfigurationTests.cs" />
-    <Compile Include="InMemoryClient\AdvancedPublishSubscribeTests.cs" />
-    <Compile Include="InMemoryClient\BasicPublishSubscribeTests.cs" />
-    <Compile Include="InMemoryClient\BasicRequestResponseTests.cs" />
-    <Compile Include="InMemoryClient\BindingInfoTests.cs" />
+    <Compile Include="Integration\DeleteQueueWhileConsuming.cs" />
+    <Compile Include="Integration\ExceptionConditionsTests.cs" />
+    <Compile Include="Integration\Helpers.cs" />
+    <Compile Include="Integration\MultipleHandlerPerConsumerTests.cs" />
+    <Compile Include="Integration\NonGenericExtensionsIntegrationTests.cs" />
+    <Compile Include="Integration\PersistentChannelTests.cs" />
+    <Compile Include="Integration\PolymorphicPubSub.cs" />
+    <Compile Include="Integration\PublisherConfirmsIntegrationTests.cs" />
+    <Compile Include="Integration\SendReceiveIntegrationTests.cs" />
     <Compile Include="JsonSerializerTests.cs" />
-    <Compile Include="MockBasicProperties.cs" />
-    <Compile Include="MockConnection.cs" />
-    <Compile Include="MockConnectionFactory.cs" />
-    <Compile Include="MockConsumerFactory.cs" />
     <Compile Include="Mocking\MockBuilder.cs" />
-    <Compile Include="MockLogger.cs" />
-    <Compile Include="MockModel.cs" />
     <Compile Include="ModelCleanupTests.cs" />
-    <Compile Include="MultiThreadedPublisherTests.cs" />
+    <Compile Include="Integration\MultiThreadedPublisherTests.cs" />
+    <Compile Include="NonGeneric\NonGenericExtensionsTests.cs" />
+    <Compile Include="PersistentChannelTests\When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again.cs" />
+    <Compile Include="PersistentChannelTests\When_an_action_is_performed_on_a_closed_channel_that_then_opens.cs" />
+    <Compile Include="PersistentChannelTests\When_a_channel_action_is_invoked.cs" />
+    <Compile Include="PersistentConsumerTests\Given_a_PersistentConsumer.cs" />
+    <Compile Include="PersistentConsumerTests\When_a_Persistent_consumer_is_created.cs" />
+    <Compile Include="PersistentConsumerTests\When_disposed.cs" />
+    <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
+    <Compile Include="ProducerTests\PublisherConfirmsTests.cs" />
+    <Compile Include="ProducerTests\PublishExchangeDeclareStrategyTests.cs" />
+    <Compile Include="ProducerTests\When_a_message_is_sent.cs" />
+    <Compile Include="ProducerTests\When_a_ploymorphic_message_is_sent.cs" />
+    <Compile Include="ProducerTests\When_a_request_is_sent.cs" />
+    <Compile Include="ProducerTests\When_a_request_is_sent_but_no_reply_is_received.cs" />
+    <Compile Include="ProducerTests\When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received.cs" />
+    <Compile Include="ProducerTests\When_IModel_throws.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PublisherConfirmsTests.cs" />
-    <Compile Include="PublishSubscribeTests.cs" />
-    <Compile Include="PublishSubscribeWithPublisherConfirms.cs" />
-    <Compile Include="PublishSubscribeWithTopicsTests.cs" />
-    <Compile Include="QueueingConsumerFactoryTests.cs" />
-    <Compile Include="RabbitAdvancedBusTests.cs" />
-    <Compile Include="RequestResponseTests.cs" />
-    <Compile Include="Sagas\AsyncSubscribePublishSaga.cs" />
-    <Compile Include="Sagas\RequestResponseSaga.cs" />
-    <Compile Include="Sagas\SubscribePublishSaga.cs" />
-    <Compile Include="SchedulingTests.cs" />
+    <Compile Include="Integration\PublishSubscribeTests.cs" />
+    <Compile Include="Integration\PublishSubscribeWithTopicsTests.cs" />
+    <Compile Include="PublishTests.cs" />
+    <Compile Include="Integration\RequestResponseTests.cs" />
+    <Compile Include="Integration\SchedulingTests.cs" />
     <Compile Include="DefaultServiceProviderTests.cs" />
-    <Compile Include="SimpleSagaSpike.cs" />
-    <Compile Include="SubscribeAsyncTests.cs" />
-    <Compile Include="SubscriberOfSpike.cs" />
+    <Compile Include="Integration\SimpleSagaSpike.cs" />
+    <Compile Include="Integration\SubscribeAsyncTests.cs" />
+    <Compile Include="Integration\SubscriberOfSpike.cs" />
     <Compile Include="MessagePropertiesTests.cs" />
-    <Compile Include="SubscribeToErrorQueueSpike.cs" />
+    <Compile Include="Integration\SubscribeToErrorQueueSpike.cs" />
+    <Compile Include="RabbitHutchTests.cs" />
+    <Compile Include="SubscribeTests.cs" />
     <Compile Include="TaskExtensions.cs" />
-    <Compile Include="TestBusFactory.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
-    <Compile Include="Topology\TopologyTests.cs" />
     <Compile Include="DefaultClusterHostSelectionStrategyTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.InMemoryClient\EasyNetQ.InMemoryClient.csproj">
-      <Project>{E5115EA9-CD2E-439B-878A-DEF7F3E8FD99}</Project>
-      <Name>EasyNetQ.InMemoryClient</Name>
+    <ProjectReference Include="..\EasyNetQ.Management.Client\EasyNetQ.Management.Client.csproj">
+      <Project>{9888950b-ef30-4763-9076-38b071cdb535}</Project>
+      <Name>EasyNetQ.Management.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj">
       <Project>{E7AF3836-8354-4CDE-A9E7-352569B65B1E}</Project>
@@ -163,15 +201,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LongRunningServer.js" />
+    <Content Include="Integration\LongRunningServer.js" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SystemMessages\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -40,6 +40,7 @@ namespace EasyNetQ.Scheduler
         {
             log.DebugWrite("Starting SchedulerService");
             bus.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
+            bus.Subscribe<UnscheduleMe>(schedulerSubscriptionId, OnMessage);
 
             publishTimer = new System.Threading.Timer(OnPublishTimerTick, null, 0, configuration.PublishIntervalSeconds * 1000);
             purgeTimer = new System.Threading.Timer(OnPurgeTimerTick, null, 0, configuration.PurgeIntervalSeconds * 1000);
@@ -68,24 +69,32 @@ namespace EasyNetQ.Scheduler
             scheduleRepository.Store(scheduleMe);
         }
 
+        public void OnMessage(UnscheduleMe unscheduleMe)
+        {
+            log.DebugWrite("Got Unschedule Message");
+            scheduleRepository.Cancel(unscheduleMe);
+        }
+
         public void OnPublishTimerTick(object state)
         {
             if (!bus.IsConnected) return;
             try
             {
                 using(var scope = new TransactionScope())
-                using(var channel = bus.Advanced.OpenPublishChannel())
                 {
                     var scheduledMessages = scheduleRepository.GetPending();
+                    
                     foreach (var scheduledMessage in scheduledMessages)
                     {
                         log.DebugWrite(string.Format(
                             "Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey));
 
-                        var exchange = Exchange.DeclareTopic(scheduledMessage.BindingKey);
-                        channel.Publish(
+                        var exchange = bus.Advanced.ExchangeDeclare(scheduledMessage.BindingKey, ExchangeType.Topic);
+                        bus.Advanced.Publish(
                             exchange, 
                             scheduledMessage.BindingKey, 
+                            false,
+                            false,
                             new MessageProperties{ Type = scheduledMessage.BindingKey }, 
                             scheduledMessage.InnerMessage);
                     }

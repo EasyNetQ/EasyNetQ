@@ -1,35 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
-using RabbitMQ.Client.Exceptions;
+using RabbitMQ.Client.Framing.v0_9_1;
 
 namespace EasyNetQ.Hosepipe
 {
     public class QueueInsertion : IQueueInsertion
     {
-        public void PublishMessagesToQueue(IEnumerable<string> messages, QueueParameters parameters)
+        public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
         {
             using (var connection = HosepipeConnection.FromParamters(parameters))
             using (var channel = connection.CreateModel())
             {
-                try
-                {
-                    channel.QueueDeclarePassive(parameters.QueueName);
-                }
-                catch (OperationInterruptedException exception)
-                {
-                    Console.WriteLine(exception.Message);
-                    return;
-                }
-
                 foreach (var message in messages)
                 {
-                    var body = Encoding.UTF8.GetBytes(message);
-                    var properties = channel.CreateBasicProperties();
+                    var body = Encoding.UTF8.GetBytes(message.Body);
 
-                    // take advantage of the fact that every AMQP queue binds to the default ("")
-                    // queue using its name as the routing key
-                    channel.BasicPublish("", parameters.QueueName, properties, body);
+                    var properties = new BasicProperties();
+                    message.Properties.CopyTo(properties);
+
+                    channel.BasicPublish(message.Info.Exchange, message.Info.RoutingKey, properties, body);
                 }
             }                        
         }

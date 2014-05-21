@@ -16,7 +16,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package; PackageManagementClient" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package; PackageManagementClient; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -41,6 +41,8 @@
         <NUnit ToolPath="$(Nunit)" DisableShadowCopy="true" Assemblies="@(TestAssembly)" Framework="4.0.30319" Force32Bit="true" />
     </Target>
 
+    <!-- Packaging -->
+  
     <Target Name="Package" DependsOnTargets="Build">
 
         <ItemGroup>
@@ -50,6 +52,7 @@
         <Delete Files="@(FilesToDelete)" />
     
         <Copy SourceFiles="$(OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
+        <Copy SourceFiles="$(OutputDir)\EasyNetQ.xml" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
         
         <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.dll">
             <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
@@ -89,5 +92,125 @@
         <Exec WorkingDirectory="$(Package)\EasyNetQ.Management.Client" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.Management.Client\EasyNetQ.Management.Client.nuspec" />
 
     </Target>
+
+  <Target Name="PackageDiWindsor" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.DI.Windsor\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(OutputDir)\EasyNetQ.DI.Windsor.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Windsor\lib\net40" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.DI.Windsor.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.windsor\EasyNetQ.Di.windsor.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.windsor\EasyNetQ.Di.windsor.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.Windsor" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec" />
+
+  </Target>
+
+  <Target Name="PackageDiStructureMap" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.DI.StructureMap\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(OutputDir)\EasyNetQ.DI.StructureMap.dll" DestinationFolder="$(Package)\EasyNetQ.DI.StructureMap\lib\net40" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.DI.StructureMap.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.structuremap\EasyNetQ.Di.structuremap.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.structuremap\EasyNetQ.Di.structuremap.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.StructureMap" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.nuspec" />
+
+  </Target>
+
+  <Target Name="PackageDiNinject" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.DI.Ninject\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(OutputDir)\EasyNetQ.DI.Ninject.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Ninject\lib\net40" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.DI.Ninject.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.ninject\EasyNetQ.Di.ninject.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.ninject\EasyNetQ.Di.ninject.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.Ninject" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec" />
+
+  </Target>
+
+  <Target Name="PackageDiAutofac" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.DI.Autofac\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(OutputDir)\EasyNetQ.DI.Autofac.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Autofac\lib\net40" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.DI.Autofac.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.Autofac\EasyNetQ.Di.Autofac.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.Autofac\EasyNetQ.Di.Autofac.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.Autofac" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec" />
+
+  </Target>
 
 </Project>

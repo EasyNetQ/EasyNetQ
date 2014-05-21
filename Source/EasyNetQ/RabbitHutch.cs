@@ -6,11 +6,24 @@ using EasyNetQ.ConnectionString;
 namespace EasyNetQ
 {
     /// <summary>
-    /// Does poor man's dependency injection. Supplies default instances of services required by
-    /// RabbitBus.
+    /// Static methods to create EasyNetQ core APIs.
     /// </summary>
     public static class RabbitHutch
     {
+        private static Func<IContainer> createContainerInternal = () => new DefaultServiceProvider();
+
+        /// <summary>
+        /// Set the container creation function. This allows you to replace EasyNetQ's default internal
+        /// IoC container. Note that all components should be registered as singletons. EasyNetQ will
+        /// also call Dispose on components that are no longer required.
+        /// </summary>
+        public static void SetContainerFactory(Func<IContainer> createContainer)
+        {
+            Preconditions.CheckNotNull(createContainer, "createContainer");
+
+            createContainerInternal = createContainer;
+        }
+
         /// <summary>
         /// Creates a new instance of RabbitBus.
         /// </summary>
@@ -115,6 +128,7 @@ namespace EasyNetQ
                 Password = password,
                 RequestedHeartbeat = requestedHeartbeat
             };
+            connectionConfiguration.Validate();
 
             return CreateBus(connectionConfiguration, registerServices);
         }
@@ -135,15 +149,18 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(registerServices, "registerServices");
 
-            Action<IServiceRegister> registerServices2 = x =>
+            var container = createContainerInternal();
+            if (container == null)
             {
-                x.Register(_ => connectionConfiguration);
-                registerServices(x);
-            };
+                throw new EasyNetQException("Could not create container. " + 
+                    "Have you called SetContainerFactory(...) with a function that returns null?");
+            }
 
-            var serviceProvider = ComponentRegistration.CreateServiceProvider(registerServices2);
+            registerServices(container);
+            container.Register(_ => connectionConfiguration);
+            ComponentRegistration.RegisterServices(container);
 
-            return serviceProvider.Resolve<IBus>();
+            return container.Resolve<IBus>();
         }
 
         /// <summary>
@@ -158,12 +175,13 @@ namespace EasyNetQ
             {
                 throw new EasyNetQException(
                     "Could not find a connection string for RabbitMQ. " +
-                    "Please add a connection string in the <ConnectionStrings> secion" +
+                    "Please add a connection string in the <ConnectionStrings> section" +
                     "of the application's configuration file. For example: " +
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
 
             return CreateBus(rabbitConnectionString.ConnectionString);
         }
+
     }
 }

@@ -17,6 +17,7 @@ namespace EasyNetQ.Scheduler.Tests
         {
             var configuration = new ScheduleRepositoryConfiguration
             {
+                ProviderName = "System.Data.SqlClient",
                 ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
                 PurgeBatchSize = 100
             };
@@ -30,8 +31,19 @@ namespace EasyNetQ.Scheduler.Tests
             scheduleRepository.Store(new ScheduleMe
             {
                 BindingKey = "abc",
+                CancellationKey = "bcd",
                 WakeTime = new DateTime(2011, 5, 18),
                 InnerMessage = Encoding.UTF8.GetBytes("Hello World!")
+            });
+        }
+
+        [Test]
+        [Explicit("Required a database")]
+        public void Should_be_able_to_cancel_a_schedule()
+        {
+            scheduleRepository.Cancel(new UnscheduleMe
+            {
+                CancellationKey = "bcd"
             });
         }
 

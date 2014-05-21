@@ -26,8 +26,16 @@ namespace Sprache
             var result = parser.TryParse(input);
             
             var success = result as ISuccess<T>;
+
             if (success != null)
-                return success.Result;
+            {
+                if (!success.Remainder.AtEnd)
+                {
+                    throw new ParseException(string.Format("Parsing failure: Couldn't parse the whole input; unparsable remainder is: \"{0}\".", success.Remainder.Source.Substring(success.Remainder.Position)));
+                }
+
+              return success.Result;
+            }
 
             throw new ParseException(result.ToString());
         }

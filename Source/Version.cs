@@ -1,10 +1,71 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.10.1.0")]
+[assembly: AssemblyVersion("0.32.0.0")]
+[assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.32.0.0 Handle Consumer Task Cancellation
+// 0.31.1.0 Added QueueAttribute for controling queue / exchange names.
+// 0.31.0.0 Added FuturePublish based on deadlettering.
+// 0.30.2.0 Upgrade to RabbitMQ.Client 3.3.0
+// 0.30.1.0 Added FuturePublishAsync
+// 0.30.0.0 Added CancelFuturePublish functionality
+// 0.29.0.0 Support returned immediate/mandatory messages
+// 0.28.5.0 Added ChangeUserPassword method to the Management Client. Added the 'policymaker' to the allowed user tags.
+// 0.28.4.0 Support for queue name that contains plus char (+) when using Management Client.
+// 0.28.3.0 RabbitMQ.Client version 3.2.4
+// 0.28.1.0 Made Send method respect the PersistentMessages configuration option
+// 0.28.0.0 Consumer priority
+// 0.27.5.0 Fixed PersistentChannel issue where model invalid after exception thrown. Bug fix.
+// 0.27.4.0 Fixed broken non-connection string RabbitHutch.Create method
+// 0.27.3.0 Can set product/platfrom info (that displays in Management UI) in connection string
+// 0.27.2.0 Client information now displayed in Management UI Connections list
+// 0.27.1.0 CLS-Compliant
+// 0.27.0.0 RabbitMQ.Client version 3.2.1
+// 0.26.7.0 Type name size checking (pending a better strategy for creating AMQP object names)
+// 0.26.6.0 Better bounds checking on basic properties
+// 0.26.5.0 Added non-generic publish methods
+// 0.26.4.0 IConsumerErrorStrategy interface change.
+// 0.26.3.0 Added persistentMessages configuration option.
+// 0.26.2.0 Fixed failed reconection issue. Bug fix.
+// 0.26.1.0 New policy definitions: alternate-exchange, dead-letter-exchange, dead-letter-routing-key, message-ttl, expires, max-length. Add nullability on HaMode and HaSyncMode, to let add a policy without them.
+// 0.26.0.0 Request now throws exception if the responder throws on server. Requests will not timeout anymore on responder exception.
+// 0.25.4.0 Exchange declare accepts alternate-exchange parameter
+// 0.25.3.0 StructureMap and Windsor Container implementations
+// 0.25.2.0 Can cancel Respond.
+// 0.25.1.0 Autosubscriber explict interface implementation bug fix.
+// 0.25.0.0 SetContainerFactory on RabbitHutch, allows replacement of EasyNetQ's internal IoC container
+// 0.24.0.0 Non-Generic extension methods. Includes change to ISubscriptionConfiguration (removing generic type argument)
+// 0.23.0.0 ErrorExchangeNameConvention now takes a MessageReceivedInfo argument
+// 0.22.1.0 Fixed problem when executing channel actions on a non-open connection
+// 0.22.0.0 Send-Receive pattern fixed.
+// 0.21.0.0 Send-Receive pattern DO NOT USE THIS VERSION
+// 0.20.0.0 Mutiple handlers per consumer
+// 0.19.0.0 Consumer cancellation
+// 0.18.1.0 JsonSerializerSettings not passed when using TypeNameSerializer
+// 0.18.0.0 Publish/Subscribe polymorphism. Exchange/Queue naming conventions changed.
+// 0.17.0.0 Request synchronous. Removed callback API.
+// 0.16.0.0 Added DispatchAsync method to IAutoSubscriberMessageDispatcher
+// 0.15.3.0 Handle multiple=true on publisher confirm ack.
+// 0.15.2.0 Internal event bus
+// 0.15.1.0 PublishExchangeDeclareStrategy. Only one declare now rather than once per publish.
+// 0.15.0.0 Removed IPublishChannel and IAdvancedPublishChannel API. Publish now back on IBus.
+// 0.14.5.0 Upgrade to RabbitMQ.Client 3.1.5
+// 0.14.4.0 Consumer dispatcher queue cleared after connection lost.
+// 0.14.3.0 IConsumerErrorStrategy not being disposed fix
+// 0.14.2.0 MessageProperties serialization fix
+// 0.14.1.0 Fixed missing properties in error message
+// 0.14.0.0 Big internal consumer rewrite
+// 0.13.0.0 AutoSubscriber moved to EasyNetQ.AutoSubscribe namespace.
+// 0.12.4.0 Factored ConsumerDispatcher out of QueueingConsumerFactory.
+// 0.12.3.0 Upgrade to RabbitMQ.Client 3.1.1
+// 0.12.2.0 Requested Heartbeat on by default
+// 0.12.1.0 Factored declares out of AdvancedBus publish and consume.
+// 0.11.1.0 New plugable validation strategy (IMessageValidationStrategy)
+// 0.11.0.0 Exchange durability can be configured
 // 0.10.1.0 EasyNetQ.Trace
 // 0.10.0.0 John-Mark Newton's RequestAsync API change
 // 0.9.2.0  C# style property names on Management.Client

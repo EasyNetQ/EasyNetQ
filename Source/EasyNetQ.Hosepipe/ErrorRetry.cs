@@ -15,11 +15,11 @@ namespace EasyNetQ.Hosepipe
             this.serializer = serializer;
         }
 
-        public void RetryErrors(IEnumerable<string> rawErrorMessages, QueueParameters parameters)
+        public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
         {
             foreach (var rawErrorMessage in rawErrorMessages)
             {
-                var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(rawErrorMessage));
+                var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(rawErrorMessage.Body));
                 RepublishError(error, parameters);
             }
         }
@@ -32,7 +32,10 @@ namespace EasyNetQ.Hosepipe
             {
                 try
                 {
-                    model.ExchangeDeclarePassive(error.Exchange);
+                    if (error.Exchange != string.Empty)
+                    {
+                        model.ExchangeDeclarePassive(error.Exchange);
+                    }
 
                     var properties = model.CreateBasicProperties();
                     error.BasicProperties.CopyTo(properties);

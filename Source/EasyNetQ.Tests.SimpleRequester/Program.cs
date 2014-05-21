@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.SimpleRequester
 
         private static long count = 0;
 
-        private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorderA();
+        private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorder();
         private const int publishIntervalMilliseconds = 10;
 
         static void Main(string[] args)
@@ -42,16 +42,12 @@ namespace EasyNetQ.Tests.SimpleRequester
             {
                 lock (requestLock)
                 {
-                    using (var publishChannel = bus.OpenPublishChannel())
-                    {
-                        publishChannel.Request<TestRequestMessage, TestResponseMessage>(
-                            new TestRequestMessage
-                            {
-                                Id = count,
-                                Text = string.Format("Hello from client number: {0}! ", count)
-                            },
-                            ResponseHandler);
-                    }
+                    bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                        new TestRequestMessage
+                        {
+                            Id = count,
+                            Text = string.Format("Hello from client number: {0}! ", count)
+                        }).ContinueWith(t => ResponseHandler(t.Result));
                     latencyRecorder.RegisterRequest(count);
                     count++;
                 }
@@ -64,6 +60,7 @@ namespace EasyNetQ.Tests.SimpleRequester
 
         static void ResponseHandler(TestResponseMessage response)
         {
+            Console.WriteLine("Response: {0}", response.Text);
             latencyRecorder.RegisterResponse(response.Id);
         }
     }

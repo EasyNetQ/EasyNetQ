@@ -2,7 +2,6 @@
 
 using EasyNetQ.Management.Client.Model;
 using NUnit.Framework;
-using Newtonsoft.Json;
 
 namespace EasyNetQ.Management.Client.Tests.Model
 {
@@ -14,7 +13,7 @@ namespace EasyNetQ.Management.Client.Tests.Model
         [SetUp]
         public void SetUp()
         {
-            overview = ResourceLoader.LoadObjectFromJson<Overview>("Overview.json");
+            overview = ResourceLoader.LoadObjectFromJson<Overview>("Overview.json", ManagementClient.Settings);
         }
 
         [Test]

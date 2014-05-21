@@ -22,10 +22,11 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            var bus = RabbitHutch.CreateBus("host=localhost",
+            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;heartbeat=5;" + 
+                "product=producer",
                 x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
 
-            int messageCount = 0;
+            var messageCount = 0;
             var messageRateTimer = new Timer(state =>
             {
                 Console.Out.WriteLine("messages per second = {0}", messageCount);
@@ -42,11 +43,17 @@ namespace EasyNetQ.Tests.Performance.Producer
 
                     try
                     {
-                        using (var publishChannel = bus.OpenPublishChannel())
-                        {
-                            publishChannel.Publish(message);
-                        }
-                        Interlocked.Increment(ref messageCount);
+                        bus.PublishAsync(message).ContinueWith(task =>
+                            {
+                                if (task.IsCompleted)
+                                {
+                                    Interlocked.Increment(ref messageCount);
+                                }
+                                if (task.IsFaulted)
+                                {
+                                    Console.WriteLine(task.Exception);
+                                }
+                            });
                     }
                     catch (EasyNetQException easyNetQException)
                     {

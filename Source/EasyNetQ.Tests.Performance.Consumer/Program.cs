@@ -7,8 +7,10 @@ namespace EasyNetQ.Tests.Performance.Consumer
     {
         public static void Main(string[] args)
         {
-            var bus = RabbitHutch.CreateBus("host=localhost", 
-                x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
+            var logger = new NoDebugLogger();
+
+            var bus = RabbitHutch.CreateBus("host=localhost;product=consumer", 
+                x => x.Register<IEasyNetQLogger>(_ => logger));
 
             int messageCount = 0;
             var timer = new Timer(state =>

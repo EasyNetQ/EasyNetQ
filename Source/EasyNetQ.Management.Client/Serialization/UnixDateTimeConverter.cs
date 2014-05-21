@@ -12,7 +12,6 @@ namespace EasyNetQ.Management.Client.Serialization
     /// <remarks>
     ///   swiped from lfoust and fixed for latest json.net with some tweaks for handling out-of-range dates
     /// </remarks>
-    [CLSCompliant(false)]
     public class UnixDateTimeConverter : DateTimeConverterBase
     {
         /// <summary>

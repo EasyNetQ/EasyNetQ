@@ -46,5 +46,13 @@ namespace EasyNetQ.Management.Client.Dynamic
                 return default(T);
             }
         }
+
+        protected IDictionary<string, Object> Properties
+        {
+            get
+            {
+                return _properties;
+            }
+        }
     }
 }

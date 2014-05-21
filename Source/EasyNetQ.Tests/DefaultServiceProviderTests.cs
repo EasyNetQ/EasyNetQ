@@ -1,11 +1,82 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
+using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
 {
+    [TestFixture]
+    public class DefaultServiceProviderTestsX
+    {
+        private interface IRoot
+        {
+             IChild Child { get; }
+        }
+
+        private class Root : IRoot
+        {
+            public IChild Child { get; private set; }
+
+            public Root(IChild child)
+            {
+                Child = child;
+            }
+        }
+
+        private interface IChild
+        {
+            IGrandChild GrandChild { get; }
+            IGrandChild Second { get; }
+        }
+
+        private class Child : IChild
+        {
+            public IGrandChild GrandChild { get; private set; }
+            public IGrandChild Second { get; private set; }
+
+            public Child(IGrandChild grandChild, IGrandChild second)
+            {
+                GrandChild = grandChild;
+                Second = second;
+            }
+        }
+
+        private interface IGrandChild
+        {
+        }
+
+        private class GrandChild : IGrandChild
+        {
+        }
+
+        private DefaultServiceProvider serviceProvider;
+
+        [SetUp]
+        public void SetUp()
+        {
+            serviceProvider = new DefaultServiceProvider();
+
+            serviceProvider.Register<IRoot, Root>();
+            serviceProvider.Register<IChild, Child>();
+            serviceProvider.Register<IGrandChild, GrandChild>();
+        }
+
+        [Test]
+        public void Should_resolve_class_with_dependencies()
+        {
+            var service = (IRoot)serviceProvider.Resolve(typeof (IRoot));
+
+            service.ShouldNotBeNull();
+            service.Child.ShouldNotBeNull();
+            service.Child.GrandChild.ShouldNotBeNull();
+            service.Child.Second.ShouldNotBeNull();
+
+            service.Child.GrandChild.ShouldBeTheSameAs(service.Child.Second);
+        }
+    }
+
+
     [TestFixture]
     public class DefaultServiceProviderTests
     {
@@ -50,41 +121,30 @@ namespace EasyNetQ.Tests
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
 
-        [Test, Explicit("Requires RabbitMQ instance")]
+        [Test]
         public void Should_be_able_to_replace_bus_components()
         {
-            var logger = new TestLogger();
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            new MockBuilder(x => x.Register(_ => logger));
 
-            using (var bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => logger)))
+            logger.AssertWasCalled(x => x.DebugWrite("Trying to connect"));
+        }
+
+        [Test]
+        public void Should_be_able_to_sneakily_get_the_service_provider()
+        {
+            IServiceProvider provider = null;
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+
+            new MockBuilder(x => x.Register(sp =>
             {
-                // should see the test logger on the console
-            }
-        }
-    }
+                provider = sp;
+                return logger;
+            }));
+            var retrievedLogger = provider.Resolve<IEasyNetQLogger>();
+            retrievedLogger.DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
 
-    public class TestLogger : IEasyNetQLogger
-    {
-        public void DebugWrite(string format, params object[] args)
-        {
-            Console.WriteLine("I am the test logger");
-            Console.WriteLine(format, args);
-        }
-
-        public void InfoWrite(string format, params object[] args)
-        {
-            Console.WriteLine("I am the test logger");
-            Console.WriteLine(format, args);
-        }
-
-        public void ErrorWrite(string format, params object[] args)
-        {
-            Console.WriteLine("I am the test logger");
-            Console.WriteLine(format, args);
-        }
-
-        public void ErrorWrite(Exception exception)
-        {
-            throw new NotImplementedException();
+            logger.AssertWasCalled(x => x.DebugWrite("Hey, I'm pretending to be EasyNetQ :)"));
         }
     }
 

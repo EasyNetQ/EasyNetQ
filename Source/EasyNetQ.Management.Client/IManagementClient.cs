@@ -52,6 +52,13 @@ namespace EasyNetQ.Management.Client
         /// <returns></returns>
         IEnumerable<Channel> GetChannels();
 
+		/// <summary>
+		/// Gets the channel. This returns more detail, including consumers than the GetChannels method.
+		/// </summary>
+		/// <returns>The channel.</returns>
+		/// <param name="channelName">Channel name.</param>
+		Channel GetChannel (string channelName);
+
         /// <summary>
         /// A list of all exchanges.
         /// </summary>
@@ -240,6 +247,13 @@ namespace EasyNetQ.Management.Client
         void DeletePermission(Permission permission);
 
         /// <summary>
+        /// Update the password of an user.
+        /// </summary>
+        /// <param name="userName">The name of a user</param>
+        /// <param name="newPassword">The new password to set</param>
+        User ChangeUserPassword(string userName, string newPassword);
+
+        /// <summary>
         /// Declares a test queue, then publishes and consumes a message. Intended for use 
         /// by monitoring tools. If everything is working correctly, will return true.
         /// Note: the test queue will not be deleted (to to prevent queue churn if this 
@@ -275,5 +289,43 @@ namespace EasyNetQ.Management.Client
         /// <param name="userName">The name of the user</param>
         /// <returns>The User</returns>
         User GetUser(string userName);
+
+        /// <summary>
+        /// Get collection of Policies on the cluster
+        /// </summary>
+        /// <returns>Policies</returns>
+        IEnumerable<Policy> GetPolicies();
+
+        /// <summary>
+        /// Creates a policy on the cluster
+        /// </summary>
+        /// <param name="policy">Policy to create</param>
+        void CreatePolicy(Policy policy);
+
+        /// <summary>
+        /// Delete a policy from the cluster
+        /// </summary>
+        /// <param name="policyName">Policy name</param>
+        /// <param name="vhost">vhost on which the policy resides</param>
+        void DeletePolicy(string policyName, Vhost vhost);
+
+        /// <summary>
+        /// Get all parameters on the cluster
+        /// </summary>
+        IEnumerable<Parameter> GetParameters();
+
+        /// <summary>
+        /// Creates a parameter on the cluster
+        /// </summary>
+        /// <param name="policy">Parameter to create</param>
+        void CreateParameter(Parameter parameter);
+
+        /// <summary>
+        /// Delete a parameter from the cluster
+        /// </summary>
+        /// <param name="componentName"></param>
+        /// <param name="vhost"></param>
+        /// <param name="name"></param>
+        void DeleteParameter(string componentName, string vhost, string name);
     }
 }

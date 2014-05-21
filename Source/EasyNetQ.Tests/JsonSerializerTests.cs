@@ -1,9 +1,7 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System;
-using System.Collections;
 using System.Text;
-using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using BasicProperties = RabbitMQ.Client.Framing.v0_8.BasicProperties;
@@ -18,7 +16,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            serializer = new JsonSerializer();
+            serializer = new JsonSerializer(new TypeNameSerializer());
         }
 
         [Test]
@@ -40,7 +38,7 @@ namespace EasyNetQ.Tests
                 AppId = "some app id",
                 ClusterId = "cluster id",
                 ContentEncoding = "content encoding",
-                ContentType = "content type",
+                //ContentType = "content type",
                 CorrelationId = "correlation id",
                 DeliveryMode = 4,
                 Expiration = "expiration",
@@ -50,17 +48,16 @@ namespace EasyNetQ.Tests
                 Timestamp = new AmqpTimestamp(123344044),
                 Type = "Type",
                 UserId = "user id",
-                Headers = new Hashtable
+                Headers = new Dictionary<string, object>
                 {
                     {"one", "header one"},
                     {"two", "header two"}
                 }
             };
 
-            var messageBasicProperties = new MessageBasicProperties(originalProperties);
-
+            var messageBasicProperties = new MessageProperties(originalProperties);
             var binaryMessage = serializer.MessageToBytes(messageBasicProperties);
-            var deserializedMessageBasicProperties = serializer.BytesToMessage<MessageBasicProperties>(binaryMessage);
+            var deserializedMessageBasicProperties = serializer.BytesToMessage<MessageProperties>(binaryMessage);
 
             var newProperties = new BasicProperties();
             deserializedMessageBasicProperties.CopyTo(newProperties);
@@ -88,6 +85,17 @@ namespace EasyNetQ.Tests
             var bytes = serializer.MessageToBytes<PolyMessage>(new PolyMessage { AorB = new B() });
 
             var result = serializer.BytesToMessage<PolyMessage>(bytes);
+
+            Assert.IsInstanceOf<B>(result.AorB);
+        }
+
+        [Test]
+        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties_when_using_TypeNameSerializer()
+        {
+            var typeName = new TypeNameSerializer().Serialize(typeof (PolyMessage));
+
+            var bytes = serializer.MessageToBytes(new PolyMessage { AorB = new B() });
+            var result = (PolyMessage)serializer.BytesToMessage(typeName, bytes);
 
             Assert.IsInstanceOf<B>(result.AorB);
         }

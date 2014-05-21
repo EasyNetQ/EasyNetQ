@@ -1,6 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -8,27 +10,42 @@ namespace EasyNetQ.Hosepipe.Tests
     [TestFixture]
     public class FileMessageWriterTests
     {
+        private const string tempDirectory = @"C:\temp\MessageOutput";
+
         [SetUp]
         public void SetUp() {}
 
         [Test, Explicit("Writes files to the file system")]
         public void WriteSomeFiles()
         {
-            var writer = new FileMessageWriter();
-            var messages = new List<string>
+            var directory = new DirectoryInfo(tempDirectory);
+            foreach (var file in directory.EnumerateFiles())
             {
-                "This is message one",
-                "This is message two",
-                "This is message three"
+                file.Delete();
+            }
+
+            var properties = new MessageProperties();
+            var info = Helper.CreateMessageReceivedInfo();
+            var writer = new FileMessageWriter();
+            var messages = new List<HosepipeMessage>
+            {
+                new HosepipeMessage("This is message one", properties, info),
+                new HosepipeMessage("This is message two", properties, info),
+                new HosepipeMessage("This is message three", properties, info)
             };
 
             var parameters = new QueueParameters
             {
                 QueueName = "Queue EasyNetQ_Tests_TestAsyncRequestMessage:EasyNetQ_Tests_Messages",
-                MessageFilePath = @"C:\temp\MessageOutput"
+                MessageFilePath = tempDirectory
             };
 
             writer.Write(messages, parameters);
+
+            foreach (var file in directory.EnumerateFiles())
+            {
+                Console.Out.WriteLine("{0}", file.Name);
+            }
         }
 
         [Test]

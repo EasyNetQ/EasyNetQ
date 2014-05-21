@@ -6,12 +6,12 @@ namespace EasyNetQ.Hosepipe
 {
     public class MessageReader : IMessageReader 
     {
-        public IEnumerable<string> ReadMessages(QueueParameters parameters)
+        public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
         {
             return ReadMessages(parameters, null);
         }
 
-        public IEnumerable<string> ReadMessages(QueueParameters parameters, string messageName)
+        public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
         {
             if (!Directory.Exists(parameters.MessageFilePath))
             {
@@ -19,11 +19,25 @@ namespace EasyNetQ.Hosepipe
                 yield break;
             }
 
-            var pattern = (messageName ?? "*") + ".*.message.txt";
+            var bodyPattern = (messageName ?? "*") + ".*.message.txt";
 
-            foreach (var file in Directory.GetFiles(parameters.MessageFilePath, pattern))
+            foreach (var file in Directory.GetFiles(parameters.MessageFilePath, bodyPattern))
             {
-                yield return File.ReadAllText(file);
+                const string messageTag = ".message.";
+                var directoryName = Path.GetDirectoryName(file);
+                var fileName = Path.GetFileName(file);
+                var propertiesFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".properties."));
+                var infoFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".info."));
+
+                var body = File.ReadAllText(file);
+
+                var propertiesJson = File.ReadAllText(propertiesFileName);
+                var properties = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageProperties>(propertiesJson);
+
+                var infoJson = File.ReadAllText(infoFileName);
+                var info = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageReceivedInfo>(infoJson);
+
+                yield return new HosepipeMessage(body, properties, info);
             }
         }
     }

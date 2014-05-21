@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -57,7 +55,7 @@ namespace EasyNetQ
                     connectionFactory.Ssl = Configuration.Ssl;
 
                 connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
-                connectionFactory.ClientProperties = ConvertToHashtable(Configuration.ClientProperties);
+                connectionFactory.ClientProperties = Configuration.ClientProperties;
                 clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));
             }
         }

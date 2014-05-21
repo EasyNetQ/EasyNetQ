@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using NUnit.Framework;
+using RabbitMQ.Client.Framing.v0_9_1;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
@@ -23,8 +24,8 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             var messages = new[]
             {
-                "{\"Text\":\"I am message one\"}",
-                "{\"Text\":\"I am message two\"}"
+                new HosepipeMessage("{\"Text\":\"I am message one\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo()),
+                new HosepipeMessage("{\"Text\":\"I am message two\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo())
             };
 
             var parameters = new QueueParameters

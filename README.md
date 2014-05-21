@@ -1,28 +1,25 @@
+![EasyNetQ Logo](https://raw.github.com/wiki/mikehadlow/EasyNetQ/images/logo_design_150.png)
+
 A Nice .NET API for RabbitMQ
 
 Development is sponsored by travel industry experts [15below](http://15below.com/)
 
-**[Documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Introduction)**
-
-**[NuGet](http://nuget.org/List/Packages/EasyNetQ)**
-
-**[Discussion Group](https://groups.google.com/group/easynetq)**
+* **[Homepage](http://easynetq.com)**
+* **[Documentation](https://github.com/mikehadlow/EasyNetQ/wiki/Introduction)**
+* **[NuGet](http://nuget.org/List/Packages/EasyNetQ)**
+* **[Discussion Group](https://groups.google.com/group/easynetq)**
 
 Goals:
 
-1. Zero or at least minimal configuration.
-2. Simple API
+1. To make working with RabbitMQ on .NET as easy as possible.
 
 To connect to a RabbitMQ broker...
 
-	var bus = RabbitHutch.CreateBus("host=localhost");
+    var bus = RabbitHutch.CreateBus("host=localhost");
 
 To publish a message...
 
-    using (var publishChannel = bus.OpenPublishChannel())
-    {
-        publishChannel.Publish(message);
-    }
+    bus.Publish(message);
 
 To subscribe to a message...
 
@@ -31,15 +28,12 @@ To subscribe to a message...
 Remote procedure call...
 
     var request = new TestRequestMessage {Text = "Hello from the client! "};
-    using (var publishChannel = bus.OpenPublishChannel())
-    {
-		publishChannel.Request<TestRequestMessage, TestResponseMessage>(request, response => 
-			Console.WriteLine("Got response: '{0}'", response.Text));
-	}
+    bus.Request<TestRequestMessage, TestResponseMessage>(request, response => 
+        Console.WriteLine("Got response: '{0}'", response.Text));
 
 RPC server...
 
-	bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
+    bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
 		new TestResponseMessage{ Text = request.Text + " all done!" });
 	
 
@@ -55,17 +49,7 @@ The annoucement blog post is [here](http://mikehadlow.blogspot.co.uk/2012/11/a-c
 
 ## Some blog posts about EasyNetQ ...
 
-http://mikehadlow.blogspot.com/2011/05/easynetq-simple-net-api-for-rabbitmq.html
-
-http://mikehadlow.blogspot.com/2011/05/futurepublish-with-easynetq-rabbitmq.html
-
-http://mikehadlow.blogspot.com/2011/06/rabbitmq-subscription-and-bouncing.html
-
-http://mikehadlow.blogspot.com/2011/07/rabbitmq-subscriptions-with-dotnet.html
-
-http://mikehadlow.blogspot.com/2011/07/easynetq-how-should-messaging-client.html
-
-http://mikehadlow.blogspot.co.uk/2012/05/easynetq-breaking-change.html
+http://mikehadlow.blogspot.co.uk/search/label/EasyNetQ
 
 ## Getting started
 

@@ -1,7 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading;
+using EasyNetQ.Events;
+using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Tests
 {
@@ -9,83 +13,83 @@ namespace EasyNetQ.Tests
     public class ModelCleanupTests
     {
         private IBus bus;
-        private MockModel model;
+        private MockBuilder mockBuilder;
 
         [SetUp]
         public void SetUp()
         {
-            model = new MockModel
-            {
-                BasicPublishAction = (a,b,c,d) => { }
-            };
-            var busFactory = new TestBusFactory();
-            bus = busFactory.CreateBusWithMockAmqpClient();
-
-            ((MockConnection) busFactory.Connection).CreateModelAction = () => {
-                Console.Out.WriteLine("Creating Model");
-                return model;
-            };
+            mockBuilder = new MockBuilder();
+            bus = mockBuilder.Bus;
         }
 
         [Test]
         public void Should_cleanup_publish_model()
         {
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
+            bus.Publish(new TestMessage());
+            bus.Dispose();
 
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Publish(new TestMessage());
-            }
-
-            aborted.ShouldBeTrue();
+            mockBuilder.Channels[0].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_subscribe_model()
         {
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
             bus.Subscribe<TestMessage>("abc", mgs => {});
+            var are = WaitForConsumerModelDisposedMessage();
+
             bus.Dispose();
 
-            aborted.ShouldBeTrue();
+            are.WaitOne();
+
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_subscribe_async_model()
         {
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
             bus.SubscribeAsync<TestMessage>("abc", msg => null);
+            var are = WaitForConsumerModelDisposedMessage();
+
             bus.Dispose();
 
-            aborted.ShouldBeTrue();
+            are.WaitOne();
+
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_request_response_model()
         {
-            // TODO: Actually creates two IModel instances, should check that both get cleaned up
+            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            var are = WaitForConsumerModelDisposedMessage();
 
-            var aborted = false;
-            model.AbortAction = () => aborted = true;
-
-            using (var publishChannel = bus.OpenPublishChannel())
-            {
-                publishChannel.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), response => { });
-            }
             bus.Dispose();
 
-            aborted.ShouldBeTrue();
+            are.WaitOne();
+
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
         }
 
         [Test]
         public void Should_cleanup_respond_model()
         {
-            // TODO: Implement this test
+            bus.Respond<TestRequestMessage, TestResponseMessage>(x => null);
+            var are = WaitForConsumerModelDisposedMessage();
+
+            bus.Dispose();
+
+            are.WaitOne();
+
+            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
+        }
+
+        private AutoResetEvent WaitForConsumerModelDisposedMessage()
+        {
+            var are = new AutoResetEvent(false);
+
+            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+
+            return are;
         }
     }
 }

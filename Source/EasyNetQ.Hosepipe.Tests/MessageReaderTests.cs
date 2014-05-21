@@ -14,7 +14,7 @@ namespace EasyNetQ.Hosepipe.Tests
         [SetUp]
         public void SetUp()
         {
-            conventions = new Conventions();
+            conventions = new Conventions(new TypeNameSerializer());
             messageReader = new MessageReader();
         }
 
@@ -34,11 +34,14 @@ namespace EasyNetQ.Hosepipe.Tests
             var messages = messageReader.ReadMessages(parameters);
             foreach (var message in messages)
             {
-                Console.WriteLine(message);
+                Console.WriteLine("\nBody:\n{0}\n", message.Body);
+                Console.WriteLine("\nProperties:\n{0}\n", message.Properties);
+                Console.WriteLine("\nInfo exchange:\n{0}", message.Info.Exchange);
+                Console.WriteLine("Info routing key:\n{0}\n", message.Info.RoutingKey);
             }
         }
 
-        [Test]
+        [Test, Explicit(@"Needs message files in 'C:\temp\MessageOutput'")]
         public void Should_be_able_to_read_only_error_messages()
         {
             var parameters = new QueueParameters
@@ -49,7 +52,7 @@ namespace EasyNetQ.Hosepipe.Tests
             var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention());
             foreach (var message in messages)
             {
-                Console.WriteLine(message);
+                Console.WriteLine(message.Body);
             }
         }
     }
