@@ -29,3 +29,6 @@ test-results
 
 # NuGet Packages Directory
 packages
+
+# Ignore NuGet binary
+Source/.nuget/NuGet.exe
