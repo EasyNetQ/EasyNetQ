@@ -11,6 +11,11 @@ namespace EasyNetQ.Scheduler
 
             HostFactory.Run(hostConfiguration =>
             {
+                hostConfiguration.EnableServiceRecovery( serviceRecoveryConfiguration =>
+                {
+                    serviceRecoveryConfiguration.RestartService( delayInMinutes: 1 ); // On the first service failure, reset service after a minute
+                    serviceRecoveryConfiguration.SetResetPeriod( days: 0 ); // Reset failure count after every failure
+                } );
                 hostConfiguration.RunAsLocalSystem();
                 hostConfiguration.SetDescription("EasyNetQ.Scheduler");
                 hostConfiguration.SetDisplayName("EasyNetQ.Scheduler");
