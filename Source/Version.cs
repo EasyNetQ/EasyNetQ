@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.32.0.0")]
+[assembly: AssemblyVersion("0.32.1.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.32.1.0 Add support for message versioning
 // 0.32.0.0 Handle Consumer Task Cancellation
 // 0.31.1.0 Added QueueAttribute for controling queue / exchange names.
 // 0.31.0.0 Added FuturePublish based on deadlettering.

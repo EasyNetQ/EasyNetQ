@@ -11,51 +11,43 @@ namespace EasyNetQ
 {
     public class RabbitAdvancedBus : IAdvancedBus
     {
-        private readonly ISerializer serializer;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
-        private readonly Func<string> getCorrelationId;
         private readonly IPersistentConnection connection;
         private readonly IClientCommandDispatcher clientCommandDispatcher;
-        private readonly IPublisher _publisher;
+        private readonly IPublisher publisher;
         private readonly IEventBus eventBus;
-        private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly IContainer container;
+        private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
-            ISerializer serializer,
             IConsumerFactory consumerFactory,
             IEasyNetQLogger logger,
-            Func<string> getCorrelationId,
             IClientCommandDispatcherFactory clientCommandDispatcherFactory,
-            IPublisher _publisher,
+            IPublisher publisher,
             IEventBus eventBus,
-            ITypeNameSerializer typeNameSerializer,
             IHandlerCollectionFactory handlerCollectionFactory,
-            IContainer container)
+            IContainer container,
+            IMessageSerializationStrategy messageSerializationStrategy)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
-            Preconditions.CheckNotNull(serializer, "serializer");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
             Preconditions.CheckNotNull(logger, "logger");
-            Preconditions.CheckNotNull(getCorrelationId, "getCorrelationId");
-            Preconditions.CheckNotNull(_publisher, "_publisher");
+            Preconditions.CheckNotNull(publisher, "publisher");
             Preconditions.CheckNotNull(eventBus, "eventBus");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
             Preconditions.CheckNotNull(container, "container");
+            Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
 
-            this.serializer = serializer;
             this.consumerFactory = consumerFactory;
             this.logger = logger;
-            this.getCorrelationId = getCorrelationId;
-            this._publisher = _publisher;
+            this.publisher = publisher;
             this.eventBus = eventBus;
-            this.typeNameSerializer = typeNameSerializer;
             this.handlerCollectionFactory = handlerCollectionFactory;
             this.container = container;
+            this.messageSerializationStrategy = messageSerializationStrategy;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -115,13 +107,9 @@ namespace EasyNetQ
 
             return Consume(queue, (body, properties, messageReceivedInfo) =>
             {
-                var messageType = typeNameSerializer.DeSerialize(properties.Type);
-                var handler = handlerCollection.GetHandler(messageType);
-
-                var messageBody = serializer.BytesToMessage(properties.Type, body);
-                var message = Message.CreateInstance(messageType, messageBody);
-                message.SetProperties(properties);
-                return handler(message, messageReceivedInfo);
+                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
+                var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
+                return handler(deserializedMessage.Message, messageReceivedInfo);
             }, configure);
         }
 
@@ -166,7 +154,7 @@ namespace EasyNetQ
                     var properties = x.CreateBasicProperties();
                     messageProperties.CopyTo(properties);
 
-                    return _publisher.Publish(x,
+                return publisher.Publish(x,
                         m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body));
                 }).Unwrap();
 
@@ -187,16 +175,8 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
-            var typeName = typeNameSerializer.Serialize(message.Body.GetType());
-            var messageBody = serializer.MessageToBytes(message.Body);
-
-            message.Properties.Type = typeName;
-            message.Properties.CorrelationId =
-                string.IsNullOrEmpty(message.Properties.CorrelationId) ?
-                getCorrelationId() :
-                message.Properties.CorrelationId;
-
-            return PublishAsync(exchange, routingKey, mandatory, immediate, message.Properties, messageBody);
+            var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            return PublishAsync(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
         }
 
         public void Publish(IExchange exchange, string routingKey, bool mandatory, bool immediate,
@@ -267,7 +247,7 @@ namespace EasyNetQ
                     name, durable, exclusive, autoDelete, WriteArguments(arguments));
             }
 
-            return new Topology.Queue(name, exclusive);
+            return new Queue(name, exclusive);
         }
 
         private string WriteArguments(IEnumerable<KeyValuePair<string, object>> arguments)
@@ -276,7 +256,7 @@ namespace EasyNetQ
             var first = true;
             foreach (var argument in arguments)
             {
-                if(first)
+                if (first)
                 {
                     first = false;
                 }
@@ -337,7 +317,7 @@ namespace EasyNetQ
                 IDictionary<string, object> arguments = null;
                 if (alternateExchange != null)
                 {
-                    arguments = new Dictionary<string, object>{{"alternate-exchange", alternateExchange}};
+                    arguments = new Dictionary<string, object> { { "alternate-exchange", alternateExchange } };
                 }
 
                 clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments)).Wait();

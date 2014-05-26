@@ -18,13 +18,14 @@ namespace EasyNetQ
 
             // default service registration
             container
-                .Register(_ => container)
+                .Register(_ => container)       
                 .Register<IEasyNetQLogger, ConsoleLogger>()
                 .Register<ISerializer, JsonSerializer>()
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
                 .Register<ITypeNameSerializer, TypeNameSerializer>()
                 .Register<Func<string>>(x => CorrelationIdGenerator.GetCorrelationId)
+                .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()
