@@ -70,6 +70,50 @@ namespace EasyNetQ.Tests
             stringsPublished[0].ShouldEqual("Before cancellation");
         }
 
+        [Test]
+        public void Should_handle_resubscription_from_handler()
+        {
+            Event1 eventFromSubscription = null;
+
+            eventBus.Subscribe<Event1>(@event =>
+                {
+                    eventFromSubscription = @event;
+                    eventBus.Subscribe<Event1>(x => { });
+                });
+
+            var publishedEvent1 = new Event1
+            {
+                Text = "Hello World"
+            };
+
+            eventBus.Publish(publishedEvent1);
+
+            eventFromSubscription.ShouldNotBeNull();
+        }
+
+        [Test]
+        public void Should_handle_cancelation_from_handler()
+        {
+            Event1 eventFromSubscription = null;
+
+            CancelSubscription cancelEvent = null;
+
+            cancelEvent = eventBus.Subscribe<Event1>(@event =>
+            {
+                cancelEvent();
+                eventFromSubscription = @event;
+            });
+
+            var publishedEvent1 = new Event1
+            {
+                Text = "Hello World"
+            };
+
+            eventBus.Publish(publishedEvent1);
+
+            eventFromSubscription.ShouldNotBeNull();
+        }
+
         private class Event1
         {
             public string Text { get; set; }

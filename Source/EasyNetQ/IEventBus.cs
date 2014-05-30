@@ -21,7 +21,11 @@ namespace EasyNetQ
         public void Publish<TEvent>(TEvent @event)
         {
             if (!subscriptions.ContainsKey(typeof (TEvent))) return;
-            foreach (var eventHandler in subscriptions[typeof(TEvent)])
+
+            // Create a local copy of handlers to avoid any interference from
+            // handler subscribing to events and modifying collection.
+            var handlers = new List<object>(subscriptions[typeof(TEvent)]);
+            foreach (var eventHandler in handlers)
             {
                 ((Action<TEvent>) eventHandler)(@event);
             }
