@@ -21,9 +21,12 @@ namespace EasyNetQ.DI
         public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator)
             where TService : class
         {
-            windsorContainer.Register(
-                Component.For<TService>().UsingFactoryMethod(() => serviceCreator(this)).LifeStyle.Singleton
-                );
+            if(!windsorContainer.Kernel.HasComponent(typeof(TService)))
+            {
+                windsorContainer.Register(
+                    Component.For<TService>().UsingFactoryMethod(() => serviceCreator(this)).LifeStyle.Singleton
+                    );
+            }
             return this;
         }
 
@@ -31,9 +34,12 @@ namespace EasyNetQ.DI
             where TService : class
             where TImplementation : class, TService
         {
-            windsorContainer.Register(
-                Component.For<TService>().ImplementedBy<TImplementation>().LifeStyle.Singleton
-                );
+            if(!windsorContainer.Kernel.HasComponent(typeof(TService)))
+            {
+                windsorContainer.Register(
+                    Component.For<TService>().ImplementedBy<TImplementation>().LifeStyle.Singleton
+                    );
+            }
             return this;
         }
 
