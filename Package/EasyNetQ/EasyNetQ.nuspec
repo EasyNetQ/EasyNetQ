@@ -18,7 +18,7 @@
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
       <dependency id="RabbitMQ.Client" version="[3.3.0]" />
-      <dependency id="Newtonsoft.Json" version="4.5" />
+      <dependency id="Newtonsoft.Json" version="6.0.3" />
     </dependencies>
   </metadata>
 </package>
