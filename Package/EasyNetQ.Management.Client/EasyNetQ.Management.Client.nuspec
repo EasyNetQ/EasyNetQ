@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2012</copyright>
     <tags>RabbitMQ Messaging AMQP REST API</tags>
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="4.5" />
+      <dependency id="Newtonsoft.Json" version="6.0.3" />
     </dependencies>
   </metadata>
 </package>
