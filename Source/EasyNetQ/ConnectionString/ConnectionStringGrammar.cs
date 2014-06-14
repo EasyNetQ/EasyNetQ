@@ -41,6 +41,7 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("timeout", Number, c => c.Timeout),
             BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
             BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
+            BuildKeyValueParser("cancelOnHaFailover", Bool, c => c.CancelOnHaFailover),
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform)
         }.Aggregate((a, b) => a.Or(b));

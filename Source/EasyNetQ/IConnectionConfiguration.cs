@@ -33,6 +33,8 @@ namespace EasyNetQ
 
         bool PublisherConfirms { get; }
         bool PersistentMessages { get; set; }
+
+        bool CancelOnHaFailover { get; }
     }
 
     public interface IHostConfiguration
@@ -58,6 +60,7 @@ namespace EasyNetQ
         public ushort Timeout { get; set; }
         public bool PublisherConfirms { get; set; }
         public bool PersistentMessages { get; set; }
+        public bool CancelOnHaFailover { get; set; }
         public string Product { get; set; }
         public string Platform { get; set; }
 
@@ -72,6 +75,7 @@ namespace EasyNetQ
             Timeout = 10; // seconds
             PublisherConfirms = false;
             PersistentMessages = true;
+            CancelOnHaFailover = false;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.

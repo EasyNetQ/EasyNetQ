@@ -30,6 +30,12 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithPriority(int priority);
+
+        /// <summary>
+        /// Configures the consumer's x-cancel-on-ha-failover attribute
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -37,12 +43,20 @@ namespace EasyNetQ.FluentConfiguration
         public IList<string> Topics { get; private set; }
         public bool AutoDelete { get; private set; }
         public int Priority { get; private set; }
+        public bool CancelOnHaFailover { get; private set; }
 
         public SubscriptionConfiguration()
         {
             Topics = new List<string>();
             AutoDelete = false;
             Priority = 0;
+            CancelOnHaFailover = false;
+        }
+
+        public ISubscriptionConfiguration WithTopic(string topic)
+        {
+            Topics.Add(topic);
+            return this;
         }
 
         public ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true)
@@ -57,9 +71,9 @@ namespace EasyNetQ.FluentConfiguration
             return this;
         }
 
-        public ISubscriptionConfiguration WithTopic(string topic)
+        public ISubscriptionConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true)
         {
-            Topics.Add(topic);
+            CancelOnHaFailover = cancelOnHaFailover;
             return this;
         }
     }
