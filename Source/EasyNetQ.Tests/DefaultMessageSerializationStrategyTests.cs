@@ -75,7 +75,8 @@ namespace EasyNetQ.Tests
             var typeNameSerializer = new TypeNameSerializer();
             var serializer = new JsonSerializer( typeNameSerializer );
             const string correlationId = "CorrelationId";
-            var serializationStrategy = new DefaultMessageSerializationStrategy( typeNameSerializer, serializer, () => correlationId );
+
+            var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
             var messageBody = new MyMessage {Text = "Hello world!"};
             var message = new Message<MyMessage>( messageBody );
@@ -111,7 +112,7 @@ namespace EasyNetQ.Tests
             var serializer = MockRepository.GenerateStub<ISerializer>();
             serializer.Stub( s => s.MessageToBytes( message.Body ) ).Return( messageBody );
 
-            return new DefaultMessageSerializationStrategy( typeNameSerializer, serializer, () => correlationId );
+            return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
         private DefaultMessageSerializationStrategy CreateDeserializationStrategy( IMessage<MyMessage> message, byte[] messageBody, string correlationId )
@@ -122,7 +123,7 @@ namespace EasyNetQ.Tests
             var serializer = MockRepository.GenerateStub<ISerializer>();
             serializer.Stub( s => s.BytesToMessage( message.Properties.Type, messageBody ) ).Return( message.Body );
 
-            return new DefaultMessageSerializationStrategy( typeNameSerializer, serializer, () => correlationId );
+            return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
     }
 }

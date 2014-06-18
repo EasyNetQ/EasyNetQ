@@ -80,8 +80,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         {
             var typeNameSerializer = new TypeNameSerializer();
             var serializer = new JsonSerializer(typeNameSerializer);
+
             const string correlationId = "CorrelationId";
-            var serializationStrategy = new VersionedMessageSerializationStrategy( typeNameSerializer, serializer, () => correlationId );
+
+            var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
             var messageBody = new MyMessage {Text = "Hello world!"};
             var message = new Message<MyMessage>( messageBody );
@@ -174,7 +176,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var typeNameSerializer = new TypeNameSerializer();
             var serializer = new JsonSerializer( typeNameSerializer );
             const string correlationId = "CorrelationId";
-            var serializationStrategy = new VersionedMessageSerializationStrategy( typeNameSerializer, serializer, () => correlationId );
+
+            var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
             var messageBody = new MyMessageV2 { Text = "Hello world!", Number = 5 };
             var message = new Message<MyMessageV2>( messageBody );
@@ -197,7 +200,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var typeNameSerializer = new TypeNameSerializer();
             var serializer = new JsonSerializer(typeNameSerializer);
             const string correlationId = "CorrelationId";
-            var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, () => correlationId);
+
+            var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
             var messageBody = new MyMessageV2 { Text = "Hello world!", Number = 5 };
             var message = new Message<MyMessageV2>(messageBody);
@@ -255,7 +259,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var serializer = MockRepository.GenerateStub<ISerializer>();
             serializer.Stub( s => s.MessageToBytes( message.Body ) ).Return( messageBody );
 
-            return new VersionedMessageSerializationStrategy( typeNameSerializer, serializer, () => correlationId );
+            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
         private VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, string expectedMessageType, byte[] messageBody) where T : class
@@ -271,7 +275,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var serializer = MockRepository.GenerateStub<ISerializer>();
             serializer.Stub( s => s.BytesToMessage( expectedMessageType, messageBody ) ).Return( message );
 
-            return new VersionedMessageSerializationStrategy( typeNameSerializer, serializer, () => string.Empty );
+            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(String.Empty));
         }
     }
 }
