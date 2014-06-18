@@ -85,7 +85,7 @@ namespace EasyNetQ.Consumer
             {
                 Model = connection.CreateModel();
 
-                Model.BasicQos(0, connectionConfiguration.PrefetchCount, false);
+                Model.BasicQos(0, configuration.PrefetchCount, false);
 
                 Model.BasicConsume(
                     queue.Name,         // queue

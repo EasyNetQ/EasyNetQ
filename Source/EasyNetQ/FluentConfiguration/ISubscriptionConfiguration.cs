@@ -36,6 +36,13 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true);
+
+
+        /// <summary>
+        /// Configures the consumer's prefetch count
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -44,13 +51,15 @@ namespace EasyNetQ.FluentConfiguration
         public bool AutoDelete { get; private set; }
         public int Priority { get; private set; }
         public bool CancelOnHaFailover { get; private set; }
+        public ushort PrefetchCount { get; private set; }
 
-        public SubscriptionConfiguration()
+        public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
             Topics = new List<string>();
             AutoDelete = false;
             Priority = 0;
             CancelOnHaFailover = false;
+            PrefetchCount = defaultPrefetchCount;
         }
 
         public ISubscriptionConfiguration WithTopic(string topic)
@@ -74,6 +83,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true)
         {
             CancelOnHaFailover = cancelOnHaFailover;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount)
+        {
+            PrefetchCount = prefetchCount;
             return this;
         }
     }
