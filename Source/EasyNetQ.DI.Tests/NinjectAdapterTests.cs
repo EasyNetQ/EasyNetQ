@@ -9,9 +9,8 @@ namespace EasyNetQ.DI.Tests
     /// policy. The internal DefaultServiceProvider works this way, as does Windsor.
     /// However, Ninject doesn't allow more than one registration of a service, it 
     /// throws an exception, and StructureMap has a last-to-register-wins policy.
-    /// </summary>
-    [TestFixture]
-    [Explicit("Ninject doesn't allow multiple registrations with get first registered semantics.")]
+    /// </summary>    
+    [TestFixture]    
     public class NinjectAdapterTests
     {
         private IKernel container;
@@ -24,15 +23,25 @@ namespace EasyNetQ.DI.Tests
 
             container.RegisterAsEasyNetQContainerFactory();
 
-            bus = new MockBuilder().Bus;
+            bus = new MockBuilder(register =>
+                register.Register<IConventions>(r => new TestConventions(new TypeNameSerializer())
+            )).Bus;
         }
 
         [Test]
         public void Should_create_bus_with_ninject_adapter()
         {
-            // TODO: Ninject doesn't allow multiple registrations with
-            // get first registered semantics.
-//            Assert.IsNotNull(bus);
+            Assert.IsNotNull(bus);
+        }
+
+        [Test]
+        public void Should_resolve_test_conventions()
+        {
+            Assert.IsNotNull(bus);
+
+            var rabbitBus = (RabbitBus)bus;
+
+            Assert.IsTrue(rabbitBus.Conventions is TestConventions);
         }
 
         [TearDown]

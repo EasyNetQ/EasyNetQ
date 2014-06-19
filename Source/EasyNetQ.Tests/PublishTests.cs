@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
     public class When_publish_is_called
     {
         private const string correlationId = "abc123";
-
+        
         private MockBuilder mockBuilder;
         byte[] body;
         private IBasicProperties properties;
@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests
         public void SetUp()
         {
             mockBuilder = new MockBuilder(x => 
-                x.Register<Func<string>>(_ => () => correlationId));
+                x.Register<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId)));
 
             mockBuilder.NextModel.Stub(x =>
                 x.BasicPublish(null, null, false, false, null, null))

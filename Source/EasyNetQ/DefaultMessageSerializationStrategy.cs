@@ -6,13 +6,13 @@ namespace EasyNetQ
     {
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly ISerializer serializer;
-        private readonly Func<string> getCorrelationId;
+        private readonly ICorrelationIdGenerationStrategy correlationIdGenerator;
 
-        public DefaultMessageSerializationStrategy(ITypeNameSerializer typeNameSerializer, ISerializer serializer, Func<string> getCorrelationId)
+        public DefaultMessageSerializationStrategy(ITypeNameSerializer typeNameSerializer, ISerializer serializer, ICorrelationIdGenerationStrategy correlationIdGenerator)
         {
             this.typeNameSerializer = typeNameSerializer;
             this.serializer = serializer;
-            this.getCorrelationId = getCorrelationId;
+            this.correlationIdGenerator = correlationIdGenerator;
         }
 
         public SerializedMessage SerializeMessage<T>(IMessage<T> message) where T : class
@@ -23,7 +23,7 @@ namespace EasyNetQ
 
             messageProperties.Type = typeName;
             if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-                messageProperties.CorrelationId = getCorrelationId();
+                messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
 
             return new SerializedMessage(messageProperties, messageBody);
         }

@@ -82,7 +82,7 @@
     <Compile Include="Consumer\ConsumerDispatcherFactory.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerInfo.cs" />
     <Compile Include="Conventions.cs" />
-    <Compile Include="CorrelationIdGenerator.cs" />
+    <Compile Include="DefaultCorrelationIdGenerationStrategy.cs" />
     <Compile Include="Consumer\DefaultConsumerErrorStrategy.cs" />
     <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="DefaultMessageSerializationStrategy.cs" />
@@ -107,6 +107,7 @@
     <Compile Include="Consumer\IConsumerDispatcher.cs" />
     <Compile Include="Consumer\IConsumerDispatcherFactory.cs" />
     <Compile Include="Consumer\IConsumerErrorStrategy.cs" />
+    <Compile Include="ICorrelationIdGenerationStrategy.cs" />
     <Compile Include="IEasyNetQLogger.cs" />
     <Compile Include="IEventBus.cs" />
     <Compile Include="IMessage.cs" />

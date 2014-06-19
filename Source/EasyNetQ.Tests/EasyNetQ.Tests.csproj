@@ -171,6 +171,7 @@
     <Compile Include="RabbitHutchTests.cs" />
     <Compile Include="SubscribeTests.cs" />
     <Compile Include="TaskExtensions.cs" />
+    <Compile Include="StubCorrelationIdGenerator.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
     <Compile Include="DefaultClusterHostSelectionStrategyTests.cs" />
