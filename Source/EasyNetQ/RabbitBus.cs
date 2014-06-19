@@ -130,7 +130,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var configuration = new SubscriptionConfiguration();
+            var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
             var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
@@ -148,7 +148,8 @@ namespace EasyNetQ
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body),
                 x => x.WithPriority(configuration.Priority)
-                      .WithCancelOnHaFailover(configuration.CancelOnHaFailover));
+                      .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
+                      .WithPrefetchCount(configuration.PrefetchCount));
         }
 
         public TResponse Request<TRequest, TResponse>(TRequest request)

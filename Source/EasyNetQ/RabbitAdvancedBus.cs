@@ -19,6 +19,7 @@ namespace EasyNetQ
         private readonly IEventBus eventBus;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly IContainer container;
+        private readonly IConnectionConfiguration connectionConfiguration;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
         public RabbitAdvancedBus(
@@ -30,6 +31,7 @@ namespace EasyNetQ
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container,
+            IConnectionConfiguration connectionConfiguration,
             IMessageSerializationStrategy messageSerializationStrategy)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
@@ -40,6 +42,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
             Preconditions.CheckNotNull(container, "container");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -47,6 +50,7 @@ namespace EasyNetQ
             this.eventBus = eventBus;
             this.handlerCollectionFactory = handlerCollectionFactory;
             this.container = container;
+            this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
@@ -128,7 +132,7 @@ namespace EasyNetQ
             {
                 throw new EasyNetQException("This bus has been disposed");
             }
-            var consumerConfiguration = new ConsumerConfiguration();
+            var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection, consumerConfiguration);
             return consumer.StartConsuming();
