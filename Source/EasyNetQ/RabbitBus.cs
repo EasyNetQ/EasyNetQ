@@ -56,14 +56,14 @@ namespace EasyNetQ
             advancedBus.Disconnected += OnDisconnected;
         }
 
-        public void Publish<T>(T message) where T : class
+        public virtual void Publish<T>(T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
 
             PublishAsync(message).Wait();
         }
 
-        public void Publish<T>(T message, string topic) where T : class
+        public virtual void Publish<T>(T message, string topic) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
@@ -71,14 +71,14 @@ namespace EasyNetQ
             PublishAsync(message, topic).Wait();
         }
 
-        public Task PublishAsync<T>(T message) where T : class
+        public virtual Task PublishAsync<T>(T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
 
             return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
         }
 
-        public Task PublishAsync<T>(T message, string topic) where T : class
+        public virtual Task PublishAsync<T>(T message, string topic) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
@@ -152,7 +152,7 @@ namespace EasyNetQ
                       .WithPrefetchCount(configuration.PrefetchCount));
         }
 
-        public TResponse Request<TRequest, TResponse>(TRequest request)
+        public virtual TResponse Request<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
         {
@@ -163,7 +163,7 @@ namespace EasyNetQ
             return task.Result;
         }
 
-        public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
         {
@@ -193,25 +193,25 @@ namespace EasyNetQ
             return rpc.Respond(responder);
         }
 
-        public void Send<T>(string queue, T message)
+        public virtual void Send<T>(string queue, T message)
             where T : class
         {
             sendReceive.Send(queue, message);
         }
 
-        public IDisposable Receive<T>(string queue, Action<T> onMessage)
+        public virtual IDisposable Receive<T>(string queue, Action<T> onMessage)
             where T : class
         {
             return sendReceive.Receive(queue, onMessage);
         }
 
-        public IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
+        public virtual IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
             where T : class
         {
             return sendReceive.Receive(queue, onMessage);
         }
 
-        public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
+        public virtual IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
         {
             return sendReceive.Receive(queue, addHandlers);
         }
