@@ -99,6 +99,7 @@
     <Compile Include="Integration\AmqpStringSizeExperiments.cs" />
     <Compile Include="Integration\AutoSubscriberIntegrationTests.cs" />
     <Compile Include="Integration\ChannelExceptionBug.cs" />
+    <Compile Include="Integration\SubscribeWithExpiresTests.cs" />
     <Compile Include="MessageVersioningTests\MessageTypePropertyTests.cs" />
     <Compile Include="MessageVersioningTests\MessageVersioningExtensionsTests.cs" />
     <Compile Include="MessageVersioningTests\MessageVersionStackTests.cs" />
