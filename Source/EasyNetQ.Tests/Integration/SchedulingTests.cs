@@ -28,6 +28,32 @@ namespace EasyNetQ.Tests.Integration
         }
 
         [Test]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
+        public void Should_throw_exception_because_of_messageDelay()
+        {
+            var invitation = new PartyInvitation
+            {
+                Text = "Please come to my party",
+                Date = new DateTime(2011, 5, 24)
+            };
+            bus.FuturePublish(TimeSpan.FromMilliseconds(int.MaxValue), invitation);
+        }
+
+        [Test]
+        [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
+        public void Should_not_throw_exception_because_of_messageDelay()
+        {
+            var invitation = new PartyInvitation
+            {
+                Text = "Please come to my party",
+                Date = new DateTime(2011, 5, 24)
+            };
+            bus.FuturePublish(TimeSpan.FromMilliseconds(int.MaxValue - 1), invitation);
+        }
+
+
+        [Test]
         [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
         public void Should_be_able_to_schedule_a_message_2()
         {

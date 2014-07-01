@@ -51,7 +51,7 @@ namespace EasyNetQ
         /// Thrown if <paramref name="name"/> or <paramref name="message"/> are
         /// blank.
         /// </exception>
-        public static void CheckNotNull<T>(T value, string name, string message) where T : class 
+        public static void CheckNotNull<T>(T value, string name, string message) where T : class
         {
             CheckNotBlank(name, "name", "name must not be blank");
             CheckNotBlank(message, "message", "message must not be blank");
@@ -222,6 +222,13 @@ namespace EasyNetQ
             {
                 throw new ArgumentException(message, name);
             }
+        }
+
+        public static void CheckLess(TimeSpan value, TimeSpan maxValue, string name)
+        {
+            if (value < maxValue)
+                return;
+            throw new ArgumentOutOfRangeException(name, string.Format("Arguments {0} must be less than maxValue", name));
         }
     }
 }
