@@ -43,6 +43,19 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
+
+        /// <summary>
+        /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy. 
+        /// This controls for how long a queue can be unused before it is automatically deleted. 
+        /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period. 
+        /// This can be used, for example, for RPC-style reply queues, where many queues can be created which may never be drained.
+        /// The server guarantees that the queue will be deleted, if unused for at least the expiration period. 
+        /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed. 
+        /// Leases of durable queues restart when the server restarts.
+        /// </summary>
+        /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithExpires(int expires);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -52,6 +65,7 @@ namespace EasyNetQ.FluentConfiguration
         public int Priority { get; private set; }
         public bool CancelOnHaFailover { get; private set; }
         public ushort PrefetchCount { get; private set; }
+        public int Expires { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -60,6 +74,7 @@ namespace EasyNetQ.FluentConfiguration
             Priority = 0;
             CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
+            Expires = int.MaxValue;
         }
 
         public ISubscriptionConfiguration WithTopic(string topic)
@@ -89,6 +104,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount)
         {
             PrefetchCount = prefetchCount;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithExpires(int expires)
+        {
+            Expires = expires;
             return this;
         }
     }
