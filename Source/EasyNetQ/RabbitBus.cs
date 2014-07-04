@@ -83,12 +83,11 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
 
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, typeof(T), ExchangeType.Topic);
-            var easyNetQMessage = new Message<T>(message);
-
-            easyNetQMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
-
-            return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
+            return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, typeof(T), ExchangeType.Topic).Then(exchange =>
+                {
+                    var easyNetQMessage = new Message<T>(message) {Properties = {DeliveryMode = (byte) (connectionConfiguration.PersistentMessages ? 2 : 1)}};
+                    return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage); 
+                });
         }
 
         public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class

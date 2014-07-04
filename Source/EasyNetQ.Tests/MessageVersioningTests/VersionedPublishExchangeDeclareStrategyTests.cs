@@ -6,7 +6,6 @@ using EasyNetQ.MessageVersioning;
 using EasyNetQ.Topology;
 using NUnit.Framework;
 using Rhino.Mocks;
-using System.Linq;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
@@ -49,23 +48,24 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         private IAdvancedBus CreateAdvancedBusMock( Action<ExchangeStub> exchangeCreated, Action<ExchangeStub, ExchangeStub> exchangeBound, Func<Type,string> nameExchange  )
         {
             var advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
-            advancedBus.Stub( b => b.ExchangeDeclare( null, null, false, true, false, false, null ) )
+            advancedBus.Stub( b => b.ExchangeDeclareAsync(null, null, false, true, false, false, null ) )
                        .IgnoreArguments()
+                       .Return(null)
                        .WhenCalled( mi =>
                            {
                                var exchange = new ExchangeStub {Name = (string) mi.Arguments[ 0 ]};
                                exchangeCreated( exchange );
-                               mi.ReturnValue = exchange;
+                               mi.ReturnValue = TaskHelpers.FromResult<IExchange>(exchange);
                            } );
 
-            advancedBus.Stub( b => b.Bind( Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Equal( "#" ) ) )
+            advancedBus.Stub( b => b.BindAsync(Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Equal( "#" ) ) )
                        .Return( null )
                        .WhenCalled( mi =>
                            {
                                var source = (ExchangeStub) mi.Arguments[ 0 ];
                                var destination = (ExchangeStub) mi.Arguments[ 1 ];
                                exchangeBound( source, destination );
-                               mi.ReturnValue = MockRepository.GenerateStub<IBinding>();
+                               mi.ReturnValue = TaskHelpers.FromResult(MockRepository.GenerateStub<IBinding>());
                            } );
 
             var conventions = MockRepository.GenerateStub<IConventions>();
