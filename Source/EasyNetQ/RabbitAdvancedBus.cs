@@ -394,6 +394,57 @@ namespace EasyNetQ
             }
         }
 
+        public IBasicGetResult<T> Get<T>(IQueue queue) where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            var result = Get(queue);
+            if (result.Body == null)
+            {
+                logger.DebugWrite("... but no message was available on queue '{0}'", queue.Name);
+                return new BasicGetResult<T>();
+            }
+            else
+            {
+                var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
+                if (message.MessageType == typeof (T))
+                {
+                    return new BasicGetResult<T>(message.Message);
+                }
+                else
+                {
+                    logger.ErrorWrite("Incorrect message type returned from Get." + 
+                        "Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
+                    throw new EasyNetQException("Incorrect message type returned from Get." + 
+                        "Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
+                }
+            }
+        }
+
+        public IBasicGetResult Get(IQueue queue)
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+
+            var task = clientCommandDispatcher.Invoke(x => x.BasicGet(queue.Name, true));
+            task.Wait();
+            var result = task.Result;
+            var getResult = new BasicGetResult(
+                result.Body,
+                new MessageProperties(result.BasicProperties),
+                new MessageReceivedInfo(
+                    "",
+                    result.DeliveryTag,
+                    result.Redelivered,
+                    result.Exchange,
+                    result.RoutingKey,
+                    queue.Name
+                    )
+                );
+
+            logger.DebugWrite("Message Get from queue '{0}'", queue.Name);
+
+            return getResult;
+        }
+
         //------------------------------------------------------------------------------------------
 
         public virtual event Action Connected;
