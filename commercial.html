@@ -78,97 +78,18 @@
 
       <div class="row-fluid">
         <div class="span6">
-          <h2>Easy</h2>
+          <h2>Commercial Support for EasyNetQ</h2>
           <p>
-            EasyNetQ is the leading client API for RabbitMQ on .NET, with over 50,000 downloads on <a href="https://www.nuget.org/packages/EasyNetQ/">NuGet.org</a>. It is an open source project sponsored by <a href="http://15below.com/">15below</a> 
-            the travel industry experts. 
+          Suteki Ltd, the consulting company of EasyNetQ's author, Mike Hadlow, can provide commercial support licences for EasyNetQ.
           </p>
-        
-          <p>
-            Read <a href="http://blogs.vmware.com/vfabric/2012/12/net-rabbitmq-scales-to-100s-of-millions-of-passenger-messages-at-15below.html">
-            this VMWare whitepaper</a> describing how 15below dramatically simplified their
-            application architecture with EasyNetQ and RabbitMQ.
-          </p>
-          
-          <p>
-            Watch the author, <a href="http://mikehadlow.com/">Mike Hadlow</a>, 
-            giving a  <a href="http://www.infoq.com/presentations/RabbitMQ-NET-EasyNetQ">demo of EasyNetQ at QCon London</a>.
-            And listen to Mike talking about EasyNetQ on <a href="http://www.dotnetrocks.com/default.aspx?ShowNum=848">Dot Net Rocks</a>.
-          </p> 
-
-          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ/wiki/Quick-Start"><i class="icon-align-justify icon-white"></i> 10 Minute Quick Start Guide &raquo;</a></p>
-
-          <p>&nbsp;</p>
-
-          <h2>Easy to use</h2>
-
-          <p>We designed EasyNetQ to be as simple as possible. Get started publishing and subscribing with RabbitMQ with just a few lines of code:</p>
-          <p>To connect to a RabbitMQ broker...</p>
-          <pre><code>
-var bus = RabbitHutch.CreateBus("host=localhost");
-          </code></pre>
-
-          <p>To publish...</p>
-
-          <pre><code>
-bus.Publish(message);
-          </code></pre>
-
-          <p>To subscribe...</p>
-
-          <pre><code>
-bus.Subscribe&lt;MyMessage&gt;("my_subscription_id", msg =&gt; 
-      Console.WriteLine(msg.Text));
-          </code></pre> 
-
-          <p>For more information, read the documentation:</a>
-
-          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ/wiki/Introduction"><i class="icon-align-justify icon-white"></i> Documentation &raquo;</a></p>
-
         </div>
 
         <div class="span6">
-          <h2>Easy to install</h2>
-
-          <p>EasyNetQ is on NuGet. To install it, run the following command in the Package Manager Console</p>
-
-          <pre><code>
-  PM> Install-Package EasyNetQ
-          </code></pre>
-
-          <p><a class="btn btn-info" href="https://www.nuget.org/packages/EasyNetQ"><i class="icon-wrench icon-white"></i> NuGet &raquo;</a></p>
-
-          <p>&nbsp;</p>
-          <h2>Open Source</h2>
+          <h2>Consulting</h2>
 
           <p>
-            EasyNetQ is open source under the MIT licence. This means you can take the code and do what you like with it. Embed it in your commercial product without attribution,
-            or fork the code and release it under a new name.
+          We can also provide consulting services around EasyNetQ.
           </p>
-
-          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ"><i class="icon-wrench icon-white"></i> GitHub Project &raquo;</a></p>
-
-          <p>&nbsp;</p>
-          <h2>Easy to find out more</h2>
-
-          <p><a class="btn btn-info" href="https://groups.google.com/group/easynetq"><i class="icon-comment icon-white"></i> Discussion Group &raquo;</a></p>
-          <p><a class="btn btn-info" href="http://mikehadlow.blogspot.co.uk/search/label/EasyNetQ"><i class="icon-user icon-white"></i> Mike Hadlow's blog &raquo;</a></p>
-
-          <p>&nbsp;</p>
-          <h2>Management Client</h2>
-
-          <p>
-            The EasyNetQ project also includes a .NET client library for the RabbitMQ management API, <strong>EasyNetQ.Management.Client</strong>. 
-            Perfect for building management, monitoring and deployment tools.
-          </p>
-
-          <p>Install it with NuGet:</p>
-
-          <pre><code>
-  PM> Install-Package EasyNetQ.Management.Client
-          </code></pre>
-
-          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ/wiki/Management-API-Introduction"><i class="icon-align-justify icon-white"></i> Management Client Documentation &raquo;</a></p>
 
        </div>
 
