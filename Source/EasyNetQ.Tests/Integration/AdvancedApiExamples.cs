@@ -117,6 +117,25 @@ namespace EasyNetQ.Tests.Integration
 
             Thread.Sleep(1000);
         }
+
+        [Test, Explicit]
+        public void Should_be_able_to_get_a_message()
+        {
+            var queue = advancedBus.QueueDeclare("get_test");
+            advancedBus.Publish(Exchange.GetDefault(), "get_test", false, false,
+                new Message<MyMessage>(new MyMessage{ Text = "Oh! Hello!" }));
+
+            var getResult = advancedBus.Get<MyMessage>(queue);
+
+            if (getResult.MessageAvailable)
+            {
+                Console.Out.WriteLine("Got message: {0}", getResult.Message.Body.Text);
+            }
+            else
+            {
+                Console.Out.WriteLine("Failed to get message!");
+            }
+        }
     }
 }
 

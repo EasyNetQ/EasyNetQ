@@ -289,6 +289,21 @@ namespace EasyNetQ
         void BindingDelete(IBinding binding);
 
         /// <summary>
+        /// Get a message from the given queue.
+        /// </summary>
+        /// <typeparam name="T">The message type to get</typeparam>
+        /// <param name="queue">The queue from which to retreive the message</param>
+        /// <returns>An IBasicGetResult.</returns>
+        IBasicGetResult<T> Get<T>(IQueue queue) where T : class;
+
+        /// <summary>
+        /// Get the raw message from the given queue.
+        /// </summary>
+        /// <param name="queue">The queue from which to retreive the message</param>
+        /// <returns>An IBasicGetResult</returns>
+        IBasicGetResult Get(IQueue queue);
+
+        /// <summary>
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }
