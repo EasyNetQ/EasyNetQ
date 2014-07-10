@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EasyNetQ - An easy .NET API for RabbitMQ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EasyNetQ An easy to use .NET API for RabbitMQ">
+    <meta name="author" content="Mike Hadlow">    
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <style type="text/css">
+      /* Customize the navbar links to be fill the entire space of the .navbar */
+      .navbar .navbar-inner {
+        padding: 0;
+      }
+      .navbar .nav {
+        margin: 0;
+        display: table;
+        width: 100%;
+      }
+      .navbar .nav li {
+        display: table-cell;
+        width: 1%;
+        float: none;
+      }
+      .navbar .nav li a {
+        font-weight: bold;
+        text-align: center;
+        border-left: 1px solid rgba(255,255,255,.75);
+        border-right: 1px solid rgba(0,0,0,.1);
+      }
+      .navbar .nav li:first-child a {
+        border-left: 0;
+        border-radius: 3px 0 0 3px;
+      }
+      .navbar .nav li:last-child a {
+        border-right: 0;
+        border-radius: 0 3px 3px 0;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="container">
+
+      <div class="masthead">
+
+        <div>&nbsp;</div>
+
+        <div class="row-fluid">
+          <div class="span3">
+            <image src="design/logo_design_150.png" />
+          </div>
+          <div class="span9">
+            <h1>EasyNetQ</h1>
+            <h3>An easy .NET API for RabbitMQ</h3>
+          </div>
+        </div>
+
+        <div>&nbsp;</div>
+
+<!--         <h3 class="muted">EasyNetQ</h3> -->
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="container">
+              <ul class="nav">
+                <li class="active"><a href="#"><i class="icon-home"></i> Home</a></li>
+                <li><a href="https://github.com/mikehadlow/EasyNetQ/wiki/Introduction"><i class="icon-align-justify"></i> Documentation</a></li>
+                <li><a href="https://groups.google.com/group/easynetq"><i class="icon-comment"></i> Group</a></li>
+                <li><a href="https://github.com/mikehadlow/EasyNetQ"><i class="icon-wrench"></i> GitHub</a></li>
+                <li><a href="commercial.html"><i class="icon-star"></i> Commercial Support</a></li>
+              </ul>
+            </div>
+          </div>
+        </div><!-- /.navbar -->
+
+      </div>
+
+      <div class="row-fluid">
+        <div class="span6">
+          <h2>Easy</h2>
+          <p>
+            EasyNetQ is the leading client API for RabbitMQ on .NET, with over 50,000 downloads on <a href="https://www.nuget.org/packages/EasyNetQ/">NuGet.org</a>. It is an open source project sponsored by <a href="http://15below.com/">15below</a> 
+            the travel industry experts. 
+          </p>
+        
+          <p>
+            Read <a href="http://blogs.vmware.com/vfabric/2012/12/net-rabbitmq-scales-to-100s-of-millions-of-passenger-messages-at-15below.html">
+            this VMWare whitepaper</a> describing how 15below dramatically simplified their
+            application architecture with EasyNetQ and RabbitMQ.
+          </p>
+          
+          <p>
+            Watch the author, <a href="http://mikehadlow.com/">Mike Hadlow</a>, 
+            giving a  <a href="http://www.infoq.com/presentations/RabbitMQ-NET-EasyNetQ">demo of EasyNetQ at QCon London</a>.
+            And listen to Mike talking about EasyNetQ on <a href="http://www.dotnetrocks.com/default.aspx?ShowNum=848">Dot Net Rocks</a>.
+          </p> 
+
+          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ/wiki/Quick-Start"><i class="icon-align-justify icon-white"></i> 10 Minute Quick Start Guide &raquo;</a></p>
+
+          <p>&nbsp;</p>
+
+          <h2>Easy to use</h2>
+
+          <p>We designed EasyNetQ to be as simple as possible. Get started publishing and subscribing with RabbitMQ with just a few lines of code:</p>
+          <p>To connect to a RabbitMQ broker...</p>
+          <pre><code>
+var bus = RabbitHutch.CreateBus("host=localhost");
+          </code></pre>
+
+          <p>To publish...</p>
+
+          <pre><code>
+bus.Publish(message);
+          </code></pre>
+
+          <p>To subscribe...</p>
+
+          <pre><code>
+bus.Subscribe&lt;MyMessage&gt;("my_subscription_id", msg =&gt; 
+      Console.WriteLine(msg.Text));
+          </code></pre> 
+
+          <p>For more information, read the documentation:</a>
+
+          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ/wiki/Introduction"><i class="icon-align-justify icon-white"></i> Documentation &raquo;</a></p>
+
+        </div>
+
+        <div class="span6">
+          <h2>Easy to install</h2>
+
+          <p>EasyNetQ is on NuGet. To install it, run the following command in the Package Manager Console</p>
+
+          <pre><code>
+  PM> Install-Package EasyNetQ
+          </code></pre>
+
+          <p><a class="btn btn-info" href="https://www.nuget.org/packages/EasyNetQ"><i class="icon-wrench icon-white"></i> NuGet &raquo;</a></p>
+
+          <p>&nbsp;</p>
+          <h2>Open Source</h2>
+
+          <p>
+            EasyNetQ is open source under the MIT licence. This means you can take the code and do what you like with it. Embed it in your commercial product without attribution,
+            or fork the code and release it under a new name.
+          </p>
+
+          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ"><i class="icon-wrench icon-white"></i> GitHub Project &raquo;</a></p>
+
+          <p>&nbsp;</p>
+          <h2>Easy to find out more</h2>
+
+          <p><a class="btn btn-info" href="https://groups.google.com/group/easynetq"><i class="icon-comment icon-white"></i> Discussion Group &raquo;</a></p>
+          <p><a class="btn btn-info" href="http://mikehadlow.blogspot.co.uk/search/label/EasyNetQ"><i class="icon-user icon-white"></i> Mike Hadlow's blog &raquo;</a></p>
+
+          <p>&nbsp;</p>
+          <h2>Management Client</h2>
+
+          <p>
+            The EasyNetQ project also includes a .NET client library for the RabbitMQ management API, <strong>EasyNetQ.Management.Client</strong>. 
+            Perfect for building management, monitoring and deployment tools.
+          </p>
+
+          <p>Install it with NuGet:</p>
+
+          <pre><code>
+  PM> Install-Package EasyNetQ.Management.Client
+          </code></pre>
+
+          <p><a class="btn btn-info" href="https://github.com/mikehadlow/EasyNetQ/wiki/Management-API-Introduction"><i class="icon-align-justify icon-white"></i> Management Client Documentation &raquo;</a></p>
+
+       </div>
+
+      </div>
+
+    </div><!-- main container -->
+
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-1643677-6']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+  </body>
+
+</html>
