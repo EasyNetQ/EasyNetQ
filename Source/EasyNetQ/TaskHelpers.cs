@@ -55,7 +55,7 @@ namespace EasyNetQ
                             tcs.TrySetException(exc);
                         }
                     }
-                }, TaskContinuationOptions.ExecuteSynchronously);
+                });
             return tcs.Task;
         }
 
@@ -83,7 +83,7 @@ namespace EasyNetQ
                         tcs.TrySetException(exc);
                     }
                 }
-            }, TaskContinuationOptions.ExecuteSynchronously);
+            });
             return tcs.Task;
         }
 
@@ -108,11 +108,11 @@ namespace EasyNetQ
                             if (t.IsFaulted) tcs.TrySetException(t.Exception.InnerExceptions);
                             else if (t.IsCanceled) tcs.TrySetCanceled();
                             else tcs.TrySetResult(new NullStruct());
-                        }, TaskContinuationOptions.ExecuteSynchronously);
+                        });
                     }
                     catch (Exception exc) { tcs.TrySetException(exc); }
                 }
-            }, TaskContinuationOptions.ExecuteSynchronously);
+            });
             return tcs.Task;
         }
 
@@ -137,11 +137,11 @@ namespace EasyNetQ
                             if (t.IsFaulted) tcs.TrySetException(t.Exception.InnerExceptions);
                             else if (t.IsCanceled) tcs.TrySetCanceled();
                             else tcs.TrySetResult(t.Result);
-                        }, TaskContinuationOptions.ExecuteSynchronously);
+                        });
                     }
                     catch (Exception exc) { tcs.TrySetException(exc); }
                 }
-            }, TaskContinuationOptions.ExecuteSynchronously);
+            });
             return tcs.Task;
         }
 
