@@ -257,6 +257,21 @@ namespace EasyNetQ
         /// <returns>The exchange</returns>
         IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
 
+
+        /// <summary>
+        /// Declare an exchange
+        /// </summary>
+        /// <param name="name">The exchange name</param>
+        /// <param name="type">The type of exchange</param>
+        /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
+        /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
+        /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
+        ///     but only when bound to other exchanges.</param>
+        /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
+        /// <returns>The exchange</returns>
+        Task<IExchange> ExchangeDeclareAsync(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
+
         /// <summary>
         /// Delete an exchange
         /// </summary>
@@ -281,6 +296,15 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <returns>A binding</returns>
         IBinding Bind(IExchange source, IExchange destination, string routingKey);
+
+        /// <summary>
+        /// Bind two exchanges. Does nothing if the binding already exists.
+        /// </summary>
+        /// <param name="source">The source exchange</param>
+        /// <param name="destination">The destination exchange</param>
+        /// <param name="routingKey">The routing key</param>
+        /// <returns>A binding</returns>
+        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey);
 
         /// <summary>
         /// Delete a binding
