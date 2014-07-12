@@ -90,41 +90,52 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
-        public void The_queue_naming_convention_should_use_attribute_queueName_then_an_underscore_then_the_subscription_id()
+        [TestCase(typeof(AnnotatedTestMessage))]
+        [TestCase(typeof(IAnnotatedTestMessage))]
+        public void The_queue_naming_convention_should_use_attribute_queueName_then_an_underscore_then_the_subscription_id(Type messageType)
         {
             const string subscriptionId = "test";
-            var result = conventions.QueueNamingConvention(typeof(AnnotatedTestMessage), subscriptionId);
+            var result = conventions.QueueNamingConvention(messageType, subscriptionId);
             result.ShouldEqual("MyQueue" + "_" + subscriptionId);
         }
 
         [Test]
-        public void And_subscription_id_is_empty_the_queue_naming_convention_should_use_attribute_queueName()
+        [TestCase(typeof(AnnotatedTestMessage))]
+        [TestCase(typeof(IAnnotatedTestMessage))]
+        public void And_subscription_id_is_empty_the_queue_naming_convention_should_use_attribute_queueName(Type messageType)
         {
             const string subscriptionId = "";
-            var result = conventions.QueueNamingConvention(typeof(AnnotatedTestMessage), subscriptionId);
+            var result = conventions.QueueNamingConvention(messageType, subscriptionId);
             result.ShouldEqual("MyQueue");
         }
 
+
         [Test]
-        public void And_queueName_is_empty_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id()
+        [TestCase(typeof(EmptyQueueNameAnnotatedTestMessage))]
+        [TestCase(typeof(IEmptyQueueNameAnnotatedTestMessage))]
+        public void And_queueName_is_empty_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id(Type messageType)
         {
             const string subscriptionId = "test";
-            var result = conventions.QueueNamingConvention(typeof(EmptyQueueNameAnnotatedTestMessage), subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(EmptyQueueNameAnnotatedTestMessage)) + "_" + subscriptionId);
+            var result = conventions.QueueNamingConvention(messageType, subscriptionId);
+            result.ShouldEqual(typeNameSerializer.Serialize(messageType) + "_" + subscriptionId);
         }
 
         [Test]
-        public void The_exchange_name_convention_should_use_attribute_exchangeName()
+        [TestCase(typeof(AnnotatedTestMessage))]
+        [TestCase(typeof(IAnnotatedTestMessage))]
+        public void The_exchange_name_convention_should_use_attribute_exchangeName(Type messageType)
         {
-            var result = conventions.ExchangeNamingConvention(typeof(AnnotatedTestMessage));
+            var result = conventions.ExchangeNamingConvention(messageType);
             result.ShouldEqual("MyExchange");
         }
 
         [Test]
-        public void And_exchangeName_not_specified_the_exchange_name_convention_should_use_the_TypeNameSerializers_Serialize_method()
+        [TestCase(typeof(QueueNameOnlyAnnotatedTestMessage))]
+        [TestCase(typeof(IQueueNameOnlyAnnotatedTestMessage))]
+        public void And_exchangeName_not_specified_the_exchange_name_convention_should_use_the_TypeNameSerializers_Serialize_method(Type messageType)
         {
-            var result = conventions.ExchangeNamingConvention(typeof(QueueNameOnlyAnnotatedTestMessage));
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(QueueNameOnlyAnnotatedTestMessage)));
+            var result = conventions.ExchangeNamingConvention(messageType);
+            result.ShouldEqual(typeNameSerializer.Serialize(messageType));
         }
     }
 
