@@ -309,28 +309,43 @@ namespace EasyNetQ
             bool @internal = false,
             string alternateExchange = null)
         {
+
+            return ExchangeDeclareAsync(name, type, passive, durable, autoDelete, @internal, alternateExchange).Result;
+        }
+
+        public Task<IExchange> ExchangeDeclareAsync(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false, 
+            string alternateExchange = null)
+        {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
 
             if (passive)
             {
-                clientCommandDispatcher.Invoke(x => x.ExchangeDeclarePassive(name)).Wait();
+                return clientCommandDispatcher.Invoke(x => x.ExchangeDeclarePassive(name))
+                    .Then(() => (IExchange)new Exchange(name));
             }
-            else
+
+            IDictionary<string, object> arguments = null;
+            if (alternateExchange != null)
             {
-                IDictionary<string, object> arguments = null;
-                if (alternateExchange != null)
-                {
-                    arguments = new Dictionary<string, object> { { "alternate-exchange", alternateExchange } };
-                }
-
-                clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments)).Wait();
-                logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
-                    name, type, durable, autoDelete);
+                arguments = new Dictionary<string, object> { { "alternate-exchange", alternateExchange } };
             }
 
-            return new Exchange(name);
-        }
+            return clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments))
+                .Then(() =>
+                    {
+                        logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
+                              name, type, durable, autoDelete);
+
+                        return (IExchange)new Exchange(name);
+                    });
+       }
 
         public virtual void ExchangeDelete(IExchange exchange, bool ifUnused = false)
         {
@@ -363,6 +378,22 @@ namespace EasyNetQ
             logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}",
                 destination.Name, source.Name, routingKey);
             return new Binding(destination, source, routingKey);
+        }
+
+        public Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
+        {
+            Preconditions.CheckNotNull(source, "source");
+            Preconditions.CheckNotNull(destination, "destination");
+            Preconditions.CheckShortString(routingKey, "routingKey");
+
+            return clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey))
+                                          .Then(() =>
+                                              {
+                                                  logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}",
+                                                      destination.Name, source.Name, routingKey);
+                                                  return (IBinding)new Binding(destination, source, routingKey);
+                                              });
+
         }
 
         public virtual void BindingDelete(IBinding binding)
