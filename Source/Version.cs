@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.34.0.0")]
+[assembly: AssemblyVersion("0.35.0.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.35.0.0 Use ILRepack to internally merge Newtonsoft.Json
 // 0.34.0.0 basic.get added to advanced bus: IAdvancedBus.Get<T>(IQueue queue)
 // 0.33.2.0 x-expires now can be configured while subscribe, using the fluent interface method x => x.WithExpires(int)
 // 0.33.1.0 NinjectAdapter cannot handle first-to-register behavior, Ninject cannot handle registration of Func<>. Added ICorrelationIdGenerationStrategy, and DefaultCorrelationIdGenerationStrategy.

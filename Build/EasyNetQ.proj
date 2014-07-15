@@ -17,7 +17,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package; PackageManagementClient; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Merge; Test; Package; PackageManagementClient; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -45,7 +45,7 @@
     <Target Name="Merge" DependsOnTargets="Build">
       <Exec 
           WorkingDirectory="$(OutputDir)" 
-          Command="$(ILRepack) /internalize $(OutputDir)\EasyNetQ.dll $(OutputDir)\Newtonsoft.Json.dll" />
+          Command="$(ILRepack) /internalize /out:$(OutputDir)\EasyNetQ.dll $(OutputDir)\EasyNetQ.dll $(OutputDir)\Newtonsoft.Json.dll" />
     </Target>
 
     <!-- Packaging -->
