@@ -13,6 +13,7 @@ namespace EasyNetQ
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly IRpc rpc;
         private readonly ISendReceive sendReceive;
         private readonly IConnectionConfiguration connectionConfiguration;
@@ -32,6 +33,7 @@ namespace EasyNetQ
             IConventions conventions,
             IAdvancedBus advancedBus,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IRpc rpc,
             ISendReceive sendReceive,
             IConnectionConfiguration connectionConfiguration)
@@ -48,6 +50,7 @@ namespace EasyNetQ
             this.conventions = conventions;
             this.advancedBus = advancedBus;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.rpc = rpc;
             this.sendReceive = sendReceive;
             this.connectionConfiguration = connectionConfiguration;
@@ -82,10 +85,10 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
-
-            return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, typeof(T), ExchangeType.Topic).Then(exchange =>
+            var messageType = typeof (T);
+            return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
                 {
-                    var easyNetQMessage = new Message<T>(message) {Properties = {DeliveryMode = (byte) (connectionConfiguration.PersistentMessages ? 2 : 1)}};
+                    var easyNetQMessage = new Message<T>(message) { Properties = { DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1) } };
                     return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage); 
                 });
         }
