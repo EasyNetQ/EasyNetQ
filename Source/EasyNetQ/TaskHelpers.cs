@@ -5,6 +5,15 @@ namespace EasyNetQ
 {
     public static class TaskHelpers
     {
+        static TaskHelpers()
+        {
+            var tcs = new TaskCompletionSource<NullStruct>();
+            tcs.SetResult(new NullStruct());
+            Completed = tcs.Task;
+        }
+
+        public static Task Completed { get; private set; }
+
         public static Task ExecuteSynchronously(Action action)
         {
             var tcs = new TaskCompletionSource<NullStruct>();

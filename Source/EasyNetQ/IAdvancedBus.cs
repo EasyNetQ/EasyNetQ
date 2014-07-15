@@ -222,6 +222,22 @@ namespace EasyNetQ
         IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null);
 
         /// <summary>
+        /// Declare a queue. If the queue already exists this method does nothing
+        /// </summary>
+        /// <param name="name">The name of the queue</param>
+        /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
+        /// <param name="durable">Durable queues remain active when a server restarts.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
+        ///     and are deleted when that connection closes.</param>
+        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
+        /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
+        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
+        /// <returns>The queue</returns>
+        Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null);
+
+
+        /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
         /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
         /// consumers.
@@ -287,6 +303,15 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <returns>A binding</returns>
         IBinding Bind(IExchange exchange, IQueue queue, string routingKey);
+
+        /// <summary>
+        /// Bind an exchange to a queue. Does nothing if the binding already exists.
+        /// </summary>
+        /// <param name="exchange">The exchange to bind</param>
+        /// <param name="queue">The queue to bind</param>
+        /// <param name="routingKey">The routing key</param>
+        /// <returns>A binding</returns>
+        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey);
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
