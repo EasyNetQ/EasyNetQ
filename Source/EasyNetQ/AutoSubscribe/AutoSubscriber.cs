@@ -72,7 +72,7 @@ namespace EasyNetQ.AutoSubscribe
         /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
         /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
         /// </summary>
-        /// <param name="assemblies">The assembleis to scan for consumers.</param>
+        /// <param name="assemblies">The assemblies to scan for consumers.</param>
         public virtual void Subscribe(params Assembly[] assemblies)
         {
             Preconditions.CheckAny(assemblies, "assemblies", "No assemblies specified.");
@@ -89,7 +89,7 @@ namespace EasyNetQ.AutoSubscribe
         /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
         /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
         /// </summary>
-        /// <param name="assemblies">The assembleis to scan for consumers.</param>
+        /// <param name="assemblies">The assemblies to scan for consumers.</param>
         public virtual void SubscribeAsync(params Assembly[] assemblies)
         {
             Preconditions.CheckAny(assemblies, "assemblies", "No assemblies specified.");
