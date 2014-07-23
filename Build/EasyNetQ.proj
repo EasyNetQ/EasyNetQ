@@ -12,11 +12,12 @@
         <NuGet>$(Tools)\NuGet</NuGet>
         <Package>$(BaseDir)\Package</Package>
         <Source>$(BaseDir)\Source</Source>
+        <ILRepack>$(Tools)\ILRepack\ILRepack.exe</ILRepack>
     </PropertyGroup>
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package; PackageManagementClient; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Merge; Test; Package; PackageManagementClient; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -41,9 +42,15 @@
         <NUnit ToolPath="$(Nunit)" DisableShadowCopy="true" Assemblies="@(TestAssembly)" Framework="4.0.30319" Force32Bit="true" />
     </Target>
 
+    <Target Name="Merge" DependsOnTargets="Build">
+      <Exec 
+          WorkingDirectory="$(OutputDir)" 
+          Command="$(ILRepack) /internalize /out:$(OutputDir)\EasyNetQ.dll $(OutputDir)\EasyNetQ.dll $(OutputDir)\Newtonsoft.Json.dll" />
+    </Target>
+
     <!-- Packaging -->
   
-    <Target Name="Package" DependsOnTargets="Build">
+    <Target Name="Package" DependsOnTargets="Merge">
 
         <ItemGroup>
             <FilesToDelete Include="$(Package)\EasyNetQ\*.nupkg"  />
