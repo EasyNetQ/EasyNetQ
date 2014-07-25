@@ -25,6 +25,15 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_configure_request()
+        {
+            var client = new ManagementClient(hostUrl, username, password, configureRequest: 
+                req => req.Headers.Add("x-not-used", "some_value"));
+
+            client.GetOverview();
+        }
+
+        [Test]
         public void Should_get_overview()
         {
             var overview = managementClient.GetOverview();
