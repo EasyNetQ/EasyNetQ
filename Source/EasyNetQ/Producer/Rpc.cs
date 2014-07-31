@@ -15,7 +15,7 @@ namespace EasyNetQ.Producer
     {
         protected readonly IAdvancedBus advancedBus;
         protected readonly IConventions conventions;
-        protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        protected readonly IAdvancedPublishExchangeDeclareStrategy AdvancedPublishExchangeDeclareStrategy;
         protected readonly IConnectionConfiguration configuration;
 
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
@@ -30,18 +30,18 @@ namespace EasyNetQ.Producer
             IAdvancedBus advancedBus,
             IEventBus eventBus,
             IConventions conventions,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IAdvancedPublishExchangeDeclareStrategy advancedPublishExchangeDeclareStrategy,
             IConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(advancedPublishExchangeDeclareStrategy, "advancedPublishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(configuration, "configuration");
 
             this.advancedBus = advancedBus;
             this.conventions = conventions;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.AdvancedPublishExchangeDeclareStrategy = advancedPublishExchangeDeclareStrategy;
             this.configuration = configuration;
 
             eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
@@ -176,7 +176,7 @@ namespace EasyNetQ.Producer
         protected virtual void RequestPublish<TRequest>(TRequest request, string routingKey, string returnQueueName, Guid correlationId)
             where TRequest : class
         {
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(
+            var exchange = AdvancedPublishExchangeDeclareStrategy.DeclareExchange(
                 advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
 
             var requestMessage = new Message<TRequest>(request);
