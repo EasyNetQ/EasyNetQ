@@ -22,6 +22,8 @@ namespace EasyNetQ
         private readonly IConnectionConfiguration connectionConfiguration;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IConsumeSingle consumeSingle;
+        private readonly IAdvancedClientRpc advancedClientRpc;
+        private readonly IAdvancedServerRpc advancedServerRpc;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -35,6 +37,9 @@ namespace EasyNetQ
             IConnectionConfiguration connectionConfiguration,
             IMessageSerializationStrategy messageSerializationStrategy, 
             IConsumeSingle consumeSingle)
+            IMessageSerializationStrategy messageSerializationStrategy,
+            IAdvancedClientRpc advancedClientRpc,
+            IAdvancedServerRpc advancedServerRpc)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -56,6 +61,8 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.consumeSingle = consumeSingle;
+            this.advancedClientRpc = advancedClientRpc;
+            this.advancedServerRpc = advancedServerRpc;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -145,6 +152,26 @@ namespace EasyNetQ
         public ConsumeSingleResult ConsumeSingle()
         {
             return consumeSingle.ConsumeSingle(connection);
+        }
+
+        public IDisposable Respond(
+            IExchange requestExchange, 
+            IQueue queue, 
+            string topic, 
+            Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
+        {
+            return advancedServerRpc.Respond(requestExchange, queue, topic, handleRequest);
+        }
+
+        public Task<SerializedMessage> RequestAsync(
+            IExchange requestExchange, 
+            string requestRoutingKey, 
+            bool mandatory, 
+            bool immediate, 
+            Func<string> responseQueueName, 
+            SerializedMessage request)
+        {
+            return advancedClientRpc.Request(requestExchange, requestRoutingKey, mandatory, immediate, responseQueueName, request);
         }
 
         // -------------------------------- publish ---------------------------------------------
