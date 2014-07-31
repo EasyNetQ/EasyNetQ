@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.ProducerTests
     [TestFixture]
     public class PublishExchangeDeclareStrategyTests
     {
-        private IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private IAdvancedPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private IAdvancedBus advancedBus;
         private const string exchangeName = "the_exchange";
         private IExchange exchange;
@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             exchangeDeclareCount = 0;
 
-            publishExchangeDeclareStrategy = new PublishExchangeDeclareStrategy();
+            publishExchangeDeclareStrategy = new AdvancedPublishExchangeDeclareStrategy();
             advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
             exchange = new Exchange(exchangeName);
             exchangeTask = TaskHelpers.FromResult(exchange);

@@ -39,7 +39,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "advancedPublishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(rpc, "rpc");
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
