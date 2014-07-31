@@ -32,21 +32,21 @@ namespace EasyNetQ.Rpc
             where TResponse : class;
     }
 
-    public interface IAdvancedRpc
+    public interface IAdvancedClientRpc
     {
-        Task<AdvancedRabbitMessage> Request(IExchange exchange,
-                                            string returnQueueName,
-                                            string routingKey,
-                                            bool mandatory,
-                                            bool immediate,
-                                            AdvancedRabbitMessage msg);
-
-        IDisposable Respond(IQueue queue, Func<AdvancedRabbitMessage, AdvancedRabbitMessage> handleRequest, Action<IConsumerConfiguration> configure);
+        Task<SerializedMessage> Request(IExchange requestExchange,
+                                        string requestRoutingKey,
+                                        bool mandatory,
+                                        bool immediate,
+                                        Func<string> responseQueueName,
+                                        SerializedMessage request);
     }
 
-    public class AdvancedRabbitMessage
+    public interface IAdvancedServerRpc
     {
-        public byte[] MessageBody { get; set; }
-        public MessageProperties MessageProperties { get; set; }
+        IDisposable Respond(IExchange requestExchange, 
+                            IQueue queue, 
+                            string topic,
+                            Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
     }
 }
