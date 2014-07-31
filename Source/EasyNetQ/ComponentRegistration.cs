@@ -45,7 +45,7 @@ namespace EasyNetQ
                 .Register<IConsumeSingle, DefaultConsumeSingle>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
 
-                .Register<IRpc, BetterRpc>()
+                .Register<IRpc, Rpc.Rpc>()
                 .Register<IRpcHeaderKeys, RpcHeaderKeys>()
                 .Register<IAdvancedRpcFactory,AdvancedRpcFactory>()
 
