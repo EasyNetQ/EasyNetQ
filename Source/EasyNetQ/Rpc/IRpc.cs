@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
 {
@@ -28,5 +29,23 @@ namespace EasyNetQ.Rpc
         IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class;
+    }
+
+    public interface IAdvancedClientRpc
+    {
+        Task<SerializedMessage> RequestAsync(IExchange requestExchange,
+                                        string requestRoutingKey,
+                                        bool mandatory,
+                                        bool immediate,
+                                        Func<string> responseQueueName,
+                                        SerializedMessage request);
+    }
+
+    public interface IAdvancedServerRpc
+    {
+        IDisposable Respond(IExchange requestExchange, 
+                            IQueue queue, 
+                            string topic,
+                            Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
     }
 }
