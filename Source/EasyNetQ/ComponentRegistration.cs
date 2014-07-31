@@ -2,6 +2,7 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
+using EasyNetQ.Rpc;
 
 namespace EasyNetQ
 {

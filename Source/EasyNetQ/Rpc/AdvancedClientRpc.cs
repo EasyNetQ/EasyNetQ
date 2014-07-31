@@ -9,6 +9,18 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
 {
+    interface IRpcHeaderKeys
+    {
+        string IsFaultedKey { get; }
+        string ExceptionMessageKey { get; }
+    }
+
+    class RpcHeaderKeys : IRpcHeaderKeys
+    {
+        public string IsFaultedKey { get { return "IsFaulted"; } }
+        public string ExceptionMessageKey { get { return "ExceptionMessage"; } }
+    }
+
     class AdvancedClientRpc : IAdvancedClientRpc
     {
         private readonly IAdvancedBus _advancedBus;

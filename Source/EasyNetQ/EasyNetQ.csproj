@@ -134,11 +134,6 @@
     <Compile Include="MessageVersioning\MessageVersionStack.cs" />
     <Compile Include="NonGeneric\NonGenericExtensions.cs" />
     <Compile Include="PersistentConnection.cs" />
-    <Compile Include="Producer\AdvancedClientRpc.cs" />
-    <Compile Include="Producer\BetterRpc.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Producer\AdvancedServerRpc.cs" />
     <Compile Include="Producer\ClientCommandDispatcher.cs" />
     <Compile Include="Producer\ClientCommandDispatcherSingleton.cs" />
     <Compile Include="Producer\IClientCommandDispatcher.cs" />
@@ -147,7 +142,6 @@
     <Compile Include="Producer\IPersistentChannelFactory.cs" />
     <Compile Include="Producer\IPublisher.cs" />
     <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
-    <Compile Include="Producer\IRpc.cs" />
     <Compile Include="Producer\ISendReceive.cs" />
     <Compile Include="Producer\PersistentChannel.cs" />
     <Compile Include="Producer\PublisherBase.cs" />
@@ -156,7 +150,6 @@
     <Compile Include="Producer\PublisherFactory.cs" />
     <Compile Include="Producer\PublishExchangeDeclareStrategy.cs" />
     <Compile Include="Producer\PublishNackedException.cs" />
-    <Compile Include="Producer\Rpc.cs" />
     <Compile Include="Producer\SendReceive.cs" />
     <Compile Include="MessageVersioning\VersionedPublishExchangeDeclareStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -167,6 +160,11 @@
     <Compile Include="RabbitBusExtensions.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
+    <Compile Include="Rpc\AdvancedClientRpc.cs" />
+    <Compile Include="Rpc\AdvancedServerRpc.cs" />
+    <Compile Include="Rpc\BetterRpc.cs" />
+    <Compile Include="Rpc\IRpc.cs" />
+    <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
     <Compile Include="Sprache\Input.cs" />
