@@ -36,8 +36,7 @@ namespace EasyNetQ
             IContainer container,
             IConnectionConfiguration connectionConfiguration,
             IMessageSerializationStrategy messageSerializationStrategy,
-            IAdvancedClientRpc advancedClientRpc,
-            IAdvancedServerRpc advancedServerRpc)
+            IAdvancedRpcFactory advancedRpcFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -57,8 +56,8 @@ namespace EasyNetQ
             this.container = container;
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
-            this.advancedClientRpc = advancedClientRpc;
-            this.advancedServerRpc = advancedServerRpc;
+            advancedClientRpc = advancedRpcFactory.CreateClientRpc(this);
+            advancedServerRpc = advancedRpcFactory.CreateServerRpc(this);
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
