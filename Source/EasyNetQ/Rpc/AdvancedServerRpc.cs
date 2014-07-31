@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Rpc
 {
     class AdvancedServerRpc : IAdvancedServerRpc
     {
