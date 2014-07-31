@@ -44,11 +44,10 @@ namespace EasyNetQ
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IConsumeSingle, DefaultConsumeSingle>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
-                
+
                 .Register<IRpc, BetterRpc>()
                 .Register<IRpcHeaderKeys, RpcHeaderKeys>()
-                .Register<IAdvancedClientRpc, AdvancedClientRpc>()
-                .Register<IAdvancedServerRpc, AdvancedServerRpc>()
+                .Register<IAdvancedRpcFactory,AdvancedRpcFactory>()
 
                 .Register<ISendReceive, SendReceive>()
                 .Register<IBus, RabbitBus>();

@@ -39,8 +39,7 @@ namespace EasyNetQ
             IMessageSerializationStrategy messageSerializationStrategy, 
             IConsumeSingle consumeSingle)
             IMessageSerializationStrategy messageSerializationStrategy,
-            IAdvancedClientRpc advancedClientRpc,
-            IAdvancedServerRpc advancedServerRpc)
+            IAdvancedRpcFactory advancedRpcFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
