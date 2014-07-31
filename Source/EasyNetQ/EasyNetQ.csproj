@@ -138,6 +138,11 @@
     <Compile Include="MessageVersioning\MessageVersionStack.cs" />
     <Compile Include="NonGeneric\NonGenericExtensions.cs" />
     <Compile Include="PersistentConnection.cs" />
+    <Compile Include="Producer\AdvancedClientRpc.cs" />
+    <Compile Include="Producer\BetterRpc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Producer\AdvancedServerRpc.cs" />
     <Compile Include="Producer\ClientCommandDispatcher.cs" />
     <Compile Include="Producer\ClientCommandDispatcherSingleton.cs" />
     <Compile Include="Producer\IClientCommandDispatcher.cs" />
