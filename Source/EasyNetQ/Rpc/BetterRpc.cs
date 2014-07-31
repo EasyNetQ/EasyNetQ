@@ -30,9 +30,8 @@ namespace EasyNetQ.Rpc
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
 
             var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, () => _conventions.RpcReturnQueueNamingConvention(), serializedMessage);
-            return response.ContinueWith(
-                task => ((IMessage<TResponse>)_messageSerializationStrategy.DeserializeMessage(task.Result.Properties, task.Result.Body).Message).Body,
-                TaskContinuationOptions.NotOnFaulted);
+            return response.Then(sMsg => 
+                TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 
         //TODO add handlerId
@@ -56,10 +55,11 @@ namespace EasyNetQ.Rpc
                     var deserializedMessage = _messageSerializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
                     var request = (IMessage<TRequest>) deserializedMessage.Message;
                     var responseTask = handle(request.Body);
-                    return responseTask.ContinueWith(
-                        task => _messageSerializationStrategy.SerializeMessage(new Message<TResponse>(task.Result)),
-                        TaskContinuationOptions.NotOnFaulted);
+                    return responseTask.Then(response => 
+                        TaskHelpers.FromResult(_messageSerializationStrategy.SerializeMessage(new Message<TResponse>(response))));
                 };
         }
+
+        
     }
 }
