@@ -11,10 +11,10 @@ namespace EasyNetQ.Rpc
         private readonly IConventions _conventions;
         private readonly IMessageSerializationStrategy _messageSerializationStrategy;
 
-        public BetterRpc(IAdvancedClientRpc clientRpc, IAdvancedServerRpc serverRpc, IConventions conventions, IMessageSerializationStrategy messageSerializationStrategy)
+        public BetterRpc(IAdvancedBus advancedBus, IAdvancedRpcFactory advancedRpcFactory, IConventions conventions, IMessageSerializationStrategy messageSerializationStrategy)
         {
-            _clientRpc = clientRpc;
-            _serverRpc = serverRpc;
+            _clientRpc = advancedRpcFactory.CreateClientRpc(advancedBus);
+            _serverRpc = advancedRpcFactory.CreateServerRpc(advancedBus);
             _conventions = conventions;
             _messageSerializationStrategy = messageSerializationStrategy;
         }
