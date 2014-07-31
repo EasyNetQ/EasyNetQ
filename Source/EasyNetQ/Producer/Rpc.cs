@@ -179,10 +179,15 @@ namespace EasyNetQ.Producer
             var exchange = AdvancedPublishExchangeDeclareStrategy.DeclareExchange(
                 advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
 
-            var requestMessage = new Message<TRequest>(request);
-            requestMessage.Properties.ReplyTo = returnQueueName;
-            requestMessage.Properties.CorrelationId = correlationId.ToString();
-            requestMessage.Properties.Expiration = (configuration.Timeout*1000).ToString();
+            var requestMessage = new Message<TRequest>(request)
+                {
+                    Properties =
+                        {
+                            ReplyTo = returnQueueName,
+                            CorrelationId = correlationId.ToString(),
+                            Expiration = (configuration.Timeout*1000).ToString()
+                        }
+                };
 
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
@@ -208,58 +213,35 @@ namespace EasyNetQ.Producer
         {
             var tcs = new TaskCompletionSource<object>();
 
-            try
+            responder(requestMessage.Body).ContinueWith(task =>
             {
-                responder(requestMessage.Body).ContinueWith(task =>
+                if(task.IsFaulted)
                 {
-                    if (task.IsFaulted)
+                    if(task.Exception != null)
                     {
-                        if (task.Exception != null)
+                        var body = ReflectionHelpers.CreateInstance<TResponse>();
+                        var responseMessage = new Message<TResponse>(body);
+                        responseMessage.Properties.Headers.Add(IsFaultedKey, true);
+                        responseMessage.Properties.Headers.Add(ExceptionMessageKey, task.Exception.InnerException.Message);
+                        responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
+                        advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
+                        tcs.SetException(task.Exception);
+                    }
+                }
+                else
+                {
+                    var responseMessage = new Message<TResponse>(task.Result)
                         {
-                            OnResponderFailure<TRequest, TResponse>(requestMessage, task.Exception.InnerException.Message, task.Exception);
-                            tcs.SetException(task.Exception);
-                        }
-                    }
+                            Properties = {CorrelationId = requestMessage.Properties.CorrelationId}
+                        };
 
-                    else
-                    {
-                        OnResponderSuccess(requestMessage, task.Result);
-                        tcs.SetResult(null);
-                    }
-                });
-            }
-            catch (Exception e)
-            {
-                OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e);
-                tcs.SetException(e);
-            }
-            
+                    advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
+                    tcs.SetResult(null);
+                }
+            });
+
             return tcs.Task;
-        }
-
-
-        protected virtual void OnResponderSuccess<TRequest, TResponse>(IMessage<TRequest> requestMessage, TResponse response)
-            where TRequest : class
-            where TResponse : class
-        {
-            var responseMessage = new Message<TResponse>(response);
-            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-
-            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
-        }
-
-        protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
-            where TRequest : class 
-            where TResponse : class
-        {
-            var body = ReflectionHelpers.CreateInstance<TResponse>();
-            var responseMessage = new Message<TResponse>(body);
-            responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-            responseMessage.Properties.Headers.Add(ExceptionMessageKey, exceptionMessage);
-            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
         }
     }
 }
