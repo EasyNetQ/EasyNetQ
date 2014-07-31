@@ -66,6 +66,7 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
+    <Compile Include="Consumer\DisposeWhenSet.cs" />
     <Compile Include="Consumer\HandlerCollection.cs" />
     <Compile Include="Consumer\HandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
@@ -131,6 +132,11 @@
     <Compile Include="MessageVersioning\MessageVersionStack.cs" />
     <Compile Include="NonGeneric\NonGenericExtensions.cs" />
     <Compile Include="PersistentConnection.cs" />
+    <Compile Include="Producer\AdvancedClientRpc.cs" />
+    <Compile Include="Producer\BetterRpc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Producer\AdvancedServerRpc.cs" />
     <Compile Include="Producer\ClientCommandDispatcher.cs" />
     <Compile Include="Producer\ClientCommandDispatcherSingleton.cs" />
     <Compile Include="Producer\IClientCommandDispatcher.cs" />

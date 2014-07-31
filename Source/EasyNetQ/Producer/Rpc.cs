@@ -179,10 +179,15 @@ namespace EasyNetQ.Producer
             var exchange = AdvancedPublishExchangeDeclareStrategy.DeclareExchange(
                 advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
 
-            var requestMessage = new Message<TRequest>(request);
-            requestMessage.Properties.ReplyTo = returnQueueName;
-            requestMessage.Properties.CorrelationId = correlationId.ToString();
-            requestMessage.Properties.Expiration = (configuration.Timeout*1000).ToString();
+            var requestMessage = new Message<TRequest>(request)
+                {
+                    Properties =
+                        {
+                            ReplyTo = returnQueueName,
+                            CorrelationId = correlationId.ToString(),
+                            Expiration = (configuration.Timeout*1000).ToString()
+                        }
+                };
 
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
@@ -226,8 +231,10 @@ namespace EasyNetQ.Producer
                 }
                 else
                 {
-                    var responseMessage = new Message<TResponse>(task.Result);
-                    responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+                    var responseMessage = new Message<TResponse>(task.Result)
+                        {
+                            Properties = {CorrelationId = requestMessage.Properties.CorrelationId}
+                        };
 
                     advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
                     tcs.SetResult(null);
