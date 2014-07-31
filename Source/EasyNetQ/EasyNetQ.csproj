@@ -178,8 +178,12 @@
     <Compile Include="Rpc\AdvancedClientRpc.cs" />
     <Compile Include="Rpc\AdvancedServerRpc.cs" />
     <Compile Include="Rpc\BetterRpc.cs" />
+    <Compile Include="Rpc\IAdvancedClientRpc.cs" />
+    <Compile Include="Rpc\IAdvancedServerRpc.cs" />
     <Compile Include="Rpc\IRpc.cs" />
+    <Compile Include="Rpc\IRpcHeaderKeys.cs" />
     <Compile Include="Rpc\Rpc.cs" />
+    <Compile Include="Rpc\RpcHeaderKeys.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
     <Compile Include="Sprache\Input.cs" />
