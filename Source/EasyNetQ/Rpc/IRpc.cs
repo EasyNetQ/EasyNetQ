@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
@@ -34,7 +33,7 @@ namespace EasyNetQ.Rpc
 
     public interface IAdvancedClientRpc
     {
-        Task<SerializedMessage> Request(IExchange requestExchange,
+        Task<SerializedMessage> RequestAsync(IExchange requestExchange,
                                         string requestRoutingKey,
                                         bool mandatory,
                                         bool immediate,
