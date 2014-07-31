@@ -37,8 +37,7 @@ namespace EasyNetQ
             IContainer container,
             IConnectionConfiguration connectionConfiguration,
             IMessageSerializationStrategy messageSerializationStrategy, 
-            IConsumeSingle consumeSingle)
-            IMessageSerializationStrategy messageSerializationStrategy,
+            IConsumeSingle consumeSingle,
             IAdvancedRpcFactory advancedRpcFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
@@ -61,8 +60,8 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.consumeSingle = consumeSingle;
-            this.advancedClientRpc = advancedClientRpc;
-            this.advancedServerRpc = advancedServerRpc;
+            this.advancedClientRpc = advancedRpcFactory.BlablaMerge...;
+            this.advancedServerRpc = advancedRpcFactory.BlablaMerge...;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -256,7 +255,7 @@ namespace EasyNetQ
             int expires = int.MaxValue,
             string deadLetterExchange = null)
         {
-            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueTtl, expires, deadLetterExchange).Result;
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueTtl, expires, deadLetterExchange).Result; //TODO We need to wait for the task to finish
         }
 
         public Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = Int32.MaxValue, int expires = Int32.MaxValue, string deadLetterExchange = null)

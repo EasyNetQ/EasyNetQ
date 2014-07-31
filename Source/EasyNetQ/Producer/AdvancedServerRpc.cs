@@ -77,9 +77,7 @@ namespace EasyNetQ.Producer
                         tcs.SetResult(null);
                     }
                 });
-
             return tcs.Task;
         }
-
     }
 }
