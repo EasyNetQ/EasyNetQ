@@ -97,6 +97,35 @@ namespace EasyNetQ
         IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
+        /// Create a Rpc-like request queue, and start consuming it. Messages are raw bytes. 
+        /// It will reply on the default exchange with the routingkey given in the header 'ReplyTo' for the request message
+        /// The scheme used by this RPC implementation is compatible with IAdvancedBus.RequestAsync().
+        /// </summary>
+        /// <param name="requestExchange">The exchange the routingkey will be bound in</param>
+        /// <param name="queue">The request queue name</param>
+        /// <param name="topic">The routingkey the queue is bound to</param>
+        /// <param name="handleRequest">The function to call when a new request message is received</param>
+        /// <returns></returns>
+        IDisposable Respond(IExchange requestExchange, IQueue queue, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
+
+        /// <summary>
+        /// Send an rpc-like request to an exchange/routing key.
+        /// Before sending, a randomly named response queue is generated with auto-delete=true, expires=Configuration.Timeout
+        /// Proper headers: CorrelationId, ApplyTo, will be filled accordingly.
+        /// 
+        /// The scheme used by this RPC implementation is compatible with IAdvancedBus.Respond().
+        /// </summary>
+        /// <param name="requestExchange">The exchange the server is configured to use</param>
+        /// <param name="requestRoutingKey">The routingkey the server is configured to use.</param>
+        /// <param name="mandatory">The RabbitMq mandatory flag for the request-message</param>
+        /// <param name="immediate">The RabbitMq immediate flag for the request-message</param>
+        /// <param name="responseQueueName">A function that generates</param>
+        /// <param name="request">The request message</param>
+        /// <returns></returns>
+        Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, Func<string> responseQueueName, SerializedMessage request);
+
+
+        /// <summary>
         /// Publish a message as a byte array
         /// </summary>
         /// <param name="exchange">The exchange to publish to</param>

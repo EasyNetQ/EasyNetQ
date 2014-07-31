@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
-using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Rpc
 {
     /// <summary>
     /// An RPC style request-response pattern
@@ -30,24 +28,5 @@ namespace EasyNetQ.Producer
         IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class;
-    }
-
-    public interface IAdvancedClientRpc
-    {
-        //TODO rename to Async
-        Task<SerializedMessage> Request(IExchange requestExchange,
-                                        string requestRoutingKey,
-                                        bool mandatory,
-                                        bool immediate,
-                                        Func<string> responseQueueName,
-                                        SerializedMessage request);
-    }
-
-    public interface IAdvancedServerRpc
-    {
-        IDisposable Respond(IExchange requestExchange, 
-                            IQueue queue, 
-                            string topic,
-                            Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
     }
 }
