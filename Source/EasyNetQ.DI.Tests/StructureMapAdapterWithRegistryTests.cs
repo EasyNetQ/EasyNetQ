@@ -107,6 +107,7 @@ namespace EasyNetQ.DI.Tests
             public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
             public RpcExchangeNameConvention RpcExchangeNamingConvention { get; set; }
             public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
+            public QueueNameConvention RpcRequestQueueNameConvention { get; set; }
             public ConsumerTagConvention ConsumerTagConvention { get; set; }
 
             public static int ConventionsCallCount { get; private set; }

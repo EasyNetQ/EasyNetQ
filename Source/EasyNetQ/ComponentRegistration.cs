@@ -30,6 +30,7 @@ namespace EasyNetQ
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()
+                .Register<IAdvancedPublishExchangeDeclareStrategy, AdvancedPublishExchangeDeclareStrategy>()
                 .Register(sp => PublisherFactory.CreatePublisher(sp.Resolve<IConnectionConfiguration>(), sp.Resolve<IEasyNetQLogger>(), sp.Resolve<IEventBus>()))
                 .Register<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
                 .Register<IHandlerRunner, HandlerRunner>()
@@ -40,7 +41,12 @@ namespace EasyNetQ
                 .Register<IClientCommandDispatcherFactory, ClientCommandDispatcherFactory>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
-                .Register<IRpc, Rpc>()
+                
+                .Register<IRpc, BetterRpc>()
+                .Register<IRpcHeaderKeys, RpcHeaderKeys>()
+                .Register<IAdvancedClientRpc, AdvancedClientRpc>()
+                .Register<IAdvancedServerRpc, AdvancedServerRpc>()
+
                 .Register<ISendReceive, SendReceive>()
                 .Register<IBus, RabbitBus>();
         }

@@ -12,7 +12,6 @@ namespace EasyNetQ
     public delegate string ErrorQueueNameConvention();
     public delegate string ErrorExchangeNameConvention(MessageReceivedInfo info);
     public delegate string RpcExchangeNameConvention();
-
     public delegate string RpcReturnQueueNamingConvention();
 
     public delegate string ConsumerTagConvention();
@@ -28,8 +27,10 @@ namespace EasyNetQ
         ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
         RpcExchangeNameConvention RpcExchangeNamingConvention { get; set; }
         RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
+        QueueNameConvention RpcRequestQueueNameConvention { get; set; }
 
-        ConsumerTagConvention ConsumerTagConvention { get; set; }
+
+	    ConsumerTagConvention ConsumerTagConvention { get; set; }
 	}
 
 	public class Conventions : IConventions
@@ -66,6 +67,7 @@ namespace EasyNetQ
                             : string.Format("{0}_{1}", attr.QueueName, subscriptionId);
 					};
             RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
+		    RpcRequestQueueNameConvention = (type, id) => "Rpc:"+QueueNamingConvention(type,id);
 
             ErrorQueueNamingConvention = () => "EasyNetQ_Default_Error_Queue";
 		    ErrorExchangeNamingConvention = info => "ErrorExchange_" + info.RoutingKey;
@@ -90,7 +92,8 @@ namespace EasyNetQ
         public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
         public RpcExchangeNameConvention RpcExchangeNamingConvention { get; set; }
         public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
+	    public QueueNameConvention RpcRequestQueueNameConvention { get; set; }
 
-        public ConsumerTagConvention ConsumerTagConvention { get; set; }
+	    public ConsumerTagConvention ConsumerTagConvention { get; set; }
 	}
 }
