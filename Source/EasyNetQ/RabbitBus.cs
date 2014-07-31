@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Producer;
+using EasyNetQ.Rpc;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
