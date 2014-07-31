@@ -34,6 +34,7 @@ namespace EasyNetQ.Rpc
 
     public interface IAdvancedClientRpc
     {
+        //TODO rename to Async
         Task<SerializedMessage> Request(IExchange requestExchange,
                                         string requestRoutingKey,
                                         bool mandatory,
