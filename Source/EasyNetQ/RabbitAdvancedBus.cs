@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
+using EasyNetQ.Rpc;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -171,7 +172,7 @@ namespace EasyNetQ
             Func<string> responseQueueName, 
             SerializedMessage request)
         {
-            return advancedClientRpc.Request(requestExchange, requestRoutingKey, mandatory, immediate, responseQueueName, request);
+            return advancedClientRpc.RequestAsync(requestExchange, requestRoutingKey, mandatory, immediate, responseQueueName, request);
         }
 
         // -------------------------------- publish ---------------------------------------------
