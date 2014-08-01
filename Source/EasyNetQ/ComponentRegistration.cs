@@ -26,6 +26,7 @@ namespace EasyNetQ
                 .Register<ITypeNameSerializer, TypeNameSerializer>()
                 .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()                
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
+                .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()

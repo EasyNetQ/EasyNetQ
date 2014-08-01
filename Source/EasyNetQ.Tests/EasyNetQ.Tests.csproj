@@ -96,6 +96,7 @@
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="DefaultMessageSerializationStrategyTests.cs" />
+    <Compile Include="DeliveryModeStrategyTest.cs" />
     <Compile Include="Integration\AmqpStringSizeExperiments.cs" />
     <Compile Include="Integration\AutoSubscriberIntegrationTests.cs" />
     <Compile Include="Integration\ChannelExceptionBug.cs" />

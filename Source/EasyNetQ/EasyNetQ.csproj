@@ -89,6 +89,8 @@
     <Compile Include="DefaultMessageSerializationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="DeliveryModeAttribute.cs" />
+    <Compile Include="DeliveryModeStrategy.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="Events\AckEvent.cs" />
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
