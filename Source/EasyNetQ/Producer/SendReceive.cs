@@ -9,19 +9,19 @@ namespace EasyNetQ.Producer
     public class SendReceive : ISendReceive
     {
         private readonly IAdvancedBus advancedBus;
-        private readonly IConnectionConfiguration connectionConfiguration;
-
+        private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+        
         private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>(); 
 
         public SendReceive(
             IAdvancedBus advancedBus,
-            IConnectionConfiguration connectionConfiguration)
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
 
             this.advancedBus = advancedBus;
-            this.connectionConfiguration = connectionConfiguration;
+            this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
         public void Send<T>(string queue, T message)
@@ -33,7 +33,7 @@ namespace EasyNetQ.Producer
             DeclareQueue(queue);
             
             var wrappedMessage = new Message<T>(message);
-            wrappedMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
+            wrappedMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1);
             
             advancedBus.Publish(Exchange.GetDefault(), queue, false, false, wrappedMessage);
         }

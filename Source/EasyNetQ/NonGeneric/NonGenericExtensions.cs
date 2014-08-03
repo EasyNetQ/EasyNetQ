@@ -89,12 +89,12 @@ namespace EasyNetQ.NonGeneric
             
             var advancedBus = bus.Advanced.Container.Resolve<IAdvancedBus>();
             var publishExchangeDeclareStrategy = bus.Advanced.Container.Resolve<IPublishExchangeDeclareStrategy>();
-            var connectionConfiguration = bus.Advanced.Container.Resolve<IConnectionConfiguration>();
+            var messageDeliveryModeStrategy = bus.Advanced.Container.Resolve<IMessageDeliveryModeStrategy>();
             
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
             var easyNetQMessage = Message.CreateInstance(messageType, message);
 
-            easyNetQMessage.Properties.DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1);
+            easyNetQMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1);
 
             return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
         }
