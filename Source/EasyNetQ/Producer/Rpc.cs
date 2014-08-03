@@ -220,6 +220,7 @@ namespace EasyNetQ.Producer
                             tcs.SetException(task.Exception);
                         }
                     }
+
                     else
                     {
                         OnResponderSuccess(requestMessage, task.Result);
@@ -236,12 +237,14 @@ namespace EasyNetQ.Producer
             return tcs.Task;
         }
 
+
         protected virtual void OnResponderSuccess<TRequest, TResponse>(IMessage<TRequest> requestMessage, TResponse response)
             where TRequest : class
             where TResponse : class
         {
             var responseMessage = new Message<TResponse>(response);
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
 
             advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
         }

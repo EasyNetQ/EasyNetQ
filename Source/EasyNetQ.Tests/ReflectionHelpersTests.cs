@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
             ReflectionHelpers.CreateInstance<ClassWithoutDefaultConstuctor>();
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Test]
         public void ShouldPerformFasterThanActivator()
         {
             // warmup
@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
                 count += ReflectionHelpers.CreateInstance<ClassWithDefaultConstuctor>().Value;
             }
             stopWatch.Stop();
-            var creatorTime = stopWatch.Elapsed;
+            var activatorTime = stopWatch.Elapsed;
             stopWatch.Reset();
 
             stopWatch.Start();
@@ -49,8 +49,8 @@ namespace EasyNetQ.Tests
                 count += Activator.CreateInstance<ClassWithDefaultConstuctor>().Value;
             }
             stopWatch.Stop();
-            var activator = stopWatch.Elapsed;
-            Assert.IsTrue(creatorTime < activator);
+            var creatorTime = stopWatch.Elapsed;
+            Assert.IsTrue(creatorTime + creatorTime < activatorTime);
             Assert.AreEqual(2000000, count);
         }
 
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests
             Assert.IsTrue(typeof (TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
         }
 
-        [Test, Explicit("Fails on build server")]
+        [Test]
         public void ShouldPerformFasterThanGetCustomAttributes()
         {
             var type = typeof (TestAttributedClass);
