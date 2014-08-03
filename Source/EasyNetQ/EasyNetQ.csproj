@@ -162,6 +162,7 @@
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitBusExtensions.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
     <Compile Include="Sprache\Input.cs" />

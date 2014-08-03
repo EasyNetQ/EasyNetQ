@@ -214,7 +214,7 @@ namespace EasyNetQ.Producer
                 {
                     if(task.Exception != null)
                     {
-                        var body = Activator.CreateInstance<TResponse>();
+                        var body = ReflectionHelpers.CreateInstance<TResponse>();
                         var responseMessage = new Message<TResponse>(body);
                         responseMessage.Properties.Headers.Add(IsFaultedKey, true);
                         responseMessage.Properties.Headers.Add(ExceptionMessageKey, task.Exception.InnerException.Message);
