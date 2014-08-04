@@ -71,17 +71,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Test]
         public void Should_have_started_consuming_from_the_correct_queues()
         {
-            Action<int, string> assertConsumerStarted = (channelIndex, queueName) =>
-                mockBuilder.Channels[channelIndex].AssertWasCalled(x => x.BasicConsume(
-                    Arg<string>.Is.Equal(queueName),
-                    Arg<bool>.Is.Equal(false), // NoAck
-                    Arg<string>.Is.Anything,
-                    Arg<IDictionary<string, object>>.Is.Anything,
-                    Arg<IBasicConsumer>.Is.Anything));
-
-            assertConsumerStarted(1, expectedQueueName1);
-            assertConsumerStarted(2, expectedQueueName2);
-            assertConsumerStarted(3, expectedQueueName3);
+            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).ShouldBeTrue();
+            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName2).ShouldBeTrue();
+            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).ShouldBeTrue();
         }
 
 
