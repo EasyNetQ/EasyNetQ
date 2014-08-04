@@ -77,8 +77,7 @@ namespace EasyNetQ
 
         private QueueAttribute GetQueueAttribute(Type messageType)
         {
-            var attr = messageType.GetCustomAttributes(typeof(QueueAttribute), true).FirstOrDefault() as QueueAttribute;
-
+            var attr = messageType.GetAttributes<QueueAttribute>().FirstOrDefault();
             return attr ?? new QueueAttribute(string.Empty);
         }
 
