@@ -3,7 +3,7 @@
   <metadata>
     <id>EasyNetQ.Management.Client</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.26.7.0</version>
+    <version>0.35.1.0</version>
     <title>EasyNetQ.Management.Client</title>
     <authors>Mike Hadlow</authors>
     <owners>Mike Hadlow</owners>
