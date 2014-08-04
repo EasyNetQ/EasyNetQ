@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
                 count += ReflectionHelpers.CreateInstance<ClassWithDefaultConstuctor>().Value;
             }
             stopWatch.Stop();
-            var activatorTime = stopWatch.Elapsed;
+            var creatorTime = stopWatch.Elapsed;
             stopWatch.Reset();
 
             stopWatch.Start();
@@ -49,8 +49,8 @@ namespace EasyNetQ.Tests
                 count += Activator.CreateInstance<ClassWithDefaultConstuctor>().Value;
             }
             stopWatch.Stop();
-            var creatorTime = stopWatch.Elapsed;
-            Assert.IsTrue(creatorTime + creatorTime < activatorTime);
+            var activator = stopWatch.Elapsed;
+            Assert.IsTrue(creatorTime < activator);
             Assert.AreEqual(2000000, count);
         }
 
