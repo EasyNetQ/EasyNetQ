@@ -1,4 +1,5 @@
 ﻿using System;
+using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
@@ -39,6 +40,7 @@ namespace EasyNetQ
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
                 .Register<IClientCommandDispatcherFactory, ClientCommandDispatcherFactory>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
+                .Register<IConsumeSingle, DefaultConsumeSingle>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IRpc, Rpc>()
                 .Register<ISendReceive, SendReceive>()

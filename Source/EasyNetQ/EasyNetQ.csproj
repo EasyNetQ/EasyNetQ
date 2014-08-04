@@ -69,11 +69,13 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
+    <Compile Include="Consumer\ConsumeSingleResult.cs" />
     <Compile Include="Consumer\HandlerCollection.cs" />
     <Compile Include="Consumer\HandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
     <Compile Include="Consumer\IConsumerConfiguration.cs" />
     <Compile Include="Consumer\IConsumerFactory.cs" />
+    <Compile Include="Consumer\IConsumeSingle.cs" />
     <Compile Include="Consumer\IHandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IHandlerRegistration.cs" />
     <Compile Include="Consumer\InternalConsumer.cs" />
