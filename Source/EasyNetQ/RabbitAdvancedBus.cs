@@ -21,6 +21,7 @@ namespace EasyNetQ
         private readonly IContainer container;
         private readonly IConnectionConfiguration connectionConfiguration;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IConsumeSingle consumeSingle;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -32,7 +33,8 @@ namespace EasyNetQ
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container,
             IConnectionConfiguration connectionConfiguration,
-            IMessageSerializationStrategy messageSerializationStrategy)
+            IMessageSerializationStrategy messageSerializationStrategy, 
+            IConsumeSingle consumeSingle)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -43,6 +45,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(container, "container");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(consumeSingle, "consumeSingle");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -52,6 +55,7 @@ namespace EasyNetQ
             this.container = container;
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.consumeSingle = consumeSingle;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -136,6 +140,11 @@ namespace EasyNetQ
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection, consumerConfiguration);
             return consumer.StartConsuming();
+        }
+
+        public ConsumeSingleResult ConsumeSingle()
+        {
+            return consumeSingle.ConsumeSingle(connection);
         }
 
         // -------------------------------- publish ---------------------------------------------

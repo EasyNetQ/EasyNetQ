@@ -97,6 +97,12 @@ namespace EasyNetQ
         IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
+        /// Consume a single message from an exclusive single-use queue
+        /// </summary>
+        /// <returns>A ConsumeSingleResult</returns>
+        ConsumeSingleResult ConsumeSingle();
+
+        /// <summary>
         /// Publish a message as a byte array
         /// </summary>
         /// <param name="exchange">The exchange to publish to</param>
