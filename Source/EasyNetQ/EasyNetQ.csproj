@@ -58,6 +58,7 @@
     <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
     <Compile Include="AutoSubscribe\ForTopicAttribute.cs" />
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
+    <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
