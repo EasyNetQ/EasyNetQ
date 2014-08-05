@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
             ReflectionHelpers.CreateInstance<ClassWithoutDefaultConstuctor>();
         }
 
-        [Test]
+        [Test, Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivator()
         {
             // warmup
