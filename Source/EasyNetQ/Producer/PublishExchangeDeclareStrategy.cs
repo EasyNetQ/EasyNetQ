@@ -39,6 +39,7 @@ namespace EasyNetQ.Producer
             return DeclareExchangeAsync(advancedBus, exchangeName, exchangeType).Result;
         }
 
+        //TODO This is actually not a semantically correct optimization. It should fail if the exchangetype is not the same
         public Task<IExchange> DeclareExchangeAsync(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
         {
             return _exchangeNames.AddOrUpdate(
