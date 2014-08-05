@@ -114,6 +114,8 @@ namespace EasyNetQ
         /// Create a Rpc-like request queue, and start consuming it. Messages are raw bytes. 
         /// It will reply on the default exchange with the routingkey given in the header 'ReplyTo' for the request message
         /// The scheme used by this RPC implementation is compatible with IAdvancedBus.RequestAsync().
+        /// 
+        /// Note that Exception thrown in handleRequest will both forward a message to the ErrorQueue and to the client
         /// </summary>
         /// <param name="requestExchange">The exchange the routingkey will be bound in</param>
         /// <param name="queue">The request queue name</param>
