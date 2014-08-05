@@ -39,12 +39,12 @@ namespace EasyNetQ
             Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
             var advancedBus = bus.Advanced;
             var conventions = advancedBus.Container.Resolve<IConventions>();
-            var connectionConfiguration = advancedBus.Container.Resolve<IConnectionConfiguration>();
+            var messageDeliveryModeStrategy = advancedBus.Container.Resolve<IMessageDeliveryModeStrategy>();
             var delay = Round(messageDelay);
             var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
-            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
+            var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_" + delayString;
-            var futureQueueName = conventions.QueueNamingConvention(typeof(T), delayString);
+            var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
             return advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Topic)
                 .Then(futureExchange => advancedBus.QueueDeclareAsync(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName)
                                                    .Then(futureQueue => advancedBus.BindAsync(futureExchange, futureQueue, "#"))
@@ -54,12 +54,11 @@ namespace EasyNetQ
                                                                {
                                                                    Properties =
                                                                        {
-                                                                           DeliveryMode = (byte)(connectionConfiguration.PersistentMessages ? 2 : 1)
+                                                                           DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1)
                                                                        }
                                                                };
                                                            return bus.Advanced.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
                                                        }));
         }
-
     }
 }
