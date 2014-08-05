@@ -29,14 +29,15 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_be_able_to_consume_a_single_message()
         {
-            var result = advancedBus.ConsumeSingle();
+            var queue = new Queue(Guid.NewGuid().ToString(), true);
+            var result = advancedBus.ConsumeSingle(queue, TimeSpan.FromSeconds(5));
             var body = Encoding.UTF8.GetBytes("Hello World");
 
-            advancedBus.Publish(Exchange.GetDefault(), result.Queue.Name, false, false, new MessageProperties(), body);
+            advancedBus.Publish(Exchange.GetDefault(), queue.Name, false, false, new MessageProperties(), body);
 
-            result.MessageTask.Wait();
+            result.Wait();
 
-            var message = Encoding.UTF8.GetString(result.MessageTask.Result.Message);
+            var message = Encoding.UTF8.GetString(result.Result.Message);
 
             Console.Out.WriteLine("message = {0}", message);
         }
@@ -52,9 +53,9 @@ namespace EasyNetQ.Tests.Integration
             for (int i = 0; i < count; i++)
             {
                 var publishedMessage = string.Format("Hello World {0}", i);
-
-                var result = advancedBus.ConsumeSingle();
-                result.MessageTask.ContinueWith(task =>
+                var queue = new Queue(Guid.NewGuid().ToString(), true);
+                var result = advancedBus.ConsumeSingle(queue,TimeSpan.FromSeconds(5));
+                result.ContinueWith(task =>
                 {
                     var consumedMessage = Encoding.UTF8.GetString(task.Result.Message);
                     consumedMessage.ShouldEqual(publishedMessage);
@@ -62,7 +63,7 @@ namespace EasyNetQ.Tests.Integration
                 });
 
                 var body = Encoding.UTF8.GetBytes(publishedMessage);
-                advancedBus.Publish(Exchange.GetDefault(), result.Queue.Name, false, false, new MessageProperties(), body);
+                advancedBus.Publish(Exchange.GetDefault(), queue.Name, false, false, new MessageProperties(), body);
             }
 
             countdown.Wait(TimeSpan.FromSeconds(10));

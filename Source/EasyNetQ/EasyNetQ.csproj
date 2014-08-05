@@ -168,7 +168,6 @@
     <Compile Include="Rpc\AdvancedRpc.cs" />
     <Compile Include="Rpc\AdvancedRpcFactory.cs" />
     <Compile Include="Rpc\AdvancedServerRpc.cs" />
-    <Compile Include="Rpc\BetterRpc.cs" />
     <Compile Include="Rpc\IAdvancedClientRpc.cs" />
     <Compile Include="Rpc\IAdvancedRpcFactory.cs" />
     <Compile Include="Rpc\IAdvancedServerRpc.cs" />
