@@ -208,33 +208,55 @@ namespace EasyNetQ.Producer
         {
             var tcs = new TaskCompletionSource<object>();
 
-            responder(requestMessage.Body).ContinueWith(task =>
+            try
             {
-                if(task.IsFaulted)
+                responder(requestMessage.Body).ContinueWith(task =>
                 {
-                    if(task.Exception != null)
+                    if (task.IsFaulted)
                     {
-                        var body = Activator.CreateInstance<TResponse>();
-                        var responseMessage = new Message<TResponse>(body);
-                        responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-                        responseMessage.Properties.Headers.Add(ExceptionMessageKey, task.Exception.InnerException.Message);
-                        responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-                        advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
-                        tcs.SetException(task.Exception);
+                        if (task.Exception != null)
+                        {
+                            OnResponderFailure<TRequest, TResponse>(requestMessage, task.Exception.InnerException.Message, task.Exception);
+                            tcs.SetException(task.Exception);
+                        }
                     }
-                }
-                else
-                {
-                    var responseMessage = new Message<TResponse>(task.Result);
-                    responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-                    advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
-                    tcs.SetResult(null);
-                }
-            });
-
+                    else
+                    {
+                        OnResponderSuccess(requestMessage, task.Result);
+                        tcs.SetResult(null);
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e);
+                tcs.SetException(e);
+            }
+            
             return tcs.Task;
+        }
+
+        protected virtual void OnResponderSuccess<TRequest, TResponse>(IMessage<TRequest> requestMessage, TResponse response)
+            where TRequest : class
+            where TResponse : class
+        {
+            var responseMessage = new Message<TResponse>(response);
+            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
+            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
+        }
+
+        protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
+            where TRequest : class 
+            where TResponse : class
+        {
+            var body = ReflectionHelpers.CreateInstance<TResponse>();
+            var responseMessage = new Message<TResponse>(body);
+            responseMessage.Properties.Headers.Add(IsFaultedKey, true);
+            responseMessage.Properties.Headers.Add(ExceptionMessageKey, exceptionMessage);
+            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
+            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
         }
     }
 }

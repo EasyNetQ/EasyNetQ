@@ -58,6 +58,7 @@
     <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
     <Compile Include="AutoSubscribe\ForTopicAttribute.cs" />
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
+    <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
     <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitBusExtensions.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
     <Compile Include="Sprache\Input.cs" />

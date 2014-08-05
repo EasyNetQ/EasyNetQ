@@ -6,7 +6,6 @@ using System.Reflection;
 using EasyNetQ.Management.Client.Model;
 using EasyNetQ.Management.Client.Serialization;
 using Newtonsoft.Json;
-using System.Diagnostics.Contracts;
 using Newtonsoft.Json.Converters;
 
 namespace EasyNetQ.Management.Client
@@ -19,15 +18,8 @@ namespace EasyNetQ.Management.Client
         private readonly int portNumber;
         public static readonly JsonSerializerSettings Settings;
 
-        private bool runningOnMono;
-
-        public ManagementClient(
-            string hostUrl,
-            string username,
-            string password)
-            : this(hostUrl, username, password, 15672)
-        {
-        }
+        private readonly bool runningOnMono;
+        private readonly Action<HttpWebRequest> configureRequest;
 
         static ManagementClient()
         {
@@ -58,7 +50,13 @@ namespace EasyNetQ.Management.Client
             get { return portNumber; }
         }
 
-        public ManagementClient(string hostUrl, string username, string password, int portNumber, bool runningOnMono = false)
+        public ManagementClient(
+            string hostUrl, 
+            string username, 
+            string password, 
+            int portNumber = 15672, 
+            bool runningOnMono = false,
+            Action<HttpWebRequest> configureRequest = null)
         {
             if (string.IsNullOrEmpty(hostUrl))
             {
@@ -72,6 +70,10 @@ namespace EasyNetQ.Management.Client
             {
                 throw new ArgumentException("password is null or empty");
             }
+            if (configureRequest == null)
+            {
+                configureRequest = x => { };
+            }
 
             this.hostUrl = hostUrl;
             this.username = username;
@@ -79,6 +81,8 @@ namespace EasyNetQ.Management.Client
             this.portNumber = portNumber;
 
             this.runningOnMono = runningOnMono;
+            this.configureRequest = configureRequest;
+
 			if (!runningOnMono) 
 			{
 	            LeaveDotsAndSlashesEscaped();
@@ -646,6 +650,8 @@ namespace EasyNetQ.Management.Client
 
 			var request = (HttpWebRequest)WebRequest.Create(uri);
             request.Credentials = new NetworkCredential(username, password);
+            configureRequest(request);
+
             return request;
         }
 

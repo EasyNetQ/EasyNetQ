@@ -147,7 +147,7 @@ namespace EasyNetQ.Producer
 
         private bool IsTimedOut(DateTime startTime)
         {
-            return startTime.AddSeconds(configuration.Timeout) < DateTime.Now;
+            return !configuration.Timeout.Equals(0) && startTime.AddSeconds(configuration.Timeout) < DateTime.Now;
         }
 
         public void Dispose()

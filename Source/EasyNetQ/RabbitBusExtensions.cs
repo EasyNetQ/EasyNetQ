@@ -17,28 +17,7 @@ namespace EasyNetQ
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IBus bus, TimeSpan messageDelay, T message) where T : class
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
-            var advancedBus = bus.Advanced;
-            var conventions = advancedBus.Container.Resolve<IConventions>();
-            var deliveryModeStrategy = advancedBus.Container.Resolve<IMessageDeliveryModeStrategy>();
-            var delay = Round(messageDelay);
-            var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
-            var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
-            var futureExchangeName = exchangeName + "_" + delayString;
-            var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
-            var futureExchange = advancedBus.ExchangeDeclare(futureExchangeName, ExchangeType.Topic);
-            var futureQueue = advancedBus.QueueDeclare(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName);
-            advancedBus.Bind(futureExchange, futureQueue, "#");
-            var easyNetQMessage = new Message<T>(message)
-                {
-                    Properties =
-                        {
-                            DeliveryMode = (byte) (deliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1)
-                        }
-                };
-
-            bus.Advanced.Publish(futureExchange, "#", false, false, easyNetQMessage);
+            FuturePublishAsync(bus, messageDelay, message).Wait();
         }
 
         private static TimeSpan Round(TimeSpan timeSpan)
@@ -66,18 +45,20 @@ namespace EasyNetQ
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_" + delayString;
             var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
-            var futureExchange = advancedBus.ExchangeDeclare(futureExchangeName, ExchangeType.Topic);
-            var futureQueue = advancedBus.QueueDeclare(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName);
-            advancedBus.Bind(futureExchange, futureQueue, "#");
-            var easyNetQMessage = new Message<T>(message)
-                {
-                    Properties =
-                        {
-                            DeliveryMode = (byte) (messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1)
-                        }
-                };
-
-            return bus.Advanced.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
+            return advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Topic)
+                .Then(futureExchange => advancedBus.QueueDeclareAsync(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName)
+                                                   .Then(futureQueue => advancedBus.BindAsync(futureExchange, futureQueue, "#"))
+                                                   .Then(() =>
+                                                       {
+                                                           var easyNetQMessage = new Message<T>(message)
+                                                               {
+                                                                   Properties =
+                                                                       {
+                                                                           DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1)
+                                                                       }
+                                                               };
+                                                           return bus.Advanced.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
+                                                       }));
         }
     }
 }

@@ -20,9 +20,9 @@ namespace EasyNetQ
         public bool IsPersistent(Type messageType)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
-            var persistentAttribute = messageType.GetCustomAttributes(typeof (DeliveryModeAttribute), true).FirstOrDefault() as DeliveryModeAttribute;
-            if (persistentAttribute != null)
-                return persistentAttribute.IsPersistent;
+            var deliveryModeAttribute = messageType.GetAttributes<DeliveryModeAttribute>().FirstOrDefault();
+            if (deliveryModeAttribute != null)
+                return deliveryModeAttribute.IsPersistent;
             return connectionConfiguration.PersistentMessages;
         }
     }
