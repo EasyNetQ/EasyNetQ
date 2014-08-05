@@ -4,7 +4,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
 {
-    class BetterRpc : IRpc
+    public class BetterRpc : IRpc
     {
         private readonly IAdvancedClientRpc _clientRpc;
         private readonly IAdvancedServerRpc _serverRpc;
