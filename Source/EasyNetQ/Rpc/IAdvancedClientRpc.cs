@@ -10,7 +10,7 @@ namespace EasyNetQ.Rpc
                                              string requestRoutingKey,
                                              bool mandatory,
                                              bool immediate,
-                                             Func<string> responseQueueName,
+                                             TimeSpan timeout,
                                              SerializedMessage request);
     }
 }

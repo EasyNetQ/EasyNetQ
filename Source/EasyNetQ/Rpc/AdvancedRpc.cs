@@ -4,19 +4,23 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
 {
-    public class BetterRpc : IRpc
+    public class AdvancedRpc : IRpc
     {
         private readonly IAdvancedClientRpc _clientRpc;
         private readonly IAdvancedServerRpc _serverRpc;
+        private readonly IAdvancedBus _advancedBus;
         private readonly IConventions _conventions;
         private readonly IMessageSerializationStrategy _messageSerializationStrategy;
+        private readonly IConnectionConfiguration _connectionConfiguration;
 
-        public BetterRpc(IAdvancedBus advancedBus, IAdvancedRpcFactory advancedRpcFactory, IConventions conventions, IMessageSerializationStrategy messageSerializationStrategy)
+        public AdvancedRpc(IAdvancedBus advancedBus, IAdvancedRpcFactory advancedRpcFactory, IConventions conventions, IMessageSerializationStrategy messageSerializationStrategy, IConnectionConfiguration connectionConfiguration)
         {
             _clientRpc = advancedRpcFactory.CreateClientRpc(advancedBus);
             _serverRpc = advancedRpcFactory.CreateServerRpc(advancedBus);
+            _advancedBus = advancedBus;
             _conventions = conventions;
             _messageSerializationStrategy = messageSerializationStrategy;
+            _connectionConfiguration = connectionConfiguration;
         }
 
         public Task<TResponse> Request<TRequest, TResponse>(TRequest request)
@@ -25,13 +29,16 @@ namespace EasyNetQ.Rpc
         {
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
             var requestRoutingKey = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
+            
+            var timeout = TimeSpan.FromSeconds(_connectionConfiguration.Timeout);
+
             var message = new Message<TRequest>(request);
-
+            
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
-
-            var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, () => _conventions.RpcReturnQueueNamingConvention(), serializedMessage);
-            return response.Then(sMsg => 
-                TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
+            
+            var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, timeout, serializedMessage);
+            
+            return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 
         //TODO add handlerId
@@ -44,6 +51,8 @@ namespace EasyNetQ.Rpc
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
             var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId),false);
             var topic = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
+
+            _advancedBus.ExchangeDeclare(exchange.Name, ExchangeType.Topic);
 
             return _serverRpc.Respond(exchange, queue, topic, HandleRequest(responder));
         }
@@ -59,7 +68,5 @@ namespace EasyNetQ.Rpc
                         TaskHelpers.FromResult(_messageSerializationStrategy.SerializeMessage(new Message<TResponse>(response))));
                 };
         }
-
-        
     }
 }

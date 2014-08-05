@@ -37,7 +37,7 @@ namespace EasyNetQ
             IContainer container,
             IConnectionConfiguration connectionConfiguration,
             IMessageSerializationStrategy messageSerializationStrategy, 
-            IConsumeSingle consumeSingle,
+            IConsumeSingleFactory consumeSingleFactory,
             IAdvancedRpcFactory advancedRpcFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
@@ -49,7 +49,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(container, "container");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
-            Preconditions.CheckNotNull(consumeSingle, "consumeSingle");
+            Preconditions.CheckNotNull(consumeSingleFactory, "consumeSingleFactory");
+            Preconditions.CheckNotNull(advancedRpcFactory, "advancedRpcFactory");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -59,11 +60,12 @@ namespace EasyNetQ
             this.container = container;
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
-            this.consumeSingle = consumeSingle;
+            
             advancedClientRpc = advancedRpcFactory.CreateClientRpc(this);
             advancedServerRpc = advancedRpcFactory.CreateServerRpc(this);
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
+            this.consumeSingle = consumeSingleFactory.Create(connection);
 
             eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
@@ -148,9 +150,14 @@ namespace EasyNetQ
             return consumer.StartConsuming();
         }
 
-        public ConsumeSingleResult ConsumeSingle()
+        public Task ConsumeSingle(IQueue queue, TimeSpan timeout, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
         {
-            return consumeSingle.ConsumeSingle(connection);
+            return consumeSingle.ConsumeSingle(queue, timeout).Then(context => onMessage(context.Message, context.Properties, context.Info));
+        }
+
+        public Task<MessageConsumeContext> ConsumeSingle(IQueue queue, TimeSpan timeout)
+        {
+            return consumeSingle.ConsumeSingle(queue, timeout);
         }
 
         public IDisposable Respond(
@@ -167,10 +174,10 @@ namespace EasyNetQ
             string requestRoutingKey, 
             bool mandatory, 
             bool immediate, 
-            Func<string> responseQueueName, 
+            TimeSpan timeout,
             SerializedMessage request)
         {
-            return advancedClientRpc.RequestAsync(requestExchange, requestRoutingKey, mandatory, immediate, responseQueueName, request);
+            return advancedClientRpc.RequestAsync(requestExchange, requestRoutingKey, mandatory, immediate, timeout, request);
         }
 
         // -------------------------------- publish ---------------------------------------------

@@ -40,7 +40,7 @@ namespace EasyNetQ.Rpc
                 passive: false, 
                 durable: false, 
                 exclusive: queue.IsExclusive,
-                autoDelete: false, 
+                autoDelete: true, 
                 expires: expires);
 
             advancedBus.Bind(requestExchange, queue, topic);
@@ -77,6 +77,8 @@ namespace EasyNetQ.Rpc
                         tcs.SetResult(null);
                     }
                 });
+            
+            
             return tcs.Task;
         }
     }
