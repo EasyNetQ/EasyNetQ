@@ -97,10 +97,18 @@ namespace EasyNetQ
         IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
-        /// Consume a single message from an exclusive single-use queue
+        /// Consume a single message from a queue
         /// </summary>
-        /// <returns>A ConsumeSingleResult</returns>
-        ConsumeSingleResult ConsumeSingle();
+        /// <returns>The Task from onMessage</returns>
+        Task ConsumeSingle(IQueue queue, TimeSpan timeout, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
+
+        /// <summary>
+        /// Consume a single message from a queue
+        /// </summary>
+        /// <param name="queue">QueueName</param>
+        /// <param name="timeout">Response Timeout</param>
+        /// <returns>Task to continue. Note that it might have failed (Check Task.IsFaulted and Task.IsCancelled)</returns>
+        Task<MessageConsumeContext> ConsumeSingle(IQueue queue, TimeSpan timeout);
 
         /// <summary>
         /// Create a Rpc-like request queue, and start consuming it. Messages are raw bytes. 
@@ -125,10 +133,10 @@ namespace EasyNetQ
         /// <param name="requestRoutingKey">The routingkey the server is configured to use.</param>
         /// <param name="mandatory">The RabbitMq mandatory flag for the request-message</param>
         /// <param name="immediate">The RabbitMq immediate flag for the request-message</param>
-        /// <param name="responseQueueName">A function that generates</param>
+        /// <param name="timeout">Response timeout</param>
         /// <param name="request">The request message</param>
         /// <returns></returns>
-        Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, Func<string> responseQueueName, SerializedMessage request);
+        Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request);
 
 
         /// <summary>

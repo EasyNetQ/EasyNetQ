@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.Events;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
@@ -14,97 +12,23 @@ namespace EasyNetQ.Rpc
         private readonly IAdvancedBus _advancedBus;
         private readonly IConnectionConfiguration _configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
-        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
         
-        private readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
-        
-
-        public AdvancedClientRpc(IAdvancedBus advancedBus, IConnectionConfiguration configuration, IEventBus eventBus, IRpcHeaderKeys rpcHeaderKeys)
+        public AdvancedClientRpc(IAdvancedBus advancedBus, IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys)
         {
             _advancedBus = advancedBus;
             _configuration = configuration;
             _rpcHeaderKeys = rpcHeaderKeys;
-
-            eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
         }
         
-        public Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, Func<string> responseQueueNameFactory, SerializedMessage request)
+        public Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
         {
+            Preconditions.CheckNotNull(requestExchange, "requestExchange");
+            Preconditions.CheckNotNull(requestRoutingKey, "requestRoutingKey");
             Preconditions.CheckNotNull(request, "request");
 
             var correlationId = Guid.NewGuid();
+            var responseQueueName = "rpc:"+correlationId;
 
-            var tcs = new TaskCompletionSource<SerializedMessage>();
-            var timer = new Timer(state =>
-                {
-                    ((Timer)state).Dispose();
-                    tcs.TrySetException(new TimeoutException(
-                                            string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
-                });
-
-            timer.Change(TimeSpan.FromSeconds(_configuration.Timeout), disablePeriodicSignaling);
-
-            RegisterErrorHandling(correlationId, timer, tcs);
-
-            var responseQueueName = responseQueueNameFactory();
-            
-            SubscribeToResponse(responseQueueName);
-            RequestPublish(requestExchange, request, requestRoutingKey, responseQueueName, correlationId);
-
-            return tcs.Task;
-        }
-
-        private void RequestPublish(IExchange requestExchange, SerializedMessage request, string requestRoutingKey, string responseQueueName, Guid correlationId)
-        {
-            request.Properties.ReplyTo = responseQueueName;
-            request.Properties.CorrelationId = correlationId.ToString();
-            request.Properties.Expiration = TimeSpan.FromSeconds(_configuration.Timeout).TotalMilliseconds.ToString();
-
-            _advancedBus.Publish(requestExchange, requestRoutingKey, false, false, request.Properties, request.Body);
-        }
-
-        private void RegisterErrorHandling(Guid correlationId, Timer timer, TaskCompletionSource<SerializedMessage> tcs)
-        {
-            responseActions.TryAdd(correlationId.ToString(), new ResponseAction
-                {
-                    OnSuccess = msg =>
-                        {
-                            timer.Dispose();
-
-                            var isFaulted = false;
-                            var exceptionMessage = "The exception message has not been specified.";
-                            if (msg.Properties.HeadersPresent)
-                            {
-                                if (msg.Properties.Headers.ContainsKey(_rpcHeaderKeys.IsFaultedKey))
-                                {
-                                    isFaulted = Convert.ToBoolean(msg.Properties.Headers[_rpcHeaderKeys.IsFaultedKey]);
-                                }
-                                if (msg.Properties.Headers.ContainsKey(_rpcHeaderKeys.ExceptionMessageKey))
-                                {
-                                    exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[_rpcHeaderKeys.ExceptionMessageKey]);
-                                }
-                            }
-
-                            if (isFaulted)
-                            {
-                                tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
-                            }
-                            else
-                            {
-                                tcs.TrySetResult(msg);
-                            }
-                        },
-                    OnFailure = () =>
-                        {
-                            timer.Dispose();
-                            tcs.TrySetException(new EasyNetQException(
-                                                    "Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
-                        }
-                });
-        }
-
-        private void SubscribeToResponse(string responseQueueName)
-        {
             var queue = _advancedBus.QueueDeclare(
                 responseQueueName,
                 passive: false,
@@ -114,36 +38,40 @@ namespace EasyNetQ.Rpc
                 autoDelete: true);
 
             //the response is published to the default exchange with the queue name as routingkey. So no need to bind to exchange
-            var disposeWhenSet = new DisposeWhenSet();
-            var consumingDisposer = _advancedBus.Consume(queue, (bytes, msgProp, messageReceivedInfo) => Task.Factory.StartNew(() =>
+            var continuation = _advancedBus.ConsumeSingle(new Queue(queue.Name, queue.IsExclusive), timeout);
+            
+            PublishRequest(requestExchange, request, requestRoutingKey, responseQueueName, correlationId);
+            return continuation
+                .Then(ExtractExceptionsFromHeaders)
+                .Then(mcc => TaskHelpers.FromResult(new SerializedMessage(mcc.Properties, mcc.Message)));
+        }
+
+        private void PublishRequest(IExchange requestExchange, SerializedMessage request, string requestRoutingKey, string responseQueueName, Guid correlationId)
+        {
+            request.Properties.ReplyTo = responseQueueName;
+            request.Properties.CorrelationId = correlationId.ToString();
+            request.Properties.Expiration = TimeSpan.FromSeconds(_configuration.Timeout).TotalMilliseconds.ToString();
+
+            //TODO write a specific RPC publisher that handles BasicReturn. Then we can set immediate+mandatory to true and react accordingly (now it will time out)
+            _advancedBus.Publish(requestExchange, requestRoutingKey, false, false, request.Properties, request.Body);
+        }
+
+        private Task<MessageConsumeContext> ExtractExceptionsFromHeaders(MessageConsumeContext mcc)
+        {
+            var isFaulted = false;
+            var exceptionMessage = "The exception message has not been specified.";
+            if (mcc.Properties.HeadersPresent)
             {
-                ResponseAction responseAction;
-                if (responseActions.TryRemove(msgProp.CorrelationId, out responseAction))
+                if (mcc.Properties.Headers.ContainsKey(_rpcHeaderKeys.IsFaultedKey))
                 {
-                    responseAction.OnSuccess(new SerializedMessage(msgProp, bytes));
+                    isFaulted = Convert.ToBoolean(mcc.Properties.Headers[_rpcHeaderKeys.IsFaultedKey]);
                 }
-                disposeWhenSet.DisposeObject();
-            }), c => c.WithPrefetchCount(1));
-            disposeWhenSet.Disposable = consumingDisposer;
-        }
-
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
-        {
-            var copyOfResponseActions = responseActions.Values;
-            responseActions.Clear();
-
-            // retry in-flight requests.
-            foreach (var responseAction in copyOfResponseActions)
-            {
-                responseAction.OnFailure();
+                if (mcc.Properties.Headers.ContainsKey(_rpcHeaderKeys.ExceptionMessageKey))
+                {
+                    exceptionMessage = Encoding.UTF8.GetString((byte[]) mcc.Properties.Headers[_rpcHeaderKeys.ExceptionMessageKey]);
+                }
             }
+            return isFaulted ? TaskHelpers.FromException<MessageConsumeContext>(new EasyNetQResponderException(exceptionMessage)) : TaskHelpers.FromResult(mcc);
         }
-
-        private class ResponseAction
-        {
-            public Action<SerializedMessage> OnSuccess { get; set; }
-            public Action OnFailure { get; set; }
-        }
-
     }
 }

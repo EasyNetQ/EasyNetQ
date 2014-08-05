@@ -42,7 +42,7 @@ namespace EasyNetQ
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
                 .Register<IClientCommandDispatcherFactory, ClientCommandDispatcherFactory>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
-                .Register<IConsumeSingle, DefaultConsumeSingle>()
+                .Register<IConsumeSingleFactory, DefaultConsumeSingleFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
 
                 .Register<IRpc, Rpc.Rpc>()
