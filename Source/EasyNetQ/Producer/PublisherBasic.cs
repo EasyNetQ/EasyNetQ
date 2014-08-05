@@ -19,12 +19,8 @@ namespace EasyNetQ.Producer
         public override Task Publish(IModel model, Action<IModel> publishAction)
         {
             SetModel(model);
-            
             publishAction(model);
-            
-            var tcs = new TaskCompletionSource<NullStruct>();
-            tcs.SetResult(new NullStruct());
-            return tcs.Task;
+            return TaskHelpers.Completed;
         }
     }
 }

@@ -10,13 +10,29 @@
     {
     }
 
+    [Queue("MyQueue", ExchangeName = "MyExchange")]
+    public interface IAnnotatedTestMessage
+    {
+    }
+
+
     [Queue("MyQueue")]
     public class QueueNameOnlyAnnotatedTestMessage
     {
     }
 
+    [Queue("MyQueue")]
+    public interface IQueueNameOnlyAnnotatedTestMessage
+    {
+    }
+
     [Queue("")]
     public class EmptyQueueNameAnnotatedTestMessage
+    {
+    }
+
+    [Queue("")]
+    public interface IEmptyQueueNameAnnotatedTestMessage
     {
     }
 

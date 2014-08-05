@@ -21,6 +21,7 @@ namespace EasyNetQ
         private readonly IContainer container;
         private readonly IConnectionConfiguration connectionConfiguration;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IConsumeSingle consumeSingle;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -32,7 +33,8 @@ namespace EasyNetQ
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container,
             IConnectionConfiguration connectionConfiguration,
-            IMessageSerializationStrategy messageSerializationStrategy)
+            IMessageSerializationStrategy messageSerializationStrategy, 
+            IConsumeSingle consumeSingle)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -43,6 +45,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(container, "container");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(consumeSingle, "consumeSingle");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -52,6 +55,7 @@ namespace EasyNetQ
             this.container = container;
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.consumeSingle = consumeSingle;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -138,6 +142,11 @@ namespace EasyNetQ
             return consumer.StartConsuming();
         }
 
+        public ConsumeSingleResult ConsumeSingle()
+        {
+            return consumeSingle.ConsumeSingle(connection);
+        }
+
         // -------------------------------- publish ---------------------------------------------
 
         public virtual Task PublishAsync(
@@ -220,38 +229,45 @@ namespace EasyNetQ
             int expires = int.MaxValue,
             string deadLetterExchange = null)
         {
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueTtl, expires, deadLetterExchange).Result;
+        }
+
+        public Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = Int32.MaxValue, int expires = Int32.MaxValue, string deadLetterExchange = null)
+        {
             Preconditions.CheckNotNull(name, "name");
 
-            IDictionary<string, object> arguments = new Dictionary<string, object>();
             if (passive)
             {
-                clientCommandDispatcher.Invoke(
-                    x => x.QueueDeclarePassive(name)).Wait();
+                return clientCommandDispatcher.Invoke(x => x.QueueDeclarePassive(name))
+                    .Then(() => (IQueue) new Queue(name, exclusive));
             }
-            else
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            
+            if (perQueueTtl != int.MaxValue)
             {
-                if (perQueueTtl != int.MaxValue)
-                {
-                    arguments.Add("x-message-ttl", perQueueTtl);
-                }
-
-                if (expires != int.MaxValue)
-                {
-                    arguments.Add("x-expires", expires);
-                }
-                if (! string.IsNullOrEmpty(deadLetterExchange))
-                {
-                    arguments.Add("x-dead-letter-exchange", deadLetterExchange);
-                }
-                clientCommandDispatcher.Invoke(
-                    x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)
-                    ).Wait();
-
-                logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
-                    name, durable, exclusive, autoDelete, WriteArguments(arguments));
+                arguments.Add("x-message-ttl", perQueueTtl);
             }
 
-            return new Queue(name, exclusive);
+            if (expires != int.MaxValue)
+            {
+                arguments.Add("x-expires", expires);
+            }
+            if (!string.IsNullOrEmpty(deadLetterExchange))
+            {
+                arguments.Add("x-dead-letter-exchange", deadLetterExchange);
+            }
+
+            return clientCommandDispatcher.Invoke(
+                x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)
+                ).Then(() =>
+                    {
+                        logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
+                            name, durable, exclusive, autoDelete, WriteArguments(arguments));
+
+                        return (IQueue) new Queue(name, exclusive);
+                    });
+
+            
         }
 
         private string WriteArguments(IEnumerable<KeyValuePair<string, object>> arguments)
@@ -365,6 +381,21 @@ namespace EasyNetQ
             logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",
                 queue.Name, exchange.Name, routingKey);
             return new Binding(queue, exchange, routingKey);
+        }
+
+        public Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
+        {
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckShortString(routingKey, "routingKey");
+
+            return clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey))
+                .Then(() =>
+                    {
+                        logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",
+                            queue.Name, exchange.Name, routingKey);
+                        return (IBinding)new Binding(queue, exchange, routingKey);
+                    });
         }
 
         public virtual IBinding Bind(IExchange source, IExchange destination, string routingKey)
