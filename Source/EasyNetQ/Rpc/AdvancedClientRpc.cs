@@ -19,7 +19,6 @@ namespace EasyNetQ.Rpc
             _configuration = configuration;
             _rpcHeaderKeys = rpcHeaderKeys;
         }
-        
         public Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
         {
             Preconditions.CheckNotNull(requestExchange, "requestExchange");

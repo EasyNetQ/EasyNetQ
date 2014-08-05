@@ -32,21 +32,4 @@ namespace EasyNetQ.Rpc
             where TResponse : class;
     }
 
-    public interface IAdvancedClientRpc
-    {
-        Task<SerializedMessage> Request(IExchange requestExchange,
-                                        string requestRoutingKey,
-                                        bool mandatory,
-                                        bool immediate,
-                                        Func<string> responseQueueName,
-                                        SerializedMessage request);
-    }
-
-    public interface IAdvancedServerRpc
-    {
-        IDisposable Respond(IExchange requestExchange, 
-                            IQueue queue, 
-                            string topic,
-                            Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
-    }
 }
