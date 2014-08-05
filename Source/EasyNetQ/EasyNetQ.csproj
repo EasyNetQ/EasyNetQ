@@ -67,6 +67,7 @@
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
     <Compile Include="Consumer\MessageConsumeContext.cs" />
+    <Compile Include="Consumer\DisposeWhenSet.cs" />
     <Compile Include="Consumer\HandlerCollection.cs" />
     <Compile Include="Consumer\HandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
@@ -172,6 +173,16 @@
     <Compile Include="Rpc\AdvancedServerRpc.cs" />
     <Compile Include="Rpc\AdvancedRpc.cs" />
     <Compile Include="Rpc\IRpcHeaderKeys.cs" />
+    <Compile Include="Rpc\AdvancedClientRpc.cs" />
+    <Compile Include="Rpc\AdvancedRpcFactory.cs" />
+    <Compile Include="Rpc\AdvancedServerRpc.cs" />
+    <Compile Include="Rpc\BetterRpc.cs" />
+    <Compile Include="Rpc\IAdvancedClientRpc.cs" />
+    <Compile Include="Rpc\IAdvancedRpcFactory.cs" />
+    <Compile Include="Rpc\IAdvancedServerRpc.cs" />
+    <Compile Include="Rpc\IRpc.cs" />
+    <Compile Include="Rpc\IRpcHeaderKeys.cs" />
+    <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Rpc\RpcHeaderKeys.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
