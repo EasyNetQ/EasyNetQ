@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
