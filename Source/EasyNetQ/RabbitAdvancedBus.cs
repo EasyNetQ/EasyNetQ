@@ -60,8 +60,8 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.consumeSingle = consumeSingle;
-            this.advancedClientRpc = advancedRpcFactory.BlablaMerge...;
-            this.advancedServerRpc = advancedRpcFactory.BlablaMerge...;
+            advancedClientRpc = advancedRpcFactory.CreateClientRpc(this);
+            advancedServerRpc = advancedRpcFactory.CreateServerRpc(this);
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
