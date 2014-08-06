@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Rpc.FreshQueue
+namespace EasyNetQ.Rpc
 {
-    public class FreshQueueRpc : IRpc
+    public class AdvancedRpc : IRpc
     {
         private readonly IAdvancedClientRpc _clientRpc;
         private readonly IAdvancedServerRpc _serverRpc;
@@ -13,7 +13,7 @@ namespace EasyNetQ.Rpc.FreshQueue
         private readonly IMessageSerializationStrategy _messageSerializationStrategy;
         private readonly IConnectionConfiguration _connectionConfiguration;
 
-        public FreshQueueRpc(IAdvancedBus advancedBus, IAdvancedRpcFactory advancedRpcFactory, IConventions conventions, IMessageSerializationStrategy messageSerializationStrategy, IConnectionConfiguration connectionConfiguration)
+        public AdvancedRpc(IAdvancedBus advancedBus, IAdvancedRpcFactory advancedRpcFactory, IConventions conventions, IMessageSerializationStrategy messageSerializationStrategy, IConnectionConfiguration connectionConfiguration)
         {
             _clientRpc = advancedRpcFactory.CreateClientRpc(advancedBus);
             _serverRpc = advancedRpcFactory.CreateServerRpc(advancedBus);
@@ -54,7 +54,7 @@ namespace EasyNetQ.Rpc.FreshQueue
 
             _advancedBus.ExchangeDeclare(exchange.Name, ExchangeType.Topic);
 
-            return _serverRpc.Respond(exchange, queue, topic, HandleRequest(responder));
+            return _serverRpc.Respond(exchange, queue.Name, topic, HandleRequest(responder));
         }
 
         private Func<SerializedMessage, Task<SerializedMessage>> HandleRequest<TRequest,TResponse>(Func<TRequest, Task<TResponse>> handle) where TResponse : class

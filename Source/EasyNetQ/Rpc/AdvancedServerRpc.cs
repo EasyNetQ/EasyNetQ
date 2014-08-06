@@ -1,45 +1,40 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Rpc.FreshQueue
+namespace EasyNetQ.Rpc
 {
-    class FreshQueueServerRpc : IAdvancedServerRpc
+    class AdvancedServerRpc : IAdvancedServerRpc
     {
         private readonly IAdvancedBus advancedBus;
-        private readonly IAdvancedPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IConnectionConfiguration configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
 
-        public FreshQueueServerRpc(
+        public AdvancedServerRpc(
             IAdvancedBus advancedBus,
-            IAdvancedPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IConnectionConfiguration configuration,
             IRpcHeaderKeys rpcHeaderKeys)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(configuration, "configuration");
 
             this.advancedBus = advancedBus;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
             this.configuration = configuration;
             _rpcHeaderKeys = rpcHeaderKeys;
         }
 
-        public IDisposable Respond(IExchange requestExchange, IQueue queue, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
+        public IDisposable Respond(IExchange requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
         {
             Preconditions.CheckNotNull(requestExchange, "requestExchange");
-            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(queueName, "queueName");
             Preconditions.CheckNotNull(topic, "topic");
             Preconditions.CheckNotNull(handleRequest, "handleRequest");
 
             var expires = (int)TimeSpan.FromSeconds(configuration.Timeout).TotalMilliseconds;
-            advancedBus.QueueDeclare(queue.Name, 
+            var queue = advancedBus.QueueDeclare(queueName, 
                 passive: false, 
                 durable: false, 
-                exclusive: queue.IsExclusive,
+                exclusive: false,
                 autoDelete: true, 
                 expires: expires);
 

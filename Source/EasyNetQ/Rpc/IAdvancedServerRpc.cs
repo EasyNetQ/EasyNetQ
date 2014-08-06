@@ -7,7 +7,7 @@ namespace EasyNetQ.Rpc
     public interface IAdvancedServerRpc
     {
         IDisposable Respond(IExchange requestExchange, 
-                            IQueue queue, 
+                            string queueName, 
                             string topic,
                             Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
     }
