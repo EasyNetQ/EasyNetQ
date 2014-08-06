@@ -31,5 +31,4 @@ namespace EasyNetQ.Rpc
             where TRequest : class
             where TResponse : class;
     }
-
 }
