@@ -165,7 +165,7 @@
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Rpc\FreshQueue\FreshQueueClientRpc.cs" />
-    <Compile Include="Rpc\FreshQueue\FreshQueueRpc.cs" />
+    <Compile Include="Rpc\AdvancedRpc.cs" />
     <Compile Include="Rpc\FreshQueue\FreshQueueRpcFactory.cs" />
     <Compile Include="Rpc\AdvancedServerRpc.cs" />
     <Compile Include="Rpc\IAdvancedClientRpc.cs" />
@@ -173,7 +173,6 @@
     <Compile Include="Rpc\IAdvancedServerRpc.cs" />
     <Compile Include="Rpc\IRpc.cs" />
     <Compile Include="Rpc\IRpcHeaderKeys.cs" />
-    <Compile Include="Rpc\ReuseQueue\ReuseQueueRpc.cs" />
     <Compile Include="Rpc\ReuseQueue\ReuseQueueAdvancedClientRpc.cs" />
     <Compile Include="Rpc\ReuseQueue\ReuseQueueAdvancedRpcFactory.cs" />
     <Compile Include="Rpc\Rpc.cs" />
