@@ -167,7 +167,7 @@
     <Compile Include="Rpc\FreshQueue\FreshQueueClientRpc.cs" />
     <Compile Include="Rpc\FreshQueue\FreshQueueRpc.cs" />
     <Compile Include="Rpc\FreshQueue\FreshQueueRpcFactory.cs" />
-    <Compile Include="Rpc\FreshQueue\FreshQueueServerRpc.cs" />
+    <Compile Include="Rpc\AdvancedServerRpc.cs" />
     <Compile Include="Rpc\IAdvancedClientRpc.cs" />
     <Compile Include="Rpc\IAdvancedRpcFactory.cs" />
     <Compile Include="Rpc\IAdvancedServerRpc.cs" />
@@ -176,7 +176,6 @@
     <Compile Include="Rpc\ReuseQueue\ReuseQueueRpc.cs" />
     <Compile Include="Rpc\ReuseQueue\ReuseQueueAdvancedClientRpc.cs" />
     <Compile Include="Rpc\ReuseQueue\ReuseQueueAdvancedRpcFactory.cs" />
-    <Compile Include="Rpc\ReuseQueue\ReuseQueueAdvancedServerRpc.cs" />
     <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Rpc\RpcHeaderKeys.cs" />
     <Compile Include="Sprache\Failure.cs" />

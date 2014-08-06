@@ -28,7 +28,7 @@ namespace EasyNetQ.Rpc.FreshQueue
 
         public IAdvancedServerRpc CreateServerRpc(IAdvancedBus advancedBus)
         {
-            return (_server = _server ?? new FreshQueueServerRpc(advancedBus, _advancedPublishExchangeDeclareStrategy, _configuration, _rpcHeaderKeys));
+            return (_server = _server ?? new AdvancedServerRpc(advancedBus, _advancedPublishExchangeDeclareStrategy, _configuration, _rpcHeaderKeys));
         }
     }
 }
