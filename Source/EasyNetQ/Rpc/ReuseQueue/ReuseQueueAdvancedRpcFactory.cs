@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Rpc.ReuseQueue
 {
-    class ReuseQueueAdvancedRpcFactory : IAdvancedRpcFactory
+    public class ReuseQueueAdvancedRpcFactory : IAdvancedRpcFactory
     {
         public IAdvancedClientRpc CreateClientRpc(IAdvancedBus advancedBus)
         {

@@ -2,7 +2,7 @@
 
 namespace EasyNetQ.Rpc.FreshQueue
 {
-    class FreshQueueRpcFactory : IAdvancedRpcFactory
+    public class FreshQueueRpcFactory : IAdvancedRpcFactory
     {
         private readonly IConnectionConfiguration _configuration;
         private readonly IAdvancedPublishExchangeDeclareStrategy _advancedPublishExchangeDeclareStrategy;

@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Rpc
 {
-    interface IRpcHeaderKeys
+    public interface IRpcHeaderKeys
     {
         string IsFaultedKey { get; }
         string ExceptionMessageKey { get; }

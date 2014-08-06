@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Rpc.ReuseQueue
 {
-    class ReuseQueueRpc : IRpc
+    public class ReuseQueueRpc : IRpc
     {
         public Task<TResponse> Request<TRequest, TResponse>(TRequest request) where TRequest : class where TResponse : class
         {
