@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Rpc
+namespace EasyNetQ.Rpc.FreshQueue
 {
-    class AdvancedClientRpc : IAdvancedClientRpc
+    class FreshQueueClientRpc : IAdvancedClientRpc
     {
         private readonly IAdvancedBus _advancedBus;
         private readonly IConnectionConfiguration _configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
         
-        public AdvancedClientRpc(IAdvancedBus advancedBus, IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys)
+        public FreshQueueClientRpc(IAdvancedBus advancedBus, IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys)
         {
             _advancedBus = advancedBus;
             _configuration = configuration;
