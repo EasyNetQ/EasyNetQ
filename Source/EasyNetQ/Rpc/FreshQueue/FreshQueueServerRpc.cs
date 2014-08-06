@@ -3,15 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Rpc
+namespace EasyNetQ.Rpc.FreshQueue
 {
-    class AdvancedServerRpc : IAdvancedServerRpc
+    class FreshQueueServerRpc : IAdvancedServerRpc
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConnectionConfiguration configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
 
-        public AdvancedServerRpc(
+        public FreshQueueServerRpc(
             IAdvancedBus advancedBus,
             IConnectionConfiguration configuration,
             IRpcHeaderKeys rpcHeaderKeys)

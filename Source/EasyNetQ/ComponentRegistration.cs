@@ -4,6 +4,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
 using EasyNetQ.Rpc;
+using EasyNetQ.Rpc.FreshQueue;
 
 namespace EasyNetQ
 {
@@ -47,7 +48,7 @@ namespace EasyNetQ
 
                 .Register<IRpc, Rpc.Rpc>()
                 .Register<IRpcHeaderKeys, RpcHeaderKeys>()
-                .Register<IAdvancedRpcFactory,AdvancedRpcFactory>()
+                .Register<IAdvancedRpcFactory,FreshQueueRpcFactory>()
 
                 .Register<ISendReceive, SendReceive>()
                 .Register<IBus, RabbitBus>();
