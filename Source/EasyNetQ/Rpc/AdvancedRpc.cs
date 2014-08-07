@@ -29,16 +29,16 @@ namespace EasyNetQ.Rpc
         {
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
             var requestRoutingKey = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-            
+
             var timeout = TimeSpan.FromSeconds(_connectionConfiguration.Timeout);
 
             var message = new Message<TRequest>(request);
-            
+
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
-            
+
             var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, timeout, serializedMessage);
-            
-            return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
+
+            return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>)_messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 
         //TODO add handlerId
@@ -49,24 +49,24 @@ namespace EasyNetQ.Rpc
             var handlerId = "";
 
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
-            var queue = _conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId);
+            var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof(TRequest), handlerId), false);
             var topic = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
             _advancedBus.ExchangeDeclare(exchange.Name, ExchangeType.Topic);
 
-            return _serverRpc.Respond(exchange, queue, topic, HandleRequest(responder));
+            return _serverRpc.Respond(exchange, queue.Name, topic, HandleRequest(responder));
         }
 
-        private Func<SerializedMessage, Task<SerializedMessage>> HandleRequest<TRequest,TResponse>(Func<TRequest, Task<TResponse>> handle) where TResponse : class
+        private Func<SerializedMessage, Task<SerializedMessage>> HandleRequest<TRequest, TResponse>(Func<TRequest, Task<TResponse>> handle) where TResponse : class
         {
-            return serializedMessage =>
+            return serializedMessage => 
+                Task.Factory.StartNew(() =>
                 {
                     var deserializedMessage = _messageSerializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
-                    var request = (IMessage<TRequest>) deserializedMessage.Message;
-                    var responseTask = handle(request.Body);
-                    return responseTask.Then(response => 
-                        TaskHelpers.FromResult(_messageSerializationStrategy.SerializeMessage(new Message<TResponse>(response))));
-                };
+                    return (IMessage<TRequest>)deserializedMessage.Message;
+                })
+                .Then(request => handle(request.Body))
+                .Then(response => TaskHelpers.FromResult(_messageSerializationStrategy.SerializeMessage(new Message<TResponse>(response))));
         }
     }
 }
