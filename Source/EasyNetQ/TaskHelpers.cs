@@ -46,6 +46,30 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        public static Task<T> ContinueWithSideEffect<T>(this Task<T> first, Action ac)
+        {
+            var tcs = new TaskCompletionSource<T>();
+            first.ContinueWith(x =>
+                {
+                    if (x.IsFaulted)
+                        tcs.TrySetException(x.Exception.InnerExceptions);
+                    else if (x.IsCanceled)
+                        tcs.TrySetCanceled();
+                    else
+                    {
+                        try
+                        {
+                            ac();
+                        }
+                        catch (Exception exc)
+                        {
+                            tcs.TrySetException(exc);
+                        }
+                    }
+                });
+            return tcs.Task;
+        }
+
         //http://blogs.msdn.com/b/pfxteam/archive/2010/11/21/10094564.aspx
 
         public static Task<T2> Then<T1, T2>(this Task<T1> first, Func<T2> next)

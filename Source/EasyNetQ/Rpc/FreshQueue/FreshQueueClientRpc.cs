@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
@@ -40,8 +39,8 @@ namespace EasyNetQ.Rpc.FreshQueue
             
             PublishRequest(requestExchange, request, requestRoutingKey, responseQueueName, correlationId);
             return continuation
-                .Then(ExtractExceptionsFromHeaders)
-                .Then(mcc => TaskHelpers.FromResult(new SerializedMessage(mcc.Properties, mcc.Message)));
+                .Then(mcc => TaskHelpers.FromResult(new SerializedMessage(mcc.Properties, mcc.Message)))
+                .Then(sm => RpcHelpers.ExtractExceptionFromHeadersAndPropagateToTaskCompletionSource(_rpcHeaderKeys, sm));
         }
 
         private void PublishRequest(IExchange requestExchange, SerializedMessage request, string requestRoutingKey, string responseQueueName, Guid correlationId)
@@ -52,24 +51,6 @@ namespace EasyNetQ.Rpc.FreshQueue
 
             //TODO write a specific RPC publisher that handles BasicReturn. Then we can set immediate+mandatory to true and react accordingly (now it will time out)
             _advancedBus.Publish(requestExchange, requestRoutingKey, false, false, request.Properties, request.Body);
-        }
-
-        private Task<MessageConsumeContext> ExtractExceptionsFromHeaders(MessageConsumeContext mcc)
-        {
-            var isFaulted = false;
-            var exceptionMessage = "The exception message has not been specified.";
-            if (mcc.Properties.HeadersPresent)
-            {
-                if (mcc.Properties.Headers.ContainsKey(_rpcHeaderKeys.IsFaultedKey))
-                {
-                    isFaulted = Convert.ToBoolean(mcc.Properties.Headers[_rpcHeaderKeys.IsFaultedKey]);
-                }
-                if (mcc.Properties.Headers.ContainsKey(_rpcHeaderKeys.ExceptionMessageKey))
-                {
-                    exceptionMessage = Encoding.UTF8.GetString((byte[]) mcc.Properties.Headers[_rpcHeaderKeys.ExceptionMessageKey]);
-                }
-            }
-            return isFaulted ? TaskHelpers.FromException<MessageConsumeContext>(new EasyNetQResponderException(exceptionMessage)) : TaskHelpers.FromResult(mcc);
         }
     }
 }
