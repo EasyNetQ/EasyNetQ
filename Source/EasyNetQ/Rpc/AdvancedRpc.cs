@@ -62,6 +62,7 @@ namespace EasyNetQ.Rpc
             return serializedMessage => Task.Factory.StartNew(() =>
                 {
                     var deserializedMessage = _messageSerializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
+
                     return (IMessage<TRequest>)deserializedMessage.Message;
                 })
                 .Then(request => handle(request.Body))

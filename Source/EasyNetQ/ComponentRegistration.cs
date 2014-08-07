@@ -48,7 +48,7 @@ namespace EasyNetQ
 
                 .Register<IRpc, Rpc.Rpc>()
                 .Register<IRpcHeaderKeys, RpcHeaderKeys>()
-                .Register<IAdvancedRpcFactory,FreshQueueRpcFactory>()
+                .Register<IAdvancedRpcFactory,FreshQueueAdvancedRpcFactory>()
 
                 .Register<ISendReceive, SendReceive>()
                 .Register<IBus, RabbitBus>();

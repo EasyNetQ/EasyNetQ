@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using EasyNetQ.Rpc.FreshQueue;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc

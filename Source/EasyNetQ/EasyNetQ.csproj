@@ -164,9 +164,9 @@
     <Compile Include="RabbitBusExtensions.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
-    <Compile Include="Rpc\FreshQueue\FreshQueueClientRpc.cs" />
-    <Compile Include="Rpc\FreshQueue\FreshQueueRpcFactory.cs" />
-    <Compile Include="Rpc\FreshQueue\FreshQueueServerRpc.cs" />
+    <Compile Include="Rpc\AdvancedServerRpc.cs" />
+    <Compile Include="Rpc\FreshQueue\FreshQueueAdvancedClientRpc.cs" />
+    <Compile Include="Rpc\FreshQueue\FreshQueueAdvancedRpcFactory.cs" />
     <Compile Include="Rpc\AdvancedRpc.cs" />
     <Compile Include="Rpc\RpcHelpers.cs" />
     <Compile Include="Rpc\UserHandlerInfo.cs" />

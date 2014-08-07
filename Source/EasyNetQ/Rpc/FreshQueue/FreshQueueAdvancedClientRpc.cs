@@ -5,13 +5,13 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc.FreshQueue
 {
-    class FreshQueueClientRpc : IAdvancedClientRpc
+    class FreshQueueAdvancedClientRpc : IAdvancedClientRpc
     {
         private readonly IAdvancedBus _advancedBus;
         private readonly IConnectionConfiguration _configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
         
-        public FreshQueueClientRpc(IAdvancedBus advancedBus, IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys)
+        public FreshQueueAdvancedClientRpc(IAdvancedBus advancedBus, IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys)
         {
             _advancedBus = advancedBus;
             _configuration = configuration;
