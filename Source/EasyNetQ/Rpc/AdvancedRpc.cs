@@ -37,7 +37,7 @@ namespace EasyNetQ.Rpc
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
             
             var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, timeout, serializedMessage);
-            
+
             return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 

@@ -21,7 +21,7 @@ namespace EasyNetQ.Rpc.FreshQueue
 
         public bool IsFailed()
         {
-            return Exception == null;
+            return Exception != null;
         }
     }
 }

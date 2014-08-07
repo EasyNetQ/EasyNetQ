@@ -60,6 +60,7 @@ namespace EasyNetQ
                         try
                         {
                             ac();
+                            tcs.SetResult(x.Result);
                         }
                         catch (Exception exc)
                         {

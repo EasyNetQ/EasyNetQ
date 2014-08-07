@@ -31,6 +31,8 @@ namespace EasyNetQ.Rpc
             Preconditions.CheckNotNull(handleRequest, "handleRequest");
 
             var expires = (int)TimeSpan.FromSeconds(configuration.Timeout).TotalMilliseconds;
+            
+            //TODO declare exchange
             var queue = advancedBus.QueueDeclare(queueName, 
                 passive: false, 
                 durable: false, 

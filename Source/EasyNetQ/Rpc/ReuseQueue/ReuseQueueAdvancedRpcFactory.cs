@@ -8,20 +8,18 @@ namespace EasyNetQ.Rpc.ReuseQueue
         private readonly IConnectionConfiguration _configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
         private readonly IEventBus _eventBus;
-        private readonly IAdvancedPublishExchangeDeclareStrategy _exchangeDeclareStrategy;
 
-        public ReuseQueueAdvancedRpcFactory(IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys, IEventBus eventBus, IAdvancedPublishExchangeDeclareStrategy exchangeDeclareStrategy)
+        public ReuseQueueAdvancedRpcFactory(IConnectionConfiguration configuration, IRpcHeaderKeys rpcHeaderKeys, IEventBus eventBus)
         {
             _configuration = configuration;
             _rpcHeaderKeys = rpcHeaderKeys;
             _eventBus = eventBus;
-            _exchangeDeclareStrategy = exchangeDeclareStrategy;
         }
 
         public IAdvancedClientRpc CreateClientRpc(IAdvancedBus advancedBus)
         {
             var responseQueueName = "rpc:" + Guid.NewGuid().ToString(); // TODO this should be changed to something more eatable
-            return new ReuseQueueAdvancedClientRpc(advancedBus, _configuration, _rpcHeaderKeys, _eventBus, _exchangeDeclareStrategy, responseQueueName);
+            return new ReuseQueueAdvancedClientRpc(advancedBus, _configuration, _rpcHeaderKeys, _eventBus, responseQueueName);
         }
 
         public IAdvancedServerRpc CreateServerRpc(IAdvancedBus advancedBus)

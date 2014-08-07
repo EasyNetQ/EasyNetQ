@@ -15,29 +15,26 @@ namespace EasyNetQ.Rpc.ReuseQueue
         private readonly IAdvancedBus _advancedBus;
         private readonly IConnectionConfiguration _configuration;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
-        private readonly IAdvancedPublishExchangeDeclareStrategy _advancedPublishExchangeDeclareStrategy;
         private readonly string _responseQueueName;
         private readonly TimeSpan _disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
         
         private readonly ConcurrentDictionary<string, ResponseAction> _responseActions = new ConcurrentDictionary<string, ResponseAction>();
         private IDisposable _consumer;
+        private bool _firstTime = true;
 
         public ReuseQueueAdvancedClientRpc(
             IAdvancedBus advancedBus, 
             IConnectionConfiguration configuration, 
             IRpcHeaderKeys rpcHeaderKeys, 
             IEventBus eventBus, 
-            IAdvancedPublishExchangeDeclareStrategy advancedPublishExchangeDeclareStrategy, 
             string responseQueueName)
         {
             _advancedBus = advancedBus;
             _configuration = configuration;
             _rpcHeaderKeys = rpcHeaderKeys;
-            _advancedPublishExchangeDeclareStrategy = advancedPublishExchangeDeclareStrategy;
             _responseQueueName = responseQueueName;
             eventBus.Subscribe<ConnectionCreatedEvent>(_ => OnConnectionCreated());
             eventBus.Subscribe<ConnectionDisconnectedEvent>(_ => OnConnectionDisconnected());
-            CreateQueueAndConsume();
         }
 
         public Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
@@ -45,8 +42,11 @@ namespace EasyNetQ.Rpc.ReuseQueue
             Preconditions.CheckNotNull(request, "request");
             Preconditions.CheckNotNull(requestExchange, "requestExchange");
             Preconditions.CheckNotNull(requestRoutingKey, "requestRoutingKey");
-
-            const string exchangeType = ExchangeType.Topic;
+            if (_firstTime)
+            {
+                CreateQueueAndConsume();
+                _firstTime = false;
+            }
             var correlationId = Guid.NewGuid();
 
             var tcs = new TaskCompletionSource<SerializedMessage>();
@@ -60,27 +60,9 @@ namespace EasyNetQ.Rpc.ReuseQueue
                     ConnectionLost = () => tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()))
                 });
 
-            RequestPublish(request, requestRoutingKey, requestExchange, exchangeType, _responseQueueName, correlationId, timeout);
+            RpcHelpers.PublishRequest(_advancedBus, requestExchange, request, requestRoutingKey, _responseQueueName, correlationId, timeout);
 
             return tcs.Task.ContinueWithSideEffect(timer.Dispose);
-        }
-
-        private void RequestPublish<TRequest>(TRequest request, string routingKey, IExchange exchange, string exchangeType, string returnQueueName, Guid correlationId, TimeSpan timeout)
-            where TRequest : class
-        {
-            _advancedPublishExchangeDeclareStrategy.DeclareExchange(_advancedBus, exchange.Name, exchangeType);
-
-            var requestMessage = new Message<TRequest>(request)
-            {
-                Properties =
-                {
-                    ReplyTo = returnQueueName,
-                    CorrelationId = correlationId.ToString(),
-                    Expiration = ((int)timeout.TotalMilliseconds).ToString()
-                }
-            };
-
-            _advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
 
         private void OnConnectionDisconnected()

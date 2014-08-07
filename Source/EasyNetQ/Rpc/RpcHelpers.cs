@@ -3,11 +3,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Rpc.FreshQueue;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
 {
     static class RpcHelpers
     {
+
+        public static void PublishRequest(IAdvancedBus advancedBus, IExchange requestExchange, SerializedMessage request, string requestRoutingKey, string responseQueueName, Guid correlationId, TimeSpan timeout)
+        {
+            request.Properties.ReplyTo = responseQueueName;
+            request.Properties.CorrelationId = correlationId.ToString();
+            request.Properties.Expiration = timeout.TotalMilliseconds.ToString();
+
+            //TODO write a specific RPC publisher that handles BasicReturn. Then we can set immediate+mandatory to true and react accordingly (now it will time out)
+            advancedBus.Publish(requestExchange, requestRoutingKey, false, false, request.Properties, request.Body);
+        }
+
         public static void ExtractExceptionFromHeadersAndPropagateToTaskCompletionSource(IRpcHeaderKeys rpcHeaderKeys, SerializedMessage sm, TaskCompletionSource<SerializedMessage> tcs)
         {
             var isFaulted = false;

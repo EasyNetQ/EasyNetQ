@@ -37,20 +37,12 @@ namespace EasyNetQ.Rpc.FreshQueue
             //the response is published to the default exchange with the queue name as routingkey. So no need to bind to exchange
             var continuation = _advancedBus.ConsumeSingle(new Queue(queue.Name, queue.IsExclusive), timeout);
             
-            PublishRequest(requestExchange, request, requestRoutingKey, responseQueueName, correlationId);
+            RpcHelpers.PublishRequest(_advancedBus, requestExchange, request, requestRoutingKey, responseQueueName, correlationId, timeout);
             return continuation
                 .Then(mcc => TaskHelpers.FromResult(new SerializedMessage(mcc.Properties, mcc.Message)))
                 .Then(sm => RpcHelpers.ExtractExceptionFromHeadersAndPropagateToTask(_rpcHeaderKeys, sm));
         }
 
-        private void PublishRequest(IExchange requestExchange, SerializedMessage request, string requestRoutingKey, string responseQueueName, Guid correlationId)
-        {
-            request.Properties.ReplyTo = responseQueueName;
-            request.Properties.CorrelationId = correlationId.ToString();
-            request.Properties.Expiration = TimeSpan.FromSeconds(_configuration.Timeout).TotalMilliseconds.ToString();
-
-            //TODO write a specific RPC publisher that handles BasicReturn. Then we can set immediate+mandatory to true and react accordingly (now it will time out)
-            _advancedBus.Publish(requestExchange, requestRoutingKey, false, false, request.Properties, request.Body);
-        }
+        
     }
 }
