@@ -20,6 +20,8 @@ namespace EasyNetQ.Management.Client
 
         private readonly bool runningOnMono;
         private readonly Action<HttpWebRequest> configureRequest;
+        private readonly TimeSpan defaultTimeout = TimeSpan.FromSeconds(20);
+        private readonly TimeSpan timeout;
 
         static ManagementClient()
         {
@@ -56,6 +58,7 @@ namespace EasyNetQ.Management.Client
             string password, 
             int portNumber = 15672, 
             bool runningOnMono = false,
+            TimeSpan? timeout = null,
             Action<HttpWebRequest> configureRequest = null)
         {
             if (string.IsNullOrEmpty(hostUrl))
@@ -79,7 +82,7 @@ namespace EasyNetQ.Management.Client
             this.username = username;
             this.password = password;
             this.portNumber = portNumber;
-
+            this.timeout = timeout ?? defaultTimeout;
             this.runningOnMono = runningOnMono;
             this.configureRequest = configureRequest;
 
@@ -526,13 +529,14 @@ namespace EasyNetQ.Management.Client
         {
             var request = CreateRequestForPath(path);
 
-            var response = request.GetHttpResponse();
-            if (response.StatusCode != HttpStatusCode.OK)
+            using (var response = request.GetHttpResponse())
             {
-                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                }
+                return DeserializeResponse<T>(response);   
             }
-
-            return DeserializeResponse<T>(response);
         }
 
         private TResult Post<TItem, TResult>(string path, TItem item)
@@ -556,10 +560,12 @@ namespace EasyNetQ.Management.Client
             var request = CreateRequestForPath(path);
             request.Method = "DELETE";
 
-            var response = request.GetHttpResponse();
-            if (response.StatusCode != HttpStatusCode.NoContent)
+            using (var response = request.GetHttpResponse())
             {
-                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                if (response.StatusCode != HttpStatusCode.NoContent)
+                {
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                }   
             }
         }
 
@@ -569,10 +575,12 @@ namespace EasyNetQ.Management.Client
             request.Method = "PUT";
             request.ContentType = "application/json";
 
-            var response = request.GetHttpResponse();
-            if (response.StatusCode != HttpStatusCode.NoContent)
+            using (var response = request.GetHttpResponse())
             {
-                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                if (response.StatusCode != HttpStatusCode.NoContent)
+                {
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                }
             }
         }
 
@@ -583,10 +591,12 @@ namespace EasyNetQ.Management.Client
 
             InsertRequestBody(request, item);
 
-            var response = request.GetHttpResponse();
-            if (response.StatusCode != HttpStatusCode.NoContent)
+            using (var response = request.GetHttpResponse())
             {
-                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                if (response.StatusCode != HttpStatusCode.NoContent)
+                {
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                }
             }
         }
 
@@ -649,7 +659,9 @@ namespace EasyNetQ.Management.Client
 			}
 
 			var request = (HttpWebRequest)WebRequest.Create(uri);
-            request.Credentials = new NetworkCredential(username, password);
+            request.Credentials = new NetworkCredential(username, password); 
+            request.Timeout = request.ReadWriteTimeout = (int)timeout.TotalMilliseconds;
+
             configureRequest(request);
 
             return request;
