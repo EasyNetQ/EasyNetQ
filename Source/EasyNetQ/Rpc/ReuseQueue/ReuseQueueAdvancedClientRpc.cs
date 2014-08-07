@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
+using EasyNetQ.Rpc.FreshQueue;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc.ReuseQueue
@@ -45,24 +46,23 @@ namespace EasyNetQ.Rpc.ReuseQueue
             Preconditions.CheckNotNull(requestExchange, "requestExchange");
             Preconditions.CheckNotNull(requestRoutingKey, "requestRoutingKey");
 
-            var exchangeType = ExchangeType.Direct;
+            const string exchangeType = ExchangeType.Topic;
             var correlationId = Guid.NewGuid();
 
             var tcs = new TaskCompletionSource<SerializedMessage>();
-            var timer = new Timer(state =>
-            {
-                ((Timer)state).Dispose();
-                tcs.TrySetException(new TimeoutException(
-                    string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
-            });
+            var timer = new Timer(state => tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString()))));
 
             timer.Change(TimeSpan.FromSeconds(_configuration.Timeout), _disablePeriodicSignaling);
 
-            RegisterMessageHandling(correlationId, timer, tcs);
+            _responseActions.TryAdd(correlationId.ToString(), new ResponseAction
+                {
+                    OnSuccess = sm => RpcHelpers.ExtractExceptionFromHeadersAndPropagateToTaskCompletionSource(_rpcHeaderKeys,sm, tcs),
+                    ConnectionLost = () => tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()))
+                });
 
             RequestPublish(request, requestRoutingKey, requestExchange, exchangeType, _responseQueueName, correlationId, timeout);
 
-            return tcs.Task;
+            return tcs.Task.ContinueWithSideEffect(timer.Dispose);
         }
 
         private void RequestPublish<TRequest>(TRequest request, string routingKey, IExchange exchange, string exchangeType, string returnQueueName, Guid correlationId, TimeSpan timeout)
@@ -96,7 +96,7 @@ namespace EasyNetQ.Rpc.ReuseQueue
             // retry in-flight requests.
             foreach (var responseAction in copyOfResponseActions)
             {
-                responseAction.OnFailure();
+                responseAction.ConnectionLost();
             }
 
             CreateQueueAndConsume();
@@ -124,51 +124,11 @@ namespace EasyNetQ.Rpc.ReuseQueue
                 }));
         }
 
-        private void RegisterMessageHandling(Guid correlationId, Timer timer, TaskCompletionSource<SerializedMessage> tcs)
-        {
-            _responseActions.TryAdd(correlationId.ToString(), new ResponseAction
-            {
-                OnSuccess = smsg =>
-                {
-                    timer.Dispose();
-
-                    var isFaulted = false;
-                    var exceptionMessage = "The exception message has not been specified.";
-                    if (smsg.Properties.HeadersPresent)
-                    {
-                        if (smsg.Properties.Headers.ContainsKey(_rpcHeaderKeys.IsFaultedKey))
-                        {
-                            isFaulted = Convert.ToBoolean(smsg.Properties.Headers[_rpcHeaderKeys.IsFaultedKey]);
-                        }
-                        if (smsg.Properties.Headers.ContainsKey(_rpcHeaderKeys.ExceptionMessageKey))
-                        {
-                            exceptionMessage = Encoding.UTF8.GetString((byte[])smsg.Properties.Headers[_rpcHeaderKeys.ExceptionMessageKey]);
-                        }
-                    }
-
-                    if (isFaulted)
-                    {
-                        tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
-                    }
-                    else
-                    {
-                        tcs.TrySetResult(smsg);
-                    }
-                },
-                OnFailure = () =>
-                {
-                    timer.Dispose();
-                    tcs.TrySetException(new EasyNetQException(
-                        "Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
-                }
-            });
-        }
-
 
         private class ResponseAction
         {
             public Action<SerializedMessage> OnSuccess { get; set; }
-            public Action OnFailure { get; set; }
+            public Action ConnectionLost { get; set; }
         }
     }
 }
