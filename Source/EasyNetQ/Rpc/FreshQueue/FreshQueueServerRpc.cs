@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using EasyNetQ.Rpc.FreshQueue;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Rpc
@@ -45,45 +46,25 @@ namespace EasyNetQ.Rpc
             return advancedBus.Consume(queue, (msgBytes, msgProp, messageRecievedInfo) => ExecuteResponder(responseExchange, handleRequest, new SerializedMessage(msgProp, msgBytes)));
         }
             
-        private Task ExecuteResponder(IExchange responseExchange, Func<SerializedMessage, Task<SerializedMessage>> responder, SerializedMessage requestMessage) 
+        private Task ExecuteResponder(IExchange responseExchange, Func<SerializedMessage, Task<SerializedMessage>> responder, SerializedMessage requestMessage)
         {
-            var tcs = new TaskCompletionSource<object>();
-
-            responder(requestMessage).ContinueWith(SendReplyContinuation(responseExchange, requestMessage, tcs));
-            
-            
-            return tcs.Task;
-        }
-
-        private Action<Task<SerializedMessage>> SendReplyContinuation(IExchange responseExchange, SerializedMessage requestMessage, TaskCompletionSource<object> tcs)
-        {
-            return task =>
-                {
-                    
-                    if (task.IsFaulted)
+            return responder(requestMessage)
+                .ContinueWith(RpcHelpers.MaybeAddExceptionToHeaders(_rpcHeaderKeys, requestMessage))
+                .Then(uhInfo =>
                     {
-                        if (task.Exception != null)
+                        var sm = uhInfo.Response;
+                        sm.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+                        advancedBus.Publish(responseExchange, requestMessage.Properties.ReplyTo, false, false, sm.Properties, sm.Body);
+                        return TaskHelpers.FromResult(uhInfo);
+                    })
+                .Then(uhInfo => 
+                    {
+                        if (uhInfo.IsFailed())
                         {
-                            var errorStackTrace = string.Join("\n\n", task.Exception.InnerExceptions.Select(e => e.StackTrace));
-
-                            var responseMessage = new SerializedMessage(new MessageProperties(), new byte[] { });
-                            responseMessage.Properties.Headers.Add(_rpcHeaderKeys.IsFaultedKey, true);
-                            responseMessage.Properties.Headers.Add(_rpcHeaderKeys.ExceptionMessageKey, errorStackTrace);
-                            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-                            advancedBus.Publish(responseExchange, requestMessage.Properties.ReplyTo, false, false, responseMessage.Properties, requestMessage.Body);
-                            tcs.SetException(task.Exception);
+                            throw new EasyNetQResponderException("MessageHandler Failed", uhInfo.Exception);
                         }
-                    }
-                    else
-                    {
-                        var responseMessage = task.Result;
-                        responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-                        advancedBus.Publish(responseExchange, requestMessage.Properties.ReplyTo, false, false, responseMessage.Properties, responseMessage.Body);
-                        tcs.SetResult(null);
-                    }
-                };
+                        return TaskHelpers.FromResult(0);
+                    });
         }
     }
 }

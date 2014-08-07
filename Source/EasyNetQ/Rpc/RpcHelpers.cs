@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EasyNetQ.Rpc.FreshQueue;
 
-namespace EasyNetQ.Rpc.FreshQueue
+namespace EasyNetQ.Rpc
 {
     static class RpcHelpers
     {
@@ -38,9 +40,26 @@ namespace EasyNetQ.Rpc.FreshQueue
             return tcs.Task;
         }
 
-        public static Task<SerializedMessage> MaybeAddExceptionToHeaders()
+        public static Func<Task<SerializedMessage>, UserHandlerInfo> MaybeAddExceptionToHeaders(IRpcHeaderKeys rpcHeaderKeys, SerializedMessage requestMessage)
         {
-            
+            return task =>
+            {
+                if (task.IsFaulted)
+                {
+                    if (task.Exception != null)
+                    {
+                        var errorStackTrace = string.Join("\n\n", task.Exception.InnerExceptions.Select(e => e.StackTrace));
+
+                        var sm = new SerializedMessage(new MessageProperties(), new byte[] { });
+                        sm.Properties.Headers.Add(rpcHeaderKeys.IsFaultedKey, true);
+                        sm.Properties.Headers.Add(rpcHeaderKeys.ExceptionMessageKey, errorStackTrace);
+                        sm.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+
+                        return new UserHandlerInfo(sm,task.Exception);
+                    }
+                }
+                return new UserHandlerInfo(task.Result);
+            };
         }
     }
 }
