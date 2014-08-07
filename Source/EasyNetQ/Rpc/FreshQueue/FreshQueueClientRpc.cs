@@ -40,7 +40,7 @@ namespace EasyNetQ.Rpc.FreshQueue
             PublishRequest(requestExchange, request, requestRoutingKey, responseQueueName, correlationId);
             return continuation
                 .Then(mcc => TaskHelpers.FromResult(new SerializedMessage(mcc.Properties, mcc.Message)))
-                .Then(sm => RpcHelpers.ExtractExceptionFromHeadersAndPropagateToTaskCompletionSource(_rpcHeaderKeys, sm));
+                .Then(sm => RpcHelpers.ExtractExceptionFromHeadersAndPropagateToTask(_rpcHeaderKeys, sm));
         }
 
         private void PublishRequest(IExchange requestExchange, SerializedMessage request, string requestRoutingKey, string responseQueueName, Guid correlationId)

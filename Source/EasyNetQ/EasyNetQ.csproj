@@ -168,7 +168,8 @@
     <Compile Include="Rpc\AdvancedRpc.cs" />
     <Compile Include="Rpc\FreshQueue\FreshQueueRpcFactory.cs" />
     <Compile Include="Rpc\AdvancedServerRpc.cs" />
-    <Compile Include="Rpc\FreshQueue\RpcHelpers.cs" />
+    <Compile Include="Rpc\RpcHelpers.cs" />
+    <Compile Include="Rpc\UserHandlerInfo.cs" />
     <Compile Include="Rpc\IAdvancedClientRpc.cs" />
     <Compile Include="Rpc\IAdvancedRpcFactory.cs" />
     <Compile Include="Rpc\IAdvancedServerRpc.cs" />
