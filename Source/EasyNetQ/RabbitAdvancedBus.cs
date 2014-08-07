@@ -162,7 +162,7 @@ namespace EasyNetQ
 
         public IDisposable Respond(
             IExchange requestExchange, 
-            IQueue queue, 
+            string queue, 
             string topic, 
             Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
         {

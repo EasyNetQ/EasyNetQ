@@ -118,11 +118,11 @@ namespace EasyNetQ
         /// Note that Exception thrown in handleRequest will both forward a message to the ErrorQueue and to the client
         /// </summary>
         /// <param name="requestExchange">The exchange the routingkey will be bound in</param>
-        /// <param name="queue">The request queue name</param>
+        /// <param name="queueName">The request queue name</param>
         /// <param name="topic">The routingkey the queue is bound to</param>
         /// <param name="handleRequest">The function to call when a new request message is received</param>
         /// <returns></returns>
-        IDisposable Respond(IExchange requestExchange, IQueue queue, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
+        IDisposable Respond(IExchange requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
 
         /// <summary>
         /// Send an rpc-like request to an exchange/routing key.

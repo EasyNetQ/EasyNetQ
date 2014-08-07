@@ -49,7 +49,7 @@ namespace EasyNetQ.Rpc
             var handlerId = "";
 
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
-            var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId),false);
+            var queue = _conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId);
             var topic = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
             _advancedBus.ExchangeDeclare(exchange.Name, ExchangeType.Topic);

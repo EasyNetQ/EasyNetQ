@@ -6,7 +6,6 @@ namespace EasyNetQ.Rpc
     class AdvancedRpcFactory : IAdvancedRpcFactory
     {
         private readonly IConnectionConfiguration _configuration;
-        private readonly IAdvancedPublishExchangeDeclareStrategy _advancedPublishExchangeDeclareStrategy;
         private readonly IRpcHeaderKeys _rpcHeaderKeys;
 
         private IAdvancedClientRpc _client;
@@ -14,11 +13,9 @@ namespace EasyNetQ.Rpc
 
         public AdvancedRpcFactory(
             IConnectionConfiguration configuration,
-            IAdvancedPublishExchangeDeclareStrategy advancedPublishExchangeDeclareStrategy,
             IRpcHeaderKeys rpcHeaderKeys)
         {
             _configuration = configuration;
-            _advancedPublishExchangeDeclareStrategy = advancedPublishExchangeDeclareStrategy;
             _rpcHeaderKeys = rpcHeaderKeys;
         }
 
@@ -29,7 +26,7 @@ namespace EasyNetQ.Rpc
 
         public IAdvancedServerRpc CreateServerRpc(IAdvancedBus advancedBus)
         {
-            return (_server = _server ?? new AdvancedServerRpc(advancedBus, _advancedPublishExchangeDeclareStrategy, _configuration, _rpcHeaderKeys));
+            return (_server = _server ?? new AdvancedServerRpc(advancedBus, _configuration, _rpcHeaderKeys));
         }
     }
 }
