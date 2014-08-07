@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
@@ -48,15 +49,26 @@ namespace EasyNetQ.Rpc
         {
             var tcs = new TaskCompletionSource<object>();
 
-            responder(requestMessage).ContinueWith(task =>
+            responder(requestMessage).ContinueWith(SendReplyContinuation(responseExchange, requestMessage, tcs));
+            
+            
+            return tcs.Task;
+        }
+
+        private Action<Task<SerializedMessage>> SendReplyContinuation(IExchange responseExchange, SerializedMessage requestMessage, TaskCompletionSource<object> tcs)
+        {
+            return task =>
                 {
+                    
                     if (task.IsFaulted)
                     {
                         if (task.Exception != null)
                         {
+                            var errorStackTrace = string.Join("\n\n", task.Exception.InnerExceptions.Select(e => e.StackTrace));
+
                             var responseMessage = new SerializedMessage(new MessageProperties(), new byte[] { });
                             responseMessage.Properties.Headers.Add(_rpcHeaderKeys.IsFaultedKey, true);
-                            responseMessage.Properties.Headers.Add(_rpcHeaderKeys.ExceptionMessageKey, task.Exception.InnerException.Message);
+                            responseMessage.Properties.Headers.Add(_rpcHeaderKeys.ExceptionMessageKey, errorStackTrace);
                             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
 
                             advancedBus.Publish(responseExchange, requestMessage.Properties.ReplyTo, false, false, responseMessage.Properties, requestMessage.Body);
@@ -71,10 +83,7 @@ namespace EasyNetQ.Rpc
                         advancedBus.Publish(responseExchange, requestMessage.Properties.ReplyTo, false, false, responseMessage.Properties, responseMessage.Body);
                         tcs.SetResult(null);
                     }
-                });
-            
-            
-            return tcs.Task;
+                };
         }
     }
 }
