@@ -31,7 +31,7 @@ namespace EasyNetQ.Rpc.FreshQueue
             }
         }
 
-        public static Task<SerializedMessage> ExtractExceptionFromHeadersAndPropagateToTaskCompletionSource(IRpcHeaderKeys rpcHeaderKeys, SerializedMessage sm)
+        public static Task<SerializedMessage> ExtractExceptionFromHeadersAndPropagateToTask(IRpcHeaderKeys rpcHeaderKeys, SerializedMessage sm)
         {
             var tcs = new TaskCompletionSource<SerializedMessage>();
             ExtractExceptionFromHeadersAndPropagateToTaskCompletionSource(rpcHeaderKeys, sm, tcs);
