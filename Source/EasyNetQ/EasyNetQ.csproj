@@ -118,6 +118,7 @@
     <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="IMessageSerializationStrategy.cs" />
     <Compile Include="ISaga.cs" />
+    <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="JsonSerializer.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitBusExtensions.cs" />
+    <Compile Include="RabbitScheduler.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
