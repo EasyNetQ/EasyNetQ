@@ -122,7 +122,7 @@ namespace EasyNetQ
         /// <param name="topic">The routingkey the queue is bound to</param>
         /// <param name="handleRequest">The function to call when a new request message is received</param>
         /// <returns></returns>
-        IDisposable Respond(IExchange requestExchange, IQueue queue, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
+        IDisposable Respond(IExchange requestExchange, string queue, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
 
         /// <summary>
         /// Send an rpc-like request to an exchange/routing key.
