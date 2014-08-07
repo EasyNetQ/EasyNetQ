@@ -29,16 +29,16 @@ namespace EasyNetQ.Rpc
         {
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
             var requestRoutingKey = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-
+            
             var timeout = TimeSpan.FromSeconds(_connectionConfiguration.Timeout);
 
             var message = new Message<TRequest>(request);
-
+            
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
-
+            
             var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, timeout, serializedMessage);
-
-            return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>)_messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
+            
+            return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 
         //TODO add handlerId
@@ -49,7 +49,7 @@ namespace EasyNetQ.Rpc
             var handlerId = "";
 
             var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
-            var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof(TRequest), handlerId), false);
+            var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId),false);
             var topic = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
             _advancedBus.ExchangeDeclare(exchange.Name, ExchangeType.Topic);
@@ -57,10 +57,9 @@ namespace EasyNetQ.Rpc
             return _serverRpc.Respond(exchange, queue.Name, topic, HandleRequest(responder));
         }
 
-        private Func<SerializedMessage, Task<SerializedMessage>> HandleRequest<TRequest, TResponse>(Func<TRequest, Task<TResponse>> handle) where TResponse : class
+        private Func<SerializedMessage, Task<SerializedMessage>> HandleRequest<TRequest,TResponse>(Func<TRequest, Task<TResponse>> handle) where TResponse : class
         {
-            return serializedMessage => 
-                Task.Factory.StartNew(() =>
+            return serializedMessage => Task.Factory.StartNew(() =>
                 {
                     var deserializedMessage = _messageSerializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
                     return (IMessage<TRequest>)deserializedMessage.Message;

@@ -1,6 +1,5 @@
 ﻿using System;
 using EasyNetQ.Producer;
-using EasyNetQ.Rpc.FreshQueue;
 
 namespace EasyNetQ.Rpc.ReuseQueue
 {
@@ -21,7 +20,7 @@ namespace EasyNetQ.Rpc.ReuseQueue
 
         public IAdvancedClientRpc CreateClientRpc(IAdvancedBus advancedBus)
         {
-            var responseQueueName = Guid.NewGuid().ToString(); // TODO this should be changed to something more eatable
+            var responseQueueName = "rpc:" + Guid.NewGuid().ToString(); // TODO this should be changed to something more eatable
             return new ReuseQueueAdvancedClientRpc(advancedBus, _configuration, _rpcHeaderKeys, _eventBus, _exchangeDeclareStrategy, responseQueueName);
         }
 

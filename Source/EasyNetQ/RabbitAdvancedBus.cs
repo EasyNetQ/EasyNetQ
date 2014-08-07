@@ -61,8 +61,7 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.messageSerializationStrategy = messageSerializationStrategy;
             
-            advancedClientRpc = advancedRpcFactory.CreateClientRpc(this);
-            advancedServerRpc = advancedRpcFactory.CreateServerRpc(this);
+            
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
             this.consumeSingle = consumeSingleFactory.Create(connection);
@@ -72,6 +71,9 @@ namespace EasyNetQ
             eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
+
+            advancedClientRpc = advancedRpcFactory.CreateClientRpc(this);
+            advancedServerRpc = advancedRpcFactory.CreateServerRpc(this);
         }
 
 
