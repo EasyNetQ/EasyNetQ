@@ -1,25 +1,39 @@
 ﻿using System;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using EasyNetQ.SystemMessages;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
     public class RabbitScheduler : IScheduler
     {
+        private readonly IAdvancedBus advancedBus;
+        private readonly IConventions conventions;
+        private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly ISerializer serializer;
         private readonly ITypeNameSerializer typeNameSerializer;
-        private readonly IBus bus;
 
         public RabbitScheduler(
-            IBus bus,
+            IAdvancedBus advancedBus,
+            IConventions conventions,
+            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             ISerializer serializer,
             ITypeNameSerializer typeNameSerializer)
         {
-            Preconditions.CheckNotNull(bus, "bus");
+            Preconditions.CheckNotNull(advancedBus, "advancedBus");
+            Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(serializer, "serializer");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
-            this.bus = bus;
+            this.advancedBus = advancedBus;
+            this.conventions = conventions;
+            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.serializer = serializer;
             this.typeNameSerializer = typeNameSerializer;
         }
@@ -31,26 +45,12 @@ namespace EasyNetQ
 
         public void FuturePublish<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class
         {
-            Preconditions.CheckNotNull(message, "message");
-            
-            var typeName = typeNameSerializer.Serialize(typeof(T));
-            var messageBody = serializer.MessageToBytes(message);
-
-            bus.Publish(new ScheduleMe
-            {
-                WakeTime = futurePublishDate,
-                BindingKey = typeName,
-                CancellationKey = cancellationKey,
-                InnerMessage = messageBody
-            });
+            FuturePublishAsync(futurePublishDate, cancellationKey, message).Wait();
         }
 
         public void CancelFuturePublish(string cancellationKey)
         {
-            bus.Publish(new UnscheduleMe
-            {
-                CancellationKey = cancellationKey
-            });
+            CancelFuturePublishAsync(cancellationKey).Wait();
         }
 
         public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message) where T : class
@@ -61,24 +61,32 @@ namespace EasyNetQ
         public Task FuturePublishAsync<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
-
-            var typeName = typeNameSerializer.Serialize(typeof(T));
-            var messageBody = serializer.MessageToBytes(message);
-
-            return bus.PublishAsync(new ScheduleMe
+            var messageType = typeof(ScheduleMe);
+            return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
             {
-                WakeTime = futurePublishDate,
-                BindingKey = typeName,
-                CancellationKey = cancellationKey,
-                InnerMessage = messageBody
+                var typeName = typeNameSerializer.Serialize(typeof(T));
+                var messageBody = serializer.MessageToBytes(message);
+                var easyNetQMessage = new Message<ScheduleMe>(new ScheduleMe
+                {
+                    WakeTime = futurePublishDate,
+                    BindingKey = typeName,
+                    CancellationKey = cancellationKey,
+                    InnerMessage = messageBody
+                }) { Properties = { DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1) } };
+                return advancedBus.PublishAsync(exchange, conventions.TopicNamingConvention(messageType), false, false, easyNetQMessage);
             });
         }
 
         public Task CancelFuturePublishAsync(string cancellationKey)
         {
-            return bus.PublishAsync(new UnscheduleMe
+            var messageType = typeof(UnscheduleMe);
+            return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
             {
-                CancellationKey = cancellationKey
+                var easyNetQMessage = new Message<UnscheduleMe>(new UnscheduleMe
+                {
+                    CancellationKey = cancellationKey
+                }) { Properties = { DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1) } };
+                return advancedBus.PublishAsync(exchange, conventions.TopicNamingConvention(messageType), false, false, easyNetQMessage);
             });
         }
     }
