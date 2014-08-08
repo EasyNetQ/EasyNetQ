@@ -131,15 +131,17 @@ namespace EasyNetQ
         /// Proper headers: CorrelationId, ApplyTo, will be filled accordingly.
         /// 
         /// The scheme used by this RPC implementation is compatible with IAdvancedBus.Respond().
+        /// 
+        /// Assumes the exchange is created
         /// </summary>
-        /// <param name="requestExchangeName">The exchange the server is configured to use</param>
+        /// <param name="requestExchange">The exchange the server is configured to use</param>
         /// <param name="requestRoutingKey">The routingkey the server is configured to use.</param>
         /// <param name="mandatory">The RabbitMq mandatory flag for the request-message</param>
         /// <param name="immediate">The RabbitMq immediate flag for the request-message</param>
         /// <param name="timeout">Response timeout</param>
         /// <param name="request">The request message</param>
         /// <returns></returns>
-        Task<SerializedMessage> RequestAsync(string requestExchangeName, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request);
+        Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request);
 
 
         /// <summary>

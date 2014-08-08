@@ -37,19 +37,16 @@ namespace EasyNetQ.Rpc.ReuseQueue
             eventBus.Subscribe<ConnectionDisconnectedEvent>(_ => OnConnectionDisconnected());
         }
 
-        public Task<SerializedMessage> RequestAsync(string requestExchangeName, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
+        public Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
         {
             Preconditions.CheckNotNull(request, "request");
-            Preconditions.CheckNotNull(requestExchangeName, "requestExchangeName");
+            Preconditions.CheckNotNull(requestExchange, "requestExchange");
             Preconditions.CheckNotNull(requestRoutingKey, "requestRoutingKey");
             if (_firstTime)
             {
                 CreateQueueAndConsume();
                 _firstTime = false;
             }
-
-            // assume that the server declares the exchange
-            var exchange = new Exchange(requestExchangeName); 
 
             var correlationId = Guid.NewGuid();
 
@@ -64,7 +61,7 @@ namespace EasyNetQ.Rpc.ReuseQueue
                     ConnectionLost = () => tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()))
                 });
 
-            RpcHelpers.PublishRequest(_advancedBus, exchange, request, requestRoutingKey, _responseQueueName, correlationId, timeout);
+            RpcHelpers.PublishRequest(_advancedBus, requestExchange, request, requestRoutingKey, _responseQueueName, correlationId, timeout);
 
             return tcs.Task.ContinueWithSideEffect(timer.Dispose);
         }

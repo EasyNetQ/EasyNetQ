@@ -16,7 +16,7 @@ namespace EasyNetQ.Rpc.FreshQueue
             _configuration = configuration;
             _rpcHeaderKeys = rpcHeaderKeys;
         }
-        public Task<SerializedMessage> RequestAsync(string requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
+        public Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request)
         {
             Preconditions.CheckNotNull(requestExchange, "requestExchange");
             Preconditions.CheckNotNull(requestRoutingKey, "requestRoutingKey");
@@ -24,9 +24,6 @@ namespace EasyNetQ.Rpc.FreshQueue
 
             var correlationId = Guid.NewGuid();
             var responseQueueName = "rpc:"+correlationId;
-
-            // assume that the server declares the exchange
-            var exchange = new Exchange(requestExchange); 
 
             var queue = _advancedBus.QueueDeclare(
                 responseQueueName,
@@ -39,7 +36,7 @@ namespace EasyNetQ.Rpc.FreshQueue
             //the response is published to the default exchange with the queue name as routingkey. So no need to bind to exchange
             var continuation = _advancedBus.ConsumeSingle(new Queue(queue.Name, queue.IsExclusive), timeout);
 
-            RpcHelpers.PublishRequest(_advancedBus, exchange, request, requestRoutingKey, responseQueueName, correlationId, timeout);
+            RpcHelpers.PublishRequest(_advancedBus, requestExchange, request, requestRoutingKey, responseQueueName, correlationId, timeout);
             return continuation
                 .Then(mcc => TaskHelpers.FromResult(new SerializedMessage(mcc.Properties, mcc.Message)))
                 .Then(sm => RpcHelpers.ExtractExceptionFromHeadersAndPropagateToTask(_rpcHeaderKeys, sm));

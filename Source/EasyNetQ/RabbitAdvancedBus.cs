@@ -172,7 +172,7 @@ namespace EasyNetQ
         }
 
         public Task<SerializedMessage> RequestAsync(
-            string requestExchange, 
+            IExchange requestExchange, 
             string requestRoutingKey, 
             bool mandatory, 
             bool immediate, 

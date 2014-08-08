@@ -28,16 +28,14 @@ namespace EasyNetQ.Rpc
             where TResponse : class
         {
             var exchangeName = _conventions.RpcExchangeNamingConvention();
+            var requestExchange = new Exchange(exchangeName);
             var requestRoutingKey = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-            
             var timeout = TimeSpan.FromSeconds(_connectionConfiguration.Timeout);
 
             var message = new Message<TRequest>(request);
-            
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
             
-            var response = _clientRpc.RequestAsync(exchangeName, requestRoutingKey, false, false, timeout, serializedMessage);
-
+            var response = _clientRpc.RequestAsync(requestExchange, requestRoutingKey, false, false, timeout, serializedMessage);
             return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 
