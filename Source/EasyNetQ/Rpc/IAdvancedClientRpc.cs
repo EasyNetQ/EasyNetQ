@@ -6,7 +6,7 @@ namespace EasyNetQ.Rpc
 {
     public interface IAdvancedClientRpc
     {
-        Task<SerializedMessage> RequestAsync(IExchange requestExchange,
+        Task<SerializedMessage> RequestAsync(string requestExchange,
                                              string requestRoutingKey,
                                              bool mandatory,
                                              bool immediate,

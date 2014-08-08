@@ -116,13 +116,14 @@ namespace EasyNetQ
         /// The scheme used by this RPC implementation is compatible with IAdvancedBus.RequestAsync().
         /// 
         /// Note that Exception thrown in handleRequest will both forward a message to the ErrorQueue and to the client
+        /// A topic exchange will be created.
         /// </summary>
-        /// <param name="requestExchange">The exchange the routingkey will be bound in</param>
+        /// <param name="requestExchangeName">The exchange the routingkey will be bound in</param>
         /// <param name="queueName">The request queue name</param>
         /// <param name="topic">The routingkey the queue is bound to</param>
         /// <param name="handleRequest">The function to call when a new request message is received</param>
         /// <returns></returns>
-        IDisposable Respond(IExchange requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
+        IDisposable Respond(string requestExchangeName, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest);
 
         /// <summary>
         /// Send an rpc-like request to an exchange/routing key.
@@ -131,14 +132,14 @@ namespace EasyNetQ
         /// 
         /// The scheme used by this RPC implementation is compatible with IAdvancedBus.Respond().
         /// </summary>
-        /// <param name="requestExchange">The exchange the server is configured to use</param>
+        /// <param name="requestExchangeName">The exchange the server is configured to use</param>
         /// <param name="requestRoutingKey">The routingkey the server is configured to use.</param>
         /// <param name="mandatory">The RabbitMq mandatory flag for the request-message</param>
         /// <param name="immediate">The RabbitMq immediate flag for the request-message</param>
         /// <param name="timeout">Response timeout</param>
         /// <param name="request">The request message</param>
         /// <returns></returns>
-        Task<SerializedMessage> RequestAsync(IExchange requestExchange, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request);
+        Task<SerializedMessage> RequestAsync(string requestExchangeName, string requestRoutingKey, bool mandatory, bool immediate, TimeSpan timeout, SerializedMessage request);
 
 
         /// <summary>

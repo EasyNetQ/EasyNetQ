@@ -23,7 +23,7 @@ namespace EasyNetQ.Rpc
             _rpcHeaderKeys = rpcHeaderKeys;
         }
 
-        public IDisposable Respond(IExchange requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
+        public IDisposable Respond(string requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
         {
             Preconditions.CheckNotNull(requestExchange, "requestExchange");
             Preconditions.CheckNotNull(queueName, "queueName");
@@ -32,7 +32,7 @@ namespace EasyNetQ.Rpc
 
             var expires = (int)TimeSpan.FromSeconds(_configuration.Timeout).TotalMilliseconds;
 
-            _advancedBus.ExchangeDeclare(requestExchange.Name, ExchangeType.Topic);
+            var exchange = _advancedBus.ExchangeDeclare(requestExchange, ExchangeType.Topic);
 
             var queue = _advancedBus.QueueDeclare(queueName, 
                 passive: false, 
@@ -41,7 +41,7 @@ namespace EasyNetQ.Rpc
                 autoDelete: true, 
                 expires: expires);
 
-            _advancedBus.Bind(requestExchange, queue, topic);
+            _advancedBus.Bind(exchange, queue, topic);
 
             var responseExchange = Exchange.GetDefault();
             return _advancedBus.Consume(queue, (msgBytes, msgProp, messageRecievedInfo) => ExecuteResponder(responseExchange, handleRequest, new SerializedMessage(msgProp, msgBytes)));

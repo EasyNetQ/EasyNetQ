@@ -27,7 +27,7 @@ namespace EasyNetQ.Rpc
             where TRequest : class
             where TResponse : class
         {
-            var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
+            var exchangeName = _conventions.RpcExchangeNamingConvention();
             var requestRoutingKey = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
             
             var timeout = TimeSpan.FromSeconds(_connectionConfiguration.Timeout);
@@ -36,7 +36,7 @@ namespace EasyNetQ.Rpc
             
             var serializedMessage = _messageSerializationStrategy.SerializeMessage(message);
             
-            var response = _clientRpc.RequestAsync(exchange, requestRoutingKey, false, false, timeout, serializedMessage);
+            var response = _clientRpc.RequestAsync(exchangeName, requestRoutingKey, false, false, timeout, serializedMessage);
 
             return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
@@ -48,11 +48,9 @@ namespace EasyNetQ.Rpc
         {
             var handlerId = "";
 
-            var exchange = new Exchange(_conventions.RpcExchangeNamingConvention());
+            var exchange = _conventions.RpcExchangeNamingConvention();
             var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId),false);
             var topic = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-
-            _advancedBus.ExchangeDeclare(exchange.Name, ExchangeType.Topic);
 
             return _serverRpc.Respond(exchange, queue.Name, topic, HandleRequest(responder));
         }
