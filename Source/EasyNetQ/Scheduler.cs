@@ -6,7 +6,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
-    public class RabbitScheduler : IScheduler
+    public class Scheduler : IScheduler
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
@@ -15,7 +15,7 @@ namespace EasyNetQ
         private readonly ISerializer serializer;
         private readonly ITypeNameSerializer typeNameSerializer;
 
-        public RabbitScheduler(
+        public Scheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,

@@ -163,7 +163,7 @@
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitBusExtensions.cs" />
-    <Compile Include="RabbitScheduler.cs" />
+    <Compile Include="Scheduler.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
