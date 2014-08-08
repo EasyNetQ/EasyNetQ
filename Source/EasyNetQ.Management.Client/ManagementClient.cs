@@ -546,13 +546,15 @@ namespace EasyNetQ.Management.Client
 
             InsertRequestBody(request, item);
 
-            var response = request.GetHttpResponse();
-            if (!(response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created))
+            using(var response = request.GetHttpResponse())
             {
-                throw new UnexpectedHttpStatusCodeException(response.StatusCode);
-            }
+                if (!(response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created))
+                {
+                    throw new UnexpectedHttpStatusCodeException(response.StatusCode);
+                }
 
-            return DeserializeResponse<TResult>(response);
+                return DeserializeResponse<TResult>(response);
+            }
         }
 
         private void Delete(string path)
