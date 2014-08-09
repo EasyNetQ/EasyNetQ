@@ -60,7 +60,6 @@
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
     <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
-    <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />

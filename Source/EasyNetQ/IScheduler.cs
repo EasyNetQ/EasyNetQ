@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ
 {
     /// <summary>
-    /// Provides a simple Publish API for schedule a message on the bus.
+    /// Provides a simple Publish API to schedule a message to be published at some time in the future.
     /// </summary>
     public interface IScheduler
     {
@@ -26,6 +26,14 @@ namespace EasyNetQ
         /// <param name="cancellationKey">An identifier that can be used with CancelFuturePublish to cancel the sending of this message at a later time</param>
         /// <param name="message">The message to response with</param>
         void FuturePublish<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class;
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="messageDelay">The delay time for message to publish in future</param>
+        /// <param name="message">The message to response with</param>
+        void FuturePublish<T>(TimeSpan messageDelay, T message) where T : class;
 
         /// <summary>
         /// Unschedule all messages matching the cancellationKey.
@@ -51,6 +59,14 @@ namespace EasyNetQ
         /// <param name="cancellationKey">An identifier that can be used with CancelFuturePublish to cancel the sending of this message at a later time</param>
         /// <param name="message">The message to response with</param>
         Task FuturePublishAsync<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class;
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="messageDelay">The delay time for message to publish in future</param>
+        /// <param name="message">The message to response with</param>
+        Task FuturePublishAsync<T>(TimeSpan messageDelay, T message) where T : class;
 
         /// <summary>
         /// Unschedule all messages matching the cancellationKey.

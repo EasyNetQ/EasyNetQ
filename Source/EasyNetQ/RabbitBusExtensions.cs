@@ -1,15 +1,44 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
     public static class RabbitBusExtensions
     {
-        private static readonly TimeSpan MaxMessageDelay = TimeSpan.FromMilliseconds(int.MaxValue);
+        private static IScheduler Scheduler(this IBus bus)
+        {
+            return bus.Advanced.Container.Resolve<IScheduler>();
+        }
 
         /// <summary>
         /// Schedule a message to be published at some time in the future.
+        /// This required the EasyNetQ.Scheduler service to be running.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="futurePublishDate">The time at which the message should be sent (UTC)</param>
+        /// <param name="message">The message to response with</param>
+        public static void FuturePublish<T>(this IBus bus, DateTime futurePublishDate, T message) where T : class
+        {
+            bus.Scheduler().FuturePublish(futurePublishDate, null, message);
+        }
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future.
+        /// This required the EasyNetQ.Scheduler service to be running.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="futurePublishDate">The time at which the message should be sent (UTC)</param>
+        /// <param name="cancellationKey">An identifier that can be used with CancelFuturePublish to cancel the sending of this message at a later time</param>
+        /// <param name="message">The message to response with</param>
+        public static void FuturePublish<T>(this IBus bus, DateTime futurePublishDate, string cancellationKey, T message) where T : class
+        {
+            bus.Scheduler().FuturePublish(futurePublishDate, cancellationKey, message);
+        }
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The IBus instance to publish on</param>
@@ -17,17 +46,48 @@ namespace EasyNetQ
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IBus bus, TimeSpan messageDelay, T message) where T : class
         {
-            FuturePublishAsync(bus, messageDelay, message).Wait();
+            bus.Scheduler().FuturePublish(messageDelay, message);
         }
 
-        private static TimeSpan Round(TimeSpan timeSpan)
+        /// <summary>
+        /// Unschedule all messages matching the cancellationKey.
+        /// </summary>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="cancellationKey">The identifier that was used when originally scheduling the message with FuturePublish</param>
+        public static void CancelFuturePublish(this IBus bus, string cancellationKey)
         {
-            return new TimeSpan(timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, 0);
+            bus.Scheduler().CancelFuturePublish(cancellationKey);
         }
-
 
         /// <summary>
         /// Schedule a message to be published at some time in the future.
+        /// This required the EasyNetQ.Scheduler service to be running.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="futurePublishDate">The time at which the message should be sent (UTC)</param>
+        /// <param name="message">The message to response with</param>
+        public static Task FuturePublishAsync<T>(this IBus bus, DateTime futurePublishDate, T message) where T : class
+        {
+            return bus.Scheduler().FuturePublishAsync(futurePublishDate, message);
+        }
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future.
+        /// This required the EasyNetQ.Scheduler service to be running.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="futurePublishDate">The time at which the message should be sent (UTC)</param>
+        /// <param name="cancellationKey">An identifier that can be used with CancelFuturePublish to cancel the sending of this message at a later time</param>
+        /// <param name="message">The message to response with</param>
+        public static Task FuturePublishAsync<T>(this IBus bus, DateTime futurePublishDate, string cancellationKey, T message) where T : class
+        {
+            return bus.Scheduler().FuturePublishAsync(futurePublishDate, cancellationKey, message);
+        }
+
+        /// <summary>
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The IBus instance to publish on</param>
@@ -35,30 +95,17 @@ namespace EasyNetQ
         /// <param name="message">The message to response with</param>
         public static Task FuturePublishAsync<T>(this IBus bus, TimeSpan messageDelay, T message) where T : class
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
-            var advancedBus = bus.Advanced;
-            var conventions = advancedBus.Container.Resolve<IConventions>();
-            var messageDeliveryModeStrategy = advancedBus.Container.Resolve<IMessageDeliveryModeStrategy>();
-            var delay = Round(messageDelay);
-            var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
-            var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
-            var futureExchangeName = exchangeName + "_" + delayString;
-            var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
-            return advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Topic)
-                .Then(futureExchange => advancedBus.QueueDeclareAsync(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName)
-                                                   .Then(futureQueue => advancedBus.BindAsync(futureExchange, futureQueue, "#"))
-                                                   .Then(() =>
-                                                       {
-                                                           var easyNetQMessage = new Message<T>(message)
-                                                               {
-                                                                   Properties =
-                                                                       {
-                                                                           DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1)
-                                                                       }
-                                                               };
-                                                           return bus.Advanced.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
-                                                       }));
+            return bus.Scheduler().FuturePublishAsync(messageDelay, message);
+        }
+
+        /// <summary>
+        /// Unschedule all messages matching the cancellationKey.
+        /// </summary>
+        /// <param name="bus">The IBus instance to publish on</param>
+        /// <param name="cancellationKey">The identifier that was used when originally scheduling the message with FuturePublish</param>
+        public static Task CancelFuturePublishAsync(this IBus bus, string cancellationKey)
+        {
+            return bus.Scheduler().CancelFuturePublishAsync(cancellationKey);
         }
     }
 }
