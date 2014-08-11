@@ -42,6 +42,7 @@ namespace EasyNetQ
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IRpc, Rpc>()
                 .Register<ISendReceive, SendReceive>()
+                .Register<IScheduler, Scheduler>()
                 .Register<IBus, RabbitBus>();
         }
          
