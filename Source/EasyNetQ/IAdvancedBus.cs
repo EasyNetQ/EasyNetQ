@@ -81,7 +81,7 @@ namespace EasyNetQ
         /// receive context. Returns a Task.
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
+        IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
         /// Consume raw bytes from the queue.
@@ -94,7 +94,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
+        IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Publish a message as a byte array

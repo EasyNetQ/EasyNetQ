@@ -116,6 +116,14 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="IMessageSerializationStrategy.cs" />
+    <Compile Include="Interception\CompositeInterceptor.cs" />
+    <Compile Include="Interception\DefaultInterceptor.cs" />
+    <Compile Include="Interception\GZipInterceptor.cs" />
+    <Compile Include="Interception\InterceptionExtentions.cs" />
+    <Compile Include="Interception\InterceptorRegistrator.cs" />
+    <Compile Include="Interception\IProduceConsumeInterceptor.cs" />
+    <Compile Include="Interception\RawMessage.cs" />
+    <Compile Include="Interception\TripleDESInterceptor.cs" />
     <Compile Include="ISaga.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
