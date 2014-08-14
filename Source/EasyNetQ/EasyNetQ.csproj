@@ -60,7 +60,6 @@
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
     <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
-    <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
@@ -126,6 +125,7 @@
     <Compile Include="Interception\RawMessage.cs" />
     <Compile Include="Interception\TripleDESInterceptor.cs" />
     <Compile Include="ISaga.cs" />
+    <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="JsonSerializer.cs" />
@@ -170,6 +170,7 @@
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitBusExtensions.cs" />
+    <Compile Include="Scheduler.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
