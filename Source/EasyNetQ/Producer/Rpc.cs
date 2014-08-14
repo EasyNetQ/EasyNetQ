@@ -16,6 +16,7 @@ namespace EasyNetQ.Producer
         protected readonly IAdvancedBus advancedBus;
         protected readonly IConventions conventions;
         protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         protected readonly IConnectionConfiguration configuration;
 
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
@@ -31,17 +32,20 @@ namespace EasyNetQ.Producer
             IEventBus eventBus,
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(configuration, "configuration");
 
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.configuration = configuration;
 
             eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
@@ -179,10 +183,12 @@ namespace EasyNetQ.Producer
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(
                 advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
 
+            var messageType = typeof(TRequest);
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;
             requestMessage.Properties.CorrelationId = correlationId.ToString();
             requestMessage.Properties.Expiration = (configuration.Timeout*1000).ToString();
+            requestMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1);
 
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
@@ -208,33 +214,57 @@ namespace EasyNetQ.Producer
         {
             var tcs = new TaskCompletionSource<object>();
 
-            responder(requestMessage.Body).ContinueWith(task =>
+            try
             {
-                if(task.IsFaulted)
+                responder(requestMessage.Body).ContinueWith(task =>
                 {
-                    if(task.Exception != null)
+                    if (task.IsFaulted)
                     {
-                        var body = Activator.CreateInstance<TResponse>();
-                        var responseMessage = new Message<TResponse>(body);
-                        responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-                        responseMessage.Properties.Headers.Add(ExceptionMessageKey, task.Exception.InnerException.Message);
-                        responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-                        advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
-                        tcs.SetException(task.Exception);
+                        if (task.Exception != null)
+                        {
+                            OnResponderFailure<TRequest, TResponse>(requestMessage, task.Exception.InnerException.Message, task.Exception);
+                            tcs.SetException(task.Exception);
+                        }
                     }
-                }
-                else
-                {
-                    var responseMessage = new Message<TResponse>(task.Result);
-                    responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-
-                    advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
-                    tcs.SetResult(null);
-                }
-            });
-
+                    else
+                    {
+                        OnResponderSuccess(requestMessage, task.Result);
+                        tcs.SetResult(null);
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e);
+                tcs.SetException(e);
+            }
+            
             return tcs.Task;
+        }
+
+        protected virtual void OnResponderSuccess<TRequest, TResponse>(IMessage<TRequest> requestMessage, TResponse response)
+            where TRequest : class
+            where TResponse : class
+        {
+            var responseMessage = new Message<TResponse>(response);
+            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+            responseMessage.Properties.DeliveryMode = 1; // non-persistent
+
+            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
+        }
+
+        protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
+            where TRequest : class 
+            where TResponse : class
+        {
+            var body = ReflectionHelpers.CreateInstance<TResponse>();
+            var responseMessage = new Message<TResponse>(body);
+            responseMessage.Properties.Headers.Add(IsFaultedKey, true);
+            responseMessage.Properties.Headers.Add(ExceptionMessageKey, exceptionMessage);
+            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
+            responseMessage.Properties.DeliveryMode = 1; // non-persistent
+
+            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
         }
     }
 }

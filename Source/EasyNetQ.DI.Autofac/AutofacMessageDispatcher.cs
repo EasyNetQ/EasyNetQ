@@ -27,9 +27,20 @@ namespace EasyNetQ.DI
         {
             var scope = component.BeginLifetimeScope("async-message");
             var consumer = scope.Resolve<TConsumer>();
-            return consumer
+            var tsc = new TaskCompletionSource<object>();
+            consumer
                 .Consume(message)
-                .ContinueWith(task => scope.Dispose());
+                .ContinueWith(task =>
+                {
+                    scope.Dispose();
+
+                    if (task.IsFaulted && task.Exception != null)
+                    {
+                        tsc.SetException(task.Exception);
+                    }
+                });
+
+            return tsc.Task;
         }
     }
 }

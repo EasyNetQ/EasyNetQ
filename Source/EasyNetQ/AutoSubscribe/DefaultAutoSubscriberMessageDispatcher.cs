@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 namespace EasyNetQ.AutoSubscribe
@@ -9,7 +8,7 @@ namespace EasyNetQ.AutoSubscribe
             where TMessage : class
             where TConsumer : IConsume<TMessage>
         {
-            var consumer = (IConsume<TMessage>)Activator.CreateInstance(typeof(TConsumer));
+            var consumer = (IConsume<TMessage>)ReflectionHelpers.CreateInstance<TConsumer>();
 
             consumer.Consume(message);
         }
@@ -18,7 +17,7 @@ namespace EasyNetQ.AutoSubscribe
             where TMessage : class
             where TConsumer : IConsumeAsync<TMessage>
         {
-            var consumer = (IConsumeAsync<TMessage>)Activator.CreateInstance(typeof(TConsumer));
+            var consumer = (IConsumeAsync<TMessage>)ReflectionHelpers.CreateInstance<TConsumer>();
 
             return consumer.Consume(message);
         }

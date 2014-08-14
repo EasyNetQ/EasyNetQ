@@ -21,8 +21,7 @@ namespace EasyNetQ.Producer
     public class PublisherConfirms : PublisherBase
     {
         private readonly IEasyNetQLogger logger;
-        private readonly IDictionary<ulong, ConfirmActions> dictionary = 
-            new ConcurrentDictionary<ulong, ConfirmActions>();
+        private readonly IDictionary<ulong, ConfirmActions> dictionary = new ConcurrentDictionary<ulong, ConfirmActions>();
 
         private readonly int timeoutSeconds;
 

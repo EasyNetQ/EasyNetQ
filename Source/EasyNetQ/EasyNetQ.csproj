@@ -58,8 +58,8 @@
     <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
     <Compile Include="AutoSubscribe\ForTopicAttribute.cs" />
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
+    <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
-    <Compile Include="BusExtensions.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
@@ -89,6 +89,8 @@
     <Compile Include="DefaultMessageSerializationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="DeliveryModeAttribute.cs" />
+    <Compile Include="DeliveryModeStrategy.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="Events\AckEvent.cs" />
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="IMessageSerializationStrategy.cs" />
     <Compile Include="ISaga.cs" />
+    <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="JsonSerializer.cs" />
@@ -159,7 +162,9 @@
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
     <Compile Include="RabbitBusExtensions.cs" />
+    <Compile Include="Scheduler.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
     <Compile Include="Sprache\IFailure.cs" />
     <Compile Include="Sprache\Input.cs" />

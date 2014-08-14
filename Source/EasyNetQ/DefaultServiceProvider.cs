@@ -37,30 +37,30 @@ namespace EasyNetQ
 
         public virtual TService Resolve<TService>() where TService : class
         {
-            var serivceType = typeof (TService);
+            var serviceType = typeof (TService);
 
-            if (!ServiceIsRegistered(serivceType))
+            if (!ServiceIsRegistered(serviceType))
             {
-                throw new EasyNetQException("No service of type {0} has been registered", serivceType.Name);
+                throw new EasyNetQException("No service of type {0} has been registered", serviceType.Name);
             }
 
-            if (!instances.ContainsKey(serivceType))
+            if (!instances.ContainsKey(serviceType))
             {
-                if (registrations.ContainsKey(serivceType))
+                if (registrations.ContainsKey(serviceType))
                 {
-                    var implementationType = registrations[serivceType];
+                    var implementationType = registrations[serviceType];
                     var service = CreateServiceInstance(implementationType);
-                    instances.Add(serivceType, service);
+                    instances.Add(serviceType, service);
                 }
 
-                if (factories.ContainsKey(serivceType))
+                if (factories.ContainsKey(serviceType))
                 {
-                    var service = ((Func<IServiceProvider, TService>)factories[serivceType])(this);
-                    instances.Add(serivceType, service);
+                    var service = ((Func<IServiceProvider, TService>)factories[serviceType])(this);
+                    instances.Add(serviceType, service);
                 }
             }
 
-            return (TService)instances[serivceType];
+            return (TService)instances[serviceType];
         }
 
         public object Resolve(Type serviceType)

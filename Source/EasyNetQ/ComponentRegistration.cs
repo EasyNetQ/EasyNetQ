@@ -26,6 +26,7 @@ namespace EasyNetQ
                 .Register<ITypeNameSerializer, TypeNameSerializer>()
                 .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()                
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
+                .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()
@@ -41,6 +42,7 @@ namespace EasyNetQ
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IRpc, Rpc>()
                 .Register<ISendReceive, SendReceive>()
+                .Register<IScheduler, Scheduler>()
                 .Register<IBus, RabbitBus>();
         }
          
