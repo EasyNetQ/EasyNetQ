@@ -38,6 +38,10 @@ namespace EasyNetQ.DI
                     {
                         tsc.SetException(task.Exception);
                     }
+                    else
+                    {
+                        tsc.SetResult(null);
+                    }
                 });
 
             return tsc.Task;
