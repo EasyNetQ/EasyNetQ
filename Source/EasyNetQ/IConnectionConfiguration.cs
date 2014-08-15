@@ -92,8 +92,25 @@ namespace EasyNetQ
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
-            var applicationName = Path.GetFileName(applicationNameAndPath);
-            var applicationPath = Path.GetDirectoryName(applicationNameAndPath);
+
+            var applicationName = "unknown";
+            var applicationPath = "unknown";
+            if (!string.IsNullOrWhiteSpace(applicationNameAndPath))
+            {
+                // Note: When running the application in an Integration Services Package (SSIS) the
+                // Environment.GetCommandLineArgs()[0] can return null, and therefor it is not possible to get
+                // the filename or directory name.
+                try
+                {
+                    // Will only throw an exception if the applicationName contains invalid characters, is empty, or too long
+                    // Silently catch the exception, as we will just leave the application name and path to "unknown"
+                    applicationName = Path.GetFileName(applicationNameAndPath);
+                    applicationPath = Path.GetDirectoryName(applicationNameAndPath);
+                }
+                catch (ArgumentException) { }
+                catch (PathTooLongException) { }
+            }
+
             var hostname = Environment.MachineName;
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
