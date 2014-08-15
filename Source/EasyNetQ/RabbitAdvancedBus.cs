@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
+using EasyNetQ.Interception;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -20,6 +21,7 @@ namespace EasyNetQ
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly IContainer container;
         private readonly IConnectionConfiguration connectionConfiguration;
+        private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
         public RabbitAdvancedBus(
@@ -32,6 +34,7 @@ namespace EasyNetQ
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container,
             IConnectionConfiguration connectionConfiguration,
+            IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
@@ -43,6 +46,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(container, "container");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -51,6 +55,7 @@ namespace EasyNetQ
             this.handlerCollectionFactory = handlerCollectionFactory;
             this.container = container;
             this.connectionConfiguration = connectionConfiguration;
+            this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
@@ -122,7 +127,7 @@ namespace EasyNetQ
             return Consume(queue, onMessage, x => { });
         }
 
-        public virtual IDisposable Consume(IQueue queue, Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
+        public virtual IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -134,7 +139,11 @@ namespace EasyNetQ
             }
             var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
             configure(consumerConfiguration);
-            var consumer = consumerFactory.CreateConsumer(queue, onMessage, connection, consumerConfiguration);
+            var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receviedInfo) =>
+                {
+                    var rawMessage = produceConsumeInterceptor.OnConsume(new RawMessage(properties, body));
+                    return onMessage(rawMessage.Body, rawMessage.Properties, receviedInfo);
+                }, connection, consumerConfiguration);
             return consumer.StartConsuming();
         }
 
@@ -153,19 +162,16 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
 
-            var task = clientCommandDispatcher.Invoke(x =>
+            var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
+
+            return clientCommandDispatcher.Invoke(x =>
                 {
                     var properties = x.CreateBasicProperties();
-                    messageProperties.CopyTo(properties);
+                    rawMessage.Properties.CopyTo(properties);
 
-                return publisher.Publish(x,
-                        m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, body));
+                    return publisher.Publish(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body))
+                                    .Then(() => logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId));
                 }).Unwrap();
-
-            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
-                exchange.Name, routingKey, messageProperties.CorrelationId);
-
-            return task;
         }
 
         public virtual Task PublishAsync<T>(

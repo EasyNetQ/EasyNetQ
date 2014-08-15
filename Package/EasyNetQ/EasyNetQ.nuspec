@@ -5,7 +5,7 @@
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
     <version>0.35.1.0</version>
     <title>EasyNetQ</title>
-    <authors>Mike Hadlow, Contribtors (see GitHub repo)</authors>
+    <authors>Mike Hadlow, Contributors (see GitHub repo)</authors>
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/mikehadlow/EasyNetQ/blob/master/licence.txt</licenseUrl>
     <projectUrl>http://easynetq.com/</projectUrl>
