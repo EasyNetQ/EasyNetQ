@@ -14,8 +14,7 @@ namespace EasyNetQ.ConnectionString
         public static Parser<string> Text = Parse.CharExcept(';').Many().Text();
         public static Parser<ushort> Number = Parse.Number.Select(ushort.Parse);
 
-        public static Parser<bool> Bool =
-           (Parse.String("true").Or(Parse.String("True")).Or(Parse.String("false")).Or(Parse.String("False"))).Text().Select(x => x == "true" || x == "True");
+        public static Parser<bool> Bool = (Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false"))).Text().Select(x => x.ToLower() == "true");
 
         public static Parser<IHostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
