@@ -77,7 +77,8 @@ namespace EasyNetQ.Management.Client
             {
                 configureRequest = x => { };
             }
-
+            if (!hostUrl.StartsWith("http://"))
+                hostUrl = "http://" + hostUrl;
             this.hostUrl = hostUrl;
             this.username = username;
             this.password = password;
