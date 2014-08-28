@@ -53,17 +53,36 @@ namespace EasyNetQ.Management.Client
         }
 
         public ManagementClient(
-            string hostUrl, 
-            string username, 
-            string password, 
-            int portNumber = 15672, 
+            string hostUrl,
+            string username,
+            string password,
+            int portNumber = 15672,
             bool runningOnMono = false,
             TimeSpan? timeout = null,
-            Action<HttpWebRequest> configureRequest = null)
+            Action<HttpWebRequest> configureRequest = null,
+            bool ssl = false)
         {
+            var urlRegex = new Regex(@"^(http|https):\/\/.+\w$");
+            Uri urlUri = null;
             if (string.IsNullOrEmpty(hostUrl))
             {
                 throw new ArgumentException("hostUrl is null or empty");
+            }
+            if (ssl)
+            {
+                if (hostUrl.Contains("http://"))
+                    throw new ArgumentException("hostUrl is illegal");
+                hostUrl = hostUrl.Contains("https://") ? hostUrl : "https://" + hostUrl;
+            }
+            else
+            {
+                if (hostUrl.Contains("https://"))
+                    throw new ArgumentException("hostUrl is illegal");
+                hostUrl = hostUrl.Contains("http://") ? hostUrl : "http://" + hostUrl;
+            }
+            if (!urlRegex.IsMatch(hostUrl) || !Uri.TryCreate(hostUrl, UriKind.Absolute, out urlUri))
+            {
+                throw new ArgumentException("hostUrl is illegal");
             }
             if (string.IsNullOrEmpty(username))
             {
@@ -77,8 +96,6 @@ namespace EasyNetQ.Management.Client
             {
                 configureRequest = x => { };
             }
-            if (!hostUrl.StartsWith("http://"))
-                hostUrl = "http://" + hostUrl;
             this.hostUrl = hostUrl;
             this.username = username;
             this.password = password;
@@ -87,10 +104,10 @@ namespace EasyNetQ.Management.Client
             this.runningOnMono = runningOnMono;
             this.configureRequest = configureRequest;
 
-			if (!runningOnMono) 
-			{
-	            LeaveDotsAndSlashesEscaped();
-			}
+            if (!runningOnMono)
+            {
+                LeaveDotsAndSlashesEscaped();
+            }
         }
 
         public Overview GetOverview()
