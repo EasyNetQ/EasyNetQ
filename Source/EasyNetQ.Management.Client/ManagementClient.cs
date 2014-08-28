@@ -7,6 +7,7 @@ using EasyNetQ.Management.Client.Model;
 using EasyNetQ.Management.Client.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Text.RegularExpressions;
 
 namespace EasyNetQ.Management.Client
 {
