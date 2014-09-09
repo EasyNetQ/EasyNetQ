@@ -83,6 +83,7 @@
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration_action.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing.cs" />
+    <Compile Include="BlockedConnectionNotificationTests.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />

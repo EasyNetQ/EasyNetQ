@@ -93,8 +93,10 @@
     <Compile Include="DeliveryModeStrategy.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="Events\AckEvent.cs" />
+    <Compile Include="Events\ConnectionBlockedEvent.cs" />
     <Compile Include="Events\ConnectionCreatedEvent.cs" />
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
+    <Compile Include="Events\ConnectionUnblockedEvent.cs" />
     <Compile Include="Events\ConsumerModelDisposedEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />
     <Compile Include="Events\ReturnedMessageEvent.cs" />
