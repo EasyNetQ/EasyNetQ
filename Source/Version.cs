@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.35.6.0")]
+[assembly: AssemblyVersion("0.36.0.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.36.0.0 Support for blocked connection notifications
 // 0.35.5.0 Basic implementation of produce-consumer interception
 // 0.35.4.0 Future publish refactor: introduced IScheduler interface.
 // 0.35.3.0 Infinite timeout. (set timeout to 0)

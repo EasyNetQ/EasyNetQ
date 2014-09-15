@@ -368,6 +368,16 @@ namespace EasyNetQ
         event Action Disconnected;
 
         /// <summary>
+        /// Event fires when the bus gets blocked due to the broker running low on resources.
+        /// </summary>
+        event Action Blocked;
+
+        /// <summary>
+        /// Event fires when the bus is unblocked.
+        /// </summary>
+        event Action Unblocked;
+
+        /// <summary>
         /// Event fires when a mandatory or immediate message is returned as un-routable
         /// </summary>
         event Action<byte[], MessageProperties, MessageReturnedInfo> MessageReturned;

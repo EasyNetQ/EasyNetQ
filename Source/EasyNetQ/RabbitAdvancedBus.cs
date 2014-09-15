@@ -62,6 +62,8 @@ namespace EasyNetQ
 
             eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
+            eventBus.Subscribe<ConnectionBlockedEvent>(e => OnBlocked());
+            eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
             eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
@@ -518,6 +520,22 @@ namespace EasyNetQ
         protected void OnDisconnected()
         {
             if (Disconnected != null) Disconnected();
+        }
+
+        public virtual event Action Blocked;
+
+        protected void OnBlocked()
+        {
+            var blocked = Blocked;
+            if (blocked != null) blocked();
+        }
+
+        public virtual event Action Unblocked;
+
+        protected void OnUnblocked()
+        {
+            var unblocked = Unblocked;
+            if (unblocked != null) unblocked();
         }
 
         public event Action<byte[], MessageProperties, MessageReturnedInfo> MessageReturned;

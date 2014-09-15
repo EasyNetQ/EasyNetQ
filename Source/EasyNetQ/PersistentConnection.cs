@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
@@ -83,6 +84,8 @@ namespace EasyNetQ
             if (connectionFactory.Succeeded)
             {
                 connection.ConnectionShutdown += OnConnectionShutdown;
+                connection.ConnectionBlocked += OnConnectionBlocked;
+                connection.ConnectionUnblocked += OnConnectionUnblocked;
 
                 OnConnected();
                 logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
@@ -117,6 +120,20 @@ namespace EasyNetQ
             logger.InfoWrite("Disconnected from RabbitMQ Broker");
 
             TryToConnect(null);
+        }
+
+        void OnConnectionBlocked(IConnection sender, ConnectionBlockedEventArgs reason)
+        {
+            logger.InfoWrite("Connection blocked. Reason: '{0}'", reason.Reason);
+
+            eventBus.Publish(new ConnectionBlockedEvent(reason.Reason));
+        }
+
+        void OnConnectionUnblocked(IConnection sender)
+        {
+            logger.InfoWrite("Connection unblocked.");
+
+            eventBus.Publish(new ConnectionUnblockedEvent());
         }
 
         public void OnConnected()
