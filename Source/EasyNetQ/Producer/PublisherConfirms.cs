@@ -161,7 +161,20 @@ namespace EasyNetQ.Producer
                     TaskCompletionSource = tcs
                 });
 
-            publishAction(model);
+            try
+            {
+                //execute publish
+                publishAction(model);
+            }
+            catch(Exception ex)
+            {
+                //return fault when publish action can't be executed
+                logger.ErrorWrite("Publish Failed. Sequence number: {0}. Exception: {1}", sequenceNumber, ex);
+                timer.Dispose();
+                dictionary.Remove(sequenceNumber);
+                tcs.TrySetException(ex);
+            }
+            
 
             return tcs.Task;
         }
