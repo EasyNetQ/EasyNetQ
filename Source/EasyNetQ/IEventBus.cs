@@ -4,19 +4,24 @@ using System.Collections.Generic;
 
 namespace EasyNetQ
 {
+    using System.Collections;
+    using System.Collections.Immutable;
+    using System.Linq;
+
     /// <summary>
     /// An internal pub-sub bus to distribute events within EasyNetQ
     /// </summary>
     public interface IEventBus
     {
         void Publish<TEvent>(TEvent @event);
+
         CancelSubscription Subscribe<TEvent>(Action<TEvent> eventHandler);
     }
 
     public class EventBus : IEventBus
     {
-        private readonly ConcurrentDictionary<Type, IList<object>> subscriptions = 
-            new ConcurrentDictionary<Type, IList<object>>();
+        private readonly ConcurrentDictionary<Type, IImmutableSet<object>> subscriptions = 
+            new ConcurrentDictionary<Type, IImmutableSet<object>>();
 
         public void Publish<TEvent>(TEvent @event)
         {
@@ -33,24 +38,38 @@ namespace EasyNetQ
 
         public CancelSubscription Subscribe<TEvent>(Action<TEvent> eventHandler)
         {
-            CancelSubscription cancelSubscription = null;
+            subscriptions.AddOrUpdate(
+                typeof(TEvent),
+                t => ImmutableHashSet.Create<object>(eventHandler),
+                (t, l) => l.Add(eventHandler));
 
-            subscriptions.AddOrUpdate(typeof(TEvent),
-                    t =>
+            return () =>
+                {
+                    IImmutableSet<object> comparisonValue;
+                    while (subscriptions.TryGetValue(typeof(TEvent), out comparisonValue))
                     {
-                        var l = new List<object> {eventHandler};
-                        cancelSubscription = () => l.Remove(eventHandler);
-                        return l;
-                    },
-                    (t, l) =>
-                    {
-                        l.Add(eventHandler);
-                        cancelSubscription = () => l.Remove(eventHandler);
-                        return l;
+                        if (comparisonValue.Contains(eventHandler))
+                        {
+                            IImmutableSet<object> newValue = comparisonValue.Remove(eventHandler);
+                            if (newValue.Any())
+                            {
+                                if (subscriptions.TryUpdate(typeof(TEvent), newValue, comparisonValue))
+                                {
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                if (((ICollection<KeyValuePair<Type, IImmutableSet<object>>>)subscriptions).Remove(new KeyValuePair<Type, IImmutableSet<object>>(
+                                    typeof(TEvent),
+                                    comparisonValue)))
+                                {
+                                    return;
+                                }
+                            }
+                        }
                     }
-                );
-
-            return cancelSubscription;
+                };
         }
     }
 
