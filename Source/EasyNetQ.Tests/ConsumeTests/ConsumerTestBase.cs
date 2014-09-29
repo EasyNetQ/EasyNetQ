@@ -86,7 +86,15 @@ namespace EasyNetQ.Tests.ConsumeTests
                 OriginalBody
                 );
 
+            WaitForMessageDispatchToBegin();
             WaitForMessageDispatchToComplete();
+        }
+
+        private void WaitForMessageDispatchToBegin()
+        {
+            var autoResetEvent = new AutoResetEvent(false);
+            MockBuilder.EventBus.Subscribe<DeliveredMessageEvent>(x => autoResetEvent.Set());
+            autoResetEvent.WaitOne(1000);
         }
 
         protected void WaitForMessageDispatchToComplete()

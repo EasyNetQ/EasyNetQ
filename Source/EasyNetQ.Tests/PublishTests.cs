@@ -2,6 +2,8 @@
 
 using System;
 using System.Text;
+using System.Threading;
+using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -36,6 +38,14 @@ namespace EasyNetQ.Tests
 
             var message = new MyMessage { Text = "Hiya!" };
             mockBuilder.Bus.Publish(message);
+            WaitForMessageToPublish();
+        }
+
+        private void WaitForMessageToPublish()
+        {
+            var autoResetEvent = new AutoResetEvent(false);
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => autoResetEvent.Set());
+            autoResetEvent.WaitOne(1000);
         }
 
         [Test]
@@ -109,6 +119,14 @@ namespace EasyNetQ.Tests
 
             var message = new MyMessage { Text = "Hiya!" };
             mockBuilder.Bus.Publish(message, "X.A");
+            WaitForMessageToPublish();
+        }
+
+        private void WaitForMessageToPublish()
+        {
+            var autoResetEvent = new AutoResetEvent(false);
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => autoResetEvent.Set());
+            autoResetEvent.WaitOne(1000);
         }
 
         [Test]

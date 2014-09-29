@@ -104,7 +104,9 @@
     <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
     <Compile Include="Events\ConnectionUnblockedEvent.cs" />
     <Compile Include="Events\ConsumerModelDisposedEvent.cs" />
+    <Compile Include="Events\DeliveredMessageEvent.cs" />
     <Compile Include="Events\PublishChannelCreatedEvent.cs" />
+    <Compile Include="Events\PublishedMessageEvent.cs" />
     <Compile Include="Events\ReturnedMessageEvent.cs" />
     <Compile Include="Events\StoppedConsumingEvent.cs" />
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />

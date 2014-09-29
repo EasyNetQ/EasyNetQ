@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace EasyNetQ
 {
-    using System.Collections;
     using System.Collections.Immutable;
     using System.Linq;
 
