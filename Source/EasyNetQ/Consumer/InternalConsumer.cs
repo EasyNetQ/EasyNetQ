@@ -173,7 +173,11 @@ namespace EasyNetQ.Consumer
             var messsageProperties = new MessageProperties(properties);
             var context = new ConsumerExecutionContext(onMessage, messageReceivedInfo, messsageProperties, body, this);
 
-            consumerDispatcher.QueueAction(() => handlerRunner.InvokeUserMessageHandler(context));
+            consumerDispatcher.QueueAction(() =>
+                {
+                    eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messsageProperties, body));
+                    handlerRunner.InvokeUserMessageHandler(context);
+                });
         }
 
         private bool disposed;
