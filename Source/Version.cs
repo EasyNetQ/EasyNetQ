@@ -7,7 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
-// 0.36.4.0 Use ILRepack to internally merge  System.Collections.Immutable.Net40
+// 0.36.4.0 Fixed EasyNetQ.nuspec by adding the dependency on System.Collections.Immutable.Net40
 // 0.36.3.0 PublishedMessageEvent, DeliveredMessageEvent
 // 0.36.2.0 Fixed threading issue in EventBus
 // 0.36.1.0 Updated Json.Net to the latest version
