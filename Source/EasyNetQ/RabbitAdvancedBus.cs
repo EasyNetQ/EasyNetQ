@@ -172,7 +172,11 @@ namespace EasyNetQ
                     rawMessage.Properties.CopyTo(properties);
 
                     return publisher.Publish(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body))
-                                    .Then(() => logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId));
+                                    .Then(() =>
+                                        {
+                                            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
+                                            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
+                                        });
                 }).Unwrap();
         }
 

@@ -122,7 +122,7 @@ namespace EasyNetQ.Consumer
             }
             finally
             {
-                eventBus.Publish(new AckEvent(context, ackResult));
+                eventBus.Publish(new AckEvent(context.Info, context.Properties, context.Body, ackResult));
             }
         }
 
