@@ -123,7 +123,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var queue = advancedBus.QueueDeclare("get_test");
             advancedBus.Publish(Exchange.GetDefault(), "get_test", false, false,
-                new Message<MyMessage>(new MyMessage{ Text = "Oh! Hello!" }));
+                new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
 
             var getResult = advancedBus.Get<MyMessage>(queue);
 
@@ -132,6 +132,18 @@ namespace EasyNetQ.Tests.Integration
                 Console.Out.WriteLine("Got message: {0}", getResult.Message.Body.Text);
             }
             else
+            {
+                Console.Out.WriteLine("Failed to get message!");
+            }
+        }
+
+        [Test, Explicit]
+        public void Should_set_MessageAvailable_to_false_when_queue_is_empty()
+        {
+            var queue = advancedBus.QueueDeclare("get_empty_queue_test");
+            var getResult = advancedBus.Get<MyMessage>(queue);
+
+            if (!getResult.MessageAvailable)
             {
                 Console.Out.WriteLine("Failed to get message!");
             }

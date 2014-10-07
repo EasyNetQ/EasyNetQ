@@ -463,7 +463,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, "queue");
             var result = Get(queue);
-            if (result.Body == null)
+            if (result == null || result.Body == null)
             {
                 logger.DebugWrite("... but no message was available on queue '{0}'", queue.Name);
                 return new BasicGetResult<T>();
@@ -492,6 +492,7 @@ namespace EasyNetQ
             var task = clientCommandDispatcher.Invoke(x => x.BasicGet(queue.Name, true));
             task.Wait();
             var result = task.Result;
+            if (result == null) return null;
             var getResult = new BasicGetResult(
                 result.Body,
                 new MessageProperties(result.BasicProperties),
