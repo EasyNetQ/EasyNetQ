@@ -26,6 +26,7 @@ namespace EasyNetQ.Consumer
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly object syncLock = new object();
 
         private IConnection connection;
         private bool errorQueueDeclared;
@@ -53,9 +54,12 @@ namespace EasyNetQ.Consumer
 
         private void Connect()
         {
-            if(connection == null || !connection.IsOpen)
+            lock (syncLock)
             {
-                connection = connectionFactory.CreateConnection();
+                if (connection == null || !connection.IsOpen)
+                {
+                    connection = connectionFactory.CreateConnection();
+                }
             }
         }
 
