@@ -511,6 +511,16 @@ namespace EasyNetQ
             return getResult;
         }
 
+        public uint MessageCount(IQueue queue)
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            var task = clientCommandDispatcher.Invoke(x => x.QueueDeclarePassive(queue.Name));
+            task.Wait();
+            var messageCount = task.Result.MessageCount;
+            logger.DebugWrite("{0} messages in queue '{1}'", messageCount, queue.Name);
+            return messageCount;
+        }
+
         //------------------------------------------------------------------------------------------
 
         public virtual event Action Connected;

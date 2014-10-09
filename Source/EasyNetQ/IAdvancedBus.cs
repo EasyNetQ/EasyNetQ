@@ -353,6 +353,13 @@ namespace EasyNetQ
         IBasicGetResult Get(IQueue queue);
 
         /// <summary>
+        /// Counts messages in the given queue
+        /// </summary>
+        /// <param name="queue">The queue in which to count messages</param>
+        /// <returns>The number of counted messages</returns>
+        uint MessageCount(IQueue queue);
+
+        /// <summary>
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }

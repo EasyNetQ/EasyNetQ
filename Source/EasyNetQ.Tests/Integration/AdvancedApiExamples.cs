@@ -148,6 +148,16 @@ namespace EasyNetQ.Tests.Integration
                 Console.Out.WriteLine("Failed to get message!");
             }
         }
+
+        [Test, Explicit]
+        public void Should_be_able_to_get_queue_length()
+        {
+            var queue = advancedBus.QueueDeclare("count_test");
+            advancedBus.Publish(Exchange.GetDefault(), "count_test", false, false,
+                new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
+            uint messageCount = advancedBus.MessageCount(queue);
+            Console.WriteLine("{0} messages in queue", messageCount);
+        }
     }
 }
 
