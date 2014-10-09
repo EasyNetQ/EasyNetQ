@@ -54,11 +54,14 @@ namespace EasyNetQ.Consumer
 
         private void Connect()
         {
-            lock (syncLock)
+            if (connection == null || !connection.IsOpen)
             {
-                if (connection == null || !connection.IsOpen)
+                lock (syncLock)
                 {
-                    connection = connectionFactory.CreateConnection();
+                    if (connection == null || !connection.IsOpen)
+                    {
+                        connection = connectionFactory.CreateConnection();
+                    }
                 }
             }
         }
