@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.36.4.0")]
+[assembly: AssemblyVersion("0.37.0.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.37.0.0 Added MessageCount method to AdvancedBus
 // 0.36.4.0 Fixed EasyNetQ.nuspec by adding the dependency on System.Collections.Immutable.Net40
 // 0.36.3.0 PublishedMessageEvent, DeliveredMessageEvent
 // 0.36.2.0 Fixed threading issue in EventBus
