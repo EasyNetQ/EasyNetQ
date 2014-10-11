@@ -60,6 +60,11 @@ namespace EasyNetQ.Consumer
                 {
                     if (connection == null || !connection.IsOpen)
                     {
+                        if (connection != null)
+                        {
+                            connection.Dispose();
+                        }
+
                         connection = connectionFactory.CreateConnection();
                     }
                 }
