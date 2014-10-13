@@ -86,8 +86,22 @@ namespace EasyNetQ.AutoSubscribe
         {
             Preconditions.CheckAny(assemblies, "assemblies", "No assemblies specified.");
 
+            Subscribe(assemblies.SelectMany(a => a.GetTypes()).ToArray());
+        }
+
+        /// <summary>
+        /// Registers all types as consumers. The actual Subscriber instances is
+        /// created using <seealso cref="AutoSubscriberMessageDispatcher"/>. The SubscriptionId per consumer
+        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
+        /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
+        /// </summary>
+        /// <param name="consumerTypes">the types to register as consumers.</param>
+        public virtual void Subscribe(params Type[] consumerTypes)
+        {
+            if (consumerTypes == null) throw new ArgumentNullException("consumerTypes");
+
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus("Subscribe",typeof(Action<>));
-            var subscriptionInfos = GetSubscriptionInfos(assemblies.SelectMany(a => a.GetTypes()), typeof(IConsume<>));
+            var subscriptionInfos = GetSubscriptionInfos(consumerTypes, typeof(IConsume<>));
 
             InvokeMethods(subscriptionInfos,DispatchMethodName, genericBusSubscribeMethod, messageType => typeof(Action<>).MakeGenericType(messageType));
         }
@@ -103,13 +117,25 @@ namespace EasyNetQ.AutoSubscribe
         {
             Preconditions.CheckAny(assemblies, "assemblies", "No assemblies specified.");
 
+            SubscribeAsync(assemblies.SelectMany(a => a.GetTypes()).ToArray());
+        }
+
+        /// <summary>
+        /// Registers all async consumers in passed assembly. The actual Subscriber instances is
+        /// created using <seealso cref="AutoSubscriberMessageDispatcher"/>. The SubscriptionId per consumer
+        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
+        /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
+        /// </summary>
+        /// <param name="consumerTypes">the types to register as consumers.</param>
+        public virtual void SubscribeAsync(params Type[] consumerTypes)
+        {
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus("SubscribeAsync", typeof(Func<,>));
-            var subscriptionInfos = GetSubscriptionInfos(assemblies.SelectMany(a => a.GetTypes()), typeof(IConsumeAsync<>));
+            var subscriptionInfos = GetSubscriptionInfos(consumerTypes, typeof(IConsumeAsync<>));
             Func<Type,Type> subscriberTypeFromMessageTypeDelegate = messageType => typeof (Func<,>).MakeGenericType(messageType, typeof (Task));
             InvokeMethods(subscriptionInfos, DispatchAsyncMethodName, genericBusSubscribeMethod, subscriberTypeFromMessageTypeDelegate);
         }
 
-        protected void InvokeMethods(IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> subscriptionInfos, string dispatchName, MethodInfo genericBusSubscribeMethod, Func<Type, Type> subscriberTypeFromMessageTypeDelegate)
+        protected virtual void InvokeMethods(IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> subscriptionInfos, string dispatchName, MethodInfo genericBusSubscribeMethod, Func<Type, Type> subscriberTypeFromMessageTypeDelegate)
         {
             foreach (var kv in subscriptionInfos)
             {

@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
 
-            autoSubscriber.Subscribe(GetType().Assembly);
+            autoSubscriber.Subscribe(typeof(MyAsyncConsumer), typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>));
         }
 
         [Test]
