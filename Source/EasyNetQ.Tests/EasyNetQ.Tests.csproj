@@ -79,6 +79,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AmqpExceptionParserTests.cs" />
+    <Compile Include="AutoSubscriberTests\When_autosubscribing_with_assembly_scanning.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration_action_and_attribute.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration_action.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration.cs" />
