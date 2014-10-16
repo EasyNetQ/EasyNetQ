@@ -139,6 +139,7 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         private const string testExchange = "management_api_test_exchange";
+        private const string testExchangetestQueueWithPlusChar = "management_api_test_exchange+plus+test";
 
         [Test]
         public void Should_be_able_to_get_an_individual_exchange_by_name()
@@ -160,9 +161,31 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_create_an_exchange_with_plus_char_in_the_name()
+        {
+            var vhost = managementClient.GetVhost("/");
+            var exhangeInfo = new ExchangeInfo(testExchangetestQueueWithPlusChar, "direct");
+            var queue = managementClient.CreateExchange(exhangeInfo, vhost);
+            queue.Name.ShouldEqual(testExchangetestQueueWithPlusChar);
+        }
+
+        [Test]
         public void Should_be_able_to_delete_an_exchange()
         {
             var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchange);
+            if (exchange == null)
+            {
+                throw new ApplicationException(
+                    string.Format("Test exchange '{0}' hasn't been created", testExchange));
+            }
+
+            managementClient.DeleteExchange(exchange);
+        }
+
+        [Test]
+        public void Should_be_able_to_delete_an_exchange_with_pluses()
+        {
+            var exchange = managementClient.GetExchanges().SingleOrDefault(x => x.Name == testExchangetestQueueWithPlusChar);
             if (exchange == null)
             {
                 throw new ApplicationException(
