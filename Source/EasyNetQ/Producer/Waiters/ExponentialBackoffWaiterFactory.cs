@@ -7,15 +7,10 @@ namespace EasyNetQ.Producer.Waiters
         private const int DefaultInitialDelayInMilliseconds = 10;
         private readonly int initialDelayInMilliseconds;
 
-        public ExponentialBackoffWaiterFactory(int initialDelayInMilliseconds)
+        public ExponentialBackoffWaiterFactory()
         {
-            this.initialDelayInMilliseconds = initialDelayInMilliseconds;
+            initialDelayInMilliseconds = DefaultInitialDelayInMilliseconds;
         }
-
-        public ExponentialBackoffWaiterFactory() : this(DefaultInitialDelayInMilliseconds)
-        {
-        }
-
 
         public IReconnectionWaiter GetWaiter()
         {

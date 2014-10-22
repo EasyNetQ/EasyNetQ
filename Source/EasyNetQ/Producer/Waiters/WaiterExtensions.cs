@@ -4,15 +4,15 @@ namespace EasyNetQ.Producer.Waiters
 {
     public static class WaiterExtensions
     {
-        public static IServiceRegister EnableReconnectionWithFixedDelay(this IServiceRegister serviceRegister, TimeSpan delay)
+        public static IServiceRegister EnableReconnectionWithFixedDelay(this IServiceRegister serviceRegister)
         {
-            serviceRegister.Register<IReconnectionWaiterFactory>(_ => new FixedDelayWaiterFactory((int) delay.TotalMilliseconds));
+            serviceRegister.Register<IReconnectionWaiterFactory>(_ => new FixedDelayWaiterFactory());
             return serviceRegister;
         }
 
-        public static IServiceRegister EnableReconnectionWithExponentialBackoffDelay(this IServiceRegister serviceRegister, TimeSpan initialDelay)
+        public static IServiceRegister EnableReconnectionWithExponentialBackoffDelay(this IServiceRegister serviceRegister)
         {
-            serviceRegister.Register<IReconnectionWaiterFactory>(_ => new ExponentialBackoffWaiterFactory((int)initialDelay.TotalMilliseconds));
+            serviceRegister.Register<IReconnectionWaiterFactory>(_ => new ExponentialBackoffWaiterFactory());
             return serviceRegister;
         }
     }

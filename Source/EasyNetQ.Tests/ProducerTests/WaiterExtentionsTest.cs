@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             var serviceRegister = NewMock<IServiceRegister>();
             serviceRegister.Expect(x => x.Register(Arg<Func<IServiceProvider, IReconnectionWaiterFactory>>.Is.Anything)).TentativeReturn();
-            serviceRegister.EnableReconnectionWithFixedDelay(TimeSpan.FromMinutes(1));
+            serviceRegister.EnableReconnectionWithFixedDelay();
         }
 
         [Test]
@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             var serviceRegister = NewMock<IServiceRegister>();
             serviceRegister.Expect(x => x.Register(Arg<Func<IServiceProvider, IReconnectionWaiterFactory>>.Is.Anything)).TentativeReturn();
-            serviceRegister.EnableReconnectionWithExponentialBackoffDelay(TimeSpan.FromMinutes(1));
+            serviceRegister.EnableReconnectionWithExponentialBackoffDelay();
         }
     }
 }

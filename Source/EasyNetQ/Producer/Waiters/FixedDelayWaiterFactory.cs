@@ -8,13 +8,9 @@ namespace EasyNetQ.Producer.Waiters
 
         private readonly int delayInMilliseconds;
 
-        public FixedDelayWaiterFactory(int delayInMilliseconds)
+        public FixedDelayWaiterFactory()
         {
-            this.delayInMilliseconds = delayInMilliseconds;
-        }
-
-        public FixedDelayWaiterFactory() : this(DefaultDelayInMilliseconds)
-        {
+            delayInMilliseconds = DefaultDelayInMilliseconds;
         }
 
         public IReconnectionWaiter GetWaiter()
