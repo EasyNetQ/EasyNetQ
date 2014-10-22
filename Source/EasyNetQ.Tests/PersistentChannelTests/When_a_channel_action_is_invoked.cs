@@ -2,6 +2,7 @@
 
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
+using EasyNetQ.Producer.Waiters;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using Rhino.Mocks;
@@ -26,8 +27,10 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             persistentConnection.Stub(x => x.CreateModel()).Return(channel);
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
-
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
+            var reconnectionWaiterFactory = MockRepository.GenerateStub<IReconnectionWaiterFactory>();
+            var waiter = MockRepository.GenerateStub<IReconnectionWaiter>();
+            reconnectionWaiterFactory.Stub(x => x.GetWaiter()).Return(waiter);
+            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, reconnectionWaiterFactory, eventBus);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }

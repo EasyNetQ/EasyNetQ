@@ -4,6 +4,7 @@ using System.Threading;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
+using EasyNetQ.Producer.Waiters;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -45,7 +46,11 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
+            var reconnectionWaiterFactory = MockRepository.GenerateStub<IReconnectionWaiterFactory>();
+            var waiter = MockRepository.GenerateStub<IReconnectionWaiter>();
+            reconnectionWaiterFactory.Stub(x => x.GetWaiter()).Return(waiter);
+
+            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, reconnectionWaiterFactory, eventBus);
 
             new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent())).Change(10, Timeout.Infinite);
 
