@@ -10,8 +10,6 @@ namespace EasyNetQ.Tests.Interception
     [TestFixture]
     public class InterceptionExtensionsTests : UnitTestBase
     {
-        
-
         [Test]
         public void When_using_EnableInterception_extension_method_required_services_are_registered()
         {

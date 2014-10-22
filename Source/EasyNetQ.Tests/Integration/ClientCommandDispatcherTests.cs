@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
+using EasyNetQ.Producer.Waiters;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
@@ -29,7 +30,8 @@ namespace EasyNetQ.Tests.Integration
             var hostSelectionStrategy = new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>();
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
-            var persistentChannelFactory = new PersistentChannelFactory(logger, configuration, eventBus);
+            var reconnectionWaiterFactory = new ExponentialBackoffWaiterFactory();
+            var persistentChannelFactory = new PersistentChannelFactory(logger, configuration, eventBus, reconnectionWaiterFactory);
 
             dispatcher = new ClientCommandDispatcher(connection, persistentChannelFactory);
         }

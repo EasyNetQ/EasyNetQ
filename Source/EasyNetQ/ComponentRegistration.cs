@@ -3,6 +3,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
+using EasyNetQ.Producer.Waiters;
 
 namespace EasyNetQ
 {
@@ -25,6 +26,7 @@ namespace EasyNetQ
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
                 .Register<ITypeNameSerializer, TypeNameSerializer>()
+                .Register<IReconnectionWaiterFactory, ExponentialBackoffWaiterFactory>()
                 .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()                
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()

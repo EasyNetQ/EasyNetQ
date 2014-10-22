@@ -116,6 +116,7 @@
     <Compile Include="MessageVersioningTests\VersionedPublishExchangeDeclareStrategyTests.cs" />
     <Compile Include="MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes.cs" />
     <Compile Include="Integration\When_a_message_with_a_long_type_name_is_published.cs" />
+    <Compile Include="ProducerTests\WaiterExtentionsTest.cs" />
     <Compile Include="ProducerTests\When_a_request_is_sent_but_an_exception_is_thrown_by_responder.cs" />
     <Compile Include="RandomClusterHostSelectionStrategyTests.cs" />
     <Compile Include="EventBusTests.cs" />
