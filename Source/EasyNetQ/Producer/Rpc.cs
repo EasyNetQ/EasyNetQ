@@ -211,11 +211,21 @@ namespace EasyNetQ.Producer
 
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
-            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
-            var queue = advancedBus.QueueDeclare(routingKey);
-            advancedBus.Bind(exchange, queue, routingKey);
+            return Respond(routingKey, responder);
+        }
 
-            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage));
+        public virtual IDisposable Respond<TRequest, TResponse>(string queue, Func<TRequest, Task<TResponse>> responder)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(responder, "responder");
+
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+            var receiveQueue = advancedBus.QueueDeclare(queue);
+            advancedBus.Bind(exchange, receiveQueue, queue);
+
+            return advancedBus.Consume<TRequest>(receiveQueue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage));
         }
 
         protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage)

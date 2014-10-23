@@ -13,7 +13,9 @@ namespace EasyNetQ.Tests.SimpleService
             var bus = RabbitHutch.CreateBus("host=localhost",
                 x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
             bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
+            bus.Respond<TestRequestMessage, TestResponseMessage>("EasyNetQ.CustomTestQueue", HandleRequest);
             bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
+            bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>("EasyNetQ.CustomTestQueue", HandleAsyncRequest);
 
             Console.WriteLine("Waiting to service requests");
             Console.WriteLine("Ctrl-C to exit");

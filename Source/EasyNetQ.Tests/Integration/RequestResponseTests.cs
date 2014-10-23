@@ -72,12 +72,8 @@ namespace EasyNetQ.Tests.Integration
         {
             var request = new TestRequestMessage { Text = "Hello from the client! " };
 
-            var typeNameSerializer = new TypeNameSerializer();
-            var conventions = new Conventions(typeNameSerializer);
-            var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TestRequestMessage));
-
             Console.WriteLine("Making request");
-            var response = bus.Request<TestRequestMessage, TestResponseMessage>(routingKey, request);
+            var response = bus.Request<TestRequestMessage, TestResponseMessage>("EasyNetQ.CustomTestQueue", request);
 
             Console.WriteLine("Got response: '{0}'", response.Text);
         }
@@ -136,12 +132,8 @@ namespace EasyNetQ.Tests.Integration
             var autoResetEvent = new AutoResetEvent(false);
             var request = new TestAsyncRequestMessage { Text = "Hello async from the client!" };
 
-            var typeNameSerializer = new TypeNameSerializer();
-            var conventions = new Conventions(typeNameSerializer);
-            var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TestAsyncRequestMessage));
-
             Console.Out.WriteLine("Making request");
-            bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(routingKey, request).ContinueWith(response =>
+            bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>("EasyNetQ.CustomTestQueue", request).ContinueWith(response =>
             {
                 Console.Out.WriteLine("response = {0}", response.Result.Text);
                 autoResetEvent.Set();
