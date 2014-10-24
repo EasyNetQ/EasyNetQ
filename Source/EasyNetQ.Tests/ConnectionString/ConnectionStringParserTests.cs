@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.ConnectionString
     [TestFixture]
     public class ConnectionStringParserTests
     {
-        private IConnectionStringParser connectionStringParser;
+        private ConnectionStringParser connectionStringParser;
 
         private const string connectionString =
             "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" + 

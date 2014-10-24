@@ -1,17 +1,16 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Sprache;
 
 namespace EasyNetQ.ConnectionString
 {
-    public interface IConnectionStringParser
+    public interface IConnectionStringParser<out T> where T : IConnectionConfiguration
     {
-        IConnectionConfiguration Parse(string connectionString);
+        T Parse(string connectionString);
     }
 
-    public class ConnectionStringParser : IConnectionStringParser
+    public class ConnectionStringParser : IConnectionStringParser<ConnectionConfiguration>
     {
-        public IConnectionConfiguration Parse(string connectionString)
+        public ConnectionConfiguration Parse(string connectionString)
         {
             try
             {
