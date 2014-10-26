@@ -131,6 +131,18 @@ namespace EasyNetQ
             where TResponse : class;
 
         /// <summary>
+        /// Makes an RPC style request
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="queue">The queue to send the message to</param>
+        /// <param name="request">The request message.</param>
+        /// <returns>The response</returns>
+        TResponse Request<TRequest, TResponse>(string queue, TRequest request)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
         /// Makes an RPC style request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
@@ -138,6 +150,18 @@ namespace EasyNetQ
         /// <param name="request">The request message.</param>
         /// <returns>A task that completes when the response returns</returns>
         Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Makes an RPC style request
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="queue">The queue to send the message to</param>
+        /// <param name="request">The request message.</param>
+        /// <returns>A task that completes when the response returns</returns>
+        Task<TResponse> RequestAsync<TRequest, TResponse>(string queue, TRequest request)
             where TRequest : class
             where TResponse : class;
 
@@ -154,6 +178,19 @@ namespace EasyNetQ
             where TResponse : class;
 
         /// <summary>
+        /// Responds to an RPC request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="queue">The queue to receive from</param>
+        /// <param name="responder">
+        /// A function to run when the request is received. It should return the response.
+        /// </param>
+        IDisposable Respond<TRequest, TResponse>(string queue, Func<TRequest, TResponse> responder)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
         /// Responds to an RPC request asynchronously.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
@@ -162,6 +199,19 @@ namespace EasyNetQ
         /// A function to run when the request is received.
         /// </param>
         IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="queue">The queue to receive from</param>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        IDisposable RespondAsync<TRequest, TResponse>(string queue, Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class;
 

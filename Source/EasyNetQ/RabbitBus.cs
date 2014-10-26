@@ -165,6 +165,18 @@ namespace EasyNetQ
             return task.Result;
         }
 
+        public virtual TResponse Request<TRequest, TResponse>(string queue, TRequest request)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(request, "request");
+
+            var task = RequestAsync<TRequest, TResponse>(queue, request);
+            task.Wait();
+            return task.Result;
+        }
+
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
@@ -172,6 +184,16 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(request, "request");
 
             return rpc.Request<TRequest, TResponse>(request);
+        }
+
+        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(string queue, TRequest request)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(request, "request");
+
+            return rpc.Request<TRequest, TResponse>(queue, request);
         }
 
         public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
@@ -186,6 +208,19 @@ namespace EasyNetQ
             return RespondAsync(taskResponder);
         }
 
+        public virtual IDisposable Respond<TRequest, TResponse>(string queue, Func<TRequest, TResponse> responder)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(responder, "responder");
+
+            Func<TRequest, Task<TResponse>> taskResponder =
+                request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
+
+            return RespondAsync(queue, taskResponder);
+        }
+
         public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class
@@ -193,6 +228,16 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(responder, "responder");
 
             return rpc.Respond(responder);
+        }
+
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string queue, Func<TRequest, Task<TResponse>> responder)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(responder, "responder");
+
+            return rpc.Respond(queue, responder);
         }
 
         public virtual void Send<T>(string queue, T message)

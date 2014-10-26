@@ -66,6 +66,20 @@ namespace EasyNetQ.Tests.Integration
 
         // First start the EasyNetQ.Tests.SimpleService console app.
         // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_do_simple_request_response_to_specific_queue()
+        {
+            var request = new TestRequestMessage { Text = "Hello from the client! " };
+
+            Console.WriteLine("Making request");
+            var response = bus.Request<TestRequestMessage, TestResponseMessage>("EasyNetQ.CustomTestQueue", request);
+
+            Console.WriteLine("Got response: '{0}'", response.Text);
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
         // responding to 1000 messages and you should see the messages return here.
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response_lots()
@@ -101,6 +115,25 @@ namespace EasyNetQ.Tests.Integration
 
             Console.Out.WriteLine("Making request");
             bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
+            {
+                Console.Out.WriteLine("response = {0}", response.Result.Text);
+                autoResetEvent.Set();
+            });
+
+            autoResetEvent.WaitOne(2000);
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_make_a_request_to_a_specific_queue_that_runs_async_on_the_server()
+        {
+            var autoResetEvent = new AutoResetEvent(false);
+            var request = new TestAsyncRequestMessage { Text = "Hello async from the client!" };
+
+            Console.Out.WriteLine("Making request");
+            bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>("EasyNetQ.CustomTestQueue", request).ContinueWith(response =>
             {
                 Console.Out.WriteLine("response = {0}", response.Result.Text);
                 autoResetEvent.Set();
