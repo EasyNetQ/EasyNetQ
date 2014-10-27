@@ -11,7 +11,7 @@ namespace EasyNetQ.Producer
     {
         private readonly IPersistentConnection connection;
         private readonly IEasyNetQLogger logger;
-        private readonly IConnectionConfiguration configuration;
+        private readonly ConnectionConfiguration configuration;
         private readonly IEventBus eventBus;
 
         private IModel channel;
@@ -20,7 +20,7 @@ namespace EasyNetQ.Producer
         public PersistentChannel(
             IPersistentConnection connection, 
             IEasyNetQLogger logger, 
-            IConnectionConfiguration configuration,
+            ConnectionConfiguration configuration,
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connection, "connection");

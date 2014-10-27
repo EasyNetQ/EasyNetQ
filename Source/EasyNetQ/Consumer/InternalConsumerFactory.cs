@@ -13,7 +13,7 @@ namespace EasyNetQ.Consumer
         private readonly IHandlerRunner handlerRunner;
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
-        private readonly IConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IConsumerDispatcherFactory consumerDispatcherFactory;
         private readonly IEventBus eventBus;
 
@@ -21,7 +21,7 @@ namespace EasyNetQ.Consumer
             IHandlerRunner handlerRunner, 
             IEasyNetQLogger logger, 
             IConventions conventions, 
-            IConnectionConfiguration connectionConfiguration, 
+            ConnectionConfiguration connectionConfiguration, 
             IConsumerDispatcherFactory consumerDispatcherFactory, 
             IEventBus eventBus)
         {

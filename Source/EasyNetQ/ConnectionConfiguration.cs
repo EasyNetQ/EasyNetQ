@@ -7,56 +7,26 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
-    public interface IConnectionConfiguration
-    {
-        ushort Port { get; }
-        string VirtualHost { get; }
-        string UserName { get; }
-        string Password { get; }
-
-        /// <summary>
-        /// Heartbeat interval seconds. (default is 10)
-        /// </summary>
-        ushort RequestedHeartbeat { get; }
-        ushort PrefetchCount { get; }
-        Uri AMQPConnectionString { get; }
-        IDictionary<string, object> ClientProperties { get; }
-        
-        IEnumerable<IHostConfiguration> Hosts { get; }
-
-        SslOption Ssl { get; }
-
-        /// <summary>
-        /// Operation timeout seconds. (default is 10)
-        /// </summary>
-        ushort Timeout { get; }
-
-        bool PublisherConfirms { get; }
-        bool PersistentMessages { get; set; }
-
-        bool CancelOnHaFailover { get; }
-    }
-
-    public interface IHostConfiguration
-    {
-        string Host { get; }
-        ushort Port { get; }
-    }
-
-    public class ConnectionConfiguration : IConnectionConfiguration
+    public class ConnectionConfiguration
     {
         private const int DefaultPort = 5672;
         public ushort Port { get; set; }
         public string VirtualHost { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
+        /// <summary>
+        /// Heartbeat interval seconds. (default is 10)
+        /// </summary>
         public ushort RequestedHeartbeat { get; set; }
         public ushort PrefetchCount { get; set; }
         public Uri AMQPConnectionString { get; set; }
         public IDictionary<string, object> ClientProperties { get; private set; } 
 
-        public IEnumerable<IHostConfiguration> Hosts { get; set; }
+        public IEnumerable<HostConfiguration> Hosts { get; set; }
         public SslOption Ssl { get; private set; }
+        /// <summary>
+        /// Operation timeout seconds. (default is 10)
+        /// </summary>
         public ushort Timeout { get; set; }
         public bool PublisherConfirms { get; set; }
         public bool PersistentMessages { get; set; }
@@ -83,7 +53,7 @@ namespace EasyNetQ
             // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
             PrefetchCount = 50;
             
-            Hosts = new List<IHostConfiguration>();
+            Hosts = new List<HostConfiguration>();
 
             Ssl = new SslOption();
         }
@@ -147,7 +117,7 @@ namespace EasyNetQ
             {
                 if (hostConfiguration.Port == 0)
                 {
-                    ((HostConfiguration)hostConfiguration).Port = Port;
+                    hostConfiguration.Port = Port;
                 }
             }
 
@@ -156,7 +126,7 @@ namespace EasyNetQ
         }
     }
 
-    public class HostConfiguration : IHostConfiguration
+    public class HostConfiguration
     {
         public string Host { get; set; }
         public ushort Port { get; set; }

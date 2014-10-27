@@ -16,12 +16,12 @@ namespace EasyNetQ.ConnectionString
 
         public static Parser<bool> Bool = (Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false"))).Text().Select(x => x.ToLower() == "true");
 
-        public static Parser<IHostConfiguration> Host =
+        public static Parser<HostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
             from port in Parse.Char(':').Then(_ => Number).Or(Parse.Return((ushort)0))
             select new HostConfiguration { Host = host, Port = port };
 
-        public static Parser<IEnumerable<IHostConfiguration>> Hosts = Host.ListDelimitedBy(',');
+        public static Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
         private static Uri result;
         public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out result)).Select(_ => new Uri(_));

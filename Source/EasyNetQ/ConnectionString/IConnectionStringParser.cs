@@ -3,12 +3,12 @@ using Sprache;
 
 namespace EasyNetQ.ConnectionString
 {
-    public interface IConnectionStringParser<out T> where T : IConnectionConfiguration
+    public interface IConnectionStringParser
     {
-        T Parse(string connectionString);
+        ConnectionConfiguration Parse(string connectionString);
     }
 
-    public class ConnectionStringParser : IConnectionStringParser<ConnectionConfiguration>
+    public class ConnectionStringParser
     {
         public ConnectionConfiguration Parse(string connectionString)
         {

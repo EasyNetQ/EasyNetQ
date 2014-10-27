@@ -118,7 +118,7 @@ namespace EasyNetQ
 
             var connectionConfiguration = new ConnectionConfiguration
             {
-                Hosts = new List<IHostConfiguration>
+                Hosts = new List<HostConfiguration>
                     {
                         new HostConfiguration { Host = hostName, Port = hostPort }
                     },
@@ -137,14 +137,14 @@ namespace EasyNetQ
         /// Creates a new instance of RabbitBus
         /// </summary>
         /// <param name="connectionConfiguration">
-        /// An IConnectionConfiguration instance.
+        /// An ConnectionConfiguration instance.
         /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default IEasyNetQLogger:
         /// RabbitHutch.CreateBus("host=localhost", x => x.Register&lt;IEasyNetQLogger&gt;(_ => myLogger));
         /// </param>
         /// <returns></returns>
-        public static IBus CreateBus(IConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+        public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(registerServices, "registerServices");

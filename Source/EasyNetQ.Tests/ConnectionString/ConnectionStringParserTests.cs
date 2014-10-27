@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests.ConnectionString
         [TestCaseSource("AppendixAExamples")]
         public void Should_parse_Examples(AmqpSpecification spec)
         {
-            IConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("" + spec.amqpUri);
+            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("" + spec.amqpUri);
 
             connectionConfiguration.Port.ShouldEqual(spec.port);
             connectionConfiguration.AMQPConnectionString.ShouldEqual(spec.amqpUri);
@@ -100,8 +100,7 @@ namespace EasyNetQ.Tests.ConnectionString
         [Test]
         public void Should_UsePort_From_ConnectionString()
         {
-            IConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host/;port=123");
-
+            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host/;port=123");
 
             connectionConfiguration.Port.ShouldEqual(123);
         }
@@ -109,7 +108,7 @@ namespace EasyNetQ.Tests.ConnectionString
         [Test]
         public void Should_NotUsePort_From_ConnectionString()
         {
-            IConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host:1234/");
+            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host:1234/");
 
             connectionConfiguration.Port.ShouldEqual(1234);
         }
@@ -117,12 +116,11 @@ namespace EasyNetQ.Tests.ConnectionString
         [Test]
         public void Should_AddHost_ToHosts()
         {
-            IConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("host=local;amqp=amqp://amqphost:1234/");
+            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("host=local;amqp=amqp://amqphost:1234/");
 
             connectionConfiguration.Hosts.Count().ShouldEqual(2);
             connectionConfiguration.Hosts.First().Host.ShouldEqual("local");
             connectionConfiguration.Hosts.Last().Host.ShouldEqual("amqphost");
-
         }
 
         public class AmqpSpecification
