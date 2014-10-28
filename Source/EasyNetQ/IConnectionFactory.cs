@@ -31,7 +31,13 @@ namespace EasyNetQ
 
             foreach (var hostConfiguration in Configuration.Hosts)
             {
-                var connectionFactory = new ConnectionFactory();
+                var connectionFactory = new ConnectionFactory
+                {
+                    UseBackgroundThreadsForIO = false,
+                    AutomaticRecoveryEnabled = false,
+                    TopologyRecoveryEnabled = false
+                };
+
                 if (connectionConfiguration.AMQPConnectionString != null)
                 {
                     connectionFactory.uri = connectionConfiguration.AMQPConnectionString;
@@ -58,16 +64,6 @@ namespace EasyNetQ
                 connectionFactory.ClientProperties = Configuration.ClientProperties;
                 clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));
             }
-        }
-
-        private static IDictionary ConvertToHashtable(IDictionary<string, string> clientProperties)
-        {
-            var dictionary = new Hashtable();
-            foreach (var clientProperty in clientProperties)
-            {
-                dictionary.Add(clientProperty.Key, clientProperty.Value);
-            }
-            return dictionary;
         }
 
         public virtual IConnection CreateConnection()

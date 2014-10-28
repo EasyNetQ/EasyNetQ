@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
+using RabbitMQ.Client.Framing;
 // ReSharper disable InconsistentNaming
 using System;
 using System.Text;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using BasicProperties = RabbitMQ.Client.Framing.v0_8.BasicProperties;
 
 namespace EasyNetQ.Tests
 {

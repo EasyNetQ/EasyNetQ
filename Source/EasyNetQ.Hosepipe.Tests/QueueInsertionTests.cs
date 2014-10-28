@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using NUnit.Framework;
-using RabbitMQ.Client.Framing.v0_9_1;
 
 namespace EasyNetQ.Hosepipe.Tests
 {

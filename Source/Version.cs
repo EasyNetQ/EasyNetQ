@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.37.1.0")]
+[assembly: AssemblyVersion("0.37.2.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.37.2.0 Upgrade to RabbitMQ.Client 3.4.0
 // 0.37.1.0 AutoSubscriber Subscribe and SubscribeAsync support loading consumers from an array of types
 // 0.37.0.0 Added MessageCount method to AdvancedBus
 // 0.36.5.0 Make DefaultConsumerErrorStrategy thread-safe

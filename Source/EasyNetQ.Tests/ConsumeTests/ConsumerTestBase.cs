@@ -4,12 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using EasyNetQ.Loggers;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.v0_9_1;
+using RabbitMQ.Client.Framing;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests.ConsumeTests

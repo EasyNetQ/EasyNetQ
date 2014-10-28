@@ -1,12 +1,11 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using RabbitMQ.Client.Framing;
+// ReSharper disable InconsistentNaming
 using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using EasyNetQ.NonGeneric;
-using RabbitMQ.Client.Framing.v0_9_1;
 
 namespace EasyNetQ.Tests.NonGeneric
 {

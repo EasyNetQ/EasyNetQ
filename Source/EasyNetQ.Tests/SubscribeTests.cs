@@ -7,7 +7,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.v0_9_1;
+using RabbitMQ.Client.Framing;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests

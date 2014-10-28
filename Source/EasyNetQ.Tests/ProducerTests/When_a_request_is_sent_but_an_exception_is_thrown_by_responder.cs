@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using RabbitMQ.Client.Framing;
 // ReSharper disable InconsistentNaming
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.v0_9_1;
 using Rhino.Mocks;
 using System;
 using System.Text;
