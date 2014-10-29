@@ -17,7 +17,7 @@ namespace EasyNetQ.Producer
         protected readonly IConventions conventions;
         protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        protected readonly IConnectionConfiguration configuration;
+        protected readonly ConnectionConfiguration configuration;
 
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
         private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
@@ -33,7 +33,7 @@ namespace EasyNetQ.Producer
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
-            IConnectionConfiguration configuration)
+            ConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");

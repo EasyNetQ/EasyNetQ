@@ -8,10 +8,10 @@
     public class PersistentChannelFactory : IPersistentChannelFactory
     {
         private readonly IEasyNetQLogger logger;
-        private readonly IConnectionConfiguration configuration;
+        private readonly ConnectionConfiguration configuration;
         private readonly IEventBus eventBus;
 
-        public PersistentChannelFactory(IEasyNetQLogger logger, IConnectionConfiguration configuration, IEventBus eventBus)
+        public PersistentChannelFactory(IEasyNetQLogger logger, ConnectionConfiguration configuration, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(configuration, "configuration");

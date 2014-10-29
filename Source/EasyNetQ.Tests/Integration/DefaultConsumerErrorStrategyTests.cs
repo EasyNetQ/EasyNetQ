@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
         {
             var configuration = new ConnectionConfiguration
             {
-                Hosts = new List<IHostConfiguration>
+                Hosts = new List<HostConfiguration>
                 {
                     new HostConfiguration { Host = "localhost", Port = 5672 }
                 },

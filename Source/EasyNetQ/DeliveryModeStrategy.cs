@@ -10,9 +10,9 @@ namespace EasyNetQ
 
     public class MessageDeliveryModeStrategy : IMessageDeliveryModeStrategy
     {
-        private readonly IConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration connectionConfiguration;
 
-        public MessageDeliveryModeStrategy(IConnectionConfiguration connectionConfiguration)
+        public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration)
         {
             this.connectionConfiguration = connectionConfiguration;
         }

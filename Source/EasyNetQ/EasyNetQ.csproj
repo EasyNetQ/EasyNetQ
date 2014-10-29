@@ -113,7 +113,7 @@
     <Compile Include="IAdvancedBus.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="IClusterHostSelectionStrategy.cs" />
-    <Compile Include="IConnectionConfiguration.cs" />
+    <Compile Include="ConnectionConfiguration.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="AutoSubscribe\IConsume.cs" />
     <Compile Include="Consumer\IConsumerDispatcher.cs" />

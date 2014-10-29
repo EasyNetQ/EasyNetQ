@@ -20,7 +20,7 @@ namespace EasyNetQ
         private readonly IEventBus eventBus;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly IContainer container;
-        private readonly IConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
@@ -33,7 +33,7 @@ namespace EasyNetQ
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container,
-            IConnectionConfiguration connectionConfiguration,
+            ConnectionConfiguration connectionConfiguration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy)
         {

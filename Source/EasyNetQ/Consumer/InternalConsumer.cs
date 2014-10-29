@@ -26,7 +26,7 @@ namespace EasyNetQ.Consumer
         private readonly IEasyNetQLogger logger;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
-        private readonly IConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IEventBus eventBus;
 
         private Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
@@ -43,7 +43,7 @@ namespace EasyNetQ.Consumer
             IEasyNetQLogger logger,
             IConsumerDispatcher consumerDispatcher,
             IConventions conventions,
-            IConnectionConfiguration connectionConfiguration,
+            ConnectionConfiguration connectionConfiguration,
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");

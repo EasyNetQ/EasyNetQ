@@ -25,7 +25,7 @@ namespace EasyNetQ.Producer
 
         private readonly int timeoutSeconds;
 
-        public PublisherConfirms(IConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus) : base (eventBus)
+        public PublisherConfirms(ConnectionConfiguration configuration, IEasyNetQLogger logger, IEventBus eventBus) : base (eventBus)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(logger, "logger");
