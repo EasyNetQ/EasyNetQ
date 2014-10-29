@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2012</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-      <dependency id="RabbitMQ.Client" version="[3.3.2]" />
+      <dependency id="RabbitMQ.Client" version="[3.4,]" />
       <dependency id="System.Collections.Immutable.Net40" version="[1.0.30.17]" />
     </dependencies>
   </metadata>
