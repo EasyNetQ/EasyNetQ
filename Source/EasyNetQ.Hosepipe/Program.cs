@@ -70,6 +70,8 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
             arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
                 .FailWith(messsage("Invalid number of messages to retrieve"));
+            arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
+                .FailWith(messsage("Invalid purge (x) parameter"));
 
             try
             {

@@ -27,7 +27,7 @@ namespace EasyNetQ.Hosepipe
                 }
 
                 var count = 0;
-                while (++count < parameters.NumberOfMessagesToRetrieve)
+                while (count++ < parameters.NumberOfMessagesToRetrieve)
                 {
                     var basicGetResult = channel.BasicGet(parameters.QueueName, noAck: parameters.Purge);
                     if (basicGetResult == null) break; // no more messages on the queue
