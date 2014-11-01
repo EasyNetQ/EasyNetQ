@@ -45,6 +45,58 @@ namespace EasyNetQ.Tests.Integration
             Console.WriteLine("Stopped consuming");
         }
 
+
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_subscribe_as_exlusive()
+        {
+            var countdownEvent = new CountdownEvent(10);
+            var firstCount = 0;
+            var secondCount = 0;
+
+            bus.Subscribe<MyMessage>("test", message =>
+                {
+                    countdownEvent.Signal();
+                    Interlocked.Increment(ref firstCount);
+                    Console.WriteLine("[1] " + message.Text);
+                }, x => x.AsExclusive());
+            bus.Subscribe<MyMessage>("test", message =>
+                {
+                    countdownEvent.Signal();
+                    Interlocked.Increment(ref secondCount);
+                    Console.WriteLine("[2] " + message.Text);
+                }, x => x.AsExclusive());
+
+            for (var i = 0; i < 10; ++i)
+                bus.Publish(new MyMessage
+                    {
+                        Text = "Exclusive " + i
+                    });
+            countdownEvent.Wait(10 * 1000);
+            Assert.IsTrue(firstCount == 10 && secondCount == 0 || firstCount == 0 && secondCount == 10);
+            Console.WriteLine("Stopped consuming");
+        }
+
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Long_running_exclusive_subscriber_should_survive_a_rabbit_restart()
+        {
+            var autoResetEvent = new AutoResetEvent(false);
+            bus.Subscribe<MyMessage>("test", message =>
+            {
+                Console.Out.WriteLine("Restart RabbitMQ now.");
+                new Timer(x =>
+                {
+                    Console.WriteLine(message.Text);
+                    autoResetEvent.Set();
+                }, null, 5000, Timeout.Infinite);
+            }, x => x.AsExclusive());
+
+            // allow time for messages to be consumed
+            autoResetEvent.WaitOne(15000);
+
+            Console.WriteLine("Stopped consuming");
+        }
+
+
         // 2. Run this a few times, should publish some messages
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_publish()

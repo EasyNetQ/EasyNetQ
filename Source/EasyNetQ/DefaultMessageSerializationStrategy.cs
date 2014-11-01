@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ
 {
     public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy

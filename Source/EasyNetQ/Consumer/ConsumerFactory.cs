@@ -16,10 +16,11 @@ namespace EasyNetQ.Consumer
         public ConsumerFactory(IInternalConsumerFactory internalConsumerFactory, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
+            Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
-
+            
             eventBus.Subscribe<StoppedConsumingEvent>(stoppedConsumingEvent =>
                 {
                     object value;
@@ -61,7 +62,8 @@ namespace EasyNetQ.Consumer
             {
                 return new TransientConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
             }
-
+            if(configuration.IsExclusive)
+                return new ExclusiveConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
             return new PersistentConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
         }
 
