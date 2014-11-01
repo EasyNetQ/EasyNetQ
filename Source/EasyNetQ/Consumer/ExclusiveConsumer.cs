@@ -78,7 +78,12 @@ namespace EasyNetQ.Consumer
                 internalConsumer.Cancelled += consumer => Dispose();
                 var status = internalConsumer.StartConsuming(connection, queue, onMessage, configuration);
                 if (status == StartConsumingStatus.Failed)
+                {
+                    object value;
+                    internalConsumer.Dispose();
+                    internalConsumers.TryRemove(internalConsumer, out value);
                     LeaveExclusiveArea(queue);
+                }
             }
         }
 
