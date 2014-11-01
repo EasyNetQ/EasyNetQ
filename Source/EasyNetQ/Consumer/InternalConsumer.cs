@@ -10,7 +10,7 @@ namespace EasyNetQ.Consumer
 {
     public interface IInternalConsumer : IDisposable
     {
-        void StartConsuming(
+        StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
@@ -61,7 +61,7 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
-        public void StartConsuming(
+        public StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
@@ -91,6 +91,8 @@ namespace EasyNetQ.Consumer
                     queue.Name,         // queue
                     false,              // noAck
                     consumerTag,        // consumerTag
+                    true,
+                    configuration.IsExclusive,
                     arguments,          // arguments
                     this);              // consumer
 
@@ -99,9 +101,11 @@ namespace EasyNetQ.Consumer
             }
             catch (Exception exception)
             {
-                logger.InfoWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
+                logger.ErrorWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
                                  queue.Name, consumerTag, exception.Message);
+                return StartConsumingStatus.Failed;
             }
+            return StartConsumingStatus.Succeed;
         }
 
         /// <summary>

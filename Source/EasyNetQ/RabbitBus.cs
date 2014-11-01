@@ -149,9 +149,14 @@ namespace EasyNetQ
             return advancedBus.Consume<T>(
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body),
-                x => x.WithPriority(configuration.Priority)
-                      .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
-                      .WithPrefetchCount(configuration.PrefetchCount));
+                x =>
+                    {
+                        x.WithPriority(configuration.Priority)
+                         .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
+                         .WithPrefetchCount(configuration.PrefetchCount);
+                        if (configuration.IsExclusive)
+                            x.AsExclusive();
+                    });
         }
 
         public virtual TResponse Request<TRequest, TResponse>(TRequest request)
