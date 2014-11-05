@@ -48,6 +48,7 @@
     </Compile>
     <Compile Include="InjectionExtensions.cs" />
     <Compile Include="NinjectAdapter.cs" />
+    <Compile Include="NinjectMessageDispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
