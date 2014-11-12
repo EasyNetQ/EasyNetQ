@@ -120,6 +120,27 @@ namespace EasyNetQ
             where T : class;
 
         /// <summary>
+        /// Subscribes to a stream of messages that match a .NET type.
+        /// </summary>
+        /// <typeparam name="T">The type to subscribe to</typeparam>
+        /// <param name="subscriptionId">
+        /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
+        /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
+        /// to load balance a subscription in a round-robin fashion.
+        /// </param>
+        /// <param name="onMessage">
+        /// The action to run when a message arrives. onMessage can immediately return a Task and
+        /// then continue processing asynchronously. When the Task completes the message will be
+        /// Ack'd.
+        /// </param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
+        /// </param>
+        IDisposable SubscribeAsync<T>(string subscriptionId, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage,
+            Action<ISubscriptionConfiguration> configure)
+            where T : class;
+
+        /// <summary>
         /// Makes an RPC style request
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
