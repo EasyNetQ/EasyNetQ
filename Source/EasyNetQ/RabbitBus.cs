@@ -126,7 +126,13 @@ namespace EasyNetQ
             return SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
-        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
+        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage,
+            Action<ISubscriptionConfiguration> configure) where T : class
+        {
+            return SubscribeAsync<T>(subscriptionId, (message, messageReceivedInfo) => onMessage(message.Body), configure);
+        }
+
+        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -148,7 +154,7 @@ namespace EasyNetQ
 
             return advancedBus.Consume<T>(
                 queue,
-                (message, messageReceivedInfo) => onMessage(message.Body),
+                onMessage,
                 x => x.WithPriority(configuration.Priority)
                       .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
                       .WithPrefetchCount(configuration.PrefetchCount));
