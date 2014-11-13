@@ -14,7 +14,7 @@
     <description>EasyNetQ is a simple, opinionated .NET API for RabbitMQ</description>
     <releaseNotes>
     </releaseNotes>
-    <copyright>Copyright Mike Hadlow 2012</copyright>
+    <copyright>Copyright Mike Hadlow 2014</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
       <dependency id="RabbitMQ.Client" version="[3.4,]" />
