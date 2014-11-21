@@ -38,6 +38,20 @@ namespace EasyNetQ.Producer
             advancedBus.Publish(Exchange.GetDefault(), queue, false, false, wrappedMessage);
         }
 
+        public void SendAsync<T>(string queue, T message)
+            where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(message, "message");
+
+            DeclareQueue(queue);
+
+            var wrappedMessage = new Message<T>(message);
+            wrappedMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1);
+
+            advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, false, wrappedMessage);
+        }
+
         public IDisposable Receive<T>(string queue, Action<T> onMessage)
             where T : class
         {
