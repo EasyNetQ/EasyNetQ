@@ -139,6 +139,7 @@
     <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
+    <Compile Include="ITimeoutStrategy.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
@@ -198,6 +199,7 @@
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="TaskHelpers.cs" />
+    <Compile Include="TimeoutSecondsAttribute.cs" />
     <Compile Include="Topology\Binding.cs" />
     <Compile Include="Topology\Exchange.cs" />
     <Compile Include="Topology\ExchangeType.cs" />
