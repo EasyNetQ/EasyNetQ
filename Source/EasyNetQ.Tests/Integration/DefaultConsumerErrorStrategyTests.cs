@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests
             configuration.Validate();
 
             var typeNameSerializer = new TypeNameSerializer();
-            connectionFactory = new ConnectionFactoryWrapper(configuration, new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>());
+            connectionFactory = new ConnectionFactoryWrapper(configuration, new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>());
             serializer = new JsonSerializer(typeNameSerializer);
             conventions = new Conventions(typeNameSerializer);
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(

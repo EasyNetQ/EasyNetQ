@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.38.1.0")]
+[assembly: AssemblyVersion("0.38.2.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.38.2.0 RandomHostSelectionStrategy is default hosts selection strategy
 // 0.38.1.0 Configuration of rpc timeout  
 // 0.38.0.0 ILMerging to remove the potentially conflicting dependency on System.Collections.Immutable.Net40 from the NuGet
 // 0.37.3.0 Remove POCO interfaces IConnectionConfiguration and IHostConfiguration

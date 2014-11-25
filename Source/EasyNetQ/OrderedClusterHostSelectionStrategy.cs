@@ -6,7 +6,7 @@ namespace EasyNetQ
     /// <summary>
     /// A collection that hands out the next item until success, or until every item has been tried.
     /// </summary>
-    public class DefaultClusterHostSelectionStrategy<T> : IClusterHostSelectionStrategy<T>, IEnumerable<T> where T : class
+    public class OrderedClusterHostSelectionStrategy<T> : IClusterHostSelectionStrategy<T>, IEnumerable<T> where T : class
     {
         private readonly IList<T> items = new List<T>();
         private int currentIndex = 0;
@@ -59,7 +59,7 @@ namespace EasyNetQ
 
         private bool firstUse = true;
 
-        public DefaultClusterHostSelectionStrategy()
+        public OrderedClusterHostSelectionStrategy()
         {
             Succeeded = false;
         }

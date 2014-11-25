@@ -208,7 +208,7 @@
     <Compile Include="Topology\IExchange.cs" />
     <Compile Include="Topology\IQueue.cs" />
     <Compile Include="Topology\Queue.cs" />
-    <Compile Include="DefaultClusterHostSelectionStrategy.cs" />
+    <Compile Include="OrderedClusterHostSelectionStrategy.cs" />
     <Compile Include="Consumer\TransientConsumer.cs" />
     <Compile Include="TypeNameSerializer.cs" />
     <Compile Include="Preconditions.cs" />

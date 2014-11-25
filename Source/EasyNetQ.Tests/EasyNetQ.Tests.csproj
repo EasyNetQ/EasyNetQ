@@ -186,7 +186,7 @@
     <Compile Include="StubCorrelationIdGenerator.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
-    <Compile Include="DefaultClusterHostSelectionStrategyTests.cs" />
+    <Compile Include="OrderedClusterHostSelectionStrategyTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
     <Compile Include="MessageVersioningTests\VersionedMessageSerializationStrategyTests.cs" />
   </ItemGroup>
