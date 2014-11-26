@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace EasyNetQ.Tests
 {
     [TestFixture]
-    public class DefaultClusterHostSelectionStrategyTests
+    public class OrderedClusterHostSelectionStrategyTests
     {
         private IClusterHostSelectionStrategy<string> defaultClusterHostSelectionStrategy;
         private StringWriter writer;    
@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            defaultClusterHostSelectionStrategy = new DefaultClusterHostSelectionStrategy<string>
+            defaultClusterHostSelectionStrategy = new OrderedClusterHostSelectionStrategy<string>
             {
                 "0",
                 "1",
