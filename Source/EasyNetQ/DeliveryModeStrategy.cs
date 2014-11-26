@@ -14,6 +14,7 @@ namespace EasyNetQ
 
         public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration)
         {
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             this.connectionConfiguration = connectionConfiguration;
         }
 

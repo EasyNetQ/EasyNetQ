@@ -502,7 +502,7 @@ namespace EasyNetQ.Management.Client
             }
 
             Put(string.Format("permissions/{0}/{1}",
-                    permissionInfo.GetVirtualHostName(),
+                   SanitiseVhostName(permissionInfo.GetVirtualHostName()),
                     permissionInfo.GetUserName()),
                 permissionInfo);
         }

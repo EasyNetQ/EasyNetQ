@@ -17,6 +17,7 @@ namespace EasyNetQ.Producer
         protected readonly IConventions conventions;
         protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+        private readonly ITimeoutStrategy timeoutStrategy;
         protected readonly ConnectionConfiguration configuration;
 
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
@@ -33,6 +34,7 @@ namespace EasyNetQ.Producer
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
+            ITimeoutStrategy timeoutStrategy,
             ConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
@@ -40,12 +42,14 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
+            Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
             Preconditions.CheckNotNull(configuration, "configuration");
 
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
+            this.timeoutStrategy = timeoutStrategy;
             this.configuration = configuration;
 
             eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
@@ -80,12 +84,13 @@ namespace EasyNetQ.Producer
                         string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 });
 
-            timer.Change(TimeSpan.FromSeconds(configuration.Timeout), disablePeriodicSignaling);
 
+            var requestTyoe = typeof (TRequest);
+            timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestTyoe)), disablePeriodicSignaling);
             RegisterErrorHandling(correlationId, timer, tcs);
 
             var queueName = SubscribeToResponse<TRequest, TResponse>();
-            var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
+            var routingKey = conventions.RpcRoutingKeyNamingConvention(requestTyoe);
             RequestPublish(request, routingKey, queueName, correlationId);
 
             return tcs.Task;
@@ -180,15 +185,13 @@ namespace EasyNetQ.Producer
         protected virtual void RequestPublish<TRequest>(TRequest request, string routingKey, string returnQueueName, Guid correlationId)
             where TRequest : class
         {
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(
-                advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
-
-            var messageType = typeof(TRequest);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+            var requestType = typeof(TRequest);
             var requestMessage = new Message<TRequest>(request);
             requestMessage.Properties.ReplyTo = returnQueueName;
             requestMessage.Properties.CorrelationId = correlationId.ToString();
-            requestMessage.Properties.Expiration = (configuration.Timeout*1000).ToString();
-            requestMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1);
+            requestMessage.Properties.Expiration = (timeoutStrategy.GetTimeoutSeconds(requestType) * 1000).ToString();
+            requestMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(requestType) ? 2 : 1);
 
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }

@@ -45,10 +45,12 @@
     </Reference>
     <Reference Include="ReadOnlyCollectionsInterfaces">
       <HintPath>..\packages\ReadOnlyCollectionInterfaces.1.0.0\lib\NET40-client\ReadOnlyCollectionsInterfaces.dll</HintPath>
+      <ILMerge>true</ILMerge>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable.Net40">
       <HintPath>..\packages\System.Collections.Immutable.Net40.1.0.30.17\lib\net40\System.Collections.Immutable.Net40.dll</HintPath>
+      <ILMerge>true</ILMerge>
     </Reference>
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -139,6 +141,7 @@
     <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
+    <Compile Include="ITimeoutStrategy.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
@@ -198,6 +201,7 @@
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
     <Compile Include="TaskHelpers.cs" />
+    <Compile Include="TimeoutSecondsAttribute.cs" />
     <Compile Include="Topology\Binding.cs" />
     <Compile Include="Topology\Exchange.cs" />
     <Compile Include="Topology\ExchangeType.cs" />
@@ -206,7 +210,7 @@
     <Compile Include="Topology\IExchange.cs" />
     <Compile Include="Topology\IQueue.cs" />
     <Compile Include="Topology\Queue.cs" />
-    <Compile Include="DefaultClusterHostSelectionStrategy.cs" />
+    <Compile Include="OrderedClusterHostSelectionStrategy.cs" />
     <Compile Include="Consumer\TransientConsumer.cs" />
     <Compile Include="TypeNameSerializer.cs" />
     <Compile Include="Preconditions.cs" />
@@ -215,14 +219,16 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+       Other similar extension points exist, see Microsoft.Common.targets. -->
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
+    <CreateItem Include="@(ReferencePath)" Condition="'%(ReferencePath.ILMerge)'=='True'">
+      <Output TaskParameter="Include" ItemName="ILMergeAssemblies" />
+    </CreateItem>
+    <Exec Command="..\Packages\ilmerge.2.13.0307\ILMerge.exe /Closed /Internalize /Lib:$(OutputPath) /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(ILMergeAssemblies->'&quot;%(FullPath)&quot;', ' ')" />
   </Target>
-  -->
 </Project>

@@ -156,8 +156,8 @@ namespace EasyNetQ
                     "Have you called SetContainerFactory(...) with a function that returns null?");
             }
 
-            registerServices(container);
             container.Register(_ => connectionConfiguration);
+            registerServices(container);
             ComponentRegistration.RegisterServices(container);
 
             return container.Resolve<IBus>();
