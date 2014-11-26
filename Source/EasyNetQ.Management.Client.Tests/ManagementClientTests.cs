@@ -585,6 +585,27 @@ namespace EasyNetQ.Management.Client.Tests
         }
 
         [Test]
+        public void Should_be_able_to_create_permissions_in_default_Vhost()
+        {
+            var user = managementClient.GetUsers().SingleOrDefault(x => x.Name == testUser);
+            if (user == null)
+            {
+                //create user if it does not exists
+                var userInfo = new UserInfo(testUser, "topSecret").AddTag("administrator");
+                user = managementClient.CreateUser(userInfo);
+            }
+            var vhost = managementClient.GetVHosts().SingleOrDefault(x => x.Name == "/");
+            if (vhost == null)
+            {
+                throw new ApplicationException(string.Format("Default vhost: '{0}' has not been created", testVHost));
+
+            }
+
+            var permissionInfo = new PermissionInfo(user, vhost);
+            managementClient.CreatePermission(permissionInfo);
+        }
+
+        [Test]
         public void Should_be_able_to_delete_permissions()
         {
             var permission = managementClient.GetPermissions()
