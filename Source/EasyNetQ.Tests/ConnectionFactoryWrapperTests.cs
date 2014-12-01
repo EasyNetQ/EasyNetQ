@@ -14,12 +14,12 @@ namespace EasyNetQ.Tests
         private const string VirtualHost = "123";
         private readonly Uri amqpConnectionString = new Uri(string.Format("amqp://{0}:{1}@localhost:10000/{2}", UserName, Password, VHost));
         private readonly Uri amqpSecureConnectionString = new Uri("amqps://localhost:5671");
-        private DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterSelectionStrategy;
+        private RandomClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterSelectionStrategy;
 
         [SetUp]
         public void SetUp()
         {
-            clusterSelectionStrategy = new DefaultClusterHostSelectionStrategy<ConnectionFactoryInfo>();
+            clusterSelectionStrategy = new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>();
         }
 
         [Test]

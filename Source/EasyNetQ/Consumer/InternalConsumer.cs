@@ -95,7 +95,7 @@ namespace EasyNetQ.Consumer
                     this);              // consumer
 
                 logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
-                                  queue.Name, consumerTag, connectionConfiguration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
+                                  queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
             }
             catch (Exception exception)
             {
