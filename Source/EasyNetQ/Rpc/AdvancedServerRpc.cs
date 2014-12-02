@@ -23,7 +23,7 @@ namespace EasyNetQ.Rpc
             _rpcHeaderKeys = rpcHeaderKeys;
         }
 
-        public IDisposable Respond(string requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
+        public IDisposable Respond(string requestExchange, string queueName, string topic, Func<SerializedMessage, MessageReceivedInfo, Task<SerializedMessage>> handleRequest)
         {
             Preconditions.CheckNotNull(requestExchange, "requestExchange");
             Preconditions.CheckNotNull(queueName, "queueName");
@@ -44,12 +44,17 @@ namespace EasyNetQ.Rpc
             _advancedBus.Bind(exchange, queue, topic);
 
             var responseExchange = Exchange.GetDefault();
-            return _advancedBus.Consume(queue, (msgBytes, msgProp, messageRecievedInfo) => ExecuteResponder(responseExchange, handleRequest, new SerializedMessage(msgProp, msgBytes)));
+            return _advancedBus.Consume(queue, (msgBytes, msgProp, messageRecievedInfo) => ExecuteResponder(responseExchange, handleRequest, new SerializedMessage(msgProp, msgBytes), messageRecievedInfo));
         }
-            
-        private Task ExecuteResponder(IExchange responseExchange, Func<SerializedMessage, Task<SerializedMessage>> responder, SerializedMessage requestMessage)
+
+        public IDisposable Respond(string requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
         {
-            return responder(requestMessage)
+            return Respond(requestExchange, queueName, topic, (message, info) => handleRequest(message));
+        }
+
+        private Task ExecuteResponder(IExchange responseExchange, Func<SerializedMessage, MessageReceivedInfo, Task<SerializedMessage>> responder, SerializedMessage requestMessage, MessageReceivedInfo messageRecievedInfo)
+        {
+            return responder(requestMessage, messageRecievedInfo)
                 .ContinueWith(RpcHelpers.MaybeAddExceptionToHeaders(_rpcHeaderKeys, requestMessage))
                 .Then(uhInfo =>
                     {

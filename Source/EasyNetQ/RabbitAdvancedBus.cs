@@ -165,7 +165,16 @@ namespace EasyNetQ
         public IDisposable Respond(
             string requestExchangeName, 
             string queue, 
-            string topic, 
+            string topic,
+            Func<SerializedMessage, MessageReceivedInfo, Task<SerializedMessage>> handleRequest)
+        {
+            return advancedServerRpc.Respond(requestExchangeName, queue, topic, handleRequest);
+        }
+
+        public IDisposable Respond(
+            string requestExchangeName, 
+            string queue, 
+            string topic,
             Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
         {
             return advancedServerRpc.Respond(requestExchangeName, queue, topic, handleRequest);
