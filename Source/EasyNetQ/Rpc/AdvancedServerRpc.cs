@@ -47,11 +47,6 @@ namespace EasyNetQ.Rpc
             return _advancedBus.Consume(queue, (msgBytes, msgProp, messageRecievedInfo) => ExecuteResponder(responseExchange, handleRequest, new SerializedMessage(msgProp, msgBytes), messageRecievedInfo));
         }
 
-        public IDisposable Respond(string requestExchange, string queueName, string topic, Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
-        {
-            return Respond(requestExchange, queueName, topic, (message, info) => handleRequest(message));
-        }
-
         private Task ExecuteResponder(IExchange responseExchange, Func<SerializedMessage, MessageReceivedInfo, Task<SerializedMessage>> responder, SerializedMessage requestMessage, MessageReceivedInfo messageRecievedInfo)
         {
             return responder(requestMessage, messageRecievedInfo)

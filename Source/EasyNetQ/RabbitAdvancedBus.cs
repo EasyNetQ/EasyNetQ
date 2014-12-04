@@ -177,7 +177,7 @@ namespace EasyNetQ
             string topic,
             Func<SerializedMessage, Task<SerializedMessage>> handleRequest)
         {
-            return advancedServerRpc.Respond(requestExchangeName, queue, topic, handleRequest);
+            return advancedServerRpc.Respond(requestExchangeName, queue, topic, (message, info) => handleRequest(message));
         }
 
         public Task<SerializedMessage> RequestAsync(

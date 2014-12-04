@@ -39,7 +39,6 @@ namespace EasyNetQ.Rpc
             return response.Then(sMsg => TaskHelpers.FromResult(((IMessage<TResponse>) _messageSerializationStrategy.DeserializeMessage(sMsg.Properties, sMsg.Body).Message).Body));
         }
 
-        //TODO add handlerId
         public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class
@@ -50,7 +49,7 @@ namespace EasyNetQ.Rpc
             var queue = new Queue(_conventions.RpcRequestQueueNameConvention(typeof (TRequest), handlerId),false);
             var topic = _conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
-            return _serverRpc.Respond(exchange, queue.Name, topic, HandleRequest(responder));
+            return _serverRpc.Respond(exchange, queue.Name, topic, (message, info) => HandleRequest(responder)(message));
         }
 
         private Func<SerializedMessage, Task<SerializedMessage>> HandleRequest<TRequest,TResponse>(Func<TRequest, Task<TResponse>> handle) where TResponse : class
