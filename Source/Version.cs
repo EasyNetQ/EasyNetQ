@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.39.1.0")]
+[assembly: AssemblyVersion("0.39.2.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.39.2.0 Removed Immutable Packages and replaced IEventBus.cs with previous version to prevent cs1685 compiler warnings
 // 0.39.1.0 Fix multiple queue's creation. Bug fix
 // 0.39.0.0 Added SendAsync
 // 0.38.2.0 RandomHostSelectionStrategy is default hosts selection strategy
