@@ -20,7 +20,7 @@ namespace EasyNetQ.Producer
         /// <typeparam name="T">The type of message to send</typeparam>
         /// <param name="queue">The queue to send the message to</param>
         /// <param name="message">The message to send</param>
-        void SendAsync<T>(string queue, T message) where T : class;
+        Task SendAsync<T>(string queue, T message) where T : class;
 
         /// <summary>
         /// Receive a message from the specified queue

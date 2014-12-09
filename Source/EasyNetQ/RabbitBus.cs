@@ -201,10 +201,10 @@ namespace EasyNetQ
             sendReceive.Send(queue, message);
         }
 
-        public virtual void SendAsync<T>(string queue, T message)
+        public virtual Task SendAsync<T>(string queue, T message)
             where T : class
         {
-            sendReceive.SendAsync(queue, message);
+            return sendReceive.SendAsync(queue, message);
         }
 
         public virtual IDisposable Receive<T>(string queue, Action<T> onMessage)

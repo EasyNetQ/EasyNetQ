@@ -179,7 +179,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to send</typeparam>
         /// <param name="queue">The queue to send to</param>
         /// <param name="message">The message</param>
-        void SendAsync<T>(string queue, T message) where T : class;
+        Task SendAsync<T>(string queue, T message) where T : class;
 
         /// <summary>
         /// Receive messages from a queue.

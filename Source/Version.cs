@@ -6,6 +6,7 @@ using System.Reflection;
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.39.3.0 SendAsync should return Task
 // 0.39.2.0 Removed Immutable Packages and replaced IEventBus.cs with previous version to prevent cs1685 compiler warnings
 // 0.39.1.0 Fix multiple queue's creation. Bug fix
 // 0.39.0.0 Added SendAsync
