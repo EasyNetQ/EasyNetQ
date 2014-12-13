@@ -18,24 +18,17 @@ namespace EasyNetQ.Consumer
 
             dispatchThread = new Thread(_ =>
                 {
-                    try
+                    Action action;
+                    while(!disposed && queue.TryTake(out action, -1))
                     {
-                        while (true)
+                        try
                         {
-                            if (disposed) break;
-
-                            queue.Take()();
+                            action();
                         }
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // InvalidOperationException is thrown when Take is called after 
-                        // queue.CompleteAdding(), this is signals that this class is being
-                        // disposed, so we allow the thread to complete.
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.ErrorWrite(exception);
+                        catch (Exception exception)
+                        {
+                            logger.ErrorWrite(exception);
+                        }
                     }
                 }) { Name = "EasyNetQ consumer dispatch thread" };
             dispatchThread.Start();
