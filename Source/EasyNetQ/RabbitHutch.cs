@@ -56,7 +56,7 @@ namespace EasyNetQ
         /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default IEasyNetQLogger:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register&lt;IEasyNetQLogger&gt;(_ => myLogger));
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
         /// </param>
         /// <returns>
         /// A new RabbitBus instance.
@@ -96,7 +96,7 @@ namespace EasyNetQ
         /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default IEasyNetQLogger:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register&lt;IEasyNetQLogger&gt;(_ => myLogger));
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
         /// </param>
         /// <returns>
         /// A new RabbitBus instance.
@@ -141,7 +141,7 @@ namespace EasyNetQ
         /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default IEasyNetQLogger:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register&lt;IEasyNetQLogger&gt;(_ => myLogger));
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
         /// </param>
         /// <returns></returns>
         public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
