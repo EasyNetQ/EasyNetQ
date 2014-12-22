@@ -32,7 +32,7 @@ namespace EasyNetQ
         /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
         /// 
         /// The following default values will be used if not specified:
-        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=0
+        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
         /// </param>
         /// <returns>
         /// A new RabbitBus instance.
@@ -52,7 +52,7 @@ namespace EasyNetQ
         /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
         /// 
         /// The following default values will be used if not specified:
-        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=0
+        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
         /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default IEasyNetQLogger:
