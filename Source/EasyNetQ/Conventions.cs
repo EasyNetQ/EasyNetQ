@@ -44,7 +44,7 @@ namespace EasyNetQ
                 var attr = GetQueueAttribute(messageType);
 
                 return string.IsNullOrEmpty(attr.ExchangeName)
-                    ? typeNameSerializer.Serialize(messageType)
+                    ? typeNameSerializer.SerializeFriendly(messageType)
                     : attr.ExchangeName;
             };
 			
@@ -57,7 +57,7 @@ namespace EasyNetQ
 
                         if (string.IsNullOrEmpty(attr.QueueName))
                         {
-                            var typeName = typeNameSerializer.Serialize(messageType);
+                            var typeName = typeNameSerializer.SerializeFriendly(messageType);
                             return string.Format("{0}_{1}", typeName, subscriptionId);
                         }
 

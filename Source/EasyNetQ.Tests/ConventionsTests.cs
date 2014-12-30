@@ -23,12 +23,12 @@ namespace EasyNetQ.Tests
 			conventions = new Conventions(typeNameSerializer);
 		}
 
-		[Test]
-		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
-		{
-			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
-		}
+    [Test]
+    public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_SerializeFriendly_method()
+    {
+      var result = conventions.ExchangeNamingConvention(typeof(TestMessage));      
+      result.ShouldEqual(typeNameSerializer.SerializeFriendly(typeof(TestMessage)));
+    }
 
 		[Test]
 		public void The_default_topic_naming_convention_should_return_an_empty_string()
@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests
 		{
 			const string subscriptionId = "test";
 			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
+      result.ShouldEqual(typeNameSerializer.SerializeFriendly(typeof(TestMessage)) + "_" + subscriptionId);
 		}
 
         [Test]
@@ -113,11 +113,11 @@ namespace EasyNetQ.Tests
         [Test]
         [TestCase(typeof(EmptyQueueNameAnnotatedTestMessage))]
         [TestCase(typeof(IEmptyQueueNameAnnotatedTestMessage))]
-        public void And_queueName_is_empty_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id(Type messageType)
+        public void And_queueName_is_empty_should_use_the_TypeNameSerializers_SerializeFriendly_method_then_an_underscore_then_the_subscription_id(Type messageType)
         {
             const string subscriptionId = "test";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(messageType) + "_" + subscriptionId);
+            result.ShouldEqual(typeNameSerializer.SerializeFriendly(messageType) + "_" + subscriptionId);
         }
 
         [Test]
@@ -132,10 +132,10 @@ namespace EasyNetQ.Tests
         [Test]
         [TestCase(typeof(QueueNameOnlyAnnotatedTestMessage))]
         [TestCase(typeof(IQueueNameOnlyAnnotatedTestMessage))]
-        public void And_exchangeName_not_specified_the_exchange_name_convention_should_use_the_TypeNameSerializers_Serialize_method(Type messageType)
+        public void And_exchangeName_not_specified_the_exchange_name_convention_should_use_the_TypeNameSerializers_SerializeFriendly_method(Type messageType)
         {
             var result = conventions.ExchangeNamingConvention(messageType);
-            result.ShouldEqual(typeNameSerializer.Serialize(messageType));
+            result.ShouldEqual(typeNameSerializer.SerializeFriendly(messageType));
         }
     }
 

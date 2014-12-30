@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace EasyNetQ
 {
@@ -8,7 +9,26 @@ namespace EasyNetQ
         Type DeSerialize(string typeName);
     }
 
-    public class TypeNameSerializer : ITypeNameSerializer
+    //avoid breaking existing implementations of ITypeNameSerializer
+    public interface IFriendlyTypeNameSerializer
+    {
+      string SerializeFriendly(Type type);
+    }
+
+    public static class ITypeNameSerializerExtensions
+    {
+      public static string SerializeFriendly(this ITypeNameSerializer serializer, Type type)
+      {
+        var friendlySerializer = serializer as IFriendlyTypeNameSerializer;
+        
+        if (friendlySerializer != null)
+          return friendlySerializer.SerializeFriendly(type);
+
+        return serializer.Serialize(type);
+      }
+    }
+
+    public class TypeNameSerializer : ITypeNameSerializer, IFriendlyTypeNameSerializer
     {
         public Type DeSerialize(string typeName)
         {
@@ -41,5 +61,26 @@ namespace EasyNetQ
             }
             return typeName;
         }
+
+      public string SerializeFriendly(Type type)
+      {
+        const string GENERIC_FORMAT = "<{0}>";
+
+        var friendlyName = type.Name;
+
+        if (!type.IsGenericType)
+        {
+          var backtickIndex = friendlyName.IndexOf('`');
+          if (backtickIndex > 0)
+            friendlyName = friendlyName.Remove(backtickIndex);
+
+          var genericArguments = type.GetGenericArguments().Select(a => a.Name);
+          var genericArgumentNames = String.Join(",", genericArguments);
+
+          friendlyName += String.Format(GENERIC_FORMAT, genericArgumentNames);
+        }
+
+        return friendlyName;
+      }
     }
 }
