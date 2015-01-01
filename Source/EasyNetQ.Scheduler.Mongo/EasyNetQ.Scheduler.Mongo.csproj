@@ -50,6 +50,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
     <Compile Include="ConfigurationBase.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
