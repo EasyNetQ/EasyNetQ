@@ -49,6 +49,12 @@ namespace EasyNetQ.Tests
         public string Text { get; set; }
     }
 
+    [Serializable]
+    public class GenericMessage<T>
+    {
+      public T t { get; set; }
+    }
+
     public interface IAnimal
     {
         string Name { get; set; }
