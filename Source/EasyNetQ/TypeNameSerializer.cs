@@ -35,8 +35,8 @@ namespace EasyNetQ
             var typeName = type.FullName + ":" + type.Assembly.GetName().Name;
             if (typeName.Length > 255)
             {
-                throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP" + 
-                    "maximum short string lengh of 255 characters.",
+                throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP " + 
+                    "maximum short string length of 255 characters.",
                     type.Name);
             }
             return typeName;

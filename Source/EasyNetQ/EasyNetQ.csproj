@@ -43,15 +43,7 @@
     <Reference Include="RabbitMQ.Client">
       <HintPath>..\packages\RabbitMQ.Client.3.4.0\lib\net35\RabbitMQ.Client.dll</HintPath>
     </Reference>
-    <Reference Include="ReadOnlyCollectionsInterfaces">
-      <HintPath>..\packages\ReadOnlyCollectionInterfaces.1.0.0\lib\NET40-client\ReadOnlyCollectionsInterfaces.dll</HintPath>
-      <ILMerge>true</ILMerge>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable.Net40">
-      <HintPath>..\packages\System.Collections.Immutable.Net40.1.0.30.17\lib\net40\System.Collections.Immutable.Net40.dll</HintPath>
-      <ILMerge>true</ILMerge>
-    </Reference>
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />

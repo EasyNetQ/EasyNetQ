@@ -38,7 +38,7 @@ namespace EasyNetQ.Producer
             advancedBus.Publish(Exchange.GetDefault(), queue, false, false, wrappedMessage);
         }
 
-        public void SendAsync<T>(string queue, T message)
+        public Task SendAsync<T>(string queue, T message)
             where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -49,7 +49,7 @@ namespace EasyNetQ.Producer
             var wrappedMessage = new Message<T>(message);
             wrappedMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1);
 
-            advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, false, wrappedMessage);
+            return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, false, wrappedMessage);
         }
 
         public IDisposable Receive<T>(string queue, Action<T> onMessage)
