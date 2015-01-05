@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.39.4.0")]
+[assembly: AssemblyVersion("0.39.5.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.39.5.0 Fix concurrent bugs in EventBus
 // 0.39.4.0 ConsumerDispatcher's dispatching thread shall not die due to single action failure.
 // 0.39.3.0 SendAsync should return Task
 // 0.39.2.0 Removed Immutable Packages and replaced IEventBus.cs with previous version to prevent cs1685 compiler warnings
