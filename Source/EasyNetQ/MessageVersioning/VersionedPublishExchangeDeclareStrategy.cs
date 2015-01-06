@@ -25,7 +25,7 @@ namespace EasyNetQ.MessageVersioning
             return exchangeNames.AddOrUpdate(
                 exchangeName,
                 name => advancedBus.ExchangeDeclareAsync(name, exchangeType),
-                (_, exchange) => exchange);
+                (name, exchangeTask) => exchangeTask.IsFaulted ? advancedBus.ExchangeDeclareAsync(name, exchangeType) : exchangeTask);
         }
 
         public Task<IExchange> DeclareExchangeAsync(IAdvancedBus advancedBus, Type messageType, string exchangeType)
