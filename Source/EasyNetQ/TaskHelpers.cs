@@ -190,6 +190,13 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        public static Task<T> FromException<T>(Exception exception)
+        {
+            var tcs = new TaskCompletionSource<T>();
+            tcs.SetException(exception);
+            return tcs.Task;
+        }
+
         private struct NullStruct
         {
         }

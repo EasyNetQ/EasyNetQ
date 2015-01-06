@@ -12,6 +12,42 @@ namespace EasyNetQ.Tests.MessageVersioningTests
     [TestFixture]
     public class VersionedPublishExchangeDeclareStrategyTests
     {
+        [Test]
+        public void Should_declare_exchange_again_if_first_attempt_failed()
+        {
+            var exchangeDeclareCount = 0;
+            var exchangeName = "exchangeName";
+
+            var advancedBus = MockRepository.GenerateStrictMock<IAdvancedBus>();
+            IExchange exchange = new Exchange(exchangeName);
+            var exchangeTask = TaskHelpers.FromResult(exchange);
+
+            advancedBus
+                .Expect(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
+                .Return(TaskHelpers.FromException<IExchange>(new Exception()))
+                .WhenCalled(x => exchangeDeclareCount++);
+
+            advancedBus
+                .Expect(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
+                .Return(exchangeTask)
+                .WhenCalled(x => exchangeDeclareCount++);
+
+            var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy();
+            try
+            {
+                publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+            }
+            catch (AggregateException)
+            {
+            }
+            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
+            declaredExchange.ShouldBeTheSameAs(exchange);
+            exchangeDeclareCount.ShouldEqual(2);
+        }
+
+
         // Unversioned message - exchange declared
         // Versioned message - superceded exchange declared, then superceding, then bind
         [Test]
