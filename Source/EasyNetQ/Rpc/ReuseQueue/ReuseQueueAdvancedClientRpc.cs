@@ -68,7 +68,8 @@ namespace EasyNetQ.Rpc.ReuseQueue
 
         private void OnConnectionDisconnected()
         {
-            _consumer.Dispose();
+            if (_consumer != null)
+                _consumer.Dispose();
         }
 
         private void OnConnectionCreated()
