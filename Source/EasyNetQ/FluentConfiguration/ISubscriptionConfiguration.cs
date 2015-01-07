@@ -56,6 +56,12 @@ namespace EasyNetQ.FluentConfiguration
         /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
         /// <returns></returns>
         ISubscriptionConfiguration WithExpires(int expires);
+
+        /// <summary>
+        /// Configures the consumer's to be exclusive
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration AsExclusive();
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -112,5 +118,13 @@ namespace EasyNetQ.FluentConfiguration
             Expires = expires;
             return this;
         }
+
+        public ISubscriptionConfiguration AsExclusive()
+        {
+            IsExclusive = true;
+            return this;
+        }
+
+        public bool IsExclusive { get; private set; }
     }
 }
