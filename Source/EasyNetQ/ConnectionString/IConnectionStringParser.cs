@@ -8,7 +8,7 @@ namespace EasyNetQ.ConnectionString
         ConnectionConfiguration Parse(string connectionString);
     }
 
-    public class ConnectionStringParser
+    public class ConnectionStringParser : IConnectionStringParser
     {
         public ConnectionConfiguration Parse(string connectionString)
         {
