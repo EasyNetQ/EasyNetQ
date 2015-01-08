@@ -67,6 +67,7 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
+    <Compile Include="Consumer\ExclusiveConsumer.cs" />
     <Compile Include="Consumer\HandlerCollection.cs" />
     <Compile Include="Consumer\HandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Consumer\ConsumerDispatcher.cs" />
     <Compile Include="Consumer\ConsumerDispatcherFactory.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerInfo.cs" />
+    <Compile Include="Consumer\StartConsumingStatus.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="DefaultCorrelationIdGenerationStrategy.cs" />
     <Compile Include="Consumer\DefaultConsumerErrorStrategy.cs" />
