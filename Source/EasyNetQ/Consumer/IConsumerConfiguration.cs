@@ -20,6 +20,7 @@
             Priority = 0;
             CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
+            IsExclusive = false;
         }
 
         public int Priority { get; private set; }
