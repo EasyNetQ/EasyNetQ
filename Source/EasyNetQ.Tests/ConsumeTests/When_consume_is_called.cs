@@ -34,6 +34,8 @@ namespace EasyNetQ.Tests.ConsumeTests
                 Arg<string>.Is.Equal("my_queue"),
                 Arg<bool>.Is.Equal(false), // NoAck
                 Arg<string>.Is.Equal(ConsumerTag),
+                Arg<bool>.Is.Equal(true),
+                Arg<bool>.Is.Equal(false), 
                 Arg<IDictionary<string, object>>.Is.Equal(new Dictionary<string, object>
                     {
                         {"x-priority", 0},
