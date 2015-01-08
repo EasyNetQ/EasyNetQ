@@ -10,8 +10,8 @@ namespace EasyNetQ.Consumer
 {
     public class ExclusiveConsumer : IConsumer
     {
-        private static readonly ConcurrentDictionary<string, object> ExclusiveQueueArea = 
-            new ConcurrentDictionary<string, object>(); 
+        private readonly object syncLock = new object();
+        private volatile bool isStarted;
 
         private readonly IQueue queue;
         private readonly Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
@@ -21,8 +21,7 @@ namespace EasyNetQ.Consumer
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IEventBus eventBus;
   
-        private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers =
-            new ConcurrentDictionary<IInternalConsumer, object>();
+        private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = new ConcurrentDictionary<IInternalConsumer, object>();
 
         private readonly IList<CancelSubscription> eventCancellations = new List<CancelSubscription>();
 
@@ -48,84 +47,77 @@ namespace EasyNetQ.Consumer
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
-
             timer = new Timer(s =>
                 {
-                    if (disposed)
-                        return;
-                    StartConsumingInternal();
-                    ((Timer) s).Change(5000, Timeout.Infinite);
+                    StartConsumer();
+                    ((Timer)s).Change(10000, -1);
                 });
-            timer.Change(5000, Timeout.Infinite);
+            timer.Change(10000, -1);
         }
 
         public IDisposable StartConsuming()
         {
             eventCancellations.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
             eventCancellations.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
+            StartConsumer();
             return new ConsumerCancellation(Dispose);   
         }
 
-
-        private void StartConsumingInternal()
+        private void StartConsumer()
         {
-            if (disposed) return;
-            if (!connection.IsConnected) return;
-            if (TryEnterExclusiveArea(queue))
+            if (disposed)
+                return;
+            if (!connection.IsConnected)
+                return;
+
+            lock (syncLock)
             {
+                if (isStarted)
+                    return;
                 var internalConsumer = internalConsumerFactory.CreateConsumer();
                 internalConsumers.TryAdd(internalConsumer, null);
                 internalConsumer.Cancelled += consumer => Dispose();
                 var status = internalConsumer.StartConsuming(connection, queue, onMessage, configuration);
-                if (status == StartConsumingStatus.Failed)
+                if (status == StartConsumingStatus.Succeed)
+                    isStarted = true;
+                else
                 {
-                    object value;
                     internalConsumer.Dispose();
+                    object value;
                     internalConsumers.TryRemove(internalConsumer, out value);
-                    LeaveExclusiveArea(queue);
                 }
             }
         }
 
         private void ConnectionOnDisconnected()
         {
-            internalConsumerFactory.OnDisconnected();
-            internalConsumers.Clear();
-            LeaveExclusiveArea(queue);
+            lock (syncLock)
+            {
+                isStarted = false;
+                internalConsumers.Clear();
+                internalConsumerFactory.OnDisconnected();
+            }
         }
 
         private void ConnectionOnConnected()
         {
-            StartConsumingInternal();
-        }
-
-        private static bool TryEnterExclusiveArea(IQueue queue)
-        {
-            return ExclusiveQueueArea.TryAdd(queue.Name, null);
-        }
-
-        private static void LeaveExclusiveArea(IQueue queue)
-        {
-            object value;
-            ExclusiveQueueArea.TryRemove(queue.Name, out value);
+            StartConsumer();
         }
 
         private bool disposed = false;
         private readonly Timer timer;
-        
+
         public void Dispose()
         {
-            if (disposed) return;
+            if (disposed)
+                return;
             disposed = true;
             timer.Dispose();
-            LeaveExclusiveArea(queue);
             eventBus.Publish(new StoppedConsumingEvent(this));
-
             foreach (var cancelSubscription in eventCancellations)
             {
                 cancelSubscription();
             }
-
             foreach (var internalConsumer in internalConsumers.Keys)
             {
                 internalConsumer.Dispose();
