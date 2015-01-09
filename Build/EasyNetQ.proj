@@ -45,7 +45,7 @@
     <Target Name="Merge" DependsOnTargets="Build">
       <Exec 
           WorkingDirectory="$(OutputDir)" 
-          Command="$(ILRepack) /internalize /out:$(OutputDir)\EasyNetQ.dll $(OutputDir)\EasyNetQ.dll $(OutputDir)\Newtonsoft.Json.dll" />
+          Command="$(ILRepack) /internalize /targetplatform:v4 /out:$(OutputDir)\EasyNetQ.dll $(OutputDir)\EasyNetQ.dll $(OutputDir)\Newtonsoft.Json.dll" />
     </Target>
 
     <!-- Packaging -->
