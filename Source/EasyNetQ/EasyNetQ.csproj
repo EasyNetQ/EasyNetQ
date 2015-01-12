@@ -218,9 +218,7 @@
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
-    <CreateItem Include="@(ReferencePath)" Condition="'%(ReferencePath.ILMerge)'=='True'">
-      <Output TaskParameter="Include" ItemName="ILMergeAssemblies" />
-    </CreateItem>
-    <Exec Command="..\Packages\ilmerge.2.13.0307\ILMerge.exe /Closed /Internalize /Lib:$(OutputPath) /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(ILMergeAssemblies->'&quot;%(FullPath)&quot;', ' ')" />
+      <!-- /internalize /targetplatform:v4 /out:$(OutputPath)\EasyNetQ.dll $(OutputPath)\EasyNetQ.dll $(OutputPath)\Newtonsoft.Json.dll -->
+    <Exec Command="..\..\Tools\ILRepack\ILRepack.exe /internalize /targetplatform:v4 /out:$(OutputPath)\EasyNetQ.dll $(OutputPath)\EasyNetQ.dll $(OutputPath)\Newtonsoft.Json.dll" />
   </Target>
 </Project>
