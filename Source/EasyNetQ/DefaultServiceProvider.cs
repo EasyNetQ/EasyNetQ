@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace EasyNetQ
@@ -12,10 +12,10 @@ namespace EasyNetQ
     /// </summary>
     public class DefaultServiceProvider : IContainer
     {
-        private readonly IDictionary<Type, object> factories = new Dictionary<Type, object>();
-        private readonly IDictionary<Type, Type> registrations = new Dictionary<Type, Type>();
-
-        private readonly IDictionary<Type, object> instances = new Dictionary<Type, object>();
+        private readonly object syncLock = new object();
+        private readonly ConcurrentDictionary<Type, object> factories = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, Type> registrations = new ConcurrentDictionary<Type, Type>();
+        private readonly ConcurrentDictionary<Type, object> instances = new ConcurrentDictionary<Type, object>();
 
         private bool ServiceIsRegistered(Type serviceType)
         {
@@ -26,46 +26,49 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(serviceCreator, "serviceCreator");
 
-            var serivceType = typeof (TService);
-
-            // first to register wins
-            if (ServiceIsRegistered(serivceType)) return this;
-
-            factories.Add(serivceType, serviceCreator);
-            return this;
+            lock (syncLock)
+            {
+                var serviceType = typeof(TService);
+                if (ServiceIsRegistered(serviceType))
+                    return this;
+                factories.TryAdd(serviceType, serviceCreator);
+                return this;
+            }
         }
 
         public virtual TService Resolve<TService>() where TService : class
         {
-            var serviceType = typeof (TService);
-
-            if (!ServiceIsRegistered(serviceType))
+            var serviceType = typeof(TService);
+            object service;
+            if (instances.TryGetValue(serviceType, out service))
+                return (TService)service;
+            lock (syncLock)
             {
-                throw new EasyNetQException("No service of type {0} has been registered", serviceType.Name);
-            }
+                if (instances.TryGetValue(serviceType, out service))
+                    return (TService)service;
 
-            if (!instances.ContainsKey(serviceType))
-            {
                 if (registrations.ContainsKey(serviceType))
                 {
                     var implementationType = registrations[serviceType];
-                    var service = CreateServiceInstance(implementationType);
-                    instances.Add(serviceType, service);
+                    service = CreateServiceInstance(implementationType);
+                    instances.TryAdd(serviceType, service);
                 }
-
-                if (factories.ContainsKey(serviceType))
+                else if (factories.ContainsKey(serviceType))
                 {
-                    var service = ((Func<IServiceProvider, TService>)factories[serviceType])(this);
-                    instances.Add(serviceType, service);
+                    service = ((Func<IServiceProvider, TService>)factories[serviceType])(this);
+                    instances.TryAdd(serviceType, service);
                 }
+                else
+                {
+                    throw new EasyNetQException("No service of type {0} has been registered", serviceType.Name);
+                }
+                return (TService)service;
             }
-
-            return (TService)instances[serviceType];
         }
 
         public object Resolve(Type serviceType)
         {
-            return typeof (DefaultServiceProvider)
+            return typeof(DefaultServiceProvider)
                 .GetMethod("Resolve", new Type[0])
                 .MakeGenericMethod(serviceType)
                 .Invoke(this, new object[0]);
@@ -85,29 +88,33 @@ namespace EasyNetQ
 
         public IServiceRegister Register<TService, TImplementation>()
             where TService : class
-            where TImplementation : class, TService 
+            where TImplementation : class, TService
         {
-            var serviceType = typeof (TService);
-            var implementationType = typeof (TImplementation);
-
-            //  first to register wins
-            if (ServiceIsRegistered(serviceType)) return this;
-
-            if (!serviceType.IsAssignableFrom(implementationType))
+            lock (syncLock)
             {
-                throw new EasyNetQException("Component {0} does not implement service interface {1}",
-                    implementationType.Name, serviceType.Name);
-            }
+                var serviceType = typeof(TService);
+                var implementationType = typeof(TImplementation);
 
-            var constructors = implementationType.GetConstructors();
-            if (constructors.Length != 1)
-            {
-                throw new EasyNetQException("An EasyNetQ service must have one and one only constructor. " +
-                    "Service {0} has {1}", implementationType.Name, constructors.Length.ToString());
-            }
+                if (ServiceIsRegistered(serviceType))
+                    return this;
 
-            registrations.Add(serviceType, implementationType);
-            return this;
+                if (!serviceType.IsAssignableFrom(implementationType))
+                {
+                    throw new EasyNetQException("Component {0} does not implement service interface {1}",
+                        implementationType.Name, serviceType.Name);
+                }
+
+                var constructors = implementationType.GetConstructors();
+                if (constructors.Length != 1)
+                {
+                    throw new EasyNetQException("An EasyNetQ service must have one and one only constructor. " +
+                                                "Service {0} has {1}", implementationType.Name,
+                        constructors.Length.ToString());
+                }
+
+                registrations.TryAdd(serviceType, implementationType);
+                return this;
+            }
         }
     }
 }
