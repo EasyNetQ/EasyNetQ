@@ -2,10 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.40.0.0")]
+[assembly: AssemblyVersion("0.40.1.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+
+// 0.40.1.0 Fix concurrent bugs in DefaultServiceProvider
 // 0.40.0.0 Exclusive Consumer
 // 0.39.6.0 Fix enable recreating of exchangeTask if it is faulted
 // 0.39.5.0 Fix concurrent bugs in EventBus
