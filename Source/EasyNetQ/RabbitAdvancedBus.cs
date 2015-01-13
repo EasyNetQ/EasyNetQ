@@ -473,7 +473,7 @@ namespace EasyNetQ
                 var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
                 if (message.MessageType == typeof (T))
                 {
-                    return new BasicGetResult<T>(message.Message);
+                    return new BasicGetResult<T>((IMessage<T>)message.Message);
                 }
                 else
                 {

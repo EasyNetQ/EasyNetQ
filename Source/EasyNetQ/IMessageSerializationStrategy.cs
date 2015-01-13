@@ -29,6 +29,6 @@ namespace EasyNetQ
         }
 
         public Type MessageType { get; private set; }
-        public dynamic Message { get; private set; }
+        public IMessage<object> Message { get; private set; }
     }
 }
