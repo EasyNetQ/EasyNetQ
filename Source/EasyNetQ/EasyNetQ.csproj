@@ -158,6 +158,7 @@
     <Compile Include="Producer\IPersistentChannelFactory.cs" />
     <Compile Include="Producer\IPublisher.cs" />
     <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
+    <Compile Include="Producer\IResponderConfiguration.cs" />
     <Compile Include="Producer\IRpc.cs" />
     <Compile Include="Producer\ISendReceive.cs" />
     <Compile Include="Producer\PersistentChannel.cs" />
@@ -218,7 +219,7 @@
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
-      <!-- /internalize /targetplatform:v4 /out:$(OutputPath)\EasyNetQ.dll $(OutputPath)\EasyNetQ.dll $(OutputPath)\Newtonsoft.Json.dll -->
+    <!-- /internalize /targetplatform:v4 /out:$(OutputPath)\EasyNetQ.dll $(OutputPath)\EasyNetQ.dll $(OutputPath)\Newtonsoft.Json.dll -->
     <Exec Command="..\..\Tools\ILRepack\ILRepack.exe /internalize /targetplatform:v4 /out:$(OutputPath)\EasyNetQ.dll $(OutputPath)\EasyNetQ.dll $(OutputPath)\Newtonsoft.Json.dll" />
   </Target>
 </Project>
