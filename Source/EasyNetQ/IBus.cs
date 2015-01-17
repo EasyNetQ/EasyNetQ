@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ
 {
@@ -154,6 +155,21 @@ namespace EasyNetQ
             where TResponse : class;
 
         /// <summary>
+        /// Responds to an RPC request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="responder">
+        /// A function to run when the request is received. It should return the response.
+        /// </param>
+        /// <param name="configure">
+        /// A function for responder configuration
+        /// </param>
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
         /// Responds to an RPC request asynchronously.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
@@ -162,6 +178,21 @@ namespace EasyNetQ
         /// A function to run when the request is received.
         /// </param>
         IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        /// <param name="configure">
+        /// A function for responder configuration
+        /// </param>
+        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
             where TRequest : class
             where TResponse : class;
 

@@ -28,5 +28,17 @@ namespace EasyNetQ.Producer
         IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class;
+
+
+        /// <summary>
+        /// Set up a responder for an RPC service.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="responder">A function that performs the response</param>
+        /// <param name="configure">A function that performs the configuration</param>
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
+            where TRequest : class
+            where TResponse : class;
     }
 }

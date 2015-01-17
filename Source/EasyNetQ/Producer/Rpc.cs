@@ -13,6 +13,7 @@ namespace EasyNetQ.Producer
     /// </summary>
     public class Rpc : IRpc
     {
+        private readonly ConnectionConfiguration connectionConfiguration;
         protected readonly IAdvancedBus advancedBus;
         protected readonly IConventions conventions;
         protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
@@ -29,6 +30,7 @@ namespace EasyNetQ.Producer
         protected const string ExceptionMessageKey = "ExceptionMessage";
 
         public Rpc(
+            ConnectionConfiguration connectionConfiguration,
             IAdvancedBus advancedBus,
             IEventBus eventBus,
             IConventions conventions,
@@ -36,6 +38,7 @@ namespace EasyNetQ.Producer
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             ITimeoutStrategy timeoutStrategy)
         {
+            Preconditions.CheckNotNull(connectionConfiguration, "configuration");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
@@ -43,6 +46,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
 
+            this.connectionConfiguration = connectionConfiguration;
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
@@ -197,7 +201,15 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class
         {
+            return Respond(responder, c => { });
+        }
+
+        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        {
             Preconditions.CheckNotNull(responder, "responder");
+            Preconditions.CheckNotNull(configure, "configure");
+            var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
+            configure(configuration);
 
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
@@ -205,7 +217,8 @@ namespace EasyNetQ.Producer
             var queue = advancedBus.QueueDeclare(routingKey);
             advancedBus.Bind(exchange, queue, routingKey);
 
-            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage));
+            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
+                c => c.WithPrefetchCount(configuration.PrefetchCount));
         }
 
         protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage) 
