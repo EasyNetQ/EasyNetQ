@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace EasyNetQ
 {
@@ -21,10 +20,8 @@ namespace EasyNetQ
         public ulong GetTimeoutSeconds(Type messageType)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
-            var timeoutAttribute = messageType.GetAttributes<TimeoutSecondsAttribute>().FirstOrDefault();
-            if (timeoutAttribute != null)
-                return timeoutAttribute.Timeout;
-            return connectionConfiguration.Timeout;
+            var timeoutAttribute = messageType.GetAttribute<TimeoutSecondsAttribute>();
+            return timeoutAttribute != null ? timeoutAttribute.Timeout : connectionConfiguration.Timeout;
         }
     }
 }

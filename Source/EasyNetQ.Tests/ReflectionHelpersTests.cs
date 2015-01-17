@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
-        [ExpectedException(typeof (Exception))]
+        [ExpectedException(typeof(MissingMethodException))]
         public void ShouldFailToCreateClassWithoutDefaultConstructor()
         {
             ReflectionHelpers.CreateInstance<ClassWithoutDefaultConstuctor>();
@@ -57,14 +57,14 @@ namespace EasyNetQ.Tests
         [Test]
         public void ShouldGetAttributes()
         {
-            Assert.IsTrue(typeof (TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
-            Assert.IsTrue(typeof (TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
+            Assert.IsTrue(typeof(TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
+            Assert.IsTrue(typeof(TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
         }
 
         [Test, Explicit("Fails on build server")]
         public void ShouldPerformFasterThanGetCustomAttributes()
         {
-            var type = typeof (TestAttributedClass);
+            var type = typeof(TestAttributedClass);
             // warmup
             for (var i = 0; i < 10; ++i)
             {
@@ -97,12 +97,19 @@ namespace EasyNetQ.Tests
             Console.WriteLine(getAttributesTime);
         }
 
+        [Test]
+        public void ShouldGetAttribute()
+        {
+            Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
+            Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class OneTestAttribute :Attribute
+    public class OneTestAttribute : Attribute
     {
-        public int Value {
+        public int Value
+        {
             get { return 1; }
         }
     }
@@ -110,7 +117,8 @@ namespace EasyNetQ.Tests
     [AttributeUsage(AttributeTargets.Class)]
     public class AnotherTestAttribute : Attribute
     {
-        public int Value {
+        public int Value
+        {
             get { return 1; }
         }
     }
