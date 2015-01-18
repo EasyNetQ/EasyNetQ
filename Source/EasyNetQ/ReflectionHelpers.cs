@@ -10,25 +10,25 @@ namespace EasyNetQ
     {
         private static readonly ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>> _attributes = new ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>>();
 
+        private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
+        {
+            return _attributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
+                                                    .Cast<Attribute>()
+                                                    .GroupBy(attr => attr.GetType())
+                                                    .ToDictionary(group => group.Key, group => group.ToArray()));
+        }
+
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this Type type) where TAttribute : Attribute
         {
-            var typeAttributeDictionary = _attributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
-                                                              .Cast<Attribute>()
-                                                              .GroupBy(attr => attr.GetType())
-                                                              .ToDictionary(group => group.Key, group => group.ToArray()));
             Attribute[] attributes;
-            return typeAttributeDictionary.TryGetValue(typeof(TAttribute), out attributes) ? attributes.Cast<TAttribute>().ToArray() : new TAttribute[0];
-
+            return GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out attributes) ? 
+                attributes.Cast<TAttribute>().ToArray() : new TAttribute[0];
         }
 
         public static TAttribute GetAttribute<TAttribute>(this Type type) where TAttribute : Attribute
         {
-            var typeAttributeDictionary = _attributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
-                                                                           .Cast<Attribute>()
-                                                                           .GroupBy(attr => attr.GetType())
-                                                                           .ToDictionary(group => group.Key, group => group.ToArray()));
             Attribute[] attributes;
-            if (typeAttributeDictionary.TryGetValue(typeof(TAttribute), out attributes) && attributes.Length > 0)
+            if (GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out attributes) && attributes.Length > 0)
             {
                 return (TAttribute)attributes[0];
             }
