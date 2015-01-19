@@ -229,7 +229,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
         private void AssertMessageDeserializedCorrectly(DeserializedMessage message, string expectedBodyText, Type expectedMessageType, Action<MessageProperties> assertMessagePropertiesCorrect )
         {
-            Assert.That(((MyMessageV2)message.Message.Body).Text, Is.EqualTo(expectedBodyText), "Deserialized message body text does not match expected value");
+            Assert.That(((MyMessage)message.Message.Body).Text, Is.EqualTo(expectedBodyText), "Deserialized message body text does not match expected value");
             Assert.That(message.MessageType, Is.EqualTo(expectedMessageType), "Deserialized message type does not match expected value");
 
             assertMessagePropertiesCorrect( message.Message.Properties );
