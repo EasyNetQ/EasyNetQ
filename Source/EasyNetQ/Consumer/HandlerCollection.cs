@@ -7,9 +7,6 @@ namespace EasyNetQ.Consumer
 {
     public class HandlerCollection : IHandlerCollection
     {
-//        private readonly IDictionary<Type, Func<IMessage<object>, MessageReceivedInfo, Task>> handlers = 
-//            new Dictionary<Type, Func<IMessage<object>, MessageReceivedInfo, Task>>();
-
         private readonly IDictionary<Type, object> handlers = new Dictionary<Type, object>(); 
         
         private readonly IEasyNetQLogger logger;
@@ -47,7 +44,6 @@ namespace EasyNetQ.Consumer
         // _is_ invoked by the GetHandler(Type messsageType) method below by reflection.
         public Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>() where T : class
         {
-            // return (Func<IMessage<T>, MessageReceivedInfo, Task>)GetHandler(typeof(T));
             var messageType = typeof (T);
 
             if (handlers.ContainsKey(messageType))
@@ -71,13 +67,15 @@ namespace EasyNetQ.Consumer
             return (message, info) => Task.Factory.StartNew(() => { });
         }
 
-        public dynamic GetHandler(Type messageType)
+        public Func<IMessage<object>, MessageReceivedInfo, Task> GetHandler(Type messageType)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
 
-            var getHandlerGenericMethod = GetType().GetMethod("GetHandler", new Type[0]).MakeGenericMethod(messageType);
+            var getHandlerGenericMethod = GetType().GetMethod("GetHandler", Type.EmptyTypes).MakeGenericMethod(messageType);
+            
+            var func = (Delegate)getHandlerGenericMethod.Invoke(this, null);
 
-            return getHandlerGenericMethod.Invoke(this, new object[0]);
+            return (message, info) => (Task)func.Method.Invoke(func.Target, new object[] { message, info });
         }
 
         public bool ThrowOnNoMatchingHandler { get; set; }

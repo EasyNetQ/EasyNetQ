@@ -52,6 +52,6 @@ namespace EasyNetQ.Consumer
         /// </summary>
         /// <param name="messageType">The type of handler to return</param>
         /// <returns>The handler</returns>
-        dynamic GetHandler(Type messageType);
+        Func<IMessage<object>, MessageReceivedInfo, Task> GetHandler(Type messageType);
     }
 }

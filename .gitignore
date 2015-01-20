@@ -32,3 +32,6 @@ packages
 
 # Ignore NuGet binary
 Source/.nuget/NuGet.exe
+
+# Ignore Visual Studio profile report
+*.vsp

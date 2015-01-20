@@ -91,7 +91,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var deserializedMessage = serializationStrategy.DeserializeMessage( serializedMessage.Properties, serializedMessage.Body );
 
             Assert.That( deserializedMessage.Message.Body.GetType(), Is.EqualTo( message.Body.GetType() ) );
-            Assert.That( deserializedMessage.Message.Body.Text, Is.EqualTo( message.Body.Text ) );
+            Assert.That( ((MyMessage)deserializedMessage.Message.Body).Text, Is.EqualTo( message.Body.Text ) );
         }
 
         [Test]
@@ -188,10 +188,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             serializedMessage.Properties.Headers[ AlternativeMessageTypesHeaderKey ] = Encoding.UTF8.GetBytes( alternativeMessageHeader );
 
             var deserializedMessage = serializationStrategy.DeserializeMessage( serializedMessage.Properties, serializedMessage.Body );
-
+            
             Assert.That( deserializedMessage.Message.Body.GetType(), Is.EqualTo( message.Body.GetType() ) );
-            Assert.That( deserializedMessage.Message.Body.Text, Is.EqualTo( message.Body.Text ) );
-            Assert.That( deserializedMessage.Message.Body.Number, Is.EqualTo( message.Body.Number ) );
+            Assert.That( ((MyMessageV2)deserializedMessage.Message.Body).Text, Is.EqualTo( message.Body.Text ) );
+            Assert.That( ((MyMessageV2)deserializedMessage.Message.Body).Number, Is.EqualTo( message.Body.Number ) );
         }
 
         [Test]
@@ -217,8 +217,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
 
             Assert.That( deserializedMessage.Message.Body.GetType(), Is.EqualTo( typeof( MyMessageV2 ) ) );
-            Assert.That( deserializedMessage.Message.Body.Text, Is.EqualTo( message.Body.Text ) );
-            Assert.That( deserializedMessage.Message.Body.Number, Is.EqualTo( message.Body.Number ) );
+            Assert.That( ((MyMessageV2)deserializedMessage.Message.Body).Text, Is.EqualTo( message.Body.Text ) );
+            Assert.That( ((MyMessageV2)deserializedMessage.Message.Body).Number, Is.EqualTo( message.Body.Number ) );
         }
 
         private void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, Action<MessageProperties> assertMessagePropertiesCorrect )
@@ -229,7 +229,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
         private void AssertMessageDeserializedCorrectly(DeserializedMessage message, string expectedBodyText, Type expectedMessageType, Action<MessageProperties> assertMessagePropertiesCorrect )
         {
-            Assert.That(message.Message.Body.Text, Is.EqualTo(expectedBodyText), "Deserialized message body text does not match expected value");
+            Assert.That(((MyMessage)message.Message.Body).Text, Is.EqualTo(expectedBodyText), "Deserialized message body text does not match expected value");
             Assert.That(message.MessageType, Is.EqualTo(expectedMessageType), "Deserialized message type does not match expected value");
 
             assertMessagePropertiesCorrect( message.Message.Properties );
