@@ -1,9 +1,10 @@
 ﻿using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
 using System.Threading;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
+
+// ReSharper disable InconsistentNaming
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -46,7 +47,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
             Deliver(new Dog());
 
-            countdownEvent.Wait(1000);
+            countdownEvent.Wait(5000);
         }
 
         public void Deliver<T>(T message) where T : class
