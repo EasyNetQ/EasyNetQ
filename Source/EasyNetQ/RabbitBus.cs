@@ -203,7 +203,7 @@ namespace EasyNetQ
             where TRequest : class
             where TResponse : class
         {
-            return Respond(responder, c => { });
+            return RespondAsync(responder, c => { });
         }
 
         public IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
