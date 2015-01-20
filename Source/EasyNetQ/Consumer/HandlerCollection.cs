@@ -70,10 +70,10 @@ namespace EasyNetQ.Consumer
         public Func<IMessage<object>, MessageReceivedInfo, Task> GetHandler(Type messageType)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
+
+            var getHandlerGenericMethod = GetType().GetMethod("GetHandler", Type.EmptyTypes).MakeGenericMethod(messageType);
             
-            var getHandlerGenericMethod = GetType().GetMethod("GetHandler", new Type[0]).MakeGenericMethod(messageType);
-            
-            var func = (Delegate)getHandlerGenericMethod.Invoke(this, new object[0]);
+            var func = (Delegate)getHandlerGenericMethod.Invoke(this, null);
 
             return (message, info) => (Task)func.Method.Invoke(func.Target, new object[] { message, info });
         }
