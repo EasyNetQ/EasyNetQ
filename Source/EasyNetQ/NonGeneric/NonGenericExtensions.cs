@@ -92,8 +92,7 @@ namespace EasyNetQ.NonGeneric
             var messageDeliveryModeStrategy = bus.Advanced.Container.Resolve<IMessageDeliveryModeStrategy>();
             
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
-            var easyNetQMessage = Message.CreateInstance(messageType, message);
-
+            var easyNetQMessage = MessageFactory.CreateInstance(messageType, message);
             easyNetQMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1);
 
             return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);

@@ -21,8 +21,11 @@ namespace EasyNetQ
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this Type type) where TAttribute : Attribute
         {
             Attribute[] attributes;
-            return GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out attributes) ? 
-                attributes.Cast<TAttribute>().ToArray() : new TAttribute[0];
+            if (GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out attributes))
+            {
+                return attributes.Cast<TAttribute>().ToArray();
+            }
+            return new TAttribute[0];
         }
 
         public static TAttribute GetAttribute<TAttribute>(this Type type) where TAttribute : Attribute

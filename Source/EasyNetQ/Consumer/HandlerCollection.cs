@@ -7,11 +7,9 @@ namespace EasyNetQ.Consumer
 {
     public class HandlerCollection : IHandlerCollection
     {
-//        private readonly IDictionary<Type, Func<IMessage<object>, MessageReceivedInfo, Task>> handlers = 
-//            new Dictionary<Type, Func<IMessage<object>, MessageReceivedInfo, Task>>();
+        private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, Task>> handlers = 
+            new Dictionary<Type, Func<IMessage, MessageReceivedInfo, Task>>();
 
-        private readonly IDictionary<Type, object> handlers = new Dictionary<Type, object>(); 
-        
         private readonly IEasyNetQLogger logger;
 
         public HandlerCollection(IEasyNetQLogger logger)
@@ -31,7 +29,7 @@ namespace EasyNetQ.Consumer
                 throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);
             }
 
-            handlers.Add(typeof(T), handler);
+            handlers.Add(typeof (T), (iMessage, messageReceivedInfo) => handler((IMessage<T>)iMessage, messageReceivedInfo));
             return this;
         }
 
@@ -43,23 +41,30 @@ namespace EasyNetQ.Consumer
             return this;
         }
 
-        // NOTE: refactoring tools might suggest this method is never invoked. Ignore them it
-        // _is_ invoked by the GetHandler(Type messsageType) method below by reflection.
         public Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>() where T : class
         {
-            // return (Func<IMessage<T>, MessageReceivedInfo, Task>)GetHandler(typeof(T));
-            var messageType = typeof (T);
+            return GetHandler(typeof(T));
+        }
+
+        public Func<IMessage, MessageReceivedInfo, Task> GetHandler(Type messageType)
+        {
+            Func<IMessage, MessageReceivedInfo, Task> func;
+            if (handlers.TryGetValue(messageType, out func))
+            {
+                return func;
+            }
 
             if (handlers.ContainsKey(messageType))
             {
-                return (Func<IMessage<T>, MessageReceivedInfo, Task>)handlers[messageType];
+                return handlers[messageType];
             }
 
             // no exact handler match found, so let's see if we can find a handler that
             // handles a supertype of the consumed message.
-            foreach (var handlerType in handlers.Keys.Where(type => type.IsAssignableFrom(messageType)))
+            var handlerType = handlers.Keys.FirstOrDefault(type => type.IsAssignableFrom(messageType));
+            if (handlerType != null)
             {
-                return (Func<IMessage<T>, MessageReceivedInfo, Task>)handlers[handlerType];
+                return handlers[handlerType];
             }
 
             if (ThrowOnNoMatchingHandler)
@@ -69,15 +74,6 @@ namespace EasyNetQ.Consumer
             }
 
             return (message, info) => Task.Factory.StartNew(() => { });
-        }
-
-        public dynamic GetHandler(Type messageType)
-        {
-            Preconditions.CheckNotNull(messageType, "messageType");
-
-            var getHandlerGenericMethod = GetType().GetMethod("GetHandler", new Type[0]).MakeGenericMethod(messageType);
-
-            return getHandlerGenericMethod.Invoke(this, new object[0]);
         }
 
         public bool ThrowOnNoMatchingHandler { get; set; }

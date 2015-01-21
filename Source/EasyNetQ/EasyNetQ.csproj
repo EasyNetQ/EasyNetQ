@@ -140,7 +140,7 @@
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Loggers\DelegateLogger.cs" />
     <Compile Include="Loggers\NullLogger.cs" />
-    <Compile Include="Message.cs" />
+    <Compile Include="MessageFactory.cs" />
     <Compile Include="MessageReceivedInfo.cs" />
     <Compile Include="MessageProperties.cs" />
     <Compile Include="MessageReturnedInfo.cs" />

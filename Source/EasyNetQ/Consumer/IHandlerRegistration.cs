@@ -13,7 +13,7 @@ namespace EasyNetQ.Consumer
         /// <returns></returns>
         IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, Task> handler)
             where T : class;
-
+        
         /// <summary>
         /// Add a synchronous handler
         /// </summary>
@@ -52,6 +52,6 @@ namespace EasyNetQ.Consumer
         /// </summary>
         /// <param name="messageType">The type of handler to return</param>
         /// <returns>The handler</returns>
-        dynamic GetHandler(Type messageType);
+        Func<IMessage, MessageReceivedInfo, Task> GetHandler(Type messageType);
     }
 }

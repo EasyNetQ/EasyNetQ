@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
             Deliver(new Dog());
 
-            countdownEvent.Wait(1000);
+            countdownEvent.Wait(3000);
         }
 
         public void Deliver<T>(T message) where T : class
