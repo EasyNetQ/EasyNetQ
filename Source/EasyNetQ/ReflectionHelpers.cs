@@ -58,12 +58,33 @@ namespace EasyNetQ
                     var constructorInfo = typeof(T).GetConstructor(Type.EmptyTypes);
                     if (constructorInfo == null)
                     {
-                        throw new MissingMethodException("The type that is specified for T does not have a parameterless constructor.");
+                        throw new MissingMethodException("The type that is specified for T does not have a public parameterless constructor.");
                     }
                     factory = Expression.Lambda<Func<T>>(Expression.New(constructorInfo)).Compile();
                 }
                 return factory();
             }
+        }
+
+        private static readonly ConcurrentDictionary<Type, Func<object>> _parameterlessConstructorMap =
+            new ConcurrentDictionary<Type, Func<object>>();
+
+        /// <summary>
+        /// A factory method that creates an instance of the specified <see cref="Type"/> using a public parameterless constructor.
+        /// If no such constructor is found, a <see cref="MissingMethodException"/> will be thrown.
+        /// </summary>
+        public static object CreateInstance(Type objectType)
+        {
+            var ctor = _parameterlessConstructorMap.GetOrAdd(objectType, t =>
+            {
+                var innerCtor = objectType.GetConstructor(Type.EmptyTypes);
+                if (innerCtor == null)
+                {
+                    throw new MissingMethodException(String.Format("Type {0} doesn't have a public parameterless constructor.", objectType));
+                }
+                return () => innerCtor.Invoke(null);
+            });
+            return ctor();
         }
 
         private static readonly ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>> _singleParameterConstructorMap = 
