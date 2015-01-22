@@ -66,27 +66,6 @@ namespace EasyNetQ
             }
         }
 
-        private static readonly ConcurrentDictionary<Type, Func<object>> _parameterlessConstructorMap =
-            new ConcurrentDictionary<Type, Func<object>>();
-
-        /// <summary>
-        /// A factory method that creates an instance of the specified <see cref="Type"/> using a public parameterless constructor.
-        /// If no such constructor is found, a <see cref="MissingMethodException"/> will be thrown.
-        /// </summary>
-        public static object CreateInstance(Type objectType)
-        {
-            var ctor = _parameterlessConstructorMap.GetOrAdd(objectType, t =>
-            {
-                var innerCtor = objectType.GetConstructor(Type.EmptyTypes);
-                if (innerCtor == null)
-                {
-                    throw new MissingMethodException(String.Format("Type {0} doesn't have a public parameterless constructor.", objectType));
-                }
-                return () => innerCtor.Invoke(null);
-            });
-            return ctor();
-        }
-
         private static readonly ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>> _singleParameterConstructorMap = 
             new ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>>();
         private static readonly Func<Type, Type, Func<object, object>> _singleParameterConstructorMapUpdate = ((objectType, argType) =>
@@ -97,7 +76,8 @@ namespace EasyNetQ
                 throw new MissingMethodException(String.Format("Type {0} doesn't have a public constructor that take one parameter of type {1}."
                                                                , objectType, argType));
             }
-            return obj => ctor.Invoke(new[] { obj });
+            var paramExp = Expression.Parameter(typeof(object), "arg");
+            return Expression.Lambda<Func<object, object>>(Expression.New(ctor, new Expression[] { Expression.Convert(paramExp, argType) }), paramExp).Compile();
         });
 
         /// <summary>
@@ -132,7 +112,12 @@ namespace EasyNetQ
                 throw new MissingMethodException(String.Format("Type {0} doesn't have a public constructor that take two parametesr of type {1} and {2}.",
                                                                objectType, firstArgType, secondArgType));
             }
-            return (arg1, arg2) => ctor.Invoke(new[] { arg1, arg2 });
+            var paramExp1 = Expression.Parameter(typeof(object), "firstArg");
+            var paramExp2 = Expression.Parameter(typeof(object), "secondArg");
+            var argsExp = new Expression[2];
+            argsExp[0] = Expression.Convert(paramExp1, firstArgType);
+            argsExp[1] = Expression.Convert(paramExp2, secondArgType);
+            return Expression.Lambda<Func<object, object, object>>(Expression.New(ctor, argsExp), paramExp1, paramExp2).Compile();
         });
 
         /// <summary>
