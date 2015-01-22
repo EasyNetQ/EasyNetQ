@@ -7,7 +7,7 @@ namespace EasyNetQ.Consumer
 {
     public class HandlerCollection : IHandlerCollection
     {
-        private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, Task>> handlers = 
+        private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, Task>> handlers =
             new Dictionary<Type, Func<IMessage, MessageReceivedInfo, Task>>();
 
         private readonly IEasyNetQLogger logger;
@@ -24,12 +24,12 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(handler, "handler");
 
-            if (handlers.ContainsKey(typeof (T)))
+            if (handlers.ContainsKey(typeof(T)))
             {
                 throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);
             }
 
-            handlers.Add(typeof (T), (iMessage, messageReceivedInfo) => handler((IMessage<T>)iMessage, messageReceivedInfo));
+            handlers.Add(typeof(T), (iMessage, messageReceivedInfo) => handler((IMessage<T>)iMessage, messageReceivedInfo));
             return this;
         }
 
@@ -52,11 +52,6 @@ namespace EasyNetQ.Consumer
             if (handlers.TryGetValue(messageType, out func))
             {
                 return func;
-            }
-
-            if (handlers.ContainsKey(messageType))
-            {
-                return handlers[messageType];
             }
 
             // no exact handler match found, so let's see if we can find a handler that
