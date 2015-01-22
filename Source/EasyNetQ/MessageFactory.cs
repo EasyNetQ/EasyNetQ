@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 
 namespace EasyNetQ
 {
@@ -8,22 +9,20 @@ namespace EasyNetQ
     /// </summary>
     public static class MessageFactory
     {
+        private static readonly ConcurrentDictionary<Type, Type> _genericMessageTypesMap = new ConcurrentDictionary<Type, Type>();
+
         public static IMessage CreateInstance(Type messageType, object body)
         {
-            var constructor = typeof(Message<>).MakeGenericType(messageType).GetConstructor(new[] { messageType });
-// ReSharper disable PossibleNullReferenceException
-            var message = constructor.Invoke(new[] { body }) as IMessage;
+            var genericType = _genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
+            var message = ReflectionHelpers.CreateInstance(genericType, body);
             return (IMessage)message;
-// ReSharper restore PossibleNullReferenceException
         }
 
         public static IMessage CreateInstance(Type messageType, object body, MessageProperties properties)
         {
-            var constructor = typeof(Message<>).MakeGenericType(messageType).GetConstructor(new[] { messageType, typeof(MessageProperties) });
-// ReSharper disable PossibleNullReferenceException
-            var message = constructor.Invoke(new[] { body, properties });
+            var genericType = _genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
+            var message = ReflectionHelpers.CreateInstance(genericType, body, properties);
             return (IMessage)message;
-// ReSharper restore PossibleNullReferenceException
         }
     }
 }

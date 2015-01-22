@@ -38,6 +38,10 @@ namespace EasyNetQ
             return default(TAttribute);
         }
 
+        /// <summary>
+        /// A factory method that creates an instance of <paramref name="{T}"/> using a public parameterless constructor.
+        /// If no such constructor is found on <paramref name="{T}"/>, a <see cref="MissingMethodException"/> will be thrown.
+        /// </summary>
         public static T CreateInstance<T>()
         {
             return DefaultFactories<T>.Get();
@@ -60,6 +64,93 @@ namespace EasyNetQ
                 }
                 return factory();
             }
+        }
+
+        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>> _singleParameterConstructorMap = 
+            new ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>>();
+        private static readonly Func<Type, Type, Func<object, object>> _singleParameterConstructorMapUpdate = ((objectType, argType) =>
+        {
+            var ctor = objectType.GetConstructor(new[] { argType });
+            if (ctor == null)
+            {
+                throw new MissingMethodException(String.Format("Type {0} doesn't have a public constructor that take one parameter of type {1}."
+                                                               , objectType, argType));
+            }
+            return obj => ctor.Invoke(new[] { obj });
+        });
+
+        /// <summary>
+        /// A factory method that creates an instance of the specified <see cref="Type"/>
+        /// using a public constructor that accepts one argument of the type of <paramref name="arg"/>.
+        /// If no such constructor is found on type of <paramref name="objectType"/>, a <see cref="MissingMethodException"/> will be thrown.
+        /// </summary>
+        public static object CreateInstance(Type objectType, object arg)
+        {
+            var argType = arg.GetType();
+            var constructors = _singleParameterConstructorMap.GetOrAdd(objectType, t => new Dictionary<Type, Func<object, object>>
+            {
+                { argType, _singleParameterConstructorMapUpdate(objectType, argType) }
+            });
+
+            Func<object, object> ctor;
+            if (!constructors.TryGetValue(argType, out ctor))
+            {
+                ctor = _singleParameterConstructorMapUpdate(objectType, argType);
+                constructors.Add(argType, ctor);
+            }
+            return ctor(arg);
+        }
+
+        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Dictionary<Type, Func<object, object, object>>>> _dualParameterConstructorMap =
+            new ConcurrentDictionary<Type, Dictionary<Type, Dictionary<Type, Func<object, object, object>>>>();
+        private static readonly Func<Type, Type, Type, Func<object, object, object>> _dualParameterConstructorMapUpdate = ((objectType, firstArgType, secondArgType) =>
+        {
+            var ctor = objectType.GetConstructor(new[] { firstArgType, secondArgType });
+            if (ctor == null)
+            {
+                throw new MissingMethodException(String.Format("Type {0} doesn't have a public constructor that take two parametesr of type {1} and {2}.",
+                                                               objectType, firstArgType, secondArgType));
+            }
+            return (arg1, arg2) => ctor.Invoke(new[] { arg1, arg2 });
+        });
+
+        /// <summary>
+        /// A factory method that creates an instance of the specified <see cref="Type"/>
+        /// using a public constructor that accepts two arguments of the type of <paramref name="firstArg"/> and <paramref name="secondArg"/> in that order.
+        /// If no such constructor is found on type of <paramref name="objectType"/>, a <see cref="MissingMethodException"/> will be thrown.
+        /// </summary>
+        public static object CreateInstance(Type objectType, object firstArg, object secondArg)
+        {
+            var firstArgType = firstArg.GetType();
+            var secondArgType = secondArg.GetType();
+
+            var constructors = _dualParameterConstructorMap.GetOrAdd(objectType, t => new Dictionary<Type, Dictionary<Type, Func<object, object, object>>>
+            {
+                {
+                    firstArgType, new Dictionary<Type, Func<object, object, object>>
+                    {
+                        { secondArgType, _dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType) }
+                    }
+                }
+            });
+
+            Dictionary<Type, Func<object, object, object>> firstArgConstructorMap;
+            if (!constructors.TryGetValue(firstArgType, out firstArgConstructorMap))
+            {
+                firstArgConstructorMap = new Dictionary<Type, Func<object, object, object>>
+                {
+                    { secondArgType, _dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType) }
+                };
+                constructors.Add(firstArgType, firstArgConstructorMap);
+            }
+
+            Func<object, object, object> ctor;
+            if (!firstArgConstructorMap.TryGetValue(secondArgType, out ctor))
+            {
+                ctor = _dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType);
+                firstArgConstructorMap.Add(secondArgType, ctor);
+            }
+            return ctor(firstArg, secondArg);
         }
     }
 }
