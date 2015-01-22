@@ -13,6 +13,9 @@ namespace EasyNetQ
 
         public static IMessage CreateInstance(Type messageType, object body)
         {
+            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckNotNull(body, "body");
+
             var genericType = _genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
             var message = ReflectionHelpers.CreateInstance(genericType, body);
             return (IMessage)message;
@@ -20,6 +23,10 @@ namespace EasyNetQ
 
         public static IMessage CreateInstance(Type messageType, object body, MessageProperties properties)
         {
+            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckNotNull(properties, "properties");
+
             var genericType = _genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
             var message = ReflectionHelpers.CreateInstance(genericType, body, properties);
             return (IMessage)message;
