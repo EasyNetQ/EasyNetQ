@@ -218,8 +218,11 @@ namespace EasyNetQ
         /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
-        /// <returns>The queue</returns>
-        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null);
+        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
+        /// <returns>
+        /// The queue
+        /// </returns>
+        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null);
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -233,8 +236,9 @@ namespace EasyNetQ
         /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
+        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null);
+        Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null);
 
 
         /// <summary>
