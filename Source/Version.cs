@@ -7,6 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.40.5.0 Preconditions will check for blank argument name / exception message only when needed
 // 0.40.4.0 Bug fix of Rpc
 // 0.40.3.0 Upgrade to RabbitMQ.Client 3.4.3
 // 0.40.2.0 ReflectionHelpers improvement
