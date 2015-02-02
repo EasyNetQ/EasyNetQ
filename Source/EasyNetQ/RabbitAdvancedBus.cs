@@ -230,12 +230,13 @@ namespace EasyNetQ
             bool autoDelete = false,
             int perQueueTtl = int.MaxValue,
             int expires = int.MaxValue,
-            string deadLetterExchange = null)
+            string deadLetterExchange = null,
+            string deadLetterRoutingKey = null)
         {
-            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueTtl, expires, deadLetterExchange).Result;
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueTtl, expires, deadLetterExchange, deadLetterRoutingKey).Result;
         }
 
-        public Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = Int32.MaxValue, int expires = Int32.MaxValue, string deadLetterExchange = null)
+        public Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = Int32.MaxValue, int expires = Int32.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -258,6 +259,10 @@ namespace EasyNetQ
             if (!string.IsNullOrEmpty(deadLetterExchange))
             {
                 arguments.Add("x-dead-letter-exchange", deadLetterExchange);
+            }
+            if (!string.IsNullOrEmpty(deadLetterRoutingKey))
+            {
+                arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
             }
 
             return clientCommandDispatcher.Invoke(
