@@ -53,11 +53,11 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckNotNull<T>(T value, string name, string message) where T : class
         {
-            CheckNotBlank(name, "name", "name must not be blank");
-            CheckNotBlank(message, "message", "message must not be blank");
-
             if (value == null)
             {
+                CheckNotBlank(name, "name", "name must not be blank");
+                CheckNotBlank(message, "message", "message must not be blank");
+
                 throw new ArgumentNullException(name, message);
             }
         }
@@ -138,11 +138,11 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckAny<T>(IEnumerable<T> collection, string name, string message)
         {
-            CheckNotBlank(name, "name", "name must not be blank");
-            CheckNotBlank(message, "message", "message must not be blank");
-
             if (collection == null || !collection.Any())
             {
+                CheckNotBlank(name, "name", "name must not be blank");
+                CheckNotBlank(message, "message", "message must not be blank");
+
                 throw new ArgumentException(message, name);
             }
         }
@@ -167,11 +167,11 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckTrue(bool value, string name, string message)
         {
-            CheckNotBlank(name, "name", "name must not be blank");
-            CheckNotBlank(message, "message", "message must not be blank");
-
             if (!value)
             {
+                CheckNotBlank(name, "name", "name must not be blank");
+                CheckNotBlank(message, "message", "message must not be blank");
+
                 throw new ArgumentException(message, name);
             }
         }
@@ -196,11 +196,11 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckFalse(bool value, string name, string message)
         {
-            CheckNotBlank(name, "name", "name must not be blank");
-            CheckNotBlank(message, "message", "message must not be blank");
-
             if (value)
             {
+                CheckNotBlank(name, "name", "name must not be blank");
+                CheckNotBlank(message, "message", "message must not be blank");
+
                 throw new ArgumentException(message, name);
             }
         }
@@ -216,10 +216,11 @@ namespace EasyNetQ
 
         public static void CheckTypeMatches(Type expectedType, object value, string name, string message)
         {
-            CheckNotBlank(name, "name", "name must not be blank");
-            CheckNotBlank(message, "message", "message must not be blank");
             if (!expectedType.IsAssignableFrom(value.GetType()))
             {
+                CheckNotBlank(name, "name", "name must not be blank");
+                CheckNotBlank(message, "message", "message must not be blank");
+
                 throw new ArgumentException(message, name);
             }
         }
