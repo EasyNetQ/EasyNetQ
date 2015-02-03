@@ -2,12 +2,14 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.40.3.0")]
+[assembly: AssemblyVersion("0.41.0.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
 // 0.41.0.0 Dynamic removal 
+// 0.40.6.0 Added parameter to set the 'x-dead-letter-routing-key' argument when declaring a queue.
+// 0.40.5.0 Preconditions will check for blank argument name / exception message only when needed
 // 0.40.4.0 Bug fix of Rpc
 // 0.40.3.0 Upgrade to RabbitMQ.Client 3.4.3
 // 0.40.2.0 ReflectionHelpers improvement
