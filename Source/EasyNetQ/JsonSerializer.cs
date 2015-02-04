@@ -15,7 +15,6 @@ namespace EasyNetQ
         public JsonSerializer(ITypeNameSerializer typeNameSerializer)
         {
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
-
             this.typeNameSerializer = typeNameSerializer;
         }
 
@@ -35,9 +34,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(typeName, "typeName");
             Preconditions.CheckNotNull(bytes, "bytes");
-
             var type = typeNameSerializer.DeSerialize(typeName);
-
             return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type, serializerSettings);
         }
     }

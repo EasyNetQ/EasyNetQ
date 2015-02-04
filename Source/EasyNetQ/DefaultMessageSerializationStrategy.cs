@@ -13,26 +13,31 @@ namespace EasyNetQ
             this.correlationIdGenerator = correlationIdGenerator;
         }
 
-        public SerializedMessage SerializeMessage<T>(IMessage<T> message) where T : class
+        public SerializedMessage SerializeMessage(IMessage message)
         {
-            var typeName = typeNameSerializer.Serialize(message.Body.GetType());
-            var messageBody = serializer.MessageToBytes(message.Body);
+            var typeName = typeNameSerializer.Serialize(message.MessageType);
+            var messageBody = serializer.MessageToBytes(message.GetBody());
             var messageProperties = message.Properties;
 
             messageProperties.Type = typeName;
             if (string.IsNullOrEmpty(messageProperties.CorrelationId))
+            {
                 messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
-
+            }
             return new SerializedMessage(messageProperties, messageBody);
         }
 
-        public DeserializedMessage DeserializeMessage(MessageProperties properties, byte[] body)
+        public IMessage<T> DeserializeMessage<T>(MessageProperties properties, byte[] body) where T : class
+        {
+            var messageBody = serializer.BytesToMessage<T>(body);
+            return new Message<T>(messageBody, properties);
+        }
+
+        public IMessage DeserializeMessage(MessageProperties properties, byte[] body)
         {
             var messageType = typeNameSerializer.DeSerialize(properties.Type);
             var messageBody = serializer.BytesToMessage(properties.Type, body);
-            var message = Message.CreateInstance(messageType, messageBody);
-            message.SetProperties(properties);
-            return new DeserializedMessage(messageType, message);
+            return MessageFactory.CreateInstance(messageType, messageBody, properties);
         }
     }
 }

@@ -100,6 +100,7 @@
     <Compile Include="ConsumeTests\When_a_message_is_received.cs" />
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
+    <Compile Include="MessageFactoryTests.cs" />
     <Compile Include="TimeoutStrategyTest.cs" />
     <Compile Include="DefaultMessageSerializationStrategyTests.cs" />
     <Compile Include="DeliveryModeStrategyTest.cs" />

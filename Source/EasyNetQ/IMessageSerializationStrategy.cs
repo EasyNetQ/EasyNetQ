@@ -1,34 +1,22 @@
-using System;
 
 namespace EasyNetQ
 {
     public interface IMessageSerializationStrategy
     {
-        SerializedMessage SerializeMessage<T>(IMessage<T> message) where T : class;
-        DeserializedMessage DeserializeMessage(MessageProperties properties, byte[] body);
+        SerializedMessage SerializeMessage(IMessage message);
+        IMessage<T> DeserializeMessage<T>(MessageProperties properties, byte[] body) where T : class;
+        IMessage DeserializeMessage(MessageProperties properties, byte[] body);
     }
 
     public class SerializedMessage
     {
-        public SerializedMessage(MessageProperties properties, byte[] messageBody)
+        public SerializedMessage(MessageProperties properties, byte[] body)
         {
             Properties = properties;
-            Body = messageBody;
+            Body = body;
         }
 
         public MessageProperties Properties { get; private set; }
         public byte[] Body { get; private set; }
-    }
-
-    public class DeserializedMessage
-    {
-        public DeserializedMessage(Type messageType, dynamic message)
-        {
-            MessageType = messageType;
-            Message = message;
-        }
-
-        public Type MessageType { get; private set; }
-        public dynamic Message { get; private set; }
-    }
+    }     
 }

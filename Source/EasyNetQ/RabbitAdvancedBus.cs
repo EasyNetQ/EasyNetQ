@@ -120,7 +120,7 @@ namespace EasyNetQ
             {
                 var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
                 var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
-                return handler(deserializedMessage.Message, messageReceivedInfo);
+                return handler(deserializedMessage, messageReceivedInfo);
             }, configure);
         }
 
@@ -186,6 +186,21 @@ namespace EasyNetQ
             bool mandatory,
             bool immediate,
             IMessage<T> message) where T : class
+        {
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckShortString(routingKey, "routingKey");
+            Preconditions.CheckNotNull(message, "message");
+
+            var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            return PublishAsync(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
+        }
+
+        public virtual Task PublishAsync(
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            bool immediate,
+            IMessage message)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -265,17 +280,13 @@ namespace EasyNetQ
                 arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
             }
 
-            return clientCommandDispatcher.Invoke(
-                x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)
-                ).Then(() =>
-                    {
-                        logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
-                            name, durable, exclusive, autoDelete, WriteArguments(arguments));
+            return clientCommandDispatcher.Invoke(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
+            {
+                logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
+                    name, durable, exclusive, autoDelete, WriteArguments(arguments));
 
-                        return (IQueue) new Queue(name, exclusive);
-                    });
-
-            
+                return (IQueue)new Queue(name, exclusive);
+            });
         }
 
         private string WriteArguments(IEnumerable<KeyValuePair<string, object>> arguments)
@@ -475,10 +486,10 @@ namespace EasyNetQ
             }
             else
             {
-                var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
+                var message = messageSerializationStrategy.DeserializeMessage<T>(result.Properties, result.Body);
                 if (message.MessageType == typeof (T))
                 {
-                    return new BasicGetResult<T>(message.Message);
+                    return new BasicGetResult<T>(message);
                 }
                 else
                 {
