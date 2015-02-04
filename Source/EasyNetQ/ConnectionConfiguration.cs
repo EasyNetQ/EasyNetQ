@@ -94,7 +94,7 @@ namespace EasyNetQ
             clientProperties.Add("application_location", applicationPath);
             clientProperties.Add("machine_name", hostname);
             clientProperties.Add("user", UserName);
-            clientProperties.Add("connected", DateTime.Now.ToString("MM/dd/yy HH:mm:ss"));
+            clientProperties.Add("connected", DateTime.UtcNow.ToString("u")); // UniversalSortableDateTimePattern: yyyy'-'MM'-'dd HH':'mm':'ss'Z'
             clientProperties.Add("requested_heartbeat", RequestedHeartbeat.ToString());
             clientProperties.Add("timeout", Timeout.ToString());
             clientProperties.Add("publisher_confirms", PublisherConfirms.ToString());

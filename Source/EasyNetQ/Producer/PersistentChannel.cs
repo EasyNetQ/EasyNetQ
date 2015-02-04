@@ -80,7 +80,7 @@ namespace EasyNetQ.Producer
         public void InvokeChannelAction(Action<IModel> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            InvokeChannelActionInternal(channelAction, DateTime.Now);
+            InvokeChannelActionInternal(channelAction, DateTime.UtcNow);
         }
 
         private void InvokeChannelActionInternal(Action<IModel> channelAction, DateTime startTime)
@@ -147,7 +147,7 @@ namespace EasyNetQ.Producer
 
         private bool IsTimedOut(DateTime startTime)
         {
-            return !configuration.Timeout.Equals(0) && startTime.AddSeconds(configuration.Timeout) < DateTime.Now;
+            return !configuration.Timeout.Equals(0) && startTime.AddSeconds(configuration.Timeout) < DateTime.UtcNow;
         }
 
         public void Dispose()

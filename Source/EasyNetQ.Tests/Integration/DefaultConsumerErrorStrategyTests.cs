@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests
                     message.Exchange.ShouldEqual(context.Info.Exchange);
                     message.Message.ShouldEqual(originalMessage);
                     message.Exception.ShouldEqual("System.Exception: I just threw!");
-                    message.DateTime.Date.ShouldEqual(DateTime.Now.Date);
+                    message.DateTime.Date.ShouldEqual(DateTime.UtcNow.Date);
                     message.BasicProperties.CorrelationId.ShouldEqual(context.Properties.CorrelationId);
                     message.BasicProperties.AppId.ShouldEqual(context.Properties.AppId);
                 }
