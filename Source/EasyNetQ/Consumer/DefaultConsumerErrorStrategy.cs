@@ -161,7 +161,7 @@ namespace EasyNetQ.Consumer
                 Exchange = context.Info.Exchange,
                 Exception = exception.ToString(),
                 Message = messageAsString,
-                DateTime = DateTime.Now,
+                DateTime = DateTime.UtcNow,
                 BasicProperties = context.Properties
             };
 
