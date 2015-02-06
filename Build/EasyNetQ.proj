@@ -48,6 +48,12 @@
           Command="$(ILRepack) /internalize /targetplatform:v4 /out:$(OutputDir)\EasyNetQ.dll $(OutputDir)\EasyNetQ.dll $(OutputDir)\Newtonsoft.Json.dll" />
     </Target>
 
+  <Target Name="MergeManagementClient" DependsOnTargets="Build">
+    <Exec
+        WorkingDirectory="$(OutputDir)"
+        Command="$(ILRepack) /internalize /targetplatform:v4 /out:$(OutputDir)\EasyNetQ.Management.Client.dll $(OutputDir)\EasyNetQ.Management.Client.dll $(OutputDir)\Newtonsoft.Json.dll" />
+  </Target>
+
     <!-- Packaging -->
   
     <Target Name="Package" DependsOnTargets="Merge">
@@ -76,7 +82,7 @@
         <Message Text="##teamcity[buildNumber '%(AsmInfo.Version)']" />
     </Target>
 
-    <Target Name="PackageManagementClient" DependsOnTargets="Build">
+    <Target Name="PackageManagementClient" DependsOnTargets="MergeManagementClient">
 
         <ItemGroup>
             <FilesToDelete Include="$(Package)\EasyNetQ.Management.Client\*.nupkg"  />

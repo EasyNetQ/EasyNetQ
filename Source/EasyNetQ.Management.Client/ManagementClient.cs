@@ -682,6 +682,7 @@ namespace EasyNetQ.Management.Client
 			var request = (HttpWebRequest)WebRequest.Create(uri);
             request.Credentials = new NetworkCredential(username, password); 
             request.Timeout = request.ReadWriteTimeout = (int)timeout.TotalMilliseconds;
+            request.KeepAlive = false; //default WebRequest.KeepAlive to false to resolve spurious 'the request was aborted: the request was canceled' exceptions
 
             configureRequest(request);
 
