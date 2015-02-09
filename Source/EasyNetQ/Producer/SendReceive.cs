@@ -61,6 +61,16 @@ namespace EasyNetQ.Producer
             return Receive<T>(queue, message => TaskHelpers.ExecuteSynchronously(() => onMessage(message)));
         }
 
+        public IDisposable Receive<T>(string queue, Action<T> onMessage, Action<IConsumerConfiguration> configure)
+            where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            return Receive<T>(queue, message => TaskHelpers.ExecuteSynchronously(() => onMessage(message)), configure);
+        }
+
         public IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
             where T : class
         {
@@ -71,10 +81,30 @@ namespace EasyNetQ.Producer
             return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body));
         }
 
+        public IDisposable Receive<T>(string queue, Func<T, Task> onMessage, Action<IConsumerConfiguration> configure)
+            where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            var declaredQueue = DeclareQueue(queue);
+            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body), configure);
+        }
+
         public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
         {
             var declaredQueue = DeclareQueue(queue);
             return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)));
+        }
+
+        public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers, Action<IConsumerConfiguration> configure)
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            var declaredQueue = DeclareQueue(queue);
+            return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)), configure);
         }
 
         private IQueue DeclareQueue(string queueName)

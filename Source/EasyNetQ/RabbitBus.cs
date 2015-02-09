@@ -232,15 +232,32 @@ namespace EasyNetQ
             return sendReceive.Receive(queue, onMessage);
         }
 
+        public virtual IDisposable Receive<T>(string queue, Action<T> onMessage, Action<IConsumerConfiguration> configure)
+            where T : class
+        {
+            return sendReceive.Receive(queue, onMessage, configure);
+        }
+
         public virtual IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
             where T : class
         {
             return sendReceive.Receive(queue, onMessage);
         }
 
+        public virtual IDisposable Receive<T>(string queue, Func<T, Task> onMessage, Action<IConsumerConfiguration> configure)
+            where T : class
+        {
+            return sendReceive.Receive(queue, onMessage, configure);
+        }
+
         public virtual IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
         {
             return sendReceive.Receive(queue, addHandlers);
+        }
+
+        public virtual IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers, Action<IConsumerConfiguration> configure)
+        {
+            return sendReceive.Receive(queue, addHandlers, configure);
         }
 
         public virtual event Action Connected;
