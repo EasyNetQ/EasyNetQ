@@ -101,6 +101,7 @@ namespace EasyNetQ.Producer
         public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(addHandlers, "addHandlers");
             Preconditions.CheckNotNull(configure, "configure");
 
             var declaredQueue = DeclareQueue(queue);
