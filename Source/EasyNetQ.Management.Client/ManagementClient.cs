@@ -69,6 +69,10 @@ namespace EasyNetQ.Management.Client
             {
                 throw new ArgumentException("hostUrl is null or empty");
             }
+
+            if (hostUrl.StartsWith("https://"))
+                ssl = true;
+
             if (ssl)
             {
                 if (hostUrl.Contains("http://"))
@@ -107,7 +111,7 @@ namespace EasyNetQ.Management.Client
 
             if (!runningOnMono)
             {
-                LeaveDotsAndSlashesEscaped();
+                LeaveDotsAndSlashesEscaped(ssl);
             }
         }
 
@@ -711,9 +715,10 @@ namespace EasyNetQ.Management.Client
         }
 
         /// <summary>
-        /// See http://mikehadlow.blogspot.co.uk/2011/08/how-to-stop-systemuri-un-escaping.html
+        /// See http://mikehadlow.blogspot.co.uk/2011/08/how-to-stop-systemuri-un-escaping.html.
         /// </summary>
-        private void LeaveDotsAndSlashesEscaped()
+        /// <param name="useSsl">   true if using SSL.</param>
+        private void LeaveDotsAndSlashesEscaped(bool useSsl)
         {
             var getSyntaxMethod =
                 typeof(UriParser).GetMethod("GetSyntax", BindingFlags.Static | BindingFlags.NonPublic);
@@ -722,7 +727,7 @@ namespace EasyNetQ.Management.Client
                 throw new MissingMethodException("UriParser", "GetSyntax");
             }
 
-            var uriParser = getSyntaxMethod.Invoke(null, new object[] { "http" });
+            var uriParser = getSyntaxMethod.Invoke(null, new object[] { useSsl ? "https" : "http" });
 
             var setUpdatableFlagsMethod =
                 uriParser.GetType().GetMethod("SetUpdatableFlags", BindingFlags.Instance | BindingFlags.NonPublic);
