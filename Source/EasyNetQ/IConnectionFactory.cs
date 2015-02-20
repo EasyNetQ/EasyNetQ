@@ -57,8 +57,12 @@ namespace EasyNetQ
                 if (connectionFactory.Port == -1)
                     connectionFactory.Port = hostConfiguration.Port;
 
-                if (Configuration.Ssl.Enabled)
-                    connectionFactory.Ssl = Configuration.Ssl;
+				if (hostConfiguration.Ssl.Enabled)
+					connectionFactory.Ssl = hostConfiguration.Ssl;
+
+				//Prefer SSL configurations per each host but fall back to ConnectionConfiguration's SSL configuration for backwards compatibility
+				else if (Configuration.Ssl.Enabled)
+					connectionFactory.Ssl = Configuration.Ssl;
 
                 connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
                 connectionFactory.ClientProperties = Configuration.ClientProperties;
