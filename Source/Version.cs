@@ -7,6 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.45.0.0 IBus Subscription methods now return an ISubscriptionResult and IAdvancedBus exposes IConventions.
 // 0.44.0.0 Added Action<IConsumerConfiguration> overloads to Receive() on IBus, ISendReceive, and their implementations
 // 0.43.1.0 Management Client fix for URI slash escaping in .NET 4.0 with https connection.
 // 0.43.0.0 Use ILRepack to internally merge Newtonsoft.Json in ManagementClient, default WebRequest.KeepAlive to false to resolve spurious 'the request was aborted: the request was canceled' exceptions
