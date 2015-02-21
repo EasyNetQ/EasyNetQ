@@ -9,7 +9,6 @@ namespace EasyNetQ
 {
     public class RabbitBus : IBus
     {
-        private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
@@ -18,18 +17,7 @@ namespace EasyNetQ
         private readonly ISendReceive sendReceive;
         private readonly ConnectionConfiguration connectionConfiguration;
 
-        public IEasyNetQLogger Logger
-        {
-            get { return logger; }
-        }
-
-        public IConventions Conventions
-        {
-            get { return conventions; }
-        }
-
         public RabbitBus(
-            IEasyNetQLogger logger,
             IConventions conventions,
             IAdvancedBus advancedBus,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
@@ -38,7 +26,6 @@ namespace EasyNetQ
             ISendReceive sendReceive,
             ConnectionConfiguration connectionConfiguration)
         {
-            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
@@ -46,7 +33,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
 
-            this.logger = logger;
             this.conventions = conventions;
             this.advancedBus = advancedBus;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
