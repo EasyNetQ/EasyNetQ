@@ -93,12 +93,12 @@ namespace EasyNetQ
                 });
         }
 
-        public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
+        public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
         {
             return Subscribe(subscriptionId, onMessage, x => { });
         }
 
-        public virtual IDisposable Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
+        public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -121,12 +121,12 @@ namespace EasyNetQ
             configure);
         }
 
-        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
+        public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
         {
             return SubscribeAsync(subscriptionId, onMessage, x => { });
         }
 
-        public virtual IDisposable SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
+        public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -146,7 +146,7 @@ namespace EasyNetQ
                 advancedBus.Bind(exchange, queue, topic);
             }
 
-            return advancedBus.Consume<T>(
+            var consumerCancellation = advancedBus.Consume<T>(
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body),
                 x =>
@@ -155,8 +155,11 @@ namespace EasyNetQ
                          .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
                          .WithPrefetchCount(configuration.PrefetchCount);
                         if (configuration.IsExclusive)
+                        {
                             x.AsExclusive();
+                        }
                     });
+            return new SubscriptionResult(exchange, queue, consumerCancellation);
         }
 
         public virtual TResponse Request<TRequest, TResponse>(TRequest request)
