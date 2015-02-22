@@ -128,13 +128,7 @@ namespace EasyNetQ
 
     public class HostConfiguration
     {
-        public HostConfiguration()
-        {
-            Ssl = new SslOption();
-        }
-
         public string Host { get; set; }
         public ushort Port { get; set; }
-        public SslOption Ssl { get; private set; }
     }
 }
