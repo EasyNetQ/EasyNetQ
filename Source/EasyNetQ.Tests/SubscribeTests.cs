@@ -22,6 +22,8 @@ namespace EasyNetQ.Tests
         private const string queueName = typeName + "_" + subscriptionId;
         private const string consumerTag = "the_consumer_tag";
 
+        private ISubscriptionResult subscriptionResult; 
+
         [SetUp]
         public void SetUp()
         {
@@ -35,7 +37,7 @@ namespace EasyNetQ.Tests
                 //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
                 );
 
-            mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
+            subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
         [Test]
@@ -96,6 +98,17 @@ namespace EasyNetQ.Tests
         public void Should_register_consumer()
         {
             mockBuilder.Consumers.Count.ShouldEqual(1);
+        }
+
+        [Test]
+        public void Should_return_non_null_and_with_expected_values_result()
+        {
+            Assert.IsNotNull(subscriptionResult);
+            Assert.IsNotNull(subscriptionResult.Exchange);
+            Assert.IsNotNull(subscriptionResult.Queue);
+            Assert.IsNotNull(subscriptionResult.ConsumerCancellation);
+            Assert.IsTrue(subscriptionResult.Exchange.Name == typeName);
+            Assert.IsTrue(subscriptionResult.Queue.Name == queueName);
         }
     }
 
@@ -294,6 +307,36 @@ namespace EasyNetQ.Tests
             basicDeliverEventArgs.Info.ConsumerTag.ShouldEqual(consumerTag);
             basicDeliverEventArgs.Info.DeliverTag.ShouldEqual(deliveryTag);
             basicDeliverEventArgs.Info.RoutingKey.ShouldEqual("#");
+        }
+    }
+
+    [TestFixture]
+    public class When_a_subscription_is_cancelled_by_the_user
+    {
+        private MockBuilder mockBuilder;
+        private const string subscriptionId = "the_subscription_id";
+        private const string consumerTag = "the_consumer_tag";
+
+        [SetUp]
+        public void SetUp()
+        {
+            var conventions = new Conventions(new TypeNameSerializer())
+            {
+                ConsumerTagConvention = () => consumerTag
+            };
+
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => conventions));
+            var subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
+             var are = new AutoResetEvent(false);
+            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+            subscriptionResult.Dispose();
+            are.WaitOne(500);
+        }
+
+        [Test]
+        public void Should_dispose_the_model()
+        {
+            mockBuilder.Consumers[0].Model.AssertWasCalled(x => x.Dispose());
         }
     }
 }
