@@ -143,7 +143,9 @@ namespace EasyNetQ
         /// Override default services. For example, to override the default IEasyNetQLogger:
         /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        /// A new RabbitBus instance.
+        /// </returns>
         public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
@@ -167,8 +169,27 @@ namespace EasyNetQ
         /// Creates a new instance of RabbitBus
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new RabbitBus instance.
+        /// </returns>
         public static IBus CreateBus()
+        {
+            return CreateBus(c => {});
+        }
+
+
+        /// <summary>
+        /// Creates a new instance of RabbitBus
+        /// The RabbitMQ broker is defined in the connection string named 'rabbit'
+        /// </summary>
+        /// <param name="registerServices">
+        /// Override default services. For example, to override the default IEasyNetQLogger:
+        /// RabbitHutch.CreateBus(x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// </param>
+        /// <returns>
+        /// A new RabbitBus instance.
+        /// </returns>
+        public static IBus CreateBus(Action<IServiceRegister> registerServices)
         {
             var rabbitConnectionString = ConfigurationManager.ConnectionStrings["rabbit"];
             if (rabbitConnectionString == null)
@@ -180,7 +201,7 @@ namespace EasyNetQ
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
 
-            return CreateBus(rabbitConnectionString.ConnectionString);
+            return CreateBus(rabbitConnectionString.ConnectionString, registerServices);
         }
 
     }
