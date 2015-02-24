@@ -57,7 +57,10 @@ namespace EasyNetQ
                         if (string.IsNullOrEmpty(attr.QueueName))
                         {
                             var typeName = typeNameSerializer.Serialize(messageType);
-                            return string.Format("{0}_{1}", typeName, subscriptionId);
+
+                            return string.IsNullOrEmpty(subscriptionId)
+                                ? typeName
+                                : string.Format("{0}_{1}", typeName, subscriptionId);
                         }
 
                         return string.IsNullOrEmpty(subscriptionId)
