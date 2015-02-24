@@ -102,6 +102,7 @@ namespace EasyNetQ.Tests.Integration
 
             var body = Encoding.UTF8.GetBytes("Hello World!");
             advancedBus.Publish(exchange, "routing_key", false, new MessageProperties(), body);
+            advancedBus.Publish(exchange, "routing_key", false, new MessageProperties(), body);
 
             Thread.Sleep(5000);
         }
