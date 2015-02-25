@@ -23,6 +23,7 @@ namespace EasyNetQ
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IBusEventHandlers busEventHandlers;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -35,7 +36,8 @@ namespace EasyNetQ
             IContainer container,
             ConnectionConfiguration connectionConfiguration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
-            IMessageSerializationStrategy messageSerializationStrategy)
+            IMessageSerializationStrategy messageSerializationStrategy,
+            IBusEventHandlers busEventHandlers)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -47,6 +49,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
+            Preconditions.CheckNotNull(busEventHandlers, "busEventHandlers");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -57,14 +60,20 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.busEventHandlers = busEventHandlers;
+
+            this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
+            if (this.busEventHandlers.Connected != null) Connected += this.busEventHandlers.Connected;
+            this.eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
+            if (this.busEventHandlers.Disconnected != null) Disconnected += this.busEventHandlers.Disconnected;
+            this.eventBus.Subscribe<ConnectionBlockedEvent>(e => OnBlocked());
+            if (this.busEventHandlers.Blocked != null) Blocked += this.busEventHandlers.Blocked;
+            this.eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
+            if (this.busEventHandlers.Unblocked != null) Unblocked += this.busEventHandlers.Unblocked;
+            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
+            if (this.busEventHandlers.MessageReturned != null) MessageReturned += this.busEventHandlers.MessageReturned;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
-
-            eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
-            eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
-            eventBus.Subscribe<ConnectionBlockedEvent>(e => OnBlocked());
-            eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
-            eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }

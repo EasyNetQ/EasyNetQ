@@ -163,6 +163,11 @@ namespace EasyNetQ
             return container.Resolve<IBus>();
         }
 
+        public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, IBusEventHandlers busEventHandlers, Action<IServiceRegister> registerServices)
+        {
+            // We probably don't want the interface on IBusEventHandlers if we're gonna use it that way in a static factory method.
+        }
+
         /// <summary>
         /// Creates a new instance of RabbitBus
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'

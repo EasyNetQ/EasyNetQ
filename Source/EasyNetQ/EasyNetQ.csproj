@@ -60,6 +60,7 @@
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
     <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
+    <Compile Include="BusEventHandlers.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
     <Compile Include="Consumer\HandlerRunner.cs" />
     <Compile Include="IAdvancedBus.cs" />
+    <Compile Include="IBusEventHandlers.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="IClusterHostSelectionStrategy.cs" />
     <Compile Include="ConnectionConfiguration.cs" />
