@@ -54,9 +54,6 @@ namespace EasyNetQ
             this.rpc = rpc;
             this.sendReceive = sendReceive;
             this.connectionConfiguration = connectionConfiguration;
-
-            advancedBus.Connected += OnConnected;
-            advancedBus.Disconnected += OnDisconnected;
         }
 
         public virtual void Publish<T>(T message) where T : class
@@ -258,20 +255,6 @@ namespace EasyNetQ
         public virtual IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers, Action<IConsumerConfiguration> configure)
         {
             return sendReceive.Receive(queue, addHandlers, configure);
-        }
-
-        public virtual event Action Connected;
-
-        protected void OnConnected()
-        {
-            if (Connected != null) Connected();
-        }
-
-        public virtual event Action Disconnected;
-
-        protected void OnDisconnected()
-        {
-            if (Disconnected != null) Disconnected();
         }
 
         public virtual bool IsConnected
