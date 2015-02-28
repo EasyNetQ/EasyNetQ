@@ -213,12 +213,12 @@ namespace EasyNetQ
         /// A new <see cref="RabbitBus"/> instance.
         /// </returns>
         public static IBus CreateBus(
-            string hostName, 
-            ushort hostPort, 
-            string virtualHost, 
-            string username, 
+            string hostName,
+            ushort hostPort,
+            string virtualHost,
+            string username,
             string password,
-            ushort requestedHeartbeat, 
+            ushort requestedHeartbeat,
             Action<IServiceRegister> registerServices)
         {
             Preconditions.CheckNotNull(hostName, "hostName");
