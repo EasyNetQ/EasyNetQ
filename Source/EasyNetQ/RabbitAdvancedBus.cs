@@ -607,14 +607,14 @@ namespace EasyNetQ
             }
         }
 
-        public event EventHandler<MessageReturnedEventArgs> MessageReturned;
+        public virtual event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
         protected void OnMessageReturned(ReturnedMessageEvent args)
         {
             var messageReturned = MessageReturned;
             if (messageReturned != null)
             {
-                MessageReturned(this, new MessageReturnedEventArgs(args.Body, args.Properties, args.Info));
+                messageReturned(this, new MessageReturnedEventArgs(args.Body, args.Properties, args.Info));
             }
         }
 
