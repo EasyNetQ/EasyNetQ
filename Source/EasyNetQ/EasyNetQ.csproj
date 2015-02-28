@@ -109,7 +109,6 @@
     <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
     <Compile Include="Consumer\HandlerRunner.cs" />
     <Compile Include="IAdvancedBus.cs" />
-    <Compile Include="IAdvancedBusEventHandlers.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="IClusterHostSelectionStrategy.cs" />
     <Compile Include="ConnectionConfiguration.cs" />
