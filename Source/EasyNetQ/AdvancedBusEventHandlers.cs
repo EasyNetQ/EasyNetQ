@@ -38,7 +38,7 @@ namespace EasyNetQ
             EventHandler<MessageReturnedEventArgs> messageReturned = null)
         {
             // It's ok for any of the specified handler to be null.
-            // This allows the caller to specify only the events that he wants to handle when IAdvancedBus is instantiated.
+            // This allows the caller to specify only the events that he wants to handle when RabbitAdvancedBus is instantiated.
 
             Connected = connected;
             Disconnected = disconnected;
