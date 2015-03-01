@@ -1,4 +1,5 @@
 ﻿using System;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -20,7 +21,7 @@ namespace EasyNetQ
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Blocked"/>.
         /// </summary>
-        public EventHandler Blocked { get; private set; }
+        public EventHandler<ConnectionBlockedEventArgs> Blocked { get; private set; }
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Unblocked"/>.
         /// </summary>
@@ -33,7 +34,7 @@ namespace EasyNetQ
         public AdvancedBusEventHandlers(
             EventHandler connected = null,
             EventHandler disconnected = null,
-            EventHandler blocked = null,
+            EventHandler<ConnectionBlockedEventArgs> blocked = null,
             EventHandler unblocked = null,
             EventHandler<MessageReturnedEventArgs> messageReturned = null)
         {

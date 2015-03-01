@@ -7,6 +7,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -72,7 +73,7 @@ namespace EasyNetQ
             {
                 Disconnected += this.advancedBusEventHandlers.Disconnected;
             }
-            this.eventBus.Subscribe<ConnectionBlockedEvent>(e => OnBlocked());
+            this.eventBus.Subscribe<ConnectionBlockedEvent>(OnBlocked);
             if (this.advancedBusEventHandlers.Blocked != null)
             {
                 Blocked += this.advancedBusEventHandlers.Blocked;
@@ -585,14 +586,14 @@ namespace EasyNetQ
             }
         }
 
-        public virtual event EventHandler Blocked;
+        public virtual event EventHandler<ConnectionBlockedEventArgs> Blocked;
 
-        protected void OnBlocked()
+        protected void OnBlocked(ConnectionBlockedEvent args)
         {
             var blocked = Blocked;
             if (blocked != null)
             {
-                blocked(this, EventArgs.Empty);
+                blocked(this, new ConnectionBlockedEventArgs(args.Reason));
             }
         }
 

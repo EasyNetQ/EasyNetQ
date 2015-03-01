@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -409,7 +410,7 @@ namespace EasyNetQ
         /// <summary>
         /// Event fires when the bus gets blocked due to the broker running low on resources.
         /// </summary>
-        event EventHandler Blocked;
+        event EventHandler<ConnectionBlockedEventArgs> Blocked;
 
         /// <summary>
         /// Event fires when the bus is unblocked.
