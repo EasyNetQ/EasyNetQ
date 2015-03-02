@@ -60,6 +60,7 @@
     <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
     <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
     <Compile Include="BasicGetResult.cs" />
+    <Compile Include="AdvancedBusEventHandlers.cs" />
     <Compile Include="ComponentRegistration.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="MessageFactory.cs" />
     <Compile Include="MessageReceivedInfo.cs" />
     <Compile Include="MessageProperties.cs" />
+    <Compile Include="MessageReturnedEventArgs.cs" />
     <Compile Include="MessageReturnedInfo.cs" />
     <Compile Include="MessageVersioning\ISupersede.cs" />
     <Compile Include="MessageVersioning\MessageType.cs" />

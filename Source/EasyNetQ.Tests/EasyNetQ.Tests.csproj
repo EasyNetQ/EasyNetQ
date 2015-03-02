@@ -78,6 +78,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AdvancedBusEventHandlersTests.cs" />
     <Compile Include="AmqpExceptionParserTests.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_assembly_scanning.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration_action_and_attribute.cs" />

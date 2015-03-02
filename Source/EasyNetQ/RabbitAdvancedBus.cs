@@ -7,6 +7,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -24,6 +25,7 @@ namespace EasyNetQ
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IConventions conventions;
+        private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -37,7 +39,8 @@ namespace EasyNetQ
             ConnectionConfiguration connectionConfiguration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
-            IConventions conventions)
+            IConventions conventions,
+            AdvancedBusEventHandlers advancedBusEventHandlers)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -50,6 +53,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -61,14 +65,35 @@ namespace EasyNetQ
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.conventions = conventions;
+            this.advancedBusEventHandlers = advancedBusEventHandlers;
+
+            this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
+            if (this.advancedBusEventHandlers.Connected != null)
+            {
+                Connected += this.advancedBusEventHandlers.Connected;
+            }
+            this.eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
+            if (this.advancedBusEventHandlers.Disconnected != null)
+            {
+                Disconnected += this.advancedBusEventHandlers.Disconnected;
+            }
+            this.eventBus.Subscribe<ConnectionBlockedEvent>(OnBlocked);
+            if (this.advancedBusEventHandlers.Blocked != null)
+            {
+                Blocked += this.advancedBusEventHandlers.Blocked;
+            }
+            this.eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
+            if (this.advancedBusEventHandlers.Unblocked != null)
+            {
+                Unblocked += this.advancedBusEventHandlers.Unblocked;
+            }
+            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
+            if (this.advancedBusEventHandlers.MessageReturned != null)
+            {
+                MessageReturned += this.advancedBusEventHandlers.MessageReturned;
+            }
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
-
-            eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
-            eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
-            eventBus.Subscribe<ConnectionBlockedEvent>(e => OnBlocked());
-            eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
-            eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
 
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }
@@ -543,41 +568,59 @@ namespace EasyNetQ
 
         //------------------------------------------------------------------------------------------
 
-        public virtual event Action Connected;
+        public virtual event EventHandler Connected;
 
         protected void OnConnected()
         {
-            if (Connected != null) Connected();
+            var connected = Connected;
+            if (connected != null)
+            {
+                connected(this, EventArgs.Empty);
+            }
         }
 
-        public virtual event Action Disconnected;
+        public virtual event EventHandler Disconnected;
 
         protected void OnDisconnected()
         {
-            if (Disconnected != null) Disconnected();
+            var disconnected = Disconnected;
+            if (disconnected != null)
+            {
+                disconnected(this, EventArgs.Empty);
+            }
         }
 
-        public virtual event Action Blocked;
+        public virtual event EventHandler<ConnectionBlockedEventArgs> Blocked;
 
-        protected void OnBlocked()
+        protected void OnBlocked(ConnectionBlockedEvent args)
         {
             var blocked = Blocked;
-            if (blocked != null) blocked();
+            if (blocked != null)
+            {
+                blocked(this, new ConnectionBlockedEventArgs(args.Reason));
+            }
         }
 
-        public virtual event Action Unblocked;
+        public virtual event EventHandler Unblocked;
 
         protected void OnUnblocked()
         {
             var unblocked = Unblocked;
-            if (unblocked != null) unblocked();
+            if (unblocked != null)
+            {
+                unblocked(this, EventArgs.Empty);
+            }
         }
 
-        public event Action<byte[], MessageProperties, MessageReturnedInfo> MessageReturned;
+        public virtual event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
         protected void OnMessageReturned(ReturnedMessageEvent args)
         {
-            if (MessageReturned != null) MessageReturned(args.Body, args.Properties, args.Info);
+            var messageReturned = MessageReturned;
+            if (messageReturned != null)
+            {
+                messageReturned(this, new MessageReturnedEventArgs(args.Body, args.Properties, args.Info));
+            }
         }
 
         public virtual bool IsConnected
