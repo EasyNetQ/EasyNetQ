@@ -60,6 +60,7 @@ namespace EasyNetQ.Tests
                 MockRepository.GenerateStub<ConnectionConfiguration>(),
                 MockRepository.GenerateStub<IProduceConsumeInterceptor>(),
                 MockRepository.GenerateStub<IMessageSerializationStrategy>(),
+                MockRepository.GenerateStub<IConventions>(),
                 advancedBusEventHandlers);
         }
 

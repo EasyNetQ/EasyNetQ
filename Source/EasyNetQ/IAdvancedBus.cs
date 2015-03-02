@@ -423,8 +423,13 @@ namespace EasyNetQ
         event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
         /// <summary>
-        /// The IoC container that EasyNetQ uses to resolve it's services.
+        /// The IoC container that EasyNetQ uses to resolve its services.
         /// </summary>
         IContainer Container { get; }
+
+        /// <summary>
+        /// The conventions used by EasyNetQ to name its routing topology elements.
+        /// </summary>
+        IConventions Conventions { get; }
     }
 }

@@ -24,6 +24,7 @@ namespace EasyNetQ
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IConventions conventions;
         private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
         public RabbitAdvancedBus(
@@ -38,6 +39,7 @@ namespace EasyNetQ
             ConnectionConfiguration connectionConfiguration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
+            IConventions conventions,
             AdvancedBusEventHandlers advancedBusEventHandlers)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
@@ -50,6 +52,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
+            Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
 
             this.consumerFactory = consumerFactory;
@@ -61,6 +64,7 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.conventions = conventions;
             this.advancedBusEventHandlers = advancedBusEventHandlers;
 
             this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
@@ -627,6 +631,11 @@ namespace EasyNetQ
         public IContainer Container
         {
             get { return container; }
+        }
+
+        public IConventions Conventions
+        {
+            get { return conventions; }
         }
 
         private bool disposed = false;

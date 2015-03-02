@@ -67,6 +67,7 @@
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
     <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
+    <Compile Include="SubscriptionResult.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
     <Compile Include="Consumer\ExclusiveConsumer.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Consumer\HandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IConsumer.cs" />
     <Compile Include="Consumer\IConsumerConfiguration.cs" />
+    <Compile Include="ISubscriptionResult.cs" />
     <Compile Include="Consumer\IConsumerFactory.cs" />
     <Compile Include="Consumer\IHandlerCollectionFactory.cs" />
     <Compile Include="Consumer\IHandlerRegistration.cs" />
