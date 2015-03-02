@@ -23,6 +23,7 @@ namespace EasyNetQ
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IConventions conventions;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
@@ -35,7 +36,8 @@ namespace EasyNetQ
             IContainer container,
             ConnectionConfiguration connectionConfiguration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
-            IMessageSerializationStrategy messageSerializationStrategy)
+            IMessageSerializationStrategy messageSerializationStrategy,
+            IConventions conventions)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -47,6 +49,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
+            Preconditions.CheckNotNull(conventions, "conventions");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -57,6 +60,7 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.conventions = conventions;
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
 
@@ -584,6 +588,11 @@ namespace EasyNetQ
         public IContainer Container
         {
             get { return container; }
+        }
+
+        public IConventions Conventions
+        {
+            get { return conventions; }
         }
 
         private bool disposed = false;
