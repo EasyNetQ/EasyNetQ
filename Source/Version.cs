@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.44.3.0")]
+[assembly: AssemblyVersion("0.44.4.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.44.4.0 Fix NullReferenceException on Serialize
 // 0.44.3.0 RabbitHutch.CreateBus overload
 // 0.44.2.0 Bug fix, when a subscriptionId is null the queue name end with '_'
 // 0.44.1.0 SSL enabled cluster support - Added SSL options per host configuration
