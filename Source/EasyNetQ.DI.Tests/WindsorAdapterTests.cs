@@ -41,7 +41,7 @@ namespace EasyNetQ.DI.Tests
 
             var rabbitBus = (RabbitBus)bus;
 
-            Assert.IsTrue(rabbitBus.Conventions is TestConventions);
+            Assert.IsTrue(rabbitBus.Advanced.Conventions is TestConventions);
         }
 
         [TearDown]

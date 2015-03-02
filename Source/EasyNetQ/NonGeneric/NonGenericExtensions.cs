@@ -10,12 +10,12 @@ namespace EasyNetQ.NonGeneric
 {
     public static class NonGenericExtensions
     {
-        public static IDisposable Subscribe(this IBus bus, Type messageType, string subscriptionId, Action<object> onMessage)
+        public static ISubscriptionResult Subscribe(this IBus bus, Type messageType, string subscriptionId, Action<object> onMessage)
         {
             return Subscribe(bus, messageType, subscriptionId, onMessage, configuration => { });
         }
 
-        public static IDisposable Subscribe(
+        public static ISubscriptionResult Subscribe(
             this IBus bus,
             Type messageType,
             string subscriptionId,
@@ -29,7 +29,7 @@ namespace EasyNetQ.NonGeneric
             return SubscribeAsync(bus, messageType, subscriptionId, asyncOnMessage, configure);
         }
 
-        public static IDisposable SubscribeAsync(
+        public static ISubscriptionResult SubscribeAsync(
             this IBus bus,
             Type messageType,
             string subscriptionId,
@@ -38,7 +38,7 @@ namespace EasyNetQ.NonGeneric
             return SubscribeAsync(bus, messageType, subscriptionId, onMessage, configuration => { });
         }
 
-        public static IDisposable SubscribeAsync(
+        public static ISubscriptionResult SubscribeAsync(
             this IBus bus,
             Type messageType,
             string subscriptionId,
@@ -61,7 +61,7 @@ namespace EasyNetQ.NonGeneric
             }
 
             var subscribeMethod = subscribeMethodOpen.MakeGenericMethod(messageType);
-            return (IDisposable)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configure });
+            return (ISubscriptionResult)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configure });
         } 
 
         public static void Publish(this IBus bus, Type messageType, object message)
