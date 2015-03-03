@@ -119,7 +119,7 @@ namespace EasyNetQ
         public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
             where T : class
         {
-            return Consume(queue, onMessage, x => { });
+            return Consume<T>(queue, onMessage, x => { });
         }
 
         public IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class
@@ -128,7 +128,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            return Consume(queue, x => x.Add(onMessage), configure);
+            return Consume<T>(queue, x => x.Add(onMessage), configure);
         }
 
         public virtual IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers)
@@ -149,6 +149,24 @@ namespace EasyNetQ
             {
                 var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
                 var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
+                return handler(deserializedMessage, messageReceivedInfo);
+            }, configure);
+        }
+
+        private IDisposable Consume<T>(IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure)
+            where T : class
+        {
+            Preconditions.CheckNotNull(queue, "queue");
+            Preconditions.CheckNotNull(addHandlers, "addHandlers");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
+            addHandlers(handlerCollection);
+
+            return Consume(queue, (body, properties, messageReceivedInfo) =>
+            {
+                var deserializedMessage = messageSerializationStrategy.DeserializeMessage<T>(properties, body);
+                var handler = handlerCollection.GetHandler<T>();
                 return handler(deserializedMessage, messageReceivedInfo);
             }, configure);
         }
