@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
@@ -15,7 +14,7 @@ namespace EasyNetQ
     {
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
-        private readonly List<IPersistentDispatcher> persistentDispatcher;
+        private readonly OrderedClusterHostSelectionStrategy<IPersistentDispatcher> persistentDispatcher;
         private readonly IPublisher publisher;
         private readonly IEventBus eventBus;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
@@ -47,6 +46,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
+            Preconditions.CheckAny(connectionFactory.Configuration.Hosts, "connectionFactory","No hosts found in connection factory");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -58,7 +58,7 @@ namespace EasyNetQ
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
 
-            persistentDispatcher = new List<IPersistentDispatcher>(connectionFactory.Configuration.Hosts.Count());
+            persistentDispatcher = new OrderedClusterHostSelectionStrategy<IPersistentDispatcher>();
             do
             {
                 var connection = new PersistentConnection(connectionFactory.GetCurrentFactory(), logger, eventBus);
@@ -155,16 +155,20 @@ namespace EasyNetQ
             return consumer.StartConsuming();
         }
 
-        // ---------------------------------
+        // ------------------------------ 
 
         private IPersistentConnection GetConnection()
         {
-            return persistentDispatcher.First().Connection;
+            if ( !persistentDispatcher.Next() )
+                persistentDispatcher.Reset();
+            return persistentDispatcher.Current().Connection;
         }
 
         private IClientCommandDispatcher GetClientCommandDispatcher()
         {
-            return persistentDispatcher.First().CommandDispatcher;
+            if (!persistentDispatcher.Next())
+                persistentDispatcher.Reset();
+            return persistentDispatcher.Current().CommandDispatcher;
         }
 
         // -------------------------------- publish ---------------------------------------------
