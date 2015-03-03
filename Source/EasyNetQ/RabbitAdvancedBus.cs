@@ -11,34 +11,6 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
-    internal interface IPersistentDispatcher
-    {
-        IPersistentConnection Connection { get; }
-        IClientCommandDispatcher CommandDispatcher { get; }
-    }
-
-    internal class PersistentDispatcher : IPersistentDispatcher
-    {
-        private readonly IPersistentConnection _connection;
-        private readonly IClientCommandDispatcher _clientCommandDispatcher;
-
-        internal PersistentDispatcher(IPersistentConnection connection, IClientCommandDispatcher clientCommandDispatcher)
-        {
-            _connection = connection;
-            _clientCommandDispatcher = clientCommandDispatcher;
-        }
-
-        public IPersistentConnection Connection
-        {
-            get { return _connection; }
-        }
-
-        public IClientCommandDispatcher CommandDispatcher
-        {
-            get { return _clientCommandDispatcher; }
-        }
-    }
-
     public class RabbitAdvancedBus : IAdvancedBus
     {
         private readonly IConsumerFactory consumerFactory;
@@ -85,8 +57,8 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
-            persistentDispatcher = new List<IPersistentDispatcher>(connectionFactory.Configuration.Hosts.Count());
 
+            persistentDispatcher = new List<IPersistentDispatcher>(connectionFactory.Configuration.Hosts.Count());
             do
             {
                 var connection = new PersistentConnection(connectionFactory.GetCurrentFactory(), logger, eventBus);
