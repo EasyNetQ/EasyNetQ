@@ -46,7 +46,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
-            Preconditions.CheckAny(connectionFactory.Configuration.Hosts, "connectionFactory","No hosts found in connection factory");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
