@@ -98,8 +98,7 @@ namespace EasyNetQ
             connection.Initialize();
         }
 
-
-
+        
         // ---------------------------------- consume --------------------------------------
 
         public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
