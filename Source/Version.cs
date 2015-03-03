@@ -7,7 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
-// 0.47.0.0 It's now required to call PersistentConnection.InitAsync() to bootstrap a PersistentConnection and make it start attempting to connect.
+// 0.47.0.0 It's now required to call PersistentConnection.Initialize() to bootstrap a PersistentConnection and make it start attempting to connect.
 // 0.46.1.0 Fix NullReferenceException on Serialize
 // 0.46.0.0 Implementation of AdvancedBusEventHandlers and events are gone from IBus.
 // 0.45.0.0 IBus Subscription methods now return an ISubscriptionResult and IAdvancedBus exposes IConventions.

@@ -95,7 +95,7 @@ namespace EasyNetQ
 
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
-            connection.InitAsync().Wait();
+            connection.Initialize();
         }
 
 
