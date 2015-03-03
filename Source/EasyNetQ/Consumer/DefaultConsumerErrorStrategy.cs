@@ -62,7 +62,28 @@ namespace EasyNetQ.Consumer
                     {
                         if (connection != null)
                         {
-                            connection.Dispose();
+                            try
+                            {
+                                // when the broker connection is lost
+                                // and ShutdownReport.Count > 0 RabbitMQ.Client
+                                // throw an exception, but before the IConnection.Abort()
+                                // is invoked
+                                // https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/ea913903602ba03841f2515c23f843304211cd9e/projects/client/RabbitMQ.Client/src/client/impl/Connection.cs#L1070
+                                connection.Dispose();
+                            }
+                            catch
+                            {
+                                if (connection.CloseReason != null)
+                                {
+                                    this.logger.InfoWrite("Connection '{0}' has shutdown. Reason: '{1}'", 
+                                        connection, connection.CloseReason.Cause);
+                                }
+                                else
+                                {
+                                    throw;
+                                }
+                            }
+
                         }
 
                         connection = connectionFactory.CreateConnection();
