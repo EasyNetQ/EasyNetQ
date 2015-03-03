@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -10,6 +11,11 @@ namespace EasyNetQ
     public interface IPersistentConnection : IDisposable
     {
         bool IsConnected { get; }
+        /// <summary>
+        /// Initialization method that should be only called once,
+        /// usually right after the implementation constructor has run.
+        /// </summary>
+        Task InitAsync();
         IModel CreateModel();
     }
 
@@ -23,6 +29,8 @@ namespace EasyNetQ
         private readonly IConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
+        private readonly object locker = new object();
+        private bool initialized = false;
         private IConnection connection;
 
         public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
@@ -34,8 +42,19 @@ namespace EasyNetQ
             this.connectionFactory = connectionFactory;
             this.logger = logger;
             this.eventBus = eventBus;
+        }
 
-            TryToConnect(null);
+        public Task InitAsync()
+        {
+            lock (locker)
+            {
+                if (initialized)
+                {
+                    throw new EasyNetQException("This PersistentConnection has already been initialized.");
+                }
+                initialized = true;
+                return Task.Factory.StartNew(() => TryToConnect(null));
+            }
         }
 
         public IModel CreateModel()

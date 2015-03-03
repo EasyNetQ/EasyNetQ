@@ -26,6 +26,7 @@ namespace EasyNetQ.Tests.Integration
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
             persistentChannel = new PersistentChannel(connection, logger, configuration, new EventBus());
+            connection.InitAsync().Wait();
         }
 
         [TearDown]
