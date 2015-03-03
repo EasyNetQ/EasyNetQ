@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace EasyNetQ.Tests.Integration
         [SetUp]
         public void SetUp()
         {
-            advancedBus = RabbitHutch.CreateBus("host=localhost,localhost").Advanced;
+            advancedBus = RabbitHutch.CreateBus("host=localhost:5672,localhost:5673").Advanced;
         }
 
         [TearDown]
@@ -83,16 +84,53 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(5000);
         }
 
-        [Test, Explicit("Requires Manual Verification through management console")]
+        [Test, Explicit("Requires Manual Verification through management console that we are actually using multiple connections to host")]
         public void LoadBalancedMassPublishToAnExchangeThroughDifferentChannels()
         {
             var myExchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct);
             var body = Encoding.UTF8.GetBytes("Hello Worlds");
-
-            while (true)
+            var tasks = new List<Task>();
+            for (var i = 0; i < 100000; i++)
             {
-                advancedBus.PublishAsync(myExchange, "routing_key", false, false, new MessageProperties(), body);
+                tasks.Add(advancedBus.PublishAsync(myExchange, "routing_key", false, false, new MessageProperties(), body));
             }
+            Task.WaitAll(tasks.ToArray());
+        }
+        
+        [Test]
+        public void Should_be_able_to_do_lots_more_operations_from_different_threads()
+        {
+            Helpers.ClearAllQueues();
+
+            var myExchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct);
+            var tasks = new List<Task>();
+            var body = Encoding.UTF8.GetBytes("Hello World!");
+            for (var i = 0; i < 10; i++)
+            {
+                tasks.Add(Task.Factory.StartNew(() =>
+                    {
+                        for (var j = 0; j < 100000; j++)
+                        {
+                            advancedBus.PublishAsync(myExchange, "routing_key", false, false, new MessageProperties(), body).Wait();
+                        }
+                    }, TaskCreationOptions.LongRunning));
+            }
+
+            var running = true;
+            var killerTask = Task.Factory.StartNew(() =>
+                {
+                    while (running)
+                    {
+                        Thread.Sleep(1000);
+                        Helpers.CloseConnection();
+                    }
+                }, TaskCreationOptions.LongRunning);
+
+            Task.WaitAll(tasks.ToArray());
+            Console.Out.WriteLine("Workers complete");
+            running = false;
+            killerTask.Wait();
+            Console.Out.WriteLine("Killer complete");
         }
 
         [Test]
