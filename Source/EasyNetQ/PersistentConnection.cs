@@ -20,21 +20,24 @@ namespace EasyNetQ
     {
         private const int connectAttemptIntervalMilliseconds = 5000;
 
-        private readonly IConnectionFactory connectionFactory;
+        private readonly ConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
         private IConnection connection;
+        private readonly Guid identifier;
 
-        public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
+        public PersistentConnection(RabbitMQ.Client.IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
-            this.connectionFactory = connectionFactory;
+            Preconditions.CheckTypeMatches(typeof(ConnectionFactory),connectionFactory,"connectionFactory","Expected type of ConnectionFactory");
+
+            this.connectionFactory = (ConnectionFactory)connectionFactory;
             this.logger = logger;
             this.eventBus = eventBus;
-
+            identifier = Guid.NewGuid();
             TryToConnect(null);
         }
 
@@ -62,26 +65,22 @@ namespace EasyNetQ
 
             logger.DebugWrite("Trying to connect");
             if (disposed) return;
-
-            connectionFactory.Reset();
-            do
+            var succeeded = false;
+            try
             {
-                try
-                {
-                    connection = connectionFactory.CreateConnection();
-                    connectionFactory.Success();
-                }
-                catch (System.Net.Sockets.SocketException socketException)
-                {
-                    LogException(socketException);
-                }
-                catch (BrokerUnreachableException brokerUnreachableException)
-                {
-                    LogException(brokerUnreachableException);
-                }
-            } while (connectionFactory.Next());
+                connection = connectionFactory.CreateConnection();
+                succeeded = true;
+            }
+            catch (System.Net.Sockets.SocketException socketException)
+            {
+                LogException(socketException);
+            }
+            catch (BrokerUnreachableException brokerUnreachableException)
+            {
+                LogException(brokerUnreachableException);
+            }
 
-            if (connectionFactory.Succeeded)
+            if (succeeded)
             {
                 connection.ConnectionShutdown += OnConnectionShutdown;
                 connection.ConnectionBlocked += OnConnectionBlocked;
@@ -89,9 +88,9 @@ namespace EasyNetQ
 
                 OnConnected();
                 logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
-                    connectionFactory.CurrentHost.Host,
-                    connectionFactory.CurrentHost.Port,
-                    connectionFactory.Configuration.VirtualHost);
+                    connectionFactory.HostName,
+                    connectionFactory.Port,
+                    connectionFactory.VirtualHost);
             }
             else
             {
@@ -105,9 +104,9 @@ namespace EasyNetQ
         {
             logger.ErrorWrite("Failed to connect to Broker: '{0}', Port: {1} VHost: '{2}'. " +
                     "ExceptionMessage: '{3}'",
-                connectionFactory.CurrentHost.Host,
-                connectionFactory.CurrentHost.Port,
-                connectionFactory.Configuration.VirtualHost,
+                    connectionFactory.HostName,
+                    connectionFactory.Port,
+                    connectionFactory.VirtualHost,
                 exception.Message);
         }
 
@@ -139,7 +138,7 @@ namespace EasyNetQ
         public void OnConnected()
         {
             logger.DebugWrite("OnConnected event fired");
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent(identifier));
         }
 
         public void OnDisconnected()

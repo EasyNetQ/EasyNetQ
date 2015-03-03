@@ -58,7 +58,12 @@ namespace EasyNetQ
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
 
-            connection = new PersistentConnection(connectionFactory, logger, eventBus);
+            do
+            {
+                connection = new PersistentConnection(connectionFactory.GetCurrentFactory(), logger, eventBus);
+                clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
+            } while (connectionFactory.Next());
+            
 
             eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
@@ -66,7 +71,6 @@ namespace EasyNetQ
             eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
             eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
 
-            clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
         }
 
 

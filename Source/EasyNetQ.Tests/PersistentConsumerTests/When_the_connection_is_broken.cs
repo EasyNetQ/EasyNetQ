@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using EasyNetQ.Events;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -9,11 +10,11 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     [TestFixture]
     public class When_the_connection_is_broken : Given_a_PersistentConsumer
     {
-        public override void AdditionalSetup()
+        public override void AdditionalSetup(Guid identifier)
         {
             persistentConnection.Stub(x => x.IsConnected).Return(true);
             consumer.StartConsuming();
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent(identifier));
         }
 
         [Test]

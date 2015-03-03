@@ -16,6 +16,7 @@ namespace EasyNetQ.Producer
 
         private IModel channel;
         private bool disconnected = true;
+        private readonly Guid _identifier;
 
         public PersistentChannel(
             IPersistentConnection connection, 
@@ -28,6 +29,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
+            _identifier = Guid.NewGuid();
             this.connection = connection;
             this.logger = logger;
             this.configuration = configuration;
@@ -81,6 +83,11 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
             InvokeChannelActionInternal(channelAction, DateTime.UtcNow);
+        }
+
+        public Guid Identifier
+        {
+            get { return _identifier; }
         }
 
         private void InvokeChannelActionInternal(Action<IModel> channelAction, DateTime startTime)
