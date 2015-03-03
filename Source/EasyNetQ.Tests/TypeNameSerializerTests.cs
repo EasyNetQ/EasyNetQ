@@ -64,6 +64,13 @@ namespace EasyNetQ.Tests
                     ));
         }
 
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Should_throw_exception_if_type_name_is_null()
+        {
+            typeNameSerializer.DeSerialize(null);
+        }
+
         public void Spike()
         {
             var type = Type.GetType("EasyNetQ.Tests.SomeRandomClass, EasyNetQ.Tests");
