@@ -2,12 +2,15 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.46.1.0")]
+[assembly: AssemblyVersion("0.47.1.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
-// 0.46.1.0 Logging is disabled by default.
+// 0.47.2.0 Logging is disabled by default.
+// 0.47.1.0 Bug fix, when the message broker connection is lost is not possible any more publish a message on queue EasyNetQ_Default_Error_Queue.
+// 0.47.0.0 It's now required to call PersistentConnection.Initialize() to bootstrap a PersistentConnection and make it start attempting to connect.
+// 0.46.1.0 Fix NullReferenceException on Serialize
 // 0.46.0.0 Implementation of AdvancedBusEventHandlers and events are gone from IBus.
 // 0.45.0.0 IBus Subscription methods now return an ISubscriptionResult and IAdvancedBus exposes IConventions.
 // 0.44.3.0 RabbitHutch.CreateBus overload
