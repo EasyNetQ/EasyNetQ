@@ -9,8 +9,11 @@ namespace EasyNetQ
         private static int index = 0;
         internal static T Random<T>(this IEnumerable<T> enumerable, Func<T, bool> condition) where T : class
         {
+            Preconditions.CheckNotNull(enumerable,"enumerable", "Null collection passed to Random()");
+            Preconditions.CheckAny(enumerable, "enumerable", "Empty collection passed to Random()");
+
             var possibilities = enumerable.Where(condition);
-            if (!possibilities.Any()) return null;
+            if (!possibilities.Any()) return enumerable.First();
 
             var count = possibilities.Count();
             var response = possibilities.ToArray()[index % count];
