@@ -158,16 +158,12 @@ namespace EasyNetQ
 
         private IPersistentConnection GetConnection()
         {
-            if ( !persistentDispatcher.Next() )
-                persistentDispatcher.Reset();
-            return persistentDispatcher.Current().Connection;
+            return persistentDispatcher.Random(x => x.Connection.IsConnected).Connection;
         }
 
         private IClientCommandDispatcher GetClientCommandDispatcher()
         {
-            if (!persistentDispatcher.Next())
-                persistentDispatcher.Reset();
-            return persistentDispatcher.Current().CommandDispatcher;
+            return persistentDispatcher.Random(x => x.Connection.IsConnected).CommandDispatcher;
         }
 
         // -------------------------------- publish ---------------------------------------------
