@@ -65,16 +65,7 @@ namespace EasyNetQ
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.conventions = conventions;
             this.advancedBusEventHandlers = advancedBusEventHandlers;
-
-            persistentDispatcher = new OrderedClusterHostSelectionStrategy<IPersistentDispatcher>();
-            do
-            {
-                var connection = new PersistentConnection(connectionFactory.GetCurrentFactory(), logger, eventBus);
-                var clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
-                persistentDispatcher.Add(new PersistentDispatcher(connection, clientCommandDispatcher));
-            } while (connectionFactory.Next());
             
-
             this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             if (this.advancedBusEventHandlers.Connected != null)
             {
@@ -100,6 +91,15 @@ namespace EasyNetQ
             {
                 MessageReturned += this.advancedBusEventHandlers.MessageReturned;
             }
+
+            persistentDispatcher = new OrderedClusterHostSelectionStrategy<IPersistentDispatcher>();
+            do
+            {
+                var connection = new PersistentConnection(connectionFactory.GetCurrentFactory(), logger, eventBus);
+                var clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
+                persistentDispatcher.Add(new PersistentDispatcher(connection, clientCommandDispatcher));
+            } while (connectionFactory.Next());
+            
         }
 
         

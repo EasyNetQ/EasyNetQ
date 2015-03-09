@@ -40,11 +40,16 @@ namespace EasyNetQ.Tests
                     messageReturnedEventArgs = e;
                 });
 
+
+            var rabbitMQClientConnectionFactory = MockRepository.GenerateStub<ConnectionFactory>();
+            rabbitMQClientConnectionFactory.Stub(x => x.CreateConnection()).Return(MockRepository.GenerateStub<IConnection>());
+
             var connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
             connectionFactory.Stub(x => x.Succeeded).Return(true);
-            connectionFactory.Stub(x => x.CreateConnection()).Return(MockRepository.GenerateStub<IConnection>());
             connectionFactory.Stub(x => x.CurrentHost).Return(new HostConfiguration());
             connectionFactory.Stub(x => x.Configuration).Return(new ConnectionConfiguration());
+            connectionFactory.Stub(x => x.GetCurrentFactory())
+                .Return(rabbitMQClientConnectionFactory);
 
             eventBus = new EventBus();
 
