@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.Integration
             var configuration = parser.Parse("host=localhost");
             var hostSelectionStrategy = new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>();
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
-            connection = new PersistentConnection(connectionFactory, logger, eventBus);
+            connection = new PersistentConnection(connectionFactory.GetCurrentFactory(), logger, eventBus);
             var persistentChannelFactory = new PersistentChannelFactory(logger, configuration, eventBus);
 
             dispatcher = new ClientCommandDispatcher(connection, persistentChannelFactory);

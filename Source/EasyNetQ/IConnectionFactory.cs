@@ -13,6 +13,7 @@ namespace EasyNetQ
         void Success();
         void Reset();
         bool Succeeded { get; }
+        ConnectionFactory GetCurrentFactory();
     }
 
     public class ConnectionFactoryWrapper : IConnectionFactory
@@ -70,6 +71,11 @@ namespace EasyNetQ
             }
         }
 
+        public ConnectionFactory GetCurrentFactory()
+        {
+            return clusterHostSelectionStrategy.Current().ConnectionFactory;
+        }
+
         public virtual IConnection CreateConnection()
         {
             return clusterHostSelectionStrategy.Current().ConnectionFactory.CreateConnection();
@@ -99,6 +105,7 @@ namespace EasyNetQ
         {
             get { return clusterHostSelectionStrategy.Succeeded; }
         }
+
     }
 
     public class ConnectionFactoryInfo

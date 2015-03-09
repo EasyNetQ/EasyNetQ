@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using Rhino.Mocks;
@@ -8,6 +9,7 @@ namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
+        private readonly ConnectionFactory rmqConnectionFactory = MockRepository.GenerateStub<ConnectionFactory>();
         readonly IConnectionFactory connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
         readonly IConnection connection = MockRepository.GenerateStub<IConnection>();
         readonly List<IModel> channels = new List<IModel>();
@@ -35,6 +37,9 @@ namespace EasyNetQ.Tests.Mocking
                 channelPool.Push(MockRepository.GenerateStub<IModel>());
             }
 
+            //TODO:  Update Mocks
+            connectionFactory.Stub(x => x.GetCurrentFactory()).Return(rmqConnectionFactory);
+            rmqConnectionFactory.Stub(x => x.CreateConnection()).Return(connection);
             connectionFactory.Stub(x => x.CreateConnection()).Return(connection);
             connectionFactory.Stub(x => x.Next()).Return(false);
             connectionFactory.Stub(x => x.Succeeded).Return(true);

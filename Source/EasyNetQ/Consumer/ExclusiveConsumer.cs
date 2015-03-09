@@ -40,7 +40,7 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(configuration, "configuration");
-       
+
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
