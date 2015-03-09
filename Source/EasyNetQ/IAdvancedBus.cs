@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -397,33 +398,38 @@ namespace EasyNetQ
         bool IsConnected { get; }
 
         /// <summary>
-        /// Event fires when the bus connects
+        /// Event fires when the bus has connected to a RabbitMQ broker.
         /// </summary>
-        event Action Connected;
+        event EventHandler Connected;
 
         /// <summary>
-        /// Event fires when the bus disconnects
+        /// Event fires when the bus has disconnected from a RabbitMQ broker.
         /// </summary>
-        event Action Disconnected;
+        event EventHandler Disconnected;
 
         /// <summary>
         /// Event fires when the bus gets blocked due to the broker running low on resources.
         /// </summary>
-        event Action Blocked;
+        event EventHandler<ConnectionBlockedEventArgs> Blocked;
 
         /// <summary>
         /// Event fires when the bus is unblocked.
         /// </summary>
-        event Action Unblocked;
+        event EventHandler Unblocked;
 
         /// <summary>
         /// Event fires when a mandatory or immediate message is returned as un-routable
         /// </summary>
-        event Action<byte[], MessageProperties, MessageReturnedInfo> MessageReturned;
+        event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
         /// <summary>
-        /// The IoC container that EasyNetQ uses to resolve it's services.
+        /// The IoC container that EasyNetQ uses to resolve its services.
         /// </summary>
         IContainer Container { get; }
+
+        /// <summary>
+        /// The conventions used by EasyNetQ to name its routing topology elements.
+        /// </summary>
+        IConventions Conventions { get; }
     }
 }

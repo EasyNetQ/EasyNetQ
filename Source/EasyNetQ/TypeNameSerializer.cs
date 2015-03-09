@@ -12,6 +12,7 @@ namespace EasyNetQ
     {
         public Type DeSerialize(string typeName)
         {
+            Preconditions.CheckNotBlank(typeName, "typeName");
             var nameParts = typeName.Split(':');
             if (nameParts.Length != 2)
             {

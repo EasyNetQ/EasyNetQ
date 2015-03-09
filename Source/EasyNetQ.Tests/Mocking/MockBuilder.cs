@@ -32,12 +32,11 @@ namespace EasyNetQ.Tests.Mocking
 
         public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 channelPool.Push(MockRepository.GenerateStub<IModel>());
             }
 
-            //TODO:  Update Mocks
             connectionFactory.Stub(x => x.GetCurrentFactory()).Return(rmqConnectionFactory);
             rmqConnectionFactory.Stub(x => x.CreateConnection()).Return(connection);
             connectionFactory.Stub(x => x.CreateConnection()).Return(connection);
