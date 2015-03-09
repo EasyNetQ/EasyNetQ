@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EasyNetQ.Events
+﻿namespace EasyNetQ.Events
 {
     public class ConnectionCreatedEvent
     {

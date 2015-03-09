@@ -54,7 +54,7 @@ namespace EasyNetQ.Consumer
 
             return new ConsumerCancellation(Dispose);
         }
-        
+
         private void StartConsumingInternal()
         {
             if (disposed) return;
