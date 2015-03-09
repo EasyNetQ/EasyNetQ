@@ -10,7 +10,6 @@ namespace EasyNetQ.Consumer
 {
     public class ExclusiveConsumer : IConsumer
     {
-        private readonly Guid _identifier;
         private readonly object syncLock = new object();
         private volatile bool isStarted;
 
@@ -42,7 +41,6 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            _identifier = Guid.NewGuid();
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
@@ -63,11 +61,6 @@ namespace EasyNetQ.Consumer
             eventCancellations.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
             StartConsumer();
             return new ConsumerCancellation(Dispose);   
-        }
-
-        public Guid Identifier
-        {
-            get { return _identifier; }
         }
 
         private void StartConsumer()

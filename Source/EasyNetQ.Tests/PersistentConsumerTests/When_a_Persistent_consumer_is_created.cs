@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     [TestFixture]
     public class When_a_Persistent_consumer_starts_consuming : Given_a_PersistentConsumer
     {
-        public override void AdditionalSetup(Guid identifier)
+        public override void AdditionalSetup()
         {
             persistentConnection.Stub(x => x.IsConnected).Return(true);
             consumer.StartConsuming();

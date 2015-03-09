@@ -60,10 +60,10 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                 internalConsumerFactory, 
                 eventBus);
 
-            AdditionalSetup(consumer.Identifier);
+            AdditionalSetup();
         }
 
-        public abstract void AdditionalSetup(Guid identifier);
+        public abstract void AdditionalSetup();
     }
 }
 

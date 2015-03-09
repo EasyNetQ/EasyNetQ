@@ -9,8 +9,6 @@ namespace EasyNetQ.Consumer
 {
     public class PersistentConsumer : IConsumer
     {
-
-        private readonly Guid _identifier;
         private readonly IQueue queue;
         private readonly Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private readonly IPersistentConnection connection;
@@ -39,7 +37,6 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            _identifier = Guid.NewGuid();
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
@@ -57,12 +54,6 @@ namespace EasyNetQ.Consumer
 
             return new ConsumerCancellation(Dispose);
         }
-
-        public Guid Identifier
-        {
-            get { return _identifier; }
-        }
-
         
         private void StartConsumingInternal()
         {

@@ -24,7 +24,6 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
         private IConnection connection;
-        private readonly Guid identifier;
 
         public PersistentConnection(RabbitMQ.Client.IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
         {
@@ -37,7 +36,6 @@ namespace EasyNetQ
             this.connectionFactory = (ConnectionFactory)connectionFactory;
             this.logger = logger;
             this.eventBus = eventBus;
-            identifier = Guid.NewGuid();
             TryToConnect(null);
         }
 
@@ -138,7 +136,7 @@ namespace EasyNetQ
         public void OnConnected()
         {
             logger.DebugWrite("OnConnected event fired");
-            eventBus.Publish(new ConnectionCreatedEvent(identifier));
+            eventBus.Publish(new ConnectionCreatedEvent());
         }
 
         public void OnDisconnected()
