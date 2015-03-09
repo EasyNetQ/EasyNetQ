@@ -43,7 +43,6 @@ namespace EasyNetQ
             this.connectionFactory = (ConnectionFactory)connectionFactory;
             this.logger = logger;
             this.eventBus = eventBus;
-            TryToConnect(null);
         }
 
         public void Initialize()
