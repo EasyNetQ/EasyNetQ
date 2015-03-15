@@ -67,6 +67,7 @@
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
     <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
+    <Compile Include="MessageDeliveryMode.cs" />
     <Compile Include="SubscriptionResult.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
