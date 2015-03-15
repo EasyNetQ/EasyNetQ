@@ -7,6 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.47.4.0 PersistentChannel update preventing race condition following PersistentConnection quick connection/disconnection.
 // 0.47.3.0 Using MessageDeliveryMode instead of hardcoded 1/2 and Exchange/ExchangeType update.
 // 0.47.2.0 Logging is disabled by default.
 // 0.47.1.0 Bug fix, when the message broker connection is lost is not possible any more publish a message on queue EasyNetQ_Default_Error_Queue.
