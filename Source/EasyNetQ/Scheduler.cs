@@ -73,13 +73,21 @@ namespace EasyNetQ
             {
                 var typeName = typeNameSerializer.Serialize(typeof(T));
                 var messageBody = serializer.MessageToBytes(message);
-                var easyNetQMessage = new Message<ScheduleMe>(new ScheduleMe
+                var scheduleMe = new ScheduleMe
                 {
                     WakeTime = futurePublishDate,
                     BindingKey = typeName,
                     CancellationKey = cancellationKey,
                     InnerMessage = messageBody
-                }) { Properties = { DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1) } };
+                };
+                var easyNetQMessage = new Message<ScheduleMe>(scheduleMe)
+                {
+                    Properties =
+                    {
+                        DeliveryMode = messageDeliveryModeStrategy.IsPersistent(messageType) ? 
+                            MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                    }
+                };
                 return advancedBus.PublishAsync(exchange, conventions.TopicNamingConvention(messageType), false, false, easyNetQMessage);
             });
         }
@@ -102,7 +110,8 @@ namespace EasyNetQ
                                                        {
                                                            Properties =
                                                            {
-                                                               DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 2 : 1)
+                                                               DeliveryMode = messageDeliveryModeStrategy.IsPersistent(typeof(T)) ?
+                                                                    MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
                                                            }
                                                        };
                                                        return advancedBus.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
@@ -119,10 +128,15 @@ namespace EasyNetQ
             var messageType = typeof(UnscheduleMe);
             return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
             {
-                var easyNetQMessage = new Message<UnscheduleMe>(new UnscheduleMe
+                var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
+                var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
                 {
-                    CancellationKey = cancellationKey
-                }) { Properties = { DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1) } };
+                    Properties =
+                    {
+                        DeliveryMode = messageDeliveryModeStrategy.IsPersistent(messageType) ?
+                            MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                    }
+                };
                 return advancedBus.PublishAsync(exchange, conventions.TopicNamingConvention(messageType), false, false, easyNetQMessage);
             });
         }

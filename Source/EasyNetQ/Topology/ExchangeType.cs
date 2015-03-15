@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Topology
 {
-    public class ExchangeType
+    public static class ExchangeType
     {
         public const string Direct = "direct";
         public const string Topic = "topic";

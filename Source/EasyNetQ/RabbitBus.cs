@@ -71,7 +71,14 @@ namespace EasyNetQ
             var messageType = typeof (T);
             return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
                 {
-                    var easyNetQMessage = new Message<T>(message) { Properties = { DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(messageType) ? 2 : 1) } };
+                    var easyNetQMessage = new Message<T>(message)
+                    {
+                        Properties =
+                        {
+                            DeliveryMode = messageDeliveryModeStrategy.IsPersistent(messageType) ? 
+                                MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                        }
+                    };
                     return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage); 
                 });
         }
