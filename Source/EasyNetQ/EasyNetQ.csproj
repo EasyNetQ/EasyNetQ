@@ -94,7 +94,6 @@
     <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="DefaultMessageSerializationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
-    <Compile Include="Delegates.cs" />
     <Compile Include="DeliveryModeAttribute.cs" />
     <Compile Include="MessageDeliveryModeStrategy.cs" />
     <Compile Include="EasyNetQException.cs" />
