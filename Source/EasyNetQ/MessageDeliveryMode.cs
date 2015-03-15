@@ -1,8 +1,8 @@
 ﻿namespace EasyNetQ
 {
-    public enum MessageDeliveryMode : byte
+    public static class MessageDeliveryMode
     {
-        NonPersistent = 1,
-        Persistent = 2
+        public const byte NonPersistent = 1;
+        public const byte Persistent = 2;
     }
 }

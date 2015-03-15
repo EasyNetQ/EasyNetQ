@@ -188,11 +188,16 @@ namespace EasyNetQ.Producer
         {
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
             var requestType = typeof(TRequest);
-            var requestMessage = new Message<TRequest>(request);
-            requestMessage.Properties.ReplyTo = returnQueueName;
-            requestMessage.Properties.CorrelationId = correlationId.ToString();
-            requestMessage.Properties.Expiration = (timeoutStrategy.GetTimeoutSeconds(requestType) * 1000).ToString();
-            requestMessage.Properties.DeliveryMode = (byte)(messageDeliveryModeStrategy.IsPersistent(requestType) ? 2 : 1);
+            var requestMessage = new Message<TRequest>(request)
+            {
+                Properties =
+                {
+                    ReplyTo = returnQueueName,
+                    CorrelationId = correlationId.ToString(), 
+                    Expiration = (timeoutStrategy.GetTimeoutSeconds(requestType) * 1000).ToString(),
+                    DeliveryMode = messageDeliveryModeStrategy.IsPersistent(requestType) ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                }
+            };
 
             advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
         }
@@ -259,9 +264,14 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class
         {
-            var responseMessage = new Message<TResponse>(response);
-            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-            responseMessage.Properties.DeliveryMode = 1; // non-persistent
+            var responseMessage = new Message<TResponse>(response)
+            {
+                Properties =
+                {
+                    CorrelationId = requestMessage.Properties.CorrelationId, 
+                    DeliveryMode = MessageDeliveryMode.NonPersistent
+                }
+            };
 
             advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
         }
@@ -275,7 +285,7 @@ namespace EasyNetQ.Producer
             responseMessage.Properties.Headers.Add(IsFaultedKey, true);
             responseMessage.Properties.Headers.Add(ExceptionMessageKey, exceptionMessage);
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-            responseMessage.Properties.DeliveryMode = 1; // non-persistent
+            responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
 
             advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
         }
