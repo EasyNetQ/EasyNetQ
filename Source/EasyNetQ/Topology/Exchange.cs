@@ -2,11 +2,13 @@
 {
     public class Exchange : IExchange
     {
+        private static readonly Exchange defaultExchange = new Exchange("");
+
         public string Name { get; private set; }
 
         public static IExchange GetDefault()
         {
-            return new Exchange("");
+            return defaultExchange;
         }
 
         public Exchange(string name)
