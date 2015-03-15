@@ -134,7 +134,6 @@
     <Compile Include="Interception\IProduceConsumeInterceptor.cs" />
     <Compile Include="Interception\RawMessage.cs" />
     <Compile Include="Interception\TripleDESInterceptor.cs" />
-    <Compile Include="ISaga.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
