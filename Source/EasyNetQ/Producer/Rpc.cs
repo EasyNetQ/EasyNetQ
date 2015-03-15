@@ -195,7 +195,7 @@ namespace EasyNetQ.Producer
                     ReplyTo = returnQueueName,
                     CorrelationId = correlationId.ToString(), 
                     Expiration = (timeoutStrategy.GetTimeoutSeconds(requestType) * 1000).ToString(),
-                    DeliveryMode = messageDeliveryModeStrategy.IsPersistent(requestType) ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
                 }
             };
 
