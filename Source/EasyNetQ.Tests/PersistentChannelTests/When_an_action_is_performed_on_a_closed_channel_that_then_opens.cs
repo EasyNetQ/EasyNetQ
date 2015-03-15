@@ -31,17 +31,9 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 AmqpException.ConnectionClosed,
                 "connection closed by peer");
             var exception = new OperationInterruptedException(shutdownArgs);
-            var first = true;
 
-            persistentConnection.Stub(x => x.CreateModel()).WhenCalled(x =>
-                {
-                    if (first)
-                    {
-                        first = false;
-                        throw exception;
-                    }
-                    x.ReturnValue = channel;
-                });
+            persistentConnection.Stub(x => x.CreateModel()).Throw(exception).Repeat.Once();
+            persistentConnection.Stub(x => x.CreateModel()).Return(channel).Repeat.Any();
 
             var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
 

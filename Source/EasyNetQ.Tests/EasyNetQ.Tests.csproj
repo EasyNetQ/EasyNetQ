@@ -103,6 +103,7 @@
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="Integration\AdvancedBusTests.cs" />
     <Compile Include="MessageFactoryTests.cs" />
+    <Compile Include="PersistentChannelTests\When_a_ConnectionCreatedEvent_is_published.cs" />
     <Compile Include="TimeoutStrategyTest.cs" />
     <Compile Include="DefaultMessageSerializationStrategyTests.cs" />
     <Compile Include="DeliveryModeStrategyTest.cs" />
