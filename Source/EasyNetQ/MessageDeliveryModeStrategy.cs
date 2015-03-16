@@ -4,7 +4,7 @@ namespace EasyNetQ
 {
     public interface IMessageDeliveryModeStrategy
     {
-        bool IsPersistent(Type messageType);
+        byte GetDeliveryMode(Type messageType);
     }
 
     public class MessageDeliveryModeStrategy : IMessageDeliveryModeStrategy
@@ -17,11 +17,18 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
         }
 
-        public bool IsPersistent(Type messageType)
+        public byte GetDeliveryMode(Type messageType)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
             var deliveryModeAttribute = messageType.GetAttribute<DeliveryModeAttribute>();
-            return deliveryModeAttribute != null ? deliveryModeAttribute.IsPersistent : connectionConfiguration.PersistentMessages;
+            if (deliveryModeAttribute == null)
+                return GetDeliveryModeInternal(connectionConfiguration.PersistentMessages);
+            return GetDeliveryModeInternal(deliveryModeAttribute.IsPersistent);
+        }
+
+        private static byte GetDeliveryModeInternal(bool isPersistent)
+        {
+            return isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent;
         }
     }
 }
