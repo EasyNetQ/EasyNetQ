@@ -36,8 +36,7 @@ namespace EasyNetQ.Producer
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.IsPersistent(typeof(T)) ? 
-                        MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
                 }
             };
 
@@ -56,8 +55,7 @@ namespace EasyNetQ.Producer
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.IsPersistent(typeof(T)) ?
-                        MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
                 }
             };
 

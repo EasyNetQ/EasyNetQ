@@ -94,9 +94,8 @@
     <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
     <Compile Include="DefaultMessageSerializationStrategy.cs" />
     <Compile Include="DefaultServiceProvider.cs" />
-    <Compile Include="Delegates.cs" />
     <Compile Include="DeliveryModeAttribute.cs" />
-    <Compile Include="DeliveryModeStrategy.cs" />
+    <Compile Include="MessageDeliveryModeStrategy.cs" />
     <Compile Include="EasyNetQException.cs" />
     <Compile Include="Events\AckEvent.cs" />
     <Compile Include="Events\ConnectionBlockedEvent.cs" />
@@ -134,7 +133,6 @@
     <Compile Include="Interception\IProduceConsumeInterceptor.cs" />
     <Compile Include="Interception\RawMessage.cs" />
     <Compile Include="Interception\TripleDESInterceptor.cs" />
-    <Compile Include="ISaga.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />

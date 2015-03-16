@@ -75,8 +75,7 @@ namespace EasyNetQ
                     {
                         Properties =
                         {
-                            DeliveryMode = messageDeliveryModeStrategy.IsPersistent(messageType) ? 
-                                MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
                         }
                     };
                     return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage); 

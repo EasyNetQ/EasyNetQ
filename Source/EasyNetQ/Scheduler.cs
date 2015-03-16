@@ -84,8 +84,7 @@ namespace EasyNetQ
                 {
                     Properties =
                     {
-                        DeliveryMode = messageDeliveryModeStrategy.IsPersistent(messageType) ? 
-                            MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                        DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
                     }
                 };
                 return advancedBus.PublishAsync(exchange, conventions.TopicNamingConvention(messageType), false, false, easyNetQMessage);
@@ -110,8 +109,7 @@ namespace EasyNetQ
                                                        {
                                                            Properties =
                                                            {
-                                                               DeliveryMode = messageDeliveryModeStrategy.IsPersistent(typeof(T)) ?
-                                                                    MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                                                               DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
                                                            }
                                                        };
                                                        return advancedBus.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
@@ -133,8 +131,7 @@ namespace EasyNetQ
                 {
                     Properties =
                     {
-                        DeliveryMode = messageDeliveryModeStrategy.IsPersistent(messageType) ?
-                            MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
+                        DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
                     }
                 };
                 return advancedBus.PublishAsync(exchange, conventions.TopicNamingConvention(messageType), false, false, easyNetQMessage);
