@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
@@ -58,7 +60,10 @@ namespace EasyNetQ
 
         public IModel CreateModel()
         {
-            if(!IsConnected) throw new EasyNetQException("Not connected");
+            if (!IsConnected)
+            {
+                throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
+            }
 
             return connection.CreateModel();
         }
@@ -89,7 +94,7 @@ namespace EasyNetQ
                     connection = connectionFactory.CreateConnection();
                     connectionFactory.Success();
                 }
-                catch (System.Net.Sockets.SocketException socketException)
+                catch (SocketException socketException)
                 {
                     LogException(socketException);
                 }
@@ -176,7 +181,7 @@ namespace EasyNetQ
                 {
                     connection.Dispose();
                 }
-                catch (System.IO.IOException exception)
+                catch (IOException exception)
                 {
                     logger.DebugWrite(
                         "IOException thrown on connection dispose. Message: '{0}'. " + 

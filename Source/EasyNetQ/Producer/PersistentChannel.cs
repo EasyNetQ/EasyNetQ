@@ -54,10 +54,13 @@ namespace EasyNetQ.Producer
 
         private void ConnectionOnConnected(ConnectionCreatedEvent @event)
         {
-            OpenChannel();
+            if (connection.IsConnected)
+            {
+                OpenChannel();
+            }
         }
 
-        public IModel Channel
+        private IModel Channel
         {
             get
             {
@@ -122,7 +125,6 @@ namespace EasyNetQ.Producer
                 WaitForReconnectionOrTimeout(startTime);
                 InvokeChannelActionInternal(channelAction, startTime);
             }
-
         }
 
         private void WaitForReconnectionOrTimeout(DateTime startTime)
