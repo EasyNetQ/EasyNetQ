@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.47.5.0")]
+[assembly: AssemblyVersion("0.47.6.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.47.6.0 AtLeastOneWithDefault -> DefaultIfEmpty
 // 0.47.5.0 PersistentChannel update preventing race condition following PersistentConnection quick connection/disconnection.
 // 0.47.4.0 Refactor MessageDeliveryModeStrategy
 // 0.47.3.0 Using MessageDeliveryMode instead of hardcoded 1/2 and Exchange/ExchangeType update.
