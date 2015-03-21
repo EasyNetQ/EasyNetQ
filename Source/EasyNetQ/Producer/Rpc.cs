@@ -14,10 +14,10 @@ namespace EasyNetQ.Producer
     public class Rpc : IRpc
     {
         private readonly ConnectionConfiguration connectionConfiguration;
-        private readonly IAdvancedBus advancedBus;
-        private readonly IConventions conventions;
-        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
-        private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+        protected readonly IAdvancedBus advancedBus;
+        protected readonly IConventions conventions;
+        protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly ITimeoutStrategy timeoutStrategy;
         private readonly ITypeNameSerializer typeNameSerializer;
 
@@ -25,10 +25,10 @@ namespace EasyNetQ.Producer
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
         private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
 
-        private readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
+        protected readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
 
-        private const string isFaultedKey = "IsFaulted";
-        private const string exceptionMessageKey = "ExceptionMessage";
+        protected const string isFaultedKey = "IsFaulted";
+        protected const string exceptionMessageKey = "ExceptionMessage";
 
         public Rpc(
             ConnectionConfiguration connectionConfiguration,
