@@ -9,6 +9,7 @@ namespace EasyNetQ
         Type DeSerialize(string typeName);
     }
 
+	
     public class TypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
