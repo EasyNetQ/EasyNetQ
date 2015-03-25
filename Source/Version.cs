@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.47.6.0")]
+[assembly: AssemblyVersion("0.47.7.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.47.7.0 Validating ConnectionConfiguration in lowest level method of RabbitHutch.
 // 0.47.6.0 AtLeastOneWithDefault -> DefaultIfEmpty
 // 0.47.5.0 PersistentChannel update preventing race condition following PersistentConnection quick connection/disconnection.
 // 0.47.4.0 Refactor MessageDeliveryModeStrategy

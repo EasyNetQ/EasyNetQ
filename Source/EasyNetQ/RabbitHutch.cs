@@ -293,8 +293,6 @@ namespace EasyNetQ
                 Password = password,
                 RequestedHeartbeat = requestedHeartbeat
             };
-            connectionConfiguration.Validate();
-
             return CreateBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
         }
 
@@ -351,6 +349,7 @@ namespace EasyNetQ
                     "Have you called SetContainerFactory(...) with a function that returns null?");
             }
 
+            connectionConfiguration.Validate();
             container.Register(_ => connectionConfiguration);
             container.Register(_ => advancedBusEventHandlers);
             registerServices(container);
