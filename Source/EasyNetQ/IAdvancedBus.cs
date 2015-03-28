@@ -241,17 +241,28 @@ namespace EasyNetQ
         /// <param name="name">The name of the queue</param>
         /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
-        ///     and are deleted when that connection closes.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="perQueueMessageTtl">How long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
-        /// <returns>
-        /// The queue
-        /// </returns>
-        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null);
+        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
+        /// <param name="deadLetterExchange">The exchange to publish dead-lettered messages to.</param>
+        /// <param name="deadLetterRoutingKey">
+        /// If set, dead-lettered messages will published to their dead letter exchange using the specified routing key. 
+        /// If not set, dead-lettered messages will be published to their dead letter exchange using the same routing key they were originally published with.
+        /// </param>
+        /// <returns>The queue</returns>
+        IQueue QueueDeclare(
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false, 
+            bool autoDelete = false,
+            int? perQueueMessageTtl = null,
+            int? expires = null,
+            byte? maxPriority = null,
+            string deadLetterExchange = null, 
+            string deadLetterRoutingKey = null);
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -259,16 +270,28 @@ namespace EasyNetQ
         /// <param name="name">The name of the queue</param>
         /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
-        ///     and are deleted when that connection closes.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="perQueueMessageTtl">How long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
+        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
+        /// <param name="deadLetterExchange">The exchange to publish dead-lettered messages to.</param>
+        /// <param name="deadLetterRoutingKey">
+        /// If set, dead-lettered messages will published to their dead letter exchange using the specified routing key. 
+        /// If not set, dead-lettered messages will be published to their dead letter exchange using the same routing key they were originally published with.
+        /// </param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null);
-
+        Task<IQueue> QueueDeclareAsync(
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false, 
+            bool autoDelete = false,
+            int? perQueueMessageTtl = null,
+            int? expires = null,
+            byte? maxPriority = null,
+            string deadLetterExchange = null, 
+            string deadLetterRoutingKey = null);
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
