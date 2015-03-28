@@ -9,7 +9,7 @@
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/EasyNetQ/EasyNetQ/blob/master/licence.txt</licenseUrl>
     <projectUrl>https://github.com/EasyNetQ/EasyNetQ/wiki/Using-Alternative-DI-Containers</projectUrl>
-    <iconUrl>https://raw.github.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An adaptor to allow EasyNetQ to use Autofac as its internal IoC container</description>
     <releaseNotes>
