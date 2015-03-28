@@ -46,11 +46,11 @@ namespace EasyNetQ.Producer
 
         public abstract Task Publish(IModel model, Action<IModel> publishAction);
 
-        protected void ModelOnBasicReturn(IModel model, BasicReturnEventArgs args)
+        protected void ModelOnBasicReturn(object model, BasicReturnEventArgs e)
         {
-            eventBus.Publish(new ReturnedMessageEvent(args.Body,
-                                                      new MessageProperties(args.BasicProperties),
-                                                      new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)));
+            eventBus.Publish(new ReturnedMessageEvent(e.Body,
+                new MessageProperties(e.BasicProperties),
+                new MessageReturnedInfo(e.Exchange, e.RoutingKey, e.ReplyText)));
         }
 
         protected struct NullStruct { }

@@ -134,7 +134,7 @@ namespace EasyNetQ
                 exception.Message);
         }
 
-        void OnConnectionShutdown(IConnection _, ShutdownEventArgs reason)
+        void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
             if (disposed) return;
             OnDisconnected();
@@ -145,14 +145,14 @@ namespace EasyNetQ
             TryToConnect(null);
         }
 
-        void OnConnectionBlocked(IConnection sender, ConnectionBlockedEventArgs reason)
+        void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            logger.InfoWrite("Connection blocked. Reason: '{0}'", reason.Reason);
+            logger.InfoWrite("Connection blocked. Reason: '{0}'", e.Reason);
 
-            eventBus.Publish(new ConnectionBlockedEvent(reason.Reason));
+            eventBus.Publish(new ConnectionBlockedEvent(e.Reason));
         }
 
-        void OnConnectionUnblocked(IConnection sender)
+        void OnConnectionUnblocked(object sender, EventArgs e)
         {
             logger.InfoWrite("Connection unblocked.");
 
