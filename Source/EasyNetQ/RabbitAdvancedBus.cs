@@ -312,13 +312,13 @@ namespace EasyNetQ
             }
 
             var arguments = new Dictionary<string, object>();
-            if (perQueueMessageTtl != int.MaxValue)
+            if (perQueueMessageTtl.HasValue)
             {
-                arguments.Add("x-message-ttl", perQueueMessageTtl);
+                arguments.Add("x-message-ttl", perQueueMessageTtl.Value);
             }
-            if (expires != int.MaxValue)
+            if (expires.HasValue)
             {
-                arguments.Add("x-expires", expires);
+                arguments.Add("x-expires", expires.Value);
             }
             if (maxPriority.HasValue)
             {

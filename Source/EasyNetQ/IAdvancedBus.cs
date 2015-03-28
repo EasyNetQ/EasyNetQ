@@ -295,8 +295,7 @@ namespace EasyNetQ
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
-        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
-        /// consumers.
+        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate consumers.
         /// </summary>
         /// <returns>The queue</returns>
         IQueue QueueDeclare();
@@ -310,7 +309,7 @@ namespace EasyNetQ
         void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false);
 
         /// <summary>
-        /// Purget a queue
+        /// Purge a queue
         /// </summary>
         /// <param name="queue">The queue to purge</param>
         void QueuePurge(IQueue queue);
@@ -323,13 +322,18 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
-        ///     but only when bound to other exchanges.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <returns>The exchange</returns>
-        IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
-
-
+        IExchange ExchangeDeclare(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false, 
+            string alternateExchange = null);
+        
         /// <summary>
         /// Declare an exchange
         /// </summary>
@@ -338,11 +342,17 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
-        ///     but only when bound to other exchanges.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <returns>The exchange</returns>
-        Task<IExchange> ExchangeDeclareAsync(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
+        Task<IExchange> ExchangeDeclareAsync(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false, 
+            string alternateExchange = null);
 
         /// <summary>
         /// Delete an exchange
