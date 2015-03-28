@@ -7,14 +7,14 @@
     <title>EasyNetQ.DI.Autofac</title>
     <authors>Wiebe Tijsma, Mike Hadlow</authors>
     <owners>Mike Hadlow</owners>
-    <licenseUrl>https://github.com/mikehadlow/EasyNetQ/blob/master/licence.txt</licenseUrl>
-    <projectUrl>https://github.com/mikehadlow/EasyNetQ/wiki/Using-Alternative-DI-Containers</projectUrl>
-    <iconUrl>https://raw.github.com/mikehadlow/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
+    <licenseUrl>https://github.com/EasyNetQ/EasyNetQ/blob/master/licence.txt</licenseUrl>
+    <projectUrl>https://github.com/EasyNetQ/EasyNetQ/wiki/Using-Alternative-DI-Containers</projectUrl>
+    <iconUrl>https://raw.github.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An adaptor to allow EasyNetQ to use Autofac as its internal IoC container</description>
     <releaseNotes>
     </releaseNotes>
-    <copyright>Copyright Mike Hadlow 2013</copyright>
+    <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP REST API Ninject</tags>
     <dependencies>
       <dependency id="EasyNetQ" version="0.35.1.0" />

@@ -7,17 +7,17 @@
     <title>EasyNetQ</title>
     <authors>Mike Hadlow, Contributors (see GitHub repo)</authors>
     <owners>Mike Hadlow</owners>
-    <licenseUrl>https://github.com/mikehadlow/EasyNetQ/blob/master/licence.txt</licenseUrl>
+    <licenseUrl>https://github.com/EasyNetQ/EasyNetQ/blob/master/licence.txt</licenseUrl>
     <projectUrl>http://easynetq.com/</projectUrl>
-    <iconUrl>https://raw.github.com/mikehadlow/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>EasyNetQ is a simple, opinionated .NET API for RabbitMQ</description>
     <releaseNotes>
     </releaseNotes>
-    <copyright>Copyright Mike Hadlow 2014</copyright>
+    <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-      <dependency id="RabbitMQ.Client" version="[3.4.3,]" />
+      <dependency id="RabbitMQ.Client" version="[3.5,]" />
     </dependencies>
   </metadata>
 </package>
