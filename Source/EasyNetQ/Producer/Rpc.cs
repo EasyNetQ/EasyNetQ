@@ -19,6 +19,7 @@ namespace EasyNetQ.Producer
         protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly ITimeoutStrategy timeoutStrategy;
+        private readonly ITypeNameSerializer typeNameSerializer;
 
         private readonly object responseQueuesAddLock = new object();
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
@@ -26,8 +27,8 @@ namespace EasyNetQ.Producer
 
         protected readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
 
-        protected const string IsFaultedKey = "IsFaulted";
-        protected const string ExceptionMessageKey = "ExceptionMessage";
+        protected const string isFaultedKey = "IsFaulted";
+        protected const string exceptionMessageKey = "ExceptionMessage";
 
         public Rpc(
             ConnectionConfiguration connectionConfiguration,
@@ -36,7 +37,8 @@ namespace EasyNetQ.Producer
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
-            ITimeoutStrategy timeoutStrategy)
+            ITimeoutStrategy timeoutStrategy,
+            ITypeNameSerializer typeNameSerializer)
         {
             Preconditions.CheckNotNull(connectionConfiguration, "configuration");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
@@ -45,6 +47,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
+            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             this.connectionConfiguration = connectionConfiguration;
             this.advancedBus = advancedBus;
@@ -52,6 +55,7 @@ namespace EasyNetQ.Producer
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.timeoutStrategy = timeoutStrategy;
+            this.typeNameSerializer = typeNameSerializer;
 
             eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
         }
@@ -112,13 +116,13 @@ namespace EasyNetQ.Producer
                     string exceptionMessage = "The exception message has not been specified.";
                     if(msg.Properties.HeadersPresent)
                     {
-                        if(msg.Properties.Headers.ContainsKey(IsFaultedKey))
+                        if(msg.Properties.Headers.ContainsKey(isFaultedKey))
                         {
-                            isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
+                            isFaulted = Convert.ToBoolean(msg.Properties.Headers[isFaultedKey]);
                         }
-                        if(msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
+                        if(msg.Properties.Headers.ContainsKey(exceptionMessageKey))
                         {
-                            exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[ExceptionMessageKey]);
+                            exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[exceptionMessageKey]);
                         }
                     }
 
@@ -213,6 +217,10 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(responder, "responder");
             Preconditions.CheckNotNull(configure, "configure");
+            // We're explicitely validating TResponse here because the type won't be used directly.
+            // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
+            Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
+
             var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
@@ -282,8 +290,8 @@ namespace EasyNetQ.Producer
         {
             var body = ReflectionHelpers.CreateInstance<TResponse>();
             var responseMessage = new Message<TResponse>(body);
-            responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-            responseMessage.Properties.Headers.Add(ExceptionMessageKey, exceptionMessage);
+            responseMessage.Properties.Headers.Add(isFaultedKey, true);
+            responseMessage.Properties.Headers.Add(exceptionMessageKey, exceptionMessage);
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
             responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
 
