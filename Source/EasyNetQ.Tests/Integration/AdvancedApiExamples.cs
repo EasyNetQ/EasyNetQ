@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit]
         public void DeclareWithTtlAndExpire()
         {
-            advancedBus.QueueDeclare("my_queue", perQueueMessageTtl: 500, expires: 500);
+            advancedBus.QueueDeclare("my_queue", perQueueTtl: 500, expires: 500);
         }
 
         [Test, Explicit]
