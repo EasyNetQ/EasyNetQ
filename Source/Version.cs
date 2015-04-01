@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.47.9.0")]
+[assembly: AssemblyVersion("0.47.10.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.47.10.0 RabbitHutch.CreateBus overloads
 // 0.47.9.0 TypeNameSerializer now uses a ConcurrentDictionary to store se/deserialization results.
 // 0.47.8.0 Rpc.Respond will validate serialized length of TResponse upon method call to prevent silent exception when executing responder.
 // 0.47.7.0 Validating ConnectionConfiguration in lowest level method of RabbitHutch.
