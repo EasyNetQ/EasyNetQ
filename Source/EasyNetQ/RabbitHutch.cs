@@ -33,6 +33,44 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus()
         {
+            return CreateBus(c => {});
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus"/>.
+        /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
+        /// </summary>
+        /// <param name="registerServices">
+        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static IBus CreateBus(Action<IServiceRegister> registerServices)
+        {
+            return CreateBus(AdvancedBusEventHandlers.Default, registerServices);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus"/>.
+        /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
+        /// </summary>
+        /// <param name="advancedBusEventHandlers">
+        /// An <see cref="AdvancedBusEventHandlers"/> instance which is used to add handlers
+        /// to the events of the newly created <see cref="IBus.Advanced"/>.
+        /// As <see cref="RabbitAdvancedBus"/> attempts to connect during instantiation, specifying a <see cref="AdvancedBusEventHandlers"/>
+        /// before instantiation is the only way to catch the first <see cref="AdvancedBusEventHandlers.Connected"/> event.
+        /// </param>
+        /// <param name="registerServices">
+        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static IBus CreateBus(AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        {
             var rabbitConnectionString = ConfigurationManager.ConnectionStrings["rabbit"];
             if (rabbitConnectionString == null)
             {
@@ -43,7 +81,7 @@ namespace EasyNetQ
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
 
-            return CreateBus(rabbitConnectionString.ConnectionString);
+            return CreateBus(rabbitConnectionString.ConnectionString, advancedBusEventHandlers, registerServices);
         }
 
         /// <summary>
@@ -61,19 +99,7 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(AdvancedBusEventHandlers advancedBusEventHandlers)
         {
-            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
-
-            var rabbitConnectionString = ConfigurationManager.ConnectionStrings["rabbit"];
-            if (rabbitConnectionString == null)
-            {
-                throw new EasyNetQException(
-                    "Could not find a connection string for RabbitMQ. " +
-                    "Please add a connection string in the <ConnectionStrings> section" +
-                    "of the application's configuration file. For example: " +
-                    "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
-            }
-
-            return CreateBus(rabbitConnectionString.ConnectionString, advancedBusEventHandlers);
+            return CreateBus(advancedBusEventHandlers, c => {});
         }
 
         /// <summary>

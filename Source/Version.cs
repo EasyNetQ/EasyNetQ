@@ -8,6 +8,8 @@ using System.Reflection;
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
 // 0.48.0.0 Updated to RabbitMQ.Client 3.5
+// 0.47.10.0 RabbitHutch.CreateBus overloads
+// 0.47.9.0 TypeNameSerializer now uses a ConcurrentDictionary to store se/deserialization results.
 // 0.47.8.0 Rpc.Respond will validate serialized length of TResponse upon method call to prevent silent exception when executing responder.
 // 0.47.7.0 Validating ConnectionConfiguration in lowest level method of RabbitHutch.
 // 0.47.6.0 AtLeastOneWithDefault -> DefaultIfEmpty
