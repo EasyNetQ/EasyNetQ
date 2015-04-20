@@ -37,6 +37,11 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 return this;
             }
 
+            public IServiceRegister UseDelayedMessageExchange()
+            {
+                throw new NotImplementedException();
+            }
+
             public void AssertServiceRegistered<TService, TImplementation>()
             {
                 Assert.That( _services.ContainsKey( typeof(TService)), "No service of type {0} registered", typeof(TService).Name );

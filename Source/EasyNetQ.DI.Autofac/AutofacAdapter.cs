@@ -72,6 +72,11 @@ namespace EasyNetQ.DI
             return this;
         }
 
+        public IServiceRegister UseDelayedMessageExchange()
+        {
+            return Register<IScheduler, DelayedExchangeScheduler>();
+        }
+
         public TService Resolve<TService>() where TService : class
         {
             return Container.Resolve<TService>();

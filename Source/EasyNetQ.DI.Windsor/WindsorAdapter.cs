@@ -43,6 +43,11 @@ namespace EasyNetQ.DI
             return this;
         }
 
+        public IServiceRegister UseDelayedMessageExchange()
+        {
+            return Register<IScheduler, DelayedExchangeScheduler>();
+        }
+
         public void Dispose()
         {
             windsorContainer.Dispose();

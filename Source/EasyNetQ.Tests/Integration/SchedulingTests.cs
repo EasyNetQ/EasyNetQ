@@ -17,8 +17,8 @@ namespace EasyNetQ.Tests.Integration
         public void SetUp()
         {
             logger = new ConsoleLogger();
-            bus = RabbitHutch.CreateBus("host=localhost",
-                x => x.Register<IEasyNetQLogger>(_ => logger).Register<IScheduler, DelayedExchangeScheduler>());
+            bus = RabbitHutch.CreateBus("host=localhost", x => 
+                x.Register<IEasyNetQLogger>(_ => logger));
         }
 
         [TearDown]
@@ -126,8 +126,7 @@ namespace EasyNetQ.Tests.Integration
                 Date = new DateTime(2011, 5, 24)
             };
 
-            //bus.FuturePublish(DateTime.UtcNow.Addse(3), invitation);
-            bus.FuturePublish(TimeSpan.FromSeconds(5), invitation);
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
 
             autoResetEvent.WaitOne(10000);
         }
