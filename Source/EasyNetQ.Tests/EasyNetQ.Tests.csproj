@@ -102,6 +102,7 @@
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="Integration\AdvancedBusTests.cs" />
+    <Compile Include="Integration\DelayedExchangeSchedulerTests.cs" />
     <Compile Include="Integration\RpcTests.cs" />
     <Compile Include="MessageFactoryTests.cs" />
     <Compile Include="PersistentChannelTests\When_a_ConnectionCreatedEvent_is_published.cs" />

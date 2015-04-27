@@ -17,8 +17,8 @@ namespace EasyNetQ.Tests.Integration
         public void SetUp()
         {
             logger = new ConsoleLogger();
-            bus = RabbitHutch.CreateBus("host=localhost",
-                x => x.Register<IEasyNetQLogger>(_ => logger));
+            bus = RabbitHutch.CreateBus("host=localhost", x => 
+                x.Register<IEasyNetQLogger>(_ => logger));
         }
 
         [TearDown]
@@ -125,11 +125,12 @@ namespace EasyNetQ.Tests.Integration
                 Text = "Please come to my party",
                 Date = new DateTime(2011, 5, 24)
             };
-            
+
             bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
 
             autoResetEvent.WaitOne(10000);
         }
+        
 
         /// <summary>
         /// Based on Should_be_able_to_schedule_a_message(), but publishes 3 messages.
