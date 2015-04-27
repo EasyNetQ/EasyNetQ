@@ -116,10 +116,5 @@ namespace EasyNetQ
                 return this;
             }
         }
-
-        public IServiceRegister UseDelayedMessageExchange()
-        {
-            return Register<IScheduler, DelayedExchangeScheduler>();
-        }
     }
 }

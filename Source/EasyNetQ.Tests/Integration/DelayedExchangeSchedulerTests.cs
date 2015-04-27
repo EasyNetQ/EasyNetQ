@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests.Integration
             logger = new ConsoleLogger();
             bus = RabbitHutch.CreateBus("host=localhost", x =>
                 x.Register<IEasyNetQLogger>(_ => logger)
-                .UseDelayedMessageExchange()
+                 .Register<IScheduler, DelayedExchangeScheduler>()
                  );
         }
 

@@ -37,11 +37,6 @@ namespace EasyNetQ.DI
             return this;
         }
 
-        public IServiceRegister UseDelayedMessageExchange()
-        {
-            return Register<IScheduler, DelayedExchangeScheduler>();
-        }
-
         /// <summary>
         /// Checking if TService can be resolved is a workaround to the issue that Ninject
         /// does not allow TService to be registered multiple times such that the behavior 

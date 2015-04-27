@@ -76,11 +76,6 @@ namespace EasyNetQ.Tests
 
             return this;
         }
-
-        public IServiceRegister UseDelayedMessageExchange()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 

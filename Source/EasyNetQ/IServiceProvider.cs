@@ -49,7 +49,5 @@ namespace EasyNetQ
         IServiceRegister Register<TService, TImplementation>()
             where TService : class
             where TImplementation : class, TService;
-
-        IServiceRegister UseDelayedMessageExchange();
     }
 }

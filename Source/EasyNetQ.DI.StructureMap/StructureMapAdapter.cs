@@ -37,11 +37,6 @@ namespace EasyNetQ.DI
             return this;
         }
 
-        public IServiceRegister UseDelayedMessageExchange()
-        {
-            return Register<IScheduler, DelayedExchangeScheduler>();
-        }
-
         private bool ServiceRegistered<T>()
         {
             return structureMapContainer.Model.AllInstances.Any(x=>x.PluginType == typeof(T));           
