@@ -79,9 +79,13 @@ namespace EasyNetQ.Consumer
                 internalConsumer.Cancelled += consumer => Dispose();
                 var status = internalConsumer.StartConsuming(connection, queue, onMessage, configuration);
                 if (status == StartConsumingStatus.Succeed)
+                {
                     isStarted = true;
+                    eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
+                }
                 else
                 {
+                    eventBus.Publish(new StartConsumingFailedEvent(this, queue));
                     internalConsumer.Dispose();
                     object value;
                     internalConsumers.TryRemove(internalConsumer, out value);
