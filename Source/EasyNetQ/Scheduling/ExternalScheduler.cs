@@ -1,15 +1,13 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using EasyNetQ.Producer;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ.Scheduling
 {
-    public class Scheduler : IScheduler
+    public class ExternalScheduler : IScheduler
     {
-        private static readonly TimeSpan MaxMessageDelay = TimeSpan.FromMilliseconds(int.MaxValue);
-
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -17,7 +15,7 @@ namespace EasyNetQ
         private readonly ISerializer serializer;
         private readonly ITypeNameSerializer typeNameSerializer;
 
-        public Scheduler(
+        public ExternalScheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
@@ -40,19 +38,14 @@ namespace EasyNetQ
             this.typeNameSerializer = typeNameSerializer;
         }
 
-        public void FuturePublish<T>(DateTime futurePublishDate, T message) where T : class
+        public void FuturePublish<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
         {
-            FuturePublish(futurePublishDate, null, message);
+            FuturePublishAsync(futurePublishDate, message, cancellationKey).Wait();
         }
 
-        public void FuturePublish<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class
+        public void FuturePublish<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
         {
-            FuturePublishAsync(futurePublishDate, cancellationKey, message).Wait();
-        }
-
-        public void FuturePublish<T>(TimeSpan messageDelay, T message) where T : class
-        {
-            FuturePublishAsync(messageDelay, message).Wait();
+            FuturePublishAsync(DateTime.UtcNow.Add(messageDelay), message, cancellationKey).Wait();
         }
 
         public void CancelFuturePublish(string cancellationKey)
@@ -60,18 +53,13 @@ namespace EasyNetQ
             CancelFuturePublishAsync(cancellationKey).Wait();
         }
 
-        public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message) where T : class
-        {
-            return FuturePublishAsync(futurePublishDate, null, message);
-        }
-
-        public Task FuturePublishAsync<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class
+        public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
-            var messageType = typeof(ScheduleMe);
+            var messageType = typeof (ScheduleMe);
             return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
             {
-                var typeName = typeNameSerializer.Serialize(typeof(T));
+                var typeName = typeNameSerializer.Serialize(typeof (T));
                 var messageBody = serializer.MessageToBytes(message);
                 var scheduleMe = new ScheduleMe
                 {
@@ -91,42 +79,17 @@ namespace EasyNetQ
             });
         }
 
-        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message) where T : class
+        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
-            var delay = Round(messageDelay);
-            var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
-            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
-            var futureExchangeName = exchangeName + "_" + delayString;
-            var futureQueueName = conventions.QueueNamingConvention(typeof(T), delayString);
-            return advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Topic)
-                .Then(futureExchange => advancedBus.QueueDeclareAsync(futureQueueName, perQueueTtl: (int)delay.TotalMilliseconds, deadLetterExchange: exchangeName)
-                                                   .Then(futureQueue => advancedBus.BindAsync(futureExchange, futureQueue, "#"))
-                                                   .Then(() =>
-                                                   {
-                                                       var easyNetQMessage = new Message<T>(message)
-                                                       {
-                                                           Properties =
-                                                           {
-                                                               DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
-                                                           }
-                                                       };
-                                                       return advancedBus.PublishAsync(futureExchange, "#", false, false, easyNetQMessage);
-                                                   }));
-        }
-
-        private static TimeSpan Round(TimeSpan timeSpan)
-        {
-            return new TimeSpan(timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, 0);
+            return FuturePublishAsync(DateTime.UtcNow.Add(messageDelay), message, cancellationKey);
         }
 
         public Task CancelFuturePublishAsync(string cancellationKey)
         {
-            var messageType = typeof(UnscheduleMe);
+            var messageType = typeof (UnscheduleMe);
             return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
             {
-                var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
+                var unscheduleMe = new UnscheduleMe {CancellationKey = cancellationKey};
                 var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
                 {
                     Properties =

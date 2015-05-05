@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.Loggers;
+using EasyNetQ.Scheduling;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
@@ -174,7 +175,7 @@ namespace EasyNetQ.Tests.Integration
         [ExpectedException(typeof(NotImplementedException))]
         public void When_publishing_with_cancellation_key_then_fails()
         {
-            bus.FuturePublish(DateTime.UtcNow.AddSeconds(1), "cancellationKey", new DelayedTestMessage(1, true));
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(1), new DelayedTestMessage(1, true), "cancellationKey");
         }
     }
 

@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Loggers;
+using EasyNetQ.Scheduling;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
@@ -155,9 +156,9 @@ namespace EasyNetQ.Tests.Integration
                 Date = new DateTime(2011, 5, 24)
             };
 
-            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), "my_cancellation_key", invitation);
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation, "my_cancellation_key");
             bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation);
-            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), "my_cancellation_key", invitation);
+            bus.FuturePublish(DateTime.UtcNow.AddSeconds(3), invitation, "my_cancellation_key");
             bus.CancelFuturePublish("my_cancellation_key");
 
             Thread.Sleep(10000);
