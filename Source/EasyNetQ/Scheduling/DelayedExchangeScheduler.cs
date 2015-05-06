@@ -27,21 +27,6 @@ namespace EasyNetQ.Scheduling
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public void FuturePublish<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
-        {
-            FuturePublishAsync(futurePublishDate, message, cancellationKey).Wait();
-        }
-
-        public void FuturePublish<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
-        {
-            FuturePublishAsync(messageDelay, message, cancellationKey).Wait();
-        }
-
-        public void CancelFuturePublish(string cancellationKey)
-        {
-            CancelFuturePublishAsync(cancellationKey).Wait();
-        }
-
         public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
         {
             return FuturePublishInternalAsync(futurePublishDate - DateTime.UtcNow, message, cancellationKey);

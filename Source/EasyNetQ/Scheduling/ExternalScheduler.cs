@@ -38,21 +38,6 @@ namespace EasyNetQ.Scheduling
             this.typeNameSerializer = typeNameSerializer;
         }
 
-        public void FuturePublish<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
-        {
-            FuturePublishAsync(futurePublishDate, message, cancellationKey).Wait();
-        }
-
-        public void FuturePublish<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
-        {
-            FuturePublishAsync(DateTime.UtcNow.Add(messageDelay), message, cancellationKey).Wait();
-        }
-
-        public void CancelFuturePublish(string cancellationKey)
-        {
-            CancelFuturePublishAsync(cancellationKey).Wait();
-        }
-
         public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
