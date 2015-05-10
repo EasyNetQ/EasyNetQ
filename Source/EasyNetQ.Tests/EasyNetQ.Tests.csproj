@@ -106,10 +106,13 @@
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="Integration\AdvancedBusTests.cs" />
-    <Compile Include="Integration\DelayedExchangeSchedulerTests.cs" />
+    <Compile Include="Integration\Scheduling\DeadLetterExchangeAndMessageTtlSchedulerTests.cs" />
+    <Compile Include="Integration\Scheduling\DelayedExchangeSchedulerTests.cs" />
     <Compile Include="Integration\RpcTests.cs" />
+    <Compile Include="Integration\Scheduling\PartyInvitation.cs" />
     <Compile Include="MessageFactoryTests.cs" />
     <Compile Include="PersistentChannelTests\When_a_ConnectionCreatedEvent_is_published.cs" />
+    <Compile Include="Scheduling\SchedulingExtensionsTests.cs" />
     <Compile Include="TimeoutStrategyTest.cs" />
     <Compile Include="DefaultMessageSerializationStrategyTests.cs" />
     <Compile Include="DeliveryModeStrategyTest.cs" />
@@ -183,7 +186,7 @@
     <Compile Include="Integration\PublishSubscribeWithTopicsTests.cs" />
     <Compile Include="PublishTests.cs" />
     <Compile Include="Integration\RequestResponseTests.cs" />
-    <Compile Include="Integration\SchedulingTests.cs" />
+    <Compile Include="Integration\Scheduling\ExternalSchedulerTests.cs" />
     <Compile Include="DefaultServiceProviderTests.cs" />
     <Compile Include="Integration\SimpleSagaSpike.cs" />
     <Compile Include="Integration\SubscribeAsyncTests.cs" />
