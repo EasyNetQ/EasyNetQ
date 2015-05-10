@@ -69,6 +69,7 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="DelayedExchangeScheduler.cs" />
     <Compile Include="MessageDeliveryMode.cs" />
+    <Compile Include="SchedulerV2.cs" />
     <Compile Include="SubscriptionResult.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
@@ -195,9 +196,11 @@
     <Compile Include="Sprache\ParserOfT.cs" />
     <Compile Include="Sprache\ResultHelper.cs" />
     <Compile Include="Sprache\Success.cs" />
+    <Compile Include="SystemMessages\ScheduleMeV2.cs" />
     <Compile Include="SystemMessages\UnscheduleMe.cs" />
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
+    <Compile Include="SystemMessages\UnscheduleMeV2.cs" />
     <Compile Include="TaskHelpers.cs" />
     <Compile Include="TimeoutSecondsAttribute.cs" />
     <Compile Include="Topology\Binding.cs" />

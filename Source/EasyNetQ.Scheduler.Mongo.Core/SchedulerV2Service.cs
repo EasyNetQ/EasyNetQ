@@ -5,16 +5,16 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Scheduler.Mongo.Core
 {
-    public class SchedulerService : ISchedulerService
+    public class ScheduleV2Service : ISchedulerService
     {
         private readonly IBus bus;
         private readonly ISchedulerServiceConfiguration configuration;
         private readonly IEasyNetQLogger log;
-        private readonly IScheduleRepository scheduleRepository;
+        private readonly IScheduleV2Repository scheduleRepository;
         private Timer handleTimeoutTimer;
         private Timer publishTimer;
 
-        public SchedulerService(IBus bus, IEasyNetQLogger log, IScheduleRepository scheduleRepository, ISchedulerServiceConfiguration configuration)
+        public ScheduleV2Service(IBus bus, IEasyNetQLogger log, IScheduleV2Repository scheduleRepository, ISchedulerServiceConfiguration configuration)
         {
             this.bus = bus;
             this.log = log;
@@ -25,8 +25,8 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         public void Start()
         {
             log.DebugWrite("Starting SchedulerService");
-            bus.Subscribe<ScheduleMe>(configuration.SubscriptionId, OnMessage);
-            bus.Subscribe<UnscheduleMe>(configuration.SubscriptionId, OnMessage);
+            bus.Subscribe<ScheduleMeV2>(configuration.SubscriptionId, OnMessage);
+            bus.Subscribe<UnscheduleMeV2>(configuration.SubscriptionId, OnMessage);
             publishTimer = new Timer(OnPublishTimerTick, null, TimeSpan.Zero, configuration.PublishInterval);
             handleTimeoutTimer = new Timer(OnHandleTimeoutTimerTick, null, TimeSpan.Zero, configuration.HandleTimeoutInterval);
         }
@@ -65,15 +65,14 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                     var schedule = scheduleRepository.GetPending();
                     if (schedule == null)
                         return;
-                    log.DebugWrite(string.Format("Publishing Scheduled Message with Routing Key: '{0}'", schedule.BindingKey));
-                    var exchange = bus.Advanced.ExchangeDeclare(schedule.BindingKey, ExchangeType.Topic);
+                    var exchange = bus.Advanced.ExchangeDeclare(schedule.Exchange, schedule.ExchangeType);
                     bus.Advanced.Publish(
                         exchange,
-                        schedule.BindingKey,
+                        schedule.RoutingKey,
                         false,
                         false,
-                        new MessageProperties {Type = schedule.BindingKey},
-                        schedule.InnerMessage);
+                        schedule.BasicProperties,
+                        schedule.Message);
                     scheduleRepository.MarkAsPublished(schedule.Id);
                     ++published;
                 }
@@ -84,24 +83,27 @@ namespace EasyNetQ.Scheduler.Mongo.Core
             }
         }
 
-        private void OnMessage(UnscheduleMe message)
+        private void OnMessage(UnscheduleMeV2 message)
         {
             log.DebugWrite("Got Unschedule Message");
             scheduleRepository.Cancel(message.CancellationKey);
         }
 
-        private void OnMessage(ScheduleMe message)
+        private void OnMessage(ScheduleMeV2 message)
         {
             log.DebugWrite("Got Schedule Message");
-            scheduleRepository.Store(new Schedule
-                {
-                    Id = Guid.NewGuid(),
-                    CancellationKey = message.CancellationKey,
-                    BindingKey = message.BindingKey,
-                    InnerMessage = message.InnerMessage,
-                    State = ScheduleState.Pending,
-                    WakeTime = message.WakeTime
-                });
+            scheduleRepository.Store(new ScheduleV2
+            {
+                Id = Guid.NewGuid(),
+                CancellationKey = message.CancellationKey,
+                WakeTime = message.WakeTime,
+                State = ScheduleState.Pending,
+                Exchange = message.Exchange,
+                ExchangeType = message.ExchangeType,
+                RoutingKey = message.RoutingKey,
+                BasicProperties = message.MessageProperties,
+                Message = message.Message
+            });
         }
     }
 }

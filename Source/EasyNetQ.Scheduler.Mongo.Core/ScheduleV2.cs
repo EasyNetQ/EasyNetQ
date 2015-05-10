@@ -1,0 +1,33 @@
+﻿using System;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace EasyNetQ.Scheduler.Mongo.Core
+{
+    public class ScheduleV2
+    {
+        public Guid Id { get; set; }
+
+        public DateTime WakeTime { get; set; }
+
+        [BsonIgnoreIfNull]
+        public string CancellationKey { get; set; }
+
+        public string Exchange { get; set; }
+
+        public string ExchangeType { get; set; }
+
+        public string RoutingKey { get; set; }
+
+        public byte[] Message { get; set; }
+
+        public MessageProperties BasicProperties { get; set; }
+
+        public ScheduleState State { get; set; }
+
+        [BsonIgnoreIfNull]
+        public DateTime? PublishingTime { get; set; }
+
+        [BsonIgnoreIfNull]
+        public DateTime? PublishedTime { get; set; }
+    }
+}
