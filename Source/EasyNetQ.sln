@@ -13,7 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\Package\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec = ..\Package\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec
 		..\Package\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.nuspec = ..\Package\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.nuspec
 		..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec = ..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec
-		..\Package\EasyNetQ.Management.Client\EasyNetQ.Management.Client.nuspec = ..\Package\EasyNetQ.Management.Client\EasyNetQ.Management.Client.nuspec
 		..\Package\EasyNetQ\EasyNetQ.nuspec = ..\Package\EasyNetQ\EasyNetQ.nuspec
 		..\Build\EasyNetQ.proj = ..\Build\EasyNetQ.proj
 		..\hall_of_fame.md = ..\hall_of_fame.md
@@ -44,10 +43,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler", "{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.SimpleRequester", "EasyNetQ.Tests.SimpleRequester\EasyNetQ.Tests.SimpleRequester.csproj", "{5EDAA7BF-CD00-440C-9697-D24F7B37CFFA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Management.Client", "EasyNetQ.Management.Client\EasyNetQ.Management.Client.csproj", "{9888950B-EF30-4763-9076-38B071CDB535}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Management.Client.Tests", "EasyNetQ.Management.Client.Tests\EasyNetQ.Management.Client.Tests.csproj", "{F411090D-1CAB-4726-9F2B-582E9D9D80D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Trace", "EasyNetQ.Trace\EasyNetQ.Trace.csproj", "{11DF08A9-3D14-44CC-A65E-5933121D3D63}"
 EndProject
@@ -234,26 +229,6 @@ Global
 		{5EDAA7BF-CD00-440C-9697-D24F7B37CFFA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{5EDAA7BF-CD00-440C-9697-D24F7B37CFFA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{5EDAA7BF-CD00-440C-9697-D24F7B37CFFA}.Release|x86.ActiveCfg = Release|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{9888950B-EF30-4763-9076-38B071CDB535}.Release|x86.ActiveCfg = Release|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{F411090D-1CAB-4726-9F2B-582E9D9D80D7}.Release|x86.ActiveCfg = Release|Any CPU
 		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11DF08A9-3D14-44CC-A65E-5933121D3D63}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

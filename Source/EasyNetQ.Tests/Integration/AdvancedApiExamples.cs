@@ -67,6 +67,22 @@ namespace EasyNetQ.Tests.Integration
         }
 
         [Test, Explicit]
+        public void DeclareDelayedExchange()
+        {
+            const string bindingKey = "the-binding-key";
+
+            var delayedExchange = advancedBus.ExchangeDeclare("delayed", ExchangeType.Direct, delayed: true);
+            var queue = advancedBus.QueueDeclare("my_queue");
+            advancedBus.Bind(delayedExchange, queue, bindingKey);
+
+            var message = Encoding.UTF8.GetBytes("Some message");
+            var messageProperties = new MessageProperties();
+            messageProperties.Headers.Add("x-delay", 5000);
+            advancedBus.Publish(delayedExchange, bindingKey, false, false, messageProperties, message);
+        }
+
+
+        [Test, Explicit]
         public void ConsumeFromAQueue()
         {
             var queue = new Queue("my_queue", false);

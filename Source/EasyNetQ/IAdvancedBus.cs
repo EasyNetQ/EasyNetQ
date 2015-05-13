@@ -303,8 +303,9 @@ namespace EasyNetQ
         /// <param name="internal">If set, the exchange may not be used directly by publishers, 
         ///     but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
+        /// <param name="delayed">If set, declards x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
-        IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
+        IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null, bool delayed = false);
 
 
         /// <summary>
@@ -318,8 +319,9 @@ namespace EasyNetQ
         /// <param name="internal">If set, the exchange may not be used directly by publishers, 
         ///     but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
+        /// <param name="delayed">If set, declards x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
-        Task<IExchange> ExchangeDeclareAsync(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null);
+        Task<IExchange> ExchangeDeclareAsync(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null, bool delayed = false);
 
         /// <summary>
         /// Delete an exchange

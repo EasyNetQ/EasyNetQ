@@ -370,10 +370,11 @@ namespace EasyNetQ
             bool durable = true,
             bool autoDelete = false,
             bool @internal = false,
-            string alternateExchange = null)
+            string alternateExchange = null,
+            bool delayed = false)
         {
 
-            return ExchangeDeclareAsync(name, type, passive, durable, autoDelete, @internal, alternateExchange).Result;
+            return ExchangeDeclareAsync(name, type, passive, durable, autoDelete, @internal, alternateExchange, delayed).Result;
         }
 
         public Task<IExchange> ExchangeDeclareAsync(
@@ -383,7 +384,8 @@ namespace EasyNetQ
             bool durable = true, 
             bool autoDelete = false, 
             bool @internal = false, 
-            string alternateExchange = null)
+            string alternateExchange = null,
+            bool delayed = false)
         {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
@@ -399,12 +401,20 @@ namespace EasyNetQ
             {
                 arguments = new Dictionary<string, object> { { "alternate-exchange", alternateExchange } };
             }
+            if (delayed)
+            {
+                if (arguments == null)
+                    arguments = new Dictionary<string, object>();
+                arguments.Add("x-delayed-type", type);
+
+                type = "x-delayed-message";
+            }
 
             return clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments))
                 .Then(() =>
                     {
-                        logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}",
-                              name, type, durable, autoDelete);
+                        logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}, delayed:{4}",
+                              name, type, durable, autoDelete, delayed);
 
                         return (IExchange)new Exchange(name);
                     });
