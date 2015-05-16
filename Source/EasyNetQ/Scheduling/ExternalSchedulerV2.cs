@@ -4,9 +4,9 @@ using EasyNetQ.Producer;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ.Scheduling
 {
-    public class SchedulerV2 : IScheduler
+    public class ExternalSchedulerV2 : IScheduler
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
@@ -14,7 +14,7 @@ namespace EasyNetQ
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
-        public SchedulerV2(
+        public ExternalSchedulerV2(
             IAdvancedBus advancedBus,
             IConventions conventions,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
@@ -34,32 +34,7 @@ namespace EasyNetQ
             this.messageSerializationStrategy = messageSerializationStrategy;
         }
 
-        public void FuturePublish<T>(DateTime futurePublishDate, T message) where T : class
-        {
-            FuturePublish(futurePublishDate, null, message);
-        }
-
-        public void FuturePublish<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class
-        {
-            FuturePublishAsync(futurePublishDate, cancellationKey, message).Wait();
-        }
-
-        public void FuturePublish<T>(TimeSpan messageDelay, T message) where T : class
-        {
-            FuturePublishAsync(messageDelay, message).Wait();
-        }
-
-        public void CancelFuturePublish(string cancellationKey)
-        {
-            CancelFuturePublishAsync(cancellationKey).Wait();
-        }
-
-        public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message) where T : class
-        {
-            return FuturePublishAsync(futurePublishDate, null, message);
-        }
-
-        public Task FuturePublishAsync<T>(DateTime futurePublishDate, string cancellationKey, T message) where T : class
+        public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             var scheduleMeType = typeof(ScheduleMeV2);
@@ -95,7 +70,7 @@ namespace EasyNetQ
             });
         }
 
-        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message) where T : class
+        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
         {
             return FuturePublishAsync(DateTime.UtcNow.Add(messageDelay), message);
         }

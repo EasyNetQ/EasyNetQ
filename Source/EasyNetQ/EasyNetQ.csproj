@@ -69,7 +69,7 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />
     <Compile Include="MessageDeliveryMode.cs" />
-    <Compile Include="SchedulerV2.cs" />
+    <Compile Include="Scheduling\ExternalSchedulerV2.cs" />
     <Compile Include="Scheduling\ExternalScheduler.cs" />
     <Compile Include="Scheduling\SchedulingExtentions.cs" />
     <Compile Include="SubscriptionResult.cs" />
