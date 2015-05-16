@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using EasyNetQ.Interception;
+using EasyNetQ.Tests.Integration.Scheduling;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration

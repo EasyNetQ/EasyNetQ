@@ -67,9 +67,11 @@
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
     <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
-    <Compile Include="DelayedExchangeScheduler.cs" />
+    <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />
     <Compile Include="MessageDeliveryMode.cs" />
     <Compile Include="SchedulerV2.cs" />
+    <Compile Include="Scheduling\ExternalScheduler.cs" />
+    <Compile Include="Scheduling\SchedulingExtentions.cs" />
     <Compile Include="SubscriptionResult.cs" />
     <Compile Include="Consumer\ConsumerExecutionContext.cs" />
     <Compile Include="Consumer\ConsumerFactory.cs" />
@@ -135,7 +137,7 @@
     <Compile Include="Interception\IProduceConsumeInterceptor.cs" />
     <Compile Include="Interception\RawMessage.cs" />
     <Compile Include="Interception\TripleDESInterceptor.cs" />
-    <Compile Include="IScheduler.cs" />
+    <Compile Include="Scheduling\IScheduler.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="IServiceProvider.cs" />
     <Compile Include="ITimeoutStrategy.cs" />
@@ -182,8 +184,8 @@
     <Compile Include="RabbitAdvancedBus.cs" />
     <Compile Include="RabbitBus.cs" />
     <Compile Include="RabbitHutch.cs" />
-    <Compile Include="RabbitBusExtensions.cs" />
-    <Compile Include="Scheduler.cs" />
+    <Compile Include="Scheduling\BusExtensions.cs" />
+    <Compile Include="Scheduling\DeadLetterExchangeAndMessageTtlScheduler.cs" />
     <Compile Include="RandomClusterHostSelectionStrategy.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Sprache\Failure.cs" />
@@ -220,6 +222,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="BeforeBuild">
