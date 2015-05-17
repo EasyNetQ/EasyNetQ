@@ -306,7 +306,7 @@ namespace EasyNetQ
         void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false);
 
         /// <summary>
-        /// Purget a queue
+        /// Purges a queue
         /// </summary>
         /// <param name="queue">The queue to purge</param>
         void QueuePurge(IQueue queue);
@@ -319,10 +319,9 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
-        ///     but only when bound to other exchanges.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declards x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
         IExchange ExchangeDeclare(
             string name, 
@@ -342,10 +341,9 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
-        ///     but only when bound to other exchanges.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declards x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
         Task<IExchange> ExchangeDeclareAsync(
             string name, 
