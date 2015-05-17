@@ -18,6 +18,7 @@ namespace EasyNetQ.Tests.Integration
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
+            bus.Respond<TestRequestMessage, TestResponseMessage>(req => new TestResponseMessage { Text = req.Text });
         }
 
         [TearDown]

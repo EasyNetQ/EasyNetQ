@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.48.1.0")]
+[assembly: AssemblyVersion("0.49.0.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.49.0.0 Updated to RabbitMQ.Client 3.5.1
 // 0.48.1.0 Fix unhandled exception
 // 0.48.0.0 Refactor IScheduler and its implementations
 // 0.47.10.0 RabbitHutch.CreateBus overloads

@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
              publisher.Publish(channel, model => { }).Wait();
 
-            channel.AssertWasCalled(x => x.BasicReturn += Arg<BasicReturnEventHandler>.Is.Anything);
+             channel.AssertWasCalled(x => x.BasicReturn += Arg<EventHandler<BasicReturnEventArgs>>.Is.Anything);
         }      
 
         [Test]
@@ -120,7 +120,7 @@ namespace EasyNetQ.Tests.ProducerTests
             eventBus.Publish(new PublishChannelCreatedEvent(channel2));
             publisher.Publish(channel2, model => { }).Wait();
 
-            channel1.AssertWasCalled(x => x.BasicReturn -= Arg<BasicReturnEventHandler>.Is.Anything);
+            channel1.AssertWasCalled(x => x.BasicReturn -= Arg<EventHandler<BasicReturnEventArgs>>.Is.Anything);
         }
     }
 
@@ -199,7 +199,7 @@ namespace EasyNetQ.Tests.ProducerTests
             channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
             task.Wait();
 
-            channel.AssertWasCalled(x => x.BasicReturn += Arg<BasicReturnEventHandler>.Is.Anything);
+            channel.AssertWasCalled(x => x.BasicReturn += Arg<EventHandler<BasicReturnEventArgs>>.Is.Anything);
         }
 
         [Test]
@@ -403,9 +403,9 @@ namespace EasyNetQ.Tests.ProducerTests
             // wait for task to complete
             task.Wait();
 
-            channel1.AssertWasCalled(x => x.BasicAcks -= Arg<BasicAckEventHandler>.Is.Anything);
-            channel1.AssertWasCalled(x => x.BasicNacks -= Arg<BasicNackEventHandler>.Is.Anything);
-            channel1.AssertWasCalled(x => x.BasicReturn -= Arg<BasicReturnEventHandler>.Is.Anything);
+            channel1.AssertWasCalled(x => x.BasicAcks -= Arg<EventHandler<BasicAckEventArgs>>.Is.Anything);
+            channel1.AssertWasCalled(x => x.BasicNacks -= Arg<EventHandler<BasicNackEventArgs>>.Is.Anything);
+            channel1.AssertWasCalled(x => x.BasicReturn -= Arg<EventHandler<BasicReturnEventArgs>>.Is.Anything);
         }
     }
 }
