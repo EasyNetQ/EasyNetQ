@@ -27,8 +27,9 @@ namespace EasyNetQ.Tests
                 durable: false, 
                 exclusive: true,
                 autoDelete: true,
-                perQueueTtl: 1000,
-                expires: 2000);
+                perQueueMessageTtl: 1000,
+                expires: 2000,
+                maxPriority: 10);
         }
 
         [Test]
@@ -49,7 +50,8 @@ namespace EasyNetQ.Tests
                     Arg<bool>.Is.Equal(true),
                     Arg<IDictionary<string, object>>.Matches(args => 
                         ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000))));
+                        ((int)args["x-expires"] == 2000) &&
+                        ((byte)args["x-max-priority"] == 10))));
         }
     }
 
