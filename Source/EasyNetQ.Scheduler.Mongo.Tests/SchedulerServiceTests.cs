@@ -42,7 +42,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var id = Guid.NewGuid();
-            scheduleRepository.Stub(x => x.GetPending()).Return(new Schedule
+            scheduleRepository.Stub(x => x.GetPending()).Return(new ScheduleV1
                 {
                     Id = id,
                     BindingKey = "msg1"

@@ -57,8 +57,10 @@
     <Compile Include="SchedulerV2Service.cs" />
     <Compile Include="ISchedulerServiceConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Schedule.cs" />
     <Compile Include="ScheduleState.cs" />
+    <Compile Include="IScheduleRepository.cs" />
+    <Compile Include="ScheduleV1.cs" />
+    <Compile Include="Schedule.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj">

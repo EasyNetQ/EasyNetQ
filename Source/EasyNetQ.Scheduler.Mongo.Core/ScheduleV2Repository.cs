@@ -88,9 +88,9 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         private MongoCollection<ScheduleV2> CreateAndIndex()
         {
             var collection = Server.GetDatabase(configuration.DatabaseName).GetCollection<ScheduleV2>(configuration.CollectionName + "V2");
-            collection.CreateIndex(IndexKeys<Schedule>.Ascending(x => x.CancellationKey), IndexOptions.SetSparse(true));
-            collection.CreateIndex(IndexKeys<Schedule>.Ascending(x => x.State, x => x.WakeTime));
-            collection.CreateIndex(IndexKeys<Schedule>.Ascending(x => x.PublishedTime), IndexOptions.SetTimeToLive(configuration.DeleteTimeout).SetSparse(true));
+            collection.CreateIndex(IndexKeys<ScheduleV1>.Ascending(x => x.CancellationKey), IndexOptions.SetSparse(true));
+            collection.CreateIndex(IndexKeys<ScheduleV1>.Ascending(x => x.State, x => x.WakeTime));
+            collection.CreateIndex(IndexKeys<ScheduleV1>.Ascending(x => x.PublishedTime), IndexOptions.SetTimeToLive(configuration.DeleteTimeout).SetSparse(true));
             return collection;
         }
 
