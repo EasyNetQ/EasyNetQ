@@ -53,7 +53,7 @@ namespace EasyNetQ.Scheduling
             var futureExchangeName = exchangeName + "_" + delayString;
             var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
             return advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Topic)
-                .Then(futureExchange => advancedBus.QueueDeclareAsync(futureQueueName, perQueueTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName)
+                .Then(futureExchange => advancedBus.QueueDeclareAsync(futureQueueName, perQueueMessageTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName)
                     .Then(futureQueue => advancedBus.BindAsync(futureExchange, futureQueue, "#"))
                     .Then(() =>
                     {
