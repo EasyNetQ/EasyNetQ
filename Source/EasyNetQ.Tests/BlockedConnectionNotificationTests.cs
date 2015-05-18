@@ -1,4 +1,5 @@
-﻿// ReSharper disable InconsistentNaming
+﻿using System;
+// ReSharper disable InconsistentNaming
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -28,7 +29,7 @@ namespace EasyNetQ.Tests
         {
             var blocked = false;
             advancedBus.Blocked += (s,e) => blocked = true;
-            connection.Raise(r => r.ConnectionBlocked += null, connection, new ConnectionBlockedEventArgs("some reason"));
+            connection.Raise(r => r.ConnectionBlocked += (s, e) => { }, connection, new ConnectionBlockedEventArgs("some reason"));
 
             Assert.That(blocked, Is.True);
         }
@@ -55,7 +56,7 @@ namespace EasyNetQ.Tests
         {
             var blocked = true;
             advancedBus.Unblocked += (s,e) => blocked = false;
-            connection.Raise(r => r.ConnectionUnblocked += null, connection);
+            connection.Raise(r => r.ConnectionUnblocked += (s, e) => { }, connection, new EventArgs());
 
             Assert.That(blocked, Is.False);
         }

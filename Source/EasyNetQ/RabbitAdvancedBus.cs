@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
@@ -179,33 +180,54 @@ namespace EasyNetQ
 
         // -------------------------------- publish ---------------------------------------------
 
+        public void Publish(
+            IExchange exchange, 
+            string routingKey, 
+            bool mandatory, 
+            bool immediate,
+            MessageProperties messageProperties, 
+            byte[] body)
+        {
+            try
+            {
+                PublishAsync(exchange, routingKey, mandatory, immediate, messageProperties, body).Wait();
+            }
+            catch (AggregateException aggregateException)
+            {
+                throw aggregateException.InnerException;
+            }
+        }
+
+        public void Publish<T>(
+            IExchange exchange, 
+            string routingKey, 
+            bool mandatory, 
+            bool immediate, 
+            IMessage<T> message) where T : class
+        {
+            try
+            {
+                PublishAsync(exchange, routingKey, mandatory, immediate, message).Wait();
+            }
+            catch (AggregateException aggregateException)
+            {
+                throw aggregateException.InnerException;
+            }
+        }
+
         public virtual Task PublishAsync(
             IExchange exchange,
             string routingKey,
             bool mandatory,
             bool immediate,
-            MessageProperties messageProperties,
-            byte[] body)
+            IMessage message)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(messageProperties, "messageProperties");
-            Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckNotNull(message, "message");
 
-            var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
-
-            return clientCommandDispatcher.Invoke(x =>
-                {
-                    var properties = x.CreateBasicProperties();
-                    rawMessage.Properties.CopyTo(properties);
-
-                    return publisher.Publish(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body))
-                                    .Then(() =>
-                                        {
-                                            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-                                            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
-                                        });
-                }).Unwrap();
+            var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            return PublishAsync(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
         }
 
         public virtual Task PublishAsync<T>(
@@ -228,76 +250,80 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             bool immediate,
-            IMessage message)
+            MessageProperties messageProperties,
+            byte[] body)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(messageProperties, "messageProperties");
+            Preconditions.CheckNotNull(body, "body");
 
-            var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
-        }
+            var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
 
-        public void Publish(IExchange exchange, string routingKey, bool mandatory, bool immediate,
-                                 MessageProperties messageProperties, byte[] body)
-        {
-            try
+            return clientCommandDispatcher.Invoke(x =>
             {
-                PublishAsync(exchange, routingKey, mandatory, immediate, messageProperties, body).Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
-        }
+                var properties = x.CreateBasicProperties();
+                rawMessage.Properties.CopyTo(properties);
 
-        public void Publish<T>(IExchange exchange, string routingKey, bool mandatory, bool immediate, IMessage<T> message) where T : class
-        {
-            try
-            {
-                PublishAsync(exchange, routingKey, mandatory, immediate, message).Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+                return publisher.Publish(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body))
+                                .Then(() =>
+                                {
+                                    eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
+                                    logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
+                                });
+            }).Unwrap();
         }
 
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
 
         public virtual IQueue QueueDeclare(
-            string name,
-            bool passive = false,
-            bool durable = true,
-            bool exclusive = false,
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false, 
             bool autoDelete = false,
-            int perQueueTtl = int.MaxValue,
-            int expires = int.MaxValue,
-            string deadLetterExchange = null,
+            int? perQueueMessageTtl  = null,
+            int? expires = null,
+            byte? maxPriority = null,
+            string deadLetterExchange = null, 
             string deadLetterRoutingKey = null)
         {
-            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueTtl, expires, deadLetterExchange, deadLetterRoutingKey).Result;
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl, 
+                expires, maxPriority, deadLetterExchange, deadLetterRoutingKey).Result;
         }
 
-        public Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = Int32.MaxValue, int expires = Int32.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null)
+        public Task<IQueue> QueueDeclareAsync(
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false, 
+            bool autoDelete = false,
+            int? perQueueMessageTtl  = null,
+            int? expires = null,
+            byte? maxPriority = null,
+            string deadLetterExchange = null, 
+            string deadLetterRoutingKey = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
             if (passive)
             {
                 return clientCommandDispatcher.Invoke(x => x.QueueDeclarePassive(name))
-                    .Then(() => (IQueue) new Queue(name, exclusive));
-            }
-            IDictionary<string, object> arguments = new Dictionary<string, object>();
-            
-            if (perQueueTtl != int.MaxValue)
-            {
-                arguments.Add("x-message-ttl", perQueueTtl);
+                    .Then(() => (IQueue)new Queue(name, exclusive));
             }
 
-            if (expires != int.MaxValue)
+            var arguments = new Dictionary<string, object>();
+            if (perQueueMessageTtl.HasValue)
+            {
+                arguments.Add("x-message-ttl", perQueueMessageTtl.Value);
+            }
+            if (expires.HasValue)
             {
                 arguments.Add("x-expires", expires);
+            }
+            if (maxPriority.HasValue)
+            {
+                arguments.Add("x-max-priority", maxPriority.Value);
             }
             if (!string.IsNullOrEmpty(deadLetterExchange))
             {
@@ -310,30 +336,11 @@ namespace EasyNetQ
 
             return clientCommandDispatcher.Invoke(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
             {
-                logger.DebugWrite("Declared Queue: '{0}' durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
-                    name, durable, exclusive, autoDelete, WriteArguments(arguments));
+                logger.DebugWrite("Declared Queue: '{0}', durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
+                    name, durable, exclusive, autoDelete, string.Join(", ", arguments.Select(kvp => String.Format("{0}={1}", kvp.Key, kvp.Value))));
 
                 return (IQueue)new Queue(name, exclusive);
             });
-        }
-
-        private string WriteArguments(IEnumerable<KeyValuePair<string, object>> arguments)
-        {
-            var builder = new StringBuilder();
-            var first = true;
-            foreach (var argument in arguments)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    builder.Append(", ");
-                }
-                builder.AppendFormat("{0}={1}", argument.Key, argument.Value);
-            }
-            return builder.ToString();
         }
 
         public virtual IQueue QueueDeclare()

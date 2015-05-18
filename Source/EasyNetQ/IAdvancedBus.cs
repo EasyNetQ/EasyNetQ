@@ -151,6 +151,62 @@ namespace EasyNetQ
             IMessage<T> message) where T : class;
 
         /// <summary>
+        /// Publish a message as a .NET type when the type is only known at runtime.
+        /// Use the generic version of this method <see cref="PublishAsync{T}"/> when you know the type of the message at compile time.
+        /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
+        /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+        /// </summary>
+        /// <param name="exchange">The exchange to publish to</param>
+        /// <param name="routingKey">
+        /// The routing key for the message. The routing key is used for routing messages depending on the 
+        /// exchange configuration.</param>
+        /// <param name="mandatory">
+        /// This flag tells the server how to react if the message cannot be routed to a queue. 
+        /// If this flag is true, the server will return an unroutable message with a Return method. 
+        /// If this flag is false, the server silently drops the message.
+        /// </param>
+        /// <param name="immediate">
+        /// This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. 
+        /// If this flag is true, the server will return an undeliverable message with a Return method. 
+        /// If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed.
+        /// </param>
+        /// <param name="message">The message to publish</param>
+        Task PublishAsync(
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            bool immediate,
+            IMessage message);
+
+        /// <summary>
+        /// Publish a message as a .NET type
+        /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
+        /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="exchange">The exchange to publish to</param>
+        /// <param name="routingKey">
+        /// The routing key for the message. The routing key is used for routing messages depending on the 
+        /// exchange configuration.</param>
+        /// <param name="mandatory">
+        /// This flag tells the server how to react if the message cannot be routed to a queue. 
+        /// If this flag is true, the server will return an unroutable message with a Return method. 
+        /// If this flag is false, the server silently drops the message.
+        /// </param>
+        /// <param name="immediate">
+        /// This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. 
+        /// If this flag is true, the server will return an undeliverable message with a Return method. 
+        /// If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed.
+        /// </param>
+        /// <param name="message">The message to publish</param>
+        Task PublishAsync<T>(
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            bool immediate,
+            IMessage<T> message) where T : class;
+
+        /// <summary>
         /// Publish a message as a byte array.
         /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
         /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
@@ -180,78 +236,32 @@ namespace EasyNetQ
             byte[] body);
 
         /// <summary>
-        /// Publish a message as a .NET type
-        /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-        /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="exchange">The exchange to publish to</param>
-        /// <param name="routingKey">
-        /// The routing key for the message. The routing key is used for routing messages depending on the 
-        /// exchange configuration.</param>
-        /// <param name="mandatory">
-        /// This flag tells the server how to react if the message cannot be routed to a queue. 
-        /// If this flag is true, the server will return an unroutable message with a Return method. 
-        /// If this flag is false, the server silently drops the message.
-        /// </param>
-        /// <param name="immediate">
-        /// This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. 
-        /// If this flag is true, the server will return an undeliverable message with a Return method. 
-        /// If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed.
-        /// </param>
-        /// <param name="message">The message to publish</param>
-        Task PublishAsync<T>(
-            IExchange exchange, 
-            string routingKey,
-            bool mandatory,
-            bool immediate,
-            IMessage<T> message) where T : class;
-
-        /// <summary>
-        /// Publish a message as a .NET type when the type is only known at runtime.
-        /// Use the generic version of this method <see cref="PublishAsync{T}"/> when you know the type of the message at compile time.
-        /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-        /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
-        /// </summary>
-        /// <param name="exchange">The exchange to publish to</param>
-        /// <param name="routingKey">
-        /// The routing key for the message. The routing key is used for routing messages depending on the 
-        /// exchange configuration.</param>
-        /// <param name="mandatory">
-        /// This flag tells the server how to react if the message cannot be routed to a queue. 
-        /// If this flag is true, the server will return an unroutable message with a Return method. 
-        /// If this flag is false, the server silently drops the message.
-        /// </param>
-        /// <param name="immediate">
-        /// This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. 
-        /// If this flag is true, the server will return an undeliverable message with a Return method. 
-        /// If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed.
-        /// </param>
-        /// <param name="message">The message to publish</param>
-        Task PublishAsync(
-            IExchange exchange,
-            string routingKey,
-            bool mandatory,
-            bool immediate,
-            IMessage message);
-       
-        /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
         /// </summary>
         /// <param name="name">The name of the queue</param>
         /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
-        ///     and are deleted when that connection closes.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
+        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <returns>
         /// The queue
         /// </returns>
-        IQueue QueueDeclare(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null);
+        IQueue QueueDeclare(
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false, 
+            bool autoDelete = false,
+            int? perQueueMessageTtl  = null, 
+            int? expires = null,
+            byte? maxPriority = null,
+            string deadLetterExchange = null, 
+            string deadLetterRoutingKey = null);
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -259,16 +269,25 @@ namespace EasyNetQ
         /// <param name="name">The name of the queue</param>
         /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, 
-        ///     and are deleted when that connection closes.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueTtl">How long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
+        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(string name, bool passive = false, bool durable = true, bool exclusive = false, bool autoDelete = false, int perQueueTtl = int.MaxValue, int expires = int.MaxValue, string deadLetterExchange = null, string deadLetterRoutingKey = null);
-
+        Task<IQueue> QueueDeclareAsync(
+            string name, 
+            bool passive = false, 
+            bool durable = true, 
+            bool exclusive = false, 
+            bool autoDelete = false,
+            int? perQueueMessageTtl  = null,
+            int? expires = null,
+            byte? maxPriority = null,
+            string deadLetterExchange = null, 
+            string deadLetterRoutingKey = null);
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
@@ -287,7 +306,7 @@ namespace EasyNetQ
         void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false);
 
         /// <summary>
-        /// Purget a queue
+        /// Purges a queue
         /// </summary>
         /// <param name="queue">The queue to purge</param>
         void QueuePurge(IQueue queue);
@@ -300,14 +319,20 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
-        ///     but only when bound to other exchanges.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declards x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
-        IExchange ExchangeDeclare(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null, bool delayed = false);
-
-
+        IExchange ExchangeDeclare(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false, 
+            string alternateExchange = null, 
+            bool delayed = false);
+        
         /// <summary>
         /// Declare an exchange
         /// </summary>
@@ -316,12 +341,19 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, 
-        ///     but only when bound to other exchanges.</param>
+        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declards x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
-        Task<IExchange> ExchangeDeclareAsync(string name, string type, bool passive = false, bool durable = true, bool autoDelete = false, bool @internal = false, string alternateExchange = null, bool delayed = false);
+        Task<IExchange> ExchangeDeclareAsync(
+            string name, 
+            string type, 
+            bool passive = false, 
+            bool durable = true, 
+            bool autoDelete = false, 
+            bool @internal = false, 
+            string alternateExchange = null, 
+            bool delayed = false);
 
         /// <summary>
         /// Delete an exchange
