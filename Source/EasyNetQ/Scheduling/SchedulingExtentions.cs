@@ -11,10 +11,5 @@
         {
             return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         }
-
-        public static IServiceRegister EnableExternalSchedulerV2(this IServiceRegister serviceRegister)
-        {
-            return serviceRegister.Register<IScheduler, ExternalSchedulerV2>();
-        }
     }
 }
