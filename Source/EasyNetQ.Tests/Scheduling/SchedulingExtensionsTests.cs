@@ -25,13 +25,5 @@ namespace EasyNetQ.Tests.Scheduling
             serviceRegister.Expect(x => x.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()).TentativeReturn();
             serviceRegister.EnableDeadLetterExchangeAndMessageTtlScheduler();
         }
-
-        [Test]
-        public void When_using_EnableExternalSchedulerV2_extension_method_required_services_are_registered()
-        {
-            var serviceRegister = NewMock<IServiceRegister>();
-            serviceRegister.Expect(x => x.Register<IScheduler, ExternalSchedulerV2>()).TentativeReturn();
-            serviceRegister.EnableExternalSchedulerV2();
-        }
     }
 }
