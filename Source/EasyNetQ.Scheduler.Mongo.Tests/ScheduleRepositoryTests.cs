@@ -29,7 +29,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule()
         {
-            scheduleRepository.Store(new ScheduleV1
+            scheduleRepository.Store(new Schedule
                 {
                     BindingKey = "abc",
                     CancellationKey = "bcd",

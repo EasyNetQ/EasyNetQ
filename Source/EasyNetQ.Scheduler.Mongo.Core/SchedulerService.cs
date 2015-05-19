@@ -93,7 +93,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         private void OnMessage(ScheduleMe message)
         {
             log.DebugWrite("Got Schedule Message");
-            scheduleRepository.Store(new ScheduleV1
+            scheduleRepository.Store(new Schedule
                 {
                     Id = Guid.NewGuid(),
                     CancellationKey = message.CancellationKey,

@@ -5,9 +5,9 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
 {
     public class MockScheduleRepository : IScheduleRepository
     {
-        public Func<ScheduleV1> GetPendingDelegate { get; set; } 
+        public Func<Schedule> GetPendingDelegate { get; set; } 
 
-        public void Store(ScheduleV1 scheduleMe)
+        public void Store(Schedule scheduleMe)
         {
         }
 
@@ -15,7 +15,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         {
         }
 
-        public ScheduleV1 GetPending()
+        public Schedule GetPending()
         {
             return (GetPendingDelegate != null)
                        ? GetPendingDelegate()
