@@ -10,6 +10,7 @@ namespace EasyNetQ.Scheduling
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
+        private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
@@ -17,6 +18,7 @@ namespace EasyNetQ.Scheduling
         public ExternalScheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
+            ITypeNameSerializer typeNameSerializer,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IMessageSerializationStrategy messageSerializationStrategy)
@@ -26,11 +28,14 @@ namespace EasyNetQ.Scheduling
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
+            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             this.advancedBus = advancedBus;
             this.conventions = conventions;
+            this.typeNameSerializer = typeNameSerializer;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
+            this.messageSerializationStrategy = messageSerializationStrategy;
         }
 
         public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
@@ -54,6 +59,7 @@ namespace EasyNetQ.Scheduling
                     CancellationKey = cancellationKey,
                     InnerMessage = serializedMessage.Body,
                     MessageProperties = serializedMessage.Properties,
+                    BindingKey = typeNameSerializer.Serialize(typeof (T)), 
                     ExchangeType = ExchangeType.Topic,
                     Exchange = conventions.ExchangeNamingConvention(baseMessageType),
                     RoutingKey = "#"

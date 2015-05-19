@@ -65,14 +65,17 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                     var schedule = scheduleRepository.GetPending();
                     if (schedule == null)
                         return;
-                    log.DebugWrite(string.Format("Publishing Scheduled Message with Routing Key: '{0}'", schedule.BindingKey));
-                    var exchange = bus.Advanced.ExchangeDeclare(schedule.Exchange ?? schedule.BindingKey, schedule.ExchangeType ?? ExchangeType.Topic);
+                    var exchangeName = schedule.Exchange ?? schedule.BindingKey;
+                    var routingKey = schedule.RoutingKey ?? string.Empty;
+                    var properties = schedule.BasicProperties ?? new MessageProperties {Type = schedule.BindingKey};
+                    log.DebugWrite(string.Format("Publishing Scheduled Message with to exchange '{0}'", exchangeName));
+                    var exchange = bus.Advanced.ExchangeDeclare(exchangeName, schedule.ExchangeType ?? ExchangeType.Topic);
                     bus.Advanced.Publish(
                         exchange,
-                        schedule.RoutingKey ?? schedule.BindingKey,
+                        routingKey,
                         false,
                         false,
-                        schedule.BasicProperties ?? new MessageProperties {Type = schedule.BindingKey},
+                        properties,
                         schedule.InnerMessage);
                     scheduleRepository.MarkAsPublished(schedule.Id);
                     ++published;
