@@ -200,7 +200,6 @@
     <Compile Include="SystemMessages\UnscheduleMe.cs" />
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
-    <Compile Include="SystemMessages\UnscheduleMeV2.cs" />
     <Compile Include="TaskHelpers.cs" />
     <Compile Include="TimeoutSecondsAttribute.cs" />
     <Compile Include="Topology\Binding.cs" />
