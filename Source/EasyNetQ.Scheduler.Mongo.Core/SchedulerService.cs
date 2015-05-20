@@ -5,12 +5,6 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Scheduler.Mongo.Core
 {
-    public interface ISchedulerService
-    {
-        void Start();
-        void Stop();
-    }
-
     public class SchedulerService : ISchedulerService
     {
         private readonly IBus bus;
@@ -71,14 +65,17 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                     var schedule = scheduleRepository.GetPending();
                     if (schedule == null)
                         return;
-                    log.DebugWrite(string.Format("Publishing Scheduled Message with Routing Key: '{0}'", schedule.BindingKey));
-                    var exchange = bus.Advanced.ExchangeDeclare(schedule.BindingKey, ExchangeType.Topic);
+                    var exchangeName = schedule.Exchange ?? schedule.BindingKey;
+                    var routingKey = schedule.RoutingKey ?? schedule.BindingKey;
+                    var properties = schedule.BasicProperties ?? new MessageProperties {Type = schedule.BindingKey};
+                    log.DebugWrite(string.Format("Publishing Scheduled Message with to exchange '{0}'", exchangeName));
+                    var exchange = bus.Advanced.ExchangeDeclare(exchangeName, schedule.ExchangeType ?? ExchangeType.Topic);
                     bus.Advanced.Publish(
                         exchange,
-                        schedule.BindingKey,
+                        routingKey,
                         false,
                         false,
-                        new MessageProperties {Type = schedule.BindingKey},
+                        properties,
                         schedule.InnerMessage);
                     scheduleRepository.MarkAsPublished(schedule.Id);
                     ++published;
@@ -100,14 +97,18 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         {
             log.DebugWrite("Got Schedule Message");
             scheduleRepository.Store(new Schedule
-                {
-                    Id = Guid.NewGuid(),
-                    CancellationKey = message.CancellationKey,
-                    BindingKey = message.BindingKey,
-                    InnerMessage = message.InnerMessage,
-                    State = ScheduleState.Pending,
-                    WakeTime = message.WakeTime
-                });
+            {
+                Id = Guid.NewGuid(),
+                CancellationKey = message.CancellationKey,
+                BindingKey = message.BindingKey,
+                InnerMessage = message.InnerMessage,
+                State = ScheduleState.Pending,
+                WakeTime = message.WakeTime,
+                Exchange = message.Exchange,
+                ExchangeType = message.ExchangeType,
+                RoutingKey = message.RoutingKey,
+                BasicProperties = message.MessageProperties
+            });
         }
     }
 }

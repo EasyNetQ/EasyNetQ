@@ -1,7 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using EasyNetQ.Interception;
 using EasyNetQ.Scheduling;
 using EasyNetQ.Tests.Interception;
 using NUnit.Framework;
