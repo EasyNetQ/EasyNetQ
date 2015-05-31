@@ -117,7 +117,7 @@ namespace EasyNetQ.Producer
                     }
                     else
                     {
-                        OpenChannel();
+                        OnConnectionDisconnected(null);
                         throw;
                     }
                 }
