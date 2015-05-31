@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         {
             var exception = new CrazyTestOnlyException();
             
-            var task = dispatcher.Invoke(x =>
+            var task = dispatcher.InvokeAsync(x =>
             {
                 throw exception;
             });

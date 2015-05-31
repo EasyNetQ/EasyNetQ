@@ -107,7 +107,7 @@ namespace EasyNetQ.Producer
 
         }
 
-        public override Task Publish(IModel model, Action<IModel> publishAction)
+        public override Task PublishAsync(IModel model, Action<IModel> publishAction)
         {
             var tcs = new TaskCompletionSource<NullStruct>();
             return ExecutePublishWithConfirmation(model, publishAction, tcs);

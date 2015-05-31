@@ -9,7 +9,7 @@ namespace EasyNetQ.Producer
     /// </summary>
     public interface IClientCommandDispatcher : IDisposable
     {
-        Task<T> Invoke<T>(Func<IModel, T> channelAction);
-        Task Invoke(Action<IModel> channelAction);
+        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction);
+        Task InvokeAsync(Action<IModel> channelAction);
     }
 }

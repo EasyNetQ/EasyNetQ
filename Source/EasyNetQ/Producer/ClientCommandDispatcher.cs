@@ -21,16 +21,16 @@ namespace EasyNetQ.Producer
                 () => new ClientCommandDispatcherSingleton(connection, persistentChannelFactory));
         }
 
-        public Task<T> Invoke<T>(Func<IModel, T> channelAction)
+        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            return dispatcher.Value.Invoke(channelAction);
+            return dispatcher.Value.InvokeAsync(channelAction);
         }
 
-        public Task Invoke(Action<IModel> channelAction)
+        public Task InvokeAsync(Action<IModel> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            return dispatcher.Value.Invoke(channelAction);
+            return dispatcher.Value.InvokeAsync(channelAction);
         }
 
         public void Dispose()
