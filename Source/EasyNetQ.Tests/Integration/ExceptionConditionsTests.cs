@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
+
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Loggers;
 using EasyNetQ.Management.Client;
 

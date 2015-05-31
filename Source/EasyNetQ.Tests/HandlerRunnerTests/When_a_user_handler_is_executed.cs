@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using EasyNetQ.Loggers;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using Rhino.Mocks;

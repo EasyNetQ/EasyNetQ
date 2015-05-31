@@ -1,7 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests

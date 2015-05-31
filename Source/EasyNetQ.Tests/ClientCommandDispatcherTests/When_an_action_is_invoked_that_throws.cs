@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Runtime.Serialization;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;

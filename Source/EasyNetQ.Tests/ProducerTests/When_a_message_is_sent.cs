@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
-using System.Collections;
+﻿// ReSharper disable InconsistentNaming
+
+using System.Collections.Generic;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
