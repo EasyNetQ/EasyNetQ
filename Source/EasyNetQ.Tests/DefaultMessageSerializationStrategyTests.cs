@@ -60,13 +60,11 @@ namespace EasyNetQ.Tests
                         UserId = "Bob"
                     },
             };
-            var messageProperties = new StringBuilder();
-            message.Properties.AppendPropertyDebugStringTo(messageProperties);
             var serializationStrategy = CreateDeserializationStrategy(message, serializedMessageBody, correlationId);
 
             var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
-            AssertMessageDeserializedCorrectly((Message<MyMessage>)deserializedMessage, messageContent, typeof(MyMessage), messageProperties.ToString());
+            AssertMessageDeserializedCorrectly((Message<MyMessage>)deserializedMessage, messageContent, typeof(MyMessage), message.Properties.ToString());
         }
 
         [Test]
@@ -96,12 +94,9 @@ namespace EasyNetQ.Tests
 
         private void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType, string expectedMessageProperties)
         {
-            var messageProperties = new StringBuilder();
-            message.Properties.AppendPropertyDebugStringTo(messageProperties);
-
             Assert.That(message.Body.Text, Is.EqualTo(expectedBodyText), "Deserialized message body text does not match expected value");
             Assert.That(message.MessageType, Is.EqualTo(expectedMessageType), "Deserialized message type does not match expected value");
-            Assert.That(messageProperties.ToString(), Is.EqualTo(expectedMessageProperties), "Deserialized message properties do not match expected value");
+            Assert.That(message.Properties.ToString(), Is.EqualTo(expectedMessageProperties), "Deserialized message properties do not match expected value");
         }
 
         private DefaultMessageSerializationStrategy CreateSerializationStrategy(IMessage<MyMessage> message, string messageType, byte[] messageBody, string correlationId)

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// ReSharper disable InconsistentNaming
+using System.Collections.Generic;
 using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
 using System;
 using System.Linq;
 using System.Reflection;
@@ -79,9 +79,7 @@ namespace EasyNetQ.Tests
                     UserId = "userid",
                 };
 
-            properties.AppendPropertyDebugStringTo(stringBuilder);
-
-            stringBuilder.ToString().ShouldEqual(expectedDebugProperties);
+            properties.ToString().ShouldEqual(expectedDebugProperties);
         }
 
         [Test]
