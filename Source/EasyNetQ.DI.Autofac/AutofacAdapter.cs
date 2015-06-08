@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using Autofac;
-using Autofac.Core;
 
 namespace EasyNetQ.DI
 {

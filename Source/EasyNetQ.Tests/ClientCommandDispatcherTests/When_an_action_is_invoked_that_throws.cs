@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Runtime.Serialization;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -41,7 +40,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         {
             var exception = new CrazyTestOnlyException();
             
-            var task = dispatcher.Invoke(x =>
+            var task = dispatcher.InvokeAsync(x =>
             {
                 throw exception;
             });

@@ -1,9 +1,6 @@
-﻿using System.Linq;
+﻿using System.Threading;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
-// ReSharper disable InconsistentNaming
-using System;
-using System.Threading;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration

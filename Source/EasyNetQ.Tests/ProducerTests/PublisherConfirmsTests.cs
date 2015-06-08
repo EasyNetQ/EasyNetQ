@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_register_for_message_returns()
         {
-             publisher.Publish(channel, model => { }).Wait();
+             publisher.PublishAsync(channel, model => { }).Wait();
 
              channel.AssertWasCalled(x => x.BasicReturn += Arg<EventHandler<BasicReturnEventArgs>>.Is.Anything);
         }      
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.ProducerTests
         public void Should_complete_task_immediately_without_waiting_for_ack()
         {
             var taskWasExecuted = false;
-            var task = publisher.Publish(channel, model => taskWasExecuted = true);
+            var task = publisher.PublishAsync(channel, model => taskWasExecuted = true);
             task.Wait();
             taskWasExecuted.ShouldBeTrue();
         }
@@ -72,7 +72,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var body = new byte[0];
             var properties = new BasicProperties();
             
-            publisher.Publish(channelMock, model => { }).Wait();
+            publisher.PublishAsync(channelMock, model => { }).Wait();
             
             channelMock.Raise(x => x.BasicReturn += null, null, new BasicReturnEventArgs
                 {
@@ -116,9 +116,9 @@ namespace EasyNetQ.Tests.ProducerTests
             var channel1 = MockRepository.GenerateStub<IModel>();
             var channel2 = MockRepository.GenerateStub<IModel>();
 
-            publisher.Publish(channel1, model => { }).Wait();
+            publisher.PublishAsync(channel1, model => { }).Wait();
             eventBus.Publish(new PublishChannelCreatedEvent(channel2));
-            publisher.Publish(channel2, model => { }).Wait();
+            publisher.PublishAsync(channel2, model => { }).Wait();
 
             channel1.AssertWasCalled(x => x.BasicReturn -= Arg<EventHandler<BasicReturnEventArgs>>.Is.Anything);
         }
@@ -194,7 +194,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_register_for_message_returns()
         {
-            var task = publisherConfirms.Publish(channel, model => { });
+            var task = publisherConfirms.PublishAsync(channel, model => { });
 
             channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
             task.Wait();
@@ -205,7 +205,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_register_for_publisher_confirms()
         {
-            var task = publisherConfirms.Publish(channel, model => { });
+            var task = publisherConfirms.PublishAsync(channel, model => { });
 
             channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
             task.Wait();
@@ -218,7 +218,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             var actionWasExecuted = false;
 
-            var task = publisherConfirms.Publish(channel, model => actionWasExecuted = true);
+            var task = publisherConfirms.PublishAsync(channel, model => actionWasExecuted = true);
 
             channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
             task.Wait();
@@ -229,7 +229,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [ExpectedException(typeof(PublishNackedException))]
         public void Should_throw_exception_when_nacked()
         {
-            var task = publisherConfirms.Publish(channel, model => {});
+            var task = publisherConfirms.PublishAsync(channel, model => {});
 
             channel.Raise(x => x.BasicNacks += null, null, new BasicNackEventArgs());
 
@@ -247,7 +247,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [ExpectedException(typeof(TimeoutException))]
         public void Should_timeout_if_neither_ack_or_nack_is_raised()
         {
-            var task = publisherConfirms.Publish(channel, model => { });
+            var task = publisherConfirms.PublishAsync(channel, model => { });
             try
             {
                 task.Wait();
@@ -268,7 +268,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             for (ulong i = 0; i < 10; i++)
             {
-                tasks.Add(publisherConfirms.Publish(channel, model => { }));
+                tasks.Add(publisherConfirms.PublishAsync(channel, model => { }));
                 channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs
                     {
                         DeliveryTag = i
@@ -311,7 +311,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var body = new byte[0];
             var properties = new BasicProperties();
 
-            var task = publisherConfirms.Publish(channel, model => { });
+            var task = publisherConfirms.PublishAsync(channel, model => { });
 
             channel.Raise(x => x.BasicAcks += null, null, new BasicAckEventArgs());
             channel.Raise(x => x.BasicReturn += null, null, new BasicReturnEventArgs
@@ -368,7 +368,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var modelsUsedInPublish = new List<IModel>();
 
             // do the publish, this should be retried against the new model after it reconnects.
-            var task = publisherConfirms.Publish(channel1, modelsUsedInPublish.Add);
+            var task = publisherConfirms.PublishAsync(channel1, modelsUsedInPublish.Add);
 
             // new channel connects
             eventBus.Publish(new PublishChannelCreatedEvent(channel2));
@@ -392,7 +392,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var channel2 = MockRepository.GenerateStub<IModel>();
 
             // do the publish, this should be retried against the new model after it reconnects.
-            var task = publisherConfirms.Publish(channel1, model => { });
+            var task = publisherConfirms.PublishAsync(channel1, model => { });
 
             // new channel connects
             eventBus.Publish(new PublishChannelCreatedEvent(channel2));

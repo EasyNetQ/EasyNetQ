@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EasyNetQ
 {
@@ -19,12 +18,6 @@ namespace EasyNetQ
                 }
                 yield return item;
             }
-        }
-
-        public static IEnumerable<KeyValuePair<string, string>> EnumerateDictionary(this IDictionary<string, object> dictionary)
-        {
-            return from KeyValuePair<string, object> entry in dictionary 
-                   select new KeyValuePair<string, string>(entry.Key, entry.Value.ToString());
         }
 
         public static IEnumerable<T> SurroundWith<T>(this IEnumerable<T> items, T first, T last)
