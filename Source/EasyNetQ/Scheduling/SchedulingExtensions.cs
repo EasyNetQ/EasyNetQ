@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Scheduling
 {
-    public static class SchedulingExtentions
+    public static class SchedulingExtensions
     {
         public static IServiceRegister EnableDelayedExchangeScheduler(this IServiceRegister serviceRegister)
         {
