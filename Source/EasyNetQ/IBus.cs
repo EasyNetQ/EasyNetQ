@@ -81,14 +81,20 @@ namespace EasyNetQ
         /// recipt is Ack'd. All onMessage delegates are processed on a single thread so you should
         /// avoid long running blocking IO operations. Consider using SubscribeAsync
         /// </param>
-        /// <param name="configure">
+        /// <param name="configureSubscription">
         /// Fluent configuration e.g. x => x.WithTopic("uk.london")
+        /// </param>
+        /// <param name="configureQueue">
+        /// Fluent configuration e.g. x => x.WithMaxPriority(9)
+        /// </param>
+        /// <param name="configureExchange">
+        /// Fluent configuration e.g. x => x.WithDurable(false)
         /// </param>
         /// <returns>
         /// An <see cref="ISubscriptionResult"/>
         /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
         /// </returns>
-        ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) 
+        ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configureSubscription, Action<IQueueConfiguration> configureQueue, Action<IExchangeConfiguration> configureExchange)
             where T : class;
 
         /// <summary>
@@ -126,14 +132,20 @@ namespace EasyNetQ
         /// then continue processing asynchronously. When the Task completes the message will be
         /// Ack'd.
         /// </param>
-        /// <param name="configure">
-        /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
+        /// <param name="configureSubscription">
+        /// Fluent configuration e.g. x => x.WithTopic("uk.london")
+        /// </param>
+        /// <param name="configureQueue">
+        /// Fluent configuration e.g. x => x.WithMaxPriority(9)
+        /// </param>
+        /// <param name="configureExchange">
+        /// Fluent configuration e.g. x => x.WithDurable(false)
         /// </param>
         /// <returns>
         /// An <see cref="ISubscriptionResult"/>
         /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
         /// </returns>
-        ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) 
+        ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configureSubscription, Action<IQueueConfiguration> configureQueue, Action<IExchangeConfiguration> configureExchange)
             where T : class;
 
         /// <summary>
@@ -166,7 +178,7 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received. It should return the response.
         /// </param>
-        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
             where TRequest : class
             where TResponse : class;
 
@@ -193,7 +205,7 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received.
         /// </param>
-        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
+        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class;
 

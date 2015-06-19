@@ -20,11 +20,11 @@ namespace EasyNetQ.Tests.Integration
             var client = new ManagementClient("http://localhost", "guest", "guest");
             var vhost = new Vhost { Name = "/" };
 
-            bus.Subscribe<MyMessage>(subscriptionId, message => { }, x => x.WithExpires(1000));
+            bus.Subscribe<MyMessage>(subscriptionId, message => { }, s => s.WithExpires(1000), q => { }, e => { });
 
             var queue = client.GetQueue(queueName, vhost);
             queue.ShouldNotBeNull();
-            
+
             // this will abandon the queue... poor queue!
             bus.Dispose();
 

@@ -12,7 +12,7 @@ namespace EasyNetQ.NonGeneric
     {
         public static ISubscriptionResult Subscribe(this IBus bus, Type messageType, string subscriptionId, Action<object> onMessage)
         {
-            return Subscribe(bus, messageType, subscriptionId, onMessage, configuration => { });
+            return Subscribe(bus, messageType, subscriptionId, onMessage, s => { }, q => { }, e => { });
         }
 
         public static ISubscriptionResult Subscribe(
@@ -20,13 +20,18 @@ namespace EasyNetQ.NonGeneric
             Type messageType,
             string subscriptionId,
             Action<object> onMessage,
-            Action<ISubscriptionConfiguration> configure)
+            Action<ISubscriptionConfiguration> configureSubscription,
+            Action<IQueueConfiguration> configureQueue,
+            Action<IExchangeConfiguration> configureExchange)
         {
             Preconditions.CheckNotNull(onMessage, "onMessage");
+            Preconditions.CheckNotNull(configureSubscription, "configureSubscription");
+            Preconditions.CheckNotNull(configureQueue, "configureQueue");
+            Preconditions.CheckNotNull(configureExchange, "configureExchange");
 
             Func<object, Task> asyncOnMessage = x => TaskHelpers.ExecuteSynchronously(() => onMessage(x));
 
-            return SubscribeAsync(bus, messageType, subscriptionId, asyncOnMessage, configure);
+            return SubscribeAsync(bus, messageType, subscriptionId, asyncOnMessage, configureSubscription, configureQueue, configureExchange);
         }
 
         public static ISubscriptionResult SubscribeAsync(
@@ -35,7 +40,7 @@ namespace EasyNetQ.NonGeneric
             string subscriptionId,
             Func<object, Task> onMessage)
         {
-            return SubscribeAsync(bus, messageType, subscriptionId, onMessage, configuration => { });
+            return SubscribeAsync(bus, messageType, subscriptionId, onMessage, s => { }, q => { }, e => { });
         }
 
         public static ISubscriptionResult SubscribeAsync(
@@ -43,13 +48,17 @@ namespace EasyNetQ.NonGeneric
             Type messageType,
             string subscriptionId,
             Func<object, Task> onMessage,
-            Action<ISubscriptionConfiguration> configure)
+            Action<ISubscriptionConfiguration> configureSubscription,
+            Action<IQueueConfiguration> configureQueue,
+            Action<IExchangeConfiguration> configureExchange)
         {
             Preconditions.CheckNotNull(bus, "bus");
             Preconditions.CheckNotNull(messageType, "messageType");
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(configureSubscription, "configureSubscription");
+            Preconditions.CheckNotNull(configureQueue, "configureQueue");
+            Preconditions.CheckNotNull(configureExchange, "configureExchange");
 
             var subscribeMethodOpen = typeof(IBus)
                 .GetMethods()
@@ -61,8 +70,8 @@ namespace EasyNetQ.NonGeneric
             }
 
             var subscribeMethod = subscribeMethodOpen.MakeGenericMethod(messageType);
-            return (ISubscriptionResult)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configure });
-        } 
+            return (ISubscriptionResult)subscribeMethod.Invoke(bus, new object[] { subscriptionId, onMessage, configureSubscription, configureQueue, configureExchange });
+        }
 
         public static void Publish(this IBus bus, Type messageType, object message)
         {
@@ -86,11 +95,11 @@ namespace EasyNetQ.NonGeneric
             Preconditions.CheckNotNull(topic, "topic");
             Preconditions.CheckNotNull(messageType, "messageType");
             Preconditions.CheckTypeMatches(messageType, message, "message", "message must be of type " + messageType);
-            
+
             var advancedBus = bus.Advanced.Container.Resolve<IAdvancedBus>();
             var publishExchangeDeclareStrategy = bus.Advanced.Container.Resolve<IPublishExchangeDeclareStrategy>();
             var messageDeliveryModeStrategy = bus.Advanced.Container.Resolve<IMessageDeliveryModeStrategy>();
-            
+
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
             var easyNetQMessage = MessageFactory.CreateInstance(messageType, message);
             easyNetQMessage.Properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType);
@@ -102,11 +111,13 @@ namespace EasyNetQ.NonGeneric
         {
             var parameters = methodInfo.GetParameters();
 
-            return 
-                (parameters.Length == 3) && 
+            return
+                (parameters.Length == 5) &&
                 (parameters[0].ParameterType == typeof(string) &&
                 parameters[1].ParameterType.Name == "Func`2") &&
-                parameters[2].ParameterType == typeof(Action<ISubscriptionConfiguration>);
+                parameters[2].ParameterType == typeof(Action<ISubscriptionConfiguration>) &&
+                parameters[3].ParameterType == typeof(Action<IQueueConfiguration>) &&
+                parameters[4].ParameterType == typeof(Action<IExchangeConfiguration>);
         }
     }
 }

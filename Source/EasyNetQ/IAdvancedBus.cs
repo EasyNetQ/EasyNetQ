@@ -144,7 +144,7 @@ namespace EasyNetQ
         /// </param>
         /// <param name="message">The message to publish</param>
         void Publish<T>(
-            IExchange exchange, 
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             bool immediate,
@@ -252,15 +252,15 @@ namespace EasyNetQ
         /// The queue
         /// </returns>
         IQueue QueueDeclare(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
-            bool exclusive = false, 
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null, 
+            int? perQueueMessageTtl = null,
             int? expires = null,
             byte? maxPriority = null,
-            string deadLetterExchange = null, 
+            string deadLetterExchange = null,
             string deadLetterRoutingKey = null);
 
         /// <summary>
@@ -278,15 +278,15 @@ namespace EasyNetQ
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
-            bool exclusive = false, 
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? perQueueMessageTtl = null,
             int? expires = null,
             byte? maxPriority = null,
-            string deadLetterExchange = null, 
+            string deadLetterExchange = null,
             string deadLetterRoutingKey = null);
 
         /// <summary>
@@ -324,15 +324,15 @@ namespace EasyNetQ
         /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
         IExchange ExchangeDeclare(
-            string name, 
-            string type, 
-            bool passive = false, 
-            bool durable = true, 
-            bool autoDelete = false, 
-            bool @internal = false, 
-            string alternateExchange = null, 
+            string name,
+            string type,
+            bool passive = false,
+            bool durable = true,
+            bool autoDelete = false,
+            bool @internal = false,
+            string alternateExchange = null,
             bool delayed = false);
-        
+
         /// <summary>
         /// Declare an exchange
         /// </summary>
@@ -346,13 +346,13 @@ namespace EasyNetQ
         /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
         Task<IExchange> ExchangeDeclareAsync(
-            string name, 
-            string type, 
-            bool passive = false, 
-            bool durable = true, 
-            bool autoDelete = false, 
-            bool @internal = false, 
-            string alternateExchange = null, 
+            string name,
+            string type,
+            bool passive = false,
+            bool durable = true,
+            bool autoDelete = false,
+            bool @internal = false,
+            string alternateExchange = null,
             bool delayed = false);
 
         /// <summary>

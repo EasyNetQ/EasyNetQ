@@ -28,7 +28,7 @@ namespace EasyNetQ.AutoSubscribe
         /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
-        public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; } 
+        public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; }
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -57,7 +57,7 @@ namespace EasyNetQ.AutoSubscribe
             SubscriptionIdPrefix = subscriptionIdPrefix;
             AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
-            ConfigureSubscriptionConfiguration = subscriptionConfiguration => {};
+            ConfigureSubscriptionConfiguration = subscriptionConfiguration => { };
         }
 
         protected virtual string DefaultSubscriptionIdGenerator(AutoSubscriberConsumerInfo c)
@@ -100,10 +100,10 @@ namespace EasyNetQ.AutoSubscribe
         {
             if (consumerTypes == null) throw new ArgumentNullException("consumerTypes");
 
-            var genericBusSubscribeMethod = GetSubscribeMethodOfBus("Subscribe",typeof(Action<>));
+            var genericBusSubscribeMethod = GetSubscribeMethodOfBus("Subscribe", typeof(Action<>));
             var subscriptionInfos = GetSubscriptionInfos(consumerTypes, typeof(IConsume<>));
 
-            InvokeMethods(subscriptionInfos,DispatchMethodName, genericBusSubscribeMethod, messageType => typeof(Action<>).MakeGenericType(messageType));
+            InvokeMethods(subscriptionInfos, DispatchMethodName, genericBusSubscribeMethod, messageType => typeof(Action<>).MakeGenericType(messageType));
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace EasyNetQ.AutoSubscribe
         {
             var genericBusSubscribeMethod = GetSubscribeMethodOfBus("SubscribeAsync", typeof(Func<,>));
             var subscriptionInfos = GetSubscriptionInfos(consumerTypes, typeof(IConsumeAsync<>));
-            Func<Type,Type> subscriberTypeFromMessageTypeDelegate = messageType => typeof (Func<,>).MakeGenericType(messageType, typeof (Task));
+            Func<Type, Type> subscriberTypeFromMessageTypeDelegate = messageType => typeof(Func<,>).MakeGenericType(messageType, typeof(Task));
             InvokeMethods(subscriptionInfos, DispatchAsyncMethodName, genericBusSubscribeMethod, subscriberTypeFromMessageTypeDelegate);
         }
 
@@ -150,8 +150,10 @@ namespace EasyNetQ.AutoSubscribe
                     var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
                     var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
                     var busSubscribeMethod = genericBusSubscribeMethod.MakeGenericMethod(subscriptionInfo.MessageType);
-                    Action<ISubscriptionConfiguration> configAction = GenerateConfigurationAction(subscriptionInfo);
-                    busSubscribeMethod.Invoke(bus, new object[] { subscriptionId, dispatchDelegate, configAction });
+                    Action<ISubscriptionConfiguration> subscriptionConfigAction = GenerateConfigurationAction(subscriptionInfo);
+                    Action<IQueueConfiguration> queueConfigAction = q => { };
+                    Action<IExchangeConfiguration> exchangeConfigAction = e => { };
+                    busSubscribeMethod.Invoke(bus, new object[] { subscriptionId, dispatchDelegate, subscriptionConfigAction, queueConfigAction, exchangeConfigAction });
                 }
             }
         }
@@ -200,15 +202,15 @@ namespace EasyNetQ.AutoSubscribe
         private Action<ISubscriptionConfiguration> AutoSubscriberConsumerInfo(AutoSubscriberConsumerInfo subscriptionInfo)
         {
             var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
-            if(configSettings == null)
+            if (configSettings == null)
             {
-                return subscriptionConfiguration => {};
+                return subscriptionConfiguration => { };
             }
             return configuration =>
                 {
                     //prefetch count is set to a configurable default in RabbitAdvancedBus
                     //so don't touch it unless SubscriptionConfigurationAttribute value is other than 0.
-                    if(configSettings.PrefetchCount > 0)
+                    if (configSettings.PrefetchCount > 0)
                     {
                         configuration.WithPrefetchCount(configSettings.PrefetchCount);
                     }
@@ -239,10 +241,12 @@ namespace EasyNetQ.AutoSubscribe
             return typeof(IBus).GetMethods()
                 .Where(m => m.Name == methodName)
                 .Select(m => new { Method = m, Params = m.GetParameters() })
-                .Single(m => m.Params.Length == 3
+                .Single(m => m.Params.Length == 5
                     && m.Params[0].ParameterType == typeof(string)
                     && m.Params[1].ParameterType.GetGenericTypeDefinition() == parmType
                     && m.Params[2].ParameterType == typeof(Action<ISubscriptionConfiguration>)
+                    && m.Params[3].ParameterType == typeof(Action<IQueueConfiguration>)
+                    && m.Params[4].ParameterType == typeof(Action<IExchangeConfiguration>)
                    ).Method;
         }
 
@@ -261,11 +265,11 @@ namespace EasyNetQ.AutoSubscribe
 
         private MethodInfo GetExplicitlyDeclaredInterfaceMethod(Type messageType)
         {
-            var interfaceType = typeof (IConsume<>).MakeGenericType(messageType);
+            var interfaceType = typeof(IConsume<>).MakeGenericType(messageType);
             return interfaceType.GetMethod(ConsumeMethodName);
         }
 
-        protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types,Type interfaceType)
+        protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types, Type interfaceType)
         {
             foreach (var concreteType in types.Where(t => t.IsClass && !t.IsAbstract))
             {
@@ -279,6 +283,6 @@ namespace EasyNetQ.AutoSubscribe
             }
         }
 
-       
+
     }
 }

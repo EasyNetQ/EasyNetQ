@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -18,8 +17,8 @@ namespace EasyNetQ.Producer
         private bool disconnected = true;
 
         public PersistentChannel(
-            IPersistentConnection connection, 
-            IEasyNetQLogger logger, 
+            IPersistentConnection connection,
+            IEasyNetQLogger logger,
             ConnectionConfiguration configuration,
             IEventBus eventBus)
         {
@@ -95,6 +94,48 @@ namespace EasyNetQ.Producer
 
         private void InvokeChannelActionInternal(Action<IModel> channelAction, DateTime startTime)
         {
+            #region Original
+
+            //if (IsTimedOut(startTime))
+            //{
+            //    logger.ErrorWrite("Channel action timed out. Throwing exception to client.");
+            //    throw new TimeoutException("The operation requested on PersistentChannel timed out.");
+            //}
+            //try
+            //{
+            //    channelAction(Channel);
+            //}
+            //catch (OperationInterruptedException exception)
+            //{
+            //    try
+            //    {
+            //        var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
+            //        if (amqpException.Code == AmqpException.ConnectionClosed)
+            //        {
+            //            OnConnectionDisconnected(null);
+            //            WaitForReconnectionOrTimeout(startTime);
+            //            InvokeChannelActionInternal(channelAction, startTime);
+            //        }
+            //        else
+            //        {
+            //            OpenChannel();
+            //            throw;
+            //        }
+            //    }
+            //    catch (Sprache.ParseException)
+            //    {
+            //        throw exception;
+            //    }
+            //}
+            //catch (EasyNetQException)
+            //{
+            //    OnConnectionDisconnected(null);
+            //    WaitForReconnectionOrTimeout(startTime);
+            //    InvokeChannelActionInternal(channelAction, startTime);
+            //}
+
+            #endregion
+
             if (IsTimedOut(startTime))
             {
                 logger.ErrorWrite("Channel action timed out. Throwing exception to client.");
@@ -104,33 +145,23 @@ namespace EasyNetQ.Producer
             {
                 channelAction(Channel);
             }
-            catch (OperationInterruptedException exception)
+            catch (Exception exception)
             {
-                try
+                logger.ErrorWrite("Exception occurred while communicating with RabbitMQ.");
+                logger.ErrorWrite(exception);
+
+                if (exception is OperationInterruptedException ||
+                    exception is EasyNetQException)
                 {
-                    var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
-                    if (amqpException.Code == AmqpException.ConnectionClosed)
-                    {
-                        OnConnectionDisconnected(null);
-                        WaitForReconnectionOrTimeout(startTime);
-                        InvokeChannelActionInternal(channelAction, startTime);
-                    }
-                    else
-                    {
-                        OpenChannel();
-                        throw;
-                    }
+                    OnConnectionDisconnected(null);
+                    WaitForReconnectionOrTimeout(startTime);
+                    InvokeChannelActionInternal(channelAction, startTime);
                 }
-                catch (Sprache.ParseException)
+                else
                 {
-                    throw exception;
+                    OpenChannel();
+                    throw;
                 }
-            }
-            catch (EasyNetQException)
-            {
-                OnConnectionDisconnected(null);
-                WaitForReconnectionOrTimeout(startTime);
-                InvokeChannelActionInternal(channelAction, startTime);
             }
         }
 
@@ -142,15 +173,18 @@ namespace EasyNetQ.Producer
             while (disconnected && !IsTimedOut(startTime))
             {
                 Thread.Sleep(delayMilliseconds);
-                delayMilliseconds *= 2; // back off exponentially
+
+                if (delayMilliseconds < 1000)
+                    delayMilliseconds *= 2; // back off exponentially
+
                 try
                 {
                     OpenChannel();
                 }
                 catch (OperationInterruptedException)
-                {}
+                { }
                 catch (EasyNetQException)
-                {}
+                { }
             }
         }
 

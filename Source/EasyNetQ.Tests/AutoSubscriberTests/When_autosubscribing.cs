@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void SetUp()
         {
             mockBuilder = new MockBuilder();
-//            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
+            // mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
 
@@ -62,7 +62,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                                 Arg<string>.Is.Anything,
                                                 Arg<string>.Is.Equal(topicName))
                                                 );
-          
+
             assertConsumerStarted(1, expectedQueueName1, "#");
             assertConsumerStarted(2, expectedQueueName2, "#");
             assertConsumerStarted(3, expectedQueueName3, "Important");
@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             public void Consume(MessageC message)
             {
             }
-          
+
         }
 
         //Discovered by reflection over test assembly, do not remove.

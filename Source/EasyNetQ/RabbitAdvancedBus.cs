@@ -98,7 +98,7 @@ namespace EasyNetQ
             connection.Initialize();
         }
 
-        
+
         // ---------------------------------- consume --------------------------------------
 
         public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
@@ -180,11 +180,11 @@ namespace EasyNetQ
         // -------------------------------- publish ---------------------------------------------
 
         public void Publish(
-            IExchange exchange, 
-            string routingKey, 
-            bool mandatory, 
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
             bool immediate,
-            MessageProperties messageProperties, 
+            MessageProperties messageProperties,
             byte[] body)
         {
             try
@@ -198,10 +198,10 @@ namespace EasyNetQ
         }
 
         public void Publish<T>(
-            IExchange exchange, 
-            string routingKey, 
-            bool mandatory, 
-            bool immediate, 
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            bool immediate,
             IMessage<T> message) where T : class
         {
             try
@@ -276,31 +276,31 @@ namespace EasyNetQ
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
 
         public virtual IQueue QueueDeclare(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
-            bool exclusive = false, 
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? perQueueMessageTtl = null,
             int? expires = null,
             byte? maxPriority = null,
-            string deadLetterExchange = null, 
+            string deadLetterExchange = null,
             string deadLetterRoutingKey = null)
         {
-            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl, 
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl,
                 expires, maxPriority, deadLetterExchange, deadLetterRoutingKey).Result;
         }
 
         public Task<IQueue> QueueDeclareAsync(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
-            bool exclusive = false, 
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? perQueueMessageTtl = null,
             int? expires = null,
             byte? maxPriority = null,
-            string deadLetterExchange = null, 
+            string deadLetterExchange = null,
             string deadLetterRoutingKey = null)
         {
             Preconditions.CheckNotNull(name, "name");
@@ -322,7 +322,7 @@ namespace EasyNetQ
             }
             if (maxPriority.HasValue)
             {
-                arguments.Add("x-max-priority", maxPriority.Value);
+                arguments.Add("x-max-priority", (int)maxPriority.Value); // cast to Int32 because currently there is no Byte implementation (2015-04-19) -> https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/7c1a7d757dd62c184e8bbfd73288eccf465b4d05/projects/client/RabbitMQ.Client/src/client/impl/WireFormatting.cs
             }
             if (!string.IsNullOrEmpty(deadLetterExchange))
             {
@@ -384,12 +384,12 @@ namespace EasyNetQ
         }
 
         public Task<IExchange> ExchangeDeclareAsync(
-            string name, 
-            string type, 
-            bool passive = false, 
-            bool durable = true, 
-            bool autoDelete = false, 
-            bool @internal = false, 
+            string name,
+            string type,
+            bool passive = false,
+            bool durable = true,
+            bool autoDelete = false,
+            bool @internal = false,
             string alternateExchange = null,
             bool delayed = false)
         {
@@ -424,7 +424,7 @@ namespace EasyNetQ
 
                         return (IExchange)new Exchange(name);
                     });
-       }
+        }
 
         public virtual void ExchangeDelete(IExchange exchange, bool ifUnused = false)
         {
@@ -531,15 +531,15 @@ namespace EasyNetQ
             else
             {
                 var message = messageSerializationStrategy.DeserializeMessage<T>(result.Properties, result.Body);
-                if (message.MessageType == typeof (T))
+                if (message.MessageType == typeof(T))
                 {
                     return new BasicGetResult<T>(message);
                 }
                 else
                 {
-                    logger.ErrorWrite("Incorrect message type returned from Get." + 
+                    logger.ErrorWrite("Incorrect message type returned from Get." +
                         "Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
-                    throw new EasyNetQException("Incorrect message type returned from Get." + 
+                    throw new EasyNetQException("Incorrect message type returned from Get." +
                         "Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
                 }
             }

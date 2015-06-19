@@ -1,10 +1,10 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
-using System.Linq;
 
 namespace EasyNetQ
 {
@@ -69,7 +69,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
-            var messageType = typeof (T);
+            var messageType = typeof(T);
             return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange =>
                 {
                     var easyNetQMessage = new Message<T>(message)
@@ -79,20 +79,22 @@ namespace EasyNetQ
                             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
                         }
                     };
-                    return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage); 
+                    return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
                 });
         }
 
         public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
         {
-            return Subscribe(subscriptionId, onMessage, x => { });
+            return Subscribe(subscriptionId, onMessage, s => { }, q => { }, e => { });
         }
 
-        public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
+        public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configureSubscription, Action<IQueueConfiguration> configureQueue, Action<IExchangeConfiguration> configureExchange) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(configureSubscription, "configureSubscription");
+            Preconditions.CheckNotNull(configureQueue, "configureQueue");
+            Preconditions.CheckNotNull(configureExchange, "configureExchange");
 
             return SubscribeAsync<T>(subscriptionId, msg =>
             {
@@ -108,47 +110,74 @@ namespace EasyNetQ
                 }
                 return tcs.Task;
             },
-            configure);
+            configureSubscription, configureQueue, configureExchange);
         }
 
         public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
         {
-            return SubscribeAsync(subscriptionId, onMessage, x => { });
+            return SubscribeAsync(subscriptionId, onMessage, s => { }, q => { }, e => { });
         }
 
-        public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) where T : class
+        public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configureSubscription, Action<IQueueConfiguration> configureQueue, Action<IExchangeConfiguration> configureExchange) where T : class
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(configureSubscription, "configureSubscription");
+            Preconditions.CheckNotNull(configureQueue, "configureQueue");
+            Preconditions.CheckNotNull(configureExchange, "configureExchange");
 
-            var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
-            configure(configuration);
+            var typeOfT = typeof(T);
 
-            var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
-            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
+            var queueName = conventions.QueueNamingConvention(typeOfT, subscriptionId);
+            var queueConfig = new QueueConfiguration();
+            configureQueue(queueConfig);
 
-            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires);
-            var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
+            var queue = advancedBus.QueueDeclare(
+                queueName,
+                passive: queueConfig.Passive,
+                durable: queueConfig.Durable,
+                exclusive: queueConfig.Exclusive,
+                autoDelete: queueConfig.AutoDelete,
+                perQueueMessageTtl: queueConfig.PerQueueMessageTtl,
+                expires: queueConfig.Expires,
+                maxPriority: queueConfig.MaxPriority,
+                deadLetterExchange: queueConfig.DeadLetterExchange,
+                deadLetterRoutingKey: queueConfig.DeadLetterRoutingKey);
 
-            foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
-            {
+            var exchangeName = conventions.ExchangeNamingConvention(typeOfT);
+            var exchangeConfig = new ExchangeConfiguration();
+            configureExchange(exchangeConfig);
+
+            var exchange = advancedBus.ExchangeDeclare(
+                exchangeName,
+                ExchangeType.Topic,
+                passive: exchangeConfig.Passive,
+                durable: exchangeConfig.Durable,
+                autoDelete: exchangeConfig.AutoDelete,
+                @internal: exchangeConfig.Internal,
+                alternateExchange: exchangeConfig.AlternateExchange,
+                delayed: exchangeConfig.Delayed);
+
+            var subscriptionConfig = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
+            configureSubscription(subscriptionConfig);
+
+            foreach (var topic in subscriptionConfig.Topics.DefaultIfEmpty("#"))
                 advancedBus.Bind(exchange, queue, topic);
-            }
 
             var consumerCancellation = advancedBus.Consume<T>(
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body),
-                x =>
-                    {
-                        x.WithPriority(configuration.Priority)
-                         .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
-                         .WithPrefetchCount(configuration.PrefetchCount);
-                        if (configuration.IsExclusive)
-                        {
-                            x.AsExclusive();
-                        }
-                    });
+                consumerConfig =>
+                {
+                    consumerConfig
+                        .WithPriority(subscriptionConfig.Priority)
+                        .WithCancelOnHaFailover(subscriptionConfig.CancelOnHaFailover)
+                        .WithPrefetchCount(subscriptionConfig.PrefetchCount);
+
+                    if (subscriptionConfig.IsExclusive)
+                        consumerConfig.AsExclusive();
+                });
+
             return new SubscriptionResult(exchange, queue, consumerCancellation);
         }
 
@@ -184,7 +213,9 @@ namespace EasyNetQ
             return RespondAsync(taskResponder);
         }
 
-        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure)
+            where TRequest : class
+            where TResponse : class
         {
             Func<TRequest, Task<TResponse>> taskResponder =
                 request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
@@ -199,7 +230,9 @@ namespace EasyNetQ
             return RespondAsync(responder, c => { });
         }
 
-        public IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        public IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
+            where TRequest : class
+            where TResponse : class
         {
             Preconditions.CheckNotNull(responder, "responder");
             Preconditions.CheckNotNull(configure, "configure");

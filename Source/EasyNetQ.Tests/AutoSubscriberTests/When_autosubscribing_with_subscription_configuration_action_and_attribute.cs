@@ -12,30 +12,32 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
-       
+
         [SetUp]
         public void SetUp()
         {
             bus = MockRepository.GenerateMock<IBus>();
-           
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
                 {
-                        ConfigureSubscriptionConfiguration =
-                                c => c.WithAutoDelete(false)
-                                    .WithCancelOnHaFailover(false)
-                                    .WithExpires(11)
-                                    .WithPrefetchCount(11)
-                                    .WithPriority(11)
+                    ConfigureSubscriptionConfiguration =
+                            c => c.WithAutoDelete(false)
+                                .WithCancelOnHaFailover(false)
+                                .WithExpires(11)
+                                .WithPrefetchCount(11)
+                                .WithPriority(11)
                 };
 
             bus.Stub(x => x.Subscribe(
                     Arg<string>.Is.Equal("MyActionAndAttributeTest"),
                     Arg<Action<MessageA>>.Is.Anything,
-                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything
+                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything,
+                    Arg<Action<IQueueConfiguration>>.Is.Anything,
+                    Arg<Action<IExchangeConfiguration>>.Is.Anything
                     ))
                     .WhenCalled(a =>
                         {
-                           capturedAction= (Action<ISubscriptionConfiguration>)a.Arguments[2];
+                            capturedAction = (Action<ISubscriptionConfiguration>)a.Arguments[2];
                         });
 
             autoSubscriber.Subscribe(GetType().Assembly);
@@ -46,9 +48,11 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             bus.AssertWasCalled(
                     x => x.Subscribe(
-                        Arg<string>.Is.Anything, 
-                        Arg<Action<MessageA>>.Is.Anything, 
-                        Arg<Action<ISubscriptionConfiguration>>.Is.Anything));
+                        Arg<string>.Is.Anything,
+                        Arg<Action<MessageA>>.Is.Anything,
+                        Arg<Action<ISubscriptionConfiguration>>.Is.Anything,
+                        Arg<Action<IQueueConfiguration>>.Is.Anything,
+                        Arg<Action<IExchangeConfiguration>>.Is.Anything));
 
         }
 
@@ -56,7 +60,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe_with_attribute_values_notaction_values()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();

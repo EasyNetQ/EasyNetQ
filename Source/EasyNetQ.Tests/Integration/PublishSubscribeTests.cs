@@ -18,13 +18,13 @@ namespace EasyNetQ.Tests.Integration
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while(!bus.IsConnected) Thread.Sleep(10);
+            while (!bus.IsConnected) Thread.Sleep(10);
         }
 
         [TearDown]
         public void TearDown()
         {
-            if(bus != null) bus.Dispose();
+            if (bus != null) bus.Dispose();
         }
 
         // 1. Run this first, should see no messages consumed
@@ -58,13 +58,13 @@ namespace EasyNetQ.Tests.Integration
                     countdownEvent.Signal();
                     Interlocked.Increment(ref firstCount);
                     Console.WriteLine("[1] " + message.Text);
-                }, x => x.AsExclusive());
+                }, s => s.AsExclusive(), q => { }, e => { });
             bus.Subscribe<MyMessage>("test", message =>
                 {
                     countdownEvent.Signal();
                     Interlocked.Increment(ref secondCount);
                     Console.WriteLine("[2] " + message.Text);
-                }, x => x.AsExclusive());
+                }, s => s.AsExclusive(), q => { }, e => { });
 
             for (var i = 0; i < 10; ++i)
                 bus.Publish(new MyMessage
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine(message.Text);
                     autoResetEvent.Set();
                 }, null, 5000, Timeout.Infinite);
-            }, x => x.AsExclusive());
+            }, s => s.AsExclusive(), q => { }, e => { });
 
             // allow time for messages to be consumed
             autoResetEvent.WaitOne(15000);
@@ -180,7 +180,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine(message.Text);
                     autoResetEvent.Set();
                 }, null, 5000, Timeout.Infinite);
-                
+
             });
 
             // allow time for messages to be consumed
@@ -220,9 +220,9 @@ namespace EasyNetQ.Tests.Integration
             var subscribeBus2 = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
 
             // first set up the subscribers
-            subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message =>
                 Console.WriteLine("Subscriber 1: {0}", message.Text));
-            subscribeBus2.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus2.Subscribe<MyMessage>("roundRobinTest", message =>
                 Console.WriteLine("Subscriber 2: {0}", message.Text));
 
             // now publish some messages

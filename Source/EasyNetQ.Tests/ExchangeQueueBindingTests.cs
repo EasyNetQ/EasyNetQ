@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
 using System.Collections;
+using System.Collections.Generic;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
@@ -22,14 +22,14 @@ namespace EasyNetQ.Tests
 
             advancedBus = mockBuilder.Bus.Advanced;
             queue = advancedBus.QueueDeclare(
-                "my_queue", 
-                passive: false, 
-                durable: false, 
+                "my_queue",
+                passive: false,
+                durable: false,
                 exclusive: true,
                 autoDelete: true,
                 perQueueMessageTtl: 1000,
                 expires: 2000,
-                maxPriority: 10);
+                maxPriority: 9);
         }
 
         [Test]
@@ -42,16 +42,16 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"), 
+                    Arg<string>.Is.Equal("my_queue"),
                     Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(true),
                     Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args => 
+                    Arg<IDictionary<string, object>>.Matches(args =>
                         ((int)args["x-message-ttl"] == 1000) &&
                         ((int)args["x-expires"] == 2000) &&
-                        ((byte)args["x-max-priority"] == 10))));
+                        ((int)args["x-max-priority"] == 9))));
         }
     }
 
@@ -100,12 +100,12 @@ namespace EasyNetQ.Tests
                     });
 
             exchange = advancedBus.ExchangeDeclare(
-                "my_exchange", 
-                ExchangeType.Direct, 
-                false, 
-                false, 
-                true, 
-                true, 
+                "my_exchange",
+                ExchangeType.Direct,
+                false,
+                false,
+                true,
+                true,
                 "my.alternate.exchange");
         }
 
@@ -119,7 +119,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_an_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.ExchangeDeclare(
                     Arg<string>.Is.Equal("my_exchange"),
                     Arg<string>.Is.Equal("direct"),
@@ -217,13 +217,13 @@ namespace EasyNetQ.Tests
             binding.RoutingKey.ShouldEqual("my_routing_key");
             binding.Exchange.Name.ShouldEqual("my_exchange");
             binding.Bindable.ShouldBe<IQueue>();
-            ((IQueue) binding.Bindable).Name.ShouldEqual("my_queue");
+            ((IQueue)binding.Bindable).Name.ShouldEqual("my_queue");
         }
 
         [Test]
         public void Should_declare_a_binding()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.QueueBind("my_queue", "my_exchange", "my_routing_key"));
         }
     }
@@ -250,7 +250,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_unbind_the_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
+            mockBuilder.Channels[0].AssertWasCalled(x =>
                 x.QueueUnbind("my_queue", "my_exchange", "my_routing_key", null));
         }
     }

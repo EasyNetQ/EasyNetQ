@@ -66,6 +66,8 @@
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
     <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
+    <Compile Include="FluentConfiguration\IExchangeConfiguration.cs" />
+    <Compile Include="FluentConfiguration\IQueueConfiguration.cs" />
     <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />
     <Compile Include="MessageDeliveryMode.cs" />
     <Compile Include="Scheduling\ExternalScheduler.cs" />

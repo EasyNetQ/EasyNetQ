@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests.Integration
         [TearDown]
         public void TearDown()
         {
-            if(bus != null) bus.Dispose();
+            if (bus != null) bus.Dispose();
         }
 
         private MyMessage CreateMessage()
@@ -45,13 +45,13 @@ namespace EasyNetQ.Tests.Integration
             {
                 Console.WriteLine("I Get X: {0}", msg.Text);
                 countdownEvent.Signal();
-            }, x => x.WithTopic("X.*"));
+            }, s => s.WithTopic("X.*"), q => { }, e => { });
 
             bus.Subscribe<MyMessage>("id2", msg =>
             {
                 Console.WriteLine("I Get A: {0}", msg.Text);
                 countdownEvent.Signal();
-            }, x => x.WithTopic("*.A"));
+            }, s => s.WithTopic("*.A"), q => { }, e => { });
 
             bus.Subscribe<MyMessage>("id3", msg =>
             {
@@ -70,7 +70,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 Console.WriteLine("I Get Y or B: {0}", msg.Text);
                 countdownEvent.Signal();
-            }, x => x.WithTopic("Y.*").WithTopic("*.B"));
+            }, s => s.WithTopic("Y.*").WithTopic("*.B"), q => { }, e => { });
 
             countdownEvent.Wait(500);
         }

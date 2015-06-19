@@ -12,22 +12,24 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
-       
+
         [SetUp]
         public void SetUp()
         {
             bus = MockRepository.GenerateMock<IBus>();
-            
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
             bus.Stub(x => x.Subscribe(
                     Arg<string>.Is.Equal("MyAttrTest"),
                     Arg<Action<MessageA>>.Is.Anything,
-                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything
+                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything,
+                    Arg<Action<IQueueConfiguration>>.Is.Anything,
+                    Arg<Action<IExchangeConfiguration>>.Is.Anything
                     ))
                     .WhenCalled(a =>
                         {
-                           capturedAction= (Action<ISubscriptionConfiguration>)a.Arguments[2];
+                            capturedAction = (Action<ISubscriptionConfiguration>)a.Arguments[2];
                         });
 
             autoSubscriber.Subscribe(GetType().Assembly);
@@ -38,9 +40,11 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             bus.AssertWasCalled(
                     x => x.Subscribe(
-                        Arg<string>.Is.Anything, 
-                        Arg<Action<MessageA>>.Is.Anything, 
-                        Arg<Action<ISubscriptionConfiguration>>.Is.Anything));
+                        Arg<string>.Is.Anything,
+                        Arg<Action<MessageA>>.Is.Anything,
+                        Arg<Action<ISubscriptionConfiguration>>.Is.Anything,
+                        Arg<Action<IQueueConfiguration>>.Is.Anything,
+                        Arg<Action<IExchangeConfiguration>>.Is.Anything));
 
         }
 
@@ -48,7 +52,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe_with_action_capable_of_configuring_subscription()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();
