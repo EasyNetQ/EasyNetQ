@@ -56,7 +56,14 @@ namespace EasyNetQ.Producer
         {
             if (connection.IsConnected)
             {
-                OpenChannel();
+                try
+                {
+                    OpenChannel();
+                }
+                catch (OperationInterruptedException)
+                { }
+                catch (EasyNetQException)
+                { }
             }
         }
 

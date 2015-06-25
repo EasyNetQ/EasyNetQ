@@ -75,14 +75,14 @@ namespace EasyNetQ.Producer
             base.OnChannelClosed(oldModel);
         }
 
-        private void ModelOnBasicNacks(IModel model, BasicNackEventArgs args)
+        private void ModelOnBasicNacks(object model, BasicNackEventArgs e)
         {
-            HandleConfirm(args.DeliveryTag, args.Multiple, x => x.OnNack());
+            HandleConfirm(e.DeliveryTag, e.Multiple, x => x.OnNack());
         }
 
-        private void ModelOnBasicAcks(IModel model, BasicAckEventArgs args)
+        private void ModelOnBasicAcks(object model, BasicAckEventArgs e)
         {
-            HandleConfirm(args.DeliveryTag, args.Multiple, x => x.OnAck());
+            HandleConfirm(e.DeliveryTag, e.Multiple, x => x.OnAck());
         }
 
         private void HandleConfirm(ulong sequenceNumber, bool multiple, Action<ConfirmActions> confirmAction)
@@ -107,7 +107,7 @@ namespace EasyNetQ.Producer
 
         }
 
-        public override Task Publish(IModel model, Action<IModel> publishAction)
+        public override Task PublishAsync(IModel model, Action<IModel> publishAction)
         {
             var tcs = new TaskCompletionSource<NullStruct>();
             return ExecutePublishWithConfirmation(model, publishAction, tcs);

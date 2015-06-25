@@ -71,10 +71,10 @@ namespace EasyNetQ.FluentConfiguration
         public int Priority { get; private set; }
         public bool CancelOnHaFailover { get; private set; }
         public ushort PrefetchCount { get; private set; }
-        public int Expires { get; private set; }
+        public int? Expires { get; private set; }
 
         public bool IsExclusive { get; private set; }
-
+         
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
             Topics = new List<string>();
@@ -82,7 +82,6 @@ namespace EasyNetQ.FluentConfiguration
             Priority = 0;
             CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
-            Expires = int.MaxValue;
             IsExclusive = false;
         }
 

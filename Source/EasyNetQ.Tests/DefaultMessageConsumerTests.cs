@@ -2,7 +2,6 @@
 
 using System;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.Tests.Integration;
 using NUnit.Framework;
 
 namespace EasyNetQ.Tests

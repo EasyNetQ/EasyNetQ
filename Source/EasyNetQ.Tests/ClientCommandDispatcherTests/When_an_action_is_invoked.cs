@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 
             dispatcher = new ClientCommandDispatcher(connection, channelFactory);
 
-            dispatcher.Invoke(action).Wait();
+            dispatcher.InvokeAsync(action).Wait();
         }
 
         [TearDown]

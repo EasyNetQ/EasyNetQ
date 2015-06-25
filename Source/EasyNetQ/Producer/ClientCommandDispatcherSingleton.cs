@@ -45,7 +45,7 @@ namespace EasyNetQ.Producer
                 }) {Name = "Client Command Dispatcher Thread"}.Start();
         }
 
-        public Task<T> Invoke<T>(Func<IModel, T> channelAction)
+        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -77,11 +77,11 @@ namespace EasyNetQ.Producer
             return tcs.Task;
         }
 
-        public Task Invoke(Action<IModel> channelAction)
+        public Task InvokeAsync(Action<IModel> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            return Invoke(x =>
+            return InvokeAsync(x =>
                 {
                     channelAction(x);
                     return new NoContentStruct();

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EasyNetQ
+﻿namespace EasyNetQ
 {
     public interface ICorrelationIdGenerationStrategy
     {

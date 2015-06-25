@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_dispatch_simple_channel_action()
         {
-            var task = dispatcher.Invoke(x =>
+            var task = dispatcher.InvokeAsync(x =>
                 {
                     x.ExchangeDeclare("MyExchange", "direct");
                     Console.Out.WriteLine("declare executed");
@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_bubble_exception()
         {
-            var task = dispatcher.Invoke(x =>
+            var task = dispatcher.InvokeAsync(x =>
             {
                 x.ExchangeDeclare("MyExchange", "topic");
                 Console.Out.WriteLine("declare executed");
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_be_able_to_get_result_back()
         {
-            var task = dispatcher.Invoke(x => x.QueueDeclare("MyQueue", true, false, false, null));
+            var task = dispatcher.InvokeAsync(x => x.QueueDeclare("MyQueue", true, false, false, null));
             task.Wait();
             var queueDeclareOk = task.Result;
             Console.Out.WriteLine(queueDeclareOk.QueueName);
@@ -87,7 +87,7 @@ namespace EasyNetQ.Tests.Integration
                     {
                         for (var j = 0; j < 100000; j++)
                         {
-                            dispatcher.Invoke(
+                            dispatcher.InvokeAsync(
                                 x =>
                                 x.BasicPublish("", "MyQueue", false, false, x.CreateBasicProperties(), body)
                                 ).Wait();

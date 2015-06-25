@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests.Integration
         [Test, Explicit]
         public void DeclareWithTtlAndExpire()
         {
-            advancedBus.QueueDeclare("my_queue", perQueueTtl: 500, expires: 500);
+            advancedBus.QueueDeclare("my_queue", perQueueMessageTtl: 500, expires: 500);
         }
 
         [Test, Explicit]
@@ -65,6 +65,22 @@ namespace EasyNetQ.Tests.Integration
             var message = Encoding.UTF8.GetBytes("Some message");
             advancedBus.Publish(originalExchange, bindingKey, false, false, new MessageProperties(), message);
         }
+
+        [Test, Explicit]
+        public void DeclareDelayedExchange()
+        {
+            const string bindingKey = "the-binding-key";
+
+            var delayedExchange = advancedBus.ExchangeDeclare("delayed", ExchangeType.Direct, delayed: true);
+            var queue = advancedBus.QueueDeclare("my_queue");
+            advancedBus.Bind(delayedExchange, queue, bindingKey);
+
+            var message = Encoding.UTF8.GetBytes("Some message");
+            var messageProperties = new MessageProperties();
+            messageProperties.Headers.Add("x-delay", 5000);
+            advancedBus.Publish(delayedExchange, bindingKey, false, false, messageProperties, message);
+        }
+
 
         [Test, Explicit]
         public void ConsumeFromAQueue()

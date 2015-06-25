@@ -1,5 +1,4 @@
 ﻿using System;
-using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using StructureMap;

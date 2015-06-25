@@ -3,7 +3,6 @@
 using System;
 using System.Runtime.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using RabbitMQ.Client;
 
@@ -18,6 +17,7 @@ namespace EasyNetQ.Tests.Integration
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
+            bus.Respond<TestRequestMessage, TestResponseMessage>(req => new TestResponseMessage { Text = req.Text });
         }
 
         [TearDown]

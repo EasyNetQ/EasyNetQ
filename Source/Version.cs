@@ -2,11 +2,18 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.47.10.0")]
+[assembly: AssemblyVersion("0.50.1.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
-
+// 0.50.1.0 Fix type in Extensions
+// 0.50.0.0 Updated to RabbitMQ.Client 3.5.3
+// 0.49.3.0 Polymorphic publish now works with Scheduler.Mongo
+// 0.49.2.0 Fix subscription for events if queues were created in previous versions
+// 0.49.1.0 Priority queue support
+// 0.49.0.0 Updated to RabbitMQ.Client 3.5.1
+// 0.48.1.0 Fix unhandled exception
+// 0.48.0.0 Refactor IScheduler and its implementations
 // 0.47.10.0 RabbitHutch.CreateBus overloads
 // 0.47.9.0 TypeNameSerializer now uses a ConcurrentDictionary to store se/deserialization results.
 // 0.47.8.0 Rpc.Respond will validate serialized length of TResponse upon method call to prevent silent exception when executing responder.

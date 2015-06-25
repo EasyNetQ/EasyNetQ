@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer
@@ -130,19 +129,12 @@ namespace EasyNetQ.Consumer
         {
             var message = Encoding.UTF8.GetString(context.Body);
 
-            var properties = context.Properties;
-            var propertiesMessage = new StringBuilder();
-            if (properties != null)
-            {
-                properties.AppendPropertyDebugStringTo(propertiesMessage);
-            }
-
             return "Exception thrown by subscription callback.\n" +
                    string.Format("\tExchange:    '{0}'\n", context.Info.Exchange) +
                    string.Format("\tRouting Key: '{0}'\n", context.Info.RoutingKey) +
                    string.Format("\tRedelivered: '{0}'\n", context.Info.Redelivered) +
                    string.Format("Message:\n{0}\n", message) +
-                   string.Format("BasicProperties:\n{0}\n", propertiesMessage) +
+                   string.Format("BasicProperties:\n{0}\n", context.Properties) +
                    string.Format("Exception:\n{0}\n", exception);
         }
 

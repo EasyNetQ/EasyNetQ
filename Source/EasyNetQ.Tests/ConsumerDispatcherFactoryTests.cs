@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
 using System.Threading;
 using EasyNetQ.Consumer;
 using NUnit.Framework;

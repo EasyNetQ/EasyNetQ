@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
             {
                 RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());
             }
-        } 
+        }
     }
 
     public class MyAlternativeContainer : IContainer

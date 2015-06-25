@@ -56,7 +56,10 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="EasyNetQ.Management.Client, Version=0.47.11.35, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EasyNetQ.Management.Client.0.47.11.35\lib\net40\EasyNetQ.Management.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -64,9 +67,9 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.4.3.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RabbitMQ.Client.3.4.3\lib\net35\RabbitMQ.Client.dll</HintPath>
+    <Reference Include="RabbitMQ.Client, Version=3.5.3.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabbitMQ.Client.3.5.3\lib\net40\RabbitMQ.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Rhino.Mocks">
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
@@ -102,9 +105,13 @@
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="Integration\AdvancedBusTests.cs" />
+    <Compile Include="Integration\Scheduling\DeadLetterExchangeAndMessageTtlSchedulerTests.cs" />
+    <Compile Include="Integration\Scheduling\DelayedExchangeSchedulerTests.cs" />
     <Compile Include="Integration\RpcTests.cs" />
+    <Compile Include="Integration\Scheduling\PartyInvitation.cs" />
     <Compile Include="MessageFactoryTests.cs" />
     <Compile Include="PersistentChannelTests\When_a_ConnectionCreatedEvent_is_published.cs" />
+    <Compile Include="Scheduling\SchedulingExtensionsTests.cs" />
     <Compile Include="TimeoutStrategyTest.cs" />
     <Compile Include="DefaultMessageSerializationStrategyTests.cs" />
     <Compile Include="DeliveryModeStrategyTest.cs" />
@@ -178,7 +185,7 @@
     <Compile Include="Integration\PublishSubscribeWithTopicsTests.cs" />
     <Compile Include="PublishTests.cs" />
     <Compile Include="Integration\RequestResponseTests.cs" />
-    <Compile Include="Integration\SchedulingTests.cs" />
+    <Compile Include="Integration\Scheduling\ExternalSchedulerTests.cs" />
     <Compile Include="DefaultServiceProviderTests.cs" />
     <Compile Include="Integration\SimpleSagaSpike.cs" />
     <Compile Include="Integration\SubscribeAsyncTests.cs" />
@@ -197,10 +204,6 @@
     <Compile Include="MessageVersioningTests\VersionedMessageSerializationStrategyTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.Management.Client\EasyNetQ.Management.Client.csproj">
-      <Project>{9888950b-ef30-4763-9076-38b071cdb535}</Project>
-      <Name>EasyNetQ.Management.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj">
       <Project>{E7AF3836-8354-4CDE-A9E7-352569B65B1E}</Project>
       <Name>EasyNetQ.Tests.Messages</Name>

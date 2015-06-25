@@ -6,6 +6,6 @@ namespace EasyNetQ.Producer
 {
     public interface IPublisher
     {
-        Task Publish(IModel model, Action<IModel> publishAction);
+        Task PublishAsync(IModel model, Action<IModel> publishAction);
     }
 }

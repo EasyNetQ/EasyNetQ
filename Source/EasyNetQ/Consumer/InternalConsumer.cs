@@ -33,7 +33,7 @@ namespace EasyNetQ.Consumer
         private IQueue queue;
 
         public IModel Model { get; private set; }
-        public event ConsumerCancelledEventHandler ConsumerCancelled;
+        public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
         public string ConsumerTag { get; private set; }
 
         public event Action<IInternalConsumer> Cancelled;
@@ -140,7 +140,7 @@ namespace EasyNetQ.Consumer
                              "Consumer tag: " + consumerTag);
         }
 
-        public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
+        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
             logger.InfoWrite("Consumer '{0}', consuming from queue '{1}', has shutdown. Reason: '{2}'",
                              ConsumerTag, queue.Name, reason.Cause);

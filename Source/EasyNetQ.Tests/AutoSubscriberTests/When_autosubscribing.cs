@@ -1,11 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
-using System.Collections.Generic;
+
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
-using RabbitMQ.Client;
 using Rhino.Mocks;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
@@ -89,7 +89,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             {
             }
 
-            [ForTopicAttribute("Important")]
+            [ForTopic("Important")]
             public void Consume(MessageC message)
             {
             }

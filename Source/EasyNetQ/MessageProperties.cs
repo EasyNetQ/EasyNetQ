@@ -322,51 +322,39 @@ namespace EasyNetQ
             set { clusterIdPresent = value; }
         }
 
-        public void AppendPropertyDebugStringTo(StringBuilder stringBuilder)
+        public override string ToString()
         {
-            GetType()
+            return GetType()
                 .GetProperties()
                 .Where(x => !x.Name.EndsWith("Present"))
                 .Select(x => string.Format("{0}={1}", x.Name, GetValueString(x.GetValue(this, null))))
                 .Intersperse(", ")
-                .Aggregate(stringBuilder, (sb, x) =>
-                {
-                    sb.Append(x);
-                    return sb;
-                });
+                .Aggregate(new StringBuilder(), (sb, x) => sb.Append(x))
+                .ToString();
         }
 
-        private string GetValueString(object value)
+        private static string GetValueString(object value)
         {
             if (value == null) return "NULL";
 
             var dictionary = value as IDictionary<string, object>;
             if (dictionary == null) return value.ToString();
 
-            var stringBuilder = new StringBuilder();
-
-            dictionary
-                .EnumerateDictionary()
+            return dictionary
                 .Select(x => string.Format("{0}={1}", x.Key, x.Value))
                 .Intersperse(", ")
                 .SurroundWith("[", "]")
-                .Aggregate(stringBuilder, (sb, x) =>
-                    {
-                        sb.Append(x);
-                        return sb;
-                    });
-
-            return stringBuilder.ToString();
+                .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
+                .ToString();
         }
 
-        private string CheckShortString(string input, string name)
+        private static string CheckShortString(string input, string name)
         {
             if (input == null) return null;
 
             if (input.Length > 255)
             {
-                throw new EasyNetQException("Exceeded maximum length of basic properties field '{0}'. Value: '{1}'",
-                    name, input);
+                throw new EasyNetQException("Exceeded maximum length of basic properties field '{0}'. Value: '{1}'", name, input);
             }
 
             return input;
