@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EasyNetQ.Tests.Tasks</RootNamespace>
+    <AssemblyName>EasyNetQ.Tests.Tasks</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Net.Autofac, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Net.Autofac.0.1.10.0\lib\net40\Net.Autofac.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Net.Core, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Net.Core.0.1.10.0\lib\net40\Net.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.1.5.11\lib\net45\Serilog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.FullNetFx, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.1.5.11\lib\net45\Serilog.FullNetFx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="CommandLineTaskRunner.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="NoDebugLogger.cs" />
+    <Compile Include="Tasks\TestPerformanceConsumer.cs" />
+    <Compile Include="Tasks\TestPerformanceProducer.cs" />
+    <Compile Include="Tasks\SimpleRequester\ILatencyRecorder.cs" />
+    <Compile Include="Tasks\SimpleRequester\LatencyRecorder.cs" />
+    <Compile Include="Tasks\SimpleRequester\SimpleRequester.cs" />
+    <Compile Include="Tasks\TestSimpleService.cs" />
+    <Compile Include="Tasks\TestScheduledMessages.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj">
+      <Project>{74fb0a3d-2c72-462c-b498-15c0ae615d35}</Project>
+      <Name>EasyNetQ.DI.Autofac</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EasyNetQ.Serilog\EasyNetQ.Serilog.csproj">
+      <Project>{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}</Project>
+      <Name>EasyNetQ.Serilog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj">
+      <Project>{E7AF3836-8354-4CDE-A9E7-352569B65B1E}</Project>
+      <Name>EasyNetQ.Tests.Messages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EasyNetQ NET4\EasyNetQ NET4.csproj">
+      <Project>{B8DEF709-5168-48F1-B8D3-AD44E4A4A22B}</Project>
+      <Name>EasyNetQ</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

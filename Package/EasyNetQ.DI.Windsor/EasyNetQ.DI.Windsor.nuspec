@@ -3,7 +3,7 @@
   <metadata>
     <id>EasyNetQ.DI.Windsor</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.50.1.0</version>
+    <version>0.50.12.0</version>
     <title>EasyNetQ.DI.Windsor</title>
     <authors>Jeff Doolittle, Mike Hadlow</authors>
     <owners>Mike Hadlow</owners>
@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP REST API Windsor</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="0.50.1.0" />
+      <dependency id="EasyNetQ" version="0.50.12.0" />
       <dependency id="Castle.Windsor" version="3.2.1" />
       <dependency id="Castle.Core" version="3.2.2" />
     </dependencies>

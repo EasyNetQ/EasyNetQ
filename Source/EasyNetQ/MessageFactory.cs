@@ -9,14 +9,14 @@ namespace EasyNetQ
     /// </summary>
     public static class MessageFactory
     {
-        private static readonly ConcurrentDictionary<Type, Type> _genericMessageTypesMap = new ConcurrentDictionary<Type, Type>();
+        private static readonly ConcurrentDictionary<Type, Type> genericMessageTypesMap = new ConcurrentDictionary<Type, Type>();
 
         public static IMessage CreateInstance(Type messageType, object body)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
             Preconditions.CheckNotNull(body, "body");
 
-            var genericType = _genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
+            var genericType = genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
             var message = ReflectionHelpers.CreateInstance(genericType, body);
             return (IMessage)message;
         }
@@ -27,7 +27,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(body, "body");
             Preconditions.CheckNotNull(properties, "properties");
 
-            var genericType = _genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
+            var genericType = genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(messageType));
             var message = ReflectionHelpers.CreateInstance(genericType, body, properties);
             return (IMessage)message;
         }

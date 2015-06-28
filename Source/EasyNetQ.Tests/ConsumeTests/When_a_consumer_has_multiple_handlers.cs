@@ -1,5 +1,6 @@
-﻿using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using EasyNetQ.Internals;
+using RabbitMQ.Client.Framing;
 using System.Threading;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;

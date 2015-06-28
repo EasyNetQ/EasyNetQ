@@ -208,15 +208,16 @@ namespace EasyNetQ.AutoSubscribe
                 {
                     //prefetch count is set to a configurable default in RabbitAdvancedBus
                     //so don't touch it unless SubscriptionConfigurationAttribute value is other than 0.
-                    if(configSettings.PrefetchCount > 0)
-                    {
+                    if (configSettings.PrefetchCount > 0)
                         configuration.WithPrefetchCount(configSettings.PrefetchCount);
-                    }
-                    configuration.WithAutoDelete(configSettings.AutoDelete)
-                                 .WithCancelOnHaFailover(configSettings.CancelOnHaFailover)
-                                 .WithExpires(configSettings.Expires)
-                                 .WithPrefetchCount(configSettings.PrefetchCount)
-                                 .WithPriority(configSettings.Priority);
+
+                    if (configSettings.Expires > 0 )
+                        configuration.WithExpires(configSettings.Expires);
+
+                    configuration
+                        .WithAutoDelete(configSettings.AutoDelete)
+                        .WithCancelOnHaFailover(configSettings.CancelOnHaFailover)
+                        .WithPriority(configSettings.Priority);
                 };
         }
 
