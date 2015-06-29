@@ -22,15 +22,14 @@ namespace EasyNetQ.Tests.ProducerTests
             var publishExchangeDeclareStrategy = new PublishExchangeDeclareStrategy();
             var advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
-            var exchangeTask = TaskHelpers.FromResult(exchange);
             advancedBus
-                .Stub(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
-                .Return(exchangeTask)
+                .Stub(x => x.ExchangeDeclare(exchangeName, "topic"))
+                .Return(exchange)
                 .WhenCalled(x => exchangeDeclareCount++);
 
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
 
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
             declaredExchange.ShouldBeTheSameAs(exchange);
             exchangeDeclareCount.ShouldEqual(1);
         }
@@ -43,15 +42,14 @@ namespace EasyNetQ.Tests.ProducerTests
             var publishExchangeDeclareStrategy = new Producer.PublishExchangeDeclareStrategy();
             var advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
-            var exchangeTask = TaskHelpers.FromResult(exchange);
             advancedBus
-                .Stub(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
-                .Return(exchangeTask)
+                .Stub(x => x.ExchangeDeclare(exchangeName, "topic"))
+                .Return(exchange)
                 .WhenCalled(x => exchangeDeclareCount++);
             var _ = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
 
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
             declaredExchange.ShouldBeTheSameAs(exchange);
             exchangeDeclareCount.ShouldEqual(1);
         }
@@ -63,16 +61,15 @@ namespace EasyNetQ.Tests.ProducerTests
            
             var advancedBus = MockRepository.GenerateStrictMock<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
-            var exchangeTask = TaskHelpers.FromResult(exchange);
 
             advancedBus
-                .Expect(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
-                .Return(TaskHelpers.FromException<IExchange>(new Exception()))
+                .Expect(x => x.ExchangeDeclare(exchangeName, "topic"))
+                .Throw(new Exception())
                 .WhenCalled(x => exchangeDeclareCount++);
 
             advancedBus
-                .Expect(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
-                .Return(exchangeTask)
+                .Expect(x => x.ExchangeDeclare(exchangeName, "topic"))
+                .Return(exchange)
                 .WhenCalled(x => exchangeDeclareCount++);
 
             var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy();
@@ -80,14 +77,14 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
             }
-            catch (AggregateException)
+            catch (Exception)
             {
             }
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
             declaredExchange.ShouldBeTheSameAs(exchange);
-            exchangeDeclareCount.ShouldEqual(2);
+            exchangeDeclareCount.ShouldEqual(1);
         }
     }
 }

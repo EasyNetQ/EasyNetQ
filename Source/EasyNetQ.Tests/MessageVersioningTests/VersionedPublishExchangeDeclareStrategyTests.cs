@@ -20,16 +20,15 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var advancedBus = MockRepository.GenerateStrictMock<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
-            var exchangeTask = TaskHelpers.FromResult(exchange);
 
             advancedBus
-                .Expect(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
-                .Return(TaskHelpers.FromException<IExchange>(new Exception()))
+                .Expect(x => x.ExchangeDeclare(exchangeName, "topic"))
+                .Throw(new Exception())
                 .WhenCalled(x => exchangeDeclareCount++);
 
             advancedBus
-                .Expect(x => x.ExchangeDeclareAsync(exchangeName, "topic"))
-                .Return(exchangeTask)
+                .Expect(x => x.ExchangeDeclare(exchangeName, "topic"))
+                .Return(exchange)
                 .WhenCalled(x => exchangeDeclareCount++);
 
             var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy();
@@ -37,14 +36,14 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             {
                 publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
             }
-            catch (AggregateException)
+            catch (Exception)
             {
             }
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclareAsync(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
+            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
             declaredExchange.ShouldBeTheSameAs(exchange);
-            exchangeDeclareCount.ShouldEqual(2);
+            exchangeDeclareCount.ShouldEqual(1);
         }
 
 
@@ -84,24 +83,24 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         private IAdvancedBus CreateAdvancedBusMock( Action<ExchangeStub> exchangeCreated, Action<ExchangeStub, ExchangeStub> exchangeBound, Func<Type,string> nameExchange  )
         {
             var advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
-            advancedBus.Stub( b => b.ExchangeDeclareAsync(null, null, false, true, false, false, null ) )
+            advancedBus.Stub( b => b.ExchangeDeclare(null, null, false, true, false, false, null ) )
                        .IgnoreArguments()
                        .Return(null)
                        .WhenCalled( mi =>
                            {
                                var exchange = new ExchangeStub {Name = (string) mi.Arguments[ 0 ]};
                                exchangeCreated( exchange );
-                               mi.ReturnValue = TaskHelpers.FromResult<IExchange>(exchange);
+                               mi.ReturnValue = exchange;
                            } );
 
-            advancedBus.Stub( b => b.BindAsync(Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Equal( "#" ) ) )
+            advancedBus.Stub( b => b.Bind(Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Equal( "#" ) ) )
                        .Return( null )
                        .WhenCalled( mi =>
                            {
                                var source = (ExchangeStub) mi.Arguments[ 0 ];
                                var destination = (ExchangeStub) mi.Arguments[ 1 ];
                                exchangeBound( source, destination );
-                               mi.ReturnValue = TaskHelpers.FromResult(MockRepository.GenerateStub<IBinding>());
+                               mi.ReturnValue = MockRepository.GenerateStub<IBinding>();
                            } );
 
             var conventions = MockRepository.GenerateStub<IConventions>();
