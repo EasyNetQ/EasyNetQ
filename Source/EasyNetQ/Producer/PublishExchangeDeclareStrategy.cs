@@ -9,7 +9,7 @@ namespace EasyNetQ.Producer
     public class PublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(0, 1);
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
         {
