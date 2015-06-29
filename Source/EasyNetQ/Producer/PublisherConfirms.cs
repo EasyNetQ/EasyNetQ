@@ -21,7 +21,7 @@ namespace EasyNetQ.Producer
     public class PublisherConfirms : PublisherBase
     {
         private readonly IEasyNetQLogger logger;
-        private readonly IDictionary<ulong, ConfirmActions> dictionary = new ConcurrentDictionary<ulong, ConfirmActions>();
+        private readonly IDictionary<ulong, ConfirmActions> unconfirmedActions = new ConcurrentDictionary<ulong, ConfirmActions>();
 
         private readonly int timeoutSeconds;
 
@@ -41,7 +41,7 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(publishChannelCreatedEvent.Channel, "oldModel");
 
-            var outstandingConfirms = new List<ConfirmActions>(dictionary.Values);
+            var outstandingConfirms = new List<ConfirmActions>(unconfirmedActions.Values);
 
             foreach (var outstandingConfirm in outstandingConfirms)
             {
@@ -68,7 +68,7 @@ namespace EasyNetQ.Producer
         {
             // the old model has been closed and we're now using a new model, so remove
             // any existing callback entries in the dictionary
-            dictionary.Clear();
+            unconfirmedActions.Clear();
 
             oldModel.BasicAcks -= ModelOnBasicAcks;
             oldModel.BasicNacks -= ModelOnBasicNacks;
@@ -89,19 +89,18 @@ namespace EasyNetQ.Producer
         {
             if(multiple)
             {
-                //Console.Out.WriteLine(">>>>>>>>>>>>> multiple {0}", sequenceNumber);
-                foreach (var match in dictionary.Keys.Where(key => key <= sequenceNumber))
+                foreach (var match in unconfirmedActions.Keys.Where(key => key <= sequenceNumber))
                 {
-                    confirmAction(dictionary[match]);
-                    dictionary.Remove(match);
+                    confirmAction(unconfirmedActions[match]);
+                    unconfirmedActions.Remove(match);
                 }
             }
             else
             {
-                if(dictionary.ContainsKey(sequenceNumber))
+                if(unconfirmedActions.ContainsKey(sequenceNumber))
                 {
-                    confirmAction(dictionary[sequenceNumber]);
-                    dictionary.Remove(sequenceNumber);
+                    confirmAction(unconfirmedActions[sequenceNumber]);
+                    unconfirmedActions.Remove(sequenceNumber);
                 }
             }
 
@@ -111,6 +110,19 @@ namespace EasyNetQ.Producer
         {
             var tcs = new TaskCompletionSource<NullStruct>();
             return ExecutePublishWithConfirmation(model, publishAction, tcs);
+        }
+
+        public override void Publish(IModel model, Action<IModel> publishAction)
+        {
+            //TODO Provide nice sync implementation
+            try
+            {
+                PublishAsync(model, publishAction).Wait();
+            }
+            catch (AggregateException e)
+            {
+                throw e.InnerException;
+            }
         }
 
         private Task ExecutePublishWithConfirmation(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
@@ -125,18 +137,14 @@ namespace EasyNetQ.Producer
             Timer timer = null;
             timer = new Timer(state =>
                 {
-                    var set = tcs.TrySetException(new TimeoutException(string.Format(
-                        "Publisher confirms timed out after {0} seconds " +
-                        "waiting for ACK or NACK from sequence number {1}",
-                        timeoutSeconds, sequenceNumber)));
-
-                    if (!set) return;
-                    this.logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
-                    this.dictionary.Remove(sequenceNumber);
+                    var isSet = tcs.TrySetException(new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", timeoutSeconds, sequenceNumber)));
+                    if (!isSet) return;
+                    logger.ErrorWrite("Publish timed out. Sequence number: {0}", sequenceNumber);
+                    unconfirmedActions.Remove(sequenceNumber);
                     timer.Dispose();
                 }, null, timeoutSeconds*1000, Timeout.Infinite);
 
-            dictionary.Add(sequenceNumber, new ConfirmActions
+            unconfirmedActions.Add(sequenceNumber, new ConfirmActions
                 {
                     // 2. An ack is received, so complete normally.
                     OnAck = () =>
@@ -152,9 +160,7 @@ namespace EasyNetQ.Producer
                             logger.ErrorWrite("Publish was nacked by broker. Sequence number: {0}", sequenceNumber);
                             Task.Factory.StartNew(
                                 () =>
-                                tcs.TrySetException(
-                                    new PublishNackedException(
-                                        string.Format("Broker has signalled that publish {0} was unsuccessful", sequenceNumber))));
+                                tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", sequenceNumber))));
                         },
                     Cancel = () => timer.Dispose(),
                     PublishAction = publishAction,
@@ -163,16 +169,14 @@ namespace EasyNetQ.Producer
 
             try
             {
-                //execute publish
                 publishAction(model);
             }
             catch(Exception ex)
             {
-                //return fault when publish action can't be executed
                 logger.ErrorWrite("Publish Failed. Sequence number: {0}. Exception: {1}", sequenceNumber, ex);
                 timer.Dispose();
-                dictionary.Remove(sequenceNumber);
-                tcs.TrySetException(ex);
+                unconfirmedActions.Remove(sequenceNumber);
+                tcs.TrySetException(ex); 
             }
             
 

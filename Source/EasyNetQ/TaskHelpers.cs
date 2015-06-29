@@ -40,6 +40,7 @@ namespace EasyNetQ
 
         //http://blogs.msdn.com/b/pfxteam/archive/2010/11/21/10094564.aspx
 
+        [Obsolete("Use async-await")]
         public static Task<T2> Then<T1, T2>(this Task<T1> first, Func<T2> next)
         {
             if (first == null) throw new ArgumentNullException("first");
@@ -68,6 +69,7 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        [Obsolete("Use async-await")]
         public static Task<T2> Then<T2>(this Task first, Func<T2> next)
         {
             if (first == null) throw new ArgumentNullException("first");
@@ -96,6 +98,7 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        [Obsolete("Use async-await")]
         public static Task Then<T1>(this Task<T1> first, Func<T1, Task> next)
         {
             if (first == null) throw new ArgumentNullException("first");
@@ -125,6 +128,7 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        [Obsolete("Use async-await")]
         public static Task<T2> Then<T1, T2>(this Task<T1> first, Func<T1, Task<T2>> next)
         {
             if (first == null) throw new ArgumentNullException("first");
@@ -154,6 +158,7 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        [Obsolete("Use async-await")]
         public static Task Then(this Task first, Action next)
         {
             if (first == null) throw new ArgumentNullException("first");

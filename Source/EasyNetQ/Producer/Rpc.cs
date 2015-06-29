@@ -85,10 +85,8 @@ namespace EasyNetQ.Producer
             var timer = new Timer(state =>
                 {
                     ((Timer) state).Dispose();
-                    tcs.TrySetException(new TimeoutException(
-                        string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+                    tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 });
-
 
             var requestType = typeof (TRequest);
             timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
@@ -138,8 +136,7 @@ namespace EasyNetQ.Producer
                 OnFailure = () =>
                 {
                     timer.Dispose();
-                    tcs.TrySetException(new EasyNetQException(
-                        "Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
+                    tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
                 }
             });
         }

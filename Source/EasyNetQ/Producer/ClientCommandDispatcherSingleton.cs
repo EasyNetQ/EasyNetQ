@@ -45,6 +45,30 @@ namespace EasyNetQ.Producer
                 }) {Name = "Client Command Dispatcher Thread"}.Start();
         }
 
+        public T Invoke<T>(Func<IModel, T> channelAction)
+        {
+            try
+            {
+                return InvokeAsync(channelAction).Result;
+            }
+            catch (AggregateException e)
+            {
+                throw e.InnerException;
+            }
+        }
+
+        public void Invoke(Action<IModel> channelAction)
+        {
+            try
+            {
+                InvokeAsync(channelAction).Wait();
+            }
+            catch (AggregateException e)
+            {
+                throw e.InnerException;
+            }
+        }
+
         public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");

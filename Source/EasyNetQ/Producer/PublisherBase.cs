@@ -45,6 +45,7 @@ namespace EasyNetQ.Producer
         }
 
         public abstract Task PublishAsync(IModel model, Action<IModel> publishAction);
+        public abstract void Publish(IModel model, Action<IModel> publishAction);
 
         protected void ModelOnBasicReturn(object model, BasicReturnEventArgs e)
         {

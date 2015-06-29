@@ -21,7 +21,6 @@ namespace EasyNetQ.Scheduling
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
 
-
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;

@@ -18,9 +18,14 @@ namespace EasyNetQ.Producer
 
         public override Task PublishAsync(IModel model, Action<IModel> publishAction)
         {
+            Publish(model, publishAction);
+            return TaskHelpers.Completed;
+        }
+
+        public override void Publish(IModel model, Action<IModel> publishAction)
+        {
             SetModel(model);
             publishAction(model);
-            return TaskHelpers.Completed;
         }
     }
 }
