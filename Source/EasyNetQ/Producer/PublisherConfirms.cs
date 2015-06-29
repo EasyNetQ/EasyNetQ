@@ -179,7 +179,6 @@ namespace EasyNetQ.Producer
                 tcs.TrySetException(ex); 
             }
             
-
             return tcs.Task;
         }
         

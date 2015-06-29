@@ -8,11 +8,11 @@ namespace EasyNetQ
 {
     public static class ReflectionHelpers
     {
-        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>> _attributes = new ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>>();
+        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>> typesAttributes = new ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>>();
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-            return _attributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
+            return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));
@@ -23,7 +23,7 @@ namespace EasyNetQ
             Attribute[] attributes;
             if (GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out attributes))
             {
-                return attributes.Cast<TAttribute>().ToArray();
+                return attributes.Cast<TAttribute>();
             }
             return new TAttribute[0];
         }
@@ -66,9 +66,9 @@ namespace EasyNetQ
             }
         }
 
-        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>> _singleParameterConstructorMap = 
+        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>> singleParameterConstructorMap = 
             new ConcurrentDictionary<Type, Dictionary<Type, Func<object, object>>>();
-        private static readonly Func<Type, Type, Func<object, object>> _singleParameterConstructorMapUpdate = ((objectType, argType) =>
+        private static readonly Func<Type, Type, Func<object, object>> singleParameterConstructorMapUpdate = ((objectType, argType) =>
         {
             var ctor = objectType.GetConstructor(new[] { argType });
             if (ctor == null)
@@ -88,23 +88,23 @@ namespace EasyNetQ
         public static object CreateInstance(Type objectType, object arg)
         {
             var argType = arg.GetType();
-            var constructors = _singleParameterConstructorMap.GetOrAdd(objectType, t => new Dictionary<Type, Func<object, object>>
+            var constructors = singleParameterConstructorMap.GetOrAdd(objectType, t => new Dictionary<Type, Func<object, object>>
             {
-                { argType, _singleParameterConstructorMapUpdate(objectType, argType) }
+                { argType, singleParameterConstructorMapUpdate(objectType, argType) }
             });
 
             Func<object, object> ctor;
             if (!constructors.TryGetValue(argType, out ctor))
             {
-                ctor = _singleParameterConstructorMapUpdate(objectType, argType);
+                ctor = singleParameterConstructorMapUpdate(objectType, argType);
                 constructors.Add(argType, ctor);
             }
             return ctor(arg);
         }
 
-        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Dictionary<Type, Func<object, object, object>>>> _dualParameterConstructorMap =
+        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Dictionary<Type, Func<object, object, object>>>> dualParameterConstructorMap =
             new ConcurrentDictionary<Type, Dictionary<Type, Dictionary<Type, Func<object, object, object>>>>();
-        private static readonly Func<Type, Type, Type, Func<object, object, object>> _dualParameterConstructorMapUpdate = ((objectType, firstArgType, secondArgType) =>
+        private static readonly Func<Type, Type, Type, Func<object, object, object>> dualParameterConstructorMapUpdate = ((objectType, firstArgType, secondArgType) =>
         {
             var ctor = objectType.GetConstructor(new[] { firstArgType, secondArgType });
             if (ctor == null)
@@ -130,12 +130,12 @@ namespace EasyNetQ
             var firstArgType = firstArg.GetType();
             var secondArgType = secondArg.GetType();
 
-            var constructors = _dualParameterConstructorMap.GetOrAdd(objectType, t => new Dictionary<Type, Dictionary<Type, Func<object, object, object>>>
+            var constructors = dualParameterConstructorMap.GetOrAdd(objectType, t => new Dictionary<Type, Dictionary<Type, Func<object, object, object>>>
             {
                 {
                     firstArgType, new Dictionary<Type, Func<object, object, object>>
                     {
-                        { secondArgType, _dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType) }
+                        { secondArgType, dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType) }
                     }
                 }
             });
@@ -145,7 +145,7 @@ namespace EasyNetQ
             {
                 firstArgConstructorMap = new Dictionary<Type, Func<object, object, object>>
                 {
-                    { secondArgType, _dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType) }
+                    { secondArgType, dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType) }
                 };
                 constructors.Add(firstArgType, firstArgConstructorMap);
             }
@@ -153,7 +153,7 @@ namespace EasyNetQ
             Func<object, object, object> ctor;
             if (!firstArgConstructorMap.TryGetValue(secondArgType, out ctor))
             {
-                ctor = _dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType);
+                ctor = dualParameterConstructorMapUpdate(objectType, firstArgType, secondArgType);
                 firstArgConstructorMap.Add(secondArgType, ctor);
             }
             return ctor(firstArg, secondArg);
