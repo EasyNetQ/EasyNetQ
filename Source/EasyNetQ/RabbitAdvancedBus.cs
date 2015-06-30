@@ -190,9 +190,9 @@ namespace EasyNetQ
                 var properties = x.CreateBasicProperties();
                 rawMessage.Properties.CopyTo(properties);
                 publisher.Publish(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body));
-                eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-                logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
             });
+            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
+            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
         }
 
         public void Publish<T>(
@@ -251,14 +251,14 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(body, "body");
 
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
-            await clientCommandDispatcher.InvokeAsync(async x =>
+            await clientCommandDispatcher.InvokeAsync(x =>
             {
                 var properties = x.CreateBasicProperties();
                 rawMessage.Properties.CopyTo(properties);
-                await publisher.PublishAsync(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body)).ConfigureAwait(false);
-                eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-                logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);                
+                return publisher.PublishAsync(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body));
             }).Unwrap().ConfigureAwait(false);
+            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
+            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);                
         }
 
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
