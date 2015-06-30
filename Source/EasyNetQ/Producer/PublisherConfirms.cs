@@ -112,19 +112,6 @@ namespace EasyNetQ.Producer
             return ExecutePublishWithConfirmation(model, publishAction, tcs);
         }
 
-        public override void Publish(IModel model, Action<IModel> publishAction)
-        {
-            //TODO Provide nice sync implementation
-            try
-            {
-                PublishAsync(model, publishAction).Wait();
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException;
-            }
-        }
-
         private Task ExecutePublishWithConfirmation(IModel model, Action<IModel> publishAction, TaskCompletionSource<NullStruct> tcs)
         {
             SetModel(model);

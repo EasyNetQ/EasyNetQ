@@ -185,12 +185,12 @@ namespace EasyNetQ
             byte[] body)
         {
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
-            clientCommandDispatcher.Invoke(x =>
+            clientCommandDispatcher.InvokeAsync(x =>
             {
                 var properties = x.CreateBasicProperties();
                 rawMessage.Properties.CopyTo(properties);
-                publisher.Publish(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body));
-            });
+                return publisher.PublishAsync(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body));
+            }).Unwrap().Wait();
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
             logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
         }
