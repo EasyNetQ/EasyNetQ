@@ -23,6 +23,7 @@ namespace EasyNetQ.Producer
 
         private readonly object responseQueuesAddLock = new object();
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
+        private readonly ConcurrentDictionary<string, string> endpointQueues = new ConcurrentDictionary<string, string>();
         private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
 
         protected readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
@@ -71,6 +72,29 @@ namespace EasyNetQ.Producer
             {
                 responseAction.OnFailure();
             }
+        }
+
+        public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout)
+            where TResponse : class {
+            Preconditions.CheckNotNull(endpoint, "endpoint");
+            Preconditions.CheckNotNull(request, "message");
+
+            var correlationId = Guid.NewGuid();
+
+            var tcs = new TaskCompletionSource<TResponse>();
+            var timer = new Timer(state => {
+                ((Timer)state).Dispose();
+                tcs.TrySetException(new TimeoutException(
+                    string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+            });
+
+            timer.Change(timeout, disablePeriodicSignaling);
+            RegisterErrorHandling(correlationId, timer, tcs);
+
+            var queueName = SubscribeToResponse<TResponse>(endpoint);
+            RequestPublish(request, endpoint, queueName, correlationId);
+
+            return tcs.Task;
         }
 
         public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request)
@@ -139,6 +163,31 @@ namespace EasyNetQ.Producer
                     tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
                 }
             });
+        }
+
+        protected virtual string SubscribeToResponse<TResponse>(string endpoint) where TResponse : class {
+            string queueName;
+            if (endpointQueues.TryGetValue(endpoint, out queueName))
+                return queueName;
+            lock (responseQueuesAddLock) {
+                if (endpointQueues.TryGetValue(endpoint, out queueName))
+                    return queueName;
+                var queue = advancedBus.QueueDeclare(
+                            conventions.RpcReturnQueueNamingConvention(),
+                            passive: false,
+                            durable: false,
+                            exclusive: true,
+                            autoDelete: true);
+
+                advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() => {
+                    ResponseAction responseAction;
+                    if (responseActions.TryRemove(message.Properties.CorrelationId, out responseAction)) {
+                        responseAction.OnSuccess(message);
+                    }
+                }));
+                endpointQueues.TryAdd(endpoint, queue.Name);
+                return queue.Name;
+            }
         }
 
         protected virtual string SubscribeToResponse<TRequest, TResponse>()
