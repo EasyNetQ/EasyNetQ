@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Producer 
 {
     /// <summary>
     /// Default implementation of EasyNetQ's request-response pattern
     /// </summary>
-    public class Rpc : IRpc
+    public class Rpc : IRpc 
     {
         private readonly ConnectionConfiguration connectionConfiguration;
         protected readonly IAdvancedBus advancedBus;
@@ -61,12 +61,12 @@ namespace EasyNetQ.Producer
             eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
         }
 
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        private void OnConnectionCreated(ConnectionCreatedEvent @event) 
         {
             var copyOfResponseActions = responseActions.Values;
             responseActions.Clear();
             responseQueues.Clear();
-            
+
             // retry in-flight requests.
             foreach (var responseAction in copyOfResponseActions)
             {
@@ -99,15 +99,15 @@ namespace EasyNetQ.Producer
 
         public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request)
             where TRequest : class
-            where TResponse : class
+            where TResponse : class 
         {
             Preconditions.CheckNotNull(request, "request");
 
             var correlationId = Guid.NewGuid();
 
             var tcs = new TaskCompletionSource<TResponse>();
-            var timer = new Timer(state =>
-                {
+            var timer = new Timer(state => 
+            {
                     ((Timer) state).Dispose();
                     tcs.TrySetException(new TimeoutException(
                         string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
@@ -125,12 +125,12 @@ namespace EasyNetQ.Producer
             return tcs.Task;
         }
 
-        protected void RegisterErrorHandling<TResponse>(Guid correlationId, Timer timer, TaskCompletionSource<TResponse> tcs) 
-            where TResponse : class
+        protected void RegisterErrorHandling<TResponse>(Guid correlationId, Timer timer, TaskCompletionSource<TResponse> tcs)
+            where TResponse : class 
         {
             responseActions.TryAdd(correlationId.ToString(), new ResponseAction
             {
-                OnSuccess = message =>
+                OnSuccess = message => 
                 {
                     timer.Dispose();
 
@@ -194,13 +194,13 @@ namespace EasyNetQ.Producer
         }
 
         protected virtual string SubscribeToResponse<TRequest, TResponse>()
-            where TResponse : class
+            where TResponse : class 
         {
             var rpcKey = new RpcKey {Request = typeof (TRequest), Response = typeof (TResponse)};
             string queueName;
             if (responseQueues.TryGetValue(rpcKey, out queueName))
                 return queueName;
-            lock (responseQueuesAddLock)
+            lock (responseQueuesAddLock) 
             {
                 if (responseQueues.TryGetValue(rpcKey, out queueName))
                     return queueName;
@@ -212,7 +212,7 @@ namespace EasyNetQ.Producer
                             autoDelete: true);
 
                 advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
-                    {
+                {
                         ResponseAction responseAction;
                         if(responseActions.TryRemove(message.Properties.CorrelationId, out responseAction))
                         {
@@ -246,7 +246,7 @@ namespace EasyNetQ.Producer
                 Properties =
                 {
                     ReplyTo = returnQueueName,
-                    CorrelationId = correlationId.ToString(), 
+                    CorrelationId = correlationId.ToString(),
                     Expiration = (timeoutStrategy.GetTimeoutSeconds(requestType) * 1000).ToString(),
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
                 }
@@ -260,6 +260,31 @@ namespace EasyNetQ.Producer
             where TResponse : class
         {
             return Respond(responder, c => { });
+        }
+
+        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure = null)
+            where TRequest : class
+            where TResponse : class {
+            Preconditions.CheckNotNull(responder, "responder");
+
+            // We're explicitely validating TResponse here because the type won't be used directly.
+            // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
+            Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
+
+            if (configure == null)
+                configure = c => { };
+
+            var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
+            configure(configuration);
+
+            //var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
+
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+            var queue = advancedBus.QueueDeclare(endpoint);
+            advancedBus.Bind(exchange, queue, endpoint);
+
+            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
+                c => c.WithPrefetchCount(configuration.PrefetchCount));
         }
 
         public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
@@ -283,8 +308,8 @@ namespace EasyNetQ.Producer
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
         }
 
-        protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage) 
-            where TRequest : class 
+        protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage)
+            where TRequest : class
             where TResponse : class
         {
             var tcs = new TaskCompletionSource<object>();
@@ -301,7 +326,7 @@ namespace EasyNetQ.Producer
                             tcs.SetException(task.Exception);
                         }
                     }
-                    else
+                    else 
                     {
                         OnResponderSuccess(requestMessage, task.Result);
                         tcs.SetResult(null);
@@ -313,19 +338,19 @@ namespace EasyNetQ.Producer
                 OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e);
                 tcs.SetException(e);
             }
-            
+
             return tcs.Task;
         }
 
         protected virtual void OnResponderSuccess<TRequest, TResponse>(IMessage<TRequest> requestMessage, TResponse response)
             where TRequest : class
-            where TResponse : class
+            where TResponse : class 
         {
             var responseMessage = new Message<TResponse>(response)
             {
                 Properties =
                 {
-                    CorrelationId = requestMessage.Properties.CorrelationId, 
+                    CorrelationId = requestMessage.Properties.CorrelationId,
                     DeliveryMode = MessageDeliveryMode.NonPersistent
                 }
             };
@@ -334,7 +359,7 @@ namespace EasyNetQ.Producer
         }
 
         protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
-            where TRequest : class 
+            where TRequest : class
             where TResponse : class
         {
             var body = ReflectionHelpers.CreateInstance<TResponse>();
