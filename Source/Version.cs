@@ -6,6 +6,7 @@ using System.Reflection;
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.50.1.1 Fix Issue with RPC Callback
 // 0.50.1.0 Fix type in Extensions
 // 0.50.0.0 Updated to RabbitMQ.Client 3.5.3
 // 0.49.3.0 Polymorphic publish now works with Scheduler.Mongo
