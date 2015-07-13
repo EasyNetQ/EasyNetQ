@@ -239,6 +239,20 @@ namespace EasyNetQ
             where TRequest : class
             where TResponse : class;
 
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder)
+            where TRequest : class
+            where TResponse : class;
+
         /// <summary>
         /// Send a message directly to a queue
         /// </summary>

@@ -64,8 +64,9 @@ namespace EasyNetQ.Producer
         private void OnConnectionCreated(ConnectionCreatedEvent @event) 
         {
             var copyOfResponseActions = responseActions.Values;
-            responseActions.Clear();
+            responseActions.Clear();            
             responseQueues.Clear();
+            endpointQueues.Clear();
 
             // retry in-flight requests.
             foreach (var responseAction in copyOfResponseActions)
