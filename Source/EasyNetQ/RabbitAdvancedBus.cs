@@ -283,7 +283,7 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
             string deadLetterRoutingKey = null)
         {
@@ -299,7 +299,7 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
             string deadLetterRoutingKey = null)
         {
