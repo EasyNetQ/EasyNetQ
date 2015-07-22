@@ -3,7 +3,7 @@
   <metadata>
     <id>EasyNetQ.DI.Ninject</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.35.1.0</version>
+    <version>0.50.1.0</version>
     <title>EasyNetQ.DI.Ninject</title>
     <authors>Jeff Doolittle, Mike Hadlow</authors>
     <owners>Mike Hadlow</owners>
@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP REST API Ninject</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="0.35.1.0" />
+      <dependency id="EasyNetQ" version="0.50.1.0" />
       <dependency id="Ninject" version="3.0.1.10" />
     </dependencies>
   </metadata>
