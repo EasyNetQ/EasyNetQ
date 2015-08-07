@@ -103,6 +103,7 @@
     <Compile Include="ConsumeTests\When_a_polymorphic_message_is_delivered_to_the_consumer.cs" />
     <Compile Include="ConsumeTests\When_consume_is_called.cs" />
     <Compile Include="Integration\AdvancedBusTests.cs" />
+    <Compile Include="Integration\PolymorphicRpc.cs" />
     <Compile Include="Integration\Scheduling\DeadLetterExchangeAndMessageTtlSchedulerTests.cs" />
     <Compile Include="Integration\Scheduling\DelayedExchangeSchedulerTests.cs" />
     <Compile Include="Integration\RpcTests.cs" />

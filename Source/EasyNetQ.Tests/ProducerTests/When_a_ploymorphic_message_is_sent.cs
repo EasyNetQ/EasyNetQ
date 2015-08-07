@@ -9,7 +9,7 @@ using Rhino.Mocks;
 namespace EasyNetQ.Tests.ProducerTests
 {
     [TestFixture]
-    public class When_a_ploymorphic_message_is_sent
+    public class When_a_polymorphic_message_is_sent
     {
         private MockBuilder mockBuilder;
         private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface:EasyNetQ.Tests";
