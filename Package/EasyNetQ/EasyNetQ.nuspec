@@ -3,7 +3,7 @@
   <metadata>
     <id>EasyNetQ</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.36.4.0</version>
+    <version>0.50.1.0</version>
     <title>EasyNetQ</title>
     <authors>Mike Hadlow, Contributors (see GitHub repo)</authors>
     <owners>Mike Hadlow</owners>
@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-      <dependency id="RabbitMQ.Client" version="[3.5.3,]" />
+      <dependency id="RabbitMQ.Client" version="[3.5.4,]" />
     </dependencies>
   </metadata>
 </package>
