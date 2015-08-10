@@ -103,7 +103,7 @@ namespace EasyNetQ
 
         public void Validate()
         {
-            if (AMQPConnectionString != null)
+            if (AMQPConnectionString != null && !Hosts.Any(h => h.Host == AMQPConnectionString.Host))
             {
                 if(Port == DefaultPort && AMQPConnectionString.Port > 0) 
                         Port = (ushort) AMQPConnectionString.Port;
