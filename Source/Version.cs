@@ -2,11 +2,10 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.50.4.0")]
+[assembly: AssemblyVersion("0.50.3.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
-// 0.50.4.0 Fix assigning of AMQP connection in to ConnectionConfiguration to be idempotent.
 // 0.50.3.0 Bug fix, Polymorphic request-response did not work with polymorphic response types
 // 0.50.2.0 Updated RabbitMQ client to 3.5.4 and Json.NET to 7.0.1
 // 0.50.1.0 Fix type in Extensions
