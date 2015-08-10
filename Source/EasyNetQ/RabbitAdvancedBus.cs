@@ -13,19 +13,19 @@ namespace EasyNetQ
 {
     public class RabbitAdvancedBus : IAdvancedBus
     {
-        private readonly IConsumerFactory consumerFactory;
-        private readonly IEasyNetQLogger logger;
-        private readonly IPersistentConnection connection;
-        private readonly IClientCommandDispatcher clientCommandDispatcher;
-        private readonly IPublisher publisher;
-        private readonly IEventBus eventBus;
-        private readonly IHandlerCollectionFactory handlerCollectionFactory;
-        private readonly IContainer container;
-        private readonly ConnectionConfiguration connectionConfiguration;
-        private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
-        private readonly IMessageSerializationStrategy messageSerializationStrategy;
-        private readonly IConventions conventions;
-        private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
+        protected readonly IConsumerFactory consumerFactory;
+        protected readonly IEasyNetQLogger logger;
+        protected readonly IPersistentConnection connection;
+        protected readonly IClientCommandDispatcher clientCommandDispatcher;
+        protected readonly IPublisher publisher;
+        protected readonly IEventBus eventBus;
+        protected readonly IHandlerCollectionFactory handlerCollectionFactory;
+        protected readonly IContainer container;
+        protected readonly ConnectionConfiguration connectionConfiguration;
+        protected readonly IProduceConsumeInterceptor produceConsumeInterceptor;
+        protected readonly IMessageSerializationStrategy messageSerializationStrategy;
+        protected readonly IConventions conventions;
+        protected readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
