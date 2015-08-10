@@ -285,10 +285,12 @@ namespace EasyNetQ
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null)
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null)
         {
-            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl, 
-                expires, maxPriority, deadLetterExchange, deadLetterRoutingKey).Result;
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl,
+                expires, maxPriority, deadLetterExchange, deadLetterRoutingKey, maxLength, maxLengthBytes).Result;
         }
 
         public Task<IQueue> QueueDeclareAsync(
@@ -301,7 +303,9 @@ namespace EasyNetQ
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null)
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -332,8 +336,16 @@ namespace EasyNetQ
             {
                 arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
             }
+            if (maxLength.HasValue)
+            {
+                arguments.Add("x-max-length", maxLength.Value);
+            }
+            if (maxLengthBytes.HasValue)
+            {
+              arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
+            }
 
-            return clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
+          return clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
             {
                 logger.DebugWrite("Declared Queue: '{0}', durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
                     name, durable, exclusive, autoDelete, string.Join(", ", arguments.Select(kvp => String.Format("{0}={1}", kvp.Key, kvp.Value))));
