@@ -89,6 +89,7 @@
     <Compile Include="BlockedConnectionNotificationTests.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked.cs" />
     <Compile Include="ClientCommandDispatcherTests\When_an_action_is_invoked_that_throws.cs" />
+    <Compile Include="ConnectionConfigurationTests.cs" />
     <Compile Include="ConsumerDispatcherFactoryTests.cs" />
     <Compile Include="ConsumeTests\AckStrategyTests.cs" />
     <Compile Include="ConsumeTests\When_cancellation_of_message_handler_occurs.cs" />
