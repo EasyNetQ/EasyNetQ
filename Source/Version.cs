@@ -6,6 +6,7 @@ using System.Reflection;
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared
 // 0.50.5.0 Fix assigning of AMQP connection in to ConnectionConfiguration to be idempotent.
 // 0.50.4.0 Queue max priority now uses int instead of byte.
 // 0.50.3.0 Bug fix, Polymorphic request-response did not work with polymorphic response types
@@ -39,7 +40,7 @@ using System.Reflection;
 // 0.43.1.0 Management Client fix for URI slash escaping in .NET 4.0 with https connection.
 // 0.43.0.0 Use ILRepack to internally merge Newtonsoft.Json in ManagementClient, default WebRequest.KeepAlive to false to resolve spurious 'the request was aborted: the request was canceled' exceptions
 // 0.42.0.0 Switched from local to UTC datetimes.
-// 0.41.0.0 Dynamic removal 
+// 0.41.0.0 Dynamic removal
 // 0.40.6.0 Added parameter to set the 'x-dead-letter-routing-key' argument when declaring a queue.
 // 0.40.5.0 Preconditions will check for blank argument name / exception message only when needed
 // 0.40.4.0 Bug fix of Rpc
@@ -55,7 +56,7 @@ using System.Reflection;
 // 0.39.1.0 Fix multiple queue's creation. Bug fix
 // 0.39.0.0 Added SendAsync
 // 0.38.2.0 RandomHostSelectionStrategy is default hosts selection strategy
-// 0.38.1.0 Configuration of rpc timeout  
+// 0.38.1.0 Configuration of rpc timeout
 // 0.38.0.0 ILMerging to remove the potentially conflicting dependency on System.Collections.Immutable.Net40 from the NuGet
 // 0.37.3.0 Remove POCO interfaces IConnectionConfiguration and IHostConfiguration
 // 0.37.2.0 Upgrade to RabbitMQ.Client 3.4.0
