@@ -342,10 +342,10 @@ namespace EasyNetQ
             }
             if (maxLengthBytes.HasValue)
             {
-              arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
+                arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
-          return clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
+            return clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
             {
                 logger.DebugWrite("Declared Queue: '{0}', durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}",
                     name, durable, exclusive, autoDelete, string.Join(", ", arguments.Select(kvp => String.Format("{0}={1}", kvp.Key, kvp.Value))));
