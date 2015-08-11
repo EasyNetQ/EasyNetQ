@@ -59,9 +59,12 @@
     <Compile Include="BasicGetResult.cs" />
     <Compile Include="AdvancedBusEventHandlers.cs" />
     <Compile Include="ComponentRegistration.cs" />
+    <Compile Include="ConnectionString\ConfigurationStringSharedGrammar.cs" />
     <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
+    <Compile Include="ConnectionString\SslOptionsGrammar.cs" />
+    <Compile Include="ConnectionString\ISslOptionsStringParser.cs" />
     <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />

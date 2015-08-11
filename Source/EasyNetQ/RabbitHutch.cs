@@ -132,6 +132,31 @@ namespace EasyNetQ
         /// The following default values will be used if not specified:
         /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
         /// </param>
+        /// <param name="sslOptionsString">The SSL options string. Example:
+        /// servername=192.168.1.1;certpath=c:\\certs\\myclient.p12;certpassphrase=secret;enabled=true .  
+        /// enabled will default to true if not specified.
+        /// servername must match a host declared in the connection string.
+        /// port will default to 5671 if not specified in the connection string and ssl enabled=true</param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static IBus CreateBus(string connectionString, string sslOptionsString)
+        {
+            Preconditions.CheckNotNull(connectionString, "connectionString");
+
+            return CreateBus(connectionString, sslOptionsString, AdvancedBusEventHandlers.Default);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus"/>.
+        /// </summary>
+        /// <param name="connectionString">
+        /// The EasyNetQ connection string. Example:
+        /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
+        /// 
+        /// The following default values will be used if not specified:
+        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
+        /// </param>
         /// <param name="advancedBusEventHandlers">
         /// An <see cref="AdvancedBusEventHandlers"/> instance which is used to add handlers
         /// to the events of the newly created <see cref="IBus.Advanced"/>.
@@ -159,6 +184,38 @@ namespace EasyNetQ
         /// The following default values will be used if not specified:
         /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
         /// </param>
+        /// <param name="sslOptionsString">The SSL options string. Example:
+        /// servername=192.168.1.1;certpath=c:\\certs\\myclient.p12;certpassphrase=secret;enabled=true .  
+        /// enabled will default to true if not specified.
+        /// servername must match a host declared in the connection string.
+        /// port will default to 5671 if not specified in the connection string and ssl enabled=true</param>
+        /// <param name="advancedBusEventHandlers">
+        /// An <see cref="AdvancedBusEventHandlers"/> instance which is used to add handlers
+        /// to the events of the newly created <see cref="IBus.Advanced"/>.
+        /// As <see cref="RabbitAdvancedBus"/> attempts to connect during instantiation, specifying a <see cref="AdvancedBusEventHandlers"/>
+        /// before instantiation is the only way to catch the first <see cref="AdvancedBusEventHandlers.Connected"/> event.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static IBus CreateBus(string connectionString, string sslOptionsString, AdvancedBusEventHandlers advancedBusEventHandlers)
+        {
+            Preconditions.CheckNotNull(connectionString, "connectionString");
+            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
+
+            return CreateBus(connectionString, sslOptionsString, advancedBusEventHandlers, x => { });
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus"/>.
+        /// </summary>
+        /// <param name="connectionString">
+        /// The EasyNetQ connection string. Example:
+        /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
+        /// 
+        /// The following default values will be used if not specified:
+        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
+        /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
         /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
@@ -174,6 +231,36 @@ namespace EasyNetQ
             return CreateBus(connectionString, AdvancedBusEventHandlers.Default, registerServices);
         }
 
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus"/>.
+        /// </summary>
+        /// <param name="connectionString">
+        /// The EasyNetQ connection string. Example:
+        /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
+        /// 
+        /// The following default values will be used if not specified:
+        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
+        /// </param>
+        /// <param name="sslOptionsString">The SSL options string. Example:
+        /// servername=192.168.1.1;certpath=c:\\certs\\myclient.p12;certpassphrase=secret;enabled=true .  
+        /// enabled will default to true if not specified.
+        /// servername must match a host declared in the connection string.
+        /// port will default to 5671 if not specified in the connection string and ssl enabled=true</param>
+        /// <param name="registerServices">
+        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static IBus CreateBus(string connectionString, string sslOptionsString, Action<IServiceRegister> registerServices)
+        {
+            Preconditions.CheckNotNull(connectionString, "connectionString");
+            Preconditions.CheckNotNull(registerServices, "registerServices");
+
+            return CreateBus(connectionString, sslOptionsString, AdvancedBusEventHandlers.Default, registerServices);
+        }
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// </summary>
@@ -199,6 +286,36 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
+            return CreateBus(connectionString, null, advancedBusEventHandlers, registerServices);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus" />.
+        /// </summary>
+        /// <param name="connectionString">The EasyNetQ connection string. Example:
+        /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
+        /// The following default values will be used if not specified:
+        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10</param>
+        /// <param name="sslOptionsString">The SSL options string. Example:
+        /// servername=192.168.1.1;certpath=c:\\certs\\myclient.p12;certpassphrase=secret;enabled=true .  
+        /// enabled will default to true if not specified.
+        /// servername must match a host declared in the connection string.
+        /// port will default to 5671 if not specified in the connection string and ssl enabled=true</param>
+        /// <param name="advancedBusEventHandlers">An 
+        /// <see cref="AdvancedBusEventHandlers" /> instance which is used to add handlers
+        /// to the events of the newly created 
+        /// <see cref="IBus.Advanced" />.
+        /// As 
+        /// <see cref="RabbitAdvancedBus" /> attempts to connect during instantiation, specifying a 
+        /// <see cref="AdvancedBusEventHandlers" />
+        /// before instantiation is the only way to catch the first 
+        /// <see cref="AdvancedBusEventHandlers.Connected" /> event.</param>
+        /// <param name="registerServices">Override default services. For example, to override the default 
+        /// <see cref="IEasyNetQLogger" />:
+        /// RabbitHutch.CreateBus("host=localhost", x =&gt; x.Register{IEasyNetQLogger}(_ =&gt; myLogger));</param>
+        /// <returns>A new <see cref="RabbitBus" /> instance.</returns>
+        public static IBus CreateBus(string connectionString, string sslOptionsString, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        {
             Preconditions.CheckNotNull(connectionString, "connectionString");
             Preconditions.CheckNotNull(registerServices, "registerServices");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
@@ -206,6 +323,7 @@ namespace EasyNetQ
             var connectionStringParser = new ConnectionStringParser();
 
             var connectionConfiguration = connectionStringParser.Parse(connectionString);
+            connectionConfiguration.ApplySslOptions(sslOptionsString);
 
             return CreateBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
         }
