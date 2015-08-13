@@ -77,6 +77,11 @@ namespace EasyNetQ.Producer
 
         public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout)
             where TResponse : class {
+                return Request<TResponse>(endpoint, request, timeout, string.Empty);
+        }
+
+        public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
+            where TResponse : class {
             Preconditions.CheckNotNull(endpoint, "endpoint");
             Preconditions.CheckNotNull(request, "message");
 
@@ -93,7 +98,12 @@ namespace EasyNetQ.Producer
             RegisterErrorHandling(correlationId, timer, tcs);
 
             var queueName = SubscribeToResponse<TResponse>(endpoint);
-            RequestPublish(request, endpoint, queueName, correlationId);
+
+            var routingKey = endpoint;
+            if (!string.IsNullOrWhiteSpace(topic))
+                routingKey = string.Format("{0}.{1}", endpoint, topic);
+
+            RequestPublish(request, routingKey, queueName, correlationId);
 
             return tcs.Task;
         }
@@ -263,7 +273,13 @@ namespace EasyNetQ.Producer
             return Respond(responder, c => { });
         }
 
-        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure = null)
+        public virtual IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure = null)
+            where TRequest : class
+            where TResponse : class {
+            return Respond(endpoint, responder, string.Empty, c => { });
+        }
+
+        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic, Action<IResponderConfiguration> configure = null)
             where TRequest : class
             where TResponse : class {
             Preconditions.CheckNotNull(responder, "responder");
@@ -282,7 +298,12 @@ namespace EasyNetQ.Producer
 
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
             var queue = advancedBus.QueueDeclare(endpoint);
-            advancedBus.Bind(exchange, queue, endpoint);
+            var routingKey = endpoint;
+
+            if (!string.IsNullOrWhiteSpace(topic))
+                routingKey = string.Format("{0}.{1}", endpoint, topic);
+
+            advancedBus.Bind(exchange, queue, routingKey);
 
             return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
