@@ -169,6 +169,12 @@ namespace EasyNetQ
             return rpc.Request<TResponse>(endpoint, request, timeout);
         }
 
+        public virtual Task<TResponse> RequestAsync<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
+            where TResponse : class {
+            Preconditions.CheckNotNull(request, "request");
+            return rpc.Request<TResponse>(endpoint, request, timeout, topic);
+        }
+
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
@@ -210,16 +216,19 @@ namespace EasyNetQ
         public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class {
-            return RespondAsync(endpoint, responder, c => { });
+                return RespondAsync(endpoint, responder, c => { });
         }
 
-        public IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
             where TRequest : class
             where TResponse : class {
-            Preconditions.CheckNotNull(responder, "responder");
-            Preconditions.CheckNotNull(configure, "configure");
+                return rpc.Respond(endpoint, responder, configure);
+        }
 
-            return rpc.Respond(endpoint, responder, configure);
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic)
+            where TRequest : class
+            where TResponse : class {
+                return rpc.Respond(endpoint, responder, topic, c => { });
         }
 
         public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
