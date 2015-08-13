@@ -67,11 +67,11 @@
         
         <XmlUpdate
             Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
-            XmlFileName="$(Package)\EasyNetQ\EasyNetQ.nuspec"
+            XmlFileName="$(Package)\EasyNetQ\CCP.EasyNetQ.nuspec"
             XPath="/package/metadata/version"
             Value="%(AsmInfo.Version)" />        
         
-        <Exec WorkingDirectory="$(Package)\EasyNetQ" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ\EasyNetQ.nuspec" />
+        <Exec WorkingDirectory="$(Package)\EasyNetQ" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ\CCP.EasyNetQ.nuspec" />
 
         <Message Text="##teamcity[buildNumber '%(AsmInfo.Version)']" />
     </Target>
