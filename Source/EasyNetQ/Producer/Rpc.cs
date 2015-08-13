@@ -108,7 +108,7 @@ namespace EasyNetQ.Producer
                 {
                     timer.Dispose();
 
-                    var msg = ((Message<TResponse>)message);
+                    var msg = ((IMessage<TResponse>)message);
 
                     bool isFaulted = false;
                     string exceptionMessage = "The exception message has not been specified.";
