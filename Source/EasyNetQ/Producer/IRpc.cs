@@ -21,17 +21,6 @@ namespace EasyNetQ.Producer
         /// <summary>
         /// Make a request to an RPC service
         /// </summary>
-        /// <param name="endpoint">The endpoint queue</param>
-        /// <param name="request">The request message</param>
-        /// <param name="timeout">timeout</param>
-        /// <param name="topic">optional topic</param>
-        /// <returns>Returns a task that yields the result when the response arrives</returns>
-        Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
-            where TResponse : class;
-
-        /// <summary>
-        /// Make a request to an RPC service
-        /// </summary>
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="request">The request message</param>

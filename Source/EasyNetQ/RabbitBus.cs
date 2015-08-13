@@ -169,12 +169,6 @@ namespace EasyNetQ
             return rpc.Request<TResponse>(endpoint, request, timeout);
         }
 
-        public virtual Task<TResponse> RequestAsync<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
-            where TResponse : class {
-            Preconditions.CheckNotNull(request, "request");
-            return rpc.Request<TResponse>(endpoint, request, timeout);
-        }
-
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
