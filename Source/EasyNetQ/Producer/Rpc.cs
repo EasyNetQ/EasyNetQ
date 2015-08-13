@@ -75,7 +75,11 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout)
+        public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout) where TResponse : class {
+            return Request<TResponse>(endpoint, request, timeout, string.Empty);
+        }
+
+        public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
             where TResponse : class {
             Preconditions.CheckNotNull(endpoint, "endpoint");
             Preconditions.CheckNotNull(request, "message");
@@ -92,9 +96,11 @@ namespace EasyNetQ.Producer
             timer.Change(timeout, disablePeriodicSignaling);
             RegisterErrorHandling(correlationId, timer, tcs);
 
+            if (!string.IsNullOrWhiteSpace(topic))
+                endpoint = string.Format("{0}.{1}", endpoint, topic);
+
             var queueName = SubscribeToResponse<TResponse>(endpoint);
             RequestPublish(request, endpoint, queueName, correlationId);
-
             return tcs.Task;
         }
 
