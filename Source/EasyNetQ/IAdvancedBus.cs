@@ -248,6 +248,8 @@ namespace EasyNetQ
         /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
+        /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
         /// <returns>
         /// The queue
         /// </returns>
@@ -259,9 +261,11 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null, 
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null);
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null);
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -276,6 +280,8 @@ namespace EasyNetQ
         /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
+        /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(
             string name, 
@@ -285,9 +291,11 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null);
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null);
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the

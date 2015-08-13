@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests
                     Arg<IDictionary<string, object>>.Matches(args => 
                         ((int)args["x-message-ttl"] == 1000) &&
                         ((int)args["x-expires"] == 2000) &&
-                        ((byte)args["x-max-priority"] == 10))));
+                        ((int)args["x-max-priority"] == 10))));
         }
     }
 
