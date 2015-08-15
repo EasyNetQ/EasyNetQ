@@ -287,7 +287,6 @@ namespace EasyNetQ
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
                     var deliveryTag = model.NextPublishSeqNo;
-
                     confirmationListener.Request(deliveryTag);
 
                     try

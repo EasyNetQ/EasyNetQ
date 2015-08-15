@@ -31,13 +31,12 @@ namespace EasyNetQ.Producer
             var confirmation = unconfirmedRequests[sequenceNumber];
             try
             {
-                var task = confirmation.Task;
-                if (task.Wait((int) timeout.TotalSeconds, cancellation.Token))
+                if (confirmation.Task.Wait((int) timeout.TotalMilliseconds, cancellation.Token))
                 {
                     return;
                 }
 
-                throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", 10, sequenceNumber));
+                throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int)timeout.TotalSeconds, sequenceNumber));
             }
             finally
             {
@@ -48,12 +47,19 @@ namespace EasyNetQ.Producer
         public async Task WaitAsync(ulong sequenceNumber, TimeSpan timeout)
         {
             var confirmation = unconfirmedRequests[sequenceNumber];
-            var timeoutTask = TaskHelpers.Timeout(timeout, cancellation.Token);
-            if (timeoutTask == await TaskHelpers.WhenAny(confirmation.Task, timeoutTask).ConfigureAwait(false))
+            try
             {
-                throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", 10, sequenceNumber));
+                var timeoutTask = TaskHelpers.Timeout(timeout, cancellation.Token);
+                if (timeoutTask == await TaskHelpers.WhenAny(confirmation.Task, timeoutTask).ConfigureAwait(false))
+                {
+                    throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int) timeout.TotalSeconds, sequenceNumber));
+                }
+                await confirmation.Task.ConfigureAwait(false);
             }
-            await confirmation.Task.ConfigureAwait(false);
+            finally
+            {
+                unconfirmedRequests.Remove(sequenceNumber);
+            }
         }
 
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
