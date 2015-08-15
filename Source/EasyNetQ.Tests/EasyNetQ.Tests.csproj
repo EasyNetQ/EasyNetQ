@@ -174,7 +174,6 @@
     <Compile Include="PersistentConsumerTests\When_a_Persistent_consumer_is_created.cs" />
     <Compile Include="PersistentConsumerTests\When_disposed.cs" />
     <Compile Include="PersistentConsumerTests\When_the_connection_is_broken.cs" />
-    <Compile Include="ProducerTests\PublisherConfirmsTests.cs" />
     <Compile Include="ProducerTests\PublishExchangeDeclareStrategyTests.cs" />
     <Compile Include="ProducerTests\When_a_message_is_sent.cs" />
     <Compile Include="ProducerTests\When_a_ploymorphic_message_is_sent.cs" />

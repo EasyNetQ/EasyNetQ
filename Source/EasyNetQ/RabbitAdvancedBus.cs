@@ -15,9 +15,9 @@ namespace EasyNetQ
     {
         private readonly IConsumerFactory consumerFactory;
         private readonly IEasyNetQLogger logger;
+        private readonly IPublishConfirmationListener confirmationListener;
         private readonly IPersistentConnection connection;
         private readonly IClientCommandDispatcher clientCommandDispatcher;
-        private readonly IPublisher publisher;
         private readonly IEventBus eventBus;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly IContainer container;
@@ -31,7 +31,7 @@ namespace EasyNetQ
             IConsumerFactory consumerFactory,
             IEasyNetQLogger logger,
             IClientCommandDispatcherFactory clientCommandDispatcherFactory,
-            IPublisher publisher,
+            IPublishConfirmationListener confirmationListener,
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
             IContainer container,
@@ -44,7 +44,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
             Preconditions.CheckNotNull(logger, "logger");
-            Preconditions.CheckNotNull(publisher, "publisher");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
             Preconditions.CheckNotNull(container, "container");
@@ -56,7 +55,7 @@ namespace EasyNetQ
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
-            this.publisher = publisher;
+            this.confirmationListener = confirmationListener;
             this.eventBus = eventBus;
             this.handlerCollectionFactory = handlerCollectionFactory;
             this.container = container;
@@ -184,13 +183,42 @@ namespace EasyNetQ
             MessageProperties messageProperties, 
             byte[] body)
         {
+            // Fix me: It's very hard now to move publish logic to separate abstraction, just leave it here. 
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
-            clientCommandDispatcher.InvokeAsync(x =>
+            if (connectionConfiguration.PublisherConfirms)
             {
-                var properties = x.CreateBasicProperties();
-                rawMessage.Properties.CopyTo(properties);
-                return publisher.PublishAsync(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body));
-            }).Unwrap().Wait();
+                var messageDeliveryTag = clientCommandDispatcher.Invoke(model =>
+                {
+                    var properties = model.CreateBasicProperties();
+                    rawMessage.Properties.CopyTo(properties);
+                    var deliveryTag = model.NextPublishSeqNo;
+                    
+                    confirmationListener.Request(deliveryTag);
+                    
+                    try
+                    {
+                        model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                    }
+                    catch (Exception)
+                    {
+                        confirmationListener.Discard(deliveryTag);
+                        throw;
+                    }
+
+                    return deliveryTag;
+                });
+
+                confirmationListener.Wait(messageDeliveryTag, TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+            }
+            else
+            {
+                clientCommandDispatcher.Invoke(model =>
+                {
+                    var properties = model.CreateBasicProperties();
+                    rawMessage.Properties.CopyTo(properties);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                });
+            }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
             logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
         }
@@ -250,13 +278,41 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
 
+            // Fix me: It's very hard now to move publish logic to separate abstraction, just leave it here. 
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
-            await clientCommandDispatcher.InvokeAsync(x =>
+            if (connectionConfiguration.PublisherConfirms)
             {
-                var properties = x.CreateBasicProperties();
-                rawMessage.Properties.CopyTo(properties);
-                return publisher.PublishAsync(x, m => m.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body));
-            }).Unwrap().ConfigureAwait(false);
+                var messageDeliveryTag = await clientCommandDispatcher.InvokeAsync(model =>
+                {
+                    var properties = model.CreateBasicProperties();
+                    rawMessage.Properties.CopyTo(properties);
+                    var deliveryTag = model.NextPublishSeqNo;
+
+                    confirmationListener.Request(deliveryTag);
+
+                    try
+                    {
+                        model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                    }
+                    catch (Exception)
+                    {
+                        confirmationListener.Discard(deliveryTag);
+                        throw;
+                    }
+
+                    return deliveryTag;
+                }).ConfigureAwait(false);
+                await confirmationListener.WaitAsync(messageDeliveryTag, TimeSpan.FromSeconds(connectionConfiguration.Timeout)).ConfigureAwait(false);
+            }
+            else
+            {
+                await clientCommandDispatcher.InvokeAsync(model =>
+                {
+                    var properties = model.CreateBasicProperties();
+                    rawMessage.Properties.CopyTo(properties);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                }).ConfigureAwait(false);
+            }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
             logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);                
         }
@@ -669,6 +725,7 @@ namespace EasyNetQ
             if (disposed) return;
 
             consumerFactory.Dispose();
+            confirmationListener.Dispose();
             clientCommandDispatcher.Dispose();
             connection.Dispose();
 

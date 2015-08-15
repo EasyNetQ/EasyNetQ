@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests
                 MockRepository.GenerateStub<IConsumerFactory>(),
                 MockRepository.GenerateStub<IEasyNetQLogger>(),
                 MockRepository.GenerateStub<IClientCommandDispatcherFactory>(),
-                MockRepository.GenerateStub<IPublisher>(),
+                MockRepository.GenerateStub<IPublishConfirmationListener>(),
                 eventBus,
                 MockRepository.GenerateStub<IHandlerCollectionFactory>(),
                 MockRepository.GenerateStub<IContainer>(),

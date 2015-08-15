@@ -7,6 +7,8 @@ namespace EasyNetQ.Tests.Performance.Producer
     {
         public static void Main(string[] args)
         {
+            ThreadPool.SetMinThreads(4096, 4096);
+
             var publishInterval = 0;
             var messageSize = 1000;
 
@@ -22,7 +24,7 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer",
+            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=30;requestedHeartbeat=5;product=producer",
                 x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
 
             var messageCount = 0;

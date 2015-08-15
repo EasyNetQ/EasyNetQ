@@ -9,10 +9,9 @@ namespace EasyNetQ.Producer
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
         private const int queueSize = 1;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
-
         private readonly IPersistentChannel persistentChannel;
+        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
 
         public ClientCommandDispatcherSingleton(
             IPersistentConnection connection,
@@ -24,25 +23,6 @@ namespace EasyNetQ.Producer
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
 
             StartDispatcherThread();
-        }
-
-        private void StartDispatcherThread()
-        {
-            new Thread(() =>
-                {
-                    while (!cancellation.IsCancellationRequested)
-                    {
-                        try
-                        {
-                            var channelAction = queue.Take(cancellation.Token);
-                            channelAction();
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            break;
-                        }
-                    }
-                }) {Name = "Client Command Dispatcher Thread"}.Start();
         }
 
         public T Invoke<T>(Func<IModel, T> channelAction)
@@ -78,25 +58,25 @@ namespace EasyNetQ.Producer
             try
             {
                 queue.Add(() =>
+                {
+                    if (cancellation.IsCancellationRequested)
                     {
-                        if (cancellation.IsCancellationRequested)
-                        {
-                            tcs.SetCanceled();
-                            return;
-                        }
-                        try
-                        {
-                            persistentChannel.InvokeChannelAction(channel => tcs.SetResult(channelAction(channel)));
-                        }
-                        catch (Exception e)
-                        {
-                            tcs.SetException(e);
-                        }
-                    }, cancellation.Token);
+                        tcs.TrySetCanceledSafe();
+                        return;
+                    }
+                    try
+                    {
+                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResultSafe(channelAction(channel)));
+                    }
+                    catch (Exception e)
+                    {
+                        tcs.TrySetExceptionSafe(e);
+                    }
+                }, cancellation.Token);
             }
             catch (OperationCanceledException)
             {
-                tcs.SetCanceled();
+                tcs.TrySetCanceled();
             }
             return tcs.Task;
         }
@@ -106,10 +86,10 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
             return InvokeAsync(x =>
-                {
-                    channelAction(x);
-                    return new NoContentStruct();
-                });
+            {
+                channelAction(x);
+                return new NoContentStruct();
+            });
         }
 
         public void Dispose()
@@ -118,6 +98,27 @@ namespace EasyNetQ.Producer
             persistentChannel.Dispose();
         }
 
-        private struct NoContentStruct {}
+        private void StartDispatcherThread()
+        {
+            new Thread(() =>
+            {
+                while (!cancellation.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var channelAction = queue.Take(cancellation.Token);
+                        channelAction();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }) {Name = "Client Command Dispatcher Thread"}.Start();
+        }
+
+        private struct NoContentStruct
+        {
+        }
     }
 }
