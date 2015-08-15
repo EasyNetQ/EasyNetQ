@@ -3,17 +3,19 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
 
 namespace EasyNetQ.Producer
 {
     public class PublishConfirmationListener : IPublishConfirmationListener
     {
-        private readonly ConcurrentDictionary<ulong, TaskCompletionSource<NullStruct>> unconfirmedRequests = new ConcurrentDictionary<ulong, TaskCompletionSource<NullStruct>>();
+        private ConcurrentDictionary<ulong, TaskCompletionSource<NullStruct>> unconfirmedRequests = new ConcurrentDictionary<ulong, TaskCompletionSource<NullStruct>>();
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
 
         public PublishConfirmationListener(IEventBus eventBus)
         {
             eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation);
+            eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated);
         }
 
         public void Request(ulong deliveryTag)
@@ -70,7 +72,6 @@ namespace EasyNetQ.Producer
 
             if (multiple)
             {
-                // Fix me: Where(x <= deliveryTag) is O(N) operation and could perform slowly.
                 // Fix me: ConcurrentDictionary.Keys acquires all locks, it is very expensive operation and could perform slowly.
                 foreach (var sequenceNumber in unconfirmedRequests.Keys.Where(x => x <= deliveryTag))
                 {
@@ -88,6 +89,16 @@ namespace EasyNetQ.Producer
                 {
                     Confirm(confirmation, deliveryTag, isNack);
                 }
+            }
+        }
+
+
+        private void OnPublishChannelCreated(PublishChannelCreatedEvent obj)
+        {
+            var unconfirmedRequestsToCancel = Interlocked.Exchange(ref unconfirmedRequests, new ConcurrentDictionary<ulong, TaskCompletionSource<NullStruct>>());
+            foreach (var unconfirmedRequestToCancel in unconfirmedRequestsToCancel.Values)
+            {
+                unconfirmedRequestToCancel.TrySetCanceledSafe();
             }
         }
 

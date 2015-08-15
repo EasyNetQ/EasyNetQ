@@ -66,8 +66,6 @@ namespace EasyNetQ.Tests.Performance.Producer
             });
             publishThread.Start();
 
-
-
             Console.Out.WriteLine("Timer running, ctrl-C to end");
 
             Console.CancelKeyPress += (source, cancelKeyPressArgs) =>
