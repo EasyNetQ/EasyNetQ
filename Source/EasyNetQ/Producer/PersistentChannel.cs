@@ -53,7 +53,9 @@ namespace EasyNetQ.Producer
                 {
                     CloseChannel();
                     if (NeedRethrow(exception))
+                    {
                         throw;
+                    }
                 }
                 catch (EasyNetQException)
                 {
@@ -73,7 +75,9 @@ namespace EasyNetQ.Producer
             lock (this)
             {
                 if (internalChannel == null)
+                {
                     return;
+                }
                 internalChannel.SafeDispose();
             }
             logger.DebugWrite("Persistent internalChannel disposed.");

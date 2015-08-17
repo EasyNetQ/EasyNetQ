@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace EasyNetQ
 {
@@ -12,9 +13,9 @@ namespace EasyNetQ
             {
                 disposable.Dispose();
             }
-            catch
+            catch(Exception exception)
             {
-                // Ignore any exceptions
+                Trace.TraceError(exception.ToString());
             }
         }
 
