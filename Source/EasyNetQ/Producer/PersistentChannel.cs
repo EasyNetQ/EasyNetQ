@@ -52,7 +52,7 @@ namespace EasyNetQ.Producer
                 catch (OperationInterruptedException exception)
                 {
                     CloseChannel();
-                    if (IsStopError(exception))
+                    if (NeedRethrow(exception))
                         throw;
                 }
                 catch (EasyNetQException)
@@ -174,7 +174,7 @@ namespace EasyNetQ.Producer
             logger.DebugWrite("Persistent channel disconnected.");
         }
 
-        private static bool IsStopError(OperationInterruptedException exception)
+        private static bool NeedRethrow(OperationInterruptedException exception)
         {
             try
             {
