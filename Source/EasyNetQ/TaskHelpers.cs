@@ -16,12 +16,8 @@ namespace EasyNetQ
         /// </summary>
         private static readonly Func<Task, bool> IsSyncSafe;
 
-        public static Task Completed;
-
         static TaskHelpers()
         {
-            Completed = TaskEx.FromResult(new NullStruct());
-
             try
             {
                 var taskType = typeof (Task);
@@ -80,25 +76,23 @@ namespace EasyNetQ
 
         public static Task ExecuteSynchronously(Action action)
         {
-            var tcs = new TaskCompletionSource<NullStruct>();
+            var tcs = new TaskCompletionSource<object>();
             try
             {
                 action();
-                tcs.SetResult(new NullStruct());
+                tcs.SetResult(null);
             }
             catch (Exception e)
             {
                 tcs.SetException(e);
             }
-
             return tcs.Task;
         }
 
         public static Task FromException(Exception ex)
         {
-            var tcs = new TaskCompletionSource<NullStruct>();
+            var tcs = new TaskCompletionSource<object>();
             tcs.SetException(ex);
-
             return tcs.Task;
         }
 
@@ -147,11 +141,6 @@ namespace EasyNetQ
             {
                 Task.Factory.StartNew(() => source.TrySetException(exception));
             }
-        }
-
-
-        private struct NullStruct
-        {
         }
     }
 }

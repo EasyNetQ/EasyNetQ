@@ -100,21 +100,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            return SubscribeAsync<T>(subscriptionId, msg =>
-            {
-                var tcs = new TaskCompletionSource<object>();
-                try
-                {
-                    onMessage(msg);
-                    tcs.SetResult(null);
-                }
-                catch (Exception exception)
-                {
-                    tcs.SetException(exception);
-                }
-                return tcs.Task;
-            },
-            configure);
+            return SubscribeAsync<T>(subscriptionId, msg => TaskHelpers.ExecuteSynchronously(() => onMessage(msg)), configure);
         }
 
         public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
