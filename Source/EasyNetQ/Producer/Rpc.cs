@@ -296,7 +296,7 @@ namespace EasyNetQ.Producer
 
             //var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
-            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), string.IsNullOrWhiteSpace(topic) ? ExchangeType.Direct : ExchangeType.Topic);
             var queue = advancedBus.QueueDeclare(endpoint);
             var routingKey = endpoint;
 
