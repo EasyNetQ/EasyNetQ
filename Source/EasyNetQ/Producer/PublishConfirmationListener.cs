@@ -28,9 +28,9 @@ namespace EasyNetQ.Producer
             unconfirmedRequests.Remove(deliveryTag);
         }
 
-        public void Wait(ulong sequenceNumber, TimeSpan timeout)
+        public void Wait(ulong deliveryTag, TimeSpan timeout)
         {
-            var confirmation = unconfirmedRequests[sequenceNumber];
+            var confirmation = unconfirmedRequests[deliveryTag];
             try
             {
                 if (confirmation.Task.Wait((int) timeout.TotalMilliseconds, cancellation.Token))
@@ -38,29 +38,36 @@ namespace EasyNetQ.Producer
                     return;
                 }
 
-                throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int)timeout.TotalSeconds, sequenceNumber));
+                throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int)timeout.TotalSeconds, deliveryTag));
             }
             finally
             {
-                unconfirmedRequests.Remove(sequenceNumber);
+                unconfirmedRequests.Remove(deliveryTag);
             }
         }
 
-        public async Task WaitAsync(ulong sequenceNumber, TimeSpan timeout)
+        public async Task WaitAsync(ulong deliveryTag, TimeSpan timeout)
         {
-            var confirmation = unconfirmedRequests[sequenceNumber];
+            var confirmation = unconfirmedRequests[deliveryTag];
             try
             {
-                var timeoutTask = TaskHelpers.Timeout(timeout, cancellation.Token);
-                if (timeoutTask == await TaskHelpers.WhenAny(confirmation.Task, timeoutTask).ConfigureAwait(false))
+                using (var timeoutCancellation = new CancellationTokenSource())
                 {
-                    throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int) timeout.TotalSeconds, sequenceNumber));
+                    using (var compositeCancellation = CancellationTokenSource.CreateLinkedTokenSource(timeoutCancellation.Token, cancellation.Token))
+                    {
+                        var timeoutTask = TaskHelpers.Timeout(timeout, compositeCancellation.Token);
+                        if (timeoutTask == await TaskHelpers.WhenAny(confirmation.Task, timeoutTask).ConfigureAwait(false))
+                        {
+                            throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int) timeout.TotalSeconds, deliveryTag));
+                        }
+                        timeoutCancellation.Cancel();
+                        await confirmation.Task.ConfigureAwait(false);
+                    }
                 }
-                await confirmation.Task.ConfigureAwait(false);
             }
             finally
             {
-                unconfirmedRequests.Remove(sequenceNumber);
+                unconfirmedRequests.Remove(deliveryTag);
             }
         }
 
@@ -92,8 +99,7 @@ namespace EasyNetQ.Producer
             }
         }
 
-
-        private void OnPublishChannelCreated(PublishChannelCreatedEvent obj)
+        private void OnPublishChannelCreated(PublishChannelCreatedEvent @event)
         {
             var unconfirmedRequestsToCancel = Interlocked.Exchange(ref unconfirmedRequests, new ConcurrentDictionary<ulong, TaskCompletionSource<NullStruct>>());
             foreach (var unconfirmedRequestToCancel in unconfirmedRequestsToCancel.Values)
@@ -102,11 +108,11 @@ namespace EasyNetQ.Producer
             }
         }
 
-        private static void Confirm(TaskCompletionSource<NullStruct> tcs, ulong sequenceNumber, bool isNack)
+        private static void Confirm(TaskCompletionSource<NullStruct> tcs, ulong deliveryTag, bool isNack)
         {
             if (isNack)
             {
-                tcs.TrySetExceptionSafe(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", sequenceNumber)));
+                tcs.TrySetExceptionSafe(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
             }
             else
             {

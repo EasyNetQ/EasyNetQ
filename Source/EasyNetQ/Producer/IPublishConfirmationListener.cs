@@ -7,7 +7,7 @@ namespace EasyNetQ.Producer
     {
         void Request(ulong deliveryTag);
         void Discard(ulong deliveryTag);
-        void Wait(ulong sequenceNumber, TimeSpan timeout);
-        Task WaitAsync(ulong sequenceNumber, TimeSpan timeout);
+        void Wait(ulong deliveryTag, TimeSpan timeout);
+        Task WaitAsync(ulong deliveryTag, TimeSpan timeout);
     }
 }
