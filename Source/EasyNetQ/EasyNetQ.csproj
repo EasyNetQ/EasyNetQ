@@ -88,7 +88,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Producer\PublishConfirmationListener.cs" />
     <Compile Include="Producer\IPublishConfirmationListener.cs" />
-    <Compile Include="Producer\MessageConfirmationEvent.cs" />
+    <Compile Include="Events\MessageConfirmationEvent.cs" />
     <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />
     <Compile Include="MessageDeliveryMode.cs" />
     <Compile Include="Scheduling\ExternalScheduler.cs" />

@@ -2,9 +2,9 @@
 {
     public class ReturnedMessageEvent
     {
-        public byte[] Body { get; set; }
-        public MessageProperties Properties { get; set; }
-        public MessageReturnedInfo Info { get; set; }
+        public byte[] Body { get; private set; }
+        public MessageProperties Properties { get; private set; }
+        public MessageReturnedInfo Info { get; private set; }
         
         public ReturnedMessageEvent(byte[] body, MessageProperties properties, MessageReturnedInfo info)
         {

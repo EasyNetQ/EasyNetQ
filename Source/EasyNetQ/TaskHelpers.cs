@@ -89,6 +89,11 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
+        public static Task<T> FromResult<T>(T result)
+        {
+            return TaskEx.FromResult(result);
+        }
+
         public static Task FromException(Exception ex)
         {
             var tcs = new TaskCompletionSource<object>();
