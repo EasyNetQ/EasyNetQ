@@ -5,14 +5,14 @@ using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EasyNetQ
+namespace EasyNetQ.Internals
 {
     public static class TaskHelpers
     {
         /// <summary>
-        /// We want to prevent callers hijacking the reader thread; this is a bit nasty, but works;
-        /// see http://stackoverflow.com/a/22588431/23354 for more information; a huge
-        /// thanks to Eli Arbel for spotting this (even though it is pure evil; it is *my kind of evil*)
+        ///     We want to prevent callers hijacking the reader thread; this is a bit nasty, but works;
+        ///     see http://stackoverflow.com/a/22588431/23354 for more information; a huge
+        ///     thanks to Eli Arbel for spotting this (even though it is pure evil; it is *my kind of evil*)
         /// </summary>
         private static readonly Func<Task, bool> IsSyncSafe;
 
@@ -73,6 +73,8 @@ namespace EasyNetQ
             if (IsSyncSafe == null)
                 IsSyncSafe = t => false; // assume: not
         }
+
+        public static Task Completed = FromResult<object>(null);
 
         public static Task ExecuteSynchronously(Action action)
         {

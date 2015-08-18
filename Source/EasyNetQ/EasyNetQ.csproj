@@ -86,6 +86,7 @@
     <Compile Include="Consumer\AckStrategies.cs" />
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Internals\AsyncSemaphore.cs" />
     <Compile Include="Producer\PublishConfirmationListener.cs" />
     <Compile Include="Producer\IPublishConfirmationListener.cs" />
     <Compile Include="Events\MessageConfirmationEvent.cs" />
@@ -217,7 +218,7 @@
     <Compile Include="SystemMessages\UnscheduleMe.cs" />
     <Compile Include="SystemMessages\Error.cs" />
     <Compile Include="SystemMessages\ScheduleMe.cs" />
-    <Compile Include="TaskHelpers.cs" />
+    <Compile Include="Internals\TaskHelpers.cs" />
     <Compile Include="TimeoutSecondsAttribute.cs" />
     <Compile Include="Topology\Binding.cs" />
     <Compile Include="Topology\Exchange.cs" />

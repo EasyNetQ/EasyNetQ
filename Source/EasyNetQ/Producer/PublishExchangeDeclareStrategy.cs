@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
@@ -9,18 +9,24 @@ namespace EasyNetQ.Producer
     public class PublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        private readonly ConcurrentDictionary<string, Task<IExchange>> exchangeTasks = new ConcurrentDictionary<string, Task<IExchange>>();
+        
+        private readonly AsyncSemaphore semaphore = new AsyncSemaphore(1);
 
         public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
         {
             IExchange exchange;
-            if(exchanges.TryGetValue(exchangeName, out exchange))
+            if (exchanges.TryGetValue(exchangeName, out exchange))
+            {
                 return exchange;
+            }
             semaphore.Wait();
             try
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange))
+                {
                     return exchange;
+                }
                 exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
                 exchanges[exchangeName] = exchange;
                 return exchange;
@@ -42,14 +48,16 @@ namespace EasyNetQ.Producer
         {
             IExchange exchange;
             if (exchanges.TryGetValue(exchangeName, out exchange))
+            {
                 return exchange;
-            // TODO Need async waiting here
-            // http://blogs.msdn.com/b/pfxteam/archive/2012/02/12/10266983.aspx
-            semaphore.Wait();
+            }
+            await semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange))
+                {
                     return exchange;
+                }
                 exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;

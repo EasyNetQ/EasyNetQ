@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer

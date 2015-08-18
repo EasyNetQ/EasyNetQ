@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -10,18 +10,22 @@ namespace EasyNetQ.MessageVersioning
     public class VersionedPublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        private readonly AsyncSemaphore semaphore = new AsyncSemaphore(1);
 
         public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
         {
             IExchange exchange;
             if (exchanges.TryGetValue(exchangeName, out exchange))
+            {
                 return exchange;
+            }
             semaphore.Wait();
             try
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange))
+                {
                     return exchange;
+                }
                 exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
                 exchanges[exchangeName] = exchange;
                 return exchange;
@@ -43,14 +47,16 @@ namespace EasyNetQ.MessageVersioning
         {
             IExchange exchange;
             if (exchanges.TryGetValue(exchangeName, out exchange))
+            {
                 return exchange;
-            // TODO Need async waiting here
-            // http://blogs.msdn.com/b/pfxteam/archive/2012/02/12/10266983.aspx
-            semaphore.Wait();
+            }
+            await semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange))
+                {
                     return exchange;
+                }
                 exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
@@ -77,7 +83,9 @@ namespace EasyNetQ.MessageVersioning
                 var exchangeName = conventions.ExchangeNamingConvention(messageType);
                 var sourceExchange = await DeclareExchangeAsync(advancedBus, exchangeName, exchangeType).ConfigureAwait(false);
                 if (destinationExchange != null)
+                {
                     await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
+                }
                 destinationExchange = sourceExchange;
             }
             return destinationExchange;
@@ -92,7 +100,9 @@ namespace EasyNetQ.MessageVersioning
                 var exchangeName = conventions.ExchangeNamingConvention(messageType);
                 var sourceExchange = DeclareExchange(advancedBus, exchangeName, exchangeType);
                 if (destinationExchange != null)
+                {
                     advancedBus.Bind(sourceExchange, destinationExchange, "#");
+                }
                 destinationExchange = sourceExchange;
             }
             return destinationExchange;

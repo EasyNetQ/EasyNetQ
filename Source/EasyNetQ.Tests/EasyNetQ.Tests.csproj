@@ -111,6 +111,7 @@
     <Compile Include="Integration\Scheduling\DelayedExchangeSchedulerTests.cs" />
     <Compile Include="Integration\RpcTests.cs" />
     <Compile Include="Integration\Scheduling\PartyInvitation.cs" />
+    <Compile Include="Internal\AsyncSemaphoreTest.cs" />
     <Compile Include="MessageFactoryTests.cs" />
     <Compile Include="PersistentChannelTests\When_a_ConnectionCreatedEvent_is_published.cs" />
     <Compile Include="Scheduling\SchedulingExtensionsTests.cs" />

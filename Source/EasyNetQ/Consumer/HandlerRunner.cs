@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
+using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Events;

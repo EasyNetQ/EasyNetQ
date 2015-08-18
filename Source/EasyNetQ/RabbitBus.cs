@@ -5,6 +5,7 @@ using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using System.Linq;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
