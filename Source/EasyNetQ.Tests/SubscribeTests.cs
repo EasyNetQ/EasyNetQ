@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests
         public void Should_declare_the_exchange()
         {
             mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                typeName, "topic", true, false, null));
+                typeName, "topic", true, false, new Dictionary<string, object>()));
         }
 
         [Test]

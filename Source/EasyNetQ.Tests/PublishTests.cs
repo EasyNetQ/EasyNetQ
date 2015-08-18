@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
@@ -92,7 +93,7 @@ namespace EasyNetQ.Tests
         public void Should_declare_exchange()
         {
             mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests", "topic", true, false, null));
+                "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests", "topic", true, false, new Dictionary<string, object>()));
         }
 
         [Test]

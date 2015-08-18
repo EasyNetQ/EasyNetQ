@@ -484,7 +484,10 @@ namespace EasyNetQ
                 arguments.Add("x-delayed-type", type);
                 type = "x-delayed-message";
             }
-            clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments));
+            clientCommandDispatcher.Invoke(x =>
+            {
+                x.ExchangeDeclare(name, type, durable, autoDelete, arguments);
+            });
             logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}, delayed:{4}", name, type, durable, autoDelete, delayed);
             return new Exchange(name);
         }
