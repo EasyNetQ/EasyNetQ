@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace EasyNetQ
 {
-    public static class Extentions
+    public static class Extensions
     {
         public static void SafeDispose(this IDisposable disposable)
         {
