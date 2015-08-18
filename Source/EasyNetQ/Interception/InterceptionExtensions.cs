@@ -2,7 +2,7 @@
 
 namespace EasyNetQ.Interception
 {
-    public static class InterceptionExtentions
+    public static class InterceptionExtensions
     {
         public static IServiceRegister EnableInterception(this IServiceRegister serviceRegister, Action<IInterceptorRegistrator> configure)
         {
