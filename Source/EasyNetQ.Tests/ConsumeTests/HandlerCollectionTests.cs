@@ -1,7 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 using NUnit.Framework;
@@ -90,15 +88,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_not_be_able_to_register_multiple_handlers_for_the_same_type()
         {
             handlerCollection.Add<MyMessage>((message, info) => { });
-        }
-
-        public Task TaskSynchronous(Action action)
-        {
-            var tcs = new TaskCompletionSource<object>();
-
-            action();
-            tcs.SetResult(new object());
-            return tcs.Task;
         }
     }
 }

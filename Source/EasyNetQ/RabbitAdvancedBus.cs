@@ -202,7 +202,7 @@ namespace EasyNetQ
                     }
                     catch (Exception)
                     {
-                        confirmationListener.Discard(deliveryTag);
+                        confirmationListener.Cancel(deliveryTag);
                         throw;
                     }
 
@@ -296,7 +296,7 @@ namespace EasyNetQ
                     }
                     catch (Exception)
                     {
-                        confirmationListener.Discard(deliveryTag);
+                        confirmationListener.Cancel(deliveryTag);
                         throw;
                     }
 

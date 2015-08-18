@@ -1,7 +1,7 @@
 ﻿using EasyNetQ.Internals;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests.Internal
+namespace EasyNetQ.Tests.Internals
 {
     [TestFixture]
     public class AsyncSemaphoreTest

@@ -74,7 +74,7 @@ namespace EasyNetQ.Internals
                 IsSyncSafe = t => false; // assume: not
         }
 
-        public static Task Completed = FromResult<object>(null);
+        public static readonly Task Completed = FromResult<object>(null);
 
         public static Task ExecuteSynchronously(Action action)
         {
