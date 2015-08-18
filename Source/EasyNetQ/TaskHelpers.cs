@@ -96,7 +96,7 @@ namespace EasyNetQ
             return tcs.Task;
         }
 
-        public static Task Timeout(TimeSpan delay, CancellationToken cancellation)
+        public static Task Delay(TimeSpan delay, CancellationToken cancellation)
         {
             return TaskEx.Delay(delay, cancellation);
         }
@@ -114,7 +114,7 @@ namespace EasyNetQ
             }
             else
             {
-                Task.Factory.StartNew(() => source.TrySetResult(result));
+                TaskEx.Run(() => source.TrySetResult(result));
             }
         }
 
@@ -126,10 +126,9 @@ namespace EasyNetQ
             }
             else
             {
-                Task.Factory.StartNew(() => source.TrySetCanceled());
+                TaskEx.Run(() => source.TrySetCanceled());
             }
         }
-
 
         public static void TrySetExceptionSafe<T>(this TaskCompletionSource<T> source, Exception exception)
         {
@@ -139,7 +138,7 @@ namespace EasyNetQ
             }
             else
             {
-                Task.Factory.StartNew(() => source.TrySetException(exception));
+                TaskEx.Run(() => source.TrySetException(exception));
             }
         }
     }
