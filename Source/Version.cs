@@ -2,16 +2,17 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.50.6.0")]
+[assembly: AssemblyVersion("0.50.7.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.50.7.0 Fix typo in Extensions
 // 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared
 // 0.50.5.0 Fix assigning of AMQP connection in to ConnectionConfiguration to be idempotent.
 // 0.50.4.0 Queue max priority now uses int instead of byte.
 // 0.50.3.0 Bug fix, Polymorphic request-response did not work with polymorphic response types
 // 0.50.2.0 Updated RabbitMQ client to 3.5.4 and Json.NET to 7.0.1
-// 0.50.1.0 Fix type in Extensions
+// 0.50.1.0 Fix typo in Extensions
 // 0.50.0.0 Updated to RabbitMQ.Client 3.5.3
 // 0.49.3.0 Polymorphic publish now works with Scheduler.Mongo
 // 0.49.2.0 Fix subscription for events if queues were created in previous versions
