@@ -87,9 +87,12 @@
     <Compile Include="Consumer\ConsumerCancellation.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Internals\AsyncSemaphore.cs" />
+    <Compile Include="Producer\IPublishConfirmationWaiter.cs" />
     <Compile Include="Producer\PublishConfirmationListener.cs" />
     <Compile Include="Producer\IPublishConfirmationListener.cs" />
     <Compile Include="Events\MessageConfirmationEvent.cs" />
+    <Compile Include="Producer\PublishConfirmationWaiter.cs" />
+    <Compile Include="Producer\PublishInterruptedException.cs" />
     <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />
     <Compile Include="MessageDeliveryMode.cs" />
     <Compile Include="Scheduling\ExternalScheduler.cs" />

@@ -20,82 +20,76 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Test]
-        public void Should_fail_if_wait_without_request()
+        public void Should_timeout_without_confirmation_event()
         {
-            Assert.Throws<OperationCanceledException>(() => publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(100)));
-        }
-
-        [Test]
-        public void Should_timout_without_confirmation_event()
-        {
+            var publishConfirmationWaiter = publishConfirmationListener.GetWaiter(DeliveryTag);
             Assert.Throws<TimeoutException>(() =>
             {
-                publishConfirmationListener.Request(DeliveryTag);
-                publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(10));
+                publishConfirmationWaiter.Wait(TimeSpan.FromMilliseconds(10));
             });
         }
 
         [Test]
         public void Should_success_with_ack_confirmation_event()
         {
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter = publishConfirmationListener.GetWaiter(DeliveryTag);
             eventBus.Publish(MessageConfirmationEvent.Ack(DeliveryTag, false));
-            publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(10));
+            publishConfirmationWaiter.Wait(TimeSpan.FromMilliseconds(10));
         }
 
         [Test]
         public void Should_fail_with_nack_confirmation_event()
         {
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter = publishConfirmationListener.GetWaiter(DeliveryTag);
             eventBus.Publish(MessageConfirmationEvent.Nack(DeliveryTag, false));
-            Assert.Throws<PublishNackedException>(() => publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(10)));
+            Assert.Throws<PublishNackedException>(() => publishConfirmationWaiter.Wait(TimeSpan.FromMilliseconds(10)));
         }
 
         [Test]
         public void Should_success_with_multiple_ack_confirmation_event()
         {
-            publishConfirmationListener.Request(DeliveryTag - 1);
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(DeliveryTag - 1);
+            var publishConfirmationWaiter2 = publishConfirmationListener.GetWaiter(DeliveryTag);
             eventBus.Publish(MessageConfirmationEvent.Ack(DeliveryTag, true));
-            publishConfirmationListener.Wait(DeliveryTag - 1, TimeSpan.FromMilliseconds(10));
-            publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(10));
+            publishConfirmationWaiter1.Wait(TimeSpan.FromMilliseconds(10));
+            publishConfirmationWaiter2.Wait(TimeSpan.FromMilliseconds(10));
         }
 
         [Test]
         public void Should_fail_with_multiple_nack_confirmation_event()
         {
-            publishConfirmationListener.Request(DeliveryTag - 1);
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(DeliveryTag - 1);
+            var publishConfirmationWaiter2 = publishConfirmationListener.GetWaiter(DeliveryTag);
             eventBus.Publish(MessageConfirmationEvent.Nack(DeliveryTag, true));
-            Assert.Throws<PublishNackedException>(() => publishConfirmationListener.Wait(DeliveryTag - 1, TimeSpan.FromMilliseconds(10)));
-            Assert.Throws<PublishNackedException>(() => publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(10)));
+            Assert.Throws<PublishNackedException>(() => publishConfirmationWaiter1.Wait(TimeSpan.FromMilliseconds(10)));
+            Assert.Throws<PublishNackedException>(() => publishConfirmationWaiter2.Wait(TimeSpan.FromMilliseconds(10)));
         }
 
         [Test]
-        public void Should_fail_if_request_deliveryTag_twice()
+        public void Should_fail_if_get_waiter_for_deliveryTag_twice()
         {
-            publishConfirmationListener.Request(DeliveryTag);
-            Assert.Throws<ArgumentException>(() => publishConfirmationListener.Request(DeliveryTag));
+            publishConfirmationListener.GetWaiter(DeliveryTag);
+            Assert.Throws<ArgumentException>(() => publishConfirmationListener.GetWaiter(DeliveryTag));
         }
 
         [Test]
         public void Should_work_after_reconnection()
         {
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(DeliveryTag);
             eventBus.Publish(new PublishChannelCreatedEvent(null));
-            Assert.Throws<OperationCanceledException>(() => publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(50)));
+            Assert.Throws<PublishInterruptedException>(() => publishConfirmationWaiter1.Wait(TimeSpan.FromMilliseconds(50)));
 
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter2 = publishConfirmationListener.GetWaiter(DeliveryTag);
             eventBus.Publish(MessageConfirmationEvent.Ack(DeliveryTag, false));
-            publishConfirmationListener.Wait(DeliveryTag, TimeSpan.FromMilliseconds(50));
+            publishConfirmationWaiter2.Wait(TimeSpan.FromMilliseconds(50));
         }
 
         [Test]
-        public void Should_request_deliveryTag_again_if_previous_was_cancelled()
+        public void Should_get_waiter_for_deliveryTag_again_if_previous_was_cancelled()
         {
-            publishConfirmationListener.Request(DeliveryTag);
-            publishConfirmationListener.Cancel(DeliveryTag);
-            publishConfirmationListener.Request(DeliveryTag);
+            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(DeliveryTag);
+            publishConfirmationWaiter1.Cancel();
+            publishConfirmationListener.GetWaiter(DeliveryTag);
         }
     }
 }

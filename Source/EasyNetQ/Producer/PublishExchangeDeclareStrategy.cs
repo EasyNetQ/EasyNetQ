@@ -8,9 +8,7 @@ namespace EasyNetQ.Producer
 {
     public class PublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
-        private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
-        private readonly ConcurrentDictionary<string, Task<IExchange>> exchangeTasks = new ConcurrentDictionary<string, Task<IExchange>>();
-        
+        private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();   
         private readonly AsyncSemaphore semaphore = new AsyncSemaphore(1);
 
         public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)

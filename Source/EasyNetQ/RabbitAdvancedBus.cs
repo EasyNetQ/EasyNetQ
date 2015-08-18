@@ -188,13 +188,13 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var messageDeliveryTag = clientCommandDispatcher.Invoke(model =>
+                var confirmsWaiter = clientCommandDispatcher.Invoke(model =>
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
                     var deliveryTag = model.NextPublishSeqNo;
                     
-                    confirmationListener.Request(deliveryTag);
+                    var waiter = confirmationListener.GetWaiter(deliveryTag);
                     
                     try
                     {
@@ -202,14 +202,14 @@ namespace EasyNetQ
                     }
                     catch (Exception)
                     {
-                        confirmationListener.Cancel(deliveryTag);
+                        waiter.Cancel();
                         throw;
                     }
 
-                    return deliveryTag;
+                    return waiter;
                 });
 
-                confirmationListener.Wait(messageDeliveryTag, TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+                confirmsWaiter.Wait(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
             }
             else
             {
@@ -283,12 +283,12 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var messageDeliveryTag = await clientCommandDispatcher.InvokeAsync(model =>
+                var confirmsWaiter = await clientCommandDispatcher.InvokeAsync(model =>
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
                     var deliveryTag = model.NextPublishSeqNo;
-                    confirmationListener.Request(deliveryTag);
+                    var waiter = confirmationListener.GetWaiter(deliveryTag);
 
                     try
                     {
@@ -296,13 +296,13 @@ namespace EasyNetQ
                     }
                     catch (Exception)
                     {
-                        confirmationListener.Cancel(deliveryTag);
+                        waiter.Cancel();
                         throw;
                     }
 
-                    return deliveryTag;
+                    return waiter;
                 }).ConfigureAwait(false);
-                await confirmationListener.WaitAsync(messageDeliveryTag, TimeSpan.FromSeconds(connectionConfiguration.Timeout)).ConfigureAwait(false);
+                await confirmsWaiter.WaitAsync(TimeSpan.FromSeconds(connectionConfiguration.Timeout)).ConfigureAwait(false);
             }
             else
             {

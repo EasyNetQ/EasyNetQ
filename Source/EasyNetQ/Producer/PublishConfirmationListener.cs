@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -19,85 +18,27 @@ namespace EasyNetQ.Producer
             eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated);
         }
 
-        public void Request(ulong deliveryTag)
+        public IPublishConfirmationWaiter GetWaiter(ulong deliveryTag)
         {
-            unconfirmedRequests.Add(deliveryTag, new TaskCompletionSource<object>());
-        }
-
-        public void Cancel(ulong deliveryTag)
-        {
-            unconfirmedRequests.Remove(deliveryTag);
-        }
-
-        public void Wait(ulong deliveryTag, TimeSpan timeout)
-        {
-            TaskCompletionSource<object> confirmation;
-            if (! unconfirmedRequests.TryGetValue(deliveryTag, out confirmation))
-            {
-                throw new OperationCanceledException();
-            }
-
-            try
-            {
-                if (confirmation.Task.Wait((int) timeout.TotalMilliseconds, cancellation.Token))
-                {
-                    return;
-                }
-
-                throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int) timeout.TotalSeconds, deliveryTag));
-            }
-            catch (AggregateException exception)
-            {
-                throw exception.InnerException;
-            }
-            finally
-            {
-                unconfirmedRequests.Remove(deliveryTag);
-            }
-        }
-
-        public async Task WaitAsync(ulong deliveryTag, TimeSpan timeout)
-        {
-            TaskCompletionSource<object> confirmation;
-            if (!unconfirmedRequests.TryGetValue(deliveryTag, out confirmation))
-            {
-                throw new OperationCanceledException();
-            }
-            try
-            {
-                using (var timeoutCancellation = new CancellationTokenSource())
-                {
-                    using (var compositeCancellation = CancellationTokenSource.CreateLinkedTokenSource(timeoutCancellation.Token, cancellation.Token))
-                    {
-                        var timeoutTask = TaskHelpers.Delay(timeout, compositeCancellation.Token);
-                        if (timeoutTask == await TaskHelpers.WhenAny(confirmation.Task, timeoutTask).ConfigureAwait(false))
-                        {
-                            throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int) timeout.TotalSeconds, deliveryTag));
-                        }
-                        timeoutCancellation.Cancel();
-                        await confirmation.Task.ConfigureAwait(false);
-                    }
-                }
-            }
-            finally
-            {
-                unconfirmedRequests.Remove(deliveryTag);
-            }
+            var requests = unconfirmedRequests;
+            var confirmation = new TaskCompletionSource<object>();
+            requests.Add(deliveryTag, confirmation);
+            return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
 
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
         {
+            var requests = unconfirmedRequests;
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
             var isNack = @event.IsNack;
-
             if (multiple)
             {
                 // Fix me: ConcurrentDictionary.Keys acquires all locks, it is very expensive operation and could perform slowly.
-                foreach (var sequenceNumber in unconfirmedRequests.Keys.Where(x => x <= deliveryTag))
+                foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
                 {
                     TaskCompletionSource<object> confirmation;
-                    if (unconfirmedRequests.TryGetValue(sequenceNumber, out confirmation))
+                    if (requests.TryRemove(sequenceNumber, out confirmation))
                     {
                         Confirm(confirmation, sequenceNumber, isNack);
                     }
@@ -106,7 +47,7 @@ namespace EasyNetQ.Producer
             else
             {
                 TaskCompletionSource<object> confirmation;
-                if (unconfirmedRequests.TryGetValue(deliveryTag, out confirmation))
+                if (requests.TryRemove(deliveryTag, out confirmation))
                 {
                     Confirm(confirmation, deliveryTag, isNack);
                 }
@@ -118,7 +59,7 @@ namespace EasyNetQ.Producer
             var unconfirmedRequestsToCancel = Interlocked.Exchange(ref unconfirmedRequests, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
             foreach (var unconfirmedRequestToCancel in unconfirmedRequestsToCancel.Values)
             {
-                unconfirmedRequestToCancel.TrySetCanceledSafe();
+                unconfirmedRequestToCancel.TrySetExceptionSafe(new PublishInterruptedException());
             }
         }
 
