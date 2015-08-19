@@ -91,6 +91,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Mongo", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Mongo.Tests", "EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj", "{4E7F926F-D939-4962-A7EF-112DE41B4236}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{595E6866-0858-4475-B809-D7EDCE4DB213}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.SubscriptionRPC", "EasyNetQ.Tests.SubscriptionRPC\EasyNetQ.Tests.SubscriptionRPC.csproj", "{C83A14E2-EF3F-43F7-91E8-40756575E6B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -321,6 +325,16 @@ Global
 		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Release|x86.ActiveCfg = Release|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -329,5 +343,6 @@ Global
 		{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2} = {896B72E7-50D5-49B9-987B-4250092E39BB}
 		{F11F4058-9B0E-40B5-800F-628BC884A783} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
 		{CD6358E2-E182-4771-BF73-45704B05237D} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
+		{C83A14E2-EF3F-43F7-91E8-40756575E6B3} = {595E6866-0858-4475-B809-D7EDCE4DB213}
 	EndGlobalSection
 EndGlobal

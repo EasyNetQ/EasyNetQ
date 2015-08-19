@@ -274,8 +274,23 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received.
         /// </param>
-        /// <param name="topic">optional topic</param>
-        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic)
+        /// <param name="subscriptionId">optional subscriptionId</param>
+        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        /// <param name="subscriptionId">optional subscriptionId</param>
+        /// <param name="configure"></param>
+        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId, Action<ISubscriptionConfiguration> configure)
             where TRequest : class
             where TResponse : class;
 

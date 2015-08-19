@@ -2,11 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.50.6.0")]
-[assembly: CLSCompliant(true)]
+[assembly: AssemblyVersion("0.50.6.8")]
+[assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
-// 0.50.6.7 Added Topic Based RPC - Attempt 7
+// 0.50.6.8 Added Topic Based RPC - Attempt 8
 // 0.50.6.1 Added Topic Based RPC
 // 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared
 // 0.50.5.0 Fix assigning of AMQP connection in to ConnectionConfiguration to be idempotent.
