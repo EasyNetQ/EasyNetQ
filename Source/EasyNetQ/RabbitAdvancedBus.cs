@@ -283,12 +283,14 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null)
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null)
         {
-            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl, 
-                expires, maxPriority, deadLetterExchange, deadLetterRoutingKey).Result;
+            return QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl,
+                expires, maxPriority, deadLetterExchange, deadLetterRoutingKey, maxLength, maxLengthBytes).Result;
         }
 
         public Task<IQueue> QueueDeclareAsync(
@@ -299,9 +301,11 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null)
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -331,6 +335,14 @@ namespace EasyNetQ
             if (!string.IsNullOrEmpty(deadLetterRoutingKey))
             {
                 arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
+            }
+            if (maxLength.HasValue)
+            {
+                arguments.Add("x-max-length", maxLength.Value);
+            }
+            if (maxLengthBytes.HasValue)
+            {
+                arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
             return clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).Then(() =>
