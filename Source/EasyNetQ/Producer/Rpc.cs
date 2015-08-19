@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer 
@@ -97,12 +99,12 @@ namespace EasyNetQ.Producer
             timer.Change(timeout, disablePeriodicSignaling);
             RegisterErrorHandling(correlationId, timer, tcs);
 
-            var queueName = endpoint;
+            var routeKey = endpoint;
             if (!string.IsNullOrWhiteSpace(topic))
-                queueName = string.Format("{0}_{1}", endpoint, topic);
+                routeKey = string.Format("{0}.{1}", endpoint, topic);
 
-            var queue = SubscribeToResponse<TResponse>(queueName);
-            RequestPublish(request, endpoint, queue, correlationId);
+            var queue = SubscribeToResponse<TResponse>(endpoint);
+            RequestPublish(request, routeKey, queue, correlationId);
 
             return tcs.Task;
         }
@@ -279,9 +281,6 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class {
             Preconditions.CheckNotNull(responder, "responder");
-
-            // We're explicitely validating TResponse here because the type won't be used directly.
-            // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
 
             if (configure == null)
@@ -300,30 +299,27 @@ namespace EasyNetQ.Producer
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
         }
 
-        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic, Action<IResponderConfiguration> configure = null)
+        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId, Action<ISubscriptionConfiguration> configure)
             where TRequest : class
             where TResponse : class {
 
-            if (string.IsNullOrWhiteSpace(topic))
-                return Respond(endpoint, responder, configure);
+            if (string.IsNullOrWhiteSpace(subscriptionId))
+                return Respond(endpoint, responder, c => { });
 
             Preconditions.CheckNotNull(responder, "responder");
-
-            // We're explicitely validating TResponse here because the type won't be used directly.
-            // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
 
             if (configure == null)
                 configure = c => { };
 
-            var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
+            var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
-            var queueName = string.Format("{0}_{1}", endpoint, topic);
-            var queue = advancedBus.QueueDeclare(queueName, autoDelete: true, exclusive: true);
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
-
-            advancedBus.Bind(exchange, queue, endpoint);
+            var queue = advancedBus.QueueDeclare(string.Format("{0}_{1}", endpoint, subscriptionId), autoDelete: configuration.AutoDelete, expires: configuration.Expires);
+            foreach (var topic in configuration.Topics.DefaultIfEmpty("#")) {
+                advancedBus.Bind(exchange, queue, string.Format("{0}.{1}", endpoint, topic));
+            }
 
             return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
                 c => c.WithPrefetchCount(configuration.PrefetchCount));

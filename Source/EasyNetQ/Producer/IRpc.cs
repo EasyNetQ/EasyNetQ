@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 
 namespace EasyNetQ.Producer
 {
@@ -69,9 +70,9 @@ namespace EasyNetQ.Producer
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="endpoint">the service endpoint</param>
         /// <param name="responder">A function that performs the response</param>
-        /// <param name="topic">optional topic</param>
+        /// <param name="subscriptionId">optional subscriptionId</param>
         /// <param name="configure">A function that performs the configuration</param>
-        IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic, Action<IResponderConfiguration> configure = null)
+        IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId, Action<ISubscriptionConfiguration> configure)
             where TRequest : class
             where TResponse : class;
 

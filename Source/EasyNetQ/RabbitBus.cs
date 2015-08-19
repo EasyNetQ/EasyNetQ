@@ -231,6 +231,12 @@ namespace EasyNetQ
                 return rpc.Respond(endpoint, responder, topic, c => { });
         }
 
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId, Action<ISubscriptionConfiguration> configure)
+            where TRequest : class
+            where TResponse : class {
+            return rpc.Respond(endpoint, responder, subscriptionId, configure);
+        }
+
         public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class
