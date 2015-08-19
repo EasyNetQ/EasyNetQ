@@ -6,6 +6,8 @@ using System.Reflection;
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.50.6.7 Added Topic Based RPC - Attempt 7
+// 0.50.6.1 Added Topic Based RPC
 // 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared
 // 0.50.5.0 Fix assigning of AMQP connection in to ConnectionConfiguration to be idempotent.
 // 0.50.4.0 Queue max priority now uses int instead of byte.

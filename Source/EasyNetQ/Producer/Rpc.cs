@@ -97,13 +97,12 @@ namespace EasyNetQ.Producer
             timer.Change(timeout, disablePeriodicSignaling);
             RegisterErrorHandling(correlationId, timer, tcs);
 
-            var queueName = SubscribeToResponse<TResponse>(endpoint);
-
-            var routingKey = endpoint;
+            var queueName = endpoint;
             if (!string.IsNullOrWhiteSpace(topic))
-                routingKey = string.Format("{0}.{1}", endpoint, topic);
+                queueName = string.Format("{0}_{1}", endpoint, topic);
 
-            RequestPublish(request, routingKey, queueName, correlationId);
+            var queue = SubscribeToResponse<TResponse>(queueName);
+            RequestPublish(request, endpoint, queue, correlationId);
 
             return tcs.Task;
         }
@@ -273,13 +272,13 @@ namespace EasyNetQ.Producer
             return Respond(responder, c => { });
         }
 
-        public virtual IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure = null)
+        public virtual IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder)
             where TRequest : class
             where TResponse : class {
-            return Respond(endpoint, responder, string.Empty, c => { });
+            return Respond(endpoint, responder, c => { });
         }
 
-        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic, Action<IResponderConfiguration> configure = null)
+        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure = null)
             where TRequest : class
             where TResponse : class {
             Preconditions.CheckNotNull(responder, "responder");
@@ -294,16 +293,40 @@ namespace EasyNetQ.Producer
             var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
-            //var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-
-            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), string.IsNullOrWhiteSpace(topic) ? ExchangeType.Direct : ExchangeType.Topic);
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
             var queue = advancedBus.QueueDeclare(endpoint);
             var routingKey = endpoint;
 
-            if (!string.IsNullOrWhiteSpace(topic))
-                routingKey = string.Format("{0}.{1}", endpoint, topic);
-
             advancedBus.Bind(exchange, queue, routingKey);
+
+            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
+                c => c.WithPrefetchCount(configuration.PrefetchCount));
+        }
+
+        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic, Action<IResponderConfiguration> configure = null)
+            where TRequest : class
+            where TResponse : class {
+
+            if (string.IsNullOrWhiteSpace(topic))
+                return Respond(endpoint, responder, configure);
+
+            Preconditions.CheckNotNull(responder, "responder");
+
+            // We're explicitely validating TResponse here because the type won't be used directly.
+            // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
+            Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
+
+            if (configure == null)
+                configure = c => { };
+
+            var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
+            configure(configuration);
+
+            var queueName = string.Format("{0}_{1}", endpoint, topic);
+            var queue = advancedBus.QueueDeclare(queueName, autoDelete: true, exclusive: true);
+            var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
+
+            advancedBus.Bind(exchange, queue, endpoint);
 
             return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
@@ -321,7 +344,6 @@ namespace EasyNetQ.Producer
             configure(configuration);
 
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
-
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
             var queue = advancedBus.QueueDeclare(routingKey);
             advancedBus.Bind(exchange, queue, routingKey);
