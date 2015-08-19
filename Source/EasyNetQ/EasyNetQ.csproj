@@ -128,7 +128,7 @@
     <Compile Include="Interception\CompositeInterceptor.cs" />
     <Compile Include="Interception\DefaultInterceptor.cs" />
     <Compile Include="Interception\GZipInterceptor.cs" />
-    <Compile Include="Interception\InterceptionExtentions.cs" />
+    <Compile Include="Interception\InterceptionExtensions.cs" />
     <Compile Include="Interception\InterceptorRegistrator.cs" />
     <Compile Include="Interception\IProduceConsumeInterceptor.cs" />
     <Compile Include="Interception\RawMessage.cs" />
