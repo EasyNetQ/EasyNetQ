@@ -319,7 +319,7 @@ namespace EasyNetQ.Producer
             configure(configuration);
 
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
-            var queue = advancedBus.QueueDeclare(string.Format("{0}_{1}", endpoint, subscriptionId), autoDelete: configuration.AutoDelete, expires: configuration.Expires);
+            var queue = advancedBus.QueueDeclare(string.Format("{0}_{1}", endpoint, subscriptionId), autoDelete: configuration.AutoDelete, expires: configuration.Expires, messageTtl: configuration.messageTtl);
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#")) {
                 advancedBus.Bind(exchange, queue, string.Format("{0}.{1}", endpoint, topic));
             }

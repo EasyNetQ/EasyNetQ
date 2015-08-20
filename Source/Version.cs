@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.50.8.0")]
+[assembly: AssemblyVersion("0.50.9.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.50.8.0 Added Message TTL Configuration option to Subscriptions
 // 0.50.8.0 Added RPC Subscriptions - Route by endpoint and topic
 // 0.50.7.0 Fix typo in Extensions
 // 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared
