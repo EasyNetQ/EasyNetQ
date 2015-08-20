@@ -192,9 +192,8 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    var deliveryTag = model.NextPublishSeqNo;
                     
-                    var waiter = confirmationListener.GetWaiter(deliveryTag);
+                    var waiter = confirmationListener.GetWaiter(model);
                     
                     try
                     {
@@ -287,8 +286,7 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    var deliveryTag = model.NextPublishSeqNo;
-                    var waiter = confirmationListener.GetWaiter(deliveryTag);
+                    var waiter = confirmationListener.GetWaiter(model);
 
                     try
                     {

@@ -155,12 +155,12 @@ namespace EasyNetQ.Producer
 
         private void OnAck(object sender, BasicAckEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Ack(args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Ack((IModel) sender, args.DeliveryTag, args.Multiple));
         }
 
         private void OnNack(object sender, BasicNackEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Nack(args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
         private void CloseChannel()

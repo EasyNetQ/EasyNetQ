@@ -4,13 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
 {
     public class PublishConfirmationListener : IPublishConfirmationListener
     {
-        private ConcurrentDictionary<ulong, TaskCompletionSource<object>> unconfirmedRequests = new ConcurrentDictionary<ulong, TaskCompletionSource<object>>();
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+        private readonly ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<object>>> unconfirmedChannelRequests = new ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<object>>>();
 
         public PublishConfirmationListener(IEventBus eventBus)
         {
@@ -18,17 +19,28 @@ namespace EasyNetQ.Producer
             eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated);
         }
 
-        public IPublishConfirmationWaiter GetWaiter(ulong deliveryTag)
+        public IPublishConfirmationWaiter GetWaiter(IModel model)
         {
-            var requests = unconfirmedRequests;
+            var deliveryTag = model.NextPublishSeqNo;
+            var requests = unconfirmedChannelRequests.GetOrAdd(model, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
             var confirmation = new TaskCompletionSource<object>();
             requests.Add(deliveryTag, confirmation);
             return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
 
+        public void Dispose()
+        {
+            cancellation.Cancel();
+        }
+
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
         {
-            var requests = unconfirmedRequests;
+            ConcurrentDictionary<ulong, TaskCompletionSource<object>> requests;
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel, out requests))
+            {
+                return;
+            }
+
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
             var isNack = @event.IsNack;
@@ -38,7 +50,7 @@ namespace EasyNetQ.Producer
                 foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
                 {
                     TaskCompletionSource<object> confirmation;
-                    if (requests.TryRemove(sequenceNumber, out confirmation))
+                    if (requests.TryGetValue(sequenceNumber, out confirmation))
                     {
                         Confirm(confirmation, sequenceNumber, isNack);
                     }
@@ -47,7 +59,7 @@ namespace EasyNetQ.Producer
             else
             {
                 TaskCompletionSource<object> confirmation;
-                if (requests.TryRemove(deliveryTag, out confirmation))
+                if (requests.TryGetValue(deliveryTag, out confirmation))
                 {
                     Confirm(confirmation, deliveryTag, isNack);
                 }
@@ -56,11 +68,24 @@ namespace EasyNetQ.Producer
 
         private void OnPublishChannelCreated(PublishChannelCreatedEvent @event)
         {
-            var unconfirmedRequestsToCancel = Interlocked.Exchange(ref unconfirmedRequests, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
-            foreach (var unconfirmedRequestToCancel in unconfirmedRequestsToCancel.Values)
+            foreach (var channel in unconfirmedChannelRequests.Keys)
             {
-                unconfirmedRequestToCancel.TrySetExceptionSafe(new PublishInterruptedException());
+                ConcurrentDictionary<ulong, TaskCompletionSource<object>> confirmations;
+                if (!unconfirmedChannelRequests.TryRemove(channel, out confirmations))
+                {
+                    continue;
+                }
+                foreach (var deliveryTag in confirmations.Keys)
+                {
+                    TaskCompletionSource<object> confirmation;
+                    if (!confirmations.TryRemove(deliveryTag, out confirmation))
+                    {
+                        continue;
+                    }
+                    confirmation.TrySetExceptionSafe(new PublishInterruptedException());
+                }
             }
+            unconfirmedChannelRequests.Add(@event.Channel, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
         }
 
         private static void Confirm(TaskCompletionSource<object> tcs, ulong deliveryTag, bool isNack)
@@ -73,11 +98,6 @@ namespace EasyNetQ.Producer
             {
                 tcs.TrySetResultSafe(null);
             }
-        }
-
-        public void Dispose()
-        {
-            cancellation.Cancel();
         }
     }
 }
