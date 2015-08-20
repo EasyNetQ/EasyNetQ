@@ -5,6 +5,7 @@ using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using Rhino.Mocks;
+using System;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
@@ -29,7 +30,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"),DateTime.UtcNow );
         }
 
         [Test]

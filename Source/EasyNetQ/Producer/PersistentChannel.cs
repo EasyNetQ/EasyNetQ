@@ -87,17 +87,17 @@ namespace EasyNetQ.Producer
             logger.DebugWrite("Persistent channel connected.");
         }
 
-        public void InvokeChannelAction(Action<IModel> channelAction)
+        public void InvokeChannelAction(Action<IModel> channelAction,DateTime startTime)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            InvokeChannelActionInternal(channelAction, DateTime.UtcNow);
+            InvokeChannelActionInternal(channelAction, configuration.IncludeQueTimeInTimeout? startTime:DateTime.UtcNow);
         }
 
         private void InvokeChannelActionInternal(Action<IModel> channelAction, DateTime startTime)
         {
             if (IsTimedOut(startTime))
             {
-                logger.ErrorWrite("Channel action timed out. Throwing exception to client.");
+                logger.ErrorWrite(String.Format("Channel action timed out. Throwing exception to client. Start Time = {0}",startTime));
                 throw new TimeoutException("The operation requested on PersistentChannel timed out.");
             }
             try

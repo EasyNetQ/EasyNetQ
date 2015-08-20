@@ -8,6 +8,7 @@ using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using Rhino.Mocks;
+using System;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
@@ -41,7 +42,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent())).Change(10, Timeout.Infinite);
 
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"),DateTime.UtcNow );
         }
 
         [Test]

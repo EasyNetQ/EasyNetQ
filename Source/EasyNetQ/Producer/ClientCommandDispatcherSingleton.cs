@@ -50,6 +50,9 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
             var tcs = new TaskCompletionSource<T>();
+			// Set the start time used for calculating the message timeout to be the time when it was added to the queue, 
+			// instead of the time when it is pulled out of the queue when the includeQueTimeInTimeout option is used in the connection string. 
+			DateTime startTime = DateTime.UtcNow; 
 
             try
             {
@@ -62,7 +65,7 @@ namespace EasyNetQ.Producer
                         }
                         try
                         {
-                            persistentChannel.InvokeChannelAction(channel => tcs.SetResult(channelAction(channel)));
+                            persistentChannel.InvokeChannelAction(channel => tcs.SetResult(channelAction(channel)),startTime);
                         }
                         catch (Exception e)
                         {

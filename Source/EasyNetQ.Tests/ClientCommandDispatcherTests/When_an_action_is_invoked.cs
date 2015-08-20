@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
                 };
 
             channelFactory.Stub(x => x.CreatePersistentChannel(connection)).Return(channel);
-            channel.Stub(x => x.InvokeChannelAction(null)).IgnoreArguments().WhenCalled(
+            channel.Stub(x => x.InvokeChannelAction(null,DateTime.UtcNow)).IgnoreArguments().WhenCalled(
                 x => ((Action<IModel>)x.Arguments[0])(null));
 
             dispatcher = new ClientCommandDispatcher(connection, channelFactory);

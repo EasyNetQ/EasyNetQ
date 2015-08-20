@@ -38,14 +38,14 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_be_able_to_run_channel_actions()
         {
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct"),DateTime.UtcNow);
         }
 
         [Test]
         public void Should_allow_non_disconnect_Amqp_exception_to_bubble_up()
         {
             // run test above first
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic"),DateTime.UtcNow);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.Out.WriteLine("Running exchange declare");
                     x.ExchangeDeclare("myExchange", "direct");
                     Console.Out.WriteLine("Ran exchange declare");
-                });
+                },DateTime.UtcNow);
 
             Thread.Sleep(1000);
         }
