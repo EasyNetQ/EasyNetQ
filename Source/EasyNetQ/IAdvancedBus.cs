@@ -236,7 +236,7 @@ namespace EasyNetQ
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
         /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="messageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
         /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
@@ -252,7 +252,7 @@ namespace EasyNetQ
             bool durable = true, 
             bool exclusive = false, 
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null, 
+            int? messageTtl  = null, 
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null, 
@@ -268,7 +268,7 @@ namespace EasyNetQ
         /// <param name="durable">Durable queues remain active when a server restarts.</param>
         /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
         /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
+        /// <param name="messageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
         /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
         /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
         /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
@@ -282,7 +282,7 @@ namespace EasyNetQ
             bool durable = true, 
             bool exclusive = false, 
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? messageTtl  = null,
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null, 

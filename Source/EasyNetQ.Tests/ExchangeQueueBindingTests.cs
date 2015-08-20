@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests
                 durable: false, 
                 exclusive: true,
                 autoDelete: true,
-                perQueueMessageTtl: 1000,
+                messageTtl: 1000,
                 expires: 2000,
                 maxPriority: 10);
         }

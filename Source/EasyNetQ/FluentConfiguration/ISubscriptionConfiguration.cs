@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.FluentConfiguration
 {
@@ -45,6 +46,13 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
         /// <summary>
+        /// Determines how long a message published to a queue can live before it is discarded by the server.
+        /// </summary>
+        /// <param name="ttl">How long a message should remain on the queue before it is discarded. (default not set)</param>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithMessageTtl(TimeSpan? ttl);
+
+        /// <summary>
         /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy. 
         /// This controls for how long a queue can be unused before it is automatically deleted. 
         /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period. 
@@ -72,6 +80,8 @@ namespace EasyNetQ.FluentConfiguration
         public bool CancelOnHaFailover { get; private set; }
         public ushort PrefetchCount { get; private set; }
         public int? Expires { get; private set; }
+
+        public int? messageTtl { get; private set; }
 
         public bool IsExclusive { get; private set; }
          
@@ -118,6 +128,14 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithExpires(int expires)
         {
             Expires = expires;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithMessageTtl(TimeSpan? ttl) 
+        {
+            if (ttl.HasValue)
+                 messageTtl = (int)ttl.Value.TotalMilliseconds;
+            else messageTtl = null;
             return this;
         }
 
