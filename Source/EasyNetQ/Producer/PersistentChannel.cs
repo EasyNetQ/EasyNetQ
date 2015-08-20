@@ -72,15 +72,7 @@ namespace EasyNetQ.Producer
 
         public void Dispose()
         {
-            lock (this)
-            {
-                if (internalChannel == null)
-                {
-                    return;
-                }
-                // Fix me: use Dispose instead of SafeDispose after update of Rabbitmq.Client to 3.5.5
-                internalChannel.SafeDispose();
-            }
+            CloseChannel();
             logger.DebugWrite("Persistent internalChannel disposed.");
         }
 
@@ -171,7 +163,12 @@ namespace EasyNetQ.Producer
                 {
                     return;
                 }
-
+                if (configuration.PublisherConfirms)
+                {
+                    internalChannel.BasicAcks -= OnAck;
+                    internalChannel.BasicNacks -= OnNack;
+                }
+                internalChannel.BasicReturn -= OnReturn;
                 // Fix me: use Dispose instead of SafeDispose after update of Rabbitmq.Client to 3.5.5
                 internalChannel.SafeDispose();
                 internalChannel = null;
