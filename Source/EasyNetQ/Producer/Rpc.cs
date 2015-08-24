@@ -85,6 +85,7 @@ namespace EasyNetQ.Producer
         public virtual Task<TResponse> Request<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
             where TResponse : class {
             Preconditions.CheckNotNull(endpoint, "endpoint");
+            Preconditions.CheckShortString(endpoint, "endpoint");
             Preconditions.CheckNotNull(request, "message");
 
             var correlationId = Guid.NewGuid();
@@ -101,7 +102,7 @@ namespace EasyNetQ.Producer
 
             var routeKey = endpoint;
             if (!string.IsNullOrWhiteSpace(topic))
-                routeKey = string.Format("{0}.{1}", endpoint, topic);
+                routeKey = string.Concat(endpoint, ".", topic);
 
             var queue = SubscribeToResponse<TResponse>(endpoint);
             RequestPublish(request, routeKey, queue, correlationId);
@@ -310,7 +311,11 @@ namespace EasyNetQ.Producer
                 return Respond(endpoint, responder, c => { });
 
             Preconditions.CheckNotNull(responder, "responder");
-            Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
+            Preconditions.CheckNotNull(endpoint, "endpoint");
+
+            var queueName = string.Concat(endpoint, "_", subscriptionId);
+            Preconditions.CheckNotNull(queueName, "queueName");
+            Preconditions.CheckShortString(queueName, "queueName");
 
             if (configure == null)
                 configure = c => { };
@@ -319,9 +324,9 @@ namespace EasyNetQ.Producer
             configure(configuration);
 
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
-            var queue = advancedBus.QueueDeclare(string.Format("{0}_{1}", endpoint, subscriptionId), autoDelete: configuration.AutoDelete, expires: configuration.Expires, messageTtl: configuration.messageTtl);
+            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires, messageTtl: configuration.messageTtl);
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#")) {
-                advancedBus.Bind(exchange, queue, string.Format("{0}.{1}", endpoint, topic));
+                advancedBus.Bind(exchange, queue, string.Concat(endpoint, ".", topic));
             }
 
             return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
