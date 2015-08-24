@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.SubscriptionRPC
             try {
                 //Setup first subscriber
                 token = bus.RespondAsync(endpoint, Handler(1));
-                var task = bus.RequestAsync<TestResponse>(endpoint, new TestRequest { SenderId = 2 }, TimeSpan.FromSeconds(5));
+                var task = bus.RequestAsync<TestResponse>(endpoint, new TestRequest { SenderId = 2 }, TimeSpan.FromSeconds(5), null);
 
                 Task.WaitAll(task);
                 var result = task.Result;
