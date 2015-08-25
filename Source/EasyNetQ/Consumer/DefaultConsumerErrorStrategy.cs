@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
@@ -29,7 +30,7 @@ namespace EasyNetQ.Consumer
         private readonly object syncLock = new object();
 
         private IConnection connection;
-        private bool errorQueueDeclared;
+        private readonly IList<string> errorQueuesDeclared = new List<string>();
         private readonly ConcurrentDictionary<string, string> errorExchanges = new ConcurrentDictionary<string, string>();
 
         public DefaultConsumerErrorStrategy(
@@ -92,17 +93,18 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private void DeclareDefaultErrorQueue(IModel model)
+        private void DeclareDefaultErrorQueue(IModel model, ConsumerExecutionContext context)
         {
-            if (!errorQueueDeclared)
+            var errorQueueName = conventions.ErrorQueueNamingConvention(context.Info);
+            if (!errorQueuesDeclared.Contains(errorQueueName))
             {
                 model.QueueDeclare(
-                    queue: conventions.ErrorQueueNamingConvention(),
+                    queue: errorQueueName,
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
                     arguments: null);
-                errorQueueDeclared = true;
+                errorQueuesDeclared.Add(errorQueueName);
             }
         }
 
@@ -114,14 +116,14 @@ namespace EasyNetQ.Consumer
             {
                 var exchangeName = conventions.ErrorExchangeNamingConvention(context.Info);
                 model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
-                model.QueueBind(conventions.ErrorQueueNamingConvention(), exchangeName, originalRoutingKey);
+                model.QueueBind(conventions.ErrorQueueNamingConvention(context.Info), exchangeName, originalRoutingKey);
                 return exchangeName;
             });
         }
 
         private string DeclareErrorExchangeQueueStructure(IModel model, ConsumerExecutionContext context)
         {
-            DeclareDefaultErrorQueue(model);
+            DeclareDefaultErrorQueue(model, context);
             return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, context);
         }
 

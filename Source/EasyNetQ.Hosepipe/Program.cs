@@ -128,16 +128,18 @@ namespace EasyNetQ.Hosepipe
 
         private void ErrorDump(QueueParameters parameters)
         {
-            parameters.QueueName = conventions.ErrorQueueNamingConvention();
+            parameters.QueueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
             Dump(parameters);
         }
 
         private void Retry(QueueParameters parameters)
         {
+            parameters.QueueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
+
             var count = 0;
             errorRetry.RetryErrors(
                 WithEach(
-                    messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention()), 
+                    messageReader.ReadMessages(parameters, parameters.QueueName), 
                     () => count++), 
                 parameters);
 

@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void The_default_error_queue_name_should_be()
         {
-            var result = conventions.ErrorQueueNamingConvention();
+            var result = conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
             result.ShouldEqual("EasyNetQ_Default_Error_Queue");
         }
 
@@ -246,7 +246,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new TypeNameSerializer())
             {
-                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
+                ErrorQueueNamingConvention = info => "CustomEasyNetQErrorQueueName." + info.Queue,
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 
@@ -264,7 +264,7 @@ namespace EasyNetQ.Tests
 
             var context = new ConsumerExecutionContext(
                 (bytes, properties, arg3) => null,
-                new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
+                new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "originalQueue"),
                 new MessageProperties
                     {
                         CorrelationId = string.Empty,
@@ -295,8 +295,8 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_use_queue_name_from_custom_names_provider()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null));
+            mockBuilder.Channels[0].AssertWasCalled(x =>
+                x.QueueDeclare("CustomEasyNetQErrorQueueName.originalQueue", true, false, false, null));
         }
 
         [Test]

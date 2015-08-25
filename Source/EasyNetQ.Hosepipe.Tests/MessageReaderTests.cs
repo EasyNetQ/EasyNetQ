@@ -49,7 +49,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 MessageFilePath = @"C:\temp\MessageOutput"
             };
 
-            var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention());
+            var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(new MessageReceivedInfo()));
             foreach (var message in messages)
             {
                 Console.WriteLine(message.Body);
