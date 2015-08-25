@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
@@ -30,7 +31,7 @@ namespace EasyNetQ.Consumer
         private readonly object syncLock = new object();
 
         private IConnection connection;
-        private readonly IList<string> errorQueuesDeclared = new List<string>();
+        private readonly ConcurrentBag<string> errorQueuesDeclared = new ConcurrentBag<string>();
         private readonly ConcurrentDictionary<string, string> errorExchanges = new ConcurrentDictionary<string, string>();
 
         public DefaultConsumerErrorStrategy(
