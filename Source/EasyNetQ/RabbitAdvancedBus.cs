@@ -188,27 +188,43 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var confirmsWaiter = clientCommandDispatcher.Invoke(model =>
+                var publishConfirmsTimeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+                while (!publishConfirmsTimeBudget.HasExpired())
                 {
-                    var properties = model.CreateBasicProperties();
-                    rawMessage.Properties.CopyTo(properties);
-                    
-                    var waiter = confirmationListener.GetWaiter(model);
-                    
+                    var confirmsWaiter = clientCommandDispatcher.Invoke(model =>
+                    {
+                        var properties = model.CreateBasicProperties();
+                        rawMessage.Properties.CopyTo(properties);
+
+                        var waiter = confirmationListener.GetWaiter(model);
+
+                        try
+                        {
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                        }
+                        catch (Exception)
+                        {
+                            waiter.Cancel();
+                            throw;
+                        }
+
+                        return waiter;
+                    });
+
                     try
                     {
-                        model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                        publishConfirmsTimeBudget.Start();
+                        confirmsWaiter.Wait(publishConfirmsTimeBudget.Remaining());
+                        break;
                     }
-                    catch (Exception)
+                    catch (PublishInterruptedException)
                     {
-                        waiter.Cancel();
-                        throw;
                     }
-
-                    return waiter;
-                });
-
-                confirmsWaiter.Wait(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+                    finally
+                    {
+                        publishConfirmsTimeBudget.Stop();
+                    }
+                }
             }
             else
             {
@@ -282,25 +298,42 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var confirmsWaiter = await clientCommandDispatcher.InvokeAsync(model =>
+                var publishConfirmsTimeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+                while (!publishConfirmsTimeBudget.HasExpired())
                 {
-                    var properties = model.CreateBasicProperties();
-                    rawMessage.Properties.CopyTo(properties);
-                    var waiter = confirmationListener.GetWaiter(model);
+                    var confirmsWaiter = await clientCommandDispatcher.InvokeAsync(model =>
+                    {
+                        var properties = model.CreateBasicProperties();
+                        rawMessage.Properties.CopyTo(properties);
+                        var waiter = confirmationListener.GetWaiter(model);
+
+                        try
+                        {
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                        }
+                        catch (Exception)
+                        {
+                            waiter.Cancel();
+                            throw;
+                        }
+
+                        return waiter;
+                    }).ConfigureAwait(false);
 
                     try
                     {
-                        model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                        publishConfirmsTimeBudget.Start();
+                        await confirmsWaiter.WaitAsync(publishConfirmsTimeBudget.Remaining()).ConfigureAwait(false);
+                        break;
                     }
-                    catch (Exception)
+                    catch (PublishInterruptedException)
                     {
-                        waiter.Cancel();
-                        throw;
                     }
-
-                    return waiter;
-                }).ConfigureAwait(false);
-                await confirmsWaiter.WaitAsync(TimeSpan.FromSeconds(connectionConfiguration.Timeout)).ConfigureAwait(false);
+                    finally
+                    {
+                        publishConfirmsTimeBudget.Stop();
+                    }
+                }
             }
             else
             {
