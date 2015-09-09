@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.52.0.0")]
+[assembly: AssemblyVersion("0.53.0.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.53.0.0 fix expires default behavior of subscription configuration attribute
 // 0.52.0.0 Added synchronous callback on Consume(byte[]) methods of the advaced api
 // 0.51.0.0 Brand new sync/async implementation, a lot of changes in publish mechanisms. Should be used with care  
 // 0.50.12.0 Added Serilog nuget package 
