@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.50.7.0")]
+[assembly: AssemblyVersion("0.50.8.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.50.8.0 Allow SubscriptionConfigurationAttribute on class
 // 0.50.7.0 Fix typo in Extensions
 // 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared
 // 0.50.5.0 Fix assigning of AMQP connection in to ConnectionConfiguration to be idempotent.
