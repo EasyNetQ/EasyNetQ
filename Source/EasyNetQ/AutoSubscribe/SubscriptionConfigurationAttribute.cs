@@ -3,7 +3,7 @@
 namespace EasyNetQ.AutoSubscribe
 {
     [Serializable]
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class SubscriptionConfigurationAttribute : Attribute
     {
         public SubscriptionConfigurationAttribute()
