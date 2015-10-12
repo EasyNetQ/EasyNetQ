@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.53.5.0")]
-[assembly: CLSCompliant(true)]
+[assembly: AssemblyVersion("0.53.6.0")]
+[assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.53.6.0 set CLSCompliant to false
 // 0.53.5.0 Added custom queue-name support to 'err' and 'retry' commands
 // 0.53.4.0 Update RabbitMQ.Client to 3.5.7
 // 0.53.3.0 Bug fix, process did not always exit if persistentconnection reconnected after disposal
