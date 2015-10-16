@@ -12,20 +12,38 @@ GO
 
 PRINT 'Creating procedure [dbo].[uspAddNewMessageToScheduler]'
 GO
-
 CREATE PROCEDURE [dbo].[uspAddNewMessageToScheduler] 
 	@WakeTime DATETIME,
 	@BindingKey NVARCHAR(1000),
-	@CancellationKey NVARCHAR(255) = NULL,
-	@Message VARBINARY(MAX)
+	@Message VARBINARY(MAX),
+	@CancellationKey NVARCHAR(256) = null,
+	@Exchange NVARCHAR(256) = null,
+	@ExchangeType NVARCHAR(16) = null,
+	@RoutingKey NVARCHAR(256) = null,
+	@MessageProperties NVARCHAR(max) = null,
+	@InstanceName NVARCHAR(100) = ''
 AS
-
 DECLARE @NewID INT
-
 BEGIN TRANSACTION
-
-INSERT INTO WorkItems (BindingKey, CancellationKey, InnerMessage)
-VALUES (@BindingKey, @CancellationKey, @Message)
+INSERT INTO WorkItems (
+	BindingKey, 
+	InnerMessage, 
+	CancellationKey,
+	Exchange,
+	ExchangeType,
+	RoutingKey,
+	MessageProperties,
+	InstanceName
+) VALUES (
+	@BindingKey, 
+	@Message, 
+	@CancellationKey,
+	@Exchange,
+	@ExchangeType,
+	@RoutingKey,
+	@MessageProperties,
+	@InstanceName
+)
 -- get the ID of the inserted record for use in the child table
 SELECT @NewID = SCOPE_IDENTITY()
 IF @@ERROR > 0
@@ -44,3 +62,4 @@ ELSE
 				 COMMIT TRANSACTION
 			END 
 	END
+

@@ -4,11 +4,16 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE TABLE [dbo].[WorkItems] (
-    [WorkItemID]   INT             IDENTITY (1, 1) NOT NULL,
-    [BindingKey]   NVARCHAR (1000) NOT NULL,
+    [WorkItemID]		INT IDENTITY (1, 1) NOT NULL,
+    [BindingKey]		NVARCHAR (1000) NOT NULL,
     [CancellationKey]   NVARCHAR (255) NULL,
-    [InnerMessage] VARBINARY (MAX) NOT NULL,
-    [TextData]     NVARCHAR (MAX)  NULL
+    [InnerMessage]		VARBINARY(MAX) NOT NULL,
+    [TextData]			NVARCHAR (MAX)  NULL,
+	[InstanceName]		NVARCHAR (100) NOT NULL default(''),
+	[Exchange]			NVARCHAR (256) NULL,
+	[ExchangeType]		NVARCHAR (16) NULL,
+	[RoutingKey]		NVARCHAR (256) NULL,
+	[MessageProperties] NVARCHAR (max) NULL
 );
 
 GO
@@ -35,7 +40,12 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_workItems_cancellationKey] 
 ON [dbo].[WorkItems] 
-	([CancellationKey] ASC)
+	([InstanceName], [CancellationKey] ASC)
+WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON)
+
+CREATE NONCLUSTERED INDEX [IX_workItems_instanceName] 
+ON [dbo].[WorkItems] 
+	([InstanceName], [WorkItemID] ASC)
 WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON)
 
 CREATE NONCLUSTERED INDEX [IX_workItemStatus_purgeDate] 

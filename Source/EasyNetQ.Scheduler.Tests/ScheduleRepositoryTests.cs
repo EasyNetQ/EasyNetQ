@@ -2,6 +2,7 @@
 using System;
 using System.Text;
 using EasyNetQ.SystemMessages;
+using EasyNetQ.Topology;
 using NUnit.Framework;
 
 namespace EasyNetQ.Scheduler.Tests
@@ -33,7 +34,33 @@ namespace EasyNetQ.Scheduler.Tests
                 BindingKey = "abc",
                 CancellationKey = "bcd",
                 WakeTime = new DateTime(2011, 5, 18),
-                InnerMessage = Encoding.UTF8.GetBytes("Hello World!")
+                InnerMessage = Encoding.UTF8.GetBytes("Hello World!"),
+                MessageProperties = new MessageProperties { Type = string.Format("{0}:{1}", typeof(ScheduleMe).FullName, typeof(ScheduleMe).Assembly.GetName().Name) }
+            });
+        }
+
+        [Test]
+        [Explicit("Required a database")]
+        public void Should_be_able_to_store_a_schedule_with_exchange()
+        {
+            var typeNameSerializer = new TypeNameSerializer();
+            var conventions = new Conventions(typeNameSerializer);
+            var jsonSerializer = new JsonSerializer(typeNameSerializer);
+            var messageSerializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, jsonSerializer, new DefaultCorrelationIdGenerationStrategy());
+            var testScheduleMessage = new TestScheduleMessage { Text = "Hello World" };
+
+            var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<TestScheduleMessage>(testScheduleMessage));
+
+            scheduleRepository.Store(new ScheduleMe
+            {
+                BindingKey = "",
+                CancellationKey = "bcd",
+                Exchange = conventions.ExchangeNamingConvention(typeof(TestScheduleMessage)),
+                ExchangeType = ExchangeType.Topic,
+                RoutingKey = "#",
+                WakeTime = DateTime.UtcNow.AddMilliseconds(-1),
+                InnerMessage = serializedMessage.Body,
+                MessageProperties = serializedMessage.Properties
             });
         }
 
@@ -54,9 +81,13 @@ namespace EasyNetQ.Scheduler.Tests
             var schedules = scheduleRepository.GetPending();
             foreach (var scheduleMe in schedules)
             {
-                Console.WriteLine("{0}, {1}, {2}", 
+                Console.WriteLine("key: {0}, waketime: {1}, exchange {2}, type: {3}, properties: {4}, routing: {5}, body:{6}", 
                     scheduleMe.BindingKey, 
                     scheduleMe.WakeTime,
+                    scheduleMe.Exchange,
+                    scheduleMe.ExchangeType,
+                    scheduleMe.MessageProperties,
+                    scheduleMe.RoutingKey,
                     Encoding.UTF8.GetString(scheduleMe.InnerMessage));
             }
         }
@@ -72,6 +103,11 @@ namespace EasyNetQ.Scheduler.Tests
         {
             return DateTime.UtcNow;
         }
+    }
+
+    public class TestScheduleMessage
+    {
+        public string Text { get; set; }
     }
 }
 

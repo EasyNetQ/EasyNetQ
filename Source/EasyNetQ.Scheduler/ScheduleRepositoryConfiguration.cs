@@ -4,9 +4,15 @@ namespace EasyNetQ.Scheduler
 {
     public class ScheduleRepositoryConfiguration : ConfigurationBase
     {
+        public ScheduleRepositoryConfiguration()
+        {
+            MaximumScheduleMessagesToReturn = 100;
+        }
+
         private const string connectionStringKey = "scheduleDb";
         private const string connectionStringNameKey = "scheduleDbConnectionStringName";
         private const string schemaNameKey = "SchemaName";
+        private const string instanceNameKey = "InstanceName";
 
         public string ProviderName { get; set; }
         public string ConnectionString { get; set; }
@@ -21,6 +27,11 @@ namespace EasyNetQ.Scheduler
         /// </summary>
         public int PurgeDelayDays { get; set; }
 
+        /// <summary>
+        /// Allows to create a 'discriminator' for different environment (like a VHOST for rabbitMQ, or to use the same database for different branches, environments or developer machines)
+        /// </summary>
+        public string InstanceName { get; set; }
+
         public static ScheduleRepositoryConfiguration FromConfigFile()
         {
             var connectionStringName = ConfigurationManager.AppSettings[connectionStringNameKey] ?? connectionStringKey;
@@ -33,8 +44,10 @@ namespace EasyNetQ.Scheduler
                 PurgeBatchSize = GetShortAppSetting("PurgeBatchSize"),
                 PurgeDelayDays = GetIntAppSetting("PurgeDelayDays"),
                 MaximumScheduleMessagesToReturn = GetIntAppSetting("MaximumScheduleMessagesToReturn"),
-                SchemaName = ConfigurationManager.AppSettings[schemaNameKey]
+                SchemaName = ConfigurationManager.AppSettings[schemaNameKey],
+                InstanceName = ConfigurationManager.AppSettings[instanceNameKey] ?? ""
             };
         }
+
     }
 }
