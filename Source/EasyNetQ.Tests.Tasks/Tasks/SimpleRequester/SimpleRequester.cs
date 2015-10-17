@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Loggers;
+using EasyNetQ.Tests.Tasks;
+using EasyNetQ.Tests.Tasks.Tasks;
+using Net.CommandLine;
 
 namespace EasyNetQ.Tests.SimpleRequester
 {
-    class Program
+    public class SimpleRequester : ICommandLineTask, IDisposable
     {
         private static readonly IBus bus = RabbitHutch.CreateBus("host=localhost",
             x => x.Register(_ => new NoDebugLogger()));
@@ -14,27 +18,20 @@ namespace EasyNetQ.Tests.SimpleRequester
         private static readonly ILatencyRecorder latencyRecorder = new LatencyRecorder();
         private const int publishIntervalMilliseconds = 10;
 
-        static void Main(string[] args)
+        public Task Run(CancellationToken cancellationToken)
         {
-            var timer = new Timer(OnTimer, null, publishIntervalMilliseconds, publishIntervalMilliseconds);
+
+            timer = new Timer(OnTimer, null, publishIntervalMilliseconds, publishIntervalMilliseconds);
 
             Console.Out.WriteLine("Timer running, ctrl-C to end");
 
-            Console.CancelKeyPress += (source, cancelKeyPressArgs) =>
-            {
-                Console.Out.WriteLine("Shutting down");
+            Console.ReadLine();
 
-                timer.Dispose();
-                bus.Dispose();
-                latencyRecorder.Dispose();
-
-                Console.WriteLine("Shut down complete");
-            };
-
-            Thread.Sleep(Timeout.Infinite);
+            return Task.FromResult(0);
         }
 
         private static readonly object requestLock = new object();
+        private static Timer timer;
 
         static void OnTimer(object state)
         {
@@ -63,30 +60,16 @@ namespace EasyNetQ.Tests.SimpleRequester
             Console.WriteLine("Response: {0}", response.Text);
             latencyRecorder.RegisterResponse(response.Id);
         }
-    }
 
-    public class NoDebugLogger : IEasyNetQLogger
-    {
-        private readonly ConsoleLogger consoleLogger = new ConsoleLogger();
-
-        public void DebugWrite(string format, params object[] args)
+        public void Dispose()
         {
-            // do nothing
-        }
+            Console.Out.WriteLine("Shutting down");
 
-        public void InfoWrite(string format, params object[] args)
-        {
-            // do nothing
-        }
+            timer.Dispose();
+            bus.Dispose();
+            latencyRecorder.Dispose();
 
-        public void ErrorWrite(string format, params object[] args)
-        {
-            consoleLogger.ErrorWrite(format, args);
-        }
-
-        public void ErrorWrite(Exception exception)
-        {
-            consoleLogger.ErrorWrite(exception);
+            Console.WriteLine("Shut down complete");
         }
     }
 }

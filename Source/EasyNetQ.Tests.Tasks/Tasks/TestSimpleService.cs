@@ -1,32 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Loggers;
+using Net.CommandLine;
 
-namespace EasyNetQ.Tests.SimpleService
+namespace EasyNetQ.Tests.Tasks.Tasks
 {
-    class Program
+    public class TestSimpleService : ICommandLineTask, IDisposable
     {
-        static void Main(string[] args)
+        private IBus bus;
+
+        public Task Run(CancellationToken cancellationToken)
         {
-            var bus = RabbitHutch.CreateBus("host=localhost",
-                x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
+            bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
             bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
             bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
 
             Console.WriteLine("Waiting to service requests");
-            Console.WriteLine("Ctrl-C to exit");
+            Console.WriteLine("Press enter to stop");
+            Console.ReadLine();
 
-            Console.CancelKeyPress += (source, cancelKeyPressArgs) =>
-            {
-                bus.Dispose();
-                Console.WriteLine("Shut down complete");
-            };
-
-            Thread.Sleep(Timeout.Infinite);
-            
+            return Task.FromResult(0);
         }
+
 
         private static Task<TestAsyncResponseMessage> HandleAsyncRequest(TestAsyncRequestMessage request)
         {
@@ -35,7 +34,7 @@ namespace EasyNetQ.Tests.SimpleService
             return RunDelayed(1000, () =>
             {
                 Console.Out.WriteLine("Sending response");
-                return new TestAsyncResponseMessage {Text = request.Text + " ... completed."};
+                return new TestAsyncResponseMessage { Text = request.Text + " ... completed." };
             });
         }
 
@@ -54,7 +53,7 @@ namespace EasyNetQ.Tests.SimpleService
                     throw new SomeRandomException(request.ExceptionInServerMessage);
                 throw new SomeRandomException("Something terrible has just happened!");
             }
-            return new TestResponseMessage{ Id = request.Id, Text = request.Text + " all done!" };
+            return new TestResponseMessage { Id = request.Id, Text = request.Text + " all done!" };
         }
 
         private static Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)
@@ -87,6 +86,13 @@ namespace EasyNetQ.Tests.SimpleService
 
             return taskCompletionSource.Task;
         }
+
+        public void Dispose()
+        {
+            bus.Dispose();
+            Console.WriteLine("Shut down complete");
+
+        }
     }
 
     [Serializable]
@@ -99,37 +105,13 @@ namespace EasyNetQ.Tests.SimpleService
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public SomeRandomException() {}
-        public SomeRandomException(string message) : base(message) {}
-        public SomeRandomException(string message, Exception inner) : base(message, inner) {}
+        public SomeRandomException() { }
+        public SomeRandomException(string message) : base(message) { }
+        public SomeRandomException(string message, Exception inner) : base(message, inner) { }
 
         protected SomeRandomException(
             SerializationInfo info,
-            StreamingContext context) : base(info, context) {}
-    }
-
-    public class NoDebugLogger : IEasyNetQLogger
-    {
-        private readonly ConsoleLogger logger = new ConsoleLogger();
-
-        public void DebugWrite(string format, params object[] args)
-        {
-            
-        }
-
-        public void InfoWrite(string format, params object[] args)
-        {
-            
-        }
-
-        public void ErrorWrite(string format, params object[] args)
-        {
-            logger.ErrorWrite(format, args);
-        }
-
-        public void ErrorWrite(Exception exception)
-        {
-            logger.ErrorWrite(exception);
-        }
+            StreamingContext context) : base(info, context)
+        { }
     }
 }
