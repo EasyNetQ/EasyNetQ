@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.50.10.0")]
+[assembly: AssemblyVersion("0.50.11.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.50.11.0 Updated Scheduler for MSSQL to support all properties of the ScheduleMe message 
 // 0.50.10.0 Updated RabbitMQ client to 3.5.6 
 // 0.50.9.0 Updated RabbitMQ client to 3.5.5 
 // 0.50.8.0 Allow SubscriptionConfigurationAttribute on class
