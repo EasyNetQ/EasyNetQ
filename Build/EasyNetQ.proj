@@ -17,7 +17,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Merge; Test; Package; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Merge; Test; Package; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
