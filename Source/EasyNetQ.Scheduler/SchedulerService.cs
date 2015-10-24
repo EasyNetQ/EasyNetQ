@@ -83,19 +83,30 @@ namespace EasyNetQ.Scheduler
                 using(var scope = new TransactionScope())
                 {
                     var scheduledMessages = scheduleRepository.GetPending();
-                    
+
                     foreach (var scheduledMessage in scheduledMessages)
                     {
+                        // Binding key fallback is only provided here for backwards compatibility, will be removed in the future
                         log.DebugWrite(string.Format(
                             "Publishing Scheduled Message with Routing Key: '{0}'", scheduledMessage.BindingKey));
 
-                        var exchange = bus.Advanced.ExchangeDeclare(scheduledMessage.BindingKey, ExchangeType.Topic);
+                        var exchangeName = scheduledMessage.Exchange ?? scheduledMessage.BindingKey;
+                        var exchangeType = scheduledMessage.ExchangeType ?? ExchangeType.Topic;
+
+                        var exchange = bus.Advanced.ExchangeDeclare(exchangeName, exchangeType);
+                        var messageProperties = scheduledMessage.MessageProperties;
+
+                        if (scheduledMessage.MessageProperties == null)
+                            messageProperties = new MessageProperties { Type = scheduledMessage.BindingKey };
+
+                        var routingKey = scheduledMessage.RoutingKey ?? scheduledMessage.BindingKey;
+
                         bus.Advanced.Publish(
-                            exchange, 
-                            scheduledMessage.BindingKey, 
+                            exchange,
+                            routingKey,
                             false,
                             false,
-                            new MessageProperties{ Type = scheduledMessage.BindingKey }, 
+                            messageProperties,
                             scheduledMessage.InnerMessage);
                     }
 
@@ -110,7 +121,14 @@ namespace EasyNetQ.Scheduler
 
         private void OnPurgeTimerTick(object state)
         {
-            scheduleRepository.Purge();
+            try
+            {
+                scheduleRepository.Purge();
+            }
+            catch (Exception exception)
+            {
+                log.ErrorWrite("Error in schedule purge\r\n{0}", exception);
+            }
         }
     }
 }

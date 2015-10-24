@@ -19,6 +19,11 @@ namespace EasyNetQ.Scheduler
         string RowsParameterName { get; }
         string IdParameterName { get; }
         string StatusParameterName { get; }
+        string ExchangeParameterName { get; }
+        string ExchangeTypeParameterName { get; }
+        string RoutingKeyParameterName { get; }
+        string MessagePropertiesParameterName { get; }
+        string InstanceNameParameterName { get; }
     }
 
     public class SqlDialectResolver
@@ -55,6 +60,11 @@ namespace EasyNetQ.Scheduler
             RowsParameterName = "@rows";
             IdParameterName = "@ID";
             StatusParameterName = "@status";
+            InstanceNameParameterName = "@InstanceName";
+            ExchangeParameterName = "@Exchange";
+            ExchangeTypeParameterName = "@ExchangeType";
+            RoutingKeyParameterName = "@RoutingKey";
+            MessagePropertiesParameterName = "@MessageProperties";
         }
 
         public bool IsDialectFor(string providerName)
@@ -75,6 +85,11 @@ namespace EasyNetQ.Scheduler
         public string RowsParameterName { get; private set; }
         public string IdParameterName { get; private set; }
         public string StatusParameterName { get; private set; }
+        public string ExchangeParameterName { get; private set; }
+        public string ExchangeTypeParameterName { get; private set; }
+        public string RoutingKeyParameterName { get; private set; }
+        public string MessagePropertiesParameterName { get; private set; }
+        public string InstanceNameParameterName { get; private set; }
     }
 
     public class PostgreSqlDialect : ISqlDialect
@@ -94,6 +109,11 @@ namespace EasyNetQ.Scheduler
             RowsParameterName = "p_rows";
             IdParameterName = "p_id";
             StatusParameterName = "p_status";
+            InstanceNameParameterName = "p_instanceName";
+            ExchangeParameterName = "p_exchange";
+            ExchangeTypeParameterName = "p_exchangeType";
+            RoutingKeyParameterName = "p_routingKey";
+            MessagePropertiesParameterName = "p_messageProperties";
         }
 
         public bool IsDialectFor(string providerName)
@@ -116,5 +136,10 @@ namespace EasyNetQ.Scheduler
         public string RowsParameterName { get; private set; }
         public string IdParameterName { get; private set; }
         public string StatusParameterName { get; private set; }
+        public string InstanceNameParameterName { get; private set; }
+        public string ExchangeParameterName { get; private set; }
+        public string ExchangeTypeParameterName { get; private set; }
+        public string RoutingKeyParameterName { get; private set; }
+        public string MessagePropertiesParameterName { get; private set; }
     }
 }

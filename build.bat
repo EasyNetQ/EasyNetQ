@@ -1,3 +1,3 @@
-"C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe" "build\EasyNetQ.proj"
+"C:\Program Files (x86)\MSBuild\12.0\bin\msbuild.exe" "build\EasyNetQ.proj"
 
 pause
