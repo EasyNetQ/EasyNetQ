@@ -58,7 +58,7 @@ namespace EasyNetQ.Consumer
             {
                 lock (syncLock)
                 {
-                    if (connection == null || !connection.IsOpen)
+                    if ((connection == null || !connection.IsOpen) && !(disposing || disposed))
                     {
                         if (connection != null)
                         {
@@ -87,6 +87,11 @@ namespace EasyNetQ.Consumer
                         }
 
                         connection = connectionFactory.CreateConnection();
+                        // A possible race condition exists during EasyNetQ IBus disposal where this instance's Dispose() method runs on another thread, while this thread is mid-executing connectionFactory.CreateConnection() (or a few lines earlier), and has not assigned the result to the connection variable before Dispose() accesses it.  This could result in the creation of a RabbitMQ.Client.IConnection instance which never gets disposed; that IConnection instance holds a thread open which can prevent application shutdown.  It was not desirable to lock (syncLock) within the Dispose() method to fix this; therefore, an additional check must be made here to dispose any such extra IConnection.
+                        if (disposing || disposed)
+                        {
+                            connection.Dispose();
+                        }
                     }
                 }
             }
@@ -130,6 +135,16 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(context, "context");
             Preconditions.CheckNotNull(exception, "exception");
 
+            if (disposed || disposing)
+            {
+                logger.ErrorWrite(
+                    "EasyNetQ Consumer Error Handler: DefaultConsumerErrorStrategy was already disposed, when attempting to handle consumer error.  This can occur when messaging is being shut down through disposal of the IBus.  Message will not be ackd to RabbitMQ server and will remain on the RabbitMQ queue.  Error message will not be published to error queue.\n" +
+                    "ConsumerTag: {0}, DeliveryTag: {1}\n",
+                    context.Info.ConsumerTag,
+                    context.Info.DeliverTag);
+                return AckStrategies.NackWithRequeue;
+            }
+
             try
             {
                 Connect();
@@ -156,8 +171,8 @@ namespace EasyNetQ.Consumer
             {
                 // thrown if the broker connection is broken during declare or publish.
                 logger.ErrorWrite("EasyNetQ Consumer Error Handler: Broker connection was closed while attempting to publish Error message.\n" +
-                    string.Format("Message was: '{0}'\n", interruptedException.Message) +
-                    CreateConnectionCheckMessage());                
+                    string.Format("Exception was: '{0}'\n", interruptedException.Message) +
+                    CreateConnectionCheckMessage());
             }
             catch (Exception unexpectedException)
             {
@@ -200,12 +215,14 @@ namespace EasyNetQ.Consumer
         }
 
         private bool disposed = false;
+        private bool disposing = false;
 
         public virtual void Dispose()
         {
             if (disposed) return;
-
-            if(connection != null) connection.Dispose();
+            disposing = true;
+            
+            if (connection != null) { connection.Dispose(); }
 
             disposed = true;
         }
