@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using EasyNetQ.ConnectionString;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -11,7 +10,6 @@ namespace EasyNetQ
     public class ConnectionConfiguration
     {
         private const int DefaultPort = 5672;
-        public const int DefaultSslPort = 5671;
         public ushort Port { get; set; }
         public string VirtualHost { get; set; }
         public string UserName { get; set; }
@@ -126,47 +124,6 @@ namespace EasyNetQ
             ClientProperties = new Dictionary<string, object>();
             SetDefaultClientProperties(ClientProperties);
         }
-
-        public void ApplySslOptions(string sslOptionsString)
-        {
-            new SslOptionsStringParser().Parse(sslOptionsString).ToList().ForEach(ApplySslOption);
-        }
-
-        private void ApplySslOption(SslOption sslOption)
-        {
-            if (this.Ssl.Enabled)
-            {
-                throw new EasyNetQException("Potentially ambiguous SslOptions configuration: SslOptions are being configured on both ConnectionConfiguration and individual hosts!");
-            }
-
-            HostConfiguration matchingHost;
-            try
-            {
-                matchingHost = Hosts.SingleOrDefault(h => h.Host.Equals(sslOption.ServerName, StringComparison.InvariantCultureIgnoreCase));
-            }
-            catch (InvalidOperationException)
-            {
-                throw new EasyNetQException("Connection string: Multiple matching hosts found for SslOption with servername={0}", sslOption.ServerName);
-            }
-
-            if (matchingHost == null)
-            {
-                throw new EasyNetQException("SslOptions string: No matching host found for SslOption with servername={0}", sslOption.ServerName);
-            }
-
-            if (matchingHost.Ssl != null &&
-                matchingHost.Ssl.ServerName.Equals(sslOption.ServerName, StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new EasyNetQException("SslOptions string: Conflicting SslOptions for host with servername={0}.  Have you configured the SslOptions more than once?", sslOption.ServerName);
-            }
-
-            matchingHost.Ssl = sslOption;
-
-            if ((matchingHost.Port == 0 || matchingHost.Port == DefaultPort) && sslOption.Enabled)
-            {
-                matchingHost.Port = DefaultSslPort;
-            }
-        }
     }
 
     public class HostConfiguration
@@ -178,6 +135,6 @@ namespace EasyNetQ
 
         public string Host { get; set; }
         public ushort Port { get; set; }
-        public SslOption Ssl { get; internal set; }
+        public SslOption Ssl { get; private set; }
     }
 }
