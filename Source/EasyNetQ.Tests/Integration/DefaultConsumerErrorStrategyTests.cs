@@ -99,6 +99,46 @@ namespace EasyNetQ.Tests
                 }
             }
         }
+
+        [Test]
+        public void Should_not_reconnect_if_has_been_disposed()
+        {
+            const string originalMessage = "{ Text:\"Hello World\"}";
+            var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
+
+            var exception = new Exception("I just threw!");
+
+            var context = new ConsumerExecutionContext(
+                (bytes, properties, arg3) => null,
+                new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
+                new MessageProperties
+                {
+                    CorrelationId = "123",
+                    AppId = "456"
+                },
+                originalMessageBody,
+                MockRepository.GenerateStub<IBasicConsumer>()
+                );
+
+            var logger = MockRepository.GenerateMock<IEasyNetQLogger>();
+            connectionFactory = MockRepository.GenerateMock<IConnectionFactory>();
+
+            consumerErrorStrategy = new DefaultConsumerErrorStrategy(
+                connectionFactory,
+                MockRepository.GenerateStub<ISerializer>(),
+                logger,
+                MockRepository.GenerateStub<IConventions>(),
+                MockRepository.GenerateStub<ITypeNameSerializer>());
+
+            consumerErrorStrategy.Dispose();
+
+            var ackStrategy = consumerErrorStrategy.HandleConsumerError(context, exception);
+
+            connectionFactory.AssertWasNotCalled(f => f.CreateConnection());
+            logger.AssertWasCalled(l => l.ErrorWrite(Arg.Text.Contains("DefaultConsumerErrorStrategy was already disposed"), Arg<Object>.Is.Anything));
+
+            Assert.AreEqual(AckStrategies.NackWithRequeue, ackStrategy);
+        }
     }
 }
 
