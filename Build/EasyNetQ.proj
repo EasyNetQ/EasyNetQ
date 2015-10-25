@@ -225,9 +225,9 @@
 
     <Delete Files="@(FilesToDelete)" />
 
-    <Copy SourceFiles="$(OutputDir)\EasyNetQ.Serilog.dll" DestinationFolder="$(Package)\EasyNetQ.Serilog\lib\net40" />
+    <Copy SourceFiles="$(Source)\EasyNetQ.Serilog\bin\Release\EasyNetQ.Serilog.dll" DestinationFolder="$(Package)\EasyNetQ.Serilog\lib\net40" />
 
-    <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.Serilog.dll">
+    <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.Serilog\bin\Release\EasyNetQ.Serilog.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
 
