@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-      <dependency id="RabbitMQ.Client" version="[3.5.4,]" />
+      <dependency id="RabbitMQ.Client" version="[3.5.6,]" />
     </dependencies>
   </metadata>
 </package>
