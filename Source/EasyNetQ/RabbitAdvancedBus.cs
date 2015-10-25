@@ -188,8 +188,8 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var publishConfirmsTimeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
-                while (!publishConfirmsTimeBudget.HasExpired())
+                var timeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout)).Start();
+                while (!timeBudget.IsExpired())
                 {
                     var confirmsWaiter = clientCommandDispatcher.Invoke(model =>
                     {
@@ -213,16 +213,11 @@ namespace EasyNetQ
 
                     try
                     {
-                        publishConfirmsTimeBudget.Start();
-                        confirmsWaiter.Wait(publishConfirmsTimeBudget.Remaining());
+                        confirmsWaiter.Wait(timeBudget.GetRemainingTime());
                         break;
                     }
                     catch (PublishInterruptedException)
                     {
-                    }
-                    finally
-                    {
-                        publishConfirmsTimeBudget.Stop();
                     }
                 }
             }
@@ -298,8 +293,8 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var publishConfirmsTimeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
-                while (!publishConfirmsTimeBudget.HasExpired())
+                var timeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout)).Start();
+                while (!timeBudget.IsExpired())
                 {
                     var confirmsWaiter = await clientCommandDispatcher.InvokeAsync(model =>
                     {
@@ -322,16 +317,11 @@ namespace EasyNetQ
 
                     try
                     {
-                        publishConfirmsTimeBudget.Start();
-                        await confirmsWaiter.WaitAsync(publishConfirmsTimeBudget.Remaining()).ConfigureAwait(false);
+                        await confirmsWaiter.WaitAsync(timeBudget.GetRemainingTime()).ConfigureAwait(false);
                         break;
                     }
                     catch (PublishInterruptedException)
                     {
-                    }
-                    finally
-                    {
-                        publishConfirmsTimeBudget.Stop();
                     }
                 }
             }

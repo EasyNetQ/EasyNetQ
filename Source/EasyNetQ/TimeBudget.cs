@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace EasyNetQ
 {
-    public class TimeBudget
+    public sealed class TimeBudget
     {
         public TimeBudget(TimeSpan budget, TimeSpan precision)
         {
@@ -21,13 +21,7 @@ namespace EasyNetQ
             return this;
         }
 
-        public TimeBudget Stop()
-        {
-            watch.Stop();
-            return this;
-        }
-
-        public TimeSpan Remaining()
+        public TimeSpan GetRemainingTime()
         {
             var remaining = budget - watch.Elapsed;
             return remaining < precision
@@ -35,25 +29,10 @@ namespace EasyNetQ
                 : remaining;
         }
 
-        public TimeSpan Elapsed()
-        {
-            return watch.Elapsed;
-        }
-
-        public bool HasExpired()
+        public bool IsExpired()
         {
             var remaining = budget - watch.Elapsed;
             return remaining < precision;
-        }
-
-        public TimeSpan Budget
-        {
-            get { return budget; }
-        }
-
-        public TimeSpan Precision
-        {
-            get { return precision; }
         }
 
         private readonly TimeSpan budget;
