@@ -19,7 +19,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package;PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package;PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -217,4 +217,33 @@
 
   </Target>
 
+  <Target Name="PackageSerilog" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.Serilog\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(OutputDir)\EasyNetQ.Serilog.dll" DestinationFolder="$(Package)\EasyNetQ.Serilog\lib\net40" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(OutputDir)\EasyNetQ.Serilog.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.Serilog" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec" />
+
+  </Target>
 </Project>

@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ NET4", "EasyNetQ NET4\EasyNetQ NET4.csproj", "{B8DEF709-5168-48F1-B8D3-AD44E4A4A22B}"
 EndProject
@@ -17,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec = ..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec
 		..\Package\EasyNetQ\EasyNetQ.nuspec = ..\Package\EasyNetQ\EasyNetQ.nuspec
 		..\Build\EasyNetQ.proj = ..\Build\EasyNetQ.proj
+		..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec = ..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
 		Version.cs = Version.cs
@@ -92,6 +95,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Mongo.Tests", "EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj", "{4E7F926F-D939-4962-A7EF-112DE41B4236}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ NET45", "EasyNetQ NET45\EasyNetQ NET45.csproj", "{4543DA42-9C4D-4895-A174-BA1582331DE5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serilog", "EasyNetQ.Serilog\EasyNetQ.Serilog.csproj", "{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -333,6 +337,18 @@ Global
 		{4543DA42-9C4D-4895-A174-BA1582331DE5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4543DA42-9C4D-4895-A174-BA1582331DE5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4543DA42-9C4D-4895-A174-BA1582331DE5}.Release|x86.ActiveCfg = Release|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Debug|x86.Build.0 = Debug|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Release|x86.ActiveCfg = Release|Any CPU
+		{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

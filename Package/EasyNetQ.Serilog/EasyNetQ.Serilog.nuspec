@@ -1,24 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>EasyNetQ.DI.Autofac</id>
+    <id>EasyNetQ.Serilog</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.50.10.0</version>
-    <title>EasyNetQ.DI.Autofac</title>
+    <version>0.50.1.0</version>
+    <title>EasyNetQ.Serilog</title>
     <authors>Wiebe Tijsma, Mike Hadlow</authors>
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/EasyNetQ/EasyNetQ/blob/master/licence.txt</licenseUrl>
-    <projectUrl>https://github.com/EasyNetQ/EasyNetQ/wiki/Using-Alternative-DI-Containers</projectUrl>
+    <projectUrl>https://github.com/EasyNetQ/EasyNetQ/wiki/Logging</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>An adaptor to allow EasyNetQ to use Autofac as its internal IoC container</description>
+    <description>An Implementation to use Serilog as a logging component for EasyNetQ</description>
     <releaseNotes>
     </releaseNotes>
-    <copyright>Copyright Mike Hadlow 2015</copyright>
-    <tags>RabbitMQ Messaging AMQP REST API Autofac</tags>
+    <copyright>Copyright Wiebe Tijsma 2015</copyright>
+    <tags>RabbitMQ Messaging AMQP REST API Serilog</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="0.50.10.0" />
-      <dependency id="Autofac" version="3.3.0.0" />
+      <dependency id="EasyNetQ" version="0.50.1.0" />
+      <dependency id="Serilog" version="1.5.11" />
     </dependencies>
   </metadata>
 </package>
