@@ -97,9 +97,9 @@
       <Project>{640dec15-3a17-4e85-b38a-cfb379426dc2}</Project>
       <Name>EasyNetQ.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj">
+    <ProjectReference Include="..\EasyNetQ NET4\EasyNetQ NET4.csproj">
       <Project>{b8def709-5168-48f1-b8d3-ad44e4a4a22b}</Project>
-      <Name>EasyNetQ</Name>
+      <Name>EasyNetQ NET4</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -72,9 +72,9 @@
       <Project>{f444e58f-da2a-47e8-8246-c4bdd9a192b2}</Project>
       <Name>EasyNetQ.Scheduler.Mongo.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj">
+    <ProjectReference Include="..\EasyNetQ NET4\EasyNetQ NET4.csproj">
       <Project>{b8def709-5168-48f1-b8d3-ad44e4a4a22b}</Project>
-      <Name>EasyNetQ</Name>
+      <Name>EasyNetQ NET4</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

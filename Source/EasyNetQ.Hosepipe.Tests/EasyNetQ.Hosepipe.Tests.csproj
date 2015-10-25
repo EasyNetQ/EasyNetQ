@@ -70,9 +70,9 @@
       <Project>{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}</Project>
       <Name>EasyNetQ.Hosepipe</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj">
+    <ProjectReference Include="..\EasyNetQ NET4\EasyNetQ NET4.csproj">
       <Project>{b8def709-5168-48f1-b8d3-ad44e4a4a22b}</Project>
-      <Name>EasyNetQ</Name>
+      <Name>EasyNetQ NET4</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
