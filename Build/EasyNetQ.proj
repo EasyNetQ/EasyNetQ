@@ -34,6 +34,10 @@
     </ItemGroup>
 
     <Target Name="Build" DependsOnTargets="Version">
+        <Exec 
+          WorkingDirectory="$(Source)" 
+          Command="$(NuGet)\NuGet.exe restore $(Source)\EasyNetQ.sln" />
+
         <MSBuild Projects="@(ProjectToBuild)" Targets="Clean;Rebuild"/>
     </Target>
 
