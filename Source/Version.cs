@@ -7,7 +7,7 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
-// 0.51.0.0 A lot of changes in publish mechanisms. Should be used with care  
+// 0.51.0.0 Brand new sync/async implementation, a lot of changes in publish mechanisms. Should be used with care  
 // 0.50.12.0 Added Serilog nuget package 
 // 0.50.11.0 Updated Scheduler for MSSQL to support all properties of the ScheduleMe message 
 // 0.50.10.0 Updated RabbitMQ client to 3.5.6 
