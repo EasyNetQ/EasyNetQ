@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
@@ -164,7 +165,7 @@ namespace EasyNetQ.Tests
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
             mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.ExchangeDeclare("CustomExchangeNamingConvention", "topic", true, false, null));
+                x.ExchangeDeclare("CustomExchangeNamingConvention", "topic", true, false, new Dictionary<string, object>()));
 		}
 
 		[Test]
@@ -227,7 +228,7 @@ namespace EasyNetQ.Tests
         public void Should_declare_correct_exchange()
         {
             mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.ExchangeDeclare("CustomRpcExchangeName", "direct", true, false, null));
+                x.ExchangeDeclare("CustomRpcExchangeName", "direct", true, false, new Dictionary<string, object>()));
         }
 
     }

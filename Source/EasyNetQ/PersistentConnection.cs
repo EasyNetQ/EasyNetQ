@@ -67,7 +67,7 @@ namespace EasyNetQ
 
             return connection.CreateModel();
         }
-
+        
         public bool IsConnected
         {
             get { return connection != null && connection.IsOpen && !disposed; }

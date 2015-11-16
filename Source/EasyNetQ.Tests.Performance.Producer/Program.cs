@@ -22,14 +22,17 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer",
+            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=5;requestedHeartbeat=5;product=producer",
                 x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
 
             var messageCount = 0;
+            var faultMessageCount = 0;
             var messageRateTimer = new Timer(state =>
             {
                 Console.Out.WriteLine("messages per second = {0}", messageCount);
+                Console.Out.WriteLine("fault messages per second = {0}", faultMessageCount);
                 Interlocked.Exchange(ref messageCount, 0);
+                Interlocked.Exchange(ref faultMessageCount, 0);
             }, null, 1000, 1000);
 
             var cancelled = false;
@@ -38,21 +41,21 @@ namespace EasyNetQ.Tests.Performance.Producer
                 while (!cancelled)
                 {
                     var text = new string('#', messageSize);
-                    var message = new TestPerformanceMessage { Text = text };
+                    var message = new TestPerformanceMessage {Text = text};
 
                     try
                     {
                         bus.PublishAsync(message).ContinueWith(task =>
+                        {
+                            if (task.IsCompleted)
                             {
-                                if (task.IsCompleted)
-                                {
-                                    Interlocked.Increment(ref messageCount);
-                                }
-                                if (task.IsFaulted)
-                                {
-                                    Console.WriteLine(task.Exception);
-                                }
-                            });
+                                Interlocked.Increment(ref messageCount);
+                            }
+                            if (task.IsFaulted)
+                            {
+                                Interlocked.Increment(ref faultMessageCount);
+                            }
+                        });
                     }
                     catch (EasyNetQException easyNetQException)
                     {
