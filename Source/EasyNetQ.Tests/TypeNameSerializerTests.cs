@@ -10,6 +10,7 @@ namespace EasyNetQ.Tests
     {
         const string expectedTypeName = "System.String:mscorlib";
         private const string expectedCustomTypeName = "EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests";
+        private const string expectedCustomGenericTypeName = "EasyNetQ.Tests.SomeRandomGenericClass`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:EasyNetQ.Tests";
 
         private ITypeNameSerializer typeNameSerializer;
 
@@ -34,6 +35,13 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
+        public void Should_serialize_a_custom_generic_type()
+        {
+            var typeName = typeNameSerializer.Serialize(typeof(SomeRandomGenericClass<string>));
+            typeName.ShouldEqual(expectedCustomGenericTypeName);
+        }
+
+        [Test]
         public void Should_deserialize_a_type_name()
         {
             var type = typeNameSerializer.DeSerialize(expectedTypeName);
@@ -45,6 +53,13 @@ namespace EasyNetQ.Tests
         {
             var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
             type.ShouldEqual(typeof(SomeRandomClass));
+        }
+
+        [Test]
+        public void Should_deserialize_a_custom_generic_type()
+        {
+            var type = typeNameSerializer.DeSerialize(expectedCustomGenericTypeName);
+            type.ShouldEqual(typeof(SomeRandomGenericClass<string>));
         }
 
         [Test]
@@ -87,6 +102,10 @@ namespace EasyNetQ.Tests
     public class SomeRandomClass
     {
         
+    }
+
+    public class SomeRandomGenericClass<T>
+    {
     }
 }
 // ReSharper restore InconsistentNaming
