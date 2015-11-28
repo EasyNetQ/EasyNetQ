@@ -1,33 +1,43 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using EasyNetQ.Tests.Tasks;
+using EasyNetQ.Tests.Tasks.Tasks;
+using Net.CommandLine;
 
 namespace EasyNetQ.Tests.Performance.Producer
 {
-    public class Program
+    public class TestPerformanceParameters
     {
-        public static void Main(string[] args)
+        public TestPerformanceParameters()
         {
-            var publishInterval = 0;
-            var messageSize = 1000;
+            MessageSize = 1000;
+        }
+        public int PublishInterval { get; set; }
+        public int MessageSize { get; set; }
+    }
 
-            if (args.Length > 0)
-            {
-                publishInterval = int.Parse(args[0]);
-            }
-            if (args.Length > 1)
-            {
-                messageSize = int.Parse(args[1]);
-            }
+    public class TestPerformanceProducer : ICommandLineTask<TestPerformanceParameters>, IDisposable
+    {
+        private IBus bus;
+        private Timer messageRateTimer;
+        private bool cancelled;
+        private Thread publishThread;
+
+        public Task Run(TestPerformanceParameters args, CancellationToken cancellationToken)
+        {
+            var publishInterval = args.PublishInterval;
+            var messageSize = args.MessageSize;
 
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            var bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=5;requestedHeartbeat=5;product=producer",
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer",
                 x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
 
             var messageCount = 0;
             var faultMessageCount = 0;
-            var messageRateTimer = new Timer(state =>
+            messageRateTimer = new Timer(state =>
             {
                 Console.Out.WriteLine("messages per second = {0}", messageCount);
                 Console.Out.WriteLine("fault messages per second = {0}", faultMessageCount);
@@ -35,8 +45,8 @@ namespace EasyNetQ.Tests.Performance.Producer
                 Interlocked.Exchange(ref faultMessageCount, 0);
             }, null, 1000, 1000);
 
-            var cancelled = false;
-            var publishThread = new Thread(state =>
+            cancelled = false;
+            publishThread = new Thread(state =>
             {
                 while (!cancelled)
                 {
@@ -66,43 +76,22 @@ namespace EasyNetQ.Tests.Performance.Producer
             });
             publishThread.Start();
 
-            Console.Out.WriteLine("Timer running, ctrl-C to end");
+            Console.Out.WriteLine("Timer running, enter to end");
 
-            Console.CancelKeyPress += (source, cancelKeyPressArgs) =>
-            {
-                Console.Out.WriteLine("Shutting down");
-                
-                cancelled = true;
-				publishThread.Join();
-                messageRateTimer.Dispose();
-                bus.Dispose();
-                Console.WriteLine("Shut down complete");
-            };
+            Console.ReadLine();
 
-            Thread.Sleep(Timeout.Infinite);
-        }
-    }
-
-    public class NoDebugLogger : IEasyNetQLogger
-    {
-        public void DebugWrite(string format, params object[] args)
-        {
-            
+            return Task.FromResult(0);
         }
 
-        public void InfoWrite(string format, params object[] args)
+        public void Dispose()
         {
-            Console.WriteLine(format, args);
-        }
+            Console.Out.WriteLine("Shutting down");
 
-        public void ErrorWrite(string format, params object[] args)
-        {
-            Console.WriteLine(format, args);
-        }
-
-        public void ErrorWrite(Exception exception)
-        {
-            Console.WriteLine(exception);
+            cancelled = true;
+            publishThread.Join();
+            messageRateTimer.Dispose();
+            bus.Dispose();
+            Console.WriteLine("Shut down complete");
         }
     }
 }
