@@ -94,6 +94,9 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "EasyNetQ", "EasyNetQ\EasyNetQ.shproj", "{6A038745-6B26-437B-9524-71F9CA2971F4}"
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "EasyNetQ", "EasyNetQ\EasyNetQ.shproj", "{6A038745-6B26-437B-9524-71F9CA2971F4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EasyNetQ\EasyNetQ.projitems*{b8def709-5168-48f1-b8d3-ad44e4a4a22b}*SharedItemsImports = 4

@@ -363,7 +363,7 @@ namespace EasyNetQ
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null)
-        {
+	        {
             Preconditions.CheckNotNull(name, "name");
 
             if (passive)
@@ -415,9 +415,11 @@ namespace EasyNetQ
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
-            byte? maxPriority = null,
+            int? maxPriority = null,
             string deadLetterExchange = null, 
-            string deadLetterRoutingKey = null)
+            string deadLetterRoutingKey = null,
+            int? maxLength = null,
+            int? maxLengthBytes = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -447,6 +449,14 @@ namespace EasyNetQ
             if (!string.IsNullOrEmpty(deadLetterRoutingKey))
             {
                 arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
+            }
+            if (maxLength.HasValue)
+            {
+                arguments.Add("x-max-length", maxLength.Value);
+            }
+            if (maxLengthBytes.HasValue)
+            {
+                arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
             await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);             
