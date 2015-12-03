@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.53.2.0")]
+[assembly: AssemblyVersion("0.53.3.0")]
 [assembly: CLSCompliant(true)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.53.3.0 Bug fix, process did not always exit if persistentconnection reconnected after disposal
 // 0.53.2.0 Bug fix, process did not always exit if bus disposal caused message handlers to error
 // 0.53.1.0 Removed separate test applications in favor of a single task runner
 // 0.53.0.0 fix expires default behavior of subscription configuration attribute
