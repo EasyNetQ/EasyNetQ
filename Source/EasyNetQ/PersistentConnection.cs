@@ -91,8 +91,15 @@ namespace EasyNetQ
             {
                 try
                 {
-                    connection = connectionFactory.CreateConnection();
+                    connection = connectionFactory.CreateConnection(); // A possible dispose race condition exists, whereby the Dispose() method may run while this loop is waiting on connectionFactory.CreateConnection() returning a connection.  In that case, a connection could be created and assigned to the connection variable, without it ever being later disposed, leading to app hang on shutdown.  The following if clause guards against this condition and ensures such connections are always disposed.
+                    if (disposed)
+                    {
+                        connection.Dispose();
+                        break;
+                    }
+
                     connectionFactory.Success();
+                    
                 }
                 catch (SocketException socketException)
                 {
@@ -102,7 +109,7 @@ namespace EasyNetQ
                 {
                     LogException(brokerUnreachableException);
                 }
-            } while (connectionFactory.Next());
+            } while (!disposed && connectionFactory.Next());
 
             if (connectionFactory.Succeeded)
             {
@@ -118,9 +125,12 @@ namespace EasyNetQ
             }
             else
             {
-                logger.ErrorWrite("Failed to connect to any Broker. Retrying in {0} ms\n", 
-                    connectAttemptIntervalMilliseconds);
-                StartTryToConnect();
+                if (!disposed)
+                {
+                    logger.ErrorWrite("Failed to connect to any Broker. Retrying in {0} ms\n",
+                        connectAttemptIntervalMilliseconds);
+                    StartTryToConnect();
+                }
             }
         }
 

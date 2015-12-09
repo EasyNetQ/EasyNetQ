@@ -116,6 +116,7 @@
     <Compile Include="Internals\AsyncSemaphoreTest.cs" />
     <Compile Include="MessageFactoryTests.cs" />
     <Compile Include="PersistentChannelTests\When_a_ConnectionCreatedEvent_is_published.cs" />
+    <Compile Include="PersistentConnectionTests.cs" />
     <Compile Include="ProducerTests\PublishConfirmationListenerTest.cs" />
     <Compile Include="Scheduling\SchedulingExtensionsTests.cs" />
     <Compile Include="TimeoutStrategyTest.cs" />
