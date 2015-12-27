@@ -65,6 +65,7 @@ namespace EasyNetQ.Hosepipe
             var parameters = new QueueParameters();
             arguments.WithKey("s", a => parameters.HostName = a.Value);
             arguments.WithKey("v", a => parameters.VHost = a.Value);
+            arguments.WithKey("q", a => parameters.QueueName = a.Value);
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
@@ -128,16 +129,21 @@ namespace EasyNetQ.Hosepipe
 
         private void ErrorDump(QueueParameters parameters)
         {
-            parameters.QueueName = conventions.ErrorQueueNamingConvention();
+            if (string.IsNullOrWhiteSpace(parameters.QueueName))
+                parameters.QueueName = conventions.ErrorQueueNamingConvention();
+            
             Dump(parameters);
         }
 
         private void Retry(QueueParameters parameters)
         {
+            if (string.IsNullOrWhiteSpace(parameters.QueueName))
+                parameters.QueueName = conventions.ErrorQueueNamingConvention();
+
             var count = 0;
             errorRetry.RetryErrors(
                 WithEach(
-                    messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention()), 
+                    messageReader.ReadMessages(parameters), 
                     () => count++), 
                 parameters);
 
