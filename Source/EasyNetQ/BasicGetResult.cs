@@ -73,7 +73,9 @@ namespace EasyNetQ
         }
     }
 
+#if !DOTNET5_4
     [Serializable]
+#endif
     public class MessageNotAvailableException : Exception
     {
         //
@@ -96,11 +98,12 @@ namespace EasyNetQ
         public MessageNotAvailableException(string message, Exception inner) : base(message, inner)
         {
         }
-
+#if !DOTNET5_4
         protected MessageNotAvailableException(
             SerializationInfo info,
             StreamingContext context) : base(info, context)
         {
         }
+#endif
     }
 }

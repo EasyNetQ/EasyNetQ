@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+
 
 namespace EasyNetQ
 {
@@ -12,10 +14,17 @@ namespace EasyNetQ
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
+#if DOTNET5_4
+            return typesAttributes.GetOrAdd(type, t => t.GetTypeInfo().GetCustomAttributes(true)
+                                                    .Cast<Attribute>()
+                                                    .GroupBy(attr => attr.GetType())
+                                                    .ToDictionary(group => group.Key, group => group.ToArray()));
+#else
             return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));
+#endif
         }
 
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this Type type) where TAttribute : Attribute

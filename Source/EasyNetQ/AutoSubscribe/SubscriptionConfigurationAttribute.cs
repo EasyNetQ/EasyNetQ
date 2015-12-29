@@ -2,7 +2,9 @@
 
 namespace EasyNetQ.AutoSubscribe
 {
+#if !DOTNET5_4
     [Serializable]
+#endif
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class SubscriptionConfigurationAttribute : Attribute
     {

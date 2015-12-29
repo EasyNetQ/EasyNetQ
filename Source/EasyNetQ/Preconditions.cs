@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace EasyNetQ
 {
@@ -216,7 +217,13 @@ namespace EasyNetQ
 
         public static void CheckTypeMatches(Type expectedType, object value, string name, string message)
         {
-            if (!expectedType.IsAssignableFrom(value.GetType()))
+            bool assignable;
+#if DOTNET5_4
+            assignable = expectedType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo());
+#else
+            assignable = expectedType.IsAssignableFrom(value.GetType());
+#endif
+            if (!assignable)
             {
                 CheckNotBlank(name, "name", "name must not be blank");
                 CheckNotBlank(message, "message", "message must not be blank");

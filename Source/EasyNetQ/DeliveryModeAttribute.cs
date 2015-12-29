@@ -2,7 +2,9 @@
 
 namespace EasyNetQ
 {
+#if !DOTNET5_4
     [Serializable]
+#endif
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
     public class DeliveryModeAttribute : Attribute
     {

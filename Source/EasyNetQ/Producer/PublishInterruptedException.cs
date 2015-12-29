@@ -3,7 +3,9 @@ using System.Runtime.Serialization;
 
 namespace EasyNetQ.Producer
 {
+#if !DOTNET5_4
     [Serializable]
+#endif
     public class PublishInterruptedException : Exception
     {
         //
@@ -27,11 +29,13 @@ namespace EasyNetQ.Producer
         {
         }
 
+#if !DOTNET5_4
         protected PublishInterruptedException(
             SerializationInfo info,
             StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }
