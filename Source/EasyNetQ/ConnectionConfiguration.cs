@@ -66,8 +66,15 @@ namespace EasyNetQ
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
+            string applicationNameAndPath = null;
+#if DOTNET5_4
+            var version = this.GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
+#else
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+            applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+#endif
+
+
 
             var applicationName = "unknown";
             var applicationPath = "unknown";
@@ -87,7 +94,12 @@ namespace EasyNetQ
                 catch (PathTooLongException) { }
             }
 
+#if DOTNET5_4
+            var hostname = System.Net.Dns.GetHostName();
+#else
             var hostname = Environment.MachineName;
+#endif
+
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
 

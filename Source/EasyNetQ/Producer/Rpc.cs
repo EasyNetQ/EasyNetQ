@@ -82,13 +82,26 @@ namespace EasyNetQ.Producer
             var correlationId = Guid.NewGuid();
 
             var tcs = new TaskCompletionSource<TResponse>();
-            var timer = new Timer(state =>
-                {
-                    ((Timer) state).Dispose();
-                    tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
-                });
 
             var requestType = typeof(TRequest);
+
+            Timer timer;
+#if DOTNET5_4
+            timer = new Timer(state =>
+                {
+                      ((Timer)state).Dispose();
+                tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+                }, null, TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
+#else
+            timer = new Timer(state =>
+            {
+                ((Timer)state).Dispose();
+                tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+            });
+#endif
+          
+
+            
             timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
             RegisterErrorHandling(correlationId, timer, tcs);
 

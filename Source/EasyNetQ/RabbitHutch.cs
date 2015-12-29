@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if !DOTNET5_4
 using System.Configuration;
+#endif
 using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ
@@ -24,6 +26,7 @@ namespace EasyNetQ
             createContainerInternal = createContainer;
         }
 
+        #if !DOTNET5_4
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
@@ -51,7 +54,7 @@ namespace EasyNetQ
         {
             return CreateBus(AdvancedBusEventHandlers.Default, registerServices);
         }
-
+        
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
@@ -101,7 +104,7 @@ namespace EasyNetQ
         {
             return CreateBus(advancedBusEventHandlers, c => {});
         }
-
+#endif
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// </summary>

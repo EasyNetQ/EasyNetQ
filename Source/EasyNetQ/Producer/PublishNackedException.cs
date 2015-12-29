@@ -2,6 +2,8 @@
 
 namespace EasyNetQ.Producer
 {
+#if !DOTNET5_4
+#endif
     public class PublishNackedException : Exception
     {
         //
@@ -22,5 +24,7 @@ namespace EasyNetQ.Producer
         public PublishNackedException(string message, Exception inner) : base(message, inner)
         {
         }
+#if !DOTNET5_4
+#endif
     }
 }

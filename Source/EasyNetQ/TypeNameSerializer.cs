@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace EasyNetQ
 {
@@ -42,7 +43,13 @@ namespace EasyNetQ
 
             return serializedTypes.GetOrAdd(type, t =>
             {
+#if DOTNET5_4
+                
+                var typeName = t.FullName + ":" + t.GetTypeInfo().Assembly.GetName().Name;
+#else
                 var typeName = t.FullName + ":" + t.Assembly.GetName().Name;
+#endif
+
                 if (typeName.Length > 255)
                 {
                     throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP " +
