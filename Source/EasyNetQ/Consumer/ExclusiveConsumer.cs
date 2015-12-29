@@ -47,11 +47,19 @@ namespace EasyNetQ.Consumer
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
+#if DOTNET5_4
+            timer = new Timer(s =>
+                {
+                    StartConsumer();
+                    ((Timer)s).Change(10000, -1);
+                }, null, 10000, Timeout.Infinite);
+#else
             timer = new Timer(s =>
                 {
                     StartConsumer();
                     ((Timer)s).Change(10000, -1);
                 });
+#endif
             timer.Change(10000, -1);
         }
 
