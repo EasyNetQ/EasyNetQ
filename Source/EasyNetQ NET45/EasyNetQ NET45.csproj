@@ -58,6 +58,7 @@
     <Compile Include="Internals\AsyncSemaphore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Internals\TaskHelpers.cs" />
+    <Compile Include="SimpleTypeNameSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
