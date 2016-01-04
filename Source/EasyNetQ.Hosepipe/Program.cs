@@ -68,6 +68,7 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
             arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
+            arguments.WithKey("q", a => parameters.QueueName = a.Value);
             arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
                 .FailWith(messsage("Invalid number of messages to retrieve"));
             arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
@@ -128,16 +129,19 @@ namespace EasyNetQ.Hosepipe
 
         private void ErrorDump(QueueParameters parameters)
         {
-            parameters.QueueName = conventions.ErrorQueueNamingConvention();
+            if(parameters.QueueName == null)
+                parameters.QueueName = conventions.ErrorQueueNamingConvention();
             Dump(parameters);
         }
 
         private void Retry(QueueParameters parameters)
         {
             var count = 0;
+            var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention();
+            
             errorRetry.RetryErrors(
                 WithEach(
-                    messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention()), 
+                    messageReader.ReadMessages(parameters, queueName), 
                     () => count++), 
                 parameters);
 
