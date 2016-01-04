@@ -12,7 +12,14 @@ namespace EasyNetQ
 
         public Type DeSerialize(string typeName)
         {
-            return _deserializedTypes.GetOrAdd(typeName, SimpleTypeStringParser.Parse);
+            try
+            {
+                return _deserializedTypes.GetOrAdd(typeName, SimpleTypeStringParser.Parse);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentException(ex.Message, ex);
+            }
         }
 
         public string Serialize(Type type)
@@ -91,7 +98,7 @@ namespace EasyNetQ
                 var ret = ReadType();
                 if (_token != Token.EOT)
                 {
-                    throw new ArgumentException("invalid type string. unexpected input");
+                    throw new EasyNetQException("invalid type string. unexpected input");
                 }
                 return ret;
             }
@@ -100,7 +107,7 @@ namespace EasyNetQ
             {
                 if (_token != Token.String)
                 {
-                    throw new ArgumentException("invalid type string. expecting type string.");
+                    throw new EasyNetQException("invalid type string. expecting type string.");
                 }
 
                 var typeName = _tokenValue;
@@ -120,7 +127,7 @@ namespace EasyNetQ
 
                         if (_token != Token.BracketLeft)
                         {
-                            throw new ArgumentException("invalid type string. expecting [");
+                            throw new EasyNetQException("invalid type string. expecting [");
                         }
 
                         ReadNextToken(); // read away [
@@ -128,25 +135,25 @@ namespace EasyNetQ
 
                         if (_token != Token.BracketRight)
                         {
-                            throw new ArgumentException("invalid type string. expecting ]");
+                            throw new EasyNetQException("invalid type string. expecting ]");
                         }
                         ReadNextToken(); // read away ]
                     } while (_token == Token.Comma);
 
                     if (_token != Token.BracketRight)
                     {
-                        throw new ArgumentException("invalid type string. expecting ]");
+                        throw new EasyNetQException("invalid type string. expecting ]");
                     }
                     ReadNextToken(); // read away ]
                 }
                 if (_token != Token.Comma)
                 {
-                    throw new ArgumentException("invalid type string. expecting ,");
+                    throw new EasyNetQException("invalid type string. expecting ,");
                 }
                 ReadNextToken(); // read away ,
                 if (_token != Token.String)
                 {
-                    throw new ArgumentException("invalid type string. expecting assembly string");
+                    throw new EasyNetQException("invalid type string. expecting assembly string");
                 }
                 var assemblyName = _tokenValue;
                 ReadNextToken(); // read away string

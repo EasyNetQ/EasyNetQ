@@ -1,23 +1,24 @@
 // ReSharper disable InconsistentNaming
+
 using System;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using NUnit.Framework;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.NET45
 {
     [TestFixture]
-    public class TypeNameSerializerTests
+    public class SimpleTypeNameSerializerTests
     {
-        private const string expectedTypeName = "System.String:mscorlib";
-        private const string expectedCustomTypeName = "EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests";
-        private const string expectedCustomGenericTypeName = "EasyNetQ.Tests.SomeRandomGenericClass`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:EasyNetQ.Tests";
+        private const string expectedTypeName = "System.String, mscorlib";
+        private const string expectedCustomTypeName = "EasyNetQ.Tests.NET45.SomeRandomClass, EasyNetQ.Tests.NET45";
+        private const string expectedCustomGenericTypeName = "EasyNetQ.Tests.NET45.SomeRandomGenericClass`1[[System.String, mscorlib]], EasyNetQ.Tests.NET45";
 
         private ITypeNameSerializer typeNameSerializer;
 
         [SetUp]
         public void SetUp()
         {
-            typeNameSerializer = new TypeNameSerializer();
+            typeNameSerializer = new SimpleTypeNameSerializer();
         }
 
         [Test]
