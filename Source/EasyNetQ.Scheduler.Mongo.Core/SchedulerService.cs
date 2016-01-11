@@ -74,7 +74,6 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                         exchange,
                         routingKey,
                         false,
-                        false,
                         properties,
                         schedule.InnerMessage);
                     scheduleRepository.MarkAsPublished(schedule.Id);

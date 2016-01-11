@@ -79,7 +79,7 @@ namespace EasyNetQ.Scheduling
                     Headers = new Dictionary<string, object> {{"x-delay", (int) messageDelay.TotalMilliseconds}}
                 }
             };
-            await advancedBus.PublishAsync(futureExchange, "#", false, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(futureExchange, "#", false, easyNetQMessage).ConfigureAwait(false);
         }
 
         private void FuturePublishInternal<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
@@ -104,7 +104,7 @@ namespace EasyNetQ.Scheduling
                     Headers = new Dictionary<string, object> { { "x-delay", (int)messageDelay.TotalMilliseconds } }
                 }
             };
-            advancedBus.Publish(futureExchange, "#", false, false, easyNetQMessage);
+            advancedBus.Publish(futureExchange, "#", false, easyNetQMessage);
         }
     }
 }

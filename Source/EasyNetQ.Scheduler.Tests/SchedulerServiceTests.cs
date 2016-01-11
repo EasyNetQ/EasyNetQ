@@ -55,14 +55,12 @@ namespace EasyNetQ.Scheduler.Tests
                 Arg<Exchange>.Is.Anything, 
                 Arg<string>.Is.Equal("msg1"),
                 Arg<bool>.Is.Anything,
-                Arg<bool>.Is.Anything,
                 Arg<MessageProperties>.Is.Anything,
                 Arg<byte[]>.Is.Anything));
 
             advancedBus.AssertWasCalled(x => x.Publish(
                 Arg<Exchange>.Is.Anything, 
                 Arg<string>.Is.Equal("msg2"),
-                Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<MessageProperties>.Is.Anything,
                 Arg<byte[]>.Is.Anything));

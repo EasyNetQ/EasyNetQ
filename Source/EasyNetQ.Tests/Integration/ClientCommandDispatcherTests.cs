@@ -89,7 +89,7 @@ namespace EasyNetQ.Tests.Integration
                         {
                             dispatcher.InvokeAsync(
                                 x =>
-                                x.BasicPublish("", "MyQueue", false, false, x.CreateBasicProperties(), body)
+                                x.BasicPublish("", "MyQueue", false, x.CreateBasicProperties(), body)
                                 ).Wait();
                         }
                     }, TaskCreationOptions.LongRunning));

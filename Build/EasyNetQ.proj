@@ -13,13 +13,12 @@
         <Package>$(BaseDir)\Package</Package>
         <Source>$(BaseDir)\Source</Source>
         <ILRepack>$(Tools)\ILRepack\ILRepack.exe</ILRepack>
-        <Net4OutputDir>$(Source)\EasyNetQ NET4\bin\Release</Net4OutputDir>
         <Net45OutputDir>$(Source)\EasyNetQ NET45\bin\Release</Net45OutputDir>
     </PropertyGroup>
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package;PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -62,10 +61,6 @@
 
     <Target Name="Merge" DependsOnTargets="Test">
       <Exec 
-          WorkingDirectory="$(Net4OutputDir)" 
-          Command="$(ILRepack) /internalize /targetplatform:v4 /out:EasyNetQ.dll EasyNetQ.dll Newtonsoft.Json.dll" />
-
-      <Exec 
           WorkingDirectory="$(Net45OutputDir)" 
           Command="$(ILRepack) /internalize /targetplatform:v4 /out:EasyNetQ.dll EasyNetQ.dll Newtonsoft.Json.dll" />
     </Target>
@@ -81,11 +76,9 @@
       
         <Delete Files="@(FilesToDelete)" />
                                   
-        <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ NET4\bin\Release\EasyNetQ.dll">
+        <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ NET45\bin\Release\EasyNetQ.dll">
             <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
         </GetAssemblyIdentity>
-        <Copy SourceFiles="$(Net4OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
-        <Copy SourceFiles="$(Net4OutputDir)\EasyNetQ.xml" DestinationFolder="$(Package)\EasyNetQ\lib\net40" />
         <Copy SourceFiles="$(Net45OutputDir)\EasyNetQ.dll" DestinationFolder="$(Package)\EasyNetQ\lib\net45" />
         <Copy SourceFiles="$(Net45OutputDir)\EasyNetQ.xml" DestinationFolder="$(Package)\EasyNetQ\lib\net45" />
 
@@ -109,7 +102,7 @@
 
     <Delete Files="@(FilesToDelete)" />
 
-    <Copy SourceFiles="$(Source)\EasyNetQ.DI.Windsor\bin\Release\EasyNetQ.DI.Windsor.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Windsor\lib\net40" />
+    <Copy SourceFiles="$(Source)\EasyNetQ.DI.Windsor\bin\Release\EasyNetQ.DI.Windsor.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Windsor\lib\net45" />
 
     <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.DI.Windsor\bin\Release\EasyNetQ.DI.Windsor.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
@@ -139,7 +132,7 @@
 
     <Delete Files="@(FilesToDelete)" />
 
-    <Copy SourceFiles="$(Source)\EasyNetQ.DI.StructureMap\bin\Release\EasyNetQ.DI.StructureMap.dll" DestinationFolder="$(Package)\EasyNetQ.DI.StructureMap\lib\net40" />
+    <Copy SourceFiles="$(Source)\EasyNetQ.DI.StructureMap\bin\Release\EasyNetQ.DI.StructureMap.dll" DestinationFolder="$(Package)\EasyNetQ.DI.StructureMap\lib\net45" />
 
     <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.DI.StructureMap\bin\Release\EasyNetQ.DI.StructureMap.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
@@ -169,7 +162,7 @@
 
     <Delete Files="@(FilesToDelete)" />
 
-    <Copy SourceFiles="$(Source)\EasyNetQ.DI.Ninject\bin\Release\EasyNetQ.DI.Ninject.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Ninject\lib\net40" />
+    <Copy SourceFiles="$(Source)\EasyNetQ.DI.Ninject\bin\Release\EasyNetQ.DI.Ninject.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Ninject\lib\net45" />
 
     <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.DI.Ninject\bin\Release\EasyNetQ.DI.Ninject.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
@@ -199,7 +192,7 @@
 
     <Delete Files="@(FilesToDelete)" />
 
-    <Copy SourceFiles="$(Source)\EasyNetQ.DI.Autofac\bin\Release\EasyNetQ.DI.Autofac.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Autofac\lib\net40" />
+    <Copy SourceFiles="$(Source)\EasyNetQ.DI.Autofac\bin\Release\EasyNetQ.DI.Autofac.dll" DestinationFolder="$(Package)\EasyNetQ.DI.Autofac\lib\net45" />
 
     <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.DI.Autofac\bin\Release\EasyNetQ.DI.Autofac.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
@@ -229,7 +222,7 @@
 
     <Delete Files="@(FilesToDelete)" />
 
-    <Copy SourceFiles="$(Source)\EasyNetQ.Serilog\bin\Release\EasyNetQ.Serilog.dll" DestinationFolder="$(Package)\EasyNetQ.Serilog\lib\net40" />
+    <Copy SourceFiles="$(Source)\EasyNetQ.Serilog\bin\Release\EasyNetQ.Serilog.dll" DestinationFolder="$(Package)\EasyNetQ.Serilog\lib\net45" />
 
     <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.Serilog\bin\Release\EasyNetQ.Serilog.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />

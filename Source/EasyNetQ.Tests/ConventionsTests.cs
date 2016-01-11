@@ -176,7 +176,6 @@ namespace EasyNetQ.Tests
                     Arg<string>.Is.Equal("CustomExchangeNamingConvention"), 
                     Arg<string>.Is.Anything, 
                     Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(false),
                     Arg<IBasicProperties>.Is.Anything,
                     Arg<byte[]>.Is.Anything));
 		}
@@ -188,7 +187,6 @@ namespace EasyNetQ.Tests
                 x.BasicPublish(
                     Arg<string>.Is.Anything,
                     Arg<string>.Is.Equal("CustomTopicNamingConvention"),
-                    Arg<bool>.Is.Equal(false),
                     Arg<bool>.Is.Equal(false),
                     Arg<IBasicProperties>.Is.Anything,
                     Arg<byte[]>.Is.Anything));

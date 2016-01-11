@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             requestMessage = new TestRequestMessage();
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, false, null, null))
+            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
                        .IgnoreArguments()
                        .WhenCalled(invocation =>
                        {
