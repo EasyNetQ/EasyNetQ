@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
             mockBuilder.NextModel.Stub(x =>
                 x.BasicPublish(null, null, false, null, null))
                     .IgnoreArguments()
-                    .Callback<string, string, bool, bool, IBasicProperties, byte[]>((e, r, m, i, p, b) =>
+                    .Callback<string, string, bool, IBasicProperties, byte[]>((e, r, m, p, b) =>
                     {
                         body = b;
                         properties = p;

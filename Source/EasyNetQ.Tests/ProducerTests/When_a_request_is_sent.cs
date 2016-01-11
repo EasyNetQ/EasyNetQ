@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 .IgnoreArguments()
                 .WhenCalled(invocation =>
                     {
-                        var properties = (IBasicProperties)invocation.Arguments[4];
+                        var properties = (IBasicProperties)invocation.Arguments[3];
                         correlationId = properties.CorrelationId;
                     });
 

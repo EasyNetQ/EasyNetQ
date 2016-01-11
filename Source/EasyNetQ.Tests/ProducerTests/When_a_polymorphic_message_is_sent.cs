@@ -32,8 +32,8 @@ namespace EasyNetQ.Tests.ProducerTests
                 .IgnoreArguments()
                 .WhenCalled(x =>
                     {
-                        properties = (IBasicProperties) x.Arguments[4];
-                        publishedMessage = (byte[]) x.Arguments[5];
+                        properties = (IBasicProperties) x.Arguments[3];
+                        publishedMessage = (byte[]) x.Arguments[4];
                     });
 
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
