@@ -76,7 +76,7 @@ namespace EasyNetQ.Scheduling
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof (T))
                 }
             };
-            await advancedBus.PublishAsync(futureExchange, "#", false, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(futureExchange, "#", false, easyNetQMessage).ConfigureAwait(false);
         }
 
         private void FuturePublishInternal<T>(TimeSpan messageDelay, T message, string cancellationKey) where T : class
@@ -99,7 +99,7 @@ namespace EasyNetQ.Scheduling
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof (T))
                 }
             };
-            advancedBus.Publish(futureExchange, "#", false, false, easyNetQMessage);
+            advancedBus.Publish(futureExchange, "#", false, easyNetQMessage);
         }
 
         private static TimeSpan Round(TimeSpan timeSpan)

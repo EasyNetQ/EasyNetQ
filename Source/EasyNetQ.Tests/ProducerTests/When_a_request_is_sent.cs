@@ -26,11 +26,11 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var correlationId = "";
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, false, null, null))
+            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
                 .IgnoreArguments()
                 .WhenCalled(invocation =>
                     {
-                        var properties = (IBasicProperties)invocation.Arguments[4];
+                        var properties = (IBasicProperties)invocation.Arguments[3];
                         correlationId = properties.CorrelationId;
                     });
 
@@ -55,7 +55,6 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Channels[0].AssertWasCalled(x => x.BasicPublish(
                 Arg<string>.Is.Equal("easy_net_q_rpc"),
                 Arg<string>.Is.Equal("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Messages"),
-                Arg<bool>.Is.Equal(false),
                 Arg<bool>.Is.Equal(false),
                 Arg<IBasicProperties>.Is.Anything,
                 Arg<byte[]>.Is.Anything));

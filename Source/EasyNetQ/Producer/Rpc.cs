@@ -200,7 +200,7 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            advancedBus.Publish(exchange, routingKey, false, false, requestMessage);
+            advancedBus.Publish(exchange, routingKey, false, requestMessage);
         }
 
         public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
@@ -278,7 +278,7 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
+            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, responseMessage);
         }
 
         protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
@@ -292,7 +292,7 @@ namespace EasyNetQ.Producer
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
             responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
 
-            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, false, responseMessage);
+            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, responseMessage);
         }
     }
 }

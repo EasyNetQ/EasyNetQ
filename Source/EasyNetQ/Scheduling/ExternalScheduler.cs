@@ -70,7 +70,7 @@ namespace EasyNetQ.Scheduling
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType)
                 }
             };
-            await advancedBus.PublishAsync(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, easyNetQMessage).ConfigureAwait(false);
         }
 
         public void FuturePublish<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
@@ -105,7 +105,7 @@ namespace EasyNetQ.Scheduling
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType)
                 }
             };
-            advancedBus.Publish(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, false, easyNetQMessage);
+            advancedBus.Publish(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, easyNetQMessage);
         }
 
         public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
@@ -130,7 +130,7 @@ namespace EasyNetQ.Scheduling
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(uncheduleMeType)
                 }
             };
-            await advancedBus.PublishAsync(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, easyNetQMessage).ConfigureAwait(false);
         }
 
         public void CancelFuturePublish(string cancellationKey)
@@ -145,7 +145,7 @@ namespace EasyNetQ.Scheduling
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(uncheduleMeType)
                 }
             };
-            advancedBus.Publish(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, false, easyNetQMessage);
+            advancedBus.Publish(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, easyNetQMessage);
         }
     }
 }

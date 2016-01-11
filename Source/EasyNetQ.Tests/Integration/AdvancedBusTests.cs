@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 var advancedBus = ((IAdvancedBus)s);
                 var exchange = advancedBus.ExchangeDeclare("my_test_exchange", "topic", autoDelete: true);
-                advancedBus.Publish(exchange, "key", false, false, new MessageProperties(), Encoding.UTF8.GetBytes("Hello world"));
+                advancedBus.Publish(exchange, "key", false, new MessageProperties(), Encoding.UTF8.GetBytes("Hello world"));
             });
             bus = RabbitHutch.CreateBus("host=localhost", advancedBusEventHandlers);
         }

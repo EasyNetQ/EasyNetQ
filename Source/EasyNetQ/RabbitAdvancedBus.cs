@@ -190,7 +190,6 @@ namespace EasyNetQ
             IExchange exchange, 
             string routingKey, 
             bool mandatory, 
-            bool immediate,
             MessageProperties messageProperties, 
             byte[] body)
         {
@@ -210,7 +209,7 @@ namespace EasyNetQ
 
                         try
                         {
-                            model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                         }
                         catch (Exception)
                         {
@@ -237,7 +236,7 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                 });
             }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
@@ -248,19 +247,17 @@ namespace EasyNetQ
             IExchange exchange, 
             string routingKey, 
             bool mandatory, 
-            bool immediate, 
             IMessage<T> message) where T : class
         {
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            Publish(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
+            Publish(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body);
         }
 
         public virtual Task PublishAsync(
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            bool immediate,
             IMessage message)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -268,14 +265,13 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
+            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body);
         }
 
         public virtual Task PublishAsync<T>(
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            bool immediate,
             IMessage<T> message) where T : class
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -283,14 +279,13 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, immediate, serializedMessage.Properties, serializedMessage.Body);
+            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body);
         }
 
         public virtual async Task PublishAsync(
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            bool immediate,
             MessageProperties messageProperties,
             byte[] body)
         {
@@ -314,7 +309,7 @@ namespace EasyNetQ
 
                         try
                         {
-                            model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                         }
                         catch (Exception)
                         {
@@ -341,7 +336,7 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                 }).ConfigureAwait(false);
             }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));

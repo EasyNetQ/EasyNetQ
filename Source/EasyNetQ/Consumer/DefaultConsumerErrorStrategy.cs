@@ -155,7 +155,7 @@ namespace EasyNetQ.Consumer
 
                     var messageBody = CreateErrorMessage(context, exception);
                     var properties = model.CreateBasicProperties();
-                    properties.SetPersistent(true);
+                    properties.Persistent = true;
                     properties.Type = typeNameSerializer.Serialize(typeof (Error));
 
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);

@@ -41,7 +41,7 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            advancedBus.Publish(Exchange.GetDefault(), queue, false, false, wrappedMessage);
+            advancedBus.Publish(Exchange.GetDefault(), queue, false, wrappedMessage);
         }
 
         public Task SendAsync<T>(string queue, T message)
@@ -60,7 +60,7 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, false, wrappedMessage);
+            return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage);
         }
 
         public IDisposable Receive<T>(string queue, Action<T> onMessage)

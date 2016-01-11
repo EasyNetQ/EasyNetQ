@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.Integration
                     CorrelationId = "ping pong test"
                 };
             var body = Encoding.UTF8.GetBytes(messageText);
-            buses[1].Advanced.Publish(exchanges[1], routingKey, false, false, properties, body);
+            buses[1].Advanced.Publish(exchanges[1], routingKey, false, properties, body);
 
             while (Interlocked.Read(ref rallyCount) < rallyLength)
             {
@@ -82,7 +82,7 @@ namespace EasyNetQ.Tests.Integration
                             CorrelationId = properties.CorrelationId ?? "no id present"
                         };
                     var publishBody = GenerateNextMessage(body);
-                    buses[from].Advanced.Publish(exchanges[to], routingKey, false, false, publishProperties, publishBody);
+                    buses[from].Advanced.Publish(exchanges[to], routingKey, false, publishProperties, publishBody);
 
                     Interlocked.Increment(ref rallyCount);
                 }));
