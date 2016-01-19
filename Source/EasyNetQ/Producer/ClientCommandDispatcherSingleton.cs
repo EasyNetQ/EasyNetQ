@@ -15,15 +15,17 @@ namespace EasyNetQ.Producer
         private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
 
         public ClientCommandDispatcherSingleton(
+            ConnectionConfiguration configuration,
             IPersistentConnection connection,
             IPersistentChannelFactory persistentChannelFactory)
         {
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
 
-            StartDispatcherThread();
+            StartDispatcherThread(configuration);
         }
 
         public T Invoke<T>(Func<IModel, T> channelAction)
@@ -99,9 +101,9 @@ namespace EasyNetQ.Producer
             persistentChannel.Dispose();
         }
 
-        private void StartDispatcherThread()
+        private void StartDispatcherThread(ConnectionConfiguration configuration)
         {
-            new Thread(() =>
+            var thread = new Thread(() =>
             {
                 while (!cancellation.IsCancellationRequested)
                 {
@@ -115,7 +117,8 @@ namespace EasyNetQ.Producer
                         break;
                     }
                 }
-            }) {Name = "Client Command Dispatcher Thread"}.Start();
+            }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
+            thread.Start();
         }
 
         private struct NoContentStruct
