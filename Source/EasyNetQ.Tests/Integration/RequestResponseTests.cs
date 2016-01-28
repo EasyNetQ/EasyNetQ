@@ -176,8 +176,7 @@ namespace EasyNetQ.Tests.Integration
                 model.BasicPublish(
                     "easy_net_q_rpc", // exchange
                     routingKey, // routing key
-                    false, // manditory
-                    false, // immediate
+                    false, // mandatory
                     properties,
                     new byte[0]);
             }

@@ -72,7 +72,7 @@ namespace EasyNetQ.Tests.Integration
                     CorrelationId = "0"
                 };
             var body = Encoding.UTF8.GetBytes(messageText);
-            buses[1].Advanced.Publish(exchanges[1], routingKey, false, false, properties, body);
+            buses[1].Advanced.Publish(exchanges[1], routingKey, false, properties, body);
 
             while (Interlocked.Read(ref rallyCount) < rallyLength)
             {
@@ -105,7 +105,7 @@ namespace EasyNetQ.Tests.Integration
                     {
                         try
                         {
-                            buses[from].Advanced.Publish(exchanges[to], routingKey, false, false, publishProperties, nextMessage.Body);
+                            buses[from].Advanced.Publish(exchanges[to], routingKey, false, publishProperties, nextMessage.Body);
                             published = true;
                         }
                         catch (Exception)

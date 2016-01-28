@@ -28,12 +28,12 @@ namespace EasyNetQ.Tests.ProducerTests
                     NotInInterface = "Hi"
                 };
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, false, null, null))
+            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
                 .IgnoreArguments()
                 .WhenCalled(x =>
                     {
-                        properties = (IBasicProperties) x.Arguments[4];
-                        publishedMessage = (byte[]) x.Arguments[5];
+                        properties = (IBasicProperties) x.Arguments[3];
+                        publishedMessage = (byte[]) x.Arguments[4];
                     });
 
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
@@ -69,7 +69,6 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Channels[0].AssertWasCalled(x => x.BasicPublish(
                     Arg<string>.Is.Equal(interfaceTypeName), 
                     Arg<string>.Is.Equal(""), 
-                    Arg<bool>.Is.Equal(false), 
                     Arg<bool>.Is.Equal(false), 
                     Arg<IBasicProperties>.Is.Anything, 
                     Arg<byte[]>.Is.Anything 

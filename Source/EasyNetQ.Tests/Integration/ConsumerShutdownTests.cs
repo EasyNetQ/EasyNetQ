@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests.Integration
                         });
                 });
 
-            bus.Advanced.Publish(Exchange.GetDefault(), queueName, false, false, new MessageProperties(), message);
+            bus.Advanced.Publish(Exchange.GetDefault(), queueName, false, new MessageProperties(), message);
             Console.Out.WriteLine("Published");
 
             receivedEvent.WaitOne();

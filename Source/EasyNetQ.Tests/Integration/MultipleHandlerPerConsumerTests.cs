@@ -50,12 +50,9 @@ namespace EasyNetQ.Tests.Integration
                         })
                 );
 
-            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, 
-                new Message<MyMessage>(new MyMessage { Text = "Hello" }));
-            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, 
-                new Message<MyOtherMessage>(new MyOtherMessage { Text = "Hi" }));
-            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, 
-                new Message<Dog>(new Dog()));
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, new Message<MyMessage>(new MyMessage { Text = "Hello" }));
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, new Message<MyOtherMessage>(new MyOtherMessage { Text = "Hi" }));
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, new Message<Dog>(new Dog()));
 
             countdownEvent.Wait(1000);
         }

@@ -64,7 +64,7 @@ namespace EasyNetQ
                 }
             };
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
-            advancedBus.Publish(exchange, topic, false, false, easyNetQMessage); 
+            advancedBus.Publish(exchange, topic, false, easyNetQMessage); 
         }
 
         public virtual Task PublishAsync<T>(T message) where T : class
@@ -87,7 +87,7 @@ namespace EasyNetQ
                 }
             };
             var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage).ConfigureAwait(false); 
+            await advancedBus.PublishAsync(exchange, topic, false, easyNetQMessage).ConfigureAwait(false); 
         }
 
         public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class

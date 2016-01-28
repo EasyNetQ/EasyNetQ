@@ -29,7 +29,6 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg<string>.Is.Equal(""),
                 Arg<string>.Is.Equal(queueName),
                 Arg<bool>.Is.Equal(false),
-                Arg<bool>.Is.Equal(false),
                 Arg<IBasicProperties>.Is.Anything,
                 Arg<byte[]>.Is.Anything));
         }

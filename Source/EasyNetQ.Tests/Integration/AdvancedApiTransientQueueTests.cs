@@ -40,12 +40,12 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(5000);
 
             var body1 = Encoding.UTF8.GetBytes("Publish 1");
-            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, new MessageProperties(), body1);
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, new MessageProperties(), body1);
 
             Thread.Sleep(5000);
 
             var body2 = Encoding.UTF8.GetBytes("Publish 2");
-            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, false, new MessageProperties(), body2);
+            bus.Advanced.Publish(Exchange.GetDefault(), queue.Name, false, new MessageProperties(), body2);
 
             Thread.Sleep(1000);
         }

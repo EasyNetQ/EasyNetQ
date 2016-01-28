@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.Integration
             advancedBus.Bind(alternateExchange, queue, bindingKey);
 
             var message = Encoding.UTF8.GetBytes("Some message");
-            advancedBus.Publish(originalExchange, bindingKey, false, false, new MessageProperties(), message);
+            advancedBus.Publish(originalExchange, bindingKey, false, new MessageProperties(), message);
         }
 
         [Test, Explicit]
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests.Integration
             var message = Encoding.UTF8.GetBytes("Some message");
             var messageProperties = new MessageProperties();
             messageProperties.Headers.Add("x-delay", 5000);
-            advancedBus.Publish(delayedExchange, bindingKey, false, false, messageProperties, message);
+            advancedBus.Publish(delayedExchange, bindingKey, false, messageProperties, message);
         }
 
 
@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests.Integration
             var exchange = new Exchange("my_exchange");
 
             var body = Encoding.UTF8.GetBytes("Hello World!");
-            advancedBus.Publish(exchange, "routing_key", false, false, new MessageProperties(), body);
+            advancedBus.Publish(exchange, "routing_key", false, new MessageProperties(), body);
 
             Thread.Sleep(5000);
         }
@@ -128,8 +128,7 @@ namespace EasyNetQ.Tests.Integration
                 Task.Factory.StartNew(() => 
                     Console.WriteLine("Got message {0}", message.Body.Text)));
 
-            advancedBus.Publish(Exchange.GetDefault(), "consume_test", false, false, 
-                new Message<MyMessage>(new MyMessage{ Text = "Wotcha!"}));
+            advancedBus.Publish(Exchange.GetDefault(), "consume_test", false, new Message<MyMessage>(new MyMessage{ Text = "Wotcha!"}));
 
             Thread.Sleep(1000);
         }
@@ -138,8 +137,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_get_a_message()
         {
             var queue = advancedBus.QueueDeclare("get_test");
-            advancedBus.Publish(Exchange.GetDefault(), "get_test", false, false,
-                new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
+            advancedBus.Publish(Exchange.GetDefault(), "get_test", false, new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
 
             var getResult = advancedBus.Get<MyMessage>(queue);
 
@@ -169,8 +167,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_get_queue_length()
         {
             var queue = advancedBus.QueueDeclare("count_test");
-            advancedBus.Publish(Exchange.GetDefault(), "count_test", false, false,
-                new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
+            advancedBus.Publish(Exchange.GetDefault(), "count_test", false, new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
             uint messageCount = advancedBus.MessageCount(queue);
             Console.WriteLine("{0} messages in queue", messageCount);
         }

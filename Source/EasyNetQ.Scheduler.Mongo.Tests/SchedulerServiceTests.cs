@@ -55,7 +55,6 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
                 Arg<Exchange>.Is.Anything,
                 Arg<string>.Is.Equal("msg1"),
                 Arg<bool>.Is.Anything,
-                Arg<bool>.Is.Anything,
                 Arg<MessageProperties>.Is.Anything,
                 Arg<byte[]>.Is.Anything));
         }

@@ -17,15 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-      <group>
-        <dependency id="RabbitMQ.Client" version="[3.5.7,]" />
-        <dependency id="Microsoft.Bcl" version="1.1.10" />
-        <dependency id="Microsoft.Bcl.Async" version="1.0.168" />
-        <dependency id="Microsoft.Bcl.Build" version="1.0.21" />
-      </group>
-      <group targetFramework="net45">
-        <dependency id="RabbitMQ.Client" version="[3.5.7,]" />
-      </group>
+        <dependency id="RabbitMQ.Client" version="[3.6.0,]" />
     </dependencies>
   </metadata>
 </package>

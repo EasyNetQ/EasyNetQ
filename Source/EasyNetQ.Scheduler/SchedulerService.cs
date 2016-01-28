@@ -105,7 +105,6 @@ namespace EasyNetQ.Scheduler
                             exchange,
                             routingKey,
                             false,
-                            false,
                             messageProperties,
                             scheduledMessage.InnerMessage);
                     }
