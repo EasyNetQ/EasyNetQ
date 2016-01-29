@@ -5,6 +5,7 @@ using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using System.Linq;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
@@ -54,8 +55,15 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
-
-            PublishAsync(message, topic).Wait();
+            var messageType = typeof(T);
+            var easyNetQMessage = new Message<T>(message) {
+                Properties =
+                {
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
+                }
+            };
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
+            advancedBus.Publish(exchange, topic, false, easyNetQMessage);
         }
 
         public virtual Task PublishAsync<T>(T message) where T : class
@@ -65,22 +73,19 @@ namespace EasyNetQ
             return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
         }
 
-        public virtual Task PublishAsync<T>(T message, string topic) where T : class
+        public virtual async Task PublishAsync<T>(T message, string topic) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
-            var messageType = typeof (T);
-            return publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).Then(exchange => 
-            {
-                    var easyNetQMessage = new Message<T>(message) 
-                    {
-                        Properties =
-                        {
-                            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
-                        }
-                    };
-                    return advancedBus.PublishAsync(exchange, topic, false, false, easyNetQMessage);
-                });
+            var messageType = typeof(T);
+            var easyNetQMessage = new Message<T>(message) {
+                Properties =
+                {
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
+                }
+            };
+            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).ConfigureAwait(false);
+            await advancedBus.PublishAsync(exchange, topic, false, easyNetQMessage).ConfigureAwait(false);
         }
 
         public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
@@ -94,21 +99,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            return SubscribeAsync<T>(subscriptionId, msg => 
-            {
-                var tcs = new TaskCompletionSource<object>();
-                try
-                {
-                    onMessage(msg);
-                    tcs.SetResult(null);
-                }
-                catch (Exception exception)
-                {
-                    tcs.SetException(exception);
-                }
-                return tcs.Task;
-            },
-            configure);
+            return SubscribeAsync<T>(subscriptionId, msg => TaskHelpers.ExecuteSynchronously(() => onMessage(msg)), configure);
         }
 
         public virtual ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class
