@@ -53,6 +53,12 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithMessageTtl(TimeSpan? ttl);
 
         /// <summary>
+        /// Sets the Expiry on the Queue to the maximum allowed (24 days).
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithExpiresMax();
+
+        /// <summary>
         /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy. 
         /// This controls for how long a queue can be unused before it is automatically deleted. 
         /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period. 
@@ -149,6 +155,10 @@ namespace EasyNetQ.FluentConfiguration
         {
             PrefetchCount = prefetchCount;
             return this;
+        }
+
+        public ISubscriptionConfiguration WithExpiresMax() {
+            return WithExpires(int.MaxValue);
         }
 
         public ISubscriptionConfiguration WithExpires(int expires)
