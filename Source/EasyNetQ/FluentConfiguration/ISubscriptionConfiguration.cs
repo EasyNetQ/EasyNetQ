@@ -82,7 +82,7 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <param name="expires">Maximum value of 24 days and cannot be zero</param>
         /// <returns></returns>
-        ISubscriptionConfiguration WithExpires(TimeSpan expires);
+        ISubscriptionConfiguration WithExpires(TimeSpan? expires);
 
         /// <summary>
         /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy. 
@@ -167,11 +167,16 @@ namespace EasyNetQ.FluentConfiguration
             return this;
         }
 
-        public ISubscriptionConfiguration WithExpires(TimeSpan expires)
+        public ISubscriptionConfiguration WithExpires(TimeSpan? expires)
         {
-            if (expires.TotalDays > 24)
+            if (!expires.HasValue) {
+                Expires = null;
+                return this;
+            }
+
+            if (expires.Value.TotalDays > 24)
                 expires = TimeSpan.FromDays(24);
-            Expires = (int)expires.TotalMilliseconds;
+            Expires = (int)expires.Value.TotalMilliseconds;
             return this;
         }
 
