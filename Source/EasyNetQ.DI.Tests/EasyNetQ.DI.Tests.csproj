@@ -50,6 +50,10 @@
       <HintPath>..\packages\Castle.Windsor.3.2.1\lib\net45\Castle.Windsor.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LightInject, Version=3.0.2.7, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LightInject.3.0.2.7\lib\net45\LightInject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
       <Private>True</Private>
@@ -79,6 +83,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AutofacAdapterTests.cs" />
+    <Compile Include="LightInjectAdapterTests.cs" />
     <Compile Include="NinjectAdapterTests.cs" />
     <Compile Include="StructureMapAdapterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -93,6 +98,10 @@
     <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj">
       <Project>{74fb0a3d-2c72-462c-b498-15c0ae615d35}</Project>
       <Name>EasyNetQ.DI.Autofac</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj">
+      <Project>{3ad2cd4a-8969-4c2d-8eaa-9fc800585678}</Project>
+      <Name>EasyNetQ.DI.LightInject</Name>
     </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj">
       <Project>{c76da6ea-78f0-4918-8e0a-7a1cad31e702}</Project>
