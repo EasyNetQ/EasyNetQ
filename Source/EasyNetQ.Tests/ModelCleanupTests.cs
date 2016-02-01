@@ -20,12 +20,12 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
-        public void Should_cleanup_publish_model()
+        public void Should_not_cleanup_publish_model()
         {
             bus.Publish(new TestMessage());
             bus.Dispose();
 
-            mockBuilder.Channels[0].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[0].AssertWasNotCalled(x => x.Dispose());
         }
 
         [Test]
