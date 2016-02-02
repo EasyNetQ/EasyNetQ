@@ -31,7 +31,7 @@ namespace EasyNetQ
             {
                 var connectionFactory = new ConnectionFactory
                 {
-                    UseBackgroundThreadsForIO = false,
+                    UseBackgroundThreadsForIO = connectionConfiguration.UseBackgroundThreads,
                     AutomaticRecoveryEnabled = false,
                     TopologyRecoveryEnabled = false
                 };

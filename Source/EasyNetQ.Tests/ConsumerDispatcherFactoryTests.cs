@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Threading;
+using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -16,8 +17,10 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
+            var parser = new ConnectionStringParser();
+            var configuration = parser.Parse("host=localhost");
             logger = MockRepository.GenerateStub<IEasyNetQLogger>();
-            dispatcherFactory = new ConsumerDispatcherFactory(logger);
+            dispatcherFactory = new ConsumerDispatcherFactory(configuration, logger);
         }
 
         [TearDown]
