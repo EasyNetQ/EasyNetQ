@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
@@ -7,6 +8,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer
 {
+
     /// <summary>
     /// A strategy for dealing with failed messages. When a message consumer thows, HandleConsumerError is invoked.
     /// 
@@ -197,9 +199,29 @@ namespace EasyNetQ.Consumer
                 Exchange = context.Info.Exchange,
                 Exception = exception.ToString(),
                 Message = messageAsString,
-                DateTime = DateTime.UtcNow,
-                BasicProperties = context.Properties
+                DateTime = DateTime.UtcNow
             };
+
+            if (context.Properties.Headers == null)
+            {
+                error.BasicProperties = context.Properties;
+            }
+            else
+            {   
+                // we'll need to clone context.Properties as we are mutating the headers dictionary
+                error.BasicProperties = (MessageProperties)context.Properties.Clone();
+
+                // the RabbitMQClient implictly converts strings to byte[] on sending, but reads them back as byte[]
+                // we're making the assumption here that any byte[] values in the headers are strings
+                // and all others are basic types. RabbitMq client generally throws a nasty exception if you try
+                // to store anything other than basic types in headers anyway.
+
+                //see http://hg.rabbitmq.com/rabbitmq-dotnet-client/file/tip/projects/client/RabbitMQ.Client/src/client/impl/WireFormatting.cs
+
+                error.BasicProperties.Headers = context.Properties.Headers.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value is byte[] ? Encoding.UTF8.GetString((byte[])kvp.Value) : kvp.Value);
+            }
 
             return serializer.MessageToBytes(error);
         }

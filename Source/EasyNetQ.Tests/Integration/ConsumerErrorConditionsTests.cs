@@ -102,7 +102,8 @@ namespace EasyNetQ.Tests
              bus.Advanced.Publish(exchange, typeNameSerializer.Serialize(typeof(MyErrorTestMessage)), true, props, serializer.MessageToBytes(message));
 
             // give the publish a chance to get to rabbit and back
-            Thread.Sleep(500);
+            // also allow the DefaultConsumerErrorStrategy time to spin up its connection
+            Thread.Sleep(1000);
 
             var errorMessage = this.bus.Advanced.Get<Error>(errorQueue);
             errorMessage.MessageAvailable.ShouldBeTrue();
