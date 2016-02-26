@@ -12,6 +12,7 @@ namespace EasyNetQ.Hosepipe
         public bool Purge { get; set; }
         public int NumberOfMessagesToRetrieve { get; set; }
         public string MessageFilePath { get; set; }
+        public string RoutingKey { get; set; }
 
         public QueueParameters()
         {
