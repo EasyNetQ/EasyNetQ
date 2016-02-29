@@ -58,3 +58,4 @@ No particular order. Don't forget to add your name with your pull request.
 * Mathieu Leenhardt
 * Steven Bone
 * Matt Davey
+* Dan Barua
