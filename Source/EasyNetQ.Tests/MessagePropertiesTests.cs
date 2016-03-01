@@ -46,6 +46,28 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
+        public void Should_clone()
+        {
+            const string replyTo = "reply to";
+
+            var properties = new MessageProperties {
+                ReplyTo = replyTo,
+                Headers = new Dictionary<string, object>()
+                          {
+                              { "AString", "ThisIsAString" },
+                              { "AnInt", 123 }
+                          }
+                };
+
+            var destinationProperties = (MessageProperties)properties.Clone();
+
+            destinationProperties.ReplyTo.ShouldEqual(replyTo);
+            destinationProperties.ReplyToPresent.ShouldBeTrue();
+            destinationProperties.MessageIdPresent.ShouldBeFalse();
+            destinationProperties.Headers.ShouldEqual(properties.Headers);
+        }
+
+        [Test]
         public void Should_be_able_to_write_debug_properties()
         {
             const string expectedDebugProperties = 
