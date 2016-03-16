@@ -210,7 +210,7 @@ namespace EasyNetQ.Producer
             return Respond(responder, c => { });
         }
 
-        public IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
         {
             Preconditions.CheckNotNull(responder, "responder");
             Preconditions.CheckNotNull(configure, "configure");
