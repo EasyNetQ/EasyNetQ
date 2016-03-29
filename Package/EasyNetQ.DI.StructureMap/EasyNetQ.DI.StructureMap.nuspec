@@ -18,7 +18,7 @@
     <tags>RabbitMQ Messaging AMQP REST API StructureMap</tags>
     <dependencies>
       <dependency id="EasyNetQ" version="0.53.4.0" />
-      <dependency id="structuremap" version="2.6.4.1" />
+      <dependency id="structuremap" version="4.0.0.315" />
     </dependencies>
   </metadata>
 </package>
