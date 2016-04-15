@@ -192,7 +192,7 @@ namespace EasyNetQ.Consumer
 
         private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
-            var messageAsString = Encoding.UTF8.GetString(context.Body);
+            var messageAsString = Convert.ToBase64String(context.Body);
             var error = new Error
             {
                 RoutingKey = context.Info.RoutingKey,

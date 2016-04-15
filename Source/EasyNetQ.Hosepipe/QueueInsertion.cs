@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using RabbitMQ.Client.Framing;
 
@@ -13,7 +14,7 @@ namespace EasyNetQ.Hosepipe
             {
                 foreach (var message in messages)
                 {
-                    var body = Encoding.UTF8.GetBytes(message.Body);
+                    var body = Convert.FromBase64String(message.Body);
 
                     var properties = new BasicProperties();
                     message.Properties.CopyTo(properties);

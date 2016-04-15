@@ -19,7 +19,7 @@ namespace EasyNetQ.Hosepipe
         {
             foreach (var rawErrorMessage in rawErrorMessages)
             {
-                var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(rawErrorMessage.Body));
+                var error = serializer.BytesToMessage<Error>(Convert.FromBase64String(rawErrorMessage.Body));
                 RepublishError(error, parameters);
             }
         }
@@ -40,7 +40,7 @@ namespace EasyNetQ.Hosepipe
                     var properties = model.CreateBasicProperties();
                     error.BasicProperties.CopyTo(properties);
 
-                    var body = Encoding.UTF8.GetBytes(error.Message);
+                    var body = Convert.FromBase64String(error.Message);
 
                     model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
                 }
