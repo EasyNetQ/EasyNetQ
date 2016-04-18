@@ -152,12 +152,17 @@ namespace EasyNetQ.Producer
             {
                 if (responseQueues.TryGetValue(rpcKey, out queueName))
                     return queueName;
+                
                 var queue = advancedBus.QueueDeclare(
                             conventions.RpcReturnQueueNamingConvention(),
                             passive: false,
                             durable: false,
                             exclusive: true,
                             autoDelete: true);
+
+                var exchange = DeclareRpcExchange();
+
+                advancedBus.Bind(exchange, queue, queue.Name);
 
                 advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                     {
@@ -278,7 +283,9 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, responseMessage);
+            var exchange = DeclareRpcExchange();
+
+            advancedBus.Publish(exchange, requestMessage.Properties.ReplyTo, false, responseMessage);
         }
 
         protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
@@ -292,7 +299,14 @@ namespace EasyNetQ.Producer
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
             responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
 
-            advancedBus.Publish(Exchange.GetDefault(), requestMessage.Properties.ReplyTo, false, responseMessage);
+            var exchange = DeclareRpcExchange();
+
+            advancedBus.Publish(exchange, requestMessage.Properties.ReplyTo, false, responseMessage);
+        }
+
+        private IExchange DeclareRpcExchange()
+        {
+            return publishExchangeDeclareStrategy.DeclareExchange(advancedBus, conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
         }
     }
 }
