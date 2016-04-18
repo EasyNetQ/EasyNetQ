@@ -7,6 +7,8 @@ using System.Reflection;
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.56.0.0 Updated to StructreMap 4, Note: this is only a breaking change for users of 'EasyNetQ.DI.StructureMap'
+// 0.55.1.0 Marked Rpc.Respond overload as virtual
 // 0.55.0.0 Bug fix, DefaultConsumerErrorStrategy does not decode header values
 // 0.54.3.0 Allow usage of background threads  
 // 0.54.2.0 Fix bug with infinite dispose  
