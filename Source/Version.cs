@@ -2,11 +2,12 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.57.1.0")]
+[assembly: AssemblyVersion("0.57.2.0")]
 [assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
 
+// 0.57.2.0 Removed from the hosepipe library the useless dependency on easynetq management client
 // 0.57.1.0 Fix hosepipe usage description to describe the option `x`: the get (noack)
 // 0.57.0.0 RPC responses go through the dedicated RPC exchange (easy_net_q_rpc by default) instead of the default exchange
 // 0.56.0.0 Updated to StructreMap 4, Note: this is only a breaking change for users of 'EasyNetQ.DI.StructureMap'
