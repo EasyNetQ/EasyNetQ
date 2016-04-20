@@ -41,6 +41,7 @@ Options
 	q	the queue name to take messages from, or publish them to.
 	o	the directory to output messages to. Default is current directory.
 	n	the maximum number of messages to retrieve. Default is 1000.
+	x	to get (noack) and remove the message from the queue. Default is false.
 
 Examples
 	
@@ -53,7 +54,7 @@ Examples
 	
 	EasyNetQ.Hosepipe.exe insert s:localhost u:guest p:guest o:C:\temp\messages
 
-	3. Dump all the EasyNetQ messages queued in the broker localhost to a directory
+	3. Dump all the EasyNetQ error messages queued in the broker localhost to a directory
 	   'C:\temp\messages'
 
 	EasyNetQ.Hosepipe.exe err s:localhost o:C:\temp\messages
@@ -61,6 +62,11 @@ Examples
 	4. To re-publish all error messages in directory 'C:\temp\messages':
 
 	EasyNetQ.Hosepipe.exe retry s:localhost u:guest p:guest o:C:\temp\messages
+
+	5. Dump and remove all the EasyNetQ error messages queued 
+	   in the broker localhost to a directory
+
+	EasyNetQ.Hosepipe.exe err s:localhost o:C:\temp\messages x:true
 
 Notes
 
@@ -70,3 +76,6 @@ Notes
 	queue first (using the RabbitMQ management interface), because if the messages fail 
 	again, they too will result in new error messages being published to the error queue 
 	and it is possible that	duplicate messages could be created.
+
+	With the option 'x' you can also remove the messages from queues.
+
