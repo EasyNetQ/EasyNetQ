@@ -136,7 +136,17 @@ namespace EasyNetQ
                     {
                         x.WithPriority(configuration.Priority)
                          .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
-                         .WithPrefetchCount(configuration.PrefetchCount);
+                         .WithPrefetchCount(configuration.PrefetchCount).WithRecoveryAction(
+                          () =>
+                          {
+                              var q = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires);
+                              var exc = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
+
+                              foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
+                              {
+                                  advancedBus.Bind(exc, q, topic);
+                              }
+                          });
                         if (configuration.IsExclusive)
                         {
                             x.AsExclusive();

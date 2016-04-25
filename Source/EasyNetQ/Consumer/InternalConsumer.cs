@@ -18,6 +18,7 @@ namespace EasyNetQ.Consumer
             );
 
         event Action<IInternalConsumer> Cancelled;
+        event Action<IInternalConsumer> ConsumerLost;
     }
 
     public class InternalConsumer : IBasicConsumer, IInternalConsumer
@@ -37,6 +38,7 @@ namespace EasyNetQ.Consumer
         public string ConsumerTag { get; private set; }
 
         public event Action<IInternalConsumer> Cancelled;
+        public event Action<IInternalConsumer> ConsumerLost;
 
         public InternalConsumer(
             IHandlerRunner handlerRunner,
@@ -123,6 +125,13 @@ namespace EasyNetQ.Consumer
             if(consumerCancelled != null) consumerCancelled(this, new ConsumerEventArgs(ConsumerTag));
         }
 
+        private void FireConsumerLost()
+        {
+            // copy to temp variable to be thread safe.
+            var consumerLost = ConsumerLost;
+            if (consumerLost != null) consumerLost(this);
+        }
+
         public void HandleBasicConsumeOk(string consumerTag)
         {
             ConsumerTag = consumerTag;
@@ -133,11 +142,16 @@ namespace EasyNetQ.Consumer
             Cancel();
         }
 
+        /// <summary>
+        /// If we get this from the server, it means, that something went wrong as per the protocol documentation,
+        /// so we don't trigger Cancel, instead trigger ConsumerLost to enable PersistentCosnumer to reestablish it.
+        /// </summary>
+        /// <param name="consumerTag"></param>
         public void HandleBasicCancel(string consumerTag)
         {
-            Cancel();
             logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
                              "Consumer tag: " + consumerTag);
+            FireConsumerLost();
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
