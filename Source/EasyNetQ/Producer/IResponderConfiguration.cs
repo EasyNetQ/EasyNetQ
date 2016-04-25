@@ -11,6 +11,7 @@
         public ResponderConfiguration(ushort defaultPrefetchCount)
         {
             PrefetchCount = defaultPrefetchCount;
+            Durable = true; //this is the non-breaking default value.
         }
 
         public ushort PrefetchCount { get; private set; }

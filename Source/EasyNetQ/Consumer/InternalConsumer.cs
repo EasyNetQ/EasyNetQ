@@ -125,7 +125,7 @@ namespace EasyNetQ.Consumer
             if(consumerCancelled != null) consumerCancelled(this, new ConsumerEventArgs(ConsumerTag));
         }
 
-        private void FireConsumerLost()
+        private void OnConsumerLost()
         {
             // copy to temp variable to be thread safe.
             var consumerLost = ConsumerLost;
@@ -151,7 +151,7 @@ namespace EasyNetQ.Consumer
         {
             logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
                              "Consumer tag: " + consumerTag);
-            FireConsumerLost();
+            OnConsumerLost();
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
