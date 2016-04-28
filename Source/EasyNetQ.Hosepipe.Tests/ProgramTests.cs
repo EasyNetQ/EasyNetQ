@@ -3,6 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
+using EasyNetQ.Consumer;
+
 using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -17,6 +20,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private MockQueueInsertion queueInsertion;
         private MockErrorRetry errorRetry;
         private Conventions conventions;
+        private IErrorMessageSerializer defaultErrorMessageSerializer;
 
         [SetUp]
         public void SetUp()
@@ -27,6 +31,7 @@ namespace EasyNetQ.Hosepipe.Tests
             queueInsertion = new MockQueueInsertion();
             errorRetry = new MockErrorRetry();
             conventions = new Conventions(new TypeNameSerializer());
+            defaultErrorMessageSerializer = new DefaultErrorMessageSerializer();
 
             program = new Program(
                 new ArgParser(),

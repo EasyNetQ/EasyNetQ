@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 
@@ -16,7 +17,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             var typeNameSerializer = new TypeNameSerializer();
             conventions = new Conventions(typeNameSerializer);
-            errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer));
+            errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer), new DefaultErrorMessageSerializer());
         }
 
         [Test, Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]

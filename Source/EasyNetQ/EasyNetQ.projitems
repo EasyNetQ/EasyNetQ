@@ -27,6 +27,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)ConnectionString\ConnectionStringGrammar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConnectionString\IConnectionStringParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\AckStrategies.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Consumer\Base64ErrorMessageSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Consumer\DefaultErrorMessageSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\ConsumerCancellation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\ConsumerDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\ConsumerDispatcherFactory.cs" />
@@ -43,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\IConsumerDispatcherFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\IConsumerErrorStrategy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\IConsumerFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Consumer\IErrorMessageSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\IHandlerCollectionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\IHandlerRegistration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\InternalConsumer.cs" />

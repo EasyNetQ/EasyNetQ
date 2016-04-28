@@ -34,6 +34,7 @@ namespace EasyNetQ
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()
                 .Register<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
+                .Register<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
                 .Register<IHandlerRunner, HandlerRunner>()
                 .Register<IInternalConsumerFactory, InternalConsumerFactory>()
                 .Register<IConsumerFactory, ConsumerFactory>()
