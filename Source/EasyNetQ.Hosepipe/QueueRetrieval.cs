@@ -41,7 +41,7 @@ namespace EasyNetQ.Hosepipe
                         basicGetResult.RoutingKey,
                         parameters.QueueName);
 
-                    yield return new HosepipeMessage(Encoding.UTF8.GetString(basicGetResult.Body), properties, info);
+                    yield return new HosepipeMessage(Convert.ToBase64String(basicGetResult.Body), properties, info);
                 }
             }            
         } 
