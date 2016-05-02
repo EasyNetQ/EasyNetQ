@@ -1,5 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
+
 using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -12,7 +14,7 @@ namespace EasyNetQ.Hosepipe.Tests
         [SetUp]
         public void SetUp()
         {
-            queueInsertion = new QueueInsertion();
+            queueInsertion = new QueueInsertion(new DefaultErrorMessageSerializer());
         }
 
         /// <summary>

@@ -28,6 +28,8 @@ namespace EasyNetQ.Consumer
         private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly IErrorMessageSerializer errorMessageSerializer;
+
         private readonly object syncLock = new object();
 
         private IConnection connection;
@@ -39,7 +41,8 @@ namespace EasyNetQ.Consumer
             ISerializer serializer,
             IEasyNetQLogger logger,
             IConventions conventions, 
-            ITypeNameSerializer typeNameSerializer)
+            ITypeNameSerializer typeNameSerializer,
+            IErrorMessageSerializer errorMessageSerializer)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializer, "serializer");
@@ -52,6 +55,7 @@ namespace EasyNetQ.Consumer
             this.logger = logger;
             this.conventions = conventions;
             this.typeNameSerializer = typeNameSerializer;
+            this.errorMessageSerializer = errorMessageSerializer;
         }
 
         private void Connect()
@@ -192,7 +196,7 @@ namespace EasyNetQ.Consumer
 
         private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
-            var messageAsString = Encoding.UTF8.GetString(context.Body);
+            var messageAsString = errorMessageSerializer.Serialize(context.Body);
             var error = new Error
             {
                 RoutingKey = context.Info.RoutingKey,

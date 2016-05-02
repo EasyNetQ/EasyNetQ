@@ -4,6 +4,8 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
+using EasyNetQ.Consumer;
+
 namespace EasyNetQ.Hosepipe
 {
     public class Program
@@ -15,6 +17,14 @@ namespace EasyNetQ.Hosepipe
         private readonly IQueueInsertion queueInsertion;
         private readonly IErrorRetry errorRetry;
         private readonly IConventions conventions;
+
+        private static StringBuilder results = new StringBuilder();
+        private static bool succeeded = true;
+        private static Func<string, Action> messsage = m => () =>
+        {
+            results.AppendLine(m);
+            succeeded = false;
+        };
 
         public Program(
             ArgParser argParser, 
@@ -37,15 +47,31 @@ namespace EasyNetQ.Hosepipe
         public static void Main(string[] args)
         {
             var typeNameSerializer = new TypeNameSerializer();
+            var argParser = new ArgParser();
+            var arguments = argParser.Parse(args);
 
-            // poor man's dependency injection FTW ;)
+            bool enableBinaryPayloads = false;
+            arguments.WithTypedKeyOptional<bool>("b", a => enableBinaryPayloads = bool.Parse(a.Value))
+                .FailWith(messsage("Invalid enable binary payloads (b) parameter"));
+
+            IErrorMessageSerializer errorMessageSerializer;
+            if (enableBinaryPayloads)
+            {
+                errorMessageSerializer = new Base64ErrorMessageSerializer();
+            }
+            else
+            {
+                errorMessageSerializer = new DefaultErrorMessageSerializer();
+            }            
+
+            // poor man's dependency injection FTW ;)            
             var program = new Program(
-                new ArgParser(), 
-                new QueueRetreival(), 
+                argParser, 
+                new QueueRetreival(errorMessageSerializer), 
                 new FileMessageWriter(),
                 new MessageReader(), 
-                new QueueInsertion(),
-                new ErrorRetry(new JsonSerializer(typeNameSerializer)),
+                new QueueInsertion(errorMessageSerializer),
+                new ErrorRetry(new JsonSerializer(typeNameSerializer), errorMessageSerializer),
                 new Conventions(typeNameSerializer));
             program.Start(args);
         }
@@ -53,14 +79,6 @@ namespace EasyNetQ.Hosepipe
         public void Start(string[] args)
         {
             var arguments = argParser.Parse(args);
-
-            var results = new StringBuilder();
-            var succeeded = true;
-            Func<string, Action> messsage = m => () =>
-            {
-                results.AppendLine(m);
-                succeeded = false;
-            };
 
             var parameters = new QueueParameters();
             arguments.WithKey("s", a => parameters.HostName = a.Value);
@@ -72,7 +90,7 @@ namespace EasyNetQ.Hosepipe
             arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
                 .FailWith(messsage("Invalid number of messages to retrieve"));
             arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
-                .FailWith(messsage("Invalid purge (x) parameter"));
+                .FailWith(messsage("Invalid purge (x) parameter"));            
 
             try
             {

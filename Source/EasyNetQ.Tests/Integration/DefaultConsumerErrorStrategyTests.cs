@@ -37,6 +37,7 @@ namespace EasyNetQ.Tests
             configuration.Validate();
 
             var typeNameSerializer = new TypeNameSerializer();
+            var errorMessageSerializer = new DefaultErrorMessageSerializer();
             connectionFactory = new ConnectionFactoryWrapper(configuration, new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>());
             serializer = new JsonSerializer(typeNameSerializer);
             conventions = new Conventions(typeNameSerializer);
@@ -45,7 +46,8 @@ namespace EasyNetQ.Tests
                 serializer, 
                 new ConsoleLogger(), 
                 conventions,
-                typeNameSerializer);
+                typeNameSerializer,
+                errorMessageSerializer);
          
         }
 
@@ -128,7 +130,8 @@ namespace EasyNetQ.Tests
                 MockRepository.GenerateStub<ISerializer>(),
                 logger,
                 MockRepository.GenerateStub<IConventions>(),
-                MockRepository.GenerateStub<ITypeNameSerializer>());
+                MockRepository.GenerateStub<ITypeNameSerializer>(),
+                MockRepository.GenerateStub<IErrorMessageSerializer>());
 
             consumerErrorStrategy.Dispose();
 
