@@ -73,6 +73,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Events\ReturnedMessageEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events\StoppedConsumingEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FluentConfiguration\IPublishConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FluentConfiguration\ISubscriptionConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAdvancedBus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IBus.cs" />
