@@ -6,6 +6,7 @@ using System.Reflection;
 [assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.59.0.0 Support of priority queues to IBus publish methods
 // 0.58.0.0 added IErrorMessageSerializer and 2 implementations (UTF8 and Base64) 
 // 0.57.2.0 Removed from the hosepipe library the useless dependency on easynetq management client
 // 0.57.1.0 Fix hosepipe usage description to describe the option `x`: the get (noack)
