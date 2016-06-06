@@ -19,6 +19,16 @@ namespace EasyNetQ
         void Publish<T>(T message) where T : class;
 
         /// <summary>
+        /// Publishes a message.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="message">The message to publish</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
+        /// </param>
+        void Publish<T>(T message, Action<IPublishConfiguration> configure) where T : class;
+
+        /// <summary>
         /// Publishes a message with a topic
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
@@ -35,6 +45,19 @@ namespace EasyNetQ
         /// <param name="message">The message to publish</param>
         /// <returns></returns>
         Task PublishAsync<T>(T message) where T : class;
+
+        /// <summary>
+        /// Publishes a message.
+        /// When used with publisher confirms the task completes when the publish is confirmed.
+        /// Task will throw an exception if the confirm is NACK'd or times out.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="message">The message to publish</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
+        /// </param>
+        /// <returns></returns>
+        Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure) where T : class;
 
         /// <summary>
         /// Publishes a message with a topic.

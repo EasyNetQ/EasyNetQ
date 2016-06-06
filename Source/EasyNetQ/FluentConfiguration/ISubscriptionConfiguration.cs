@@ -62,6 +62,12 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration AsExclusive();
+
+        /// <summary>
+        /// Configures the queue's maxPriority
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithMaxPriority(byte priority);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -74,7 +80,8 @@ namespace EasyNetQ.FluentConfiguration
         public int? Expires { get; private set; }
 
         public bool IsExclusive { get; private set; }
-         
+        public byte? MaxPriority { get; private set; }
+
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
             Topics = new List<string>();
@@ -124,6 +131,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration AsExclusive()
         {
             IsExclusive = true;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithMaxPriority(byte priority)
+        {
+            MaxPriority = priority;
             return this;
         }
     }

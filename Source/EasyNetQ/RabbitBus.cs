@@ -55,6 +55,18 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
+
+            Publish(message, c => c.WithTopic(topic));
+        }
+
+        public virtual void Publish<T>(T message, Action<IPublishConfiguration> configure) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(configuration);
+
             var messageType = typeof(T);
             var easyNetQMessage = new Message<T>(message)
             {
@@ -63,8 +75,13 @@ namespace EasyNetQ
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
                 }
             };
+            if (configuration.Priority != null)
+                easyNetQMessage.Properties.Priority = configuration.Priority.Value;
+            if (configuration.Expires != null)
+                easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
+
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
-            advancedBus.Publish(exchange, topic, false, easyNetQMessage); 
+            advancedBus.Publish(exchange, configuration.Topic, false, easyNetQMessage);
         }
 
         public virtual Task PublishAsync<T>(T message) where T : class
@@ -74,11 +91,23 @@ namespace EasyNetQ
             return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
         }
 
-        public virtual async Task PublishAsync<T>(T message, string topic) where T : class
+        public virtual Task PublishAsync<T>(T message, string topic) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
-            var messageType = typeof (T);
+
+            return PublishAsync(message, c => c.WithTopic(topic));
+        }
+
+        public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure) where T : class
+        {
+            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
+
+            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(configuration);
+
+            var messageType = typeof(T);
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
@@ -86,8 +115,13 @@ namespace EasyNetQ
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
                 }
             };
+            if (configuration.Priority != null)
+                easyNetQMessage.Properties.Priority = configuration.Priority.Value;
+            if (configuration.Expires != null)
+                easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
+
             var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, topic, false, easyNetQMessage).ConfigureAwait(false); 
+            await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage).ConfigureAwait(false);
         }
 
         public virtual ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class
@@ -121,7 +155,7 @@ namespace EasyNetQ
             var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
-            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires);
+            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires, maxPriority: configuration.MaxPriority);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
