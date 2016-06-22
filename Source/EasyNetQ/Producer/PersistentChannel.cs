@@ -169,8 +169,6 @@ namespace EasyNetQ.Producer
                     internalChannel.BasicNacks -= OnNack;
                 }
                 internalChannel.BasicReturn -= OnReturn;
-                // Fix me: use Dispose instead of SafeDispose after update of Rabbitmq.Client to 3.5.5
-                internalChannel.SafeDispose();
                 internalChannel = null;
             }
 

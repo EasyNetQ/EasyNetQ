@@ -18,7 +18,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package; PackageDiWindsor; PackageDiNinject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package; PackageDiWindsor; PackageDiNinject; PackageDILightInject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -181,6 +181,36 @@
         Value="%(AsmInfo.Version)" />
 
     <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.Ninject" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec" />
+
+  </Target>
+
+  <Target Name="PackageDiLightInject" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.DI.LightInject\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(Source)\EasyNetQ.DI.LightInject\bin\Release\EasyNetQ.DI.LightInject.dll" DestinationFolder="$(Package)\EasyNetQ.DI.LightInject\lib\net45" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.DI.LightInject\bin\Release\EasyNetQ.DI.LightInject.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.DI.LightInject\EasyNetQ.Di.LightInject.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.LightInject" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.nuspec" />
 
   </Target>
 

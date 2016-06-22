@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.Integration
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
             connection = new PersistentConnection(connectionFactory, logger, eventBus);
             var persistentChannelFactory = new PersistentChannelFactory(logger, configuration, eventBus);
-            dispatcher = new ClientCommandDispatcher(connection, persistentChannelFactory);
+            dispatcher = new ClientCommandDispatcher(configuration, connection, persistentChannelFactory);
             connection.Initialize();
         }
 

@@ -10,11 +10,12 @@ namespace EasyNetQ.Consumer
     {
         private readonly Lazy<IConsumerDispatcher> dispatcher;
 
-        public ConsumerDispatcherFactory(IEasyNetQLogger logger)
+        public ConsumerDispatcherFactory(ConnectionConfiguration configuration, IEasyNetQLogger logger)
         {
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(logger, "logger");
             
-            dispatcher = new Lazy<IConsumerDispatcher>(() => new ConsumerDispatcher(logger));
+            dispatcher = new Lazy<IConsumerDispatcher>(() => new ConsumerDispatcher(configuration, logger));
         }
 
         public IConsumerDispatcher GetConsumerDispatcher()

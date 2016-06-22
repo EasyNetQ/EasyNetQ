@@ -1,11 +1,17 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
 
+using EasyNetQ.SystemMessages;
+using EasyNetQ.Topology;
+
 namespace EasyNetQ.Tests
 {
+    using EasyNetQ.Loggers;
+
     [TestFixture]
     public class ConsumerErrorConditionsTests
     {
@@ -14,7 +20,8 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = RabbitHutch.CreateBus("host=localhost");
+            bus = RabbitHutch.CreateBus(new ConnectionConfiguration() {Hosts = new HostConfiguration[] {new HostConfiguration() { Host = "localhost"} }},
+                reg => { reg.Register<IEasyNetQLogger>(p => new ConsoleLogger()); });
         }
 
         [TearDown]
@@ -48,12 +55,68 @@ namespace EasyNetQ.Tests
             });    
 
             // give the subscription a chance to complete
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             bus.Publish(new MyErrorTestMessage { Id = 444, Name = "I cause an error. Naughty me!" });
 
             // give the publish a chance to get to rabbit and back
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
+        }
+
+        [Test, Explicit("Needs a RabbitMQ instance on localhost to run")]
+        public void Should_wrap_error_messages_correctly()
+        {
+            var typeNameSerializer = bus.Advanced.Container.Resolve<ITypeNameSerializer>();
+            var serializer = bus.Advanced.Container.Resolve<ISerializer>();
+            var conventions = bus.Advanced.Container.Resolve<IConventions>();
+
+            var errorQueue = new Queue(conventions.ErrorQueueNamingConvention(), false);
+            bus.Advanced.QueuePurge(errorQueue);
+
+            var typeName = typeNameSerializer.Serialize(typeof(MyErrorTestMessage));
+            var exchange = this.bus.Advanced.ExchangeDeclare(typeName, ExchangeType.Topic);
+
+            bus.Subscribe<MyErrorTestMessage>("exceptionTest", _ =>
+            {
+                throw new Exception("Hello Error Handler!");
+            });
+
+            // give the subscription a chance to complete
+            Thread.Sleep(500);
+
+            var message = new MyErrorTestMessage { Id = 444, Name = "I cause an error. Naughty me!" };
+            var headers = new Dictionary<string, object>()
+                          {
+                              { "AString", "ThisIsAString" },
+                              { "AnInt", 123 }
+                          };
+            var correlationId = Guid.NewGuid().ToString();
+
+            var props = new MessageProperties()
+            {
+                Type = typeName,
+                Headers = headers,
+                CorrelationId = correlationId
+            };
+
+             bus.Advanced.Publish(exchange, typeNameSerializer.Serialize(typeof(MyErrorTestMessage)), true, props, serializer.MessageToBytes(message));
+
+            // give the publish a chance to get to rabbit and back
+            // also allow the DefaultConsumerErrorStrategy time to spin up its connection
+            Thread.Sleep(1000);
+
+            var errorMessage = this.bus.Advanced.Get<Error>(errorQueue);
+            errorMessage.MessageAvailable.ShouldBeTrue();
+
+            var error = errorMessage.Message.Body;
+            Console.WriteLine(error.ToString());
+
+
+            error.BasicProperties.Type.ShouldEqual(typeNameSerializer.Serialize(typeof(MyErrorTestMessage)));
+            error.BasicProperties.CorrelationId.ShouldEqual(correlationId);
+            error.BasicProperties.Headers.ShouldEqual(headers);
+            error.BasicProperties.Headers["AString"].ShouldEqual("ThisIsAString");
+            error.BasicProperties.Headers["AnInt"].ShouldEqual(123);
         }
     }
 

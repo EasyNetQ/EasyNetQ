@@ -2,6 +2,9 @@
 
 using System;
 using System.Threading;
+
+using EasyNetQ.Consumer;
+
 using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -17,7 +20,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
-            var queueRetrieval = new QueueRetreival();
+            var queueRetrieval = new QueueRetreival(new DefaultErrorMessageSerializer());
             var parameters = new QueueParameters
             {
                 QueueName = queue,

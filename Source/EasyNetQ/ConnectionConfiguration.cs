@@ -33,6 +33,7 @@ namespace EasyNetQ
         public bool CancelOnHaFailover { get; set; }
         public string Product { get; set; }
         public string Platform { get; set; }
+        public bool UseBackgroundThreads { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -46,7 +47,7 @@ namespace EasyNetQ
             PublisherConfirms = false;
             PersistentMessages = true;
             CancelOnHaFailover = false;
-
+            UseBackgroundThreads = false;             
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
             // set to 50 based on this blog post:

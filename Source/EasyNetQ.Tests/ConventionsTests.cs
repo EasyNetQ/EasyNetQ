@@ -256,7 +256,8 @@ namespace EasyNetQ.Tests
                 new JsonSerializer(new TypeNameSerializer()), 
                 MockRepository.GenerateStub<IEasyNetQLogger>(), 
                 customConventions,
-                new TypeNameSerializer());
+                new TypeNameSerializer(),
+                new DefaultErrorMessageSerializer());
 
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);

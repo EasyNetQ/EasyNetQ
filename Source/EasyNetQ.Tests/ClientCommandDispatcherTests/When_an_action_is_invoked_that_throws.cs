@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -17,6 +18,8 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         [SetUp]
         public void SetUp()
         {
+            var parser = new ConnectionStringParser();
+            var configuration = parser.Parse("host=localhost");
             var connection = MockRepository.GenerateStub<IPersistentConnection>();
             var channelFactory = MockRepository.GenerateStub<IPersistentChannelFactory>();
             channel = MockRepository.GenerateStub<IPersistentChannel>();
@@ -25,7 +28,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channel.Stub(x => x.InvokeChannelAction(null)).IgnoreArguments().WhenCalled(
                 x => ((Action<IModel>)x.Arguments[0])(null));
 
-            dispatcher = new ClientCommandDispatcher(connection, channelFactory);
+            dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
 
         }
 
