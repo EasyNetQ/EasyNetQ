@@ -2,7 +2,7 @@ using System;
 
 namespace EasyNetQ.SystemMessages
 {
-#if !DOTNET5_4
+#if !NET_CORE
 #endif
     public class UnscheduleMe
     {

@@ -76,7 +76,7 @@ namespace EasyNetQ
         void StartTryToConnect()
         {
             Timer timer;
-#if DOTNET5_4
+#if NET_CORE
             timer = new Timer(TryToConnect, null, connectAttemptIntervalMilliseconds, Timeout.Infinite);
 #else
             timer = new Timer(TryToConnect);

@@ -2,7 +2,7 @@ using System;
 
 namespace EasyNetQ.Producer
 {
-#if !DOTNET5_4
+#if !NET_CORE
 #endif
     public class PublishInterruptedException : Exception
     {
@@ -26,7 +26,7 @@ namespace EasyNetQ.Producer
             : base(message, inner)
         {
         }
-#if !DOTNET5_4
+#if !NET_CORE
 #endif
     }
 }

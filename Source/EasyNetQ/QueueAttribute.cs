@@ -2,7 +2,7 @@
 
 namespace EasyNetQ
 {
-#if !DOTNET5_4
+#if !NET_CORE
 #endif
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple=false)]
     public class QueueAttribute : Attribute

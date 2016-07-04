@@ -56,7 +56,7 @@ namespace EasyNetQ.MessageVersioning
 
         private static Type GetSupersededType( Type type )
         {
-#if DOTNET5_4
+#if NET_CORE
              return type
                 .GetInterfaces()
                 .Where( t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof( ISupersede<> ) )
@@ -73,7 +73,7 @@ namespace EasyNetQ.MessageVersioning
 
         private static void EnsureVersioningValid( Type messageType, Type supersededType )
         {
-#if DOTNET5_4
+#if NET_CORE
             if ( !messageType.GetTypeInfo().IsSubclassOf( supersededType ) )
                 throw new EasyNetQException( "Message cannot supersede a type it is not a subclass of. {0} is not a subclass of {1}", messageType.Name, supersededType.Name );
 #else

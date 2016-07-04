@@ -43,7 +43,7 @@ namespace EasyNetQ
 
             return serializedTypes.GetOrAdd(type, t =>
             {
-#if DOTNET5_4
+#if NET_CORE
                 
                 var typeName = t.FullName + ":" + t.GetTypeInfo().Assembly.GetName().Name;
 #else
