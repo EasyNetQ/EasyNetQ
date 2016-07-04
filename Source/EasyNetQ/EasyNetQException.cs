@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace EasyNetQ
 {
-#if !DOTNET5_4
+#if !NET_CORE
     [Serializable]
 #endif
     public class EasyNetQException : Exception
@@ -13,14 +13,14 @@ namespace EasyNetQ
         public EasyNetQException(string format, params string[] args) : base(string.Format(format, args)) {}
         public EasyNetQException(string message, Exception inner) : base(message, inner) {}
 
-#if !DOTNET5_4
+#if !NET_CORE
         protected EasyNetQException(
             SerializationInfo info,
             StreamingContext context) : base(info, context) {}
 #endif
     }
 
-#if !DOTNET5_4
+#if !NET_CORE
     [Serializable]
 #endif
     public class EasyNetQInvalidMessageTypeException : EasyNetQException
@@ -29,12 +29,12 @@ namespace EasyNetQ
         public EasyNetQInvalidMessageTypeException(string message) : base(message) {}
         public EasyNetQInvalidMessageTypeException(string format, params string[] args) : base(format, args) {}
         public EasyNetQInvalidMessageTypeException(string message, Exception inner) : base(message, inner) {}
-#if !DOTNET5_4
+#if !NET_CORE
         protected EasyNetQInvalidMessageTypeException(SerializationInfo info, StreamingContext context) : base(info, context) {}
 #endif
     }
 
-#if !DOTNET5_4
+#if !NET_CORE
     [Serializable]
 #endif
     public class EasyNetQResponderException : EasyNetQException
@@ -43,7 +43,7 @@ namespace EasyNetQ
         public EasyNetQResponderException(string message) : base(message) { }
         public EasyNetQResponderException(string format, params string[] args) : base(format, args) { }
         public EasyNetQResponderException(string message, Exception inner) : base(message, inner) { }
-#if !DOTNET5_4
+#if !NET_CORE
         protected EasyNetQResponderException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 #endif
     }

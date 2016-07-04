@@ -58,7 +58,7 @@ namespace EasyNetQ.Consumer
 
             // no exact handler match found, so let's see if we can find a handler that
             // handles a supertype of the consumed message.
-#if DOTNET5_4
+#if NET_CORE
             var handlerType = handlers.Keys.FirstOrDefault(type => type.GetTypeInfo().IsAssignableFrom(messageType.GetTypeInfo()));
 #else
             var handlerType = handlers.Keys.FirstOrDefault(type => type.IsAssignableFrom(messageType));

@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace EasyNetQ.Producer
 {
-#if !DOTNET5_4
+#if !NET_CORE
     [Serializable]
 #endif
     public class PublishNackedException : Exception
@@ -27,7 +27,7 @@ namespace EasyNetQ.Producer
         {
         }
 
-#if !DOTNET5_4
+#if !NET_CORE
         protected PublishNackedException(
             SerializationInfo info,
             StreamingContext context) : base(info, context)

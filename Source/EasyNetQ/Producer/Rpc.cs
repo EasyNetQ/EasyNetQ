@@ -86,7 +86,7 @@ namespace EasyNetQ.Producer
             var requestType = typeof(TRequest);
 
             Timer timer;
-#if DOTNET5_4
+#if NET_CORE
             timer = new Timer(state =>
                 {
                       ((Timer)state).Dispose();

@@ -14,7 +14,7 @@ namespace EasyNetQ
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-#if DOTNET5_4
+#if NET_CORE
             return typesAttributes.GetOrAdd(type, t => t.GetTypeInfo().GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())

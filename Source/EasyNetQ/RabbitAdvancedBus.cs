@@ -210,7 +210,7 @@ namespace EasyNetQ
 
                         try
                         {
-                            model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                         }
                         catch (Exception)
                         {
@@ -237,7 +237,7 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                 });
             }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
@@ -314,7 +314,7 @@ namespace EasyNetQ
 
                         try
                         {
-                            model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                         }
                         catch (Exception)
                         {
@@ -341,7 +341,7 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    model.BasicPublish(exchange.Name, routingKey, mandatory, immediate, properties, rawMessage.Body);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                 }).ConfigureAwait(false);
             }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));

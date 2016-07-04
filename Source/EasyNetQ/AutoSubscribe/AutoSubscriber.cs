@@ -146,7 +146,7 @@ namespace EasyNetQ.AutoSubscribe
                                                            .GetMethod(dispatchName, BindingFlags.Instance | BindingFlags.Public)
                                                            .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
 
-#if DOTNET5_4
+#if NET_CORE
                     var dispatchDelegate = dispatchMethod.CreateDelegate(
                         subscriberTypeFromMessageTypeDelegate(subscriptionInfo.MessageType),
                         AutoSubscriberMessageDispatcher);
@@ -239,7 +239,7 @@ namespace EasyNetQ.AutoSubscribe
 
         protected virtual bool IsValidMarkerType(Type markerType)
         {
-#if DOTNET5_4
+#if NET_CORE
             return markerType.GetTypeInfo().IsInterface && markerType.GetMethods().Any(m => m.Name == ConsumeMethodName);
 #else
             return markerType.IsInterface && markerType.GetMethods().Any(m => m.Name == ConsumeMethodName);
@@ -280,7 +280,7 @@ namespace EasyNetQ.AutoSubscribe
 
         protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types,Type interfaceType)
         {
-#if DOTNET5_4
+#if NET_CORE
                    foreach (var concreteType in types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract))
             {
                 var subscriptionInfos = concreteType.GetInterfaces()

@@ -218,7 +218,7 @@ namespace EasyNetQ
         public static void CheckTypeMatches(Type expectedType, object value, string name, string message)
         {
             bool assignable;
-#if DOTNET5_4
+#if NET_CORE
             assignable = expectedType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo());
 #else
             assignable = expectedType.IsAssignableFrom(value.GetType());
