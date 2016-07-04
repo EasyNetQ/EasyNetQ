@@ -1,9 +1,7 @@
 using System;
-using System.Runtime.Serialization;
 
 namespace EasyNetQ.Producer
 {
-    [Serializable]
     public class PublishInterruptedException : Exception
     {
         //
@@ -24,13 +22,6 @@ namespace EasyNetQ.Producer
 
         public PublishInterruptedException(string message, Exception inner)
             : base(message, inner)
-        {
-        }
-
-        protected PublishInterruptedException(
-            SerializationInfo info,
-            StreamingContext context)
-            : base(info, context)
         {
         }
     }

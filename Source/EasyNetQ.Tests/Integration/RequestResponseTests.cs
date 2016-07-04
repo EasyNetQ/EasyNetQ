@@ -1,7 +1,6 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using System.Runtime.Serialization;
 using System.Threading;
 using NUnit.Framework;
 using RabbitMQ.Client;
@@ -274,7 +273,6 @@ namespace EasyNetQ.Tests.Integration
 
     }
 
-    [Serializable]
     public class SomeRandomException : Exception
     {
         //
@@ -287,10 +285,6 @@ namespace EasyNetQ.Tests.Integration
         public SomeRandomException() {}
         public SomeRandomException(string message) : base(message) {}
         public SomeRandomException(string message, Exception inner) : base(message, inner) {}
-
-        protected SomeRandomException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context) {}
     }
 }
 

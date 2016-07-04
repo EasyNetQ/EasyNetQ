@@ -2,7 +2,6 @@ using System;
 
 namespace EasyNetQ.AutoSubscribe
 {
-    [Serializable]
     public class AutoSubscriberConsumerInfo
     {
         public readonly Type ConcreteType;

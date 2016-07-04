@@ -141,16 +141,13 @@ namespace EasyNetQ.Tests
             }
         }
 
-        [Serializable]
         public abstract class ErrorTestBaseMessage
         {
             public string Text { get; set; }
             public int Id { get; set; }
         }
 
-        [Serializable]
         public class FromA : ErrorTestBaseMessage {}
-        [Serializable]
         public class FromB : ErrorTestBaseMessage { }
     }
 }

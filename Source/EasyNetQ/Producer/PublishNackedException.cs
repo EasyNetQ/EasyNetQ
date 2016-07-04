@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace EasyNetQ.Producer
 {
-    [Serializable]
     public class PublishNackedException : Exception
     {
         //
@@ -22,12 +20,6 @@ namespace EasyNetQ.Producer
         }
 
         public PublishNackedException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        protected PublishNackedException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
         {
         }
     }

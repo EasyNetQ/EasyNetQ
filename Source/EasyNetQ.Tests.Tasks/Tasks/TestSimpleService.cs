@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Net.CommandLine;
@@ -95,7 +91,6 @@ namespace EasyNetQ.Tests.Tasks.Tasks
         }
     }
 
-    [Serializable]
     public class SomeRandomException : Exception
     {
         //
@@ -108,10 +103,5 @@ namespace EasyNetQ.Tests.Tasks.Tasks
         public SomeRandomException() { }
         public SomeRandomException(string message) : base(message) { }
         public SomeRandomException(string message, Exception inner) : base(message, inner) { }
-
-        protected SomeRandomException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        { }
     }
 }

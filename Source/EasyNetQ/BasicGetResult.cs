@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace EasyNetQ
 {
@@ -73,7 +72,6 @@ namespace EasyNetQ
         }
     }
 
-    [Serializable]
     public class MessageNotAvailableException : Exception
     {
         //
@@ -94,12 +92,6 @@ namespace EasyNetQ
         }
 
         public MessageNotAvailableException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        protected MessageNotAvailableException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
         {
         }
     }
