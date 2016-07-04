@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-#if !DOTNET5_4
+#if !NET_CORE
 using System.Configuration;
 #endif
 using EasyNetQ.ConnectionString;
@@ -26,7 +26,7 @@ namespace EasyNetQ
             createContainerInternal = createContainer;
         }
 
-        #if !DOTNET5_4
+        #if !NET_CORE
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'.

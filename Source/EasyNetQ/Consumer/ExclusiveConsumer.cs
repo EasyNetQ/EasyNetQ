@@ -47,7 +47,7 @@ namespace EasyNetQ.Consumer
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
-#if DOTNET5_4
+#if NET_CORE
             timer = new Timer(s =>
                 {
                     StartConsumer();

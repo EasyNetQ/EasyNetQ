@@ -2,7 +2,7 @@ using System;
 
 namespace EasyNetQ.AutoSubscribe
 {
-#if !DOTNET5_4
+#if !NET_CORE
 #endif
     public class AutoSubscriberConsumerInfo
     {
