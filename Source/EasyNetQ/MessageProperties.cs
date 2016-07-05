@@ -7,7 +7,10 @@ using System.Reflection;
 
 namespace EasyNetQ
 {
-    public class MessageProperties : ICloneable
+    public class MessageProperties
+#if !NET_CORE
+        : ICloneable
+#endif
     {
         public MessageProperties()
         {
