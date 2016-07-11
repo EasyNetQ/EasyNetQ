@@ -10,7 +10,7 @@ namespace EasyNetQ
 
     public delegate string ErrorQueueNameConvention();
     public delegate string ErrorExchangeNameConvention(MessageReceivedInfo info);
-    public delegate string RpcExchangeNameConvention();
+    public delegate string RpcExchangeNameConvention(Type messageType);
 
     public delegate string RpcReturnQueueNamingConvention();
 
@@ -25,7 +25,8 @@ namespace EasyNetQ
 
         ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
         ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
-        RpcExchangeNameConvention RpcExchangeNamingConvention { get; set; }
+        RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
+        RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
         RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
 
         ConsumerTagConvention ConsumerTagConvention { get; set; }
@@ -71,8 +72,9 @@ namespace EasyNetQ
 
             ErrorQueueNamingConvention = () => "EasyNetQ_Default_Error_Queue";
 		    ErrorExchangeNamingConvention = info => "ErrorExchange_" + info.RoutingKey;
-            RpcExchangeNamingConvention = () => "easy_net_q_rpc";
-		    RpcReturnQueueNamingConvention = () => "easynetq.response." + Guid.NewGuid().ToString();
+            RpcRequestExchangeNamingConvention = (type) => "easy_net_q_rpc";
+		    RpcResponseExchangeNamingConvention = (type) => "easy_net_q_rpc";
+            RpcReturnQueueNamingConvention = () => "easynetq.response." + Guid.NewGuid();
 
             ConsumerTagConvention = () => Guid.NewGuid().ToString();
 		}
@@ -89,7 +91,8 @@ namespace EasyNetQ
 
         public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
         public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
-        public RpcExchangeNameConvention RpcExchangeNamingConvention { get; set; }
+        public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
+        public RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
         public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
 
         public ConsumerTagConvention ConsumerTagConvention { get; set; }

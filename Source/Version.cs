@@ -2,10 +2,11 @@
 using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-[assembly: AssemblyVersion("0.61.0.0")]
+[assembly: AssemblyVersion("0.61.1.0")]
 [assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.61.1.0 Added support for configuring RPC exchange (request and response) names via conventions
 // 0.61.0.0 Added support for EXTERNAL authentication mechanism
 // 0.60.1.0 Added SimpleInjector DI support
 // 0.60.0.0 Remove [Serializable] attribute from messages and exceptions
