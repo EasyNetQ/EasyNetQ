@@ -14,3 +14,12 @@ branches:
 
 artifacts:
   - path: Package\**\*.nupkg
+
+deploy:
+  - provider: NuGet
+    artifact: /.*\.nupkg/
+    server:
+    api_key:
+      secure: 1zhszvbiMAqXYJa05TKn8sOvODYXW+xCJa3/NLNmyD7yFyqGeRqne/+H0k+CoVso
+    on:
+      branch: master
