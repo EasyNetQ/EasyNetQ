@@ -1,12 +1,9 @@
 version: 1.0.{build}
 
 build:
-  project: Source\EasyNetQ.sln
-  parallel: true
+  project: Build\EasyNetQ.proj
   verbosity: minimal
-  
-configuration: Release
-platform: Any CPU
+  publish_nuget: false
 
 branches:
   only:
@@ -14,4 +11,3 @@ branches:
 
 artifacts:
   - path: Package\**\*.nupkg
-    name: EasyNetQ
