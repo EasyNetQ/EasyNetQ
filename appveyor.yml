@@ -1,30 +1,23 @@
-version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+
+build:
+  project: Build\EasyNetQ.proj
+  verbosity: minimal
+  publish_nuget: false
 
 branches:
   only:
   - master
-  
-configuration: Release
 
-platform: Any CPU
-
-assembly_info:
-  patch: true
-  file: '**\AssemblyInfo.*'
-  assembly_version: '{version}'
-  assembly_file_version: '{version}'
-  assembly_informational_version: '{version}'
-  
-before_build:
-- cmd: nuget restore Source\EasyNetQ.sln
-
-build:
-  project: Source\EasyNetQ.sln
-  parallel: true
-  verbosity: minimal
-  
 artifacts:
-- path: Source\EasyNetQ\bin\Release\EasyNetQ.dll
-  name: EasyNetQ
-- path: Source\EasyNetQ\bin\Release\EasyNetQ.xml
-  name: EasyNetQ
+  - path: Package\**\*.nupkg
+
+deploy:
+  - provider: NuGet
+    artifact: /.*\.nupkg/
+    server:
+    api_key:
+      secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
+    on:
+      branch: master
