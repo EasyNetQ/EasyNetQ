@@ -2,8 +2,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Default">
 
     <PropertyGroup>
-        <BuildNumber>$(BUILD_NUMBER)</BuildNumber>
-        <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
         <BaseDir>$(MSBuildProjectDirectory)\..</BaseDir>
         <OutputDir>$(BaseDir)\bin</OutputDir>
         <Tools>$(BaseDir)\Tools</Tools>
@@ -14,6 +12,9 @@
         <Source>$(BaseDir)\Source</Source>
         <ILRepack>$(Tools)\ILRepack\ILRepack.exe</ILRepack>
         <Net45OutputDir>$(Source)\EasyNetQ NET45\bin\Release</Net45OutputDir>
+        <BuildNumber Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' ">$(APPVEYOR_BUILD_NUMBER)</BuildNumber>
+        <BuildNumber Condition=" '$(BUILD_NUMBER)' != '' ">$(BUILD_NUMBER)</BuildNumber>
+        <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
     </PropertyGroup>
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
@@ -91,7 +92,6 @@
         
         <Exec WorkingDirectory="$(Package)\EasyNetQ" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ\EasyNetQ.nuspec" />
 
-        <Message Text="##teamcity[buildNumber '%(AsmInfo.Version)']" />
     </Target>
 
   <Target Name="PackageDiWindsor" DependsOnTargets="Build">
