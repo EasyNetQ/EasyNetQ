@@ -18,6 +18,6 @@ deploy:
     artifact: /.*\.nupkg/
     server:
     api_key:
-      secure: 1zhszvbiMAqXYJa05TKn8sOvODYXW+xCJa3/NLNmyD7yFyqGeRqne/+H0k+CoVso
+      secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
     on:
       branch: master
