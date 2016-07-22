@@ -171,6 +171,29 @@ namespace EasyNetQ
             where TResponse : class;
 
         /// <summary>
+        /// Makes an RPC style request
+        /// </summary>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="request">The request message.</param>
+        /// <param name="timeout">The timeout for this request</param>
+        /// <returns>The response</returns>
+        Task<TResponse> RequestAsync<TResponse>(string endpoint, object request, TimeSpan timeout)
+            where TResponse : class;
+
+        /// <summary>
+        /// Makes an RPC style request
+        /// </summary>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="request">The request message.</param>
+        /// <param name="timeout">The timeout for this request</param>
+        /// <param name="topic">optional topic</param>
+        /// <returns>The response</returns>
+        Task<TResponse> RequestAsync<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
+            where TResponse : class;
+
+        /// <summary>
         /// Makes an RPC style request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
@@ -190,6 +213,22 @@ namespace EasyNetQ
         /// A function to run when the request is received. It should return the response.
         /// </param>
         IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Responds to an RPC request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="responder">
+        /// A function to run when the request is received. It should return the response.
+        /// </param>
+        /// <param name="configure">
+        /// A function for responder configuration
+        /// </param>
+        IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure)
             where TRequest : class
             where TResponse : class;
 
@@ -232,6 +271,49 @@ namespace EasyNetQ
         /// A function for responder configuration
         /// </param>
         IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
+            where TRequest : class
+            where TResponse : class;
+
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        /// <param name="subscriptionId">optional subscriptionId</param>
+        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Responds to an RPC request asynchronously.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="endpoint">endpoint</param>
+        /// <param name="responder">
+        /// A function to run when the request is received.
+        /// </param>
+        /// <param name="subscriptionId">optional subscriptionId</param>
+        /// <param name="configure"></param>
+        IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId, Action<ISubscriptionConfiguration> configure)
             where TRequest : class
             where TResponse : class;
 

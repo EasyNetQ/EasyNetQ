@@ -68,8 +68,7 @@ namespace EasyNetQ
             configure(configuration);
 
             var messageType = typeof(T);
-            var easyNetQMessage = new Message<T>(message)
-            {
+            var easyNetQMessage = new Message<T>(message) {
                 Properties =
                 {
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
@@ -108,8 +107,7 @@ namespace EasyNetQ
             configure(configuration);
 
             var messageType = typeof(T);
-            var easyNetQMessage = new Message<T>(message)
-            {
+            var easyNetQMessage = new Message<T>(message) {
                 Properties =
                 {
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
@@ -158,8 +156,7 @@ namespace EasyNetQ
             var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires, maxPriority: configuration.MaxPriority);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
-            foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
-            {
+            foreach (var topic in configuration.Topics.DefaultIfEmpty("#")) {
                 advancedBus.Bind(exchange, queue, topic);
             }
 
@@ -167,15 +164,14 @@ namespace EasyNetQ
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body),
                 x =>
-                    {
-                        x.WithPriority(configuration.Priority)
-                         .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
-                         .WithPrefetchCount(configuration.PrefetchCount);
-                        if (configuration.IsExclusive)
-                        {
-                            x.AsExclusive();
-                        }
-                    });
+                {
+                    x.WithPriority(configuration.Priority)
+                     .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
+                     .WithPrefetchCount(configuration.PrefetchCount);
+                    if (configuration.IsExclusive) {
+                        x.AsExclusive();
+                    }
+                });
             return new SubscriptionResult(exchange, queue, consumerCancellation);
         }
 
@@ -189,7 +185,19 @@ namespace EasyNetQ
             task.Wait();
             return task.Result;
         }
+        public virtual Task<TResponse> RequestAsync<TResponse>(string endpoint, object request, TimeSpan timeout)
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(request, "request");
+            return rpc.Request<TResponse>(endpoint, request, timeout);
+        }
 
+        public virtual Task<TResponse> RequestAsync<TResponse>(string endpoint, object request, TimeSpan timeout, string topic)
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(request, "request");
+            return rpc.Request<TResponse>(endpoint, request, timeout, topic);
+        }
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
@@ -217,6 +225,44 @@ namespace EasyNetQ
                 request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
 
             return RespondAsync(taskResponder, configure);
+        }
+
+        public IDisposable Respond<TRequest, TResponse>(string endpoint, Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            Func<TRequest, Task<TResponse>> taskResponder =
+                request => Task<TResponse>.Factory.StartNew(_ => responder(request), null);
+
+            return RespondAsync(endpoint, taskResponder, configure);
+        }
+
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder)
+            where TRequest : class
+            where TResponse : class
+        {
+            return RespondAsync(endpoint, responder, c => { });
+        }
+
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
+            where TRequest : class
+            where TResponse : class
+        {
+            return rpc.Respond(endpoint, responder, configure);
+        }
+
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string topic)
+            where TRequest : class
+            where TResponse : class
+        {
+            return rpc.Respond(endpoint, responder, topic, c => { });
+        }
+
+        public virtual IDisposable RespondAsync<TRequest, TResponse>(string endpoint, Func<TRequest, Task<TResponse>> responder, string subscriptionId, Action<ISubscriptionConfiguration> configure)
+            where TRequest : class
+            where TResponse : class
+        {
+            return rpc.Respond(endpoint, responder, subscriptionId, configure);
         }
 
         public virtual IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)

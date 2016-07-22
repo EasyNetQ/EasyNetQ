@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>EasyNetQ</id>
+    <id>CCP.EasyNetQ</id>
     <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
-    <version>0.53.4.0</version>
-    <title>EasyNetQ</title>
+    <version>0.54.3.0</version>
+    <title>CCP.EasyNetQ</title>
     <authors>Mike Hadlow, Contributors (see GitHub repo)</authors>
     <owners>Mike Hadlow</owners>
     <licenseUrl>https://github.com/EasyNetQ/EasyNetQ/blob/master/licence.txt</licenseUrl>
@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP</tags>
     <dependencies>
-        <dependency id="RabbitMQ.Client" version="[3.6.0,]" />
+      <dependency id="RabbitMQ.Client" version="[3.6.0,]" />
     </dependencies>
   </metadata>
 </package>
