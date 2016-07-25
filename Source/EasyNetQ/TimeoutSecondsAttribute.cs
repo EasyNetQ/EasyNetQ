@@ -2,7 +2,6 @@
 
 namespace EasyNetQ
 {
-    [Serializable]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
     public class TimeoutSecondsAttribute : Attribute
     {

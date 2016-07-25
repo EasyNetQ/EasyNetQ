@@ -2,7 +2,6 @@ using System;
 
 namespace EasyNetQ.AutoSubscribe
 {
-    [Serializable]
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class ForTopicAttribute : Attribute
     {

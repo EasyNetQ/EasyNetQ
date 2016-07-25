@@ -2,13 +2,11 @@ using System;
 
 namespace EasyNetQ.Tests
 {
-    [Serializable]
     public class TestPerformanceMessage
     {
         public string Text { get; set; }
     }
 
-    [Serializable]
     public class TestRequestMessage
     {
         public long Id { get; set; }
@@ -18,32 +16,27 @@ namespace EasyNetQ.Tests
         public bool CausesServerToTakeALongTimeToRespond { get; set; }
     }
 
-    [Serializable]
     public class TestResponseMessage
     {
         public long Id { get; set; }
         public string Text { get; set; }
     }
 
-    [Serializable]
     public class TestAsyncRequestMessage
     {
         public string Text { get; set; }
     }
 
-    [Serializable]
     public class TestAsyncResponseMessage
     {
         public string Text { get; set; }
     }
 
-    [Serializable]
     public class StartMessage
     {
         public string Text { get; set; }
     }
 
-    [Serializable]
     public class EndMessage
     {
         public string Text { get; set; }

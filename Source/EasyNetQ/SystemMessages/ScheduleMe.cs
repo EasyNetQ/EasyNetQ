@@ -2,7 +2,6 @@ using System;
 
 namespace EasyNetQ.SystemMessages
 {
-    [Serializable]
     public class ScheduleMe
     {
         public DateTime WakeTime { get; set; }
