@@ -66,6 +66,10 @@
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SimpleInjector, Version=3.2.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.2.0\lib\net45\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="StructureMap, Version=4.0.0.315, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\structuremap.4.0.0.315\lib\net40\StructureMap.dll</HintPath>
       <Private>True</Private>
@@ -85,6 +89,7 @@
     <Compile Include="AutofacAdapterTests.cs" />
     <Compile Include="LightInjectAdapterTests.cs" />
     <Compile Include="NinjectAdapterTests.cs" />
+    <Compile Include="SimpleInjectorAdapterTests.cs" />
     <Compile Include="StructureMapAdapterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureMapAdapterWithRegistryTests.cs" />
@@ -106,6 +111,10 @@
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj">
       <Project>{c76da6ea-78f0-4918-8e0a-7a1cad31e702}</Project>
       <Name>EasyNetQ.DI.Ninject</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj">
+      <Project>{519185ed-b7be-426e-8f2f-9410f8621ac4}</Project>
+      <Name>EasyNetQ.DI.SimpleInjector</Name>
     </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj">
       <Project>{54e2eea9-d56e-4eef-9521-b0c5d3b1ed2f}</Project>

@@ -19,7 +19,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package; PackageDiWindsor; PackageDiNinject; PackageDILightInject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
+    <Target Name="Default" DependsOnTargets="Version; Build; Test; Merge; Package; PackageDiWindsor; PackageDiNinject; PackageDiSimpleInjector; PackageDILightInject; PackageDiStructureMap; PackageDiAutofac; PackageSerilog" />
 
     <Target Name="Version">
         <FileUpdate Files="$(Source)\Version.cs"
@@ -181,6 +181,36 @@
         Value="%(AsmInfo.Version)" />
 
     <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.Ninject" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec" />
+
+  </Target>
+  
+  <Target Name="PackageDiSimpleInjector" DependsOnTargets="Build">
+
+    <ItemGroup>
+      <FilesToDelete Include="$(Package)\EasyNetQ.DI.SimpleInjector\*.nupkg"  />
+    </ItemGroup>
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <Copy SourceFiles="$(Source)\EasyNetQ.DI.SimpleInjector\bin\Release\EasyNetQ.DI.SimpleInjector.dll" DestinationFolder="$(Package)\EasyNetQ.DI.SimpleInjector\lib\net45" />
+
+    <GetAssemblyIdentity AssemblyFiles="$(Source)\EasyNetQ.DI.SimpleInjector\bin\Release\EasyNetQ.DI.SimpleInjector.dll">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.SimpleInjector\EasyNetQ.Di.SimpleInjector.nuspec"
+        XPath="/package/metadata/version"
+        Value="%(AsmInfo.Version)" />
+
+    <XmlUpdate
+        Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlFileName="$(Package)\EasyNetQ.Di.SimpleInjector\EasyNetQ.Di.SimpleInjector.nuspec"
+        XPath="/package/metadata/dependencies/dependency[@id='EasyNetQ']/@version"
+        Value="%(AsmInfo.Version)" />
+
+    <Exec WorkingDirectory="$(Package)\EasyNetQ.DI.SimpleInjector" Command="$(NuGet)\NuGet.exe pack $(Package)\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.nuspec" />
 
   </Target>
 
