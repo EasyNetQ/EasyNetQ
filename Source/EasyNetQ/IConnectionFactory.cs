@@ -64,6 +64,7 @@ namespace EasyNetQ
 
                 connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
                 connectionFactory.ClientProperties = Configuration.ClientProperties;
+                connectionFactory.AuthMechanisms = Configuration.AuthMechanisms;
                 clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));
             }
         }
