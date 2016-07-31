@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>EasyNetQ.DI.SimpleInjector</id>
+    <!-- Version gets updated from EasyNetQ.dll version number during the build's packaging process -->
+    <version>0.60.0.0</version>
+    <title>EasyNetQ.DI.SimpleInjector</title>
+    <authors>Jeff Doolittle, Mike Hadlow</authors>
+    <owners>Mike Hadlow</owners>
+    <licenseUrl>https://github.com/EasyNetQ/EasyNetQ/blob/master/licence.txt</licenseUrl>
+    <projectUrl>https://github.com/EasyNetQ/EasyNetQ/wiki/Using-Alternative-DI-Containers</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container</description>
+    <releaseNotes>
+    </releaseNotes>
+    <copyright>Copyright Mike Hadlow 2015</copyright>
+    <tags>RabbitMQ Messaging AMQP REST API SimpleInjector</tags>
+    <dependencies>
+      <dependency id="EasyNetQ" version="0.60.0.0" />
+      <dependency id="SimpleInjector" version="3.2.0" />
+    </dependencies>
+  </metadata>
+</package>
