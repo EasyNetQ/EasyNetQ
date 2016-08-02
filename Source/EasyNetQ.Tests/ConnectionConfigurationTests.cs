@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using EasyNetQ.ConnectionString;
 using NUnit.Framework;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
@@ -22,6 +23,15 @@ namespace EasyNetQ.Tests
             connectionConfiguration.Hosts.Count().ShouldEqual(1);
             connectionConfiguration.Hosts.Single().Host.ShouldEqual("amqphost");
             connectionConfiguration.Hosts.Single().Port.ShouldEqual(1234);
+        }
+
+        [Test]
+        public void The_AuthMechanisms_property_should_default_to_PlainMechanism()
+        {
+            ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration();
+
+            connectionConfiguration.AuthMechanisms.Count.ShouldEqual(1);
+            connectionConfiguration.AuthMechanisms.Single().ShouldBeOfType<PlainMechanismFactory>();
         }
     }
 }
