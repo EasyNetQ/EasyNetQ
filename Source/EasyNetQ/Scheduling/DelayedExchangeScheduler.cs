@@ -46,7 +46,7 @@ namespace EasyNetQ.Scheduling
             FuturePublishInternal(futurePublishDate - DateTime.UtcNow, message, topic, cancellationKey);
         }
 
-        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message,, string cancellationKey = null) where T : class
+        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
         {
             return FuturePublishAsync(messageDelay, message, "#", cancellationKey);
         }
