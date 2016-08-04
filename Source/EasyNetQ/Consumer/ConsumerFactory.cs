@@ -58,7 +58,7 @@ namespace EasyNetQ.Consumer
             IPersistentConnection connection,
             IConsumerConfiguration configuration)
         {
-            if (queue.IsExclusive)
+            if (queue.IsExclusive && configuration.RecoveryAction == null)
             {
                 return new TransientConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
             }

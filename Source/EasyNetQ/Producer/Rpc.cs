@@ -229,11 +229,18 @@ namespace EasyNetQ.Producer
             var routingKey = conventions.RpcRoutingKeyNamingConvention(typeof(TRequest));
 
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(), ExchangeType.Direct);
-            var queue = advancedBus.QueueDeclare(routingKey);
+            var queue = advancedBus.QueueDeclare(routingKey, durable: configuration.Durable);
             advancedBus.Bind(exchange, queue, routingKey);
 
             return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
-                c => c.WithPrefetchCount(configuration.PrefetchCount));
+                c => c.WithPrefetchCount(configuration.PrefetchCount).WithRecoveryAction(() =>
+                    {
+                        //just in case we loose exchange and/or queue in case of owning cluster node went down, and they are nondurable
+                        var exc = advancedBus.ExchangeDeclare(conventions.RpcExchangeNamingConvention(),
+                            ExchangeType.Direct);
+                        var q = advancedBus.QueueDeclare(routingKey, durable: configuration.Durable);
+                        advancedBus.Bind(exc, q, routingKey);
+                    }));
         }
 
         protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage) 

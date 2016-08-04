@@ -22,6 +22,8 @@ namespace EasyNetQ.Consumer
 
         private readonly IList<CancelSubscription> eventCancellations = new List<CancelSubscription>();
 
+        private bool shouldRecover = false;
+
         public PersistentConsumer(
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
@@ -66,10 +68,15 @@ namespace EasyNetQ.Consumer
                 return;
             }
 
+            if (shouldRecover && configuration.RecoveryAction != null)
+            {
+                configuration.RecoveryAction();
+            }
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
 
             internalConsumer.Cancelled += consumer => Dispose();
+            internalConsumer.ConsumerLost += OnConsumerLost;
 
             internalConsumer.StartConsuming(
                 connection, 
@@ -83,6 +90,17 @@ namespace EasyNetQ.Consumer
         {
             internalConsumerFactory.OnDisconnected();
             internalConsumers.Clear();
+            shouldRecover = true; //we need only recovery in case of connection loss, it is not needed to set it subsequently false
+        }
+
+        private void OnConsumerLost(IInternalConsumer internalConsumer)
+        {
+            shouldRecover = true; //we need only recovery in case of connection loss, it is not needed to set it subsequently false
+            object temp;
+            //We should dispose current internal consumer, as pending messages' ack/nack may shutdown it with unknown delivery tag
+            internalConsumers.TryRemove(internalConsumer, out temp);
+            internalConsumer.Dispose();
+            StartConsumingInternal();
         }
 
         private void ConnectionOnConnected()
