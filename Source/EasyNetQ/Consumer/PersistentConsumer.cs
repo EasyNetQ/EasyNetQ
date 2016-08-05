@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -70,7 +71,15 @@ namespace EasyNetQ.Consumer
 
             if (shouldRecover && configuration.RecoveryAction != null)
             {
-                configuration.RecoveryAction();
+                try
+                {
+                    configuration.RecoveryAction();
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex.ToString());
+                    throw;
+                }
             }
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
