@@ -18,7 +18,7 @@ namespace EasyNetQ.Consumer
             );
 
         event Action<IInternalConsumer> Cancelled;
-        event Action<IInternalConsumer> ConsumerLost;
+        event Action<IInternalConsumer> CancelledByBroker;
     }
 
     public class InternalConsumer : IBasicConsumer, IInternalConsumer
@@ -38,7 +38,7 @@ namespace EasyNetQ.Consumer
         public string ConsumerTag { get; private set; }
 
         public event Action<IInternalConsumer> Cancelled;
-        public event Action<IInternalConsumer> ConsumerLost;
+        public event Action<IInternalConsumer> CancelledByBroker;
 
         public InternalConsumer(
             IHandlerRunner handlerRunner,
@@ -125,11 +125,11 @@ namespace EasyNetQ.Consumer
             if(consumerCancelled != null) consumerCancelled(this, new ConsumerEventArgs(ConsumerTag));
         }
 
-        private void OnConsumerLost()
+        private void OnCancelledByBroker()
         {
             // copy to temp variable to be thread safe.
-            var consumerLost = ConsumerLost;
-            if (consumerLost != null) consumerLost(this);
+            var cancelledByBroker = CancelledByBroker;
+            if (cancelledByBroker != null) cancelledByBroker(this);
         }
 
         public void HandleBasicConsumeOk(string consumerTag)
@@ -141,17 +141,12 @@ namespace EasyNetQ.Consumer
         {
             Cancel();
         }
-
-        /// <summary>
-        /// If we get this from the server, it means, that something went wrong as per the protocol documentation,
-        /// so we don't trigger Cancel, instead trigger ConsumerLost to enable PersistentCosnumer to reestablish it.
-        /// </summary>
-        /// <param name="consumerTag"></param>
+        
         public void HandleBasicCancel(string consumerTag)
         {
             logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
                              "Consumer tag: " + consumerTag);
-            OnConsumerLost();
+            OnCancelledByBroker();
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)

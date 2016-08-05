@@ -77,15 +77,15 @@ namespace EasyNetQ.Consumer
                 }
                 catch (Exception ex)
                 {
+                    // TODO: do not eat the exception here, avoid the recovery action on durable queue!!
                     Trace.WriteLine(ex.ToString());
-                    throw;
                 }
             }
             var internalConsumer = internalConsumerFactory.CreateConsumer();
             internalConsumers.TryAdd(internalConsumer, null);
 
             internalConsumer.Cancelled += consumer => Dispose();
-            internalConsumer.ConsumerLost += OnConsumerLost;
+            internalConsumer.CancelledByBroker += consumer => Dispose();
 
             internalConsumer.StartConsuming(
                 connection, 
@@ -100,16 +100,6 @@ namespace EasyNetQ.Consumer
             internalConsumerFactory.OnDisconnected();
             internalConsumers.Clear();
             shouldRecover = true; //we need only recovery in case of connection loss, it is not needed to set it subsequently false
-        }
-
-        private void OnConsumerLost(IInternalConsumer internalConsumer)
-        {
-            shouldRecover = true; //we need only recovery in case of connection loss, it is not needed to set it subsequently false
-            object temp;
-            //We should dispose current internal consumer, as pending messages' ack/nack may shutdown it with unknown delivery tag
-            internalConsumers.TryRemove(internalConsumer, out temp);
-            internalConsumer.Dispose();
-            StartConsumingInternal();
         }
 
         private void ConnectionOnConnected()
