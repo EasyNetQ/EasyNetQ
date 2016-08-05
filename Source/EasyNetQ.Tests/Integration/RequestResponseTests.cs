@@ -1,9 +1,10 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using System.Threading;
 using NUnit.Framework;
 using RabbitMQ.Client;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -11,11 +12,24 @@ namespace EasyNetQ.Tests.Integration
     public class RequestResponseTests
     {
         private IBus bus;
+        private const string defaultRpcExchange = "easy_net_q_rpc";
+
+        private readonly Dictionary<Type, string> customRpcRequestConventionDictionary = new Dictionary<Type, string>()
+        {
+            {typeof (TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange"}
+        };
+
+        private readonly Dictionary<Type, string> customRpcResponseConventionDictionary = new Dictionary<Type, string>()
+        {
+            {typeof (TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange"}
+        };
 
         [SetUp]
         public void SetUp()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
+            bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => customRpcRequestConventionDictionary.ContainsKey(type) ? customRpcRequestConventionDictionary[type] : defaultRpcExchange;
+            bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => customRpcResponseConventionDictionary.ContainsKey(type) ? customRpcResponseConventionDictionary[type] : defaultRpcExchange;
             bus.Respond<TestRequestMessage, TestResponseMessage>(req => new TestResponseMessage { Text = req.Text });
         }
 
@@ -106,6 +120,36 @@ namespace EasyNetQ.Tests.Integration
             });
 
             autoResetEvent.WaitOne(2000);
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_make_a_request_to_customly_defined_exchange()
+        {
+            var request = new TestModifiedRequestExhangeRequestMessage { Text = "Hello from the client to funky exchange!" };
+
+            Console.Out.WriteLine("Making request");
+            var response = bus.RequestAsync<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(request);
+
+            Console.Out.WriteLine("response = {0}", response.Result.Text);
+
+        }
+
+        // First start the EasyNetQ.Tests.SimpleService console app.
+        // Run this test. You should see the SimpleService report that it's
+        // responding and the response should appear here.
+        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        public void Should_be_able_to_make_a_request_and_receive_response_to_customly_defined_exchange()
+        {
+            var request = new TestModifiedResponseExhangeRequestMessage { Text = "Hello from the client! I Wanna receive response via funky exchange!" };
+
+            Console.Out.WriteLine("Making request");
+            var response = bus.RequestAsync<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(request);
+
+            Console.Out.WriteLine("response = {0}", response.Result.Text);
+
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.

@@ -1,7 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using StructureMap;
-using StructureMap.Configuration.DSL;
+using System;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -105,7 +104,8 @@ namespace EasyNetQ.DI.Tests
             public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
             public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
             public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
-            public RpcExchangeNameConvention RpcExchangeNamingConvention { get; set; }
+            public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
+            public RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
             public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
             public ConsumerTagConvention ConsumerTagConvention { get; set; }
 

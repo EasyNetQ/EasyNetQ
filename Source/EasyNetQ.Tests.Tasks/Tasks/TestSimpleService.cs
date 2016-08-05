@@ -1,19 +1,40 @@
-﻿using System;
+﻿using Net.CommandLine;
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Net.CommandLine;
 
 namespace EasyNetQ.Tests.Tasks.Tasks
 {
     public class TestSimpleService : ICommandLineTask, IDisposable
     {
         private IBus bus;
+        private const string defaultRpcExchange = "easy_net_q_rpc";
+
+        private static readonly Dictionary<Type, string> customRpcRequestConventionDictionary = new Dictionary<Type, string>()
+        {
+            {typeof (TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange"}
+        };
+
+        private static readonly Dictionary<Type, string> customRpcResponseConventionDictionary = new Dictionary<Type, string>()
+        {
+            {typeof (TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange"}
+        };
 
         public Task Run(CancellationToken cancellationToken)
         {
+
             bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
-            bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
+
+            bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => customRpcRequestConventionDictionary.ContainsKey(type) ? customRpcRequestConventionDictionary[type] : defaultRpcExchange;
+            bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => customRpcResponseConventionDictionary.ContainsKey(type) ? customRpcResponseConventionDictionary[type] : defaultRpcExchange;
+
+            
+            bus.RespondAsync<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(HandleModifiedRequestExchangeRequest);
+            bus.RespondAsync<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(HandleModifiedResponseExchangeRequest);
             bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
+            bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
+
 
             Console.WriteLine("Waiting to service requests");
             Console.WriteLine("Press enter to stop");
@@ -50,6 +71,24 @@ namespace EasyNetQ.Tests.Tasks.Tasks
                 throw new SomeRandomException("Something terrible has just happened!");
             }
             return new TestResponseMessage { Id = request.Id, Text = request.Text + " all done!" };
+        }
+
+        public static async Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequest(TestModifiedRequestExhangeRequestMessage request)
+        {
+            Console.Out.WriteLine("Responding to RPC request from exchange : "+ customRpcRequestConventionDictionary[typeof (TestModifiedRequestExhangeRequestMessage)]);
+            return new TestModifiedRequestExhangeResponseMessage()
+            {
+                Text = request.Text + " response!"
+            };
+        }
+
+        public static async Task<TestModifiedResponseExhangeResponseMessage> HandleModifiedResponseExchangeRequest(TestModifiedResponseExhangeRequestMessage request)
+        {
+            Console.Out.WriteLine("Responding to RPC request from exchange : " + customRpcResponseConventionDictionary[typeof(TestModifiedResponseExhangeResponseMessage)]);
+            return new TestModifiedResponseExhangeResponseMessage()
+            {
+                Text = request.Text + " response!"
+            };
         }
 
         private static Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)

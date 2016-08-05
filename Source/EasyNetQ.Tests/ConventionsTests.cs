@@ -1,17 +1,17 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using Rhino.Mocks;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace EasyNetQ.Tests
 {
-	[TestFixture]
+    [TestFixture]
 	public class When_using_default_conventions
 	{
 		private Conventions conventions;
@@ -63,9 +63,16 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
-        public void The_default_rpc_exchange_name_should_be()
+        public void The_default_rpc_request_exchange_name_should_be()
         {
-            var result = conventions.RpcExchangeNamingConvention();
+            var result = conventions.RpcRequestExchangeNamingConvention(typeof (object));
+            result.ShouldEqual("easy_net_q_rpc");
+        }
+
+        [Test]
+        public void The_default_rpc_reply_exchange_name_should_be()
+        {
+            var result = conventions.RpcResponseExchangeNamingConvention(typeof(object));
             result.ShouldEqual("easy_net_q_rpc");
         }
 
@@ -74,7 +81,7 @@ namespace EasyNetQ.Tests
         {
             var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
             result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
-        }
+        }        
 	}
 
     [TestFixture]
@@ -203,7 +210,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new TypeNameSerializer())
             {
-                RpcExchangeNamingConvention = () => "CustomRpcExchangeName",
+                RpcRequestExchangeNamingConvention = messageType => "CustomRpcExchangeName",
                 RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
             };
 
