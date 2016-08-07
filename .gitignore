@@ -32,3 +32,4 @@ packages
 
 # Ignore NuGet binary
 Source/.nuget/NuGet.exe
+/Source/.vs/config
