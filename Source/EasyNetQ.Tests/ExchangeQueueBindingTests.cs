@@ -56,6 +56,108 @@ namespace EasyNetQ.Tests
     }
 
     [TestFixture]
+    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange
+    {
+        private MockBuilder mockBuilder;
+        private IAdvancedBus advancedBus;
+        private IQueue queue;
+
+        [SetUp]
+        public void SetUp()
+        {
+            mockBuilder = new MockBuilder();
+
+            advancedBus = mockBuilder.Bus.Advanced;
+            queue = advancedBus.QueueDeclare(
+                "my_queue",
+                passive: false,
+                durable: false,
+                exclusive: true,
+                autoDelete: true,
+                perQueueMessageTtl: 1000,
+                expires: 2000,
+                maxPriority: 10,
+                deadLetterExchange: "my_exchange",
+                deadLetterRoutingKey: "my_routing_key");
+        }
+
+        [Test]
+        public void Should_return_a_queue()
+        {
+            queue.ShouldNotBeNull();
+            queue.Name.ShouldEqual("my_queue");
+        }
+
+        [Test]
+        public void Should_declare_the_queue()
+        {
+            mockBuilder.Channels[0].AssertWasCalled(x =>
+                x.QueueDeclare(
+                    Arg<string>.Is.Equal("my_queue"),
+                    Arg<bool>.Is.Equal(false),
+                    Arg<bool>.Is.Equal(true),
+                    Arg<bool>.Is.Equal(true),
+                    Arg<IDictionary<string, object>>.Matches(args =>
+                        ((int)args["x-message-ttl"] == 1000) &&
+                        ((int)args["x-expires"] == 2000) &&
+                        ((int)args["x-max-priority"] == 10) &&
+                        ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
+                        ((string)args["x-dead-letter-routing-key"] == "my_routing_key"))));
+        }
+    }
+
+    [TestFixture]
+    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange
+    {
+        private MockBuilder mockBuilder;
+        private IAdvancedBus advancedBus;
+        private IQueue queue;
+
+        [SetUp]
+        public void SetUp()
+        {
+            mockBuilder = new MockBuilder();
+
+            advancedBus = mockBuilder.Bus.Advanced;
+            queue = advancedBus.QueueDeclare(
+                "my_queue",
+                passive: false,
+                durable: false,
+                exclusive: true,
+                autoDelete: true,
+                perQueueMessageTtl: 1000,
+                expires: 2000,
+                maxPriority: 10,
+                deadLetterExchange: "",
+                deadLetterRoutingKey: "my_queue2");
+        }
+
+        [Test]
+        public void Should_return_a_queue()
+        {
+            queue.ShouldNotBeNull();
+            queue.Name.ShouldEqual("my_queue");
+        }
+
+        [Test]
+        public void Should_declare_the_queue()
+        {
+            mockBuilder.Channels[0].AssertWasCalled(x =>
+                x.QueueDeclare(
+                    Arg<string>.Is.Equal("my_queue"),
+                    Arg<bool>.Is.Equal(false),
+                    Arg<bool>.Is.Equal(true),
+                    Arg<bool>.Is.Equal(true),
+                    Arg<IDictionary<string, object>>.Matches(args =>
+                        ((int)args["x-message-ttl"] == 1000) &&
+                        ((int)args["x-expires"] == 2000) &&
+                        ((int)args["x-max-priority"] == 10) &&
+                        ((string)args["x-dead-letter-exchange"] == "") &&
+                        ((string)args["x-dead-letter-routing-key"] == "my_queue2"))));
+        }
+    }
+
+    [TestFixture]
     public class When_a_queue_is_deleted
     {
         private MockBuilder mockBuilder;

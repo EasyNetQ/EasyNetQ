@@ -380,7 +380,11 @@ namespace EasyNetQ
             {
                 arguments.Add("x-max-priority", maxPriority.Value);
             }
-            if (!string.IsNullOrEmpty(deadLetterExchange))
+            // Allow empty dead-letter-exchange as it represents the default rabbitmq exchange
+            // and thus is a valid value. To dead-letter a message directly to a queue, you
+            // would set dead-letter-exchange to empty and dead-letter-routing-key to name of the
+            // queue since every queue has a direct binding with default exchange.
+            if (deadLetterExchange != null)
             {
                 arguments.Add("x-dead-letter-exchange", deadLetterExchange);
             }
@@ -437,7 +441,11 @@ namespace EasyNetQ
             {
                 arguments.Add("x-max-priority", maxPriority.Value);
             }
-            if (!string.IsNullOrEmpty(deadLetterExchange))
+            // Allow empty dead-letter-exchange as it represents the default rabbitmq exchange
+            // and thus is a valid value. To dead-letter a message directly to a queue, you
+            // would set dead-letter-exchange to empty and dead-letter-routing-key to name of the
+            // queue since every queue has a direct binding with default exchange.
+            if (deadLetterExchange != null)
             {
                 arguments.Add("x-dead-letter-exchange", deadLetterExchange);
             }
