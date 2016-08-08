@@ -32,6 +32,30 @@ namespace EasyNetQ.Tests
         public string Text { get; set; }
     }
 
+    public class TestModifiedRequestExhangeRequestMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
+    public class TestModifiedRequestExhangeResponseMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
+    public class TestModifiedResponseExhangeRequestMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
+    public class TestModifiedResponseExhangeResponseMessage
+    {
+        public string Text { get; set; }
+    }
+
+    [Serializable]
     public class StartMessage
     {
         public string Text { get; set; }
