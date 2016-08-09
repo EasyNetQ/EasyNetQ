@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.csproj", "{640DEC15-3A17-4E85-B38A-CFB379426DC2}"
 EndProject
@@ -48,8 +48,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Windsor", "Easy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Ninject", "EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj", "{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Autofac", "EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj", "{74FB0A3D-2C72-462C-B498-15C0AE615D35}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8B9F313C-2A3A-45D6-944A-DCB2F92C8227}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -87,14 +85,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ NET45", "EasyNetQ 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serilog", "EasyNetQ.Serilog\EasyNetQ.Serilog.csproj", "{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "EasyNetQ", "EasyNetQ\EasyNetQ.shproj", "{6A038745-6B26-437B-9524-71F9CA2971F4}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "EasyNetQ.Source", "EasyNetQ\EasyNetQ.Source.shproj", "{6A038745-6B26-437B-9524-71F9CA2971F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.LightInject", "EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj", "{3AD2CD4A-8969-4C2D-8EAA-9FC800585678}"
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.Core", "EasyNetQ.Core\EasyNetQ.Core.xproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ", "EasyNetQ.Core\EasyNetQ.xproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.SimpleInjector", "EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj", "{519185ED-B7BE-426E-8F2F-9410F8621AC4}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.DI.Autofac", "EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.xproj", "{9D8E2017-010D-4A62-8634-CB702A99D6BE}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -158,10 +159,6 @@ Global
 		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74FB0A3D-2C72-462C-B498-15C0AE615D35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74FB0A3D-2C72-462C-B498-15C0AE615D35}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74FB0A3D-2C72-462C-B498-15C0AE615D35}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74FB0A3D-2C72-462C-B498-15C0AE615D35}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -190,14 +187,18 @@ Global
 		{3AD2CD4A-8969-4C2D-8EAA-9FC800585678}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AD2CD4A-8969-4C2D-8EAA-9FC800585678}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AD2CD4A-8969-4C2D-8EAA-9FC800585678}.Release|Any CPU.Build.0 = Release|Any CPU
-		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{519185ED-B7BE-426E-8F2F-9410F8621AC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D8E2017-010D-4A62-8634-CB702A99D6BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D8E2017-010D-4A62-8634-CB702A99D6BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D8E2017-010D-4A62-8634-CB702A99D6BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D8E2017-010D-4A62-8634-CB702A99D6BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
