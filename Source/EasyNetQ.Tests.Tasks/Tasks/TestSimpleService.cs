@@ -73,22 +73,22 @@ namespace EasyNetQ.Tests.Tasks.Tasks
             return new TestResponseMessage { Id = request.Id, Text = request.Text + " all done!" };
         }
 
-        public static async Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequest(TestModifiedRequestExhangeRequestMessage request)
+        public static Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequest(TestModifiedRequestExhangeRequestMessage request)
         {
             Console.Out.WriteLine("Responding to RPC request from exchange : "+ customRpcRequestConventionDictionary[typeof (TestModifiedRequestExhangeRequestMessage)]);
-            return new TestModifiedRequestExhangeResponseMessage()
+            return Task.FromResult(new TestModifiedRequestExhangeResponseMessage
             {
                 Text = request.Text + " response!"
-            };
+            });
         }
 
-        public static async Task<TestModifiedResponseExhangeResponseMessage> HandleModifiedResponseExchangeRequest(TestModifiedResponseExhangeRequestMessage request)
+        public static Task<TestModifiedResponseExhangeResponseMessage> HandleModifiedResponseExchangeRequest(TestModifiedResponseExhangeRequestMessage request)
         {
             Console.Out.WriteLine("Responding to RPC request from exchange : " + customRpcResponseConventionDictionary[typeof(TestModifiedResponseExhangeResponseMessage)]);
-            return new TestModifiedResponseExhangeResponseMessage()
+            return Task.FromResult(new TestModifiedResponseExhangeResponseMessage()
             {
                 Text = request.Text + " response!"
-            };
+            });
         }
 
         private static Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)

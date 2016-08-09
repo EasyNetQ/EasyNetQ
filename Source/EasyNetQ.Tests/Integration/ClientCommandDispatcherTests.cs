@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var task = dispatcher.InvokeAsync(x =>
                 {
-                    x.ExchangeDeclare("MyExchange", "direct");
+                    x.ExchangeDeclare("MyExchange", "direct", true, false, new Dictionary<string, object>());
                     Console.Out.WriteLine("declare executed");
                 });
             task.Wait();
@@ -58,7 +58,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var task = dispatcher.InvokeAsync(x =>
             {
-                x.ExchangeDeclare("MyExchange", "topic");
+                x.ExchangeDeclare("MyExchange", "topic", true, false, new Dictionary<string, object>());
                 Console.Out.WriteLine("declare executed");
             });
             task.Wait();

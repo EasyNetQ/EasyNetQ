@@ -74,7 +74,7 @@ namespace EasyNetQ
         void StartTryToConnect()
         {
             Timer timer;
-#if NET_CORE
+#if !NETFX
             timer = new Timer(TryToConnect, null, connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
 #else
             timer = new Timer(TryToConnect);
@@ -85,7 +85,7 @@ namespace EasyNetQ
 
         void TryToConnect(object timer)
         {
-            if(timer != null) ((Timer) timer).Dispose();
+            ((Timer) timer)?.Dispose();
 
             logger.DebugWrite("Trying to connect");
             if (disposed) return;

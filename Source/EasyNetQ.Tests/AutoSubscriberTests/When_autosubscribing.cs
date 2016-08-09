@@ -14,6 +14,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     public class When_autosubscribing
     {
         private MockBuilder mockBuilder;
+        private Dictionary<string, object> parameters;
 
         private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA:EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
@@ -31,7 +32,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 //            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
-
+            parameters = new Dictionary<string, object>();
             autoSubscriber.Subscribe(typeof(MyAsyncConsumer), typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>));
         }
 
@@ -60,7 +61,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                                 x.QueueBind(
                                                 Arg<string>.Is.Equal(queueName),
                                                 Arg<string>.Is.Anything,
-                                                Arg<string>.Is.Equal(topicName))
+                                                Arg<string>.Is.Equal(topicName), parameters)
                                                 );
           
             assertConsumerStarted(1, expectedQueueName1, "#");

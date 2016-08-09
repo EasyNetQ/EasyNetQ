@@ -9,29 +9,31 @@ namespace EasyNetQ.Tests.Integration
     public class SubscribeWithExpiresTests
     {
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]
-        [ExpectedException(typeof(UnexpectedHttpStatusCodeException))]
         public void Queue_should_be_deleted_after_the_expires_ttl()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
+            Assert.Throws<UnexpectedHttpStatusCodeException>(() =>
+            {
+                var bus = RabbitHutch.CreateBus("host=localhost");
 
-            var subscriptionId = "TestSubscriptionWithExpires";
-            var conventions = new Conventions(new TypeNameSerializer());
-            var queueName = conventions.QueueNamingConvention(typeof(MyMessage), subscriptionId);
-            var client = new ManagementClient("http://localhost", "guest", "guest");
-            var vhost = new Vhost { Name = "/" };
+                var subscriptionId = "TestSubscriptionWithExpires";
+                var conventions = new Conventions(new TypeNameSerializer());
+                var queueName = conventions.QueueNamingConvention(typeof(MyMessage), subscriptionId);
+                var client = new ManagementClient("http://localhost", "guest", "guest");
+                var vhost = new Vhost { Name = "/" };
 
-            bus.Subscribe<MyMessage>(subscriptionId, message => { }, x => x.WithExpires(1000));
+                bus.Subscribe<MyMessage>(subscriptionId, message => { }, x => x.WithExpires(1000));
 
-            var queue = client.GetQueue(queueName, vhost);
-            queue.ShouldNotBeNull();
-            
-            // this will abandon the queue... poor queue!
-            bus.Dispose();
+                var queue = client.GetQueue(queueName, vhost);
+                queue.ShouldNotBeNull();
 
-            Thread.Sleep(1500);
+                // this will abandon the queue... poor queue!
+                bus.Dispose();
 
-            queue = client.GetQueue(queueName, vhost);
-            queue.ShouldBeNull();
+                Thread.Sleep(1500);
+
+                queue = client.GetQueue(queueName, vhost);
+                queue.ShouldBeNull();
+            });
         }
 
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]

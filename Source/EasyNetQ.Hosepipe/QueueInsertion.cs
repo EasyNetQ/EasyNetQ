@@ -17,7 +17,7 @@ namespace EasyNetQ.Hosepipe
 
         public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
         {
-            using (var connection = HosepipeConnection.FromParamters(parameters))
+            using (var connection = HosepipeConnection.FromParameters(parameters))
             using (var channel = connection.CreateModel())
             {
                 foreach (var message in messages)
@@ -27,7 +27,7 @@ namespace EasyNetQ.Hosepipe
                     var properties = new BasicProperties();
                     message.Properties.CopyTo(properties);
 
-                    channel.BasicPublish(message.Info.Exchange, message.Info.RoutingKey, properties, body);
+                    channel.BasicPublish(message.Info.Exchange, message.Info.RoutingKey, true, properties, body);
                 }
             }                        
         }

@@ -27,7 +27,7 @@ namespace EasyNetQ.DI.Tests
         [TearDown]
         public void TearDown()
         {
-            container.Dispose();
+            container?.Dispose();
             RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());
         }
 

@@ -8,7 +8,7 @@ using System.Reflection;
 namespace EasyNetQ
 {
     public class MessageProperties
-#if !NET_CORE
+#if NETFX
         : ICloneable
 #endif
     {

@@ -67,7 +67,7 @@ namespace EasyNetQ
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
             string applicationNameAndPath = null;
-#if NET_CORE
+#if !NETFX
             var version = this.GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();

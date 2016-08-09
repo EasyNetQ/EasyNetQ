@@ -48,10 +48,12 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Test]
-        [ExpectedException(typeof(EasyNetQException))]
         public void Should_throw_if_handler_is_not_found()
         {
-            handlerCollection.GetHandler<MyOtherMessage>();
+            Assert.Throws<EasyNetQException>(() =>
+            {
+                handlerCollection.GetHandler<MyOtherMessage>();
+            });
         }
 
         [Test]
@@ -84,10 +86,12 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Test]
-        [ExpectedException(typeof(EasyNetQException))]
         public void Should_not_be_able_to_register_multiple_handlers_for_the_same_type()
         {
-            handlerCollection.Add<MyMessage>((message, info) => { });
+            Assert.Throws<EasyNetQException>(() =>
+            {
+                handlerCollection.Add<MyMessage>((message, info) => { });
+            });
         }
     }
 }
