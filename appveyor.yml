@@ -21,3 +21,13 @@ deploy:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
     on:
       branch: master
+
+skip_commits:
+  files:
+  - *.gitattributes
+  - *.gitignore
+  - README.md
+  - build.bat
+  - hall_of_fame.md
+  - licence.txt
+  - DatabaseScripts/*
