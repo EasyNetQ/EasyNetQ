@@ -34,35 +34,40 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Test]
-        [ExpectedException(ExpectedException = typeof(EasyNetQResponderException))]
         public void Should_throw_an_EasyNetQResponderException()
         {
-            try
+            Assert.Throws<EasyNetQResponderException>(() =>
             {
-                var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
-                DeliverMessage(_correlationId, null);
-                task.Wait(1000);
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+                try
+                {
+                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+                    DeliverMessage(_correlationId, null);
+                    task.Wait(1000);
+                }
+                catch (AggregateException aggregateException)
+                {
+                    throw aggregateException.InnerException;
+                }
+            });
         }
 
         [Test]
-        [ExpectedException(ExpectedException = typeof(EasyNetQResponderException), ExpectedMessage = "Why you are so bad with me?")]
         public void Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
         {
-            try
+            Assert.Throws<EasyNetQResponderException>(() =>
             {
-                var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
-                DeliverMessage(_correlationId, "Why you are so bad with me?");
-                task.Wait(1000);
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+
+                try
+                {
+                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+                    DeliverMessage(_correlationId, "Why you are so bad with me?");
+                    task.Wait(1000);
+                }
+                catch (AggregateException aggregateException)
+                {
+                    throw aggregateException.InnerException;
+                }
+            },"Why you are so bad with me?");
         }
 
         protected void DeliverMessage(string correlationId, string exceptionMessage)

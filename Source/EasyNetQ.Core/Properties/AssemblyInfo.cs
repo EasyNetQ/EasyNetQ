@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -20,4 +20,9 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
+#if !NET_CORE
 [assembly: Guid("ed270a39-d32c-438a-bf4f-aa0e66c7879c")]
+#endif
+[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyInformationalVersion("2.0.0-radicalgeek-netcore.1+1389.Branch.radicalgeek-netcore.Sha.25ca94d3585990509e1d8cd9b18071793b281965")]
+[assembly: AssemblyFileVersion("2.0.0.0")]

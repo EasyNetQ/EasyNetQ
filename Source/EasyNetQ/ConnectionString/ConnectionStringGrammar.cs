@@ -97,7 +97,7 @@ namespace EasyNetQ.ConnectionString
             Preconditions.CheckNotNull(property, "getter", "Member is not a property.");
             Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
-#if NET_CORE
+#if !NETFX
             return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
             
 #else

@@ -19,19 +19,21 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Test]
-        [ExpectedException(typeof(EasyNetQException))]
         public void Should_throw_an_EasyNetQException()
         {
-            try
+            Assert.Throws<EasyNetQException>(() =>
             {
-                var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
-                mockBuilder.Connection.Raise(x => x.ConnectionShutdown += null, null, null);
-                task.Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+                try
+                {
+                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+                    mockBuilder.Connection.Raise(x => x.ConnectionShutdown += null, null, null);
+                    task.Wait();
+                }
+                catch (AggregateException aggregateException)
+                {
+                    throw aggregateException.InnerException;
+                }
+            });
         }         
     }
 }

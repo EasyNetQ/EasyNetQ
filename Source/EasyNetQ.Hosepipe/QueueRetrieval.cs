@@ -22,7 +22,7 @@ namespace EasyNetQ.Hosepipe
 
         public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
         {
-            using (var connection = HosepipeConnection.FromParamters(parameters))
+            using (var connection = HosepipeConnection.FromParameters(parameters))
             using (var channel = connection.CreateModel())
             {
                 try

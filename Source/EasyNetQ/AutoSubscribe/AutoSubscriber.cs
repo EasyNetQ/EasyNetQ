@@ -146,7 +146,7 @@ namespace EasyNetQ.AutoSubscribe
                                                            .GetMethod(dispatchName, BindingFlags.Instance | BindingFlags.Public)
                                                            .MakeGenericMethod(subscriptionInfo.MessageType, subscriptionInfo.ConcreteType);
 
-#if NET_CORE
+#if !NETFX
                     var dispatchDelegate = dispatchMethod.CreateDelegate(
                         subscriberTypeFromMessageTypeDelegate(subscriptionInfo.MessageType),
                         AutoSubscriberMessageDispatcher);
@@ -239,12 +239,7 @@ namespace EasyNetQ.AutoSubscribe
 
         protected virtual bool IsValidMarkerType(Type markerType)
         {
-#if NET_CORE
             return markerType.GetTypeInfo().IsInterface && markerType.GetMethods().Any(m => m.Name == ConsumeMethodName);
-#else
-            return markerType.IsInterface && markerType.GetMethods().Any(m => m.Name == ConsumeMethodName);
-#endif
-
         }
 
         protected virtual MethodInfo GetSubscribeMethodOfBus(string methodName, Type parmType)
@@ -280,8 +275,7 @@ namespace EasyNetQ.AutoSubscribe
 
         protected virtual IEnumerable<KeyValuePair<Type, AutoSubscriberConsumerInfo[]>> GetSubscriptionInfos(IEnumerable<Type> types,Type interfaceType)
         {
-#if NET_CORE
-                   foreach (var concreteType in types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract))
+            foreach (var concreteType in types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract))
             {
                 var subscriptionInfos = concreteType.GetInterfaces()
                     .Where(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == interfaceType && !i.GetGenericArguments()[0].IsGenericParameter)
@@ -291,19 +285,6 @@ namespace EasyNetQ.AutoSubscribe
                 if (subscriptionInfos.Any())
                     yield return new KeyValuePair<Type, AutoSubscriberConsumerInfo[]>(concreteType, subscriptionInfos);
             }
-#else            
-            foreach (var concreteType in types.Where(t => t.IsClass && !t.IsAbstract))
-            {
-                var subscriptionInfos = concreteType.GetInterfaces()
-                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceType && !i.GetGenericArguments()[0].IsGenericParameter)
-                    .Select(i => new AutoSubscriberConsumerInfo(concreteType, i, i.GetGenericArguments()[0]))
-                    .ToArray();
-
-                if (subscriptionInfos.Any())
-                    yield return new KeyValuePair<Type, AutoSubscriberConsumerInfo[]>(concreteType, subscriptionInfos);
-            }
-#endif
-
 
         }
 

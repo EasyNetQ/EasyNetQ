@@ -57,7 +57,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                     x.QueueBind(
                         Arg<string>.Is.Equal(queueName),
                         Arg<string>.Is.Anything,
-                        Arg<string>.Is.Equal(topicName))
+                        Arg<string>.Is.Equal(topicName), new Dictionary<string, object>())
                     );
 
             assertConsumerStarted(1, expectedQueueName1, "#");

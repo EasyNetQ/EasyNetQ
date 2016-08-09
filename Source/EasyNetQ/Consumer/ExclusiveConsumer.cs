@@ -47,7 +47,7 @@ namespace EasyNetQ.Consumer
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
-#if NET_CORE
+#if !NETFX
             timer = new Timer(s =>
                 {
                     StartConsumer();

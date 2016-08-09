@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.Integration
                 exchanges[i] = buses[i].Advanced.ExchangeDeclare(name, "direct");
 
                 // declaring a queue without specifying the name creates a transient, server named queue.
-                queues[i] = buses[i].Advanced.QueueDeclare(); 
+                queues[i] = buses[i].Advanced.QueueDeclare("pong"); 
 
                 buses[i].Advanced.QueuePurge(queues[i]);
                 buses[i].Advanced.Bind(exchanges[i], queues[i], routingKey);

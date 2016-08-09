@@ -92,7 +92,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.LightInject", "EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj", "{3AD2CD4A-8969-4C2D-8EAA-9FC800585678}"
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ DNX", "EasyNetQ DNX\EasyNetQ DNX.xproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.Core", "EasyNetQ.Core\EasyNetQ.Core.xproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.SimpleInjector", "EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj", "{519185ED-B7BE-426E-8F2F-9410F8621AC4}"
 EndProject

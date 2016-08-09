@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
@@ -38,14 +39,14 @@ namespace EasyNetQ.Tests.Integration
         [Test]
         public void Should_be_able_to_run_channel_actions()
         {
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct", true, false, new Dictionary<string, object>()));
         }
 
         [Test]
         public void Should_allow_non_disconnect_Amqp_exception_to_bubble_up()
         {
             // run test above first
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic", true, false, new Dictionary<string, object>()));
         }
 
         [Test]
@@ -57,7 +58,7 @@ namespace EasyNetQ.Tests.Integration
             persistentChannel.InvokeChannelAction(x =>
                 {
                     Console.Out.WriteLine("Running exchange declare");
-                    x.ExchangeDeclare("myExchange", "direct");
+                    x.ExchangeDeclare("myExchange", "direct", true, false, new Dictionary<string, object>());
                     Console.Out.WriteLine("Ran exchange declare");
                 });
 

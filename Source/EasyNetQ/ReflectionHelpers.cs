@@ -14,17 +14,10 @@ namespace EasyNetQ
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-#if NET_CORE
             return typesAttributes.GetOrAdd(type, t => t.GetTypeInfo().GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));
-#else
-            return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
-                                                    .Cast<Attribute>()
-                                                    .GroupBy(attr => attr.GetType())
-                                                    .ToDictionary(group => group.Key, group => group.ToArray()));
-#endif
         }
 
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this Type type) where TAttribute : Attribute

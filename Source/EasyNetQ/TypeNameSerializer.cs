@@ -43,13 +43,8 @@ namespace EasyNetQ
 
             return serializedTypes.GetOrAdd(type, t =>
             {
-#if NET_CORE
                 
                 var typeName = t.FullName + ":" + t.GetTypeInfo().Assembly.GetName().Name;
-#else
-                var typeName = t.FullName + ":" + t.Assembly.GetName().Name;
-#endif
-
                 if (typeName.Length > 255)
                 {
                     throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP " +
