@@ -24,8 +24,8 @@ deploy:
 
 skip_commits:
   files:
-  - *.gitattributes
-  - *.gitignore
+  - .gitattributes
+  - .gitignore
   - README.md
   - build.bat
   - hall_of_fame.md
