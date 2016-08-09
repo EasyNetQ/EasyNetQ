@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-radicalgeek-netc0001",
+  "version": "2.0.2-radicalgeek-netc0001",
   "description": "EasyNetQ",
   "title": "EasyNetQ",
   "name": "EasyNetQ",
@@ -114,12 +114,12 @@
       }
     },
     "net451": {
-        "frameworkAssemblies": {
-            "System": "4.0.0.0",
-            "System.Configuration": "4.0.0.0",
-            "System.Core": "4.0.0.0",
-            "System.IO.Compression": "4.0.0.0"
-        },
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Configuration": "4.0.0.0",
+        "System.Core": "4.0.0.0",
+        "System.IO.Compression": "4.0.0.0"
+      },
       "buildOptions": {
         "define": [
           "NETFX"

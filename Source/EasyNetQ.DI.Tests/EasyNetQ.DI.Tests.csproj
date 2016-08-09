@@ -104,10 +104,6 @@
       <Project>{4543da42-9c4d-4895-a174-ba1582331de5}</Project>
       <Name>EasyNetQ NET45</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj">
-      <Project>{74fb0a3d-2c72-462c-b498-15c0ae615d35}</Project>
-      <Name>EasyNetQ.DI.Autofac</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj">
       <Project>{3ad2cd4a-8969-4c2d-8eaa-9fc800585678}</Project>
       <Name>EasyNetQ.DI.LightInject</Name>
