@@ -5,7 +5,7 @@ namespace EasyNetQ.Hosepipe
 {
     public class HosepipeConnection
     {
-        public static IConnection FromParamters(QueueParameters parameters)
+        public static IConnection FromParameters(QueueParameters parameters)
         {
             var connectionFactory = new ConnectionFactory
             {

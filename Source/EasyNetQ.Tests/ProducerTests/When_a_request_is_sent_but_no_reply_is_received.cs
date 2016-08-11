@@ -18,17 +18,19 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Test]
-        [ExpectedException(typeof(TimeoutException))]
         public void Should_throw_a_timeout_exception()
         {
-            try
+            Assert.Throws<TimeoutException>(() =>
             {
-                mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage()).Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+                try
+                {
+                    mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage()).Wait();
+                }
+                catch (AggregateException aggregateException)
+                {
+                    throw aggregateException.InnerException;
+                }
+            });
         }         
     }
 }

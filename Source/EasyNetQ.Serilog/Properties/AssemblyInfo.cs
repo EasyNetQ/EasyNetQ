@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -31,4 +31,7 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.2.0")]
+
+[assembly: AssemblyVersion("2.0.2.0")]
+[assembly: AssemblyInformationalVersion("2.0.2-radicalgeek-netcore.1+1396.Branch.radicalgeek-netcore.Sha.e65133898ce725596ee8c983c941aeac1bb07e8c")]

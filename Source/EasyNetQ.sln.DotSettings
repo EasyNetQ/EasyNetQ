@@ -1,0 +1,32 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/Comment/@EntryValue">replace expectedexception</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Test/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Test/Properties/=CaseSensitive/@EntryIndexedValue">True</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Test/Properties/=ExactType/@EntryIndexedValue">False</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Test/Properties/=RegEx/@EntryIndexedValue"></s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Test/Type/@EntryValue">IdentifierPlaceholder</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/IsReplacePattern/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/LanguageName/@EntryValue">CSHARP</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/ReplaceComment/@EntryValue">with assert.throws</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/ReplacePattern/@EntryValue">public void $Test$()&#xD;
+{&#xD;
+	Assert.Throws&lt;$Exception$&gt;(()=&gt;{&#xD;
+		$Code$			&#xD;
+	});&#xD;
+}</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/SearchPattern/@EntryValue">[ExpectedException(typeof($Exception$))]&#xD;
+public void $Test$()&#xD;
+{&#xD;
+	$Code$&#xD;
+}</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/Severity/@EntryValue">ERROR</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Code/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Code/Properties/=Maximal/@EntryIndexedValue">-1</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Code/Properties/=Minimal/@EntryIndexedValue">-1</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Code/Type/@EntryValue">StatementPlaceholder</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Exception/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Exception/Properties/=ExactType/@EntryIndexedValue">False</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Exception/Properties/=Type/@EntryIndexedValue">System.Exception</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=0A288D8B266E054893824362572CD01C/CustomPatternPlaceholder/=Exception/Type/@EntryValue">TypePlaceholder</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=5F670BCFD98B3B4095433D25546E18C7/Severity/@EntryValue">WARNING</s:String></wpf:ResourceDictionary>

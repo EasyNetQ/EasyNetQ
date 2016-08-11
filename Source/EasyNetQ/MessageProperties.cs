@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RabbitMQ.Client;
+using System.Reflection;
 
 namespace EasyNetQ
 {
-    public class MessageProperties : ICloneable
+    public class MessageProperties
+#if NETFX
+        : ICloneable
+#endif
     {
         public MessageProperties()
         {
