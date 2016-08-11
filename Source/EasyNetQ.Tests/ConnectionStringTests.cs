@@ -65,17 +65,24 @@ namespace EasyNetQ.Tests
             connectionString.Password.ShouldEqual("abc_xyz");
         }
 
-        [Test, ExpectedException(typeof(EasyNetQException))]
+        [Test]
         public void Should_throw_on_malformed_string()
         {
-            new ConnectionStringParser().Parse("not a well formed name value pair;");
+            Assert.Throws<EasyNetQException>(() =>
+            {
+                new ConnectionStringParser().Parse("not a well formed name value pair;");
+            });
         }
 
-        [Test, ExpectedException(typeof(EasyNetQException))]
+        [Test]
         public void Should_fail_if_host_is_not_present()
         {
-            new ConnectionStringParser().Parse(
+            Assert.Throws<EasyNetQException>(() =>
+            {
+
+                new ConnectionStringParser().Parse(
                 "virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3");
+            });
         }
 
         [Test]

@@ -326,7 +326,7 @@ namespace EasyNetQ.Tests
         public void Should_declare_a_binding()
         {
             mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueBind("my_queue", "my_exchange", "my_routing_key"));
+                x.QueueBind("my_queue", "my_exchange", "my_routing_key", new Dictionary<string, object>()));
         }
     }
 

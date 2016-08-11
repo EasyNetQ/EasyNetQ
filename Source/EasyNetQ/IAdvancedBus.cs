@@ -290,13 +290,6 @@ namespace EasyNetQ
             int? maxLength = null,
             int? maxLengthBytes = null);
 
-        /// <summary>
-        /// Declare a transient server named queue. Note, this queue will only last for duration of the
-        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
-        /// consumers.
-        /// </summary>
-        /// <returns>The queue</returns>
-        IQueue QueueDeclare();
 
         /// <summary>
         /// Delete a queue

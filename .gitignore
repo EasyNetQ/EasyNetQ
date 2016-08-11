@@ -23,6 +23,7 @@ TestResult.xml
 *.nupkg
 Package/EasyNetQ/lib
 Package/EasyNetQ.Management.Client/lib
+Package
 
 *.userprefs
 test-results
@@ -33,3 +34,6 @@ packages
 # Ignore NuGet binary
 Source/.nuget/NuGet.exe
 /Source/.vs/config
+
+#.NET core
+*.dg

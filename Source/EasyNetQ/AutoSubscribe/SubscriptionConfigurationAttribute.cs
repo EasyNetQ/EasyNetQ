@@ -2,6 +2,8 @@
 
 namespace EasyNetQ.AutoSubscribe
 {
+#if !NET_CORE
+#endif
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class SubscriptionConfigurationAttribute : Attribute
     {

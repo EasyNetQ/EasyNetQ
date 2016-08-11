@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if NETFX
 using System.Configuration;
+#endif
 using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ
@@ -71,8 +73,10 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
-            var rabbitConnectionString = ConfigurationManager.ConnectionStrings["rabbit"];
-            if (rabbitConnectionString == null)
+            string rabbitConnectionString;
+#if NETFX
+            var rabbitConnection = ConfigurationManager.ConnectionStrings["rabbit"];
+            if (rabbitConnection == null)
             {
                 throw new EasyNetQException(
                     "Could not find a connection string for RabbitMQ. " +
@@ -80,8 +84,12 @@ namespace EasyNetQ
                     "of the application's configuration file. For example: " +
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
+            rabbitConnectionString = rabbitConnection.ConnectionString;
+#else
+            rabbitConnectionString = "host=localhost"; // TODO: get from configuration in net core 
+#endif
 
-            return CreateBus(rabbitConnectionString.ConnectionString, advancedBusEventHandlers, registerServices);
+            return CreateBus(rabbitConnectionString, advancedBusEventHandlers, registerServices);
         }
 
         /// <summary>

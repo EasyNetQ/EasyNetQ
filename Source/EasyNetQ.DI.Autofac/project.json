@@ -1,0 +1,60 @@
+{
+  "version": "2.0.2-radicalgeek-netc0001",
+  "description": "EasyNetQ Autofac Integration",
+  "title": "EasyNetQ.DI.Autofac",
+  "name": "EasyNetQ.DI.Autofac",
+  "packOptions": {
+    "licenseUrl": "https://opensource.org/licenses/MIT",
+    "projectUrl": "https://github.com/EasyNetQ",
+    "owners": [
+      "Wiebe Tijsma"
+    ],
+    "tags": [
+      "C#",
+      "RabbitMQ",
+      "Autofac"
+    ]
+  },
+  "dependencies": {
+    "Autofac": "4.0.0",
+    "EasyNetQ": "2.0.2-radicalgeek-netc0001"
+  },
+  "tools": {
+    "dotnet-gitversion": {
+      "version": "1.0.0",
+      "imports": [
+        "dotnet"
+      ]
+    }
+  },
+  "commands": {
+    "dn-version": "dotnet gitversion"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "dnxcore50",
+      "buildOptions": {
+        "define": [
+          "NET_CORE"
+        ]
+      },
+      "dependencies": {}
+    },
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [
+          "NET_STANDARD"
+        ]
+      },
+      "dependencies": {}
+    },
+    "net451": {
+      "frameworkAssemblies": {},
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      }
+    }
+  }
+}
