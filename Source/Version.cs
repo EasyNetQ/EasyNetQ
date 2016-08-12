@@ -3,10 +3,11 @@ using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
 // Note: until version 1.0 expect breaking changes on 0.X versions.
-[assembly: AssemblyVersion("0.62.1.0")]
+[assembly: AssemblyVersion("0.63.0.0")]
 [assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.63.0.0 Make ConnectIntervalAttempt for PersistentConnection configurable on ConnectionConfiguration
 // 0.62.1.0 Bug Fix: QueueDeclare does not allow an empty dead letter exchange thus preventing directly publishing to a queue
 // 0.62.0.0 Completed support for topic based routing in future publish
 // 0.61.1.0 Added support for configuring RPC exchange (request and response) names via conventions

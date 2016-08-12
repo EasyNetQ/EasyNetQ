@@ -25,8 +25,6 @@ namespace EasyNetQ
     /// </summary>
     public class PersistentConnection : IPersistentConnection
     {
-        private const int connectAttemptIntervalMilliseconds = 5000;
-
         private readonly IConnectionFactory connectionFactory;
         private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
@@ -76,7 +74,7 @@ namespace EasyNetQ
         void StartTryToConnect()
         {
             var timer = new Timer(TryToConnect);
-            timer.Change(connectAttemptIntervalMilliseconds, Timeout.Infinite);
+            timer.Change(connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
         }
 
         void TryToConnect(object timer)
@@ -127,8 +125,8 @@ namespace EasyNetQ
             {
                 if (!disposed)
                 {
-                    logger.ErrorWrite("Failed to connect to any Broker. Retrying in {0} ms\n",
-                        connectAttemptIntervalMilliseconds);
+                    logger.ErrorWrite("Failed to connect to any Broker. Retrying in {0}",
+                        connectionFactory.Configuration.ConnectIntervalAttempt);
                     StartTryToConnect();
                 }
             }
