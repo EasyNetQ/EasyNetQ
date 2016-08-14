@@ -9,6 +9,7 @@
 *.DS_Store
 [Tt]humbs.db 
 _ReSharper.*
+*.orig
 
 # Ignore NCrunch cache files.
 *.crunchproject.local.xml
@@ -33,7 +34,10 @@ packages
 
 # Ignore NuGet binary
 Source/.nuget/NuGet.exe
-/Source/.vs/config
 
 #.NET core
 *.dg
+*.lock.json
+
+# VS2015
+.vs/
