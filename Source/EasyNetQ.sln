@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec = ..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
+		NuGet.Config = NuGet.Config
 		Version.cs = Version.cs
 	EndProjectSection
 EndProject
@@ -47,13 +48,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Windsor", "EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj", "{A2214699-007A-4B79-9CC1-24AC501C4F03}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Ninject", "EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj", "{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8B9F313C-2A3A-45D6-944A-DCB2F92C8227}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mssql", "mssql", "{F11F4058-9B0E-40B5-800F-628BC884A783}"
 	ProjectSection(SolutionItems) = preProject
