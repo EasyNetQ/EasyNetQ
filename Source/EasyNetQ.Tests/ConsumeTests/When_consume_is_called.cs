@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => { });
+            StartConsumer((body, properties, info) => { }, c => { });
         }
 
         [Test]

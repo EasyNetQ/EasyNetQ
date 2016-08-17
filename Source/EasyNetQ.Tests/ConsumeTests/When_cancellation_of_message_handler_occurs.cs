@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 {
                     Cancellation.Cancel();
                     Cancellation.Token.ThrowIfCancellationRequested();
-                });
+                }, c => { });
             DeliverMessage();
         }
 

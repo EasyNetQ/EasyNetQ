@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             StartConsumer((body, properties, info) =>
                 {
                     throw exception;
-                });
+                }, c => { });
             DeliverMessage();
         }
 

@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         protected abstract void AdditionalSetUp();
 
-        protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler)
+        protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler, Action<IConsumerConfiguration> configure)
         {
             ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);
@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
                     handler(body, properties, messageInfo);
                     ConsumerWasInvoked = true;
-                }, Cancellation.Token));
+                }, Cancellation.Token), configure);
         }
 
         protected void DeliverMessage()

@@ -75,7 +75,7 @@ namespace EasyNetQ.Consumer
 
             this.queue = queue;
             this.onMessage = onMessage;
-            var consumerTag = conventions.ConsumerTagConvention();
+            var consumerTag = configuration.ConsumerTag;
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
                     {"x-priority", configuration.Priority},

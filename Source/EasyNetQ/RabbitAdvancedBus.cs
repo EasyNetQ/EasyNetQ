@@ -174,7 +174,7 @@ namespace EasyNetQ
             if (disposed)
                 throw new EasyNetQException("This bus has been disposed");
             
-            var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
+            var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount, conventions.ConsumerTagConvention());
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receviedInfo) =>
                 {

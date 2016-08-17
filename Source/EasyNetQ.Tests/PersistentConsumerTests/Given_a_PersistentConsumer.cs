@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                     createConsumerCalled++;
                     x.ReturnValue = internalConsumer;
                 }).Repeat.Any();
-            configuration = new ConsumerConfiguration(0);
+            configuration = new ConsumerConfiguration(0, Guid.NewGuid().ToString());
             consumer = new PersistentConsumer(
                 queue,
                 onMessage,
