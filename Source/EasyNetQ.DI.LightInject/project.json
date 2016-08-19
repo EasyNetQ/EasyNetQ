@@ -1,0 +1,63 @@
+{
+  "version": "2.0.2-netcore0001",
+  "description": "An adaptor to allow EasyNetQ to use LightInject as its internal IoC container",
+  "title": "EasyNetQ.DI.LightInject",
+  "name": "EasyNetQ.DI.LightInject",
+  "packOptions": {
+    "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
+    "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
+    "owners": [
+      "mikehadlow",
+      "micdenny",
+      "pliner",
+      "zidad"
+    ],
+    "tags": [
+      "Autofac",
+      "RabbitMQ",
+      "Messaging",
+      "AMQP",
+      "C#"
+    ]
+  },
+  "authors": [
+    "Mike Hadlow",
+    "Michael Denny",
+    "Yury Pliner",
+    "Wiebe Tijsma",
+    "Contributors (see GitHub repo) "
+  ],
+  "dependencies": {
+    "LightInject": "4.0.11",
+    "EasyNetQ": "2.0.2-netcore0001"
+  },
+  "tools": {
+    "dotnet-gitversion": {
+      "version": "1.0.0",
+      "imports": [
+        "dotnet"
+      ]
+    }
+  },
+  "commands": {
+    "dn-version": "dotnet gitversion"
+  },
+  "frameworks": {
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [
+          "NET_STANDARD"
+        ]
+      },
+      "dependencies": {}
+    },
+    "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      },
+      "frameworkAssemblies": {}
+    }
+  }
+}
