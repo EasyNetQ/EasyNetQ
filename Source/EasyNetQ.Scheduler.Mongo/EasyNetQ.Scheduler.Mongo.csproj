@@ -36,6 +36,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EasyNetQ, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\EasyNetQ.Core\bin\$(Configuration)\net451\EasyNetQ.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -69,10 +73,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ NET45\EasyNetQ NET45.csproj">
-      <Project>{4543da42-9c4d-4895-a174-ba1582331de5}</Project>
-      <Name>EasyNetQ NET45</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Scheduler.Mongo.Core\EasyNetQ.Scheduler.Mongo.Core.csproj">
       <Project>{f444e58f-da2a-47e8-8246-c4bdd9a192b2}</Project>
       <Name>EasyNetQ.Scheduler.Mongo.Core</Name>
