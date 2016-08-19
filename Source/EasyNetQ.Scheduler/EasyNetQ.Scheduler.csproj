@@ -44,7 +44,7 @@
   <ItemGroup>
     <Reference Include="EasyNetQ, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\EasyNetQ.Core\bin\$(Configuration)\net451\EasyNetQ.dll</HintPath>
+      <HintPath>..\EasyNetQ\bin\$(Configuration)\net451\EasyNetQ.dll</HintPath>
     </Reference>
     <Reference Include="EasyNetQ.Management.Client, Version=0.47.17.64, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EasyNetQ.Management.Client.0.47.17.64\lib\net40\EasyNetQ.Management.Client.dll</HintPath>

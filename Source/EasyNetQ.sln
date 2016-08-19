@@ -121,7 +121,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "Eas
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C} = {ED270A39-D32C-438A-BF4F-AA0E66C7879C}
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ", "EasyNetQ.Core\EasyNetQ.xproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ", "EasyNetQ\EasyNetQ.xproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.SimpleInjector", "EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj", "{519185ED-B7BE-426E-8F2F-9410F8621AC4}"
 	ProjectSection(ProjectDependencies) = postProject

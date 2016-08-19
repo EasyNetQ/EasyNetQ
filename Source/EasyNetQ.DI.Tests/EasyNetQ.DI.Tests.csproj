@@ -48,7 +48,7 @@
     </Reference>
     <Reference Include="EasyNetQ, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\EasyNetQ.Core\bin\$(Configuration)\net451\EasyNetQ.dll</HintPath>
+      <HintPath>..\EasyNetQ\bin\$(Configuration)\net451\EasyNetQ.dll</HintPath>
     </Reference>
     <Reference Include="EasyNetQ.DI.Autofac">
       <HintPath>..\EasyNetQ.DI.Autofac\bin\$(Configuration)\net451\EasyNetQ.DI.Autofac.dll</HintPath>
