@@ -116,8 +116,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serilog", "EasyNet
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C} = {ED270A39-D32C-438A-BF4F-AA0E66C7879C}
 	EndProjectSection
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "EasyNetQ.Source", "EasyNetQ\EasyNetQ.Source.shproj", "{6A038745-6B26-437B-9524-71F9CA2971F4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C} = {ED270A39-D32C-438A-BF4F-AA0E66C7879C}
@@ -135,9 +133,6 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.DI.LightInject", "EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.xproj", "{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		EasyNetQ\EasyNetQ.projitems*{6a038745-6b26-437b-9524-71f9ca2971f4}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
