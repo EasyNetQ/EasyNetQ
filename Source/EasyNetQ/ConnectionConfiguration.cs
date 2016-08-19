@@ -94,11 +94,7 @@ namespace EasyNetQ
                 catch (PathTooLongException) { }
             }
 
-#if NET_CORE
-            var hostname = System.Net.Dns.GetHostName();
-#else
             var hostname = Environment.MachineName;
-#endif
 
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;

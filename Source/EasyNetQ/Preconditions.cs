@@ -217,12 +217,7 @@ namespace EasyNetQ
 
         public static void CheckTypeMatches(Type expectedType, object value, string name, string message)
         {
-            bool assignable;
-#if NET_CORE
-            assignable = expectedType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo());
-#else
-            assignable = expectedType.IsAssignableFrom(value.GetType());
-#endif
+            bool assignable = expectedType.IsAssignableFrom(value.GetType());
             if (!assignable)
             {
                 CheckNotBlank(name, "name", "name must not be blank");

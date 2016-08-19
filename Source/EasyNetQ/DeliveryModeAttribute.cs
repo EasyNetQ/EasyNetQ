@@ -2,8 +2,6 @@
 
 namespace EasyNetQ
 {
-#if !NET_CORE
-#endif
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
     public class DeliveryModeAttribute : Attribute
     {

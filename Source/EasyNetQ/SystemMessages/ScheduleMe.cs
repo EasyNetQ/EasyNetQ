@@ -2,8 +2,6 @@ using System;
 
 namespace EasyNetQ.SystemMessages
 {
-#if !NET_CORE
-#endif
     public class ScheduleMe
     {
         public DateTime WakeTime { get; set; }

@@ -43,15 +43,6 @@
     "dn-version": "dotnet gitversion"
   },
   "frameworks": {
-    "netcoreapp1.0": {
-      "imports": "dnxcore50",
-      "buildOptions": {
-        "define": [
-          "NET_CORE"
-        ]
-      },
-      "dependencies": {}
-    },
     "netstandard1.5": {
       "buildOptions": {
         "define": [
@@ -61,12 +52,12 @@
       "dependencies": {}
     },
     "net451": {
-      "frameworkAssemblies": {},
       "buildOptions": {
         "define": [
           "NETFX"
         ]
-      }
+      },
+      "frameworkAssemblies": {}
     }
   }
 }

@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
-    "RabbitMQ.Client": "4.0.0-rc-1"
+    "RabbitMQ.Client": "4.0.0"
   },
   "tools": {
     "dotnet-gitversion": {
@@ -48,42 +48,6 @@
     "dn-version": "dotnet gitversion"
   },
   "frameworks": {
-    "netcoreapp1.0": {
-      "imports": "dnxcore50",
-      "buildOptions": {
-        "define": [
-          "NET_CORE"
-        ]
-      },
-      "dependencies": {
-        "System.Diagnostics.Debug": "4.0.11",
-        "System.Diagnostics.Tools": "4.0.1",
-        "System.Dynamic.Runtime": "4.0.11",
-        "System.Globalization": "4.0.11",
-        "System.IO": "4.1.0",
-        "System.IO.Compression": "4.1.0",
-        "System.IO.FileSystem": "4.0.1",
-        "System.IO.FileSystem.Primitives": "4.0.1",
-        "System.Linq.Expressions": "4.1.0",
-        "System.ObjectModel": "4.0.12",
-        "System.Reflection": "4.1.0",
-        "System.Reflection.Emit": "4.0.1",
-        "System.Reflection.Emit.ILGeneration": "4.0.1",
-        "System.Reflection.Emit.Lightweight": "4.0.1",
-        "System.Reflection.Extensions": "4.0.1",
-        "System.Reflection.Primitives": "4.0.1",
-        "System.Reflection.TypeExtensions": "4.1.0",
-        "System.Resources.ResourceManager": "4.0.1",
-        "System.Runtime.Extensions": "4.1.0",
-        "System.Runtime.Handles": "4.0.1",
-        "System.Runtime.InteropServices": "4.1.0",
-        "System.Text.Encoding": "4.0.11",
-        "System.Text.Encoding.Extensions": "4.0.11",
-        "System.Threading.Tasks": "4.0.11",
-        "System.Threading.Timer": "4.0.1",
-        "Microsoft.Extensions.Logging.TraceSource": "1.0.0"
-      }
-    },
     "netstandard1.5": {
       "buildOptions": {
         "define": [
@@ -120,16 +84,16 @@
       }
     },
     "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      },
       "frameworkAssemblies": {
         "System": "4.0.0.0",
         "System.Configuration": "4.0.0.0",
         "System.Core": "4.0.0.0",
         "System.IO.Compression": "4.0.0.0"
-      },
-      "buildOptions": {
-        "define": [
-          "NETFX"
-        ]
       }
     }
   }
