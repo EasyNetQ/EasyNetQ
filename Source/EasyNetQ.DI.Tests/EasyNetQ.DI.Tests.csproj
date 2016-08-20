@@ -61,12 +61,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\EasyNetQ.DI.Ninject\bin\$(Configuration)\net451\EasyNetQ.DI.Ninject.dll</HintPath>
     </Reference>
-    <Reference Include="LightInject, Version=3.0.2.7, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\LightInject.3.0.2.7\lib\net45\LightInject.dll</HintPath>
+    <Reference Include="EasyNetQ.DI.SimpleInjector, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\EasyNetQ.DI.SimpleInjector\bin\$(Configuration)\net451\EasyNetQ.DI.SimpleInjector.dll</HintPath>
+    </Reference>
+    <Reference Include="LightInject, Version=4.0.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LightInject.4.0.11\lib\net46\LightInject.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+    <Reference Include="Ninject, Version=4.0.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.4.0.0-beta-0134\lib\net45\Ninject.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
@@ -81,8 +85,8 @@
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleInjector, Version=3.2.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.2.0\lib\net45\SimpleInjector.dll</HintPath>
+    <Reference Include="SimpleInjector, Version=3.1.5.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.1.5\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="StructureMap, Version=4.0.0.315, Culture=neutral, processorArchitecture=MSIL">
