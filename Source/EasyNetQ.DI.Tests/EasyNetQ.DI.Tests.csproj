@@ -65,6 +65,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\EasyNetQ.DI.SimpleInjector\bin\$(Configuration)\net451\EasyNetQ.DI.SimpleInjector.dll</HintPath>
     </Reference>
+    <Reference Include="EasyNetQ.DI.StructureMap, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\EasyNetQ.DI.StructureMap\bin\$(Configuration)\net451\EasyNetQ.DI.StructureMap.dll</HintPath>
+    </Reference>
     <Reference Include="LightInject, Version=4.0.11.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LightInject.4.0.11\lib\net46\LightInject.dll</HintPath>
       <Private>True</Private>
@@ -89,12 +93,8 @@
       <HintPath>..\packages\SimpleInjector.3.1.5\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="StructureMap, Version=4.0.0.315, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\structuremap.4.0.0.315\lib\net40\StructureMap.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="StructureMap.Net4, Version=4.0.0.315, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\structuremap.4.0.0.315\lib\net40\StructureMap.Net4.dll</HintPath>
+    <Reference Include="StructureMap, Version=4.3.0.449, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StructureMap.4.4.0\lib\net45\StructureMap.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -115,10 +115,6 @@
     <Compile Include="WindsorAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj">
-      <Project>{54e2eea9-d56e-4eef-9521-b0c5d3b1ed2f}</Project>
-      <Name>EasyNetQ.DI.StructureMap</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj">
       <Project>{a2214699-007a-4b79-9cc1-24ac501c4f03}</Project>
       <Name>EasyNetQ.DI.Windsor</Name>
