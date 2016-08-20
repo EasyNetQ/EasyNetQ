@@ -57,6 +57,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\EasyNetQ.DI.LightInject\bin\$(Configuration)\net451\EasyNetQ.DI.LightInject.dll</HintPath>
     </Reference>
+    <Reference Include="EasyNetQ.DI.Ninject, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\EasyNetQ.DI.Ninject\bin\$(Configuration)\net451\EasyNetQ.DI.Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="LightInject, Version=3.0.2.7, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LightInject.3.0.2.7\lib\net45\LightInject.dll</HintPath>
       <Private>True</Private>
@@ -107,14 +111,6 @@
     <Compile Include="WindsorAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj">
-      <Project>{c76da6ea-78f0-4918-8e0a-7a1cad31e702}</Project>
-      <Name>EasyNetQ.DI.Ninject</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj">
-      <Project>{519185ed-b7be-426e-8f2f-9410f8621ac4}</Project>
-      <Name>EasyNetQ.DI.SimpleInjector</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj">
       <Project>{54e2eea9-d56e-4eef-9521-b0c5d3b1ed2f}</Project>
       <Name>EasyNetQ.DI.StructureMap</Name>

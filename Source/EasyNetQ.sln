@@ -71,11 +71,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Windsor", "Easy
 		{ED270A39-D32C-438A-BF4F-AA0E66C7879C} = {ED270A39-D32C-438A-BF4F-AA0E66C7879C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Ninject", "EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj", "{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}"
-	ProjectSection(ProjectDependencies) = postProject
-		{ED270A39-D32C-438A-BF4F-AA0E66C7879C} = {ED270A39-D32C-438A-BF4F-AA0E66C7879C}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mssql", "mssql", "{F11F4058-9B0E-40B5-800F-628BC884A783}"
 	ProjectSection(SolutionItems) = preProject
 		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\CreateWorkTables.sql
@@ -132,6 +127,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.DI.Autofac", "Easy
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.DI.LightInject", "EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.xproj", "{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.DI.Ninject", "EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.xproj", "{D293E3B3-D90F-4161-9987-1B9F1B880D83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -186,10 +183,6 @@ Global
 		{A2214699-007A-4B79-9CC1-24AC501C4F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2214699-007A-4B79-9CC1-24AC501C4F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2214699-007A-4B79-9CC1-24AC501C4F03}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C76DA6EA-78F0-4918-8E0A-7A1CAD31E702}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -226,6 +219,10 @@ Global
 		{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D293E3B3-D90F-4161-9987-1B9F1B880D83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D293E3B3-D90F-4161-9987-1B9F1B880D83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D293E3B3-D90F-4161-9987-1B9F1B880D83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D293E3B3-D90F-4161-9987-1B9F1B880D83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
