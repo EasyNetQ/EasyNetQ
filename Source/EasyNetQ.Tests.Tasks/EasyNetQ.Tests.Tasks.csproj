@@ -43,6 +43,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\EasyNetQ\bin\$(Configuration)\net451\EasyNetQ.dll</HintPath>
     </Reference>
+    <Reference Include="EasyNetQ.Serilog, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\EasyNetQ.Serilog\bin\$(Configuration)\net451\EasyNetQ.Serilog.dll</HintPath>
+    </Reference>
     <Reference Include="Net.Autofac, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Net.Autofac.0.1.10.0\lib\net40\Net.Autofac.dll</HintPath>
       <Private>True</Private>
@@ -51,12 +55,12 @@
       <HintPath>..\packages\Net.Core.0.1.10.0\lib\net40\Net.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.1.5.11\lib\net45\Serilog.dll</HintPath>
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.2.1.0\lib\net45\Serilog.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Serilog.FullNetFx, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.1.5.11\lib\net45\Serilog.FullNetFx.dll</HintPath>
+    <Reference Include="Serilog.Sinks.ColoredConsole, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.ColoredConsole.2.0.0\lib\net45\Serilog.Sinks.ColoredConsole.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -90,10 +94,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.Serilog\EasyNetQ.Serilog.csproj">
-      <Project>{01B7E76D-DF00-4F84-8DF4-1B8508FEFEA8}</Project>
-      <Name>EasyNetQ.Serilog</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj">
       <Project>{E7AF3836-8354-4CDE-A9E7-352569B65B1E}</Project>
       <Name>EasyNetQ.Tests.Messages</Name>
