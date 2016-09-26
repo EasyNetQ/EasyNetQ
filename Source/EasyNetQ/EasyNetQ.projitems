@@ -92,6 +92,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interception\IProduceConsumeInterceptor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interception\RawMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interception\TripleDESInterceptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPersistentConnectionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ISerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IServiceProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ISubscriptionResult.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)NonGeneric\NonGenericExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderedClusterHostSelectionStrategy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PersistentConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PersistentConnectionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Preconditions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Producer\ClientCommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Producer\ClientCommandDispatcherSingleton.cs" />

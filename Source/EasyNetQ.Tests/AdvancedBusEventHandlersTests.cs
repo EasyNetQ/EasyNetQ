@@ -48,10 +48,13 @@ namespace EasyNetQ.Tests
 
             eventBus = new EventBus();
 
+            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var persistentConnectionFactory = new PersistentConnectionFactory(logger, connectionFactory, eventBus);            
+
             var advancedBus = new RabbitAdvancedBus(
                 connectionFactory,
                 MockRepository.GenerateStub<IConsumerFactory>(),
-                MockRepository.GenerateStub<IEasyNetQLogger>(),
+                logger,
                 MockRepository.GenerateStub<IClientCommandDispatcherFactory>(),
                 MockRepository.GenerateStub<IPublishConfirmationListener>(),
                 eventBus,
@@ -61,7 +64,8 @@ namespace EasyNetQ.Tests
                 MockRepository.GenerateStub<IProduceConsumeInterceptor>(),
                 MockRepository.GenerateStub<IMessageSerializationStrategy>(),
                 MockRepository.GenerateStub<IConventions>(),
-                advancedBusEventHandlers);
+                advancedBusEventHandlers,
+                persistentConnectionFactory);
         }
 
         [Test]
