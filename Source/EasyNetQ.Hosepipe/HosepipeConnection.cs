@@ -12,7 +12,8 @@ namespace EasyNetQ.Hosepipe
                 HostName = parameters.HostName,
                 VirtualHost = parameters.VHost,
                 UserName = parameters.Username,
-                Password = parameters.Password
+                Password = parameters.Password,
+                Port = parameters.HostPort
             };
             try
             {
@@ -21,10 +22,11 @@ namespace EasyNetQ.Hosepipe
             catch (BrokerUnreachableException)
             {
                 throw new EasyNetQHosepipeException(string.Format(
-                    "The broker at '{0}', VirtualHost '{1}', is unreachable. This message can also be caused " + 
+                    "The broker at '{0}{2}' VirtualHost '{1}', is unreachable. This message can also be caused " + 
                     "by incorrect credentials.",
                     parameters.HostName,
-                    parameters.VHost));
+                    parameters.VHost,
+                    parameters.HostPort == -1 ? string.Empty: ":" + parameters.HostPort));
             }
         } 
     }
