@@ -34,7 +34,7 @@ Commands
 	?	Output this usage message
 
 Options
-	s	the RabbitMQ broker (server) to connect to. Default is 'localhost'
+	s	the RabbitMQ broker (server) to connect to. If the RabbitMQ brokers port is different from default, specify custom port value after ':' character. Default is 'localhost'
 	v	the virtual host. Default is '/'
 	u	the username to connect with. Default is 'guest'
 	p	the password to connect with. Default is 'guest'

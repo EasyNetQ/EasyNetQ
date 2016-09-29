@@ -5,6 +5,7 @@ namespace EasyNetQ.Hosepipe
     public class QueueParameters
     {
         public string HostName { get; set; }
+        public int HostPort { get; set; }
         public string VHost { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
