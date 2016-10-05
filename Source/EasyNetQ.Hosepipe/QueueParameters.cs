@@ -18,6 +18,7 @@ namespace EasyNetQ.Hosepipe
         {
             // set some defaults
             HostName = "localhost";
+            HostPort = -1;
             VHost = "/";
             Username = "guest";
             Password = "guest";

@@ -81,8 +81,8 @@ namespace EasyNetQ.Hosepipe
             var arguments = argParser.Parse(args);
 
             var parameters = new QueueParameters();
-            arguments.WithKey("s", a => parameters.HostName = a.Value.Split(new [] {':'}, 2)[0]);
-            arguments.WithKey("s", a => parameters.HostPort = GetHostPort(a.Value));
+            arguments.WithKey("s", a => parameters.HostName = a.Value);
+            arguments.WithKey("sp", a => parameters.HostPort = Convert.ToInt32(a.Value));
             arguments.WithKey("v", a => parameters.VHost = a.Value);
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
@@ -125,14 +125,6 @@ namespace EasyNetQ.Hosepipe
                 Console.WriteLine();
                 PrintUsage();
             }
-        }
-
-        private int GetHostPort(string fullHostName)
-        {
-            var parts = fullHostName.Split(new[] {':'}, 2);
-            if (parts.Length == 2)
-                return int.Parse(parts[1]);
-            return -1;
         }
 
         private void Dump(QueueParameters parameters)

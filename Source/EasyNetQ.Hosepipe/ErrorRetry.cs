@@ -32,7 +32,7 @@ namespace EasyNetQ.Hosepipe
 
         public void RepublishError(Error error, QueueParameters parameters)
         {
-            using (var connection = HosepipeConnection.FromParamters(parameters))
+            using (var connection = HosepipeConnection.FromParameters(parameters))
             using (var model = connection.CreateModel())
             {
                 try
