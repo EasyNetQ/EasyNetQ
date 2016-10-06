@@ -24,6 +24,11 @@ namespace EasyNetQ.FluentConfiguration
         /// <returns></returns>
         ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
 
+        /// <summary>
+        /// Configures the queue's durability
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithDurable(bool durable = true);
 
         /// <summary>
         /// Configures the consumer's priority
@@ -81,6 +86,7 @@ namespace EasyNetQ.FluentConfiguration
 
         public bool IsExclusive { get; private set; }
         public byte? MaxPriority { get; private set; }
+        public bool Durable { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -90,6 +96,7 @@ namespace EasyNetQ.FluentConfiguration
             CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
             IsExclusive = false;
+            Durable = true;
         }
 
         public ISubscriptionConfiguration WithTopic(string topic)
@@ -101,6 +108,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true)
         {
             AutoDelete = autoDelete;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithDurable(bool durable = true)
+        {
+            Durable = durable;
             return this;
         }
 
