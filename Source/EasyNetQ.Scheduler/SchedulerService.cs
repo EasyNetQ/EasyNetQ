@@ -25,9 +25,9 @@ namespace EasyNetQ.Scheduler
         private System.Threading.Timer purgeTimer;
 
         public SchedulerService(
-            IBus bus, 
-            IEasyNetQLogger log, 
-            IScheduleRepository scheduleRepository, 
+            IBus bus,
+            IEasyNetQLogger log,
+            IScheduleRepository scheduleRepository,
             SchedulerServiceConfiguration configuration)
         {
             this.bus = bus;
@@ -77,10 +77,15 @@ namespace EasyNetQ.Scheduler
 
         public void OnPublishTimerTick(object state)
         {
-            if (!bus.IsConnected) return;
             try
             {
-                using(var scope = new TransactionScope())
+                if (!bus.IsConnected)
+                {
+                    log.InfoWrite("Not connected");
+                    return;
+                }
+
+                using (var scope = new TransactionScope())
                 {
                     var scheduledMessages = scheduleRepository.GetPending();
 
@@ -114,7 +119,7 @@ namespace EasyNetQ.Scheduler
             }
             catch (Exception exception)
             {
-                log.ErrorWrite("Error in schedule pol\r\n{0}", exception);
+                log.ErrorWrite("Error in schedule poll\r\n{0}", exception);
             }
         }
 
