@@ -3,7 +3,7 @@ using System.Reflection;
 
 // EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
 // Note: until version 1.0 expect breaking changes on 0.X versions.
-[assembly: AssemblyVersion("0.63.5.0")]
+[assembly: AssemblyVersion("0.63.6.0")]
 [assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
