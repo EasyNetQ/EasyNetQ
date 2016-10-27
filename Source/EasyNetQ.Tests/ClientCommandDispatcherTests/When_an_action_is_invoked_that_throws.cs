@@ -58,6 +58,26 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             }
         }
 
+        [Test]
+        public void Should_call_action_when_previous_throwed_an_exception()
+        {
+            Action<IModel> errorAction = x => { throw new Exception(); };
+            var goodActionWasInvoked = false;
+            Action<IModel> goodAction = x => { goodActionWasInvoked = true; };
+
+            try
+            {
+                dispatcher.InvokeAsync(errorAction).Wait();
+            }
+            catch
+            {
+                // ignore exception
+            }
+
+            dispatcher.InvokeAsync(goodAction).Wait();
+            goodActionWasInvoked.ShouldBeTrue();
+        }
+
         private class CrazyTestOnlyException : Exception { }
     }
 }
