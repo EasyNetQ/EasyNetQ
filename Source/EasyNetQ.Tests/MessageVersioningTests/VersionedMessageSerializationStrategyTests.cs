@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.MessageVersioning;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
@@ -249,31 +249,31 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
         private VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(IMessage<T> message, IEnumerable<KeyValuePair<string, Type>> messageTypes, byte[] messageBody, string correlationId) where T : class
         {
-            var typeNameSerializer = MockRepository.GenerateStub<ITypeNameSerializer>();
+            var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             foreach (var messageType in messageTypes)
             {
                 var localMessageType = messageType;
-                typeNameSerializer.Stub(s => s.Serialize(localMessageType.Value)).Return(localMessageType.Key);
+                typeNameSerializer.Serialize(localMessageType.Value).Returns(localMessageType.Key);
             }
 
-            var serializer = MockRepository.GenerateStub<ISerializer>();
-            serializer.Stub(s => s.MessageToBytes(message.GetBody())).Return(messageBody);
+            var serializer = Substitute.For<ISerializer>();
+            serializer.MessageToBytes(message.GetBody()).Returns(messageBody);
 
             return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
         private VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, string expectedMessageType, byte[] messageBody) where T : class
         {
-            var typeNameSerializer = MockRepository.GenerateStub<ITypeNameSerializer>();
+            var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             foreach (var messageType in messageTypes)
             {
                 var localMessageType = messageType;
-                typeNameSerializer.Stub(s => s.DeSerialize(localMessageType.Key)).Return(localMessageType.Value);
+                typeNameSerializer.DeSerialize(localMessageType.Key).Returns(localMessageType.Value);
             }
 
 
-            var serializer = MockRepository.GenerateStub<ISerializer>();
-            serializer.Stub(s => s.BytesToMessage(expectedMessageType, messageBody)).Return(message);
+            var serializer = Substitute.For<ISerializer>();
+            serializer.BytesToMessage(expectedMessageType, messageBody).Returns(message);
 
             return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(String.Empty));
         }

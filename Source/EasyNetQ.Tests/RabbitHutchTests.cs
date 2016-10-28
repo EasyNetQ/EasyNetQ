@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_be_able_to_replace_default_service_provider()
         {
-            var bus = MockRepository.GenerateStub<IBus>();
+            var bus = Substitute.For<IBus>();
             var container = new MyAlternativeContainer(bus);
 
             try

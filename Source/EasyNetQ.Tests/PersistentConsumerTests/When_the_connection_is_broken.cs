@@ -2,7 +2,7 @@
 
 using EasyNetQ.Events;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     {
         public override void AdditionalSetup()
         {
-            persistentConnection.Stub(x => x.IsConnected).Return(true);
+            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
             eventBus.Publish(new ConnectionCreatedEvent());
         }
@@ -19,9 +19,8 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [Test]
         public void Should_re_create_internal_consumer()
         {
-            internalConsumerFactory.AssertWasCalled(x => x.CreateConsumer());
+            internalConsumerFactory.Received().CreateConsumer();
             createConsumerCalled.ShouldEqual(2);
-
             internalConsumers.Count.ShouldEqual(2);
         }
     }

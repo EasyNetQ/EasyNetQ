@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -10,7 +10,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     {
         public override void AdditionalSetup()
         {
-            persistentConnection.Stub(x => x.IsConnected).Return(true);
+            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
             consumer.Dispose();
         }
@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [Test]
         public void Should_dispose_the_internal_consumer()
         {
-            internalConsumers[0].AssertWasCalled(x => x.Dispose());
+            internalConsumers[0].Received().Dispose();
         }
     }
 }

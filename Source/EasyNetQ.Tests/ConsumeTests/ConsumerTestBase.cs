@@ -9,7 +9,7 @@ using EasyNetQ.Topology;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             Cancellation = new CancellationTokenSource();
 
-            ConsumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             
             IConventions conventions = new Conventions(new TypeNameSerializer())
                 {

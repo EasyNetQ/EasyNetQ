@@ -2,7 +2,7 @@
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests
             bus.Publish(new TestMessage());
             bus.Dispose();
 
-            mockBuilder.Channels[0].AssertWasNotCalled(x => x.Dispose());
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests
 
             are.WaitOne();
 
-            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests
 
             are.WaitOne();
 
-            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Test]
@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests
 
             are.WaitOne();
 
-            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace EasyNetQ.Tests
 
             are.WaitOne();
 
-            mockBuilder.Channels[1].AssertWasCalled(x => x.Dispose());
+            mockBuilder.Channels[1].Received().Dispose();
         }
 
         private AutoResetEvent WaitForConsumerModelDisposedMessage()

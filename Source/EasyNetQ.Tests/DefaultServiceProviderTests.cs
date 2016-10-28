@@ -2,7 +2,7 @@
 
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests
         [SetUp]
         public void SetUp()
         {
-            myFirst = MockRepository.GenerateStub<IMyFirst>();
+            myFirst = Substitute.For<IMyFirst>();
             someDelegate = () => { };
 
             var defaultServiceProvider = new DefaultServiceProvider();
@@ -124,17 +124,17 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_be_able_to_replace_bus_components()
         {
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = Substitute.For<IEasyNetQLogger>();
             new MockBuilder(x => x.Register(_ => logger));
 
-            logger.AssertWasCalled(x => x.DebugWrite("Trying to connect"));
+            logger.Received().DebugWrite("Trying to connect");
         }
 
         [Test]
         public void Should_be_able_to_sneakily_get_the_service_provider()
         {
             IServiceProvider provider = null;
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             new MockBuilder(x => x.Register(sp =>
             {
@@ -144,7 +144,7 @@ namespace EasyNetQ.Tests
             var retrievedLogger = provider.Resolve<IEasyNetQLogger>();
             retrievedLogger.DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
 
-            logger.AssertWasCalled(x => x.DebugWrite("Hey, I'm pretending to be EasyNetQ :)"));
+            logger.Received().DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
         }
     }
 

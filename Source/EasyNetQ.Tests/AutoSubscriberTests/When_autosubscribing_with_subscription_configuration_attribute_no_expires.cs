@@ -2,7 +2,7 @@ using System;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -15,19 +15,17 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [SetUp]
         public void SetUp()
         {
-            bus = MockRepository.GenerateMock<IBus>();
+            bus = Substitute.For<IBus>();
             
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
-            bus.Stub(x => x.Subscribe(
-                Arg<string>.Is.Equal("MyAttrTest"),
-                Arg<Action<MessageA>>.Is.Anything,
-                Arg<Action<ISubscriptionConfiguration>>.Is.Anything
-                ))
-                .WhenCalled(a =>
-                {
-                    capturedAction= (Action<ISubscriptionConfiguration>)a.Arguments[2];
-                });
+            bus.When(x => x.Subscribe(Arg.Is("MyAttrTest"),
+                                      Arg.Any<Action<MessageA>>(),
+                                      Arg.Any<Action<ISubscriptionConfiguration>>()))
+               .Do(a =>
+               {
+                   capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
+               });
 
             autoSubscriber.Subscribe(GetType().Assembly);
         }
@@ -35,12 +33,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Test]
         public void Should_have_called_subscribe()
         {
-            bus.AssertWasCalled(
-                x => x.Subscribe(
-                    Arg<string>.Is.Anything, 
-                    Arg<Action<MessageA>>.Is.Anything, 
-                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything));
-
+            bus.Received().Subscribe(Arg.Any<string>(), 
+                                     Arg.Any<Action<MessageA>>(),
+                                     Arg.Any<Action<ISubscriptionConfiguration>>());
         }
 
         [Test]

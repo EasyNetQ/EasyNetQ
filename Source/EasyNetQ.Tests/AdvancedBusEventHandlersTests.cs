@@ -5,7 +5,7 @@ using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -40,27 +40,27 @@ namespace EasyNetQ.Tests
                     messageReturnedEventArgs = e;
                 });
 
-            var connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
-            connectionFactory.Stub(x => x.Succeeded).Return(true);
-            connectionFactory.Stub(x => x.CreateConnection()).Return(MockRepository.GenerateStub<IConnection>());
-            connectionFactory.Stub(x => x.CurrentHost).Return(new HostConfiguration());
-            connectionFactory.Stub(x => x.Configuration).Return(new ConnectionConfiguration());
+            var connectionFactory = Substitute.For<IConnectionFactory>();
+            connectionFactory.Succeeded.Returns(true);
+            connectionFactory.CreateConnection().Returns(Substitute.For<IConnection>());
+            connectionFactory.CurrentHost.Returns(new HostConfiguration());
+            connectionFactory.Configuration.Returns(new ConnectionConfiguration());
 
             eventBus = new EventBus();
 
             var advancedBus = new RabbitAdvancedBus(
                 connectionFactory,
-                MockRepository.GenerateStub<IConsumerFactory>(),
-                MockRepository.GenerateStub<IEasyNetQLogger>(),
-                MockRepository.GenerateStub<IClientCommandDispatcherFactory>(),
-                MockRepository.GenerateStub<IPublishConfirmationListener>(),
+                Substitute.For<IConsumerFactory>(),
+                Substitute.For<IEasyNetQLogger>(),
+                Substitute.For<IClientCommandDispatcherFactory>(),
+                Substitute.For<IPublishConfirmationListener>(),
                 eventBus,
-                MockRepository.GenerateStub<IHandlerCollectionFactory>(),
-                MockRepository.GenerateStub<IContainer>(),
-                MockRepository.GenerateStub<ConnectionConfiguration>(),
-                MockRepository.GenerateStub<IProduceConsumeInterceptor>(),
-                MockRepository.GenerateStub<IMessageSerializationStrategy>(),
-                MockRepository.GenerateStub<IConventions>(),
+                Substitute.For<IHandlerCollectionFactory>(),
+                Substitute.For<IContainer>(),
+                Substitute.For<ConnectionConfiguration>(),
+                Substitute.For<IProduceConsumeInterceptor>(),
+                Substitute.For<IMessageSerializationStrategy>(),
+                Substitute.For<IConventions>(),
                 advancedBusEventHandlers);
         }
 

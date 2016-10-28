@@ -5,7 +5,7 @@ using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
@@ -20,9 +20,8 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
 
             mockBuilder.NextModel
-                .Stub(x => x.ExchangeDeclare(null, null, false, false, null))
-                .IgnoreArguments()
-                .WhenCalled(x =>
+                .WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
+                .Do(x =>
                     {
                         var args = new ShutdownEventArgs(ShutdownInitiator.Peer, 320, 
                             "CONNECTION_FORCED - Closed via management plugin");

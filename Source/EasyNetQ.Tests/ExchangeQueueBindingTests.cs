@@ -4,7 +4,8 @@ using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using System.Linq;
 
 namespace EasyNetQ.Tests
 {
@@ -42,16 +43,15 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"), 
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args => 
-                        ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000) &&
-                        ((int)args["x-max-priority"] == 10))));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                   Arg.Is("my_queue"),
+                   Arg.Is(false),
+                   Arg.Is(true),
+                   Arg.Is(true),
+                   Arg.Is<IDictionary<string, object>>(args =>
+                       ((int)args["x-message-ttl"] == 1000) &&
+                       ((int)args["x-expires"] == 2000) &&
+                       ((int)args["x-max-priority"] == 10)));
         }
     }
 
@@ -91,18 +91,17 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args =>
-                        ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000) &&
-                        ((int)args["x-max-priority"] == 10) &&
-                        ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
-                        ((string)args["x-dead-letter-routing-key"] == "my_routing_key"))));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                  Arg.Is("my_queue"),
+                  Arg.Is(false),
+                  Arg.Is(true),
+                  Arg.Is(true),
+                  Arg.Is<IDictionary<string, object>>(args =>
+                      ((int)args["x-message-ttl"] == 1000) &&
+                      ((int)args["x-expires"] == 2000) &&
+                      ((int)args["x-max-priority"] == 10) &&
+                      ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
+                      ((string)args["x-dead-letter-routing-key"] == "my_routing_key")));
         }
     }
 
@@ -142,18 +141,17 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args =>
-                        ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000) &&
-                        ((int)args["x-max-priority"] == 10) &&
-                        ((string)args["x-dead-letter-exchange"] == "") &&
-                        ((string)args["x-dead-letter-routing-key"] == "my_queue2"))));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                 Arg.Is("my_queue"),
+                 Arg.Is(false),
+                 Arg.Is(true),
+                 Arg.Is(true),
+                 Arg.Is<IDictionary<string, object>>(args =>
+                     ((int)args["x-message-ttl"] == 1000) &&
+                     ((int)args["x-expires"] == 2000) &&
+                     ((int)args["x-max-priority"] == 10) &&
+                     ((string)args["x-dead-letter-exchange"] == "") &&
+                     ((string)args["x-dead-letter-routing-key"] == "my_queue2")));
         }
     }
 
@@ -176,7 +174,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_delete_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.QueueDelete("my_queue", false, false));
+            mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
         }
     }
 
@@ -194,12 +192,11 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            mockBuilder.NextModel.Stub(x => x.ExchangeDeclare(null, null, false, false, null))
-                .IgnoreArguments()
-                .WhenCalled(x =>
-                    {
-                        arguments = x.Arguments[4] as IDictionary;
-                    });
+            mockBuilder.NextModel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
+                .Do(x =>
+                {
+                    arguments = x[4] as IDictionary;
+                });
 
             exchange = advancedBus.ExchangeDeclare(
                 "my_exchange", 
@@ -221,13 +218,12 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_an_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.ExchangeDeclare(
-                    Arg<string>.Is.Equal("my_exchange"),
-                    Arg<string>.Is.Equal("direct"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                    Arg.Is("my_exchange"),
+                    Arg.Is("direct"),
+                    Arg.Is(false),
+                    Arg.Is(true),
+                    Arg.Any<IDictionary<string, object>>());
         }
 
         [Test]
@@ -265,8 +261,7 @@ namespace EasyNetQ.Tests
         public void Should_passively_declare_exchange()
         {
             mockBuilder.Channels.Count.ShouldEqual(1);
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.ExchangeDeclarePassive(Arg<string>.Is.Equal("my_exchange")));
+            mockBuilder.Channels[0].Received().ExchangeDeclarePassive(Arg.Is("my_exchange"));
         }
     }
 
@@ -289,7 +284,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_delete_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDelete("my_exchange", false));
+            mockBuilder.Channels[0].Received().ExchangeDelete("my_exchange", false);
         }
     }
 
@@ -325,8 +320,11 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_declare_a_binding()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueBind("my_queue", "my_exchange", "my_routing_key", new Dictionary<string, object>()));
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is("my_queue"),
+                Arg.Is("my_exchange"),
+                Arg.Is("my_routing_key"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
     }
 
@@ -352,8 +350,7 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_unbind_the_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueUnbind("my_queue", "my_exchange", "my_routing_key", null));
+            mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);
         }
     }
 }
