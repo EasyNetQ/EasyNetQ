@@ -48,16 +48,6 @@
     "dn-version": "dotnet gitversion"
   },
   "frameworks": {
-    "netstandard1.5": {
-      "buildOptions": {
-        "define": [
-          "NET_STANDARD"
-        ]
-      },
-      "dependencies": {
-
-      }
-    },
     "net451": {
       "buildOptions": {
         "define": [
@@ -65,7 +55,7 @@
         ]
       },
       "frameworkAssemblies": {
-
+        "System.Configuration.Install": "4.0.0.0"
       }
     }
   },
