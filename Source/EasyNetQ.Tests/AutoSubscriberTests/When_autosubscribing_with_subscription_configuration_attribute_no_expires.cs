@@ -3,6 +3,7 @@ using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
 using NSubstitute;
+using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -27,7 +28,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                    capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
                });
 
-            autoSubscriber.Subscribe(GetType().Assembly);
+            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
         [Test]

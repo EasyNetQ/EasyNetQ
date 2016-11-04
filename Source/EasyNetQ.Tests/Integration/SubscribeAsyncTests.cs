@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.Integration
             // DownloadStringTask comes from http://blogs.msdn.com/b/pfxteam/archive/2010/05/04/10007557.aspx
 
             bus.SubscribeAsync<MyMessage>("subscribe_async_test", message => 
-                new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=500"))
+                new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=500"))
                     .ContinueWith(task =>
                     {
                         Console.WriteLine("Received: '{0}', Downloaded: '{1}'",
@@ -64,11 +64,11 @@ namespace EasyNetQ.Tests.Integration
             {
                 var downloadTasks = new[]
                 {
-                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=500")),
-                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=501")),
-                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=502")),
-                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=503")),
-                    new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=504")),
+                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=500")),
+                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=501")),
+                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=502")),
+                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=503")),
+                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=504")),
                 };
 
                 return Task.Factory.ContinueWhenAll(downloadTasks, tasks =>
@@ -91,13 +91,13 @@ namespace EasyNetQ.Tests.Integration
             bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
             {
                 Console.WriteLine("Got message: {0}", message.Text);
-                var firstRequestTask = new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=100"));
+                var firstRequestTask = new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=100"));
 
                 return firstRequestTask.ContinueWith(task1 =>
                 {
                     Console.WriteLine("First Response for: {0}, => {1}", message.Text, task1.Result);
-                    var secondRequestTask = new WebClient()
-                        .DownloadStringTask(new Uri("http://localhost:1338/?timeout=501"));
+                    var secondRequestTask = new HttpClient()
+                        .GetStringAsync(new Uri("http://localhost:1338/?timeout=501"));
 
                     return secondRequestTask.ContinueWith(task2 => 
                         Console.WriteLine("Second Response for: {0}, => {1}", message.Text, task2.Result));
@@ -121,7 +121,7 @@ namespace EasyNetQ.Tests.Integration
         // make sure LongRunningServer.js is working by using this...
         public void WebClientSpike()
         {
-            var downloadTask = new WebClient().DownloadStringTask(new Uri("http://localhost:1338/?timeout=150"));
+            var downloadTask = new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=150"));
             Console.WriteLine("Downloaded: '{0}'", downloadTask.Result);
         }
     }

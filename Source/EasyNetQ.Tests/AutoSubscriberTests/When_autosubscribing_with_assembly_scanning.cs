@@ -5,6 +5,7 @@ using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using NSubstitute;
 using System.Linq;
+using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -30,7 +31,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
 
-            autoSubscriber.Subscribe(GetType().Assembly);
+            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
         [Test]

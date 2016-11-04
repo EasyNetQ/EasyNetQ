@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             ConsumerErrorStrategy.HandleConsumerError(null, null)
                      .ReturnsForAnyArgs(AckStrategies.Ack);
 
-            exception = new ApplicationException("I've had a bad day :(");
+            exception = new Exception("I've had a bad day :(");
             StartConsumer((body, properties, info) =>
                 {
                     throw exception;
