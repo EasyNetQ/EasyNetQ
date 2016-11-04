@@ -73,14 +73,14 @@ namespace EasyNetQ
 
         void StartTryToConnect()
         {
-            Timer timer;
+            Timer timer = null;
 #if !NETFX
-            timer = new Timer(TryToConnect, null, connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
+            timer = new Timer(delegate { TryToConnect(timer); }, 
+                null, connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
 #else
             timer = new Timer(TryToConnect);
-#endif
-
             timer.Change(connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
+#endif
         }
 
         void TryToConnect(object timer)
