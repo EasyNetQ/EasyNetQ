@@ -52,6 +52,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\InternalConsumerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\IReceiveRegistration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\PersistentConsumer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Consumer\PersistentMultipleConsumer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\StartConsumingStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Consumer\TransientConsumer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Conventions.cs" />
