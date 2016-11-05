@@ -22,7 +22,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IEnumerable<QueueConsumerPair> queueConumserPairs, Action<IConsumerConfiguration> configure) where T : class;
+        IDisposable Consume(IEnumerable<QueueConsumerPair> queueConumserPairs, Action<IConsumerConfiguration> configure);
 
 
         /// <summary>

@@ -101,7 +101,7 @@ namespace EasyNetQ
         
         // ---------------------------------- consume --------------------------------------
 
-        public IDisposable Consume<T>(IEnumerable<QueueConsumerPair> queueConumserPairs, Action<IConsumerConfiguration> configure) where T : class
+        public IDisposable Consume(IEnumerable<QueueConsumerPair> queueConumserPairs, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queueConumserPairs, nameof(queueConumserPairs));
             Preconditions.CheckNotNull(configure, "configure");
