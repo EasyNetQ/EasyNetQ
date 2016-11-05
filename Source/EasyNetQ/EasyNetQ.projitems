@@ -142,6 +142,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Producer\Rpc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Producer\SendReceive.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueueConsumerPair.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RabbitAdvancedBus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RabbitBus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RabbitHutch.cs" />
