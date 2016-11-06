@@ -181,7 +181,6 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
 
-            var consumerTag = conventions.ConsumerTagConvention();
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
                     {"x-priority", configuration.Priority},
@@ -200,6 +199,7 @@ namespace EasyNetQ.Consumer
                 {
                     var queue = p.Item1;
                     var onMessage = p.Item2;
+                    var consumerTag = conventions.ConsumerTagConvention();
                     try
                     {
                         var basicConsumers = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
@@ -228,8 +228,8 @@ namespace EasyNetQ.Consumer
             }
             catch (Exception exception)
             {
-                logger.ErrorWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
-                    string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name)), consumerTag, exception.Message);
+                logger.ErrorWrite("Consume failed. queue='{0}', message='{1}'",
+                    string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name)), exception.Message);
                 return StartConsumingStatus.Failed;
             }
             return StartConsumingStatus.Succeed;
