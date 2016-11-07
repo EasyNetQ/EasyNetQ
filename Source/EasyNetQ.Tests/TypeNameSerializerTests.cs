@@ -2,13 +2,14 @@
 using System;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using NUnit.Framework;
+using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
     [TestFixture]
     public class TypeNameSerializerTests
     {
-        const string expectedTypeName = "System.String:mscorlib";
+        private readonly string expectedTypeName = "System.String:" + typeof(string).GetTypeInfo().Assembly.GetName().Name;
         private const string expectedCustomTypeName = "EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests";
 
         private ITypeNameSerializer typeNameSerializer;
