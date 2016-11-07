@@ -1,5 +1,8 @@
 {
-    "version": "1.0.0-*",
+  "version": "2.0.2-netcore0001",
+  "description": "EasyNetQ.Tests",
+  "title": "EasyNetQ.Tests",
+  "name": "EasyNetQ.Tests",
 
   "dependencies": {
     "NUnit": "3.5.0",
@@ -13,18 +16,18 @@
     "System.Net.Http": "4.1.0"
   },
 
-    "testRunner": "nunit",
+  "testRunner": "nunit",
 
-    "frameworks": {
-        "netcoreapp1.0": {
-            "imports": "portable-net45+win8",
-            "dependencies": {
-                "Microsoft.NETCore.App": {
-                    "version": "1.0.0-*",
-                    "type": "platform"
-                }
-            }
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
         }
-   
+      }
     }
+
+  }
 }
