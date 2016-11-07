@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "2.0.2-netcore0001",
   "description": "An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container",
   "title": "EasyNetQ.DI.SimpleInjector",
@@ -28,7 +28,7 @@
     "Contributors (see GitHub repo) "
   ],
   "dependencies": {
-    "SimpleInjector": "3.1.5",
+    "SimpleInjector": "3.2.7",
     "EasyNetQ": "2.0.2-netcore0001"
   },
   "tools": {
