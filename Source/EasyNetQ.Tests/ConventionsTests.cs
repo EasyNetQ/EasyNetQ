@@ -226,9 +226,10 @@ namespace EasyNetQ.Tests
         public void Should_correctly_bind_using_new_conventions()
         {
             mockBuilder.Channels[0].Received().QueueBind(
-                    "CustomRpcRoutingKeyName",
-                    "CustomRpcExchangeName",
-                    "CustomRpcRoutingKeyName");
+                    Arg.Is("CustomRpcRoutingKeyName"),
+                    Arg.Is("CustomRpcExchangeName"),
+                    Arg.Is("CustomRpcRoutingKeyName"),
+                    Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
         [Test]

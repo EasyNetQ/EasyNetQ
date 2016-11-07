@@ -74,7 +74,11 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_bind_the_queue_and_exchange()
         {
-            mockBuilder.Channels[0].Received().QueueBind(queueName, typeName, "#");
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is(queueName), 
+                Arg.Is(typeName), 
+                Arg.Is("#"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
         [Test]
