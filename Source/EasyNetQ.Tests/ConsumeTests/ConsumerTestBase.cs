@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected const ulong DeliverTag = 10101;
 
         [SetUp]
-        protected void SetUp()
+        public void SetUp()
         {
             Cancellation = new CancellationTokenSource();
 
