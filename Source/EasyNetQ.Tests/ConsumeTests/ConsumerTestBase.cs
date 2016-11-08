@@ -49,6 +49,11 @@ namespace EasyNetQ.Tests.ConsumeTests
             AdditionalSetUp();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            MockBuilder.Bus.Dispose();
+        }
         protected abstract void AdditionalSetUp();
 
         protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler)

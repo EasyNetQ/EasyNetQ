@@ -39,6 +39,12 @@ namespace EasyNetQ.Tests
             WaitForMessageToPublish();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         private void WaitForMessageToPublish()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -120,6 +126,12 @@ namespace EasyNetQ.Tests
             var message = new MyMessage { Text = "Hiya!" };
             mockBuilder.Bus.Publish(message, "X.A");
             WaitForMessageToPublish();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         private void WaitForMessageToPublish()

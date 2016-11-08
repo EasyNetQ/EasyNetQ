@@ -22,6 +22,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Send(queueName, new MyMessage { Text = "Hello World" });
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        } 
+
         [Test]
         public void Should_publish_the_message()
         {

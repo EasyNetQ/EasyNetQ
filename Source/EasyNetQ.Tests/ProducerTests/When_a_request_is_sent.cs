@@ -42,6 +42,12 @@ namespace EasyNetQ.Tests.ProducerTests
             responseMessage = task.Result;
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_return_the_response()
         {

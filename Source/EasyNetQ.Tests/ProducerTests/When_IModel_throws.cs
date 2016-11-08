@@ -29,6 +29,12 @@ namespace EasyNetQ.Tests.ProducerTests
                     });
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_try_to_reconnect_until_timeout()
         {

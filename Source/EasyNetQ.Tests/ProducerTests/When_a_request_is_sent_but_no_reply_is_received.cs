@@ -17,6 +17,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_throw_a_timeout_exception()
         {

@@ -31,6 +31,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown:EasyNetQ.Tests");
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_deliver_MyMessage()
         {

@@ -50,6 +50,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             countdownEvent.Wait(1000);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         public void Deliver<T>(T message) where T : class
         {
             var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(message);

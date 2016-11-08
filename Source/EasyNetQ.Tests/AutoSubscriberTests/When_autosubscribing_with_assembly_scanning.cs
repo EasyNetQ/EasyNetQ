@@ -34,6 +34,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_have_declared_the_queues()
         {

@@ -43,6 +43,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            bus.Dispose();
+        }
+
         [Test]
         public void Should_have_called_subscribe()
         {

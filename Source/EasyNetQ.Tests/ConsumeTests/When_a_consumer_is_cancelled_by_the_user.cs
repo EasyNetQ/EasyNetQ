@@ -33,6 +33,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             are.WaitOne(500);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_dispose_the_model()
         {

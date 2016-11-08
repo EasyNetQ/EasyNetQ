@@ -33,6 +33,13 @@ namespace EasyNetQ.Tests
                 maxPriority: 10);
         }
 
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_return_a_queue()
         {
@@ -79,6 +86,12 @@ namespace EasyNetQ.Tests
                 maxPriority: 10,
                 deadLetterExchange: "my_exchange",
                 deadLetterRoutingKey: "my_routing_key");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]
@@ -131,6 +144,12 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_queue2");
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_return_a_queue()
         {
@@ -171,6 +190,12 @@ namespace EasyNetQ.Tests
             advancedBus.QueueDelete(queue);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_delete_the_queue()
         {
@@ -206,6 +231,12 @@ namespace EasyNetQ.Tests
                 true, 
                 true, 
                 "my.alternate.exchange");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]
@@ -250,6 +281,12 @@ namespace EasyNetQ.Tests
             exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_return_an_exchange_instance()
         {
@@ -281,6 +318,12 @@ namespace EasyNetQ.Tests
             advancedBus.ExchangeDelete(exchange);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_delete_the_queue()
         {
@@ -305,6 +348,12 @@ namespace EasyNetQ.Tests
             var queue = new Topology.Queue("my_queue", false);
 
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]
@@ -345,6 +394,12 @@ namespace EasyNetQ.Tests
             var queue = new Topology.Queue("my_queue", false);
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
             advancedBus.BindingDelete(binding);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]

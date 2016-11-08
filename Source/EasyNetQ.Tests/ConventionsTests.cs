@@ -169,7 +169,13 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Publish(new TestMessage());
 		}
 
-		[Test]
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Test]
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -220,6 +226,12 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
 
             mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]

@@ -41,6 +41,12 @@ namespace EasyNetQ.Tests
             subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_create_a_new_channel_for_the_consumer()
         {
@@ -177,6 +183,12 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_build_bus_successfully()
         {
@@ -278,6 +290,12 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_ack()
         {
@@ -336,6 +354,12 @@ namespace EasyNetQ.Tests
             mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
             subscriptionResult.Dispose();
             are.WaitOne(500);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]

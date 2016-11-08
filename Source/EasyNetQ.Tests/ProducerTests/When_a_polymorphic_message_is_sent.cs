@@ -38,6 +38,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_name_exchange_after_interface()
         {

@@ -19,6 +19,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_throw_an_EasyNetQException()
         {

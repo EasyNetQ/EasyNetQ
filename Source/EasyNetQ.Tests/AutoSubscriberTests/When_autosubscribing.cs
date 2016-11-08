@@ -37,6 +37,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(typeof(MyAsyncConsumer), typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>));
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_have_declared_the_queues()
         {
