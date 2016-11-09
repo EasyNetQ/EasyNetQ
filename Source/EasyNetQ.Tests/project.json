@@ -12,8 +12,8 @@
     "RabbitMQ.Client": "4.1.1",
     "EasyNetQ": "2.0.2-netcore0001",
     "EasyNetQ.Management.Client": "0.47.7",
-    "EasyNetQ.Tests.Messages": "2.0.2-netcore0001",
-    "System.Net.Http": "4.1.0"
+    "EasyNetQ.Tests.Messages": "2.0.2-netcore0001"
+   
   },
 
   "testRunner": "nunit",
@@ -25,7 +25,14 @@
         "Microsoft.NETCore.App": {
           "version": "1.0.0-*",
           "type": "platform"
-        }
+        },
+        "System.Net.Http": "4.1.0"
+      }
+    },
+    "net451": {
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Net.Http": "4.0.0.0"
       }
     }
 
