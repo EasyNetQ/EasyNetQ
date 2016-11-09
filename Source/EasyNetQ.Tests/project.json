@@ -11,9 +11,8 @@
     "dotnet-test-nunit": "3.4.0-beta-3",
     "RabbitMQ.Client": "4.1.1",
     "EasyNetQ": "2.0.2-netcore0001",
-    "EasyNetQ.Management.Client": "0.47.7",
+    "EasyNetQ.Management.Client": "2.0.0-netcore0001",
     "EasyNetQ.Tests.Messages": "2.0.2-netcore0001"
-   
   },
 
   "testRunner": "nunit",
