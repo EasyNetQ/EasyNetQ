@@ -4,6 +4,7 @@ using System.Text;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace EasyNetQ.Scheduler.Tests
 {
@@ -16,13 +17,14 @@ namespace EasyNetQ.Scheduler.Tests
         [SetUp]
         public void SetUp()
         {
+            var log = MockRepository.GenerateStub<IEasyNetQLogger>();
             var configuration = new ScheduleRepositoryConfiguration
             {
                 ProviderName = "System.Data.SqlClient",
                 ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
                 PurgeBatchSize = 100
             };
-            scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);
+            scheduleRepository = new ScheduleRepository(configuration, log, () => DateTime.UtcNow);
         }
 
         [Test]

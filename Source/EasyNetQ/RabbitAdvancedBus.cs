@@ -40,7 +40,8 @@ namespace EasyNetQ
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
-            AdvancedBusEventHandlers advancedBusEventHandlers)
+            AdvancedBusEventHandlers advancedBusEventHandlers,
+            IPersistentConnectionFactory persistentConnectionFactory)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -53,6 +54,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
+            Preconditions.CheckNotNull(persistentConnectionFactory, "persistentConnectionFactory");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -91,7 +93,7 @@ namespace EasyNetQ
                 MessageReturned += advancedBusEventHandlers.MessageReturned;
             }
 
-            connection = new PersistentConnection(connectionFactory, logger, eventBus);
+            connection = persistentConnectionFactory.CreateConnection();
             clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
             connection.Initialize();
         }

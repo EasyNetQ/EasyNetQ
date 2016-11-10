@@ -40,6 +40,7 @@ namespace EasyNetQ
                 .Register<IConsumerFactory, ConsumerFactory>()
                 .Register<IConnectionFactory, ConnectionFactoryWrapper>()
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
+                .Register<IPersistentConnectionFactory, PersistentConnectionFactory>()
                 .Register<IClientCommandDispatcherFactory, ClientCommandDispatcherFactory>()
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
