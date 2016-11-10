@@ -28,7 +28,7 @@
   ],
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
-    "RabbitMQ.Client": "4.0.0"
+    "RabbitMQ.Client": "4.1.1"
   },
   "tools": {
     "dotnet-gitversion": {
