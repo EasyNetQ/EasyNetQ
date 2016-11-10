@@ -1,7 +1,7 @@
 ﻿using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NUnit.Framework;    
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
@@ -14,11 +14,10 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [SetUp]
         public void SetUp()
         {
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-            persistentConnection.Stub(x => x.CreateModel());
+            persistentConnection = Substitute.For<IPersistentConnection>();
             var configuration = new ConnectionConfiguration();
             eventBus = new EventBus();
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             var persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
         }
@@ -28,15 +27,15 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         public void Should_not_open_a_channel_when_not_connected()
         {
             eventBus.Publish(new ConnectionCreatedEvent());
-            persistentConnection.AssertWasNotCalled(x => x.CreateModel());
+            persistentConnection.DidNotReceive().CreateModel();
         }
 
         [Test]
         public void Should_open_a_channel_when_connected()
         {
-            persistentConnection.Stub(x => x.IsConnected).Return(true);
+            persistentConnection.IsConnected.Returns(true);
             eventBus.Publish(new ConnectionCreatedEvent());
-            persistentConnection.AssertWasCalled(x => x.CreateModel());
+            persistentConnection.Received().CreateModel();
         }
     }
 }

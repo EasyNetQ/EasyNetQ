@@ -3,7 +3,8 @@ using System;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -16,32 +17,37 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [SetUp]
         public void SetUp()
         {
-            bus = MockRepository.GenerateMock<IBus>();
+            bus = Substitute.For<IBus>();
             
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
-            bus.Stub(x => x.Subscribe(
-                    Arg<string>.Is.Equal("MyAttrTest"),
-                    Arg<Action<MessageA>>.Is.Anything,
-                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything
+            bus.When(x => x.Subscribe(
+                    Arg.Is("MyAttrTest"),
+                    Arg.Any<Action<MessageA>>(),
+                    Arg.Any<Action<ISubscriptionConfiguration>>()
                     ))
-                    .WhenCalled(a =>
-                        {
-                           capturedAction= (Action<ISubscriptionConfiguration>)a.Arguments[2];
-                        });
+                    .Do(a =>
+                    {
+                        capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
+                    });
 
-            autoSubscriber.Subscribe(GetType().Assembly);
+            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            bus.Dispose();
         }
 
         [Test]
         public void Should_have_called_subscribe()
         {
-            bus.AssertWasCalled(
-                    x => x.Subscribe(
-                        Arg<string>.Is.Anything, 
-                        Arg<Action<MessageA>>.Is.Anything, 
-                        Arg<Action<ISubscriptionConfiguration>>.Is.Anything));
-
+            bus.Received().Subscribe(
+                        Arg.Any<string>(),
+                        Arg.Any<Action<MessageA>>(),
+                        Arg.Any<Action<ISubscriptionConfiguration>>()
+                        );
         }
 
         [Test]

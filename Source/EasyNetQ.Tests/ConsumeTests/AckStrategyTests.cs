@@ -2,7 +2,7 @@
 using EasyNetQ.Events;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -16,17 +16,15 @@ namespace EasyNetQ.Tests.ConsumeTests
         [SetUp]
         public void Setup()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
-            model.Expect(m => m.BasicAck(deliveryTag, false));
+            model = Substitute.For<IModel>();
 
-            result = AckStrategies.Ack(model, deliveryTag);
+            result = AckStrategies.Ack(model, deliveryTag);          
         }
-
 
         [Test]
         public void Should_ack_message()
         {
-            model.VerifyAllExpectations();
+            model.Received().BasicAck(deliveryTag, false);
         }
 
         [Test]
@@ -46,8 +44,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [SetUp]
         public void Setup()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
-            model.Expect(m => m.BasicNack(deliveryTag, false, false));
+            model = Substitute.For<IModel>();
 
             result = AckStrategies.NackWithoutRequeue(model, deliveryTag);
         }
@@ -56,7 +53,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_nack_message_and_not_requeue()
         {
-            model.VerifyAllExpectations();   
+            model.Received().BasicNack(deliveryTag, false, false);
         }
 
         [Test]
@@ -76,8 +73,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [SetUp]
         public void Setup()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
-            model.Expect(m => m.BasicNack(deliveryTag, false, true));
+            model = Substitute.For<IModel>();
 
             result = AckStrategies.NackWithRequeue(model, deliveryTag);
         }
@@ -86,7 +82,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_nack_message_and_requeue()
         {
-            model.VerifyAllExpectations();
+            model.Received().BasicNack(deliveryTag, false, true);
         }
 
         [Test]
@@ -106,7 +102,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [SetUp]
         public void Setup()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
+            model = Substitute.For<IModel>();
 
             result = AckStrategies.Nothing(model, deliveryTag);
         }
@@ -114,7 +110,8 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_have_no_interaction_with_model()
         {
-            model.VerifyAllExpectations();
+            var rec = model.ReceivedCalls();
+            Assert.AreEqual(rec.GetEnumerator().MoveNext(), false);
         }
 
         [Test]

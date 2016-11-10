@@ -6,7 +6,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -32,10 +32,16 @@ namespace EasyNetQ.Tests.ConsumeTests
             are.WaitOne(500);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_dispose_of_the_model()
         {
-            mockBuilder.Consumers[0].Model.AssertWasCalled(x => x.Dispose());
+            mockBuilder.Consumers[0].Model.Received().Dispose();
         }
     }
 }

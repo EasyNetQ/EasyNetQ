@@ -3,7 +3,7 @@
 using System;
 using EasyNetQ.Consumer;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -12,9 +12,8 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.Expect(x => x.HandleConsumerCancelled(null))
-                                 .IgnoreArguments()
-                                 .Return(AckStrategies.Ack);
+            ConsumerErrorStrategy.HandleConsumerCancelled(null)
+                                 .ReturnsForAnyArgs(AckStrategies.Ack);
 
             StartConsumer((body, properties, info) =>
                 {
@@ -27,20 +26,19 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_invoke_the_cancellation_strategy()
         {
-            ConsumerErrorStrategy.AssertWasCalled(x => x.HandleConsumerCancelled(
-                Arg<ConsumerExecutionContext>.Matches(args => args.Info.ConsumerTag == ConsumerTag &&
-                                                           args.Info.DeliverTag == DeliverTag &&
-                                                           args.Info.Exchange == "the_exchange" &&
-                                                           args.Body == OriginalBody)));
+            ConsumerErrorStrategy.Received().HandleConsumerCancelled(
+               Arg.Is<ConsumerExecutionContext>(args => args.Info.ConsumerTag == ConsumerTag &&
+                                                        args.Info.DeliverTag == DeliverTag &&
+                                                        args.Info.Exchange == "the_exchange" &&
+                                                        args.Body == OriginalBody));
 
-            ConsumerErrorStrategy.AssertWasNotCalled(
-                x => x.HandleConsumerError(Arg<ConsumerExecutionContext>.Is.Anything, Arg<Exception>.Is.Anything));
+            ConsumerErrorStrategy.DidNotReceive().HandleConsumerError(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>());
         }
 
         [Test]
         public void Should_ack()
         {
-            MockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(DeliverTag, false));
+            MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
         }
 
         [Test]
@@ -48,7 +46,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             MockBuilder.Bus.Dispose();
 
-            ConsumerErrorStrategy.AssertWasCalled(x => x.Dispose());
+            ConsumerErrorStrategy.Received().Dispose();
         }
     }
 }

@@ -85,12 +85,12 @@ namespace EasyNetQ.Producer
 
             var requestType = typeof(TRequest);
 
-            Timer timer;
+            Timer timer = null;
 #if !NETFX
             timer = new Timer(state =>
                 {
-                      ((Timer)state).Dispose();
-                tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+                    timer.Dispose();
+                    tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 }, null, TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
 #else
             timer = new Timer(state =>
@@ -98,11 +98,10 @@ namespace EasyNetQ.Producer
                 ((Timer)state).Dispose();
                 tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
             });
-#endif
-          
 
-            
-            timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
+             timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
+#endif
+
             RegisterErrorHandling(correlationId, timer, tcs);
 
             var queueName = SubscribeToResponse<TRequest, TResponse>();

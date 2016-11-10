@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -64,20 +64,19 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_ack_the_message()
         {
-            MockBuilder.Channels[0].AssertWasCalled(x => x.BasicAck(DeliverTag, false));
+            MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
         }
 
         [Test]
         public void Should_write_debug_message()
         {
-            MockBuilder.Logger.AssertWasCalled(x =>
-                x.DebugWrite("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
+            MockBuilder.Logger.Received().DebugWrite("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
                     "\n\tDeliveryTag: {3}\n\tRedelivered: {4}",
                             "the_routing_key",
                             "the_correlation_id",
                             ConsumerTag,
                             DeliverTag,
-                            false));
+                            false);
         }
     }
 }

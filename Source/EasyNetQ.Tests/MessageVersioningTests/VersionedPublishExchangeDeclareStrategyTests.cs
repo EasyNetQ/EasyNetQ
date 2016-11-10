@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Topology;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
@@ -18,18 +18,19 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchangeDeclareCount = 0;
             var exchangeName = "exchangeName";
 
-            var advancedBus = MockRepository.GenerateStrictMock<IAdvancedBus>();
+            var advancedBus = Substitute.For<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
 
-            advancedBus
-                .Expect(x => x.ExchangeDeclare(exchangeName, "topic"))
-                .Throw(new Exception())
-                .WhenCalled(x => exchangeDeclareCount++);
-
-            advancedBus
-                .Expect(x => x.ExchangeDeclare(exchangeName, "topic"))
-                .Return(exchange)
-                .WhenCalled(x => exchangeDeclareCount++);
+            advancedBus.ExchangeDeclare(exchangeName, "topic").Returns(
+                x =>
+                {
+                    throw (new Exception());
+                },
+                x =>
+                {
+                    exchangeDeclareCount++;
+                    return exchange;
+                });
 
             var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy();
             try
@@ -40,8 +41,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             {
             }
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
-            advancedBus.AssertWasCalled(x => x.ExchangeDeclare(exchangeName, "topic"));
+            advancedBus.Received(2).ExchangeDeclare(exchangeName, "topic");
             declaredExchange.ShouldBeTheSameAs(exchange);
             exchangeDeclareCount.ShouldEqual(1);
         }
@@ -82,34 +82,31 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
         private IAdvancedBus CreateAdvancedBusMock( Action<ExchangeStub> exchangeCreated, Action<ExchangeStub, ExchangeStub> exchangeBound, Func<Type,string> nameExchange  )
         {
-            var advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
-            advancedBus.Stub( b => b.ExchangeDeclare(null, null, false, true, false, false, null ) )
-                       .IgnoreArguments()
-                       .Return(null)
-                       .WhenCalled( mi =>
-                           {
-                               var exchange = new ExchangeStub {Name = (string) mi.Arguments[ 0 ]};
-                               exchangeCreated( exchange );
-                               mi.ReturnValue = exchange;
-                           } );
+            var advancedBus = Substitute.For<IAdvancedBus>();
+            advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
+                       .ReturnsForAnyArgs(mi =>
+                         {
+                             var exchange = new ExchangeStub { Name = (string)mi[0] };
+                             exchangeCreated(exchange);
+                             return exchange;
+                         });
 
-            advancedBus.Stub( b => b.Bind(Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Equal( "#" ) ) )
-                       .Return( null )
-                       .WhenCalled( mi =>
-                           {
-                               var source = (ExchangeStub) mi.Arguments[ 0 ];
-                               var destination = (ExchangeStub) mi.Arguments[ 1 ];
-                               exchangeBound( source, destination );
-                               mi.ReturnValue = MockRepository.GenerateStub<IBinding>();
-                           } );
+            advancedBus.Bind(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+                       .Returns(mi =>
+                         {
+                             var source = (ExchangeStub)mi[0];
+                             var destination = (ExchangeStub)mi[1];
+                             exchangeBound(source, destination);
+                             return Substitute.For<IBinding>();
+                         });
 
-            var conventions = MockRepository.GenerateStub<IConventions>();
+            var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => nameExchange( t );
 
-            var container = MockRepository.GenerateStub<IContainer>();
-            container.Stub( c => c.Resolve<IConventions>() ).Return( conventions );
+            var container = Substitute.For<IContainer>();
+            container.Resolve<IConventions>().Returns( conventions );
 
-            advancedBus.Stub( b => b.Container ).Return( container );
+            advancedBus.Container.Returns( container );
 
             return advancedBus;
         }

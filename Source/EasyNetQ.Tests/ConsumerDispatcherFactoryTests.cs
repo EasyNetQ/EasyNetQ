@@ -4,7 +4,7 @@ using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            logger = Substitute.For<IEasyNetQLogger>();
             dispatcherFactory = new ConsumerDispatcherFactory(configuration, logger);
         }
 

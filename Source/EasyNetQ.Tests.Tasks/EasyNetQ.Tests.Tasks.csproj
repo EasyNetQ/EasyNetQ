@@ -47,6 +47,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\EasyNetQ.Serilog\bin\$(Configuration)\net451\EasyNetQ.Serilog.dll</HintPath>
     </Reference>
+    <Reference Include="EasyNetQ.Tests.Messages, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\EasyNetQ.Tests.Messages\bin\$(Configuration)\net451\EasyNetQ.Tests.Messages.dll</HintPath>
+    </Reference>
     <Reference Include="Net.Autofac, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Net.Autofac.0.1.10.0\lib\net40\Net.Autofac.dll</HintPath>
       <Private>True</Private>

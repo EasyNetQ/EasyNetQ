@@ -3,7 +3,8 @@
 using System;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
@@ -18,6 +19,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_throw_an_EasyNetQException()
         {
@@ -26,7 +33,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 try
                 {
                     var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
-                    mockBuilder.Connection.Raise(x => x.ConnectionShutdown += null, null, null);
+                    mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(new ShutdownInitiator(), 0, null));
                     task.Wait();
                 }
                 catch (AggregateException aggregateException)

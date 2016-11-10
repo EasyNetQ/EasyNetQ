@@ -5,7 +5,7 @@ using System.Text;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
@@ -26,11 +26,10 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var correlationId = "";
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
-                .IgnoreArguments()
-                .WhenCalled(invocation =>
+            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
+                .Do(invocation =>
                     {
-                        var properties = (IBasicProperties)invocation.Arguments[3];
+                        var properties = (IBasicProperties)invocation[3];
                         correlationId = properties.CorrelationId;
                     });
 
@@ -43,6 +42,12 @@ namespace EasyNetQ.Tests.ProducerTests
             responseMessage = task.Result;
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_return_the_response()
         {
@@ -52,34 +57,34 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_publish_request_message()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicPublish(
-                Arg<string>.Is.Equal("easy_net_q_rpc"),
-                Arg<string>.Is.Equal("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Messages"),
-                Arg<bool>.Is.Equal(false),
-                Arg<IBasicProperties>.Is.Anything,
-                Arg<byte[]>.Is.Anything));
+            mockBuilder.Channels[0].Received().BasicPublish(
+                Arg.Is("easy_net_q_rpc"),
+                Arg.Is("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Messages"),
+                Arg.Is(false),
+                Arg.Any<IBasicProperties>(),
+                Arg.Any<byte[]>());
         }
 
         [Test]
         public void Should_declare_the_publish_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                Arg<string>.Is.Equal("easy_net_q_rpc"), 
-                Arg<string>.Is.Equal("direct"),
-                Arg<bool>.Is.Equal(true),
-                Arg<bool>.Is.Equal(false),
-                Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is("easy_net_q_rpc"),
+                Arg.Is("direct"),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Any<IDictionary<string, object>>());
         }
 
         [Test]
         public void Should_declare_the_response_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.QueueDeclare(
-                Arg<string>.Matches(arg => arg.StartsWith("easynetq.response.")),
-                Arg<bool>.Is.Equal(false),
-                Arg<bool>.Is.Equal(true),
-                Arg<bool>.Is.Equal(true),
-                Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                Arg.Is<string>(arg => arg.StartsWith("easynetq.response.")),
+                Arg.Is(false),
+                Arg.Is(true),
+                Arg.Is(true),
+                Arg.Any<IDictionary<string, object>>());
         }
 
         protected void DeliverMessage(string correlationId)

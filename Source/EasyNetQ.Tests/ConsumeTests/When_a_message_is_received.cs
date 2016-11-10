@@ -5,7 +5,7 @@ using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -31,6 +31,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown:EasyNetQ.Tests");
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_deliver_MyMessage()
         {
@@ -48,9 +54,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Test]
         public void Should_put_unrecognised_message_on_error_queue()
         {
-            mockBuilder.Logger.AssertWasCalled(x => x.ErrorWrite(
-                Arg<string>.Matches(errorMessage => errorMessage.StartsWith("Exception thrown by subscription callback")), 
-                Arg<object[]>.Is.Anything));
+            mockBuilder.Logger.Received().ErrorWrite(
+                Arg.Is<string>(errorMessage => errorMessage.StartsWith("Exception thrown by subscription callback")), 
+                Arg.Any<object[]>());
         }
 
         private void DeliverMessage(string message, string type)

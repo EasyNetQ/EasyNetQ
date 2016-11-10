@@ -1,0 +1,39 @@
+{
+  "version": "2.0.2-netcore0001",
+  "description": "EasyNetQ.Tests",
+  "title": "EasyNetQ.Tests",
+  "name": "EasyNetQ.Tests",
+
+  "dependencies": {
+    "NUnit": "3.5.0",
+    "NSubstitute": "2.0.0-rc",
+    "Newtonsoft.Json": "9.0.1",
+    "dotnet-test-nunit": "3.4.0-beta-3",
+    "RabbitMQ.Client": "4.1.1",
+    "EasyNetQ": "2.0.2-netcore0001",
+    "EasyNetQ.Management.Client": "2.0.0-netcore0001",
+    "EasyNetQ.Tests.Messages": "2.0.2-netcore0001"
+  },
+
+  "testRunner": "nunit",
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        },
+        "System.Net.Http": "4.1.0"
+      }
+    },
+    "net451": {
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Net.Http": "4.0.0.0"
+      }
+    }
+
+  }
+}

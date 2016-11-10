@@ -7,7 +7,7 @@ using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
@@ -21,8 +21,8 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [SetUp]
         public void SetUp()
         {
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-            channel = MockRepository.GenerateStub<IModel>();
+            persistentConnection = Substitute.For<IPersistentConnection>();
+            channel = Substitute.For<IModel>();
             var eventBus = new EventBus();
             var configuration = new ConnectionConfiguration();
 
@@ -32,14 +32,16 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 "connection closed by peer");
             var exception = new OperationInterruptedException(shutdownArgs);
 
-            persistentConnection.Stub(x => x.CreateModel()).Throw(exception).Repeat.Once();
-            persistentConnection.Stub(x => x.CreateModel()).Return(channel).Repeat.Any();
+            persistentConnection.CreateModel().Returns(x => { throw exception; },
+                                                       x => channel,
+                                                       x => channel); 
+                
 
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 
-            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent())).Change(10, Timeout.Infinite);
+            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent()), null, 10, Timeout.Infinite);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
@@ -48,7 +50,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         public void Should_run_action_on_channel()
         {
             Thread.Sleep(100);
-            channel.AssertWasCalled(x => x.ExchangeDeclare("MyExchange", "direct"));
+            channel.Received().ExchangeDeclare("MyExchange", "direct");
         }
     }
 }

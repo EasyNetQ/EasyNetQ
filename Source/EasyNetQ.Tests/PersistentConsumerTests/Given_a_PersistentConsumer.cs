@@ -7,7 +7,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -39,17 +39,16 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             queue = new Queue(queueName, false);
             onMessage = (body, properties, info) => Task.Factory.StartNew(() => { });
 
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-
-            internalConsumerFactory = MockRepository.GenerateStub<IInternalConsumerFactory>();
+            persistentConnection = Substitute.For<IPersistentConnection>();
+            internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
             
-            internalConsumerFactory.Stub(x => x.CreateConsumer()).WhenCalled(x =>
+            internalConsumerFactory.CreateConsumer().Returns(x =>
                 {
-                    var internalConsumer = MockRepository.GenerateStub<IInternalConsumer>();
+                    var internalConsumer = Substitute.For<IInternalConsumer>();
                     internalConsumers.Add(internalConsumer);
                     createConsumerCalled++;
-                    x.ReturnValue = internalConsumer;
-                }).Repeat.Any();
+                    return internalConsumer;
+                });
             configuration = new ConsumerConfiguration(0);
             consumer = new PersistentConsumer(
                 queue,

@@ -6,7 +6,7 @@ using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
@@ -19,8 +19,8 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [SetUp]
         public void SetUp()
         {
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-            var eventBus = MockRepository.GenerateStub<IEventBus>();
+            persistentConnection = Substitute.For<IPersistentConnection>();
+            var eventBus = Substitute.For<IEventBus>();
 
             var configuration = new ConnectionConfiguration
                 {
@@ -33,12 +33,12 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 "connection closed by peer");
             var exception = new OperationInterruptedException(shutdownArgs);
 
-            persistentConnection.Stub(x => x.CreateModel()).WhenCalled(x =>
+            persistentConnection.When(x => x.CreateModel()).Do(x =>
                 {
                     throw exception;
                 });
 
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 

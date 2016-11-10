@@ -7,7 +7,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
 {
@@ -33,8 +33,8 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public void SetUp()
         {
             //var logger = new ConsoleLogger();
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
-            var consumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            var logger = Substitute.For<IEasyNetQLogger>();
+            var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             var eventBus = new EventBus();
 
             handlerRunner = new HandlerRunner(logger, consumerErrorStrategy, eventBus);
@@ -47,9 +47,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                         deliveredInfo = info;
                     });
 
-            var consumer = MockRepository.GenerateStub<IBasicConsumer>();
-            channel = MockRepository.GenerateStub<IModel>();
-            consumer.Stub(x => x.Model).Return(channel).Repeat.Any();
+            var consumer = Substitute.For<IBasicConsumer>();
+            channel = Substitute.For<IModel>();
+            consumer.Model.Returns(channel);
 
             var context = new ConsumerExecutionContext(
                 userHandler, messageInfo, messageProperties, messageBody, consumer);
@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         [Test]
         public void Should_ACK_message()
         {
-            channel.AssertWasCalled(x => x.BasicAck(123, false));
+            channel.Received().BasicAck(123, false);
         }
     }
 }

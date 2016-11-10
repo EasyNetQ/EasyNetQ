@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
+using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
@@ -176,7 +177,7 @@ namespace EasyNetQ.Tests
             // warmup
             for (var i = 0; i < 10; ++i)
             {
-                type.GetCustomAttributes(typeof(OneTestAttribute), true);
+                type.GetTypeInfo().GetCustomAttributes(typeof(OneTestAttribute), true);
                 type.GetAttributes<OneTestAttribute>();
             }
             // warmup
@@ -186,7 +187,7 @@ namespace EasyNetQ.Tests
             stopWatch.Start();
             for (var i = 0; i < 1000000; ++i)
             {
-                count += (type.GetCustomAttributes(typeof(OneTestAttribute), true).SingleOrDefault() as OneTestAttribute).Value;
+                count += (type.GetTypeInfo().GetCustomAttributes(typeof(OneTestAttribute), true).SingleOrDefault() as OneTestAttribute).Value;
             }
             stopWatch.Stop();
             var getCustomAttributesTime = stopWatch.Elapsed;

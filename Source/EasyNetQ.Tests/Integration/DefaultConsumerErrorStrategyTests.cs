@@ -9,7 +9,7 @@ using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -71,7 +71,7 @@ namespace EasyNetQ.Tests
                     AppId = "456"
                 },
                 originalMessageBody,
-                MockRepository.GenerateStub<IBasicConsumer>()
+                Substitute.For<IBasicConsumer>()
                 );
 
             consumerErrorStrategy.HandleConsumerError(context, exception);
@@ -119,26 +119,26 @@ namespace EasyNetQ.Tests
                     AppId = "456"
                 },
                 originalMessageBody,
-                MockRepository.GenerateStub<IBasicConsumer>()
+                Substitute.For<IBasicConsumer>()
                 );
 
-            var logger = MockRepository.GenerateMock<IEasyNetQLogger>();
-            connectionFactory = MockRepository.GenerateMock<IConnectionFactory>();
+            var logger = Substitute.For<IEasyNetQLogger>();
+            connectionFactory = Substitute.For<IConnectionFactory>();
 
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(
                 connectionFactory,
-                MockRepository.GenerateStub<ISerializer>(),
+                Substitute.For<ISerializer>(),
                 logger,
-                MockRepository.GenerateStub<IConventions>(),
-                MockRepository.GenerateStub<ITypeNameSerializer>(),
-                MockRepository.GenerateStub<IErrorMessageSerializer>());
+                Substitute.For<IConventions>(),
+                Substitute.For<ITypeNameSerializer>(),
+                Substitute.For<IErrorMessageSerializer>());
 
             consumerErrorStrategy.Dispose();
 
             var ackStrategy = consumerErrorStrategy.HandleConsumerError(context, exception);
 
-            connectionFactory.AssertWasNotCalled(f => f.CreateConnection());
-            logger.AssertWasCalled(l => l.ErrorWrite(Arg.Text.Contains("DefaultConsumerErrorStrategy was already disposed"), Arg<Object>.Is.Anything));
+            connectionFactory.DidNotReceive().CreateConnection();
+            logger.Received().ErrorWrite(Arg.Is<string>(x => x.Contains("DefaultConsumerErrorStrategy was already disposed")), Arg.Any<object[]>());
 
             Assert.AreEqual(AckStrategies.NackWithRequeue, ackStrategy);
         }

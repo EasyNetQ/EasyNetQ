@@ -20,6 +20,12 @@ namespace EasyNetQ.Tests.NonGeneric
             mockBuilder = new MockBuilder();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_be_able_to_subscribe_using_non_generic_extensions()
         {

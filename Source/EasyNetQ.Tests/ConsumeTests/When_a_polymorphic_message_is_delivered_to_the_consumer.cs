@@ -48,6 +48,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             are.WaitOne(1000);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_correctly_deserialize_message()
         {

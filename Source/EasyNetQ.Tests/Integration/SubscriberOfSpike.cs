@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
 
-            AutoRegisterSubscribers(bus, Assembly.GetExecutingAssembly());
+            AutoRegisterSubscribers(bus, GetType().GetTypeInfo().Assembly);
 
             bus.Publish(new MyAutoSubscribedMessage { Text = "Hello Message!" });
             bus.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.Integration
                 var handleMethod = subscriberInfo.SubscriberType.GetMethod("Handle");
 
                 var delegateType = typeof (Action<>).MakeGenericType(subscriberInfo.MessageType);
-                var handleDelegate = Delegate.CreateDelegate(delegateType, subscriberInstance, handleMethod);
+                var handleDelegate = handleMethod.CreateDelegate(delegateType, subscriberInstance);
 
                 subscribeMethod.Invoke(bus, new[] { subscriberId, handleDelegate });
             }
@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 var subscriberOfInterface = type
                     .GetInterfaces()
-                    .SingleOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof (ISubscriberOf<>));
+                    .SingleOrDefault(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof (ISubscriberOf<>));
 
                 if (subscriberOfInterface == null) continue;
 

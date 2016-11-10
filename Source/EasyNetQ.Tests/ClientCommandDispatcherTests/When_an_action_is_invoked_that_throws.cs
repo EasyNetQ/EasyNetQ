@@ -5,7 +5,7 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
@@ -20,16 +20,15 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            var connection = MockRepository.GenerateStub<IPersistentConnection>();
-            var channelFactory = MockRepository.GenerateStub<IPersistentChannelFactory>();
-            channel = MockRepository.GenerateStub<IPersistentChannel>();
+            var connection = Substitute.For<IPersistentConnection>();
+            var channelFactory = Substitute.For<IPersistentChannelFactory>();
+            channel = Substitute.For<IPersistentChannel>();
 
-            channelFactory.Stub(x => x.CreatePersistentChannel(connection)).Return(channel);
-            channel.Stub(x => x.InvokeChannelAction(null)).IgnoreArguments().WhenCalled(
-                x => ((Action<IModel>)x.Arguments[0])(null));
+            channelFactory.CreatePersistentChannel(connection).Returns(channel);
+            channel.WhenForAnyArgs(x => x.InvokeChannelAction(null))
+                   .Do(x => ((Action<IModel>)x[0])(null));
 
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
-
         }
 
         [TearDown]

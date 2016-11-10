@@ -2,7 +2,7 @@
 using RabbitMQ.Client.Framing;
 // ReSharper disable InconsistentNaming
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 using System;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
@@ -24,13 +24,18 @@ namespace EasyNetQ.Tests.ProducerTests
 
             requestMessage = new TestRequestMessage();
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
-                       .IgnoreArguments()
-                       .WhenCalled(invocation =>
+            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
+                       .Do(invocation =>
                        {
-                           var properties = (IBasicProperties)invocation.Arguments[3];
+                           var properties = (IBasicProperties)invocation[3];
                            _correlationId = properties.CorrelationId;
                        });
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]

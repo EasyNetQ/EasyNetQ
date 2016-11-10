@@ -4,7 +4,7 @@ using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
         {
             var blocked = false;
             advancedBus.Blocked += (s,e) => blocked = true;
-            connection.Raise(r => r.ConnectionBlocked += (s, e) => { }, connection, new ConnectionBlockedEventArgs("some reason"));
+            connection.ConnectionBlocked += Raise.EventWith(new ConnectionBlockedEventArgs("some reason"));
 
             Assert.That(blocked, Is.True);
         }
@@ -56,8 +56,7 @@ namespace EasyNetQ.Tests
         {
             var blocked = true;
             advancedBus.Unblocked += (s,e) => blocked = false;
-            connection.Raise(r => r.ConnectionUnblocked += (s, e) => { }, connection, new EventArgs());
-
+            connection.ConnectionUnblocked += Raise.EventWith(new EventArgs());
             Assert.That(blocked, Is.False);
         }
     }

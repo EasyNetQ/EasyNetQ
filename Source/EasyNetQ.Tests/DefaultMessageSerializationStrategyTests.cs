@@ -3,7 +3,7 @@
 using System;
 using System.Text;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -101,22 +101,22 @@ namespace EasyNetQ.Tests
 
         private DefaultMessageSerializationStrategy CreateSerializationStrategy(IMessage<MyMessage> message, string messageType, byte[] messageBody, string correlationId)
         {
-            var typeNameSerializer = MockRepository.GenerateStub<ITypeNameSerializer>();
-            typeNameSerializer.Stub(s => s.Serialize(message.MessageType)).Return(messageType);
+            var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
+            typeNameSerializer.Serialize(message.MessageType).Returns(messageType);
 
-            var serializer = MockRepository.GenerateStub<ISerializer>();
-            serializer.Stub(s => s.MessageToBytes(message.GetBody())).Return(messageBody);
+            var serializer = Substitute.For<ISerializer>();
+            serializer.MessageToBytes(message.GetBody()).Returns(messageBody);
 
             return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
         private DefaultMessageSerializationStrategy CreateDeserializationStrategy(IMessage<MyMessage> message, byte[] messageBody, string correlationId)
         {
-            var typeNameSerializer = MockRepository.GenerateStub<ITypeNameSerializer>();
-            typeNameSerializer.Stub(s => s.DeSerialize(message.Properties.Type)).Return(message.Body.GetType());
+            var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
+            typeNameSerializer.DeSerialize(message.Properties.Type).Returns(message.Body.GetType());
 
-            var serializer = MockRepository.GenerateStub<ISerializer>();
-            serializer.Stub(s => s.BytesToMessage(message.Properties.Type, messageBody)).Return(message.Body);
+            var serializer = Substitute.For<ISerializer>();
+            serializer.BytesToMessage(message.Properties.Type, messageBody).Returns(message.Body);
 
             return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }

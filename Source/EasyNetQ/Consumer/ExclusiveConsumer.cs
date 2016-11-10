@@ -51,7 +51,7 @@ namespace EasyNetQ.Consumer
             timer = new Timer(s =>
                 {
                     StartConsumer();
-                    ((Timer)s).Change(10000, -1);
+                    timer.Change(10000, -1);
                 }, null, 10000, Timeout.Infinite);
 #else
             timer = new Timer(s =>
@@ -59,8 +59,9 @@ namespace EasyNetQ.Consumer
                     StartConsumer();
                     ((Timer)s).Change(10000, -1);
                 });
+
+             timer.Change(10000, -1);
 #endif
-            timer.Change(10000, -1);
         }
 
         public IDisposable StartConsuming()

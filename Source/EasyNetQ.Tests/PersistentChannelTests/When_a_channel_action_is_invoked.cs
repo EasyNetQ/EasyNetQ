@@ -4,7 +4,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
@@ -19,13 +19,13 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [SetUp]
         public void SetUp()
         {
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-            channel = MockRepository.GenerateStub<IModel>();
+            persistentConnection = Substitute.For<IPersistentConnection>();
+            channel = Substitute.For<IModel>();
             var configuration = new ConnectionConfiguration();
-            eventBus = MockRepository.GenerateStub<IEventBus>();
+            eventBus = Substitute.For<IEventBus>();
 
-            persistentConnection.Stub(x => x.CreateModel()).Return(channel);
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            persistentConnection.CreateModel().Returns(channel);
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 
@@ -35,19 +35,19 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [Test]
         public void Should_open_a_channel()
         {
-            persistentConnection.AssertWasCalled(x => x.CreateModel());
+            persistentConnection.Received().CreateModel();
         }
 
         [Test]
         public void Should_run_action_on_channel()
         {
-            channel.AssertWasCalled(x => x.ExchangeDeclare("MyExchange", "direct"));
+            channel.Received().ExchangeDeclare("MyExchange", "direct");
         }
 
         [Test]
         public void Should_raise_a_PublishChannelCreatedEvent()
         {
-            eventBus.AssertWasCalled(x => x.Publish(Arg<PublishChannelCreatedEvent>.Is.Anything));
+            eventBus.Received().Publish(Arg.Any<PublishChannelCreatedEvent>());
         }
     }
 }

@@ -4,10 +4,11 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace EasyNetQ.Tests
 {
@@ -168,35 +169,43 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Publish(new TestMessage());
 		}
 
-		[Test]
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Test]
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.ExchangeDeclare("CustomExchangeNamingConvention", "topic", true, false, new Dictionary<string, object>()));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is("CustomExchangeNamingConvention"), 
+                Arg.Is("topic"),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
 		}
 
 		[Test]
 		public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
 		{
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.BasicPublish(
-                    Arg<string>.Is.Equal("CustomExchangeNamingConvention"), 
-                    Arg<string>.Is.Anything, 
-                    Arg<bool>.Is.Equal(false),
-                    Arg<IBasicProperties>.Is.Anything,
-                    Arg<byte[]>.Is.Anything));
+            mockBuilder.Channels[0].Received().BasicPublish(
+                    Arg.Is("CustomExchangeNamingConvention"), 
+                    Arg.Any<string>(), 
+                    Arg.Is(false),
+                    Arg.Any<IBasicProperties>(),
+                    Arg.Any<byte[]>());
 		}
 
 		[Test]
 		public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
 		{
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.BasicPublish(
-                    Arg<string>.Is.Anything,
-                    Arg<string>.Is.Equal("CustomTopicNamingConvention"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<IBasicProperties>.Is.Anything,
-                    Arg<byte[]>.Is.Anything));
+            mockBuilder.Channels[0].Received().BasicPublish(
+                    Arg.Any<string>(),
+                    Arg.Is("CustomTopicNamingConvention"),
+                    Arg.Is(false),
+                    Arg.Any<IBasicProperties>(),
+                    Arg.Any<byte[]>());
         }
 	}
 
@@ -219,21 +228,31 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
         [Test]
         public void Should_correctly_bind_using_new_conventions()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueBind(
-                    "CustomRpcRoutingKeyName",
-                    "CustomRpcExchangeName",
-                    "CustomRpcRoutingKeyName"));
+            mockBuilder.Channels[0].Received().QueueBind(
+                    Arg.Is("CustomRpcRoutingKeyName"),
+                    Arg.Is("CustomRpcExchangeName"),
+                    Arg.Is("CustomRpcRoutingKeyName"),
+                    Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
         [Test]
         public void Should_declare_correct_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.ExchangeDeclare("CustomRpcExchangeName", "direct", true, false, new Dictionary<string, object>()));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is("CustomRpcExchangeName"),
+                Arg.Is("direct"),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
     }
@@ -261,7 +280,7 @@ namespace EasyNetQ.Tests
             errorStrategy = new DefaultConsumerErrorStrategy(
                 mockBuilder.ConnectionFactory, 
                 new JsonSerializer(new TypeNameSerializer()), 
-                MockRepository.GenerateStub<IEasyNetQLogger>(), 
+                Substitute.For<IEasyNetQLogger>(), 
                 customConventions,
                 new TypeNameSerializer(),
                 new DefaultErrorMessageSerializer());
@@ -278,7 +297,7 @@ namespace EasyNetQ.Tests
                         AppId = string.Empty
                     },
                 originalMessageBody,
-                MockRepository.GenerateStub<IBasicConsumer>()
+                Substitute.For<IBasicConsumer>()
                 );
 
             try
@@ -295,15 +314,13 @@ namespace EasyNetQ.Tests
         [Test]
         public void Should_use_exchange_name_from_custom_names_provider()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true));
+            mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true);
         }
 
         [Test]
         public void Should_use_queue_name_from_custom_names_provider()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null));
+            mockBuilder.Channels[0].Received().QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null);
         }
 
         [Test]

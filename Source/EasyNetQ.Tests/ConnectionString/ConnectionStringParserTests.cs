@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests.ConnectionString
         }
 
 // ReSharper disable UnusedMethodReturnValue.Local
-        private IEnumerable<AmqpSpecification> AppendixAExamples()
+        private static IEnumerable<AmqpSpecification> AppendixAExamples()
 // ReSharper restore UnusedMethodReturnValue.Local
         {
             yield return new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000);

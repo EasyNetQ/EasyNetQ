@@ -37,25 +37,33 @@ namespace EasyNetQ.Tests
         public string Text { get; set; }
     }
 
+#if NETFX
     [Serializable]
+#endif
     public class TestModifiedRequestExhangeResponseMessage
     {
         public string Text { get; set; }
     }
 
+#if NETFX
     [Serializable]
+#endif
     public class TestModifiedResponseExhangeRequestMessage
     {
         public string Text { get; set; }
     }
 
+#if NETFX
     [Serializable]
+#endif
     public class TestModifiedResponseExhangeResponseMessage
     {
         public string Text { get; set; }
     }
 
+#if NETFX
     [Serializable]
+#endif
     public class StartMessage
     {
         public string Text { get; set; }

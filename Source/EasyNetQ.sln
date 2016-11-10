@@ -3,11 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.csproj", "{640DEC15-3A17-4E85-B38A-CFB379426DC2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{ED270A39-D32C-438A-BF4F-AA0E66C7879C} = {ED270A39-D32C-438A-BF4F-AA0E66C7879C}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6301F5B7-5B36-4EDA-8E37-6C970155F8B4}"
 	ProjectSection(SolutionItems) = preProject
 		..\Package\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec = ..\Package\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec
@@ -23,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet.Config = NuGet.Config
 		Version.cs = Version.cs
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Messages", "EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.csproj", "{E7AF3836-8354-4CDE-A9E7-352569B65B1E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj", "{03B93AAD-6CAB-4726-826E-B05684AEC1B9}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -123,20 +116,16 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.DI.Windsor", "Easy
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.Serilog", "EasyNetQ.Serilog\EasyNetQ.Serilog.xproj", "{23A533BE-64FB-47B2-B9D6-AF48644162DD}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.xproj", "{62BBFFCE-4E84-42C8-86F5-0164ACD12031}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EasyNetQ.Tests.Messages", "EasyNetQ.Tests.Messages\EasyNetQ.Tests.Messages.xproj", "{6B86E7DF-72B7-474B-9409-3C0A787BFB09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{640DEC15-3A17-4E85-B38A-CFB379426DC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{640DEC15-3A17-4E85-B38A-CFB379426DC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{640DEC15-3A17-4E85-B38A-CFB379426DC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{640DEC15-3A17-4E85-B38A-CFB379426DC2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7AF3836-8354-4CDE-A9E7-352569B65B1E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -217,6 +206,14 @@ Global
 		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B86E7DF-72B7-474B-9409-3C0A787BFB09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B86E7DF-72B7-474B-9409-3C0A787BFB09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B86E7DF-72B7-474B-9409-3C0A787BFB09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B86E7DF-72B7-474B-9409-3C0A787BFB09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

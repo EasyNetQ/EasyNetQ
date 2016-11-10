@@ -9,7 +9,7 @@ using EasyNetQ.Topology;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -30,11 +30,11 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected const ulong DeliverTag = 10101;
 
         [SetUp]
-        protected void SetUp()
+        public void SetUp()
         {
             Cancellation = new CancellationTokenSource();
 
-            ConsumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             
             IConventions conventions = new Conventions(new TypeNameSerializer())
                 {
@@ -49,6 +49,11 @@ namespace EasyNetQ.Tests.ConsumeTests
             AdditionalSetUp();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            MockBuilder.Bus.Dispose();
+        }
         protected abstract void AdditionalSetUp();
 
         protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler)

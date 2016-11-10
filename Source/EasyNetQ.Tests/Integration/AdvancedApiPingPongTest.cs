@@ -9,7 +9,7 @@ using EasyNetQ.Loggers;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Topology;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.Integration
             var loggers = new[]
                 {
                     new ConsoleLogger(), 
-                    MockRepository.GenerateStub<IEasyNetQLogger>()
+                    Substitute.For<IEasyNetQLogger>()
                 };
 
             rallyCount = 0;

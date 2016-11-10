@@ -2,12 +2,12 @@
 using System.Text;
 using EasyNetQ.Interception;
 using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.Interception
 {
     [TestFixture]
-    public class BuildInInterceptorsTests : UnitTestBase
+    public class BuildInInterceptorsTests
     {
         [Test]
         public void ShouldCompressAndDecompress()
@@ -35,10 +35,10 @@ namespace EasyNetQ.Tests.Interception
             var firstMessage = new RawMessage(new MessageProperties(), new byte[0]);
             var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
             
-            var first = NewMock<IProduceConsumeInterceptor>();
-            var second = NewMock<IProduceConsumeInterceptor>();
-            first.Expect(x => x.OnProduce(sourceMessage)).Return(firstMessage);
-            second.Expect(x => x.OnProduce(firstMessage)).Return(secondMessage);
+            var first = Substitute.For<IProduceConsumeInterceptor>();
+            var second = Substitute.For<IProduceConsumeInterceptor>();
+            first.OnProduce(sourceMessage).Returns(firstMessage);
+            second.OnProduce(firstMessage).Returns(secondMessage);
 
             var compositeInterceptor = new CompositeInterceptor();
             compositeInterceptor.Add(first);
@@ -54,11 +54,10 @@ namespace EasyNetQ.Tests.Interception
             var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
             
             
-            var first = NewMock<IProduceConsumeInterceptor>();
-            
-            var second = NewMock<IProduceConsumeInterceptor>();
-            first.Expect(x => x.OnConsume(secondMessage)).Return(firstMessage);
-            second.Expect(x => x.OnConsume(sourceMessage)).Return(secondMessage);
+            var first = Substitute.For<IProduceConsumeInterceptor>();      
+            var second = Substitute.For<IProduceConsumeInterceptor>();
+            first.OnConsume(secondMessage).Returns(firstMessage);
+            second.OnConsume(sourceMessage).Returns(secondMessage);
 
             var compositeInterceptor = new CompositeInterceptor();
             compositeInterceptor.Add(first);

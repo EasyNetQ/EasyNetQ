@@ -93,8 +93,8 @@
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleInjector, Version=3.1.5.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.1.5\lib\net45\SimpleInjector.dll</HintPath>
+    <Reference Include="SimpleInjector, Version=3.2.7.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.2.7\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="StructureMap, Version=4.3.0.449, Culture=neutral, processorArchitecture=MSIL">
@@ -111,6 +111,7 @@
     </Compile>
     <Compile Include="AutofacAdapterTests.cs" />
     <Compile Include="LightInjectAdapterTests.cs" />
+    <Compile Include="MockBuilder.cs" />
     <Compile Include="NinjectAdapterTests.cs" />
     <Compile Include="SimpleInjectorAdapterTests.cs" />
     <Compile Include="StructureMapAdapterTests.cs" />
@@ -119,13 +120,9 @@
     <Compile Include="WindsorAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.Tests\EasyNetQ.Tests.csproj">
-      <Project>{640dec15-3a17-4e85-b38a-cfb379426dc2}</Project>
-      <Name>EasyNetQ.Tests</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

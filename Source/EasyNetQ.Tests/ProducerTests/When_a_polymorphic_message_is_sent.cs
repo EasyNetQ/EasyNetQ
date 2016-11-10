@@ -4,7 +4,7 @@ using System.Text;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
@@ -28,26 +28,31 @@ namespace EasyNetQ.Tests.ProducerTests
                     NotInInterface = "Hi"
                 };
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
-                .IgnoreArguments()
-                .WhenCalled(x =>
-                    {
-                        properties = (IBasicProperties) x.Arguments[3];
-                        publishedMessage = (byte[]) x.Arguments[4];
-                    });
+            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
+               .Do(x =>
+               {
+                   properties = (IBasicProperties)x[3];
+                   publishedMessage = (byte[])x[4];
+               });
 
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mockBuilder.Bus.Dispose();
         }
 
         [Test]
         public void Should_name_exchange_after_interface()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                Arg<string>.Is.Equal(interfaceTypeName), 
-                Arg<string>.Is.Equal("topic"), 
-                Arg<bool>.Is.Equal(true), 
-                Arg<bool>.Is.Equal(false), 
-                Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is(interfaceTypeName),
+                Arg.Is("topic"),
+                Arg.Is(true),
+                Arg.Is(false), 
+                Arg.Any<IDictionary<string, object>>());
         }
 
         [Test]
@@ -66,13 +71,13 @@ namespace EasyNetQ.Tests.ProducerTests
         [Test]
         public void Should_publish_to_correct_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicPublish(
-                    Arg<string>.Is.Equal(interfaceTypeName), 
-                    Arg<string>.Is.Equal(""), 
-                    Arg<bool>.Is.Equal(false), 
-                    Arg<IBasicProperties>.Is.Anything, 
-                    Arg<byte[]>.Is.Anything 
-                ));
+            mockBuilder.Channels[0].Received().BasicPublish(
+                    Arg.Is(interfaceTypeName),
+                    Arg.Is(""),
+                    Arg.Is(false), 
+                    Arg.Any<IBasicProperties>(), 
+                    Arg.Any<byte[]>() 
+                );
         }
     }
 

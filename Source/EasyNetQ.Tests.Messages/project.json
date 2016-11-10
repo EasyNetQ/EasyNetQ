@@ -1,0 +1,28 @@
+{
+  "version": "2.0.2-netcore0001",
+  "description": "EasyNetQ.Tests.Messages",
+  "title": "EasyNetQ.Tests.Messages",
+  "name": "EasyNetQ.Tests.Messages",
+  "frameworks": {
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [
+          "NET_STANDARD"
+        ]
+      },
+      "dependencies": {
+        "System.Reflection.TypeExtensions": "4.1.0"
+      }
+    },
+    "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      },
+      "frameworkAssemblies": {
+        "System": "4.0.0.0"
+      }
+    }
+  }
+}
