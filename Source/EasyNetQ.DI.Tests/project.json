@@ -3,52 +3,53 @@
   "description": "EasyNetQ.DI.Tests",
   "title": "EasyNetQ.DI.Tests",
   "name": "EasyNetQ.DI.Tests",
-
-  "dependencies": {
-    "NUnit": "3.5.0",
-    "NSubstitute": "2.0.0-rc",
-    "Newtonsoft.Json": "9.0.1",
-    "dotnet-test-nunit": "3.4.0-beta-3",
-    "RabbitMQ.Client": "4.1.1",
-    "EasyNetQ": "2.0.2-netcore0001",
-    "Autofac": "4.0.0",
-    "LightInject": "4.0.11",
-    "Ninject": "4.0.0-beta-0134",
-    "SimpleInjector": "3.2.7",
-    "EasyNetQ.DI.Autofac": "2.0.2-netcore0001",
-    "EasyNetQ.DI.LightInject": "2.0.2-netcore0001",
-    "EasyNetQ.DI.Ninject": "2.0.2-netcore0001",
-    "EasyNetQ.DI.SimpleInjector": "2.0.2-netcore0001",
-    "EasyNetQ.DI.StructureMap": "2.0.2-netcore0001"
-  },
-
-  "testRunner": "nunit",
-
-  "frameworks": {
-    "netcoreapp1.0": {
-      "imports": "portable-net45+win8",
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
-          "type": "platform"
-        }
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
       }
     },
-    "net451": {
-      "compile": {
-        "includeFiles": "..\\Version.cs"
+   "dependencies": {
+      "NUnit": "3.5.0",
+      "NSubstitute": "2.0.0-rc",
+      "Newtonsoft.Json": "9.0.1",
+      "dotnet-test-nunit": "3.4.0-beta-3",
+      "RabbitMQ.Client": "4.1.1",
+      "EasyNetQ": "2.0.2-netcore0001",
+      "Autofac": "4.0.0",
+      "LightInject": "4.0.11",
+      "Ninject": "4.0.0-beta-0134",
+      "SimpleInjector": "3.2.7",
+      "EasyNetQ.DI.Autofac": "2.0.2-netcore0001",
+      "EasyNetQ.DI.LightInject": "2.0.2-netcore0001",
+      "EasyNetQ.DI.Ninject": "2.0.2-netcore0001",
+      "EasyNetQ.DI.SimpleInjector": "2.0.2-netcore0001",
+      "EasyNetQ.DI.StructureMap": "2.0.2-netcore0001"
+    },
+
+    "testRunner": "nunit",
+
+    "frameworks": {
+      "netcoreapp1.0": {
+        "imports": "portable-net45+win8",
+        "dependencies": {
+          "Microsoft.NETCore.App": {
+            "version": "1.0.0-*",
+            "type": "platform"
+          }
+        }
       },
-      "buildOptions": {
-        "define": [
-          "NETFX"
-        ]
-      },
-      "dependencies": {
-        "Castle.Core": "3.3.3",
-        "Castle.Windsor": "3.3.0",
-        "EasyNetQ.DI.Windsor": "2.0.2-netcore0001"
+      "net451": {
+        "buildOptions": {
+          "define": [
+            "NETFX"
+          ]
+        },
+        "dependencies": {
+          "Castle.Core": "3.3.3",
+          "Castle.Windsor": "3.3.0",
+          "EasyNetQ.DI.Windsor": "2.0.2-netcore0001"
+        }
       }
-    }
 
     }
-}
+  }
