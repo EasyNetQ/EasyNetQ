@@ -1,129 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NSubstitute;
+using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using Rhino.Mocks;
-using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
-        readonly IConnectionFactory connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
-        readonly IConnection connection = MockRepository.GenerateStub<IConnection>();
-        readonly List<IModel> channels = new List<IModel>();
         readonly Stack<IModel> channelPool = new Stack<IModel>();
-        readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>(); 
-        readonly IBasicProperties basicProperties = new BasicProperties();
-        readonly List<string> consumerQueueNames = new List<string>();
-        private readonly IEasyNetQLogger logger = MockRepository.GenerateStub<IEasyNetQLogger>();
-        private readonly IBus bus;
 
         public const string Host = "my_host";
         public const string VirtualHost = "my_virtual_host";
         public const int PortNumber = 1234;
 
-        public MockBuilder() : this(register => {}){}
-
-        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices){}
-
-        public MockBuilder(string connectionString) : this(connectionString, register => {}){}
-
-        public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                channelPool.Push(MockRepository.GenerateStub<IModel>());
-            }
-
-            connectionFactory.Stub(x => x.CreateConnection()).Return(connection);
-            connectionFactory.Stub(x => x.Next()).Return(false);
-            connectionFactory.Stub(x => x.Succeeded).Return(true);
-            connectionFactory.Stub(x => x.CurrentHost).Return(new HostConfiguration
-            {
-                Host = Host,
-                Port = PortNumber
-            });
-            connectionFactory.Stub(x => x.Configuration).Return(new ConnectionConfiguration
-            {
-                VirtualHost = VirtualHost,
-            });
-
-            connection.Stub(x => x.IsOpen).Return(true);
-            
-            connection.Stub(x => x.CreateModel()).WhenCalled(i =>
-                {
-                    // Console.Out.WriteLine("\n\nMockBuilder - creating model\n{0}\n\n\n", new System.Diagnostics.StackTrace().ToString());
-
-                    var channel = channelPool.Pop();
-                    i.ReturnValue = channel;
-                    channels.Add(channel);
-                    channel.Stub(x => x.CreateBasicProperties()).Return(basicProperties);
-                    channel.Stub(x => x.IsOpen).Return(true);
-                    channel.Stub(x => x.BasicConsume(null, false, null, true, false, null, null))
-                        .IgnoreArguments()
-                        .WhenCalled(consumeInvokation =>
-                        {
-                            var queueName = (string)consumeInvokation.Arguments[0];
-                            var consumerTag = (string)consumeInvokation.Arguments[2];
-                            var consumer = (IBasicConsumer)consumeInvokation.Arguments[6];
-
-                            ConsumerQueueNames.Add(queueName);
-                            consumer.HandleBasicConsumeOk(consumerTag);
-                            consumers.Add(consumer);
-                        }).Return("");
-                });
-
-            bus = RabbitHutch.CreateBus(connectionString, x =>
-                {
-                    registerServices(x);
-                    x.Register(_ => connectionFactory);
-                    x.Register(_ => logger);
-                });
-
-            Assert.IsNotNull(bus);
-            Assert.IsNotNull(bus.Advanced);
-            Assert.IsNotNull(bus.Advanced.Container);
-        }
-
-        public IConnectionFactory ConnectionFactory
-        {
-            get { return connectionFactory; }
-        }
-
-        public IConnection Connection
-        {
-            get { return connection; }
-        }
-
-        public List<IModel> Channels
-        {
-            get { return channels; }
-        }
-
-        public List<IBasicConsumer> Consumers
-        {
-            get { return consumers; }
-        }
-
-        public IBasicProperties BasicProperties
-        {
-            get { return basicProperties; }
-        }
-
-        public IEasyNetQLogger Logger
-        {
-            get { return logger; }
-        }
-
-        public IBus Bus
-        {
-            get { return bus; }
-        }
-
+        public IConnectionFactory ConnectionFactory { get; } = Substitute.For<IConnectionFactory>();
+        public IConnection Connection { get; } = Substitute.For<IConnection>();
+        public List<IModel> Channels { get; } = new List<IModel>();
+        public List<IBasicConsumer> Consumers { get; } = new List<IBasicConsumer>();
+        public IBasicProperties BasicProperties { get; } = new BasicProperties();
+        public List<string> ConsumerQueueNames { get; } = new List<string>();
+        public IEasyNetQLogger Logger { get; } = Substitute.For<IEasyNetQLogger>();    
+        public IBus Bus { get; private set; }
         public IServiceProvider ServiceProvider
         {
-            get { return bus.Advanced.Container; }
+            get { return Bus.Advanced.Container; }
         }
 
         public IModel NextModel
@@ -136,9 +38,67 @@ namespace EasyNetQ.Tests.Mocking
             get { return ServiceProvider.Resolve<IEventBus>(); }
         }
 
-        public List<string> ConsumerQueueNames
+        public MockBuilder() : this(register => { }) { }
+
+        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices) { }
+
+        public MockBuilder(string connectionString) : this(connectionString, register => { }) { }
+
+        public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
-            get { return consumerQueueNames; }
+            for (int i = 0; i < 10; i++)
+            {
+                channelPool.Push(Substitute.For<IModel>());
+            }
+
+            ConnectionFactory.CreateConnection().Returns(Connection);
+            ConnectionFactory.Next().Returns(false);
+            ConnectionFactory.Succeeded.Returns(true);
+            ConnectionFactory.CurrentHost.Returns(new HostConfiguration
+            {
+                Host = Host,
+                Port = PortNumber
+            });
+            ConnectionFactory.Configuration.Returns(new ConnectionConfiguration
+            {
+                VirtualHost = VirtualHost,
+            });
+
+            Connection.IsOpen.Returns(true);
+
+            Connection.CreateModel().Returns(i =>
+            {
+                var channel = channelPool.Pop();
+                Channels.Add(channel);
+                channel.CreateBasicProperties().Returns(BasicProperties);
+                channel.IsOpen.Returns(true);
+                channel.BasicConsume(null, false, null, true, false, null, null)
+                    .ReturnsForAnyArgs(consumeInvokation =>
+                    {
+                        var queueName = (string)consumeInvokation[0];
+                        var consumerTag = (string)consumeInvokation[2];
+                        var consumer = (IBasicConsumer)consumeInvokation[6];
+
+                        ConsumerQueueNames.Add(queueName);
+                        consumer.HandleBasicConsumeOk(consumerTag);
+                        Consumers.Add(consumer);
+                        return string.Empty;
+                    });
+
+                return channel;
+            });
+
+            Bus = RabbitHutch.CreateBus(connectionString, x =>
+            {
+                registerServices(x);
+                x.Register(_ => ConnectionFactory);
+                x.Register(_ => Logger);
+            });
+
+            Assert.IsNotNull(Bus);
+            Assert.IsNotNull(Bus.Advanced);
+            Assert.IsNotNull(Bus.Advanced.Container);
         }
+
     }
 }
