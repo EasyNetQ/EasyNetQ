@@ -71,10 +71,8 @@ namespace EasyNetQ
             var version = this.GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 #endif
-
-
+            applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
             var applicationName = "unknown";
             var applicationPath = "unknown";
