@@ -48,10 +48,13 @@ namespace EasyNetQ.Tests
 
             eventBus = new EventBus();
 
+            var logger = Substitute.For<IEasyNetQLogger>();
+            var persistentConnectionFactory = new PersistentConnectionFactory(logger, connectionFactory, eventBus);            
+
             var advancedBus = new RabbitAdvancedBus(
                 connectionFactory,
                 Substitute.For<IConsumerFactory>(),
-                Substitute.For<IEasyNetQLogger>(),
+                logger,
                 Substitute.For<IClientCommandDispatcherFactory>(),
                 Substitute.For<IPublishConfirmationListener>(),
                 eventBus,
@@ -61,7 +64,8 @@ namespace EasyNetQ.Tests
                 Substitute.For<IProduceConsumeInterceptor>(),
                 Substitute.For<IMessageSerializationStrategy>(),
                 Substitute.For<IConventions>(),
-                advancedBusEventHandlers);
+                advancedBusEventHandlers,
+                persistentConnectionFactory);
         }
 
         [Test]
