@@ -34,6 +34,12 @@ namespace EasyNetQ.DI.Tests
             easynetQContainer = bus.Advanced.Container;
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            bus.Dispose();
+        }
+
         [Test]
         public void Should_create_bus_with_structure_map_adapter()
         {

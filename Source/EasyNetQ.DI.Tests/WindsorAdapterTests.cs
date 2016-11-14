@@ -1,4 +1,5 @@
-﻿using Castle.Windsor;
+﻿#if NETFX
+using Castle.Windsor;
 using EasyNetQ.Tests.Mocking;
 using NUnit.Framework;
 
@@ -56,3 +57,4 @@ namespace EasyNetQ.DI.Tests
         }
     }
 }
+#endif
