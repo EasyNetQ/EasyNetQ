@@ -26,6 +26,7 @@ namespace EasyNetQ
             createContainerInternal = createContainer;
         }
 
+#if NETFX
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
@@ -74,7 +75,6 @@ namespace EasyNetQ
         public static IBus CreateBus(AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
             string rabbitConnectionString;
-#if NETFX
             var rabbitConnection = ConfigurationManager.ConnectionStrings["rabbit"];
             if (rabbitConnection == null)
             {
@@ -85,9 +85,6 @@ namespace EasyNetQ
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
             rabbitConnectionString = rabbitConnection.ConnectionString;
-#else
-            rabbitConnectionString = "host=localhost"; // TODO: get from configuration in net core 
-#endif
 
             return CreateBus(rabbitConnectionString, advancedBusEventHandlers, registerServices);
         }
@@ -109,6 +106,7 @@ namespace EasyNetQ
         {
             return CreateBus(advancedBusEventHandlers, c => {});
         }
+#endif
 
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
