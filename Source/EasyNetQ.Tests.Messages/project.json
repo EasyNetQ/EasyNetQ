@@ -3,6 +3,11 @@
   "description": "EasyNetQ.Tests.Messages",
   "title": "EasyNetQ.Tests.Messages",
   "name": "EasyNetQ.Tests.Messages",
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
   "frameworks": {
     "netstandard1.5": {
       "buildOptions": {
