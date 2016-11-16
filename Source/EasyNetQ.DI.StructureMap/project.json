@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "2.0.3-netcore0001",
   "description": "An adaptor to allow EasyNetQ to use StructureMap as its internal IoC container",
   "title": "EasyNetQ.DI.StructureMap",
   "name": "EasyNetQ.DI.StructureMap",

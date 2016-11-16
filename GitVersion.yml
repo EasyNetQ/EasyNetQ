@@ -1,6 +1,6 @@
 assembly-versioning-scheme: MajorMinorPatch
 mode: ContinuousDelivery
-next-version: 2.0.1
+next-version: 2.0.2
 branches: {}
 ignore:
   sha: []

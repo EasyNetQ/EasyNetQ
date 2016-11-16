@@ -22,6 +22,6 @@ using System.Runtime.InteropServices;
 [assembly: Guid("959b928e-e0eb-4df6-b830-4dc1b0fe71f7")]
 
 
-[assembly: AssemblyVersion("2.0.2.0")]
-[assembly: AssemblyInformationalVersion("2.0.2-radicalgeek-netcore.1+1396.Branch.radicalgeek-netcore.Sha.e65133898ce725596ee8c983c941aeac1bb07e8c")]
-[assembly: AssemblyFileVersion("2.0.2.0")]
+[assembly: AssemblyVersion("2.0.3.0")]
+[assembly: AssemblyInformationalVersion("2.0.3-netcore.1+1428.Branch.feature/netcore.Sha.cde287238775f88c777ecc1764f659e52832f164")]
+[assembly: AssemblyFileVersion("2.0.3.0")]
