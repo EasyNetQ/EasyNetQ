@@ -43,7 +43,7 @@ namespace EasyNetQ.Tests
 
         public static void ShouldBeNull(this object actual)
         {
-            Assert.IsNull(actual);
+            Assert.Null(actual);
         }
 
         public static void ShouldBeTheSameAs(this object actual, object expected)
