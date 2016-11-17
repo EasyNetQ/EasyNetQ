@@ -2,7 +2,7 @@
 
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
@@ -11,8 +11,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private ErrorRetry errorRetry;
         private IConventions conventions;
 
-        [SetUp]
-        public void SetUp()
+        public ErrorRetryTests()
         {
             var typeNameSerializer = new TypeNameSerializer();
             conventions = new Conventions(typeNameSerializer);

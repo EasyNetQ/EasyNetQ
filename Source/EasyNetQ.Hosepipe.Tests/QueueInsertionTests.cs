@@ -2,7 +2,7 @@
 
 using EasyNetQ.Consumer;
 
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
@@ -10,8 +10,7 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         private IQueueInsertion queueInsertion;
 
-        [SetUp]
-        public void SetUp()
+        public QueueInsertionTests()
         {
             queueInsertion = new QueueInsertion(new DefaultErrorMessageSerializer());
         }

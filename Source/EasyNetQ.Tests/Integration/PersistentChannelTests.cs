@@ -6,18 +6,17 @@ using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture, Explicit("Requires a broker on localhost.")]
+    [Explicit("Requires a broker on localhost.")]
     public class PersistentChannelTests
     {
         private IPersistentConnection connection;
         private IPersistentChannel persistentChannel;
 
-        [SetUp]
-        public void SetUp()
+        public PersistentChannelTests()
         {
             var logger = new ConsoleLogger();
             var eventBus = new EventBus();

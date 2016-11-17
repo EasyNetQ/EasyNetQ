@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using EasyNetQ.Interception;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.Interception

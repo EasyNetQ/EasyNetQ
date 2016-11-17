@@ -4,7 +4,7 @@ using System.Threading;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using NSubstitute;
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private IPersistentConnection persistentConnection;
         private IModel channel;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_performed_on_a_closed_channel_that_then_opens()
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel>();

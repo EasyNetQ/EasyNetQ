@@ -1,15 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
     public class ConnectionErrorConditionsTests
     {
-        [SetUp]
-        public void SetUp() {}
-
         [Test, Explicit("Tries to make a connection to a RabbitMQ Broker")]
         public void Should_write_a_useful_error_message_when_connetion_fails()
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using StructureMap;
 
 namespace EasyNetQ.DI.Tests
@@ -19,8 +19,7 @@ namespace EasyNetQ.DI.Tests
         private IContainer easynetQContainer;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public StructureMapAdapterTests()
         {
             container = new Container();
 

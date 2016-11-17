@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 using System.Linq;
 
@@ -25,8 +25,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private const string expectedQueueName3 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC:EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
 
-        [SetUp]
-        public void SetUp()
+        public When_autosubscribing()
         {
             mockBuilder = new MockBuilder();
 //            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());

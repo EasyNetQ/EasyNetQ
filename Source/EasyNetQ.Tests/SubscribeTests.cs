@@ -5,7 +5,7 @@ using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using NSubstitute;
@@ -24,8 +24,7 @@ namespace EasyNetQ.Tests
 
         private ISubscriptionResult subscriptionResult; 
 
-        [SetUp]
-        public void SetUp()
+        public When_subscribe_is_called()
         {
             var conventions = new Conventions(new TypeNameSerializer())
                 {
@@ -137,8 +136,7 @@ namespace EasyNetQ.Tests
         private MyMessage originalMessage;
         private MyMessage deliveredMessage;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_message_is_delivered()
         {
             var conventions = new Conventions(new TypeNameSerializer())
             {
@@ -233,8 +231,7 @@ namespace EasyNetQ.Tests
         private ConsumerExecutionContext basicDeliverEventArgs;
         private Exception raisedException;
 
-        [SetUp]
-        public void SetUp()
+        public When_the_handler_throws_an_exception()
         {
             var conventions = new Conventions(new TypeNameSerializer())
             {
@@ -336,8 +333,7 @@ namespace EasyNetQ.Tests
         private const string subscriptionId = "the_subscription_id";
         private const string consumerTag = "the_consumer_tag";
 
-        [SetUp]
-        public void SetUp()
+        public When_a_subscription_is_cancelled_by_the_user()
         {
             var conventions = new Conventions(new TypeNameSerializer())
             {

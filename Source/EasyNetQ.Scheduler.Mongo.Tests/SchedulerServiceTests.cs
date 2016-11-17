@@ -1,15 +1,14 @@
 ﻿using EasyNetQ.Scheduler.Mongo.Core;
 using EasyNetQ.Topology;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 using System;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
     public class SchedulerServiceTests
     {
-        [SetUp]
-        public void SetUp()
+        public SchedulerServiceTests()
         {
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();

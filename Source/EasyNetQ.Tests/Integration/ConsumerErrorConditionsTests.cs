@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
@@ -16,8 +16,7 @@ namespace EasyNetQ.Tests
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public ConsumerErrorConditionsTests()
         {
             bus = RabbitHutch.CreateBus(new ConnectionConfiguration() {Hosts = new HostConfiguration[] {new HostConfiguration() { Host = "localhost"} }},
                 reg => { reg.Register<IEasyNetQLogger>(p => new ConsoleLogger()); });

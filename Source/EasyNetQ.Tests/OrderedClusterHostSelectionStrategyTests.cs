@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.IO;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
@@ -10,8 +10,7 @@ namespace EasyNetQ.Tests
         private IClusterHostSelectionStrategy<string> defaultClusterHostSelectionStrategy;
         private StringWriter writer;    
 
-        [SetUp]
-        public void SetUp()
+        public OrderedClusterHostSelectionStrategyTests()
         {
             defaultClusterHostSelectionStrategy = new OrderedClusterHostSelectionStrategy<string>
             {

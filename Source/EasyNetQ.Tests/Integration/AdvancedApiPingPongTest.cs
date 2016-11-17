@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Loggers;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.Integration
@@ -26,8 +26,7 @@ namespace EasyNetQ.Tests.Integration
         private const long rallyLength = 10000;
         private long rallyCount;
 
-        [SetUp]
-        public void SetUp()
+        public AdvancedApiPingPongTest()
         {
             var loggers = new[]
                 {

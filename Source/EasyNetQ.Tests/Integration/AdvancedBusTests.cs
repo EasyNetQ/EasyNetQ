@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {

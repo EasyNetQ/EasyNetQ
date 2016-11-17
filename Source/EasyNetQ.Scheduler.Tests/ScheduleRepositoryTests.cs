@@ -2,7 +2,7 @@
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Text;
 
@@ -13,8 +13,7 @@ namespace EasyNetQ.Scheduler.Tests
     {
         private ScheduleRepository scheduleRepository;
 
-        [SetUp]
-        public void SetUp()
+        public ScheduleRepositoryTests()
         {
             var log = Substitute.For<IEasyNetQLogger>();
             var configuration = new ScheduleRepositoryConfiguration

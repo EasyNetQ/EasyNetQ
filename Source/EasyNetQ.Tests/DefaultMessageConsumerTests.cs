@@ -2,7 +2,7 @@
 
 using System;
 using EasyNetQ.AutoSubscribe;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {

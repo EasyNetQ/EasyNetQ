@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 using System.Linq;

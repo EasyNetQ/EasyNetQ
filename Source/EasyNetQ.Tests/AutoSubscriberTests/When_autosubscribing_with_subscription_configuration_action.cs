@@ -2,7 +2,7 @@
 using System;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 using System.Reflection;
 
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
        
-        [SetUp]
-        public void SetUp()
+        public When_autosubscribing_with_subscription_configuration_action()
         {
             bus = Substitute.For<IBus>();
            

@@ -1,5 +1,5 @@
 ﻿using EasyNetQ.Internals;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Internals
 {

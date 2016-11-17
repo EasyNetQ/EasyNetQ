@@ -3,7 +3,7 @@
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests
         private IConsumerDispatcherFactory dispatcherFactory;
         private IEasyNetQLogger logger;
 
-        [SetUp]
-        public void SetUp()
+        public ConsumerDispatcherFactoryTests()
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");

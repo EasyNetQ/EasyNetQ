@@ -6,7 +6,7 @@ using NSubstitute;
 using System;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
@@ -16,8 +16,7 @@ namespace EasyNetQ.Tests.ProducerTests
         private TestRequestMessage requestMessage;
         private string _correlationId;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent_but_an_exception_is_thrown_by_responder()
         {
             mockBuilder = new MockBuilder();
 

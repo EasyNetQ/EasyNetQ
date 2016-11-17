@@ -2,7 +2,7 @@
 
 using System.Linq;
 using EasyNetQ.MessageVersioning;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {

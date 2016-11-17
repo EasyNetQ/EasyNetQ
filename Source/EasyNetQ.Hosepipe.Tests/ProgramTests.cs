@@ -6,7 +6,7 @@ using System.IO;
 
 using EasyNetQ.Consumer;
 
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
@@ -21,8 +21,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private Conventions conventions;
         private IErrorMessageSerializer defaultErrorMessageSerializer;
 
-        [SetUp]
-        public void SetUp()
+        public ProgramTests()
         {
             messageWriter = new MockMessageWriter();
             queueRetrieval = new MockQueueRetrieval();

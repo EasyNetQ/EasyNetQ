@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
 using System;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
-using NUnit.Framework;
+using Xunit;
 using System.Reflection;
 
 namespace EasyNetQ.Tests
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests
 
         private ITypeNameSerializer typeNameSerializer;
 
-        [SetUp]
-        public void SetUp()
+        public TypeNameSerializerTests()
         {
             typeNameSerializer = new TypeNameSerializer();
         }

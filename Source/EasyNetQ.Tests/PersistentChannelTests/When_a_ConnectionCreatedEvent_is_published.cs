@@ -1,6 +1,6 @@
 ﻿using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;    
+using Xunit;    
 using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
@@ -10,8 +10,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private IPersistentConnection persistentConnection;
         private IEventBus eventBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_ConnectionCreatedEvent_is_published()
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             var configuration = new ConnectionConfiguration();

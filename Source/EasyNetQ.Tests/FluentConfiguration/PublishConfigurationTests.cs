@@ -1,6 +1,6 @@
 ﻿using System;
 using EasyNetQ.FluentConfiguration;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.FluentConfiguration
 {

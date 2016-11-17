@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
@@ -9,8 +9,7 @@ namespace EasyNetQ.Tests
     {
         private IEventBus eventBus;
 
-        [SetUp]
-        public void SetUp()
+        public EventBusTests()
         {
             eventBus = new EventBus();
         }

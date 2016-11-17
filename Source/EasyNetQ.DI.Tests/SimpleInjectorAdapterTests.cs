@@ -1,5 +1,5 @@
 ﻿using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using SimpleInjector;
 
 namespace EasyNetQ.DI.Tests
@@ -15,8 +15,7 @@ namespace EasyNetQ.DI.Tests
         private Container container;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public SimpleInjectorAdapterTests()
         {
             container = new Container();
 

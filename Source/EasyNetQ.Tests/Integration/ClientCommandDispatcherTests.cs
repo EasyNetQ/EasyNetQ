@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -18,8 +18,7 @@ namespace EasyNetQ.Tests.Integration
         private IClientCommandDispatcher dispatcher;
         private IPersistentConnection connection;
 
-        [SetUp]
-        public void SetUp()
+        public ClientCommandDispatcherTests()
         {
             var eventBus = new EventBus();
             var logger = new ConsoleLogger();

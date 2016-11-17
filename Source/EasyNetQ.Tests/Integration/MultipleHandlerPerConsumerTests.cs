@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -12,8 +12,7 @@ namespace EasyNetQ.Tests.Integration
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public MultipleHandlerPerConsumerTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }

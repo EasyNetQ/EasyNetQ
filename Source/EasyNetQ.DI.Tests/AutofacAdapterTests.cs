@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -13,8 +13,7 @@ namespace EasyNetQ.DI.Tests
     [Explicit("Starts a connection to localhost")]
     public class AutofacAdapterTests
     {
-        [SetUp]
-        public void SetUp()
+        public AutofacAdapterTests()
         {
             builder = new ContainerBuilder();
             builder.RegisterType<TestConventions>().As<IConventions>();

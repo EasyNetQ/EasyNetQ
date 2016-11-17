@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Net.Security;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
@@ -15,8 +15,7 @@ namespace EasyNetQ.Tests
         private readonly Uri amqpSecureConnectionString = new Uri("amqps://localhost:5671");
         private RandomClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterSelectionStrategy;
 
-        [SetUp]
-        public void SetUp()
+        public ConnectionFactoryWrapperTests()
         {
             clusterSelectionStrategy = new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>();
         }

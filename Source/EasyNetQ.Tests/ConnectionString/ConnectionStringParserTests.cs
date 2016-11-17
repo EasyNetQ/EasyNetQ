@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EasyNetQ.ConnectionString;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConnectionString
 {
@@ -16,8 +16,7 @@ namespace EasyNetQ.Tests.ConnectionString
             "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" + 
             "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;cancelOnHaFailover=true";
 
-        [SetUp]
-        public void SetUp()
+        public ConnectionStringParserTests()
         {
             connectionStringParser = new ConnectionStringParser();
         }

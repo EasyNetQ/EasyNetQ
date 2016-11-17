@@ -2,7 +2,7 @@
 
 using System;
 using System.Text;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
@@ -26,8 +26,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected const string queueName = "my_queue";
         protected int createConsumerCalled;
         
-        [SetUp]
-        public void SetUp()
+        public Given_a_PersistentConsumer()
         {
             eventBus = new EventBus();
             internalConsumers = new List<IInternalConsumer>();

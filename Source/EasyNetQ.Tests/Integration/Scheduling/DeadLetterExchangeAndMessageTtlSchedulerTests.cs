@@ -4,18 +4,17 @@ using System;
 using System.Threading;
 using EasyNetQ.Loggers;
 using EasyNetQ.Scheduling;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration.Scheduling
 {
-    [TestFixture, Explicit("Requires RabbitMQ instance to be running on localhost")]
+    [Explicit("Requires RabbitMQ instance to be running on localhost")]
     public class DeadLetterExchangeAndMessageTtlSchedulerTests
     {
         private IBus bus;
         private ConsoleLogger logger;
 
-        [SetUp]
-        public void SetUp()
+        public DeadLetterExchangeAndMessageTtlSchedulerTests()
         {
             logger = new ConsoleLogger();
             bus = RabbitHutch.CreateBus("host=localhost", x =>

@@ -3,7 +3,7 @@
 using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 using System.Linq;
 
@@ -15,8 +15,7 @@ namespace EasyNetQ.Tests
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared()
         {
             mockBuilder = new MockBuilder();
 
@@ -67,8 +66,7 @@ namespace EasyNetQ.Tests
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared_With_NonEmptyDeadLetterExchange()
         {
             mockBuilder = new MockBuilder();
 
@@ -122,8 +120,7 @@ namespace EasyNetQ.Tests
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared_With_EmptyDeadLetterExchange()
         {
             mockBuilder = new MockBuilder();
 
@@ -176,8 +173,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_deleted()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -206,8 +202,7 @@ namespace EasyNetQ.Tests
         private IExchange exchange;
         private IDictionary arguments;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_declared()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -266,8 +261,7 @@ namespace EasyNetQ.Tests
         private IAdvancedBus advancedBus;
         private IExchange exchange;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_declared_passively()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -301,8 +295,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_deleted()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -330,8 +323,7 @@ namespace EasyNetQ.Tests
         private IAdvancedBus advancedBus;
         private IBinding binding;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_bound_to_an_exchange()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -375,8 +367,7 @@ namespace EasyNetQ.Tests
         private IAdvancedBus advancedBus;
         private IBinding binding;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_unbound_from_an_exchange()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;

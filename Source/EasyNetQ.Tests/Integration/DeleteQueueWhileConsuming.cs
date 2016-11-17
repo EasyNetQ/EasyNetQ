@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -14,8 +14,7 @@ namespace EasyNetQ.Tests.Integration
         private IBus bus;
         private const string queueName = "queue_to_delete";
 
-        [SetUp]
-        public void SetUp()
+        public DeleteQueueWhileConsuming()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }

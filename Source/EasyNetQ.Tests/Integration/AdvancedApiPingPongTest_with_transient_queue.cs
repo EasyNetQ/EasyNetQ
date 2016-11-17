@@ -5,7 +5,7 @@ using System.Threading;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -22,8 +22,7 @@ namespace EasyNetQ.Tests.Integration
         private const long rallyLength = 1000;
         private long rallyCount;
 
-        [SetUp]
-        public void SetUp()
+        public AdvancedApiPingPongTest_with_transient_queue()
         {
             rallyCount = 0;
             for (int i = 0; i < 2; i++)

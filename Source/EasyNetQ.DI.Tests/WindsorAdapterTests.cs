@@ -1,7 +1,7 @@
 ﻿#if NETFX
 using Castle.Windsor;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -16,8 +16,7 @@ namespace EasyNetQ.DI.Tests
         private IWindsorContainer container;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public WindsorAdapterTests()
         {
             container = new WindsorContainer();
 

@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests.ProducerTests
         private MockBuilder mockBuilder;
         private const string queueName = "the_queue_name";
 
-        [SetUp]
-        public void SetUp()
+        public When_a_message_is_sent()
         {
             mockBuilder = new MockBuilder();
 

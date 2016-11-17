@@ -3,7 +3,7 @@
 using System;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -14,8 +14,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_invoked_that_throws()
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");

@@ -4,7 +4,7 @@ using RabbitMQ.Client.Framing;
 using System.Threading;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -16,8 +16,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private MyOtherMessage myOtherMessageResult;
         private IAnimal animalResult;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_consumer_has_multiple_handlers()
         {
             mockBuilder = new MockBuilder();
 

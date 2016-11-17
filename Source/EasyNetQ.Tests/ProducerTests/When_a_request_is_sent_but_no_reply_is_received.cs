@@ -2,7 +2,7 @@
 
 using System;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
@@ -10,8 +10,7 @@ namespace EasyNetQ.Tests.ProducerTests
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent_but_no_reply_is_received()
         {
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
         }

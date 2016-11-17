@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using NUnit.Framework;
+using Xunit;
 using System.Collections.Generic;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests

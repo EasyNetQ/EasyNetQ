@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using EasyNetQ.Scheduler.Mongo.Core;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
@@ -10,8 +10,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
     {
         private ScheduleRepository scheduleRepository;
 
-        [SetUp]
-        public void SetUp()
+        public ScheduleRepositoryTests()
         {
             var configuration = new ScheduleRepositoryConfiguration
                 {

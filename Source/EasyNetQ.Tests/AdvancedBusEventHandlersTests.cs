@@ -2,7 +2,7 @@
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using NSubstitute;
@@ -21,8 +21,7 @@ namespace EasyNetQ.Tests
         private bool messageReturnedCalled = false;
         private MessageReturnedEventArgs messageReturnedEventArgs;
 
-        [SetUp]
-        public void SetUp()
+        public AdvancedBusEventHandlersTests()
         {
             advancedBusEventHandlers = new AdvancedBusEventHandlers(
                 connected: (s, e) => connectedCalled = true,

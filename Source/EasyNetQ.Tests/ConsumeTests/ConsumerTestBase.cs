@@ -6,7 +6,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using NSubstitute;
@@ -29,8 +29,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected byte[] OriginalBody;
         protected const ulong DeliverTag = 10101;
 
-        [SetUp]
-        public void SetUp()
+        public ConsumerTestBase()
         {
             Cancellation = new CancellationTokenSource();
 

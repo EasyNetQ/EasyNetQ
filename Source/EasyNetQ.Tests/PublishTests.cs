@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 using System.Linq;
@@ -20,8 +20,7 @@ namespace EasyNetQ.Tests
         byte[] body;
         private IBasicProperties properties;
 
-        [SetUp]
-        public void SetUp()
+        public When_publish_is_called()
         {
             mockBuilder = new MockBuilder(x => 
                 x.Register<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId)));
@@ -116,8 +115,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_publish_with_topic_is_called()
         {
             mockBuilder = new MockBuilder();
 

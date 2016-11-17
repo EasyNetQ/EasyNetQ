@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -14,8 +14,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_consumer_is_cancelled_by_the_broker()
         {
             mockBuilder = new MockBuilder();
 

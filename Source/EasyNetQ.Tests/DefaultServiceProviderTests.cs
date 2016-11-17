@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
@@ -51,8 +51,7 @@ namespace EasyNetQ.Tests
 
         private DefaultServiceProvider serviceProvider;
 
-        [SetUp]
-        public void SetUp()
+        public DefaultServiceProviderTestsX()
         {
             serviceProvider = new DefaultServiceProvider();
 
@@ -83,8 +82,7 @@ namespace EasyNetQ.Tests
         private IMyFirst myFirst;
         private SomeDelegate someDelegate;
 
-        [SetUp]
-        public void SetUp()
+        public DefaultServiceProviderTests()
         {
             myFirst = Substitute.For<IMyFirst>();
             someDelegate = () => { };

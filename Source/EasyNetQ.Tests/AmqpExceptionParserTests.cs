@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.AmqpExceptions;
 
 namespace EasyNetQ.Tests

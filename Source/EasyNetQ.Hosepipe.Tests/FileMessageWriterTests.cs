@@ -3,16 +3,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
     public class FileMessageWriterTests
     {
         private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), @"MessageOutput");
-
-        [SetUp]
-        public void SetUp() {}
 
         [Test, Explicit("Writes files to the file system")]
         public void WriteSomeFiles()

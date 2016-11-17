@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
@@ -8,8 +8,7 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         private ArgParser argParser;
 
-        [SetUp]
-        public void SetUp()
+        public ArgParserTests()
         {
             argParser = new ArgParser();
         }

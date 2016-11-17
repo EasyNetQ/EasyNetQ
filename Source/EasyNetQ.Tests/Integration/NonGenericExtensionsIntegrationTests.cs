@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.Integration
@@ -12,8 +12,7 @@ namespace EasyNetQ.Tests.Integration
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public NonGenericExtensionsIntegrationTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }

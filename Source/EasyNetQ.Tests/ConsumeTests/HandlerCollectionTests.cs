@@ -2,7 +2,7 @@
 
 using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private bool myMessageHandlerExecuted = false;
         private bool animalHandlerExecuted = false;
 
-        [SetUp]
-        public void SetUp()
+        public HandlerCollectionTests()
         {
             handlerCollection = new HandlerCollection(new NullLogger());
 

@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.Interception;
 using NSubstitute;
 

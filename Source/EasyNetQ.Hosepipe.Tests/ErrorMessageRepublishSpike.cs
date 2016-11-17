@@ -3,7 +3,7 @@
 using System;
 using System.Text;
 using EasyNetQ.SystemMessages;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -12,9 +12,6 @@ namespace EasyNetQ.Hosepipe.Tests
     public class ErrorMessageRepublishSpike
     {
         readonly ISerializer serializer = new JsonSerializer(new TypeNameSerializer());
-
-        [SetUp]
-        public void SetUp() {}
 
         [Fact]
         public void Should_deserialise_error_message_correctly()

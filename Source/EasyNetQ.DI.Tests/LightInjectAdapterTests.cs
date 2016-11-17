@@ -1,5 +1,5 @@
 ﻿using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using LightInject;
 
 namespace EasyNetQ.DI.Tests
@@ -16,8 +16,7 @@ namespace EasyNetQ.DI.Tests
         private IServiceContainer container;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public LightInjectAdapterTests()
         {
             container = new ServiceContainer();
 

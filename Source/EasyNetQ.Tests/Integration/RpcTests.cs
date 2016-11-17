@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 using EasyNetQ.Loggers;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture, Explicit("Requires a RabbitMQ instance on localhost")]
+    [Explicit("Requires a RabbitMQ instance on localhost")]
     public class RpcTests
     {
         private class RpcRequest
@@ -20,8 +20,7 @@ namespace EasyNetQ.Tests.Integration
 
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public RpcTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => new ConsoleLogger()));
         }

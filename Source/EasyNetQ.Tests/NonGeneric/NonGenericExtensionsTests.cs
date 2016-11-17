@@ -4,7 +4,7 @@ using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.NonGeneric
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests.NonGeneric
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public NonGenericExtensionsTests()
         {
             mockBuilder = new MockBuilder();
         }

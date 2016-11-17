@@ -5,17 +5,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture, Explicit("Requires a RabbitMQ instance on localhost")]
+    [Explicit("Requires a RabbitMQ instance on localhost")]
     public class AdvancedApiExamples
     {
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public AdvancedApiExamples()
         {
             advancedBus = RabbitHutch.CreateBus("host=localhost").Advanced;
         }

@@ -1,5 +1,5 @@
 ﻿using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using Ninject;
 
 namespace EasyNetQ.DI.Tests
@@ -15,8 +15,7 @@ namespace EasyNetQ.DI.Tests
         private IKernel container;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public NinjectAdapterTests()
         {
             container = new StandardKernel();
 

@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
@@ -10,8 +10,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private IMessageReader messageReader;
         private IConventions conventions;
 
-        [SetUp]
-        public void SetUp()
+        public MessageReaderTests()
         {
             conventions = new Conventions(new TypeNameSerializer());
             messageReader = new MessageReader();

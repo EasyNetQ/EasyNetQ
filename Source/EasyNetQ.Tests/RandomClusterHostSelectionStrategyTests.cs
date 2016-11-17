@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
@@ -10,8 +10,7 @@ namespace EasyNetQ.Tests
         private IClusterHostSelectionStrategy<string> clusterHostSelectionStrategy;
         private HashSet<string> hosts;
 
-        [SetUp]
-        public void SetUp()
+        public RandomClusterHostSelectionStrategyTests()
         {
             clusterHostSelectionStrategy = new RandomClusterHostSelectionStrategy<string>
             {

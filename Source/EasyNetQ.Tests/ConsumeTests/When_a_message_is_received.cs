@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -15,8 +15,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private MyMessage deliveredMyMessage;
         private MyOtherMessage deliveredMyOtherMessage;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_message_is_received()
         {
             //mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
             mockBuilder = new MockBuilder();

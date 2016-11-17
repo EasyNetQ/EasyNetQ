@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {

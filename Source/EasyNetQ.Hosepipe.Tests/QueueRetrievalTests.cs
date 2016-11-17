@@ -2,18 +2,13 @@
 
 using System;
 using System.Threading;
-
 using EasyNetQ.Consumer;
-
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
     public class QueueRetrievalTests
     {
-        [SetUp]
-        public void SetUp() {}
-
         [Test, Explicit("Requires a RabbitMQ server on localhost")]
         public void TryGetMessagesFromQueue()
         {

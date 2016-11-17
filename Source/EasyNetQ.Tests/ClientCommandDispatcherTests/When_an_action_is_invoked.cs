@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         private bool actionWasInvoked;
         private string actionThreadName;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_invoked()
         {
             actionWasInvoked = false;
             actionThreadName = "Not set";

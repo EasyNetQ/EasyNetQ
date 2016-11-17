@@ -2,7 +2,7 @@
 
 using EasyNetQ.Scheduling;
 using EasyNetQ.Tests.Interception;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.Scheduling

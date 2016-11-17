@@ -2,7 +2,7 @@
 
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -15,8 +15,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private IModel channel;
         private IEventBus eventBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_channel_action_is_invoked()
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel>();

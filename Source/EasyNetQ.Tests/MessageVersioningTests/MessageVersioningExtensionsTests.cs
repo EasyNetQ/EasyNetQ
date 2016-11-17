@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.MessageVersioning;
 
 namespace EasyNetQ.Tests.MessageVersioningTests

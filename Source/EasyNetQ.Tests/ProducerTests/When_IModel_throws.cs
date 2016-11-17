@@ -2,7 +2,7 @@
 
 using System;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using NSubstitute;
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests.ProducerTests
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_IModel_throws_because_of_closed_connection()
         {
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
 

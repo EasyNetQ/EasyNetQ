@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
@@ -11,8 +11,7 @@ namespace EasyNetQ.Tests
         private IBus bus;
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public ModelCleanupTests()
         {
             mockBuilder = new MockBuilder();
             bus = mockBuilder.Bus;

@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using Xunit;
 using StructureMap;
 using System;
 
@@ -18,8 +18,7 @@ namespace EasyNetQ.DI.Tests
         private IContainer easynetQContainer;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public StructureMapAdapterWithRegistryTests()
         {
             container = new Container(cfg =>
                 {

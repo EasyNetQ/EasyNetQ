@@ -2,7 +2,7 @@
 
 using System;
 using EasyNetQ.Consumer;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests

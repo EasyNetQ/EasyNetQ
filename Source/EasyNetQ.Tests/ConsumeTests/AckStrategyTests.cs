@@ -1,6 +1,6 @@
 ﻿using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -12,8 +12,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public Ack_strategy()
         {
             model = Substitute.For<IModel>();
 
@@ -39,8 +38,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public NackWithoutRequeue_strategy()
         {
             model = Substitute.For<IModel>();
 
@@ -67,8 +65,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public NackWithRequeue_strategy()
         {
             model = Substitute.For<IModel>();
 
@@ -95,8 +92,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public Nothing_strategy()
         {
             model = Substitute.For<IModel>();
 

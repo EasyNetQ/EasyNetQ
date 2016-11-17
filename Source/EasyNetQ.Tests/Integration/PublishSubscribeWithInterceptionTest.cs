@@ -2,14 +2,13 @@
 using System.Threading;
 using EasyNetQ.Interception;
 using EasyNetQ.Tests.Integration.Scheduling;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
     public class PublishSubscribeWithInterceptionTest
     {
-        [SetUp]
-        public void SetUp()
+        public PublishSubscribeWithInterceptionTest()
         {
             bus = RabbitHutch.CreateBus("host=localhost", x => x.EnableInterception(r => r.EnableGZipCompression().EnableTripleDESEncryption(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="))));
         }

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -28,8 +28,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 
         private IModel channel;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_user_handler_is_executed()
         {
             //var logger = new ConsoleLogger();
             var logger = Substitute.For<IEasyNetQLogger>();

@@ -1,7 +1,7 @@
 ﻿using System;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
@@ -14,8 +14,7 @@ namespace EasyNetQ.Tests.ProducerTests
         private IModel model;
         private ulong DeliveryTag = 42;
 
-        [SetUp]
-        public void SetUp()
+        public PublishConfirmationListenerTest()
         {
             eventBus = new EventBus();
             model = Substitute.For<IModel>();

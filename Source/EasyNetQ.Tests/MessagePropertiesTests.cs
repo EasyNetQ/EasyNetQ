@@ -5,17 +5,12 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
     public class MessagePropertiesTests
     {
-        [SetUp]
-        public void SetUp()
-        {
-        }
-
         [Fact]
         public void Should_copy_from_Rabbit_client_properties()
         {

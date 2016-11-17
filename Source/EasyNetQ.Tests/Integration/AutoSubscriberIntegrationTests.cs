@@ -4,7 +4,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using EasyNetQ.AutoSubscribe;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -13,8 +13,7 @@ namespace EasyNetQ.Tests.Integration
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public AutoSubscriberIntegrationTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
             var subscriber = new AutoSubscriber(bus, "autosub.integration");

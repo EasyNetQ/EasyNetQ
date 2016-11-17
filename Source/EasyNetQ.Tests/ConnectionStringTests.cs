@@ -2,7 +2,7 @@
 
 using System.Linq;
 using EasyNetQ.ConnectionString;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
@@ -15,8 +15,7 @@ namespace EasyNetQ.Tests
 
         private ConnectionConfiguration defaults;
 
-        [SetUp]
-        public void SetUp()
+        public ConnectionStringTests()
         {
             connectionString = new ConnectionStringParser().Parse(connectionStringValue);
             defaults = new ConnectionStringParser().Parse("host=localhost");
