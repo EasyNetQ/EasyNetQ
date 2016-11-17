@@ -34,7 +34,13 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "99.0.0-dev"
+    "Autofac": "4.2.0",
+    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ.Serilog": "99.0.0-dev",
+    "EasyNetQ.Tests.Messages": "99.0.0-dev",
+    "Net.Autofac":"0.1.12",
+    "Net.Core": "0.1.12",
+    "Serilog.Sinks.ColoredConsole": "2.0.0"
   },
   "tools": {
     "dotnet-gitversion": {
@@ -48,20 +54,6 @@
     "dn-version": "dotnet gitversion"
   },
   "frameworks": {
-    "netcoreapp1.0": {
-      "buildOptions": {
-        "define": [
-          "NET_STANDARD"
-        ]
-      },
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.1",
-          "type": "platform"
-        }
-      },
-      "imports": "dnxcore50"
-    },
     "net451": {
       "buildOptions": {
         "define": [

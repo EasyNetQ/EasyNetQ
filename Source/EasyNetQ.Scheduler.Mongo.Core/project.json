@@ -34,7 +34,9 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "99.0.0-dev"
+    "EasyNetQ": "99.0.0-dev",
+    "MongoDB.Bson": "2.3.0",
+    "mongocsharpdriver": "2.3.0"
   },
   "tools": {
     "dotnet-gitversion": {
