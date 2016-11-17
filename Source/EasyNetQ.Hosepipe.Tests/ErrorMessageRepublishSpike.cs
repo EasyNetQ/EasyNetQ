@@ -30,7 +30,7 @@ namespace EasyNetQ.Hosepipe.Tests
             error.Message.ShouldBeNull();
         }
 
-        [Test, Explicit("Requires a localhost instance of RabbitMQ to run")]
+        [Fact][Explicit("Requires a localhost instance of RabbitMQ to run")]
         public void Should_be_able_to_republish_message()
         {
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));

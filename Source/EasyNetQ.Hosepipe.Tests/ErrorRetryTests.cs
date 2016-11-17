@@ -18,7 +18,7 @@ namespace EasyNetQ.Hosepipe.Tests
             errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer), new DefaultErrorMessageSerializer());
         }
 
-        [Test, Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]
+        [Fact][Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]
         public void Should_republish_all_error_messages_in_the_given_directory()
         {
             var parameters = new QueueParameters
@@ -35,7 +35,7 @@ namespace EasyNetQ.Hosepipe.Tests
             errorRetry.RetryErrors(rawErrorMessages, parameters);
         }
 
-        [Test, Explicit("Requires a RabbitMQ instance")]
+        [Fact][Explicit("Requires a RabbitMQ instance")]
         public void Should_republish_to_default_exchange()
         {
             var error = new Error

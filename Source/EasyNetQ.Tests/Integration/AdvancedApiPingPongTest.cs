@@ -55,7 +55,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit("Requires a RabbitMQ instance on localhost.")]
+        [Fact][Explicit("Requires a RabbitMQ instance on localhost.")]
         public void Ping_pong_with_advanced_consumers()
         {
             IntermittentDisconnection();

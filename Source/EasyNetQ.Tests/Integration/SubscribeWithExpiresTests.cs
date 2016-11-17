@@ -7,7 +7,7 @@ namespace EasyNetQ.Tests.Integration
 {
     public class SubscribeWithExpiresTests
     {
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Queue_should_be_deleted_after_the_expires_ttl()
         {
             Assert.Throws<UnexpectedHttpStatusCodeException>(() =>
@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.Integration
             });
         }
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Queue_should_not_be_deleted_if_expires_is_not_set()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");

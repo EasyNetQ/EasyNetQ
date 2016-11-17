@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
             advancedBus.Dispose();
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void DeclareTopology()
         {
             var queue = advancedBus.QueueDeclare("my_queue");
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.Integration
 
         }
 
-        [Test,Explicit]
+        [Fact][Explicit]
         public void DeclareTopologyAndCheckPassive()
         {
             var queue = advancedBus.QueueDeclare("my_queue");
@@ -42,13 +42,13 @@ namespace EasyNetQ.Tests.Integration
             advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void DeclareWithTtlAndExpire()
         {
             advancedBus.QueueDeclare("my_queue", perQueueMessageTtl: 500, expires: 500);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void DeclareExchangeWithAlternate()
         {
             const string alternate = "alternate";
@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests.Integration
             advancedBus.Publish(originalExchange, bindingKey, false, new MessageProperties(), message);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void DeclareDelayedExchange()
         {
             const string bindingKey = "the-binding-key";
@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void ConsumeFromAQueue()
         {
             var queue = new Queue("my_queue", false);
@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(500);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void PublishToAnExchange()
         {
             var exchange = new Exchange("my_exchange");
@@ -104,7 +104,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(5000);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_be_able_to_delete_objects()
         {
             // declare some objects
@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests.Integration
             advancedBus.QueueDelete(queue);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_consume_a_message()
         {
             var queue = advancedBus.QueueDeclare("consume_test");
@@ -131,7 +131,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(1000);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_be_able_to_get_a_message()
         {
             var queue = advancedBus.QueueDeclare("get_test");
@@ -149,7 +149,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_set_MessageAvailable_to_false_when_queue_is_empty()
         {
             var queue = advancedBus.QueueDeclare("get_empty_queue_test");
@@ -161,7 +161,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_be_able_to_get_queue_length()
         {
             var queue = advancedBus.QueueDeclare("count_test");
@@ -170,7 +170,7 @@ namespace EasyNetQ.Tests.Integration
             Console.WriteLine("{0} messages in queue", messageCount);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_be_able_to_dead_letter_to_fixed_queue()
         {
             // create a main queue and a retry queue with retry queue dead lettering messages directly
@@ -191,7 +191,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(1000);
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Should_be_able_to_dead_letter_to_given_exchange()
         {
             // create a main queue and a retry queue both binding to the same topic exchange with 

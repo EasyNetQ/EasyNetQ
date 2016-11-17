@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Fact][Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivator()
         {
             // warmup
@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Fact][Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivatorSingleParameter()
         {
             // warmup
@@ -127,7 +127,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Fact][Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivatorDualParameter()
         {
             // warmup
@@ -169,7 +169,7 @@ namespace EasyNetQ.Tests
             Assert.True(typeof(TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
         }
 
-        [Test, Explicit("Fails on build server")]
+        [Fact][Explicit("Fails on build server")]
         public void ShouldPerformFasterThanGetCustomAttributes()
         {
             var type = typeof(TestAttributedClass);

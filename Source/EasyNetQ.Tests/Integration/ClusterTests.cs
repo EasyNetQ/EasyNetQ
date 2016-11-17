@@ -32,20 +32,20 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_create_the_correct_connection_string()
         {
             connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5673;requestedHeartbeat=1");
         }
 
-        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_connect_to_the_first_available_node_in_cluster()
         {
             // just watch what happens
             Thread.Sleep(5 * 60 * 1000); // let's give it 5 minutes
         }
 
-        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_be_able_to_resubscribe_on_reconnection()
         {
             bus.Subscribe<MyMessage>("cluster_test", message => Console.WriteLine(message.Text));

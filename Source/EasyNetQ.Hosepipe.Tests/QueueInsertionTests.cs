@@ -18,7 +18,7 @@ namespace EasyNetQ.Hosepipe.Tests
         /// <summary>
         /// Create a RabbitMQ queue 'Hosepipe_test_queue' before attempting this test.
         /// </summary>
-        [Test, Explicit("Needs a RabbitMQ server on localhost")]
+        [Fact][Explicit("Needs a RabbitMQ server on localhost")]
         public void Should_be_able_to_inset_messages_onto_a_queue()
         {
             var messages = new[]

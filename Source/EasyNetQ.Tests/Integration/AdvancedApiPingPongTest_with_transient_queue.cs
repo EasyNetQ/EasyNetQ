@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Ping_pong_with_advances_consumers()
         {
             Consume(0, 1);

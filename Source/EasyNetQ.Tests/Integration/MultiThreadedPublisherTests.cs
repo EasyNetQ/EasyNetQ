@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit("Requires a local rabbitMq instance to run")]
+        [Fact][Explicit("Requires a local rabbitMq instance to run")]
         public void MultThreaded_publisher_should_not_cause_channel_proliferation()
         {
             var threads = new List<Thread>();
@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
-        [Test, Explicit("Requires a local RabbitMQ instance to run")]
+        [Fact][Explicit("Requires a local RabbitMQ instance to run")]
         public void MultiThreaded_requester_should_not_cause_channel_proliferation()
         {
             var threads = new List<Thread>();

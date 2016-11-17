@@ -113,10 +113,10 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_non_null_and_with_expected_values_result()
         {
-            Assert.IsNotNull(subscriptionResult);
-            Assert.IsNotNull(subscriptionResult.Exchange);
-            Assert.IsNotNull(subscriptionResult.Queue);
-            Assert.IsNotNull(subscriptionResult.ConsumerCancellation);
+            Assert.NotNull(subscriptionResult);
+            Assert.NotNull(subscriptionResult.Exchange);
+            Assert.NotNull(subscriptionResult.Queue);
+            Assert.NotNull(subscriptionResult.ConsumerCancellation);
             Assert.True(subscriptionResult.Exchange.Name == typeName);
             Assert.True(subscriptionResult.Queue.Name == queueName);
         }

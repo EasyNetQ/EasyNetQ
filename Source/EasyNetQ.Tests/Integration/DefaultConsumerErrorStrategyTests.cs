@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests
         /// <summary>
         /// NOTE: Make sure the error queue is empty before running this test.
         /// </summary>
-        [Test, Explicit("Requires a RabbitMQ instance on localhost")]
+        [Fact][Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_handle_an_exception_by_writing_to_the_error_queue()
         {
             const string originalMessage = "{ Text:\"Hello World\"}";

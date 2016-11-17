@@ -36,13 +36,13 @@ namespace EasyNetQ.DI.Tests
         [Fact]
         public void Should_create_bus_with_autofac_module()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
         [Fact]
         public void Should_resolve_autosubscriber()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
 
             Assert.True(bus is RabbitBus);
 

@@ -11,7 +11,7 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), @"MessageOutput");
 
-        [Test, Explicit("Writes files to the file system")]
+        [Fact][Explicit("Writes files to the file system")]
         public void WriteSomeFiles()
         {
             var directory = new DirectoryInfo(tempDirectory);

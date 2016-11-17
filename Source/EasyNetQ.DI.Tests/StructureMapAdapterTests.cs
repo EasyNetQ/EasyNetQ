@@ -33,7 +33,7 @@ namespace EasyNetQ.DI.Tests
         [Fact]
         public void Should_create_bus_with_structure_map_adapter()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
         [Fact]
