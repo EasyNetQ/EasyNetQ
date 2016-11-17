@@ -61,25 +61,25 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             autoResetEvent.WaitOne(1000);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_body()
         {
             deliveredBody.ShouldBeTheSameAs(messageBody);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_properties()
         {
             deliveredProperties.ShouldBeTheSameAs(messageProperties);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_info()
         {
             deliveredInfo.ShouldBeTheSameAs(messageInfo);
         }
 
-        [Test]
+        [Fact]
         public void Should_ACK_message()
         {
             channel.Received().BasicAck(123, false);

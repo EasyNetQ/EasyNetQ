@@ -22,49 +22,49 @@ namespace EasyNetQ.Tests
             defaults = new ConnectionStringParser().Parse("host=localhost");
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_host()
         {
             connectionString.Hosts.First().Host.ShouldEqual("192.168.1.1");
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_host_port()
         {
             connectionString.Hosts.First().Port.ShouldEqual(1001);
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_second_host()
         {
             connectionString.Hosts.Last().Host.ShouldEqual("my.little.host");
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_seond_port()
         {
             connectionString.Hosts.Last().Port.ShouldEqual(1002);
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_virtualHost()
         {
             connectionString.VirtualHost.ShouldEqual("Copa");
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_username()
         {
             connectionString.UserName.ShouldEqual("Copa");
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_password()
         {
             connectionString.Password.ShouldEqual("abc_xyz");
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_on_malformed_string()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -73,7 +73,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_fail_if_host_is_not_present()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -84,56 +84,56 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_port()
         {
             connectionString.Port.ShouldEqual(12345);
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_heartbeat()
         {
             connectionString.RequestedHeartbeat.ShouldEqual(3);
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_host_only()
         {
             defaults.Hosts.First().Host.ShouldEqual("localhost");
         }
 
-        [Test]
+        [Fact]
         public void Should_set_default_port()
         {
             defaults.Port.ShouldEqual(5672);
         }
 
-        [Test]
+        [Fact]
         public void Should_set_default_virtual_host()
         {
             defaults.VirtualHost.ShouldEqual("/");
         }
 
-        [Test]
+        [Fact]
         public void Should_set_default_username()
         {
             defaults.UserName.ShouldEqual("guest");
 
         }
 
-        [Test]
+        [Fact]
         public void Should_set_default_password()
         {
             defaults.Password.ShouldEqual("guest");
         }
 
-        [Test]
+        [Fact]
         public void Should_set_default_requestHeartbeat()
         {
             defaults.RequestedHeartbeat.ShouldEqual(10);
         }
 
-        [Test]
+        [Fact]
         public void Should_not_have_case_sensitive_keys()
         {
             const string connectionStringAlternateCasing =

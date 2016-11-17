@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests.Scheduling
 {
     public class InterceptionExtensionsTests
     {
-        [Test]
+        [Fact]
         public void When_using_EnableDelayedExchangeScheduler_extension_method_required_services_are_registered()
         {
             var serviceRegister = Substitute.For<IServiceRegister>();
@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests.Scheduling
             serviceRegister.Received().Register<IScheduler, DelayedExchangeScheduler>();
         }
 
-        [Test]
+        [Fact]
         public void When_using_EnableDeadLetterExchangeAndMessageTtlScheduler_extension_method_required_services_are_registered()
         {
             var serviceRegister = Substitute.For<IServiceRegister>();

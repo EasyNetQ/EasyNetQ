@@ -13,14 +13,14 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             consumer.StartConsuming();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_internal_consumer()
         {
             internalConsumerFactory.Received().CreateConsumer();
             createConsumerCalled.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_ask_the_internal_consumer_to_start_consuming()
         {
             internalConsumers[0].Received().StartConsuming(persistentConnection, queue, onMessage, configuration);

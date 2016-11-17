@@ -45,7 +45,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private readonly string expectedDumpOutput =
             "2 Messages from queue 'EasyNetQ_Default_Error_Queue'\r\noutput to directory '" + Directory.GetCurrentDirectory() + "'\r\n";
 
-        [Test]
+        [Fact]
         public void Should_output_messages_to_directory_with_dump()
         {
             var args = new[]
@@ -69,7 +69,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private readonly string expectedInsertOutput =
             "2 Messages from directory '" + Directory.GetCurrentDirectory() + "'\r\ninserted into queue ''\r\n";
 
-        [Test]
+        [Fact]
         public void Should_insert_messages_with_insert()
         {
             var args = new[]
@@ -92,7 +92,7 @@ namespace EasyNetQ.Hosepipe.Tests
             "2 Error messages from directory '" + Directory.GetCurrentDirectory() + "' republished\r\n";
 
 
-        [Test]
+        [Fact]
         public void Should_retry_errors_with_retry()
         {
             var args = new[]

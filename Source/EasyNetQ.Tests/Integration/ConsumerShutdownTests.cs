@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests.Integration
     [Explicit("Requires a RabbitMQ broker on localhost")]
     public class ConsumerShutdownTests
     {
-        [Test]
+        [Fact]
         public void Message_can_be_processed_but_not_ACKd()
         {
             var receivedEvent = new AutoResetEvent(false);

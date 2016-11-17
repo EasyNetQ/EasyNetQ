@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_an_EasyNetQResponderException()
         {
             Assert.Throws<EasyNetQResponderException>(() =>
@@ -55,7 +55,7 @@ namespace EasyNetQ.Tests.ProducerTests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
         {
             Assert.Throws<EasyNetQResponderException>(() =>

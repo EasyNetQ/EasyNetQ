@@ -50,19 +50,19 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             dispatcher.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_persistent_channel()
         {
             channel.ShouldNotBeNull();
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_action()
         {
             actionWasInvoked.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_action_on_the_dispatcher_thread()
         {
             actionThreadName.ShouldEqual("Client Command Dispatcher Thread");

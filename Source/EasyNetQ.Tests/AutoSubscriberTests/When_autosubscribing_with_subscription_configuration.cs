@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe()
         {
             bus.Received().Subscribe(
@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                         );
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe_with_action_capable_of_configuring_subscription()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);

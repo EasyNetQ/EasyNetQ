@@ -10,7 +10,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 {
     public class MessageVersioningExtensionsTests
     {
-        [Test]
+        [Fact]
         public void When_using_EnableMessageVersioning_extension_method_required_services_are_registered()
         {
             var serviceRegister = new ServiceRegisterStub();

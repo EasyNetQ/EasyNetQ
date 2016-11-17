@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_new_channel_for_the_consumer()
         {
             // A channel is created for running client originated commands,
@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Channels.Count.ShouldEqual(2);
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -65,7 +65,7 @@ namespace EasyNetQ.Tests
                     Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_exchange()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -76,7 +76,7 @@ namespace EasyNetQ.Tests
                 Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
-        [Test]
+        [Fact]
         public void Should_bind_the_queue_and_exchange()
         {
             mockBuilder.Channels[0].Received().QueueBind(
@@ -86,14 +86,14 @@ namespace EasyNetQ.Tests
                 Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
-        [Test]
+        [Fact]
         public void Should_set_configured_prefetch_count()
         {
             var connectionConfiguration = new ConnectionConfiguration();
             mockBuilder.Channels[1].Received().BasicQos(0, connectionConfiguration.PrefetchCount, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_start_consuming()
         {
             mockBuilder.Channels[1].Received().BasicConsume(
@@ -106,13 +106,13 @@ namespace EasyNetQ.Tests
                     Arg.Any<IBasicConsumer>());
         }
 
-        [Test]
+        [Fact]
         public void Should_register_consumer()
         {
             mockBuilder.Consumers.Count.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_non_null_and_with_expected_values_result()
         {
             Assert.IsNotNull(subscriptionResult);
@@ -187,26 +187,26 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_build_bus_successfully()
         {
             // just want to run SetUp()
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_message()
         {
             deliveredMessage.ShouldNotBeNull();
             deliveredMessage.Text.ShouldEqual(originalMessage.Text);
         }
 
-        [Test]
+        [Fact]
         public void Should_ack_the_message()
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_write_debug_message()
         {
             const string expectedMessageFormat =
@@ -293,26 +293,26 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_ack()
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_write_exception_log_message()
         {
             // to brittle to put exact message here I think
             mockBuilder.Logger.Received().ErrorWrite(Arg.Any<string>(), Arg.Any<object[]>());
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_consumer_error_strategy()
         {
             consumerErrorStrategy.Received().HandleConsumerError(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>());
         }
 
-        [Test]
+        [Fact]
         public void Should_pass_the_exception_to_consumerErrorStrategy()
         {
             raisedException.ShouldNotBeNull();
@@ -320,7 +320,7 @@ namespace EasyNetQ.Tests
             raisedException.InnerException.ShouldBeTheSameAs(originalException);
         }
 
-        [Test]
+        [Fact]
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
             basicDeliverEventArgs.ShouldNotBeNull();
@@ -358,7 +358,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_dispose_the_model()
         {
             mockBuilder.Consumers[0].Model.Received().Dispose();

@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_dispose_of_the_model()
         {
             mockBuilder.Consumers[0].Model.Received().Dispose();

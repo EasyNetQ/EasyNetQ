@@ -39,19 +39,19 @@ namespace EasyNetQ.DI.Tests
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_structure_map_adapter()
         {
             Assert.IsNotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_construct_registered_conventions()
         {
             Assert.Greater(MyConventions.ConventionsCallCount, 0);
         }
 
-        [Test]
+        [Fact]
         public void Should_use_registered_logger()
         {
             Assert.Greater(MyLogger.ConstructorCallCount, 0);

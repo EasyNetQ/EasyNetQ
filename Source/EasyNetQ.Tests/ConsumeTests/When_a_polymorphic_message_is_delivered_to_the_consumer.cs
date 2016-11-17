@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_correctly_deserialize_message()
         {
             receivedMessage.ShouldNotBeNull();

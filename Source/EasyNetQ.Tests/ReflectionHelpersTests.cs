@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
 {
     public class ReflectionHelpersTests
     {
-        [Test]
+        [Fact]
         public void ShouldCreateClassWithDefaultConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance<ClassWithDefaultConstuctor>();
@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests
             Assert.IsTrue(obj.GetType() == typeof(ClassWithDefaultConstuctor));
         }
 
-        [Test]
+        [Fact]
         public void ShouldFailToCreateClassWithoutDefaultConstructor()
         {
             Assert.Throws<MissingMethodException>(()=>
@@ -58,7 +58,7 @@ namespace EasyNetQ.Tests
             Assert.AreEqual(2000000, count);
         }
 
-        [Test]
+        [Fact]
         public void ShouldCreateClassWithSingleParameterConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance(typeof(ClassWithOneParameterConstructor), 1);
@@ -66,7 +66,7 @@ namespace EasyNetQ.Tests
             Assert.IsTrue(obj.GetType() == typeof(ClassWithOneParameterConstructor));
         }
 
-        [Test]
+        [Fact]
         public void ShouldFailToCreateClassWithoutSingleParameterConstructor()
         {
             Assert.Throws<MissingMethodException>(() =>
@@ -110,7 +110,7 @@ namespace EasyNetQ.Tests
             Assert.AreEqual(2000000, count);
         }
 
-        [Test]
+        [Fact]
         public void ShouldCreateClassWithDualParameterConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance(typeof(ClassWithTwoParametersConstructor), 1, 2);
@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests
             Assert.IsTrue(obj.GetType() == typeof(ClassWithTwoParametersConstructor));
         }
 
-        [Test]
+        [Fact]
         public void ShouldFailToCreateClassWithoutDualParameterConstructor()
         {
             Assert.Throws<MissingMethodException>(() =>
@@ -162,7 +162,7 @@ namespace EasyNetQ.Tests
             Assert.AreEqual(6000000, count);
         }
 
-        [Test]
+        [Fact]
         public void ShouldGetAttributes()
         {
             Assert.IsTrue(typeof(TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
@@ -205,7 +205,7 @@ namespace EasyNetQ.Tests
             Console.WriteLine(getAttributesTime);
         }
 
-        [Test]
+        [Fact]
         public void ShouldGetAttribute()
         {
             Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());

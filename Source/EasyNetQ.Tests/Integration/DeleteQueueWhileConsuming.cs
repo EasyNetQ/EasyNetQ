@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Start_consuming_then_delete_a_queue()
         {
             var queue = bus.Advanced.QueueDeclare(queueName);

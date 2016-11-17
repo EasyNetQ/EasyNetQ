@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests.Integration
         private IBus bus;
 
 
-        [Test]
+        [Fact]
         [Explicit("Needs an instance of RabbitMQ on localhost to work")]
         public void Should_be_able_to_get_a_message()
         {

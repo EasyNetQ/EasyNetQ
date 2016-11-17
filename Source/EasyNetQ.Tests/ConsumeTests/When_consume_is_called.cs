@@ -15,19 +15,19 @@ namespace EasyNetQ.Tests.ConsumeTests
             StartConsumer((body, properties, info) => { });
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_consumer()
         {
             MockBuilder.Consumers.Count.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_channel_to_consume_on()
         {
             MockBuilder.Channels.Count.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_basic_consume_on_channel()
         {
             MockBuilder.Channels[0].Received().BasicConsume(
@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                Arg.Is(MockBuilder.Consumers[0]));
         }
 
-        [Test]
+        [Fact]
         public void Should_write_debug_message()
         {
             MockBuilder.Logger.Received().InfoWrite(

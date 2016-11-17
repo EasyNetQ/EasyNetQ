@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_schedule_a_message_with_delay()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
                 Assert.Fail();
         }
 
-        [Test]
+        [Fact]
         public void High_volume_scheduling_test_with_delay()
         {
             logger.Debug = false;
@@ -76,7 +76,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
         }
 
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_schedule_a_message_with_future_date()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -98,7 +98,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
             autoResetEvent.WaitOne(10000);
         }
 
-        [Test]
+        [Fact]
         public void High_volume_scheduling_test_with_future_date()
         {
             logger.Debug = false;
@@ -121,7 +121,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
         }
 
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_cancel_a_message()
         {
             var messagesReceived = 0;

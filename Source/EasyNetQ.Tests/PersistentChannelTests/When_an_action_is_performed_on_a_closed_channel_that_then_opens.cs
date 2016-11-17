@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
 
-        [Test]
+        [Fact]
         public void Should_run_action_on_channel()
         {
             Thread.Sleep(100);

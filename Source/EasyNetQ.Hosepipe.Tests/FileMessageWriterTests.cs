@@ -55,7 +55,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        [Test]
+        [Fact]
         public void Should_remove_invalid_file_chars()
         {
             const string originalQueueName = @"\A/B:C*D?E""F<G>H|I";

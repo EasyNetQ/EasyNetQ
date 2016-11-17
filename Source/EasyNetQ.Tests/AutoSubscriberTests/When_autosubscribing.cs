@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_have_declared_the_queues()
         {
             Action<string> assertQueueDeclared = queueName =>
@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             assertQueueDeclared(expectedQueueName3);
         }
 
-        [Test]
+        [Fact]
         public void Should_have_bound_to_queues()
         {
             Action<int, string, string> assertConsumerStarted = (channelIndex, queueName, topicName) =>
@@ -74,7 +74,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             assertConsumerStarted(3, expectedQueueName3, "Important");
         }
 
-        [Test]
+        [Fact]
         public void Should_have_started_consuming_from_the_correct_queues()
         {
             mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).ShouldBeTrue();

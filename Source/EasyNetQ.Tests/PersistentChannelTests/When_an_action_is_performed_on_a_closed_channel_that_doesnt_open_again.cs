@@ -43,7 +43,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_timeout_exception()
         {
             Assert.Throws<TimeoutException>(() =>

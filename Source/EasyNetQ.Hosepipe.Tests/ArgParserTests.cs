@@ -14,7 +14,7 @@ namespace EasyNetQ.Hosepipe.Tests
             argParser = new ArgParser();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_retrieve_args_by_position()
         {
             var args = new string[]
@@ -42,7 +42,7 @@ namespace EasyNetQ.Hosepipe.Tests
             threeFailed.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_retrieve_args_by_key()
         {
             var args = new string[]
@@ -64,7 +64,7 @@ namespace EasyNetQ.Hosepipe.Tests
             fNotFound.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_retrieve_args_by_position_and_key()
         {
             var args = new string[]

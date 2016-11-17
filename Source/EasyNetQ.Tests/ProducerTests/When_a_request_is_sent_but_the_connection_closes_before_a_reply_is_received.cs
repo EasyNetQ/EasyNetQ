@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_an_EasyNetQException()
         {
             Assert.Throws<EasyNetQException>(() =>

@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
 
     public class DeliveryModeStrategyTest
     {
-        [Test]
+        [Fact]
         [TestCase(typeof(PersistentMessageWithDeliveryAttribute), true)]
         [TestCase(typeof(NotPersistentMessageWithDeliveryAttribute), false)]
         [TestCase(typeof(MessageWithoutDeliveryAttribute), true)]
@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests
             Assert.AreEqual(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
         }
 
-        [Test]
+        [Fact]
         [TestCase(typeof(PersistentMessageWithDeliveryAttribute), true)]
         [TestCase(typeof(NotPersistentMessageWithDeliveryAttribute), false)]
         [TestCase(typeof(MessageWithoutDeliveryAttribute), false)]

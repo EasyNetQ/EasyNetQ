@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_a_timeout_exception()
         {
             Assert.Throws<TimeoutException>(() =>

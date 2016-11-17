@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 {
     public class MessageVersionStackTests
     {
-        [Test]
+        [Fact]
         public void Unversioned_messages_create_a_stack_containing_the_message_type()
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.That( stack.Single(), Is.EqualTo( typeof( MyMessage ) ) );
         }
 
-        [Test]
+        [Fact]
         public void Versioned_messages_create_a_stack_containing_the_message_type_and_all_superseded_types_oldest_first()
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.That( stack.ElementAt( 1 ), Is.EqualTo( typeof( MyMessageV2 ) ) );
         }
 
-        [Test]
+        [Fact]
         public void Pop_returns_the_top_of_the_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.That( stack.Pop(), Is.EqualTo( top ) );
         }
 
-        [Test]
+        [Fact]
         public void IsEmpty_returns_false_for_non_empty_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.That( stack.IsEmpty(), Is.False );
         }
 
-        [Test]
+        [Fact]
         public void IsEmpty_returns_true_for_empty_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.That( stack.IsEmpty(), Is.True );
         }
 
-        [Test]
+        [Fact]
         public void When_message_type_is_not_subclass_of_superseded_type_exception_is_thrown()
         {
             Assert.Throws<EasyNetQException>( () => new MessageVersionStack( typeof( MyOtherMessage ) ) );

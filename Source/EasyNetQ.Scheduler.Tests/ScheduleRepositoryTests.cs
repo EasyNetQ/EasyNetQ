@@ -26,7 +26,7 @@ namespace EasyNetQ.Scheduler.Tests
             scheduleRepository = new ScheduleRepository(configuration, log, () => DateTime.UtcNow);
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule()
         {
@@ -40,7 +40,7 @@ namespace EasyNetQ.Scheduler.Tests
             });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule_with_exchange()
         {
@@ -65,7 +65,7 @@ namespace EasyNetQ.Scheduler.Tests
             });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_cancel_a_schedule()
         {
@@ -75,7 +75,7 @@ namespace EasyNetQ.Scheduler.Tests
             });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_get_messages()
         {
@@ -93,7 +93,7 @@ namespace EasyNetQ.Scheduler.Tests
             }
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_purge_messages()
         {

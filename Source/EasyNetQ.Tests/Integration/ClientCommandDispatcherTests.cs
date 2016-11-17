@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests.Integration
             connection.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_dispatch_simple_channel_action()
         {
             var task = dispatcher.InvokeAsync(x =>
@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests.Integration
             Console.Out.WriteLine("Task complete");
         }
 
-        [Test]
+        [Fact]
         public void Should_bubble_exception()
         {
             var task = dispatcher.InvokeAsync(x =>
@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests.Integration
             Console.Out.WriteLine("Task complete");
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_get_result_back()
         {
             var task = dispatcher.InvokeAsync(x => x.QueueDeclare("MyQueue", true, false, false, null));
@@ -73,7 +73,7 @@ namespace EasyNetQ.Tests.Integration
             Console.Out.WriteLine(queueDeclareOk.QueueName);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_do_lots_of_operations_from_different_threads()
         {
             Helpers.ClearAllQueues();

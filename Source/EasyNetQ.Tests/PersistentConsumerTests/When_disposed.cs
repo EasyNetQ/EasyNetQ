@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             consumer.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_dispose_the_internal_consumer()
         {
             internalConsumers[0].Received().Dispose();

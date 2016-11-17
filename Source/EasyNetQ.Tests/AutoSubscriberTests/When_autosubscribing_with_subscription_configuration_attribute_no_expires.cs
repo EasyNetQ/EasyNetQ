@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe()
         {
             bus.Received().Subscribe(Arg.Any<string>(), 
@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                      Arg.Any<Action<ISubscriptionConfiguration>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe_with_no_expires()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);

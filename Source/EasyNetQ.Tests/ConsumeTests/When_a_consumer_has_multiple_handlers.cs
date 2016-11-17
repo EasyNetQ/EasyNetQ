@@ -74,21 +74,21 @@ namespace EasyNetQ.Tests.ConsumeTests
                 );
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_myMessage()
         {
             myMessageResult.ShouldNotBeNull();
             myMessageResult.Text.ShouldEqual("Hello Polymorphs!");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_myOtherMessage()
         {
             myOtherMessageResult.ShouldNotBeNull();
             myOtherMessageResult.Text.ShouldEqual("Hello Isomorphs!");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_a_ploymorphic_message()
         {
             animalResult.ShouldNotBeNull();

@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests
 {
     public class PersistentConnectionTests
     {
-        [Test]
+        [Fact]
         public void If_connects_after_disposal_should_redispose_underlying_connection()
         {
             var logger = Substitute.For<IEasyNetQLogger>();

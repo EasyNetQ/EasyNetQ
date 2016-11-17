@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.NonGeneric
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_subscribe_using_non_generic_extensions()
         {
             var are = new AutoResetEvent(false);

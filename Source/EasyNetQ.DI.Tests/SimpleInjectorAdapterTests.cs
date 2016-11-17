@@ -27,13 +27,13 @@ namespace EasyNetQ.DI.Tests
             )).Bus;
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_ninject_adapter()
         {
             Assert.IsNotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_test_conventions()
         {
             Assert.IsNotNull(bus);

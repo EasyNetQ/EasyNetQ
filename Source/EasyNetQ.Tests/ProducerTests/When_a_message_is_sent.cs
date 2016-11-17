@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         } 
 
-        [Test]
+        [Fact]
         public void Should_publish_the_message()
         {
             mockBuilder.Channels[0].Received().BasicPublish(
@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Any<byte[]>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(

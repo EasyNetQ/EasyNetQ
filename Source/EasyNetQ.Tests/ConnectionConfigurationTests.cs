@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
     public class ConnectionConfigurationTests
     {
         
-        [Test]
+        [Fact]
         public void The_validate_method_should_apply_AMQPconnection_idempotently()
         {
             ConnectionConfiguration connectionConfiguration = new ConnectionStringParser().Parse("amqp://amqphost:1234/");
@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests
             connectionConfiguration.Hosts.Single().Port.ShouldEqual(1234);
         }
 
-        [Test]
+        [Fact]
         public void The_AuthMechanisms_property_should_default_to_PlainMechanism()
         {
             ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration();

@@ -37,7 +37,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         private IAdvancedBus advancedBus;
         private IScheduleRepository scheduleRepository;
 
-        [Test]
+        [Fact]
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var id = Guid.NewGuid();
@@ -59,7 +59,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         }
 
 
-        [Test]
+        [Fact]
         public void Should_hadle_publish_timeout_()
         {
             schedulerService.OnHandleTimeoutTimerTick(null);

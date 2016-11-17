@@ -19,35 +19,35 @@ namespace EasyNetQ.Tests
             typeNameSerializer = new TypeNameSerializer();
         }
 
-        [Test]
+        [Fact]
         public void Should_serialize_a_type_name()
         {
             var typeName = typeNameSerializer.Serialize(typeof(string));
             typeName.ShouldEqual(expectedTypeName);
         }
 
-        [Test]
+        [Fact]
         public void Should_serialize_a_custom_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(SomeRandomClass));
             typeName.ShouldEqual(expectedCustomTypeName);
         }
 
-        [Test]
+        [Fact]
         public void Should_deserialize_a_type_name()
         {
             var type = typeNameSerializer.DeSerialize(expectedTypeName);
             type.ShouldEqual(typeof (string));
         }
 
-        [Test]
+        [Fact]
         public void Should_deserialize_a_custom_type()
         {
             var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
             type.ShouldEqual(typeof(SomeRandomClass));
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_exception_when_type_name_is_not_recognised()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_if_type_name_is_too_long()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_exception_if_type_name_is_null()
         {
             Assert.Throws<ArgumentException>(() =>

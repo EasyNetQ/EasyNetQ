@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests
             serviceProvider.Register<IGrandChild, GrandChild>();
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_class_with_dependencies()
         {
             var service = (IRoot)serviceProvider.Resolve(typeof (IRoot));
@@ -98,28 +98,28 @@ namespace EasyNetQ.Tests
             serviceProvider = defaultServiceProvider;
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_a_service_interface()
         {
             var resolvedService = serviceProvider.Resolve<IMyFirst>();
             resolvedService.ShouldBeTheSameAs(myFirst);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_a_delegate_service()
         {
             var resolvedService = serviceProvider.Resolve<SomeDelegate>();
             resolvedService.ShouldBeTheSameAs(someDelegate);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_a_service_with_dependencies()
         {
             var resolvedService = serviceProvider.Resolve<IMySecond>();
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_replace_bus_components()
         {
             var logger = Substitute.For<IEasyNetQLogger>();
@@ -128,7 +128,7 @@ namespace EasyNetQ.Tests
             logger.Received().DebugWrite("Trying to connect");
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_sneakily_get_the_service_provider()
         {
             IServiceProvider provider = null;

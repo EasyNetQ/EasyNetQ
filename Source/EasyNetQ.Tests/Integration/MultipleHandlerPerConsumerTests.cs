@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_cosume_multiple_message_types()
         {
             var countdownEvent = new CountdownEvent(3);

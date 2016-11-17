@@ -43,7 +43,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_name_exchange_after_interface()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -54,20 +54,20 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_name_type_as_actual_object_type()
         {
             properties.Type.ShouldEqual(implementationTypeName);
         }
 
-        [Test]
+        [Fact]
         public void Should_correctly_serialize_implementation()
         {
             var json = Encoding.UTF8.GetString(publishedMessage);
             json.ShouldEqual("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}");
         }
 
-        [Test]
+        [Fact]
         public void Should_publish_to_correct_exchange()
         {
             mockBuilder.Channels[0].Received().BasicPublish(

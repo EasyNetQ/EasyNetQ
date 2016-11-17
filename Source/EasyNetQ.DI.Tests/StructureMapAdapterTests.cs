@@ -31,13 +31,13 @@ namespace EasyNetQ.DI.Tests
             easynetQContainer = bus.Advanced.Container;
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_structure_map_adapter()
         {
             Assert.IsNotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_utilize_first_in_wins_registration_strategy_for_an_interface()
         {
             easynetQContainer.Register<IComponent>(sp => new FirstComponent());
@@ -46,7 +46,7 @@ namespace EasyNetQ.DI.Tests
             Assert.IsAssignableFrom<FirstComponent>(easynetQContainer.Resolve<IComponent>());
         }
 
-        [Test]
+        [Fact]
         public void Should_utilize_first_in_wins_registration_strategy_for_a_named_method()
         {
             easynetQContainer.Register<Func<int>>(sp => One);
@@ -55,7 +55,7 @@ namespace EasyNetQ.DI.Tests
             Assert.AreEqual(1, easynetQContainer.Resolve<Func<int>>()());
         }
 
-        [Test]
+        [Fact]
         public void Should_utilize_first_in_wins_registration_strategy_for_a_lambda_expression()
         {
             easynetQContainer.Register<Func<int>>(sp => () => 1);

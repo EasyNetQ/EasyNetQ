@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_try_to_reconnect_until_timeout()
         {
             try

@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_publish_some_animals()
         {
             var cat = new Cat
@@ -43,7 +43,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Publish<IAnimal>(dog);
         }
 
-        [Test]
+        [Fact]
         public void Should_consume_the_correct_message_type()
         {
             bus.Subscribe<IAnimal>("polymorphic_test", @interface =>

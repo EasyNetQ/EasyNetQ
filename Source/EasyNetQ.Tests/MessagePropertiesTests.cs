@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests
         {
         }
 
-        [Test]
+        [Fact]
         public void Should_copy_from_Rabbit_client_properties()
         {
             const string replyTo = "reply to";
@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
             properties.ReplyTo.ShouldEqual(replyTo);
         }
 
-        [Test]
+        [Fact]
         public void Should_copy_to_rabbit_client_properties()
         {
             const string replyTo = "reply to";
@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests
             destinationProperties.IsMessageIdPresent().ShouldBeFalse();
         }
 
-        [Test]
+        [Fact]
         public void Should_clone()
         {
             const string replyTo = "reply to";
@@ -66,7 +66,7 @@ namespace EasyNetQ.Tests
             destinationProperties.Headers.ShouldEqual(properties.Headers);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_write_debug_properties()
         {
             const string expectedDebugProperties = 
@@ -103,7 +103,7 @@ namespace EasyNetQ.Tests
             properties.ToString().ShouldEqual(expectedDebugProperties);
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_if_any_string_property_exceeds_255_chars()
         {
             var longInput = new String('*', 256);

@@ -38,7 +38,7 @@ namespace EasyNetQ.Scheduler.Tests
                 });
         }
 
-        [Test]
+        [Fact]
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var pendingSchedule = new List<ScheduleMe>

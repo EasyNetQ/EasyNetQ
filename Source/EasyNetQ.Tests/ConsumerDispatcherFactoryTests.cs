@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests
             dispatcherFactory.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_only_create_a_single_IConsumerDispatcher_instance()
         {
             var dispatcher1 = dispatcherFactory.GetConsumerDispatcher();
@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests
             dispatcher1.ShouldBeTheSameAs(dispatcher2);
         }
 
-        [Test]
+        [Fact]
         public void Should_dispose_dispatcher_when_factory_is_disposed()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests
             ((ConsumerDispatcher)dispatcher).IsDisposed.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_run_actions_on_the_consumer_thread()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests
             threadName.ShouldEqual("EasyNetQ consumer dispatch thread");
         }
 
-        [Test]
+        [Fact]
         public void Should_clear_queue_on_disconnect()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();

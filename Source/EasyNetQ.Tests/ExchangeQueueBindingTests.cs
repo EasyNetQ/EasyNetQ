@@ -39,14 +39,14 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -92,14 +92,14 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -147,14 +147,14 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -192,7 +192,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_delete_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
@@ -234,14 +234,14 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_an_exchange_instance()
         {
             exchange.ShouldNotBeNull();
             exchange.Name.ShouldEqual("my_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_an_exchange()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -252,7 +252,7 @@ namespace EasyNetQ.Tests
                     Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_add_correct_arguments()
         {
             arguments.ShouldNotBeNull();
@@ -281,14 +281,14 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_an_exchange_instance()
         {
             exchange.ShouldNotBeNull();
             exchange.Name.ShouldEqual("my_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_passively_declare_exchange()
         {
             mockBuilder.Channels.Count.ShouldEqual(1);
@@ -317,7 +317,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_delete_the_queue()
         {
             mockBuilder.Channels[0].Received().ExchangeDelete("my_exchange", false);
@@ -348,7 +348,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_binding_instance()
         {
             binding.ShouldNotBeNull();
@@ -358,7 +358,7 @@ namespace EasyNetQ.Tests
             ((IQueue) binding.Bindable).Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_a_binding()
         {
             mockBuilder.Channels[0].Received().QueueBind(
@@ -393,7 +393,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_unbind_the_exchange()
         {
             mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);

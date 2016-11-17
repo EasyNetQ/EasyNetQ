@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests
             advancedBus = mockBuilder.Bus.Advanced;
         }
 
-        [Test]
+        [Fact]
         public void Should_raise_blocked_event()
         {
             var blocked = false;
@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests
             advancedBus = mockBuilder.Bus.Advanced;
         }
 
-        [Test]
+        [Fact]
         public void Should_raise_unblocked_event()
         {
             var blocked = true;

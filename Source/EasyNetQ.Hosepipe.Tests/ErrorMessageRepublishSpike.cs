@@ -16,7 +16,7 @@ namespace EasyNetQ.Hosepipe.Tests
         [SetUp]
         public void SetUp() {}
 
-        [Test]
+        [Fact]
         public void Should_deserialise_error_message_correctly()
         {
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));
@@ -25,7 +25,7 @@ namespace EasyNetQ.Hosepipe.Tests
             error.Message.ShouldEqual("{ Text:\"Hello World\"}");
         }
 
-        [Test]
+        [Fact]
         public void Should_fail_to_deseralize_some_other_random_message()
         {
             const string randomMessage = "{\"Text\":\"Hello World\"}";

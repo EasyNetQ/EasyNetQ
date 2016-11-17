@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         [Explicit("Requires a RabbitMQ server on localhost")]
         public void Should_create_some_error_messages()
         {
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(1000);
         }
 
-        [Test]
+        [Fact]
         [Explicit("Requires a RabbitMQ server on localhost")]
         public void Should_be_able_to_subscribe_to_error_messages()
         {

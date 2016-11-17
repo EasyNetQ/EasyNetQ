@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_use_the_non_generic_subscribe_method()
         {
             var are = new AutoResetEvent(false);

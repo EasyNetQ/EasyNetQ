@@ -34,13 +34,13 @@ namespace EasyNetQ.DI.Tests
         private IBus bus;
         private Autofac.IContainer container;
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_autofac_module()
         {
             Assert.IsNotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_autosubscriber()
         {
             Assert.IsNotNull(bus);

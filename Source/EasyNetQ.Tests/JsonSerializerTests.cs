@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests
             serializer = new JsonSerializer(new TypeNameSerializer());
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_serialize_and_deserialize_a_message()
         {
             var message = new MyMessage {Text = "Hello World"};
@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
             message.Text.ShouldEqual(deseralizedMessage.Text);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_serialize_basic_properties()
         {
             var originalProperties = new BasicProperties
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests
             public A AorB { get; set; }
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties()
         {
             var bytes = serializer.MessageToBytes<PolyMessage>(new PolyMessage { AorB = new B() });
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests
             Assert.IsInstanceOf<B>(result.AorB);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties_when_using_TypeNameSerializer()
         {
             var typeName = new TypeNameSerializer().Serialize(typeof (PolyMessage));

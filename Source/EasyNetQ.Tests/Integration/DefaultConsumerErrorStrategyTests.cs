@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests
             }
         }
 
-        [Test]
+        [Fact]
         public void Should_not_reconnect_if_has_been_disposed()
         {
             const string originalMessage = "{ Text:\"Hello World\"}";
