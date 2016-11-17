@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Scheduler.Mongo",
   "title": "EasyNetQ.Scheduler.Mongo",
   "name": "EasyNetQ.Scheduler.Mongo",
@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "2.0.2-netcore0001"
+    "EasyNetQ": "99.0.0-dev"
   },
   "tools": {
     "dotnet-gitversion": {

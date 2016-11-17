@@ -1,5 +1,5 @@
 {
-  "version": "2.0.3-netcore0001",
+  "version": "99.0.0-dev",
   "description": "An adaptor to allow EasyNetQ to use Autofac as its internal IoC container",
   "title": "EasyNetQ.DI.Autofac",
   "name": "EasyNetQ.DI.Autofac",
@@ -36,7 +36,7 @@
 
   "dependencies": {
     "Autofac": "4.0.0",
-    "EasyNetQ": "2.0.2-netcore0001"
+    "EasyNetQ": "99.0.0-dev"
   },
 
   "tools": {

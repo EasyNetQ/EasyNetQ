@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Scheduler.Tests",
   "title": "EasyNetQ.Scheduler.Tests",
   "name": "EasyNetQ.Scheduler.Tests",
@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "dotnet-test-nunit": "3.4.0-beta-3",
-    "EasyNetQ": "2.0.2-netcore0001",
-    "EasyNetQ.Scheduler": "2.0.2-netcore0001",
+    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ.Scheduler": "99.0.0-dev",
     "NUnit": "3.5.0"
   },
   "tools": {

@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Scheduler",
   "title": "EasyNetQ.Scheduler",
   "name": "EasyNetQ.Scheduler",
@@ -37,7 +37,7 @@
     ]
   },
   "dependencies": {
-    "EasyNetQ": "2.0.2-netcore0001",
+    "EasyNetQ": "99.0.0-dev",
     "log4net": "2.0.5",
     "Newtonsoft.Json": "9.0.1",
     "RabbitMQ.Client": "4.1.1",

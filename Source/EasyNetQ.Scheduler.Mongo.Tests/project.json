@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Scheduler.Mongo.Tests",
   "title": "EasyNetQ.Scheduler.Mongo.Tests",
   "name": "EasyNetQ.Scheduler.Mongo.Tests",
@@ -34,9 +34,9 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "2.0.2-netcore0001",
     "dotnet-test-nunit": "3.4.0-beta-3",
-    "NUnit": "3.5.0",
+    "EasyNetQ": "99.0.0-dev",
+    "NUnit": "3.5.0"
   },
   "tools": {
     "dotnet-gitversion": {

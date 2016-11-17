@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Hosepipe.Tests",
   "title": "EasyNetQ.Hosepipe.Tests",
   "name": "EasyNetQ.Hosepipe.Tests",
@@ -34,8 +34,8 @@
   },
   "dependencies": {
     "dotnet-test-nunit": "3.4.0-beta-3",
-    "EasyNetQ": "2.0.2-netcore0001",
-    "EasyNetQ.Hosepipe": "2.0.2-netcore0001",
+    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ.Hosepipe": "99.0.0-dev",
     "NUnit": "3.5.0",
     "RabbitMQ.Client": "4.1.1"
   },

@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Hosepipe",
   "title": "EasyNetQ.Hosepipe",
   "name": "EasyNetQ.Hosepipe",
@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "2.0.2-netcore0001"
+    "EasyNetQ": "99.0.0-dev"
   },
 
   "tools": {
