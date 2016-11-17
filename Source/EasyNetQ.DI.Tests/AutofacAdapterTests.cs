@@ -45,11 +45,11 @@ namespace EasyNetQ.DI.Tests
         {
             Assert.IsNotNull(bus);
 
-            Assert.IsTrue(bus is RabbitBus);
+            Assert.True(bus is RabbitBus);
 
             var rabbitBus = (RabbitBus)bus;
 
-            Assert.IsTrue(rabbitBus.Advanced.Conventions is TestConventions);
+            Assert.True(rabbitBus.Advanced.Conventions is TestConventions);
         }
     }
 

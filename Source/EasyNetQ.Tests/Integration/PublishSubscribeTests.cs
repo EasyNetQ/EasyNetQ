@@ -71,7 +71,7 @@ namespace EasyNetQ.Tests.Integration
                         Text = "Exclusive " + i
                     });
             countdownEvent.Wait(10 * 1000);
-            Assert.IsTrue(firstCount == 10 && secondCount == 0 || firstCount == 0 && secondCount == 10);
+            Assert.True(firstCount == 10 && secondCount == 0 || firstCount == 0 && secondCount == 10);
             Console.WriteLine("Stopped consuming");
         }
 
@@ -273,7 +273,7 @@ namespace EasyNetQ.Tests.Integration
 
             var done = autoResetEvent.WaitOne(1000);
 
-            Assert.IsTrue(done);
+            Assert.True(done);
             CollectionAssert.Equal(received, expected);
 
             testLocalBus.Dispose();

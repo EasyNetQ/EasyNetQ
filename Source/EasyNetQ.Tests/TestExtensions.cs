@@ -58,12 +58,12 @@ namespace EasyNetQ.Tests
 
         public static void ShouldBeTrue(this bool source)
         {
-            Assert.IsTrue(source);
+            Assert.True(source);
         }
 
         public static void ShouldBeTrue(this bool source, string message)
         {
-            Assert.IsTrue(source, message);
+            Assert.True(source, message);
         }
 
         public static void ShouldBeFalse(this bool source)
