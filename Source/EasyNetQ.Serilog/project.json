@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "Serilog": "2.1.0",
+    "Serilog": "2.3.0",
     "EasyNetQ": "99.0.0-dev"
   },
   "tools": {
