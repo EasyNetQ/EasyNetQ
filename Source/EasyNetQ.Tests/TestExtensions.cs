@@ -68,12 +68,12 @@ namespace EasyNetQ.Tests
 
         public static void ShouldBeFalse(this bool source)
         {
-            Assert.IsFalse(source);
+            Assert.False(source);
         }
 
         public static void ShouldBeFalse(this bool source, string message)
         {
-            Assert.IsFalse(source, message);
+            Assert.False(source, message);
         }
 
         public static void ShouldBeEmpty<T>(this IEnumerable<T> collection)
