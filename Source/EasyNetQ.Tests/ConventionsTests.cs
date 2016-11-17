@@ -321,13 +321,13 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_Ack_failed_message()
         {
-            Assert.AreSame(AckStrategies.Ack, errorAckStrategy);
+            Assert.Same(AckStrategies.Ack, errorAckStrategy);
         }
         
         [Fact]
         public void Should_Ack_canceled_message()
         {
-            Assert.AreSame(AckStrategies.Ack, cancelAckStrategy);
+            Assert.Same(AckStrategies.Ack, cancelAckStrategy);
         }
     }
 }

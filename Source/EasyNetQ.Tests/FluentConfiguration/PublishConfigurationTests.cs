@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests.FluentConfiguration
 
             configuration.WithTopic(null);
 
-            Assert.AreEqual(configuration.Topic, "default");
+            Assert.Equal(configuration.Topic, "default");
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.FluentConfiguration
 
             configuration.WithTopic("custom");
 
-            Assert.AreEqual(configuration.Topic, "custom");
+            Assert.Equal(configuration.Topic, "custom");
         }
     }
 }

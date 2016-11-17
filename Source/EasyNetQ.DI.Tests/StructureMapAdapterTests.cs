@@ -52,7 +52,7 @@ namespace EasyNetQ.DI.Tests
             easynetQContainer.Register<Func<int>>(sp => One);
             easynetQContainer.Register<Func<int>>(sp => Two);
 
-            Assert.AreEqual(1, easynetQContainer.Resolve<Func<int>>()());
+            Assert.Equal(1, easynetQContainer.Resolve<Func<int>>()());
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace EasyNetQ.DI.Tests
             easynetQContainer.Register<Func<int>>(sp => () => 1);
             easynetQContainer.Register<Func<int>>(sp => () => 2);
 
-            Assert.AreEqual(1, easynetQContainer.Resolve<Func<int>>()());
+            Assert.Equal(1, easynetQContainer.Resolve<Func<int>>()());
         }
 
         [TearDown]

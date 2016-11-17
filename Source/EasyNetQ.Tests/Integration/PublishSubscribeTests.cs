@@ -274,7 +274,7 @@ namespace EasyNetQ.Tests.Integration
             var done = autoResetEvent.WaitOne(1000);
 
             Assert.IsTrue(done);
-            CollectionAssert.AreEqual(received, expected);
+            CollectionAssert.Equal(received, expected);
 
             testLocalBus.Dispose();
         }

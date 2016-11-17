@@ -144,7 +144,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
             bus.CancelFuturePublish("my_cancellation_key");
 
             Thread.Sleep(10000);
-            Assert.AreEqual(1, messagesReceived);
+            Assert.Equal(1, messagesReceived);
         }
     }
 }

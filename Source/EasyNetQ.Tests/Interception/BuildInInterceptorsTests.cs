@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.Interception
             var gZipInterceptor = new GZipInterceptor();
             var body = Encoding.UTF8.GetBytes("haha");
             var rawMessage = new RawMessage(new MessageProperties(), body);
-            Assert.AreEqual(body, gZipInterceptor.OnConsume(gZipInterceptor.OnProduce(rawMessage)).Body);
+            Assert.Equal(body, gZipInterceptor.OnConsume(gZipInterceptor.OnProduce(rawMessage)).Body);
         }
 
 
@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Interception
             var tripleDESInterceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="));
             var body = Encoding.UTF8.GetBytes("haha");
             var rawMessage = new RawMessage(new MessageProperties(), body);
-            Assert.AreEqual(body, tripleDESInterceptor.OnConsume(tripleDESInterceptor.OnProduce(rawMessage)).Body);
+            Assert.Equal(body, tripleDESInterceptor.OnConsume(tripleDESInterceptor.OnProduce(rawMessage)).Body);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests.Interception
             var compositeInterceptor = new CompositeInterceptor();
             compositeInterceptor.Add(first);
             compositeInterceptor.Add(second);
-            Assert.AreEqual(secondMessage, compositeInterceptor.OnProduce(sourceMessage));
+            Assert.Equal(secondMessage, compositeInterceptor.OnProduce(sourceMessage));
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests.Interception
             var compositeInterceptor = new CompositeInterceptor();
             compositeInterceptor.Add(first);
             compositeInterceptor.Add(second);
-            Assert.AreEqual(firstMessage, compositeInterceptor.OnConsume(sourceMessage));
+            Assert.Equal(firstMessage, compositeInterceptor.OnConsume(sourceMessage));
         }
     }
 }

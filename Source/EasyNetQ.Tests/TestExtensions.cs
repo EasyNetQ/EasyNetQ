@@ -21,13 +21,13 @@ namespace EasyNetQ.Tests
 
         public static T ShouldEqual<T>(this T actual, object expected)
         {
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
             return actual;
         }
 
         public static T ShouldEqual<T>(this T actual, object expected, string message)
         {
-            Assert.AreEqual(expected, actual, message);
+            Assert.Equal(expected, actual, message);
             return actual;
         }
 
@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests
 
         public static void ShouldBeTheSameAs(this object actual, object expected)
         {
-            Assert.AreSame(expected, actual);
+            Assert.Same(expected, actual);
         }
 
         public static T CastTo<T>(this object source)
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests
 
         public static void ShouldBeEmpty<T>(this IEnumerable<T> collection)
         {
-            Assert.AreEqual(collection.Count(), 0,
+            Assert.Equal(collection.Count(), 0,
             string.Format("Expected collection to be empty, but had {0} items", collection.Count()));
         }
 

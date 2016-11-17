@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests
         public void TestWhenPersistentMessagesIsTrue(Type messageType, bool isPersistent)
         {
             var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration {PersistentMessages = true});
-            Assert.AreEqual(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
+            Assert.Equal(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests
         public void TestWhenPersistentMessagesIsFalse(Type messageType, bool isPersistent)
         {
             var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration { PersistentMessages = false });
-            Assert.AreEqual(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
+            Assert.Equal(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
         }
     }
 }

@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_return_Ack()
         {
-            Assert.AreEqual(AckResult.Ack, result);
+            Assert.Equal(AckResult.Ack, result);
         } 
     }
 
@@ -57,7 +57,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_return_Nack()
         {
-            Assert.AreEqual(AckResult.Nack, result);
+            Assert.Equal(AckResult.Nack, result);
         }
     }
 
@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_return_Nack()
         {
-            Assert.AreEqual(AckResult.Nack, result);
+            Assert.Equal(AckResult.Nack, result);
         }
     }
 
@@ -107,13 +107,13 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_have_no_interaction_with_model()
         {
             var rec = model.ReceivedCalls();
-            Assert.AreEqual(rec.GetEnumerator().MoveNext(), false);
+            Assert.Equal(rec.GetEnumerator().MoveNext(), false);
         }
 
         [Fact]
         public void Should_return_Nothing()
         {
-            Assert.AreEqual(AckResult.Nothing, result);
+            Assert.Equal(AckResult.Nothing, result);
         }
     }
 }

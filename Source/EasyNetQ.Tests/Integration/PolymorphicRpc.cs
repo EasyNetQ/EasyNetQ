@@ -79,8 +79,8 @@ namespace EasyNetQ.Tests.Integration
 
             IAnimal response = bus.Request<IAnimal, IAnimal>(request);
 
-            Assert.AreEqual(request.Name, response.Name);
-            Assert.AreSame(request.GetType(), response.GetType());
+            Assert.Equal(request.Name, response.Name);
+            Assert.Same(request.GetType(), response.GetType());
         }
     }
 }
