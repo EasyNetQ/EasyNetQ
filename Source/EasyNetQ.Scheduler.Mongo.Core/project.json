@@ -1,8 +1,8 @@
 {
-  "version": "2.0.3-netcore0001",
-  "description": "An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container",
-  "title": "EasyNetQ.DI.SimpleInjector",
-  "name": "EasyNetQ.DI.SimpleInjector",
+  "version": "2.0.2-netcore0001",
+  "description": "EasyNetQ.Scheduler.Mongo.Core",
+  "title": "EasyNetQ.Scheduler.Mongo.Core",
+  "name": "EasyNetQ.Scheduler.Mongo.Core",
   "packOptions": {
     "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
     "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
@@ -34,10 +34,8 @@
     }
   },
   "dependencies": {
-    "SimpleInjector": "3.2.7",
     "EasyNetQ": "2.0.2-netcore0001"
   },
-
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",
@@ -56,7 +54,9 @@
           "NET_STANDARD"
         ]
       },
-      "dependencies": {}
+      "dependencies": {
+
+      }
     },
     "net451": {
       "buildOptions": {
@@ -64,7 +64,9 @@
           "NETFX"
         ]
       },
-      "frameworkAssemblies": {}
+      "frameworkAssemblies": {
+
+      }
     }
   }
 }

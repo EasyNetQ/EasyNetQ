@@ -26,7 +26,7 @@
         "imports": "portable-net45+win8",
         "dependencies": {
           "Microsoft.NETCore.App": {
-            "version": "1.0.0-*",
+            "version": "1.0.1",
             "type": "platform"
           },
           "System.Net.Http": "4.1.0"
@@ -41,3 +41,4 @@
 
     }
   }
+ 
