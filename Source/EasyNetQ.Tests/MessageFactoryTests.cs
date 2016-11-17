@@ -3,7 +3,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class MessageFactoryTests
     {
         [Test]

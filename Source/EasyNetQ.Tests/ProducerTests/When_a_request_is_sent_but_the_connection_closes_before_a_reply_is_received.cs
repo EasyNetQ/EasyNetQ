@@ -8,7 +8,6 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
     public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received
     {
         private MockBuilder mockBuilder;

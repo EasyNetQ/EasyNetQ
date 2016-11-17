@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class PublishSubscribeWithTopicsTests
     {
         private IBus bus;

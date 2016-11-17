@@ -8,7 +8,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class When_a_connection_becomes_blocked
     {
         private MockBuilder mockBuilder;
@@ -35,7 +34,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_connection_becomes_unblocked
     {
         private MockBuilder mockBuilder;

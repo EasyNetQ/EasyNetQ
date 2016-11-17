@@ -6,7 +6,6 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class TypeNameSerializerTests
     {
         private readonly string expectedTypeName = "System.String:" + typeof(string).GetTypeInfo().Assembly.GetName().Name;

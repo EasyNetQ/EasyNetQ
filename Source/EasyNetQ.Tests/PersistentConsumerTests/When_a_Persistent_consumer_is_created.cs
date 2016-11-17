@@ -5,7 +5,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
-    [TestFixture]
     public class When_a_Persistent_consumer_starts_consuming : Given_a_PersistentConsumer
     {
         public override void AdditionalSetup()

@@ -5,7 +5,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class SubscribeWithExpiresTests
     {
         [Test, Explicit("Needs a Rabbit instance on localhost to work")]

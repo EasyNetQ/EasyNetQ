@@ -7,7 +7,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class FileMessageWriterTests
     {
         private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), @"MessageOutput");

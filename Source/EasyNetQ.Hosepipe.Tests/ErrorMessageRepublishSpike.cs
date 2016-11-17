@@ -9,7 +9,6 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class ErrorMessageRepublishSpike
     {
         readonly ISerializer serializer = new JsonSerializer(new TypeNameSerializer());

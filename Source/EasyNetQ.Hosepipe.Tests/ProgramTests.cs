@@ -10,7 +10,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class ProgramTests
     {
         private Program program;

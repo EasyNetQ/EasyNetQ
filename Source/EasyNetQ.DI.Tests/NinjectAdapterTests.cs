@@ -9,8 +9,7 @@ namespace EasyNetQ.DI.Tests
     /// policy. The internal DefaultServiceProvider works this way, as does Windsor.
     /// However, Ninject doesn't allow more than one registration of a service, it 
     /// throws an exception, and StructureMap has a last-to-register-wins policy.
-    /// </summary>    
-    [TestFixture]    
+    /// </summary>        
     public class NinjectAdapterTests
     {
         private IKernel container;

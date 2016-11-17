@@ -8,7 +8,6 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class JsonSerializerTests
     {
         private ISerializer serializer;

@@ -7,7 +7,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.Interception
 {
-    [TestFixture]
     public partial class InterceptionExtensionsTests
     {
         

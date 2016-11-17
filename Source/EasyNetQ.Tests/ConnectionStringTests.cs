@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ConnectionStringTests
     {
         const string connectionStringValue =

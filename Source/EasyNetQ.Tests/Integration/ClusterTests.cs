@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class ClusterTests
     {
         private const string clusterHost1 = "ubuntu";

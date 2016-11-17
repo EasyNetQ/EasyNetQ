@@ -6,7 +6,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ModelCleanupTests
     {
         private IBus bus;

@@ -10,8 +10,7 @@ namespace EasyNetQ.DI.Tests
     /// However, Ninject & LightInject don't allow more than one registration of a
     /// service, they throw an exception, and StructureMap has a last-to-register-wins
     /// policy.
-    /// </summary>    
-    [TestFixture]    
+    /// </summary>        
     public class LightInjectAdapterTests
     {
         private IServiceContainer container;

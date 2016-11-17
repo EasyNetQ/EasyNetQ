@@ -5,7 +5,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
-    [TestFixture]
     [Explicit("Required a database")]
     public class ScheduleRepositoryTests
     {

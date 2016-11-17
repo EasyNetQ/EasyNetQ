@@ -7,7 +7,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
     {
         private Exception exception;

@@ -9,7 +9,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class MessagePropertiesTests
     {
         [SetUp]

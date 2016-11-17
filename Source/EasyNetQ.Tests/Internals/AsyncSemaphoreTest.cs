@@ -3,7 +3,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Internals
 {
-    [TestFixture]
     public class AsyncSemaphoreTest
     {
         [Test]

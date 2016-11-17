@@ -7,7 +7,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class MultiThreadedPublisherTests
     {
         private IBus bus;

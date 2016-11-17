@@ -12,7 +12,6 @@ namespace EasyNetQ.DI.Tests
     /// throws an exception. StructureMap has a last-to-register-wins policy 
     /// by default which has been overrided in the Adapter implementation.
     /// </summary>
-    [TestFixture]
     [Explicit("Starts a connection to localhost")]
     public class StructureMapAdapterTests
     {

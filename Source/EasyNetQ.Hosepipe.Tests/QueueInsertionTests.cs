@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class QueueInsertionTests
     {
         private IQueueInsertion queueInsertion;

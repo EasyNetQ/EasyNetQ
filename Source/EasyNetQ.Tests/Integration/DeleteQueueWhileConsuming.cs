@@ -8,7 +8,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ on localhost")]
     public class DeleteQueueWhileConsuming
     {

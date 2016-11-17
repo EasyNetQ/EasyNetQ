@@ -11,7 +11,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
-    [TestFixture]
     public abstract class Given_a_PersistentConsumer
     {
         protected MockBuilder mockBuilder;

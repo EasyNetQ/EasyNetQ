@@ -6,7 +6,6 @@ using System;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
-    [TestFixture]
     public class SchedulerServiceTests
     {
         [SetUp]

@@ -10,7 +10,6 @@ namespace EasyNetQ.DI.Tests
     ///     However, Ninject doesn't allow more than one registration of a service, it
     ///     throws an exception, and StructureMap and Autofac have a last-to-register-wins policy.
     /// </summary>
-    [TestFixture]
     [Explicit("Starts a connection to localhost")]
     public class AutofacAdapterTests
     {

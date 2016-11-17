@@ -8,7 +8,6 @@ using EasyNetQ.MessageVersioning;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    [TestFixture]
     public class MessageVersioningExtensionsTests
     {
         [Test]

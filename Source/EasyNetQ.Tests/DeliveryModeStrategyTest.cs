@@ -19,7 +19,6 @@ namespace EasyNetQ.Tests
     {
     }
 
-    [TestFixture]
     public class DeliveryModeStrategyTest
     {
         [Test]

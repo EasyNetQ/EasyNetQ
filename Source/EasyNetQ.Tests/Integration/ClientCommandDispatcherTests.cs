@@ -12,7 +12,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ instance on localhost")]
     public class ClientCommandDispatcherTests
     {

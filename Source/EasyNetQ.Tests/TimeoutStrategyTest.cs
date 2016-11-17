@@ -12,7 +12,6 @@ namespace EasyNetQ.Tests
     {
     }
 
-    [TestFixture]
     public class TimeoutStrategyTest
     {
         [Test]

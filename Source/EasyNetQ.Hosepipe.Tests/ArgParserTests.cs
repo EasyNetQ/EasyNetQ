@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class ArgParserTests
     {
         private ArgParser argParser;

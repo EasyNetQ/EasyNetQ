@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class DefaultMessageConsumerTests
     {
         [Test]

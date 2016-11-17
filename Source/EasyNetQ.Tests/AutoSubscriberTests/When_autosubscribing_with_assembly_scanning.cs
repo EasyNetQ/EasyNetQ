@@ -9,7 +9,6 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    [TestFixture]
     public class When_autosubscribing_with_assembly_scanning
     {
         private MockBuilder mockBuilder;

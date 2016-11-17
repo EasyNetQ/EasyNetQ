@@ -9,7 +9,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit]
     public class AdvancedApiPingPongTest_with_transient_queue
     {

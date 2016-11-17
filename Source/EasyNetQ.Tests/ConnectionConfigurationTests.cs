@@ -10,7 +10,6 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ConnectionConfigurationTests
     {
         

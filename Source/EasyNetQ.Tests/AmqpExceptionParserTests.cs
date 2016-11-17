@@ -5,7 +5,6 @@ using EasyNetQ.AmqpExceptions;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class AmqpExceptionParserTests
     {
         [Test]

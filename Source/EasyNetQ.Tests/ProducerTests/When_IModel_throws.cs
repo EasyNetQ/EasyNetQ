@@ -9,7 +9,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
     public class When_IModel_throws_because_of_closed_connection
     {
         private MockBuilder mockBuilder;

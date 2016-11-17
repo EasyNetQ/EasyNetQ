@@ -8,7 +8,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.ConnectionString
 {
-    [TestFixture]
     public class ConnectionStringParserTests
     {
         private ConnectionStringParser connectionStringParser;

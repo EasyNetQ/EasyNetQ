@@ -8,7 +8,6 @@ using System.Linq;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class When_consume_is_called : ConsumerTestBase
     {
         protected override void AdditionalSetUp()

@@ -10,7 +10,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    [TestFixture]
     public class When_an_action_is_invoked
     {
         private IClientCommandDispatcher dispatcher;

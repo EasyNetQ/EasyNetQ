@@ -10,7 +10,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    [TestFixture]
     public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again
     {
         private IPersistentChannel persistentChannel;

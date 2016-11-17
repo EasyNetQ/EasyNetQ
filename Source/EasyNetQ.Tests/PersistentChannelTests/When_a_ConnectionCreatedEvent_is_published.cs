@@ -5,7 +5,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    [TestFixture]
     public class When_a_ConnectionCreatedEvent_is_published
     {
         private IPersistentConnection persistentConnection;

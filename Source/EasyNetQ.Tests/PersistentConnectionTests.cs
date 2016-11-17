@@ -10,7 +10,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class PersistentConnectionTests
     {
         [Test]

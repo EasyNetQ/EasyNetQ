@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    [TestFixture]
     public class MessageVersionStackTests
     {
         [Test]

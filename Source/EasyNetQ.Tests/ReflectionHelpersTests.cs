@@ -6,7 +6,6 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ReflectionHelpersTests
     {
         [Test]

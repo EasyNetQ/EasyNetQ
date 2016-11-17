@@ -8,7 +8,6 @@ using System.Text;
 
 namespace EasyNetQ.Scheduler.Tests
 {
-    [TestFixture]
     [Explicit("Required a database")]
     public class ScheduleRepositoryTests
     {

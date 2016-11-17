@@ -7,7 +7,6 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    [TestFixture]
     public class When_autosubscribing_with_subscription_configuration_attribute_no_expires
     {
         private IBus bus;

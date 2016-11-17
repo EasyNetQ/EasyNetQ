@@ -10,7 +10,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
     public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder
     {
         private MockBuilder mockBuilder;

@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace EasyNetQ.Scheduler.Tests
 {
-    [TestFixture]
     public class SchedulerServiceTests
     {
         private SchedulerService schedulerService;

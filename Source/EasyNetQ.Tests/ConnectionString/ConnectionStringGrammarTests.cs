@@ -7,7 +7,6 @@ using Sprache;
 
 namespace EasyNetQ.Tests.ConnectionString
 {
-    [TestFixture]
     public class ConnectionStringGrammarTests
     {
         [SetUp]

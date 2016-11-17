@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class When_a_queue_is_declared
     {
         private MockBuilder mockBuilder;
@@ -62,7 +61,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange
     {
         private MockBuilder mockBuilder;
@@ -118,7 +116,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_queue_is_declared_With_EmptyDeadLetterExchange
     {
         private MockBuilder mockBuilder;
@@ -174,7 +171,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_queue_is_deleted
     {
         private MockBuilder mockBuilder;
@@ -203,7 +199,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_an_exchange_is_declared
     {
         private MockBuilder mockBuilder;
@@ -265,7 +260,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_an_exchange_is_declared_passively
     {
         private MockBuilder mockBuilder;
@@ -302,7 +296,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_an_exchange_is_deleted
     {
         private MockBuilder mockBuilder;
@@ -331,7 +324,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_queue_is_bound_to_an_exchange
     {
         private MockBuilder mockBuilder;
@@ -377,7 +369,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_queue_is_unbound_from_an_exchange
     {
         private MockBuilder mockBuilder;

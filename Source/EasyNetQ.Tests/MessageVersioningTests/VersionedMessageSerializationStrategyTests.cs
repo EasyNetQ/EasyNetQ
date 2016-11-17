@@ -9,7 +9,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    [TestFixture]
     public class VersionedMessageSerializationStrategyTests
     {
         private const string AlternativeMessageTypesHeaderKey = "Alternative-Message-Types";

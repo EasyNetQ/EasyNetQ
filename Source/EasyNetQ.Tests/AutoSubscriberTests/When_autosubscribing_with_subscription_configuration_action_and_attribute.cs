@@ -8,7 +8,6 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    [TestFixture]
     public class When_autosubscribing_with_subscription_configuration_action_and_attribute
     {
         private IBus bus;

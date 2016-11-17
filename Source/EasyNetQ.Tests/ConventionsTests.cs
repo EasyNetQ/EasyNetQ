@@ -12,7 +12,6 @@ using System.Linq;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
 	public class When_using_default_conventions
 	{
 		private Conventions conventions;
@@ -85,7 +84,6 @@ namespace EasyNetQ.Tests
         }        
 	}
 
-    [TestFixture]
     public class When_using_QueueAttribute
     {
         private Conventions conventions;
@@ -148,7 +146,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-	[TestFixture]
 	public class When_publishing_a_message
 	{
         private MockBuilder mockBuilder;
@@ -209,7 +206,6 @@ namespace EasyNetQ.Tests
         }
 	}
 
-    [TestFixture]
     public class When_registering_response_handler
     {
         private MockBuilder mockBuilder;
@@ -258,7 +254,6 @@ namespace EasyNetQ.Tests
     }
 
 
-    [TestFixture]
     public class When_using_default_consumer_error_strategy
     {
         private DefaultConsumerErrorStrategy errorStrategy;

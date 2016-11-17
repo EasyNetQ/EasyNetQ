@@ -4,7 +4,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     {
         protected override void AdditionalSetUp()

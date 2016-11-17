@@ -9,7 +9,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    [TestFixture]
     public class VersionedPublishExchangeDeclareStrategyTests
     {
         [Test]

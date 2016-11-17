@@ -8,7 +8,6 @@ using System.Threading;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class RequestResponseTests
     {
         private IBus bus;

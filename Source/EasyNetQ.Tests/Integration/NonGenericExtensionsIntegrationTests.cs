@@ -7,7 +7,6 @@ using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ instance on localhost to work")]
     public class NonGenericExtensionsIntegrationTests
     {

@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    [TestFixture]
     public class MessageTypePropertyTests
     {
         private const string AlternativeMessageTypesHeaderKey = "Alternative-Message-Types";

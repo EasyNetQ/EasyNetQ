@@ -9,7 +9,6 @@ using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.NonGeneric
 {
-    [TestFixture]
     public class NonGenericExtensionsTests
     {
         private MockBuilder mockBuilder;

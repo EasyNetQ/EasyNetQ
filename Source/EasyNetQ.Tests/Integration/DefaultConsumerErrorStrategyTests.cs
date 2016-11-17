@@ -13,7 +13,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class DefaultConsumerErrorStrategyTests
     {
         private DefaultConsumerErrorStrategy consumerErrorStrategy;

@@ -7,7 +7,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a local RabbitMQ instance to work")]
     public class PolymorphicRpc
     {

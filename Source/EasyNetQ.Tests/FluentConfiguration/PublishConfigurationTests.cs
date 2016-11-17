@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.FluentConfiguration
 {
-    [TestFixture]
     public class PublishConfigurationTests
     {
         [Test]

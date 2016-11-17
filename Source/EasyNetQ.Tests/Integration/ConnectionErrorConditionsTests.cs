@@ -5,7 +5,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class ConnectionErrorConditionsTests
     {
         [SetUp]

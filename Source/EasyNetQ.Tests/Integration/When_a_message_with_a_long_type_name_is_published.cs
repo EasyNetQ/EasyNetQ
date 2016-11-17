@@ -5,7 +5,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     public class When_a_message_with_a_long_type_name_is_published
     {
         private IBus bus;

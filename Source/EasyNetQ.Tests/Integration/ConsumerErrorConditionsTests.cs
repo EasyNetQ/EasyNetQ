@@ -12,7 +12,6 @@ namespace EasyNetQ.Tests
 {
     using EasyNetQ.Loggers;
 
-    [TestFixture]
     public class ConsumerErrorConditionsTests
     {
         private IBus bus;

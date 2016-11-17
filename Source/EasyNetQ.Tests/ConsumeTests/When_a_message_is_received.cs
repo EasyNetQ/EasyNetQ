@@ -9,7 +9,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class When_a_message_is_received
     {
         private MockBuilder mockBuilder;

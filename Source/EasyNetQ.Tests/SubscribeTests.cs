@@ -13,7 +13,6 @@ using System.Linq;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class When_subscribe_is_called
     {
         private MockBuilder mockBuilder;
@@ -125,7 +124,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_message_is_delivered
     {
         private MockBuilder mockBuilder;
@@ -219,7 +217,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_the_handler_throws_an_exception
     {
         private MockBuilder mockBuilder;
@@ -333,7 +330,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_a_subscription_is_cancelled_by_the_user
     {
         private MockBuilder mockBuilder;

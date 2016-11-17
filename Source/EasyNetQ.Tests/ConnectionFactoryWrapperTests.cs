@@ -5,7 +5,6 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ConnectionFactoryWrapperTests
     {
         private const string VHost = "vhost";

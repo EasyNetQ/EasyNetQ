@@ -12,7 +12,6 @@ using System.Linq;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class When_publish_is_called
     {
         private const string correlationId = "abc123";
@@ -113,7 +112,6 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
     public class When_publish_with_topic_is_called
     {
         private MockBuilder mockBuilder;

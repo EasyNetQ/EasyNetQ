@@ -6,7 +6,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
     public class When_a_request_is_sent_but_no_reply_is_received
     {
         private MockBuilder mockBuilder;

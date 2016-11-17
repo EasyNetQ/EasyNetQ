@@ -11,7 +11,6 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
 {
-    [TestFixture]
     public class When_a_user_handler_is_executed
     {
         private IHandlerRunner handlerRunner;

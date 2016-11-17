@@ -8,7 +8,6 @@ using NUnit.Framework;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class When_a_polymorphic_message_is_delivered_to_the_consumer
     {
         private MockBuilder mockBuilder;
