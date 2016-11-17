@@ -1,8 +1,8 @@
-﻿using System;
-using EasyNetQ.Scheduler.Mongo.Core;
+﻿using EasyNetQ.Scheduler.Mongo.Core;
 using EasyNetQ.Topology;
+using NSubstitute;
 using NUnit.Framework;
-using Rhino.Mocks;
+using System;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
@@ -12,17 +12,17 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         [SetUp]
         public void SetUp()
         {
-            bus = MockRepository.GenerateStub<IBus>();
-            advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
+            bus = Substitute.For<IBus>();
+            advancedBus = Substitute.For<IAdvancedBus>();
 
-            bus.Stub(x => x.IsConnected).Return(true);
-            bus.Stub(x => x.Advanced).Return(advancedBus);
+            bus.IsConnected.Returns(true);
+            bus.Advanced.Returns(advancedBus);
 
-            scheduleRepository = MockRepository.GenerateStub<IScheduleRepository>();
+            scheduleRepository = Substitute.For<IScheduleRepository>();
 
             schedulerService = new SchedulerService(
                 bus,
-                MockRepository.GenerateStub<IEasyNetQLogger>(),
+                Substitute.For<IEasyNetQLogger>(),
                 scheduleRepository,
                 new SchedulerServiceConfiguration
                     {
@@ -42,7 +42,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var id = Guid.NewGuid();
-            scheduleRepository.Stub(x => x.GetPending()).Return(new Schedule
+            scheduleRepository.GetPending().Returns(new Schedule
                 {
                     Id = id,
                     BindingKey = "msg1"
@@ -50,13 +50,13 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
 
             schedulerService.OnPublishTimerTick(null);
 
-            scheduleRepository.AssertWasCalled(x => x.MarkAsPublished(id));
-            advancedBus.AssertWasCalled(x => x.Publish(
-                Arg<Exchange>.Is.Anything,
-                Arg<string>.Is.Equal("msg1"),
-                Arg<bool>.Is.Anything,
-                Arg<MessageProperties>.Is.Anything,
-                Arg<byte[]>.Is.Anything));
+            scheduleRepository.Received().MarkAsPublished(id);
+            advancedBus.Received().Publish(
+                Arg.Any<IExchange>(),
+                Arg.Is<string>("msg1"),
+                Arg.Any<bool>(),
+                Arg.Any<MessageProperties>(),
+                Arg.Any<byte[]>());
         }
 
 
@@ -64,7 +64,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         public void Should_hadle_publish_timeout_()
         {
             schedulerService.OnHandleTimeoutTimerTick(null);
-            scheduleRepository.AssertWasCalled(x => x.HandleTimeout());
+            scheduleRepository.Received().HandleTimeout();
         }
     }
 }
