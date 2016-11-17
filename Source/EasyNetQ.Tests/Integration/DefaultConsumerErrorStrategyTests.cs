@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests
                 var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(), true);
                 if (getArgs == null)
                 {
-                    Assert.Fail("Nothing on the error queue");
+                    Assert.True(false, "Nothing on the error queue");
                 }
                 else
                 {

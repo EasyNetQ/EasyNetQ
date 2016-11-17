@@ -126,7 +126,7 @@ namespace EasyNetQ.Tests
                 }
                 if (!threw)
                 {
-                    Assert.Fail("Over length property set didn't fail");
+                    Assert.True(false, "Over length property set didn't fail");
                 }
             }
         }
