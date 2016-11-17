@@ -38,7 +38,7 @@ namespace EasyNetQ.Scheduler.Tests
 
         public static void ShouldBe<T>(this object actual)
         {
-            Assert.IsInstanceOf<T>(actual);
+            Assert.IsType<T>(actual);
         }
 
         public static void ShouldBeNull(this object actual)
