@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.Integration
             var request = new RpcRequest { Value = 5 };
             var response = bus.Request<RpcRequest, RpcResponse>(request);
 
-            Assert.IsNotNull(response);
+            Assert.NotNull(response);
             Assert.True(request.Value == response.Value);
         }
 

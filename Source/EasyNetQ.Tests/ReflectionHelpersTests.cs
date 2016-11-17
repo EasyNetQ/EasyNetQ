@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests
         public void ShouldCreateClassWithDefaultConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance<ClassWithDefaultConstuctor>();
-            Assert.IsNotNull(obj);
+            Assert.NotNull(obj);
             Assert.True(obj.GetType() == typeof(ClassWithDefaultConstuctor));
         }
 
@@ -62,7 +62,7 @@ namespace EasyNetQ.Tests
         public void ShouldCreateClassWithSingleParameterConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance(typeof(ClassWithOneParameterConstructor), 1);
-            Assert.IsNotNull(obj);
+            Assert.NotNull(obj);
             Assert.True(obj.GetType() == typeof(ClassWithOneParameterConstructor));
         }
 
@@ -114,7 +114,7 @@ namespace EasyNetQ.Tests
         public void ShouldCreateClassWithDualParameterConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance(typeof(ClassWithTwoParametersConstructor), 1, 2);
-            Assert.IsNotNull(obj);
+            Assert.NotNull(obj);
             Assert.True(obj.GetType() == typeof(ClassWithTwoParametersConstructor));
         }
 
@@ -208,8 +208,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void ShouldGetAttribute()
         {
-            Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
-            Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
+            Assert.NotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
+            Assert.NotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
         }
     }
 

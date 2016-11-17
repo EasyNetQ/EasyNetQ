@@ -9,13 +9,13 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
     {
         public static T ShouldNotBeNull<T>(this T obj)
         {
-            Assert.IsNotNull(obj);
+            Assert.NotNull(obj);
             return obj;
         }
 
         public static T ShouldNotBeNull<T>(this T obj, string message)
         {
-            Assert.IsNotNull(obj, message);
+            Assert.NotNull(obj, message);
             return obj;
         }
 

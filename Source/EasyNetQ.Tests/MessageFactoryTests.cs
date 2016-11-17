@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests
 
             var genericMessage = MessageFactory.CreateInstance(typeof(MyMessage), message);
 
-            Assert.IsNotNull(genericMessage);
+            Assert.NotNull(genericMessage);
             Assert.IsInstanceOf<Message<MyMessage>>(genericMessage);
             Assert.IsInstanceOf<MyMessage>(genericMessage.GetBody());
             Assert.True(genericMessage.MessageType == typeof(MyMessage));
@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
             var properties = new MessageProperties { CorrelationId = Guid.NewGuid().ToString() };
             var genericMessageWithProperties = MessageFactory.CreateInstance(typeof(MyMessage), message, properties);
 
-            Assert.IsNotNull(genericMessageWithProperties);
+            Assert.NotNull(genericMessageWithProperties);
             Assert.IsInstanceOf<Message<MyMessage>>(genericMessageWithProperties);
             Assert.IsInstanceOf<MyMessage>(genericMessageWithProperties.GetBody());
             Assert.True(genericMessageWithProperties.MessageType == typeof(MyMessage));

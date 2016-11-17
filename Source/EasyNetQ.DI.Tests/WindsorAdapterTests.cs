@@ -30,13 +30,13 @@ namespace EasyNetQ.DI.Tests
         [Fact]
         public void Should_create_bus_with_windsor_adapter()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
         [Fact]
         public void Should_resolve_test_conventions()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
 
             var rabbitBus = (RabbitBus)bus;
 
