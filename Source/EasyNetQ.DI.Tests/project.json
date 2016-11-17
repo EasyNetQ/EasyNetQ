@@ -37,6 +37,11 @@
           "version": "1.0.1",
           "type": "platform"
         }
+      },
+      "buildOptions": {
+        "compile": {
+          "excludeFiles": [ "WindsorAdapterTests.cs" ]
+        }
       }
     },
     "net451": {
