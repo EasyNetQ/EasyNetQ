@@ -31,10 +31,16 @@
   "buildOptions": {
     "compile": {
       "includeFiles": "..\\Version.cs"
-    }
+    },
+    "copyToOutput": [
+      "log4net.config"
+    ]
   },
   "dependencies": {
-    "EasyNetQ": "99.0.0-dev"
+    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ.Scheduler.Mongo.Core": "99.0.0-dev",
+    "log4net": "2.0.5",
+    "Topshelf": "3.1.4"
   },
   "tools": {
     "dotnet-gitversion": {
@@ -49,7 +55,9 @@
   },
   "frameworks": {
     "net451": {
-      
+      "frameworkAssemblies": {
+        "System.Configuration": "4.0.0.0"
+      }
     }
   },
   "runtimes": {
