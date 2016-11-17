@@ -37,6 +37,7 @@
     "dotnet-test-nunit": "3.4.0-beta-3",
     "EasyNetQ": "99.0.0-dev",
     "EasyNetQ.Scheduler": "99.0.0-dev",
+    "NSubstitute": "2.0.0-rc",
     "NUnit": "3.5.0"
   },
   "tools": {
