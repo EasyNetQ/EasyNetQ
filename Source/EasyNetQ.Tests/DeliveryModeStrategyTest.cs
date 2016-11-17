@@ -21,20 +21,20 @@ namespace EasyNetQ.Tests
 
     public class DeliveryModeStrategyTest
     {
-        [Fact]
-        [TestCase(typeof(PersistentMessageWithDeliveryAttribute), true)]
-        [TestCase(typeof(NotPersistentMessageWithDeliveryAttribute), false)]
-        [TestCase(typeof(MessageWithoutDeliveryAttribute), true)]
+        [Theory]
+        [InlineData(typeof(PersistentMessageWithDeliveryAttribute), true)]
+        [InlineData(typeof(NotPersistentMessageWithDeliveryAttribute), false)]
+        [InlineData(typeof(MessageWithoutDeliveryAttribute), true)]
         public void TestWhenPersistentMessagesIsTrue(Type messageType, bool isPersistent)
         {
             var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration {PersistentMessages = true});
             Assert.Equal(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
         }
 
-        [Fact]
-        [TestCase(typeof(PersistentMessageWithDeliveryAttribute), true)]
-        [TestCase(typeof(NotPersistentMessageWithDeliveryAttribute), false)]
-        [TestCase(typeof(MessageWithoutDeliveryAttribute), false)]
+        [Theory]
+        [InlineData(typeof(PersistentMessageWithDeliveryAttribute), true)]
+        [InlineData(typeof(NotPersistentMessageWithDeliveryAttribute), false)]
+        [InlineData(typeof(MessageWithoutDeliveryAttribute), false)]
         public void TestWhenPersistentMessagesIsFalse(Type messageType, bool isPersistent)
         {
             var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration { PersistentMessages = false });
