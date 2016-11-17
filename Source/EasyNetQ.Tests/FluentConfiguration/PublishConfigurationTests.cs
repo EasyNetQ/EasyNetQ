@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests.FluentConfiguration
         [Fact]
         public void Should_throw_if_default_topic_is_null()
         {
-            Assert.That(() => new PublishConfiguration(null), Throws.InstanceOf<ArgumentNullException>());
+            Assert.Throws<ArgumentNullException>(() => new PublishConfiguration(null));
         }
 
         [Fact]

@@ -59,19 +59,19 @@ namespace EasyNetQ.Tests.ConnectionString
         [Fact]
         public void Should_Throw_Exception_OnInvalidAmqp()
         {
-            Assert.That(() => connectionStringParser.Parse("amqp=Foo"), Throws.InstanceOf<EasyNetQException>());
+            Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("amqp=Foo"));
         }
 
         [Fact]
         public void Should_throw_exception_for_unknown_key_at_the_beginning()
         {
-            Assert.That(() => connectionStringParser.Parse("unknownKey=true"), Throws.InstanceOf<EasyNetQException>());
+            Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("unknownKey=true"));
         }
 
         [Fact]
         public void Should_throw_exception_for_unknown_key_at_the_end()
         {
-            Assert.That(() => connectionStringParser.Parse("host=localhost;unknownKey=true"), Throws.InstanceOf<EasyNetQException>());
+            Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("host=localhost;unknownKey=true"));
         }
 
         [Theory]

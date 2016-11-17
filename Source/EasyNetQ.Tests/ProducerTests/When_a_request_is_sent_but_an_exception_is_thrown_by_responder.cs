@@ -58,7 +58,6 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             Assert.Throws<EasyNetQResponderException>(() =>
             {
-
                 try
                 {
                     var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
@@ -69,7 +68,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 {
                     throw aggregateException.InnerException;
                 }
-            },"Why you are so bad with me?");
+            }); // ,"Why you are so bad with me?"
         }
 
         protected void DeliverMessage(string correlationId, string exceptionMessage)
