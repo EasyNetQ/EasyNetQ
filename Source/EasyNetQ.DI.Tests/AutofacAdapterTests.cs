@@ -1,5 +1,6 @@
 ﻿using System;
 using Autofac;
+using EasyNetQ.Tests;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 

@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using EasyNetQ.Scheduler.Mongo.Core;
+using EasyNetQ.Tests;
 using Xunit;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests

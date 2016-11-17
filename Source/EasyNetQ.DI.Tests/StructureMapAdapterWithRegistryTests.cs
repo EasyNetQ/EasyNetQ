@@ -1,4 +1,5 @@
 ﻿using System;
+using EasyNetQ.Tests;
 using StructureMap;
 using Xunit;
 

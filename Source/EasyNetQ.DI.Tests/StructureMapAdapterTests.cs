@@ -1,7 +1,8 @@
 ﻿using System;
+using EasyNetQ.Tests;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
 using StructureMap;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {

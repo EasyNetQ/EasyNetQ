@@ -6,6 +6,7 @@ using EasyNetQ.SystemMessages;
 using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using EasyNetQ.Tests;
 
 namespace EasyNetQ.Hosepipe.Tests
 {

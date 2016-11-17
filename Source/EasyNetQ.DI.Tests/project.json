@@ -18,6 +18,7 @@
     "EasyNetQ.DI.Ninject": "99.0.0-dev",
     "EasyNetQ.DI.SimpleInjector": "99.0.0-dev",
     "EasyNetQ.DI.StructureMap": "99.0.0-dev",
+    "EasyNetQ.Tests.Common": "99.0.0-dev",
     "LightInject": "4.0.11",
     "Newtonsoft.Json": "9.0.1",
     "Ninject": "4.0.0-beta-0134",

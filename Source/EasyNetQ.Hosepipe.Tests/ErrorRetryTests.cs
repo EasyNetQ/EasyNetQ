@@ -2,6 +2,7 @@
 
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
+using EasyNetQ.Tests;
 using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
