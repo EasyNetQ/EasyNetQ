@@ -8,7 +8,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Integration test, requires a RabbitMQ instance on localhost")]
-    public class PublisherConfirmsIntegrationTests
+    public class PublisherConfirmsIntegrationTests : IDisposable
     {
         private IBus bus;
 
@@ -27,8 +27,7 @@ namespace EasyNetQ.Tests.Integration
                 x => x.Register<IEasyNetQLogger>(_ => dlogger));
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

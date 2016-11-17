@@ -1,18 +1,18 @@
 ﻿// ReSharper disable InconsistentNaming
-
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
-using System.Linq;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    public class When_publish_is_called
+    public class When_publish_is_called : IDisposable
     {
         private const string correlationId = "abc123";
         
@@ -37,8 +37,7 @@ namespace EasyNetQ.Tests
             WaitForMessageToPublish();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -111,7 +110,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_publish_with_topic_is_called
+    public class When_publish_with_topic_is_called : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -124,8 +123,7 @@ namespace EasyNetQ.Tests
             WaitForMessageToPublish();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

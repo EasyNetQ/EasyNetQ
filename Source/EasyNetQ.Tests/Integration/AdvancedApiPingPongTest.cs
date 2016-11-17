@@ -14,7 +14,7 @@ using NSubstitute;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit]
-    public class AdvancedApiPingPongTest
+    public class AdvancedApiPingPongTest : IDisposable
     {
         private readonly IBus[] buses = new IBus[2];
         private readonly IQueue[] queues = new IQueue[2];
@@ -47,8 +47,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             for (int i = 0; i < 2; i++)
             {

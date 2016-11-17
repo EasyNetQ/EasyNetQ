@@ -10,7 +10,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit]
-    public class AdvancedApiPingPongTest_with_transient_queue
+    public class AdvancedApiPingPongTest_with_transient_queue : IDisposable
     {
         private readonly IBus[] buses = new IBus[2];
         private readonly IQueue[] queues = new IQueue[2];
@@ -40,8 +40,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             for (int i = 0; i < 2; i++)
             {

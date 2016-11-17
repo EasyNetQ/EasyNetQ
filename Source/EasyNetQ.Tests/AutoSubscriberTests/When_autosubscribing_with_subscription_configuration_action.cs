@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    public class When_autosubscribing_with_subscription_configuration_action
+    public class When_autosubscribing_with_subscription_configuration_action : IDisposable
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
@@ -41,8 +41,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

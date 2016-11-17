@@ -9,7 +9,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration.Scheduling
 {
     [Explicit("Needs an instance of RabbitMQ on localhost to work AND scheduler service running")]
-    public class ExternalSchedulerTests
+    public class ExternalSchedulerTests : IDisposable
     {
         private IBus bus;
         private ConsoleLogger logger;
@@ -24,8 +24,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
             });
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

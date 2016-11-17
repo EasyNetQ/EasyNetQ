@@ -3,13 +3,13 @@
 using System;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    public class When_an_action_is_invoked_that_throws
+    public class When_an_action_is_invoked_that_throws : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
@@ -29,8 +29,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
         }

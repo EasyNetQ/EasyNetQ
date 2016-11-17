@@ -8,7 +8,7 @@ using EasyNetQ.NonGeneric;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a RabbitMQ instance on localhost to work")]
-    public class NonGenericExtensionsIntegrationTests
+    public class NonGenericExtensionsIntegrationTests : IDisposable
     {
         private IBus bus;
 
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

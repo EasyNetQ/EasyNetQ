@@ -6,7 +6,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    public class When_a_request_is_sent_but_no_reply_is_received
+    public class When_a_request_is_sent_but_no_reply_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -15,8 +15,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

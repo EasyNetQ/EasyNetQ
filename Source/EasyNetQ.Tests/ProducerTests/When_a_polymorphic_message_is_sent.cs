@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    public class When_a_polymorphic_message_is_sent
+    public class When_a_polymorphic_message_is_sent : IDisposable
     {
         private MockBuilder mockBuilder;
         private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface:EasyNetQ.Tests";
@@ -36,8 +37,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

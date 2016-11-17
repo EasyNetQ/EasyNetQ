@@ -6,14 +6,13 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    public abstract class ConsumerTestBase
+    public abstract class ConsumerTestBase : IDisposable
     {
         protected MockBuilder MockBuilder;
         protected IConsumerErrorStrategy ConsumerErrorStrategy;
@@ -48,8 +47,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             AdditionalSetUp();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             MockBuilder.Bus.Dispose();
         }

@@ -8,7 +8,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received
+    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

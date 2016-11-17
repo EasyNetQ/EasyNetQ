@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.Tests
     /// by default which has been overrided in the Adapter implementation.
     /// </summary>
     [Explicit("Starts a connection to localhost")]
-    public class StructureMapAdapterTests
+    public class StructureMapAdapterTests : IDisposable
     {
         private StructureMap.IContainer container;
         private IContainer easynetQContainer;
@@ -63,8 +63,7 @@ namespace EasyNetQ.DI.Tests
             Assert.Equal(1, easynetQContainer.Resolve<Func<int>>()());
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null)
             {

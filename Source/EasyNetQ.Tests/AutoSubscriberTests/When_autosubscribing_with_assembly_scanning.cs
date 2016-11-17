@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    public class When_autosubscribing_with_assembly_scanning
+    public class When_autosubscribing_with_assembly_scanning : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -32,8 +32,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

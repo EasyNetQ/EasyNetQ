@@ -1,15 +1,16 @@
-﻿using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
 using NSubstitute;
+using RabbitMQ.Client.Framing;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    public class When_a_message_is_received
+    public class When_a_message_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
         private MyMessage deliveredMyMessage;
@@ -29,8 +30,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown:EasyNetQ.Tests");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

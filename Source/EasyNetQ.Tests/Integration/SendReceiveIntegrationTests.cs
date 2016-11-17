@@ -7,7 +7,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a RabbitMQ broker on localhost")]
-    public class SendReceiveIntegrationTests
+    public class SendReceiveIntegrationTests : IDisposable
     {
         private IBus bus;
 
@@ -16,8 +16,7 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

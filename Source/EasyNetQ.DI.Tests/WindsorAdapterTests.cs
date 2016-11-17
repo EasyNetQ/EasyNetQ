@@ -1,4 +1,4 @@
-﻿#if NETFX
+﻿using System;
 using Castle.Windsor;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
@@ -11,7 +11,7 @@ namespace EasyNetQ.DI.Tests
     /// However, Ninject doesn't allow more than one registration of a service, it 
     /// throws an exception, and StructureMap has a last-to-register-wins policy.
     /// </summary>
-    public class WindsorAdapterTests
+    public class WindsorAdapterTests: IDisposable
     {
         private IWindsorContainer container;
         private IBus bus;
@@ -43,8 +43,7 @@ namespace EasyNetQ.DI.Tests
             Assert.True(rabbitBus.Advanced.Conventions is TestConventions);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null)
             {
@@ -55,4 +54,3 @@ namespace EasyNetQ.DI.Tests
         }
     }
 }
-#endif

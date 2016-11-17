@@ -1,14 +1,15 @@
-﻿using RabbitMQ.Client.Framing;
+﻿using System;
 // ReSharper disable InconsistentNaming
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    public class When_a_polymorphic_message_is_delivered_to_the_consumer
+    public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposable
     {
         private MockBuilder mockBuilder;
         ITestMessageInterface receivedMessage;
@@ -46,8 +47,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             are.WaitOne(1000);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

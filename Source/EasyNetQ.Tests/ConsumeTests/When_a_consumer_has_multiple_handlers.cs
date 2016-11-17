@@ -1,14 +1,15 @@
 ﻿// ReSharper disable InconsistentNaming
-using EasyNetQ.Internals;
-using RabbitMQ.Client.Framing;
+using System;
 using System.Threading;
+using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    public class When_a_consumer_has_multiple_handlers
+    public class When_a_consumer_has_multiple_handlers : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -48,8 +49,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             countdownEvent.Wait(1000);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

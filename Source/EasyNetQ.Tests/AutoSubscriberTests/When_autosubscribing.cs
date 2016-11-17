@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    public class When_autosubscribing
+    public class When_autosubscribing : IDisposable
     {
         private MockBuilder mockBuilder;
         private Dictionary<string, object> parameters;
@@ -35,8 +35,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(typeof(MyAsyncConsumer), typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>));
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

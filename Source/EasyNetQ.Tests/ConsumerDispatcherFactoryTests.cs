@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-
+using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
@@ -8,7 +8,7 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    public class ConsumerDispatcherFactoryTests
+    public class ConsumerDispatcherFactoryTests : IDisposable
     {
         private IConsumerDispatcherFactory dispatcherFactory;
         private IEasyNetQLogger logger;
@@ -21,8 +21,7 @@ namespace EasyNetQ.Tests
             dispatcherFactory = new ConsumerDispatcherFactory(configuration, logger);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcherFactory.Dispose();
         }

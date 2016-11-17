@@ -9,7 +9,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a RabbitMQ on localhost")]
-    public class DeleteQueueWhileConsuming
+    public class DeleteQueueWhileConsuming : IDisposable
     {
         private IBus bus;
         private const string queueName = "queue_to_delete";
@@ -19,8 +19,7 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

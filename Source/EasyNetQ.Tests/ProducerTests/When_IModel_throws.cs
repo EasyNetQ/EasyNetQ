@@ -9,7 +9,7 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    public class When_IModel_throws_because_of_closed_connection
+    public class When_IModel_throws_because_of_closed_connection : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -27,8 +27,7 @@ namespace EasyNetQ.Tests.ProducerTests
                     });
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

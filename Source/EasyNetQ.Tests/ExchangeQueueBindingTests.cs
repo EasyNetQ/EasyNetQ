@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using Xunit;
 using NSubstitute;
-using System.Linq;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    public class When_a_queue_is_declared
+    public class When_a_queue_is_declared : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -31,9 +32,7 @@ namespace EasyNetQ.Tests
                 maxPriority: 10);
         }
 
-
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -60,7 +59,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange
+    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -84,8 +83,7 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_routing_key");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -114,7 +112,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange
+    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -138,8 +136,7 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_queue2");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -168,7 +165,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_queue_is_deleted
+    public class When_a_queue_is_deleted : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -182,8 +179,7 @@ namespace EasyNetQ.Tests
             advancedBus.QueueDelete(queue);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -195,7 +191,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_an_exchange_is_declared
+    public class When_an_exchange_is_declared : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -223,8 +219,7 @@ namespace EasyNetQ.Tests
                 "my.alternate.exchange");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -255,7 +250,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_an_exchange_is_declared_passively
+    public class When_an_exchange_is_declared_passively : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -269,8 +264,7 @@ namespace EasyNetQ.Tests
             exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -290,7 +284,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_an_exchange_is_deleted
+    public class When_an_exchange_is_deleted : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -304,8 +298,7 @@ namespace EasyNetQ.Tests
             advancedBus.ExchangeDelete(exchange);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -317,7 +310,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_queue_is_bound_to_an_exchange
+    public class When_a_queue_is_bound_to_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -334,8 +327,7 @@ namespace EasyNetQ.Tests
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -361,7 +353,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_queue_is_unbound_from_an_exchange
+    public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
@@ -378,8 +370,7 @@ namespace EasyNetQ.Tests
             advancedBus.BindingDelete(binding);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

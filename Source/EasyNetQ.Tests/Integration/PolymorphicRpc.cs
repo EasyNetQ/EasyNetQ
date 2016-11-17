@@ -8,7 +8,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a local RabbitMQ instance to work")]
-    public class PolymorphicRpc
+    public class PolymorphicRpc : IDisposable
     {
         private IBus bus;
 
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger, NullLogger>());
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

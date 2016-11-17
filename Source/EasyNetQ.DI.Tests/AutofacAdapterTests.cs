@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 
@@ -11,7 +12,7 @@ namespace EasyNetQ.DI.Tests
     ///     throws an exception, and StructureMap and Autofac have a last-to-register-wins policy.
     /// </summary>
     [Explicit("Starts a connection to localhost")]
-    public class AutofacAdapterTests
+    public class AutofacAdapterTests : IDisposable
     {
         public AutofacAdapterTests()
         {
@@ -22,8 +23,7 @@ namespace EasyNetQ.DI.Tests
             bus = container.Resolve<IBus>();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             container?.Dispose();
             RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());

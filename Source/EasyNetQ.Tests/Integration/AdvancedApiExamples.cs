@@ -10,7 +10,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a RabbitMQ instance on localhost")]
-    public class AdvancedApiExamples
+    public class AdvancedApiExamples : IDisposable
     {
         private IAdvancedBus advancedBus;
 
@@ -19,8 +19,7 @@ namespace EasyNetQ.Tests.Integration
             advancedBus = RabbitHutch.CreateBus("host=localhost").Advanced;
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             advancedBus.Dispose();
         }

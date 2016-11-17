@@ -1,5 +1,5 @@
-﻿using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using RabbitMQ.Client.Framing;
 using System;
 using System.Text;
 using System.Threading;
@@ -9,7 +9,7 @@ using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.NonGeneric
 {
-    public class NonGenericExtensionsTests
+    public class NonGenericExtensionsTests : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -18,8 +18,7 @@ namespace EasyNetQ.Tests.NonGeneric
             mockBuilder = new MockBuilder();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

@@ -10,7 +10,7 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    public class When_an_action_is_invoked
+    public class When_an_action_is_invoked : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
@@ -43,8 +43,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             dispatcher.InvokeAsync(action).Wait();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
         }

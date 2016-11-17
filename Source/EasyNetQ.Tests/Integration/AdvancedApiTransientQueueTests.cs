@@ -10,7 +10,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit]
-    public class AdvancedApiTransientQueueTests
+    public class AdvancedApiTransientQueueTests : IDisposable
     {
         private IBus bus;
 
@@ -19,8 +19,7 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

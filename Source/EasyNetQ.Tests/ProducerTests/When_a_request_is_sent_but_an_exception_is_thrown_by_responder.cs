@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
-using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
-using RabbitMQ.Client;
-using NSubstitute;
+﻿// ReSharper disable InconsistentNaming
 using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
+using NSubstitute;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder
+    public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IDisposable
     {
         private MockBuilder mockBuilder;
         private TestRequestMessage requestMessage;
@@ -30,8 +30,7 @@ namespace EasyNetQ.Tests.ProducerTests
                        });
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

@@ -13,7 +13,7 @@ using Xunit;
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a RabbitMQ instance on localhost")]
-    public class ClientCommandDispatcherTests
+    public class ClientCommandDispatcherTests : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentConnection connection;
@@ -32,8 +32,7 @@ namespace EasyNetQ.Tests.Integration
             connection.Initialize();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
             connection.Dispose();

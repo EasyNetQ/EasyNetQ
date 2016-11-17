@@ -1,15 +1,15 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
     [Explicit("Requires a RabbitMQ instance on localhost to work")]
-    public class AdvancedBusTests
+    public class AdvancedBusTests : IDisposable
     {
         private IBus bus;
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }

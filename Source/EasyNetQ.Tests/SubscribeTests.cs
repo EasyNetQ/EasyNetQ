@@ -1,19 +1,19 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
+using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using NSubstitute;
-using System.Linq;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    public class When_subscribe_is_called
+    public class When_subscribe_is_called : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -39,8 +39,7 @@ namespace EasyNetQ.Tests
             subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -123,7 +122,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_message_is_delivered
+    public class When_a_message_is_delivered : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -179,8 +178,7 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -215,7 +213,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_the_handler_throws_an_exception
+    public class When_the_handler_throws_an_exception : IDisposable
     {
         private MockBuilder mockBuilder;
         private IConsumerErrorStrategy consumerErrorStrategy;
@@ -284,8 +282,7 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -327,7 +324,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_subscription_is_cancelled_by_the_user
+    public class When_a_subscription_is_cancelled_by_the_user : IDisposable
     {
         private MockBuilder mockBuilder;
         private const string subscriptionId = "the_subscription_id";
@@ -348,8 +345,7 @@ namespace EasyNetQ.Tests
             are.WaitOne(500);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }

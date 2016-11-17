@@ -144,7 +144,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-	public class When_publishing_a_message
+	public class When_publishing_a_message : IDisposable
 	{
         private MockBuilder mockBuilder;
 	    private ITypeNameSerializer typeNameSerializer;
@@ -163,8 +163,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Publish(new TestMessage());
 		}
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -203,7 +202,7 @@ namespace EasyNetQ.Tests
         }
 	}
 
-    public class When_registering_response_handler
+    public class When_registering_response_handler : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -220,8 +219,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
