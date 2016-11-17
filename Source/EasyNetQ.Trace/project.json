@@ -34,6 +34,7 @@
     }
   },
   "dependencies": {
+    "CommandLineParser": "2.1.1-beta",
     "EasyNetQ": "99.0.0-dev"
   },
   "tools": {
