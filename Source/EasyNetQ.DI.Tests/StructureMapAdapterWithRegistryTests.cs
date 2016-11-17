@@ -47,13 +47,13 @@ namespace EasyNetQ.DI.Tests
         [Fact]
         public void Should_construct_registered_conventions()
         {
-            Assert.Greater(MyConventions.ConventionsCallCount, 0);
+            Assert.True(MyConventions.ConventionsCallCount > 0);
         }
 
         [Fact]
         public void Should_use_registered_logger()
         {
-            Assert.Greater(MyLogger.ConstructorCallCount, 0);
+            Assert.True(MyLogger.ConstructorCallCount > 0);
         }
 
         public class MessagingRegistry : Registry
