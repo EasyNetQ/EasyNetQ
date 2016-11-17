@@ -13,27 +13,15 @@ namespace EasyNetQ.Hosepipe.Tests
             return obj;
         }
 
-        public static T ShouldNotBeNull<T>(this T obj, string message)
-        {
-            Assert.NotNull(obj, message);
-            return obj;
-        }
-
         public static T ShouldEqual<T>(this T actual, object expected)
         {
             Assert.Equal(expected, actual);
             return actual;
         }
 
-        public static T ShouldEqual<T>(this T actual, object expected, string message)
+        public static T ShouldBeThrownBy<T>(Action testDelegate) where T : Exception
         {
-            Assert.Equal(expected, actual, message);
-            return actual;
-        }
-
-        public static Exception ShouldBeThrownBy(this Type exceptionType, TestDelegate testDelegate)
-        {
-            return Assert.Throws(exceptionType, testDelegate);
+            return Assert.Throws<T>(testDelegate);
         }
 
         public static void ShouldBe<T>(this object actual)
