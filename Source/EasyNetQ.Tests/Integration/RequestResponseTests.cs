@@ -266,7 +266,7 @@ namespace EasyNetQ.Tests.Integration
                 {
                     throw e.InnerException;
                 }
-            }, "This should be the original exception message!");
+            }); //, "This should be the original exception message!");
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.

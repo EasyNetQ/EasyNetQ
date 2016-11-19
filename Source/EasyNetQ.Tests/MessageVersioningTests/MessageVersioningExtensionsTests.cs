@@ -38,8 +38,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             public void AssertServiceRegistered<TService, TImplementation>()
             {
-                Assert.That( _services.ContainsKey( typeof(TService)), "No service of type {0} registered", typeof(TService).Name );
-                Assert.That( _services[ typeof( TService ) ], Is.EqualTo(typeof(TImplementation)), "Implementation registered for service type {0} is not the expected type {1}", typeof( TService ).Name, typeof( TImplementation ).Name );
+                Assert.True( _services.ContainsKey( typeof(TService)), $"No service of type {typeof(TService).Name} registered");
+                Assert.Equal( _services[ typeof( TService ) ], typeof(TImplementation)); // "Implementation registered for service type {0} is not the expected type {1}", typeof( TService ).Name, typeof( TImplementation ).Name );
             }
         }
     }

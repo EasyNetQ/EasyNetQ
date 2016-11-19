@@ -58,9 +58,9 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             publishExchangeStrategy.DeclareExchange( bus, typeof( MyMessage ), ExchangeType.Topic );
 
-            Assert.That( exchanges, Has.Count.EqualTo( 1 ), "Single exchange should have been created" );
-            Assert.That( exchanges[ 0 ].Name, Is.EqualTo( "MyMessage" ), "Exchange should have used naming convection to name the exchange" );
-            Assert.That( exchanges[ 0 ].BoundTo, Is.Null, "Unversioned message should not create any exchange to exchange bindings" );
+            Assert.Equal(1, exchanges.Count); //, "Single exchange should have been created" );
+            Assert.Equal("MyMessage", exchanges[0].Name);//, "Exchange should have used naming convection to name the exchange" );
+            Assert.Null(exchanges[0].BoundTo); // "Unversioned message should not create any exchange to exchange bindings" );
         }
 
         [Fact]
@@ -72,11 +72,11 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             publishExchangeStrategy.DeclareExchange( bus, typeof( MyMessageV2 ), ExchangeType.Topic );
 
-            Assert.That( exchanges, Has.Count.EqualTo( 2 ), "Two exchanges should have been created" );
-            Assert.That( exchanges[ 0 ].Name, Is.EqualTo( "MyMessage" ), "Superseded message exchange should been created first" );
-            Assert.That( exchanges[ 1 ].Name, Is.EqualTo( "MyMessageV2" ), "Superseding message exchange should been created second" );
-            Assert.That( exchanges[ 1 ].BoundTo, Is.EqualTo( exchanges[ 0 ] ), "Superseding message exchange should route message to superseded exchange" );
-            Assert.That( exchanges[ 0 ].BoundTo, Is.Null, "Superseded message exchange should route messages anywhere" );
+            Assert.Equal(2, exchanges.Count); //, "Two exchanges should have been created" );
+            Assert.Equal("MyMessage", exchanges[0].Name); //, "Superseded message exchange should been created first" );
+            Assert.Equal("MyMessageV2", exchanges[1].Name); //, "Superseding message exchange should been created second" );
+            Assert.Equal(exchanges[0] , exchanges[1].BoundTo); //, "Superseding message exchange should route message to superseded exchange" );
+            Assert.Null( exchanges[0].BoundTo); //, "Superseded message exchange should route messages anywhere" );
         }
 
         private IAdvancedBus CreateAdvancedBusMock( Action<ExchangeStub> exchangeCreated, Action<ExchangeStub, ExchangeStub> exchangeBound, Func<Type,string> nameExchange  )

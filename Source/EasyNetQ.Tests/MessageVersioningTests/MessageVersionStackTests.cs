@@ -13,16 +13,16 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
 
-            Assert.That( stack.Single(), Is.EqualTo( typeof( MyMessage ) ) );
+            Assert.Equal( stack.Single(),  typeof( MyMessage ) );
         }
 
         [Fact]
         public void Versioned_messages_create_a_stack_containing_the_message_type_and_all_superseded_types_oldest_first()
         {
-            var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
+            var stack = new MessageVersionStack( typeof( MyMessageV2 ));
 
-            Assert.That( stack.ElementAt( 0 ), Is.EqualTo( typeof( MyMessage ) ) );
-            Assert.That( stack.ElementAt( 1 ), Is.EqualTo( typeof( MyMessageV2 ) ) );
+            Assert.Equal( stack.ElementAt( 0 ),  typeof( MyMessage ) );
+            Assert.Equal( stack.ElementAt( 1 ),  typeof( MyMessageV2 ) );
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
             var top = stack.ElementAt( 0 );
-            Assert.That( stack.Pop(), Is.EqualTo( top ) );
+            Assert.Equal( stack.Pop(),  top );
         }
 
         [Fact]
@@ -38,8 +38,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
 
-            Assert.That( stack.Count(), Is.GreaterThan( 0 ) );
-            Assert.That( stack.IsEmpty(), Is.False );
+            Assert.True( stack.Count() > 0 );
+            Assert.False(stack.IsEmpty());
         }
 
         [Fact]
@@ -48,8 +48,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var stack = new MessageVersionStack( typeof( MyMessage ) );
             stack.Pop();
 
-            Assert.That( stack.Count(), Is.EqualTo( 0 ) );
-            Assert.That( stack.IsEmpty(), Is.True );
+            Assert.Equal( stack.Count(),  0 );
+            Assert.True( stack.IsEmpty());
         }
 
         [Fact]

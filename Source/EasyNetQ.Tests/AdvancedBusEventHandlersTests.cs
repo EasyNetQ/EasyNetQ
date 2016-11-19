@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(connectionBlockedEvent);
             Assert.True(blockedCalled, "The AdvancedBusEventHandlers Blocked event handler wasn't called after a ConnectionBlockedEvent publish.");
-            Assert.NotNull(connectionBlockedEventArgs, "The AdvancedBusEventHandlers Blocked event handler received a null ConnectionBlockedEventArgs");
+            Assert.NotNull(connectionBlockedEventArgs); //, "The AdvancedBusEventHandlers Blocked event handler received a null ConnectionBlockedEventArgs");
             Assert.True(connectionBlockedEvent.Reason == connectionBlockedEventArgs.Reason, "The published ConnectionBlockedEvent Reason isn't the same object than the one received in AdvancedBusEventHandlers Blocked ConnectionBlockedEventArgs.");
         }
 
@@ -111,7 +111,7 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(returnedMessageEvent);
             Assert.True(messageReturnedCalled, "The AdvancedBusEventHandlers MessageReturned event handler wasn't called after a ReturnedMessageEvent publish.");
-            Assert.NotNull(messageReturnedEventArgs, "The AdvancedBusEventHandlers MessageReturned event handler received a null MessageReturnedEventArgs.");
+            Assert.NotNull(messageReturnedEventArgs); //, "The AdvancedBusEventHandlers MessageReturned event handler received a null MessageReturnedEventArgs.");
             Assert.True(returnedMessageEvent.Body == messageReturnedEventArgs.MessageBody, "The published ReturnedMessageEvent Body isn't the same object than the one received in AdvancedBusEventHandlers MessageReturned MessageReturnedEventArgs.");
             Assert.True(returnedMessageEvent.Properties == messageReturnedEventArgs.MessageProperties, "The published ReturnedMessageEvent Properties isn't the same object than the one received in AdvancedBusEventHandlers MessageReturned MessageReturnedEventArgs.");
             Assert.True(returnedMessageEvent.Info == messageReturnedEventArgs.MessageReturnedInfo, "The published ReturnedMessageEvent Info isn't the same object than the one received in AdvancedBusEventHandlers MessageReturned MessageReturnedEventArgs.");
