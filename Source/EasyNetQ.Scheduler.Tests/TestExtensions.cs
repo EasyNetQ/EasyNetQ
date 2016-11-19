@@ -66,8 +66,7 @@ namespace EasyNetQ.Scheduler.Tests
 
         public static void ShouldBeEmpty<T>(this IEnumerable<T> collection)
         {
-            Assert.Equal(collection.Count(), 0,
-            string.Format("Expected collection to be empty, but had {0} items", collection.Count()));
+            Assert.Empty(collection);
         }
     }
 }
