@@ -1,8 +1,8 @@
 {
   "version": "99.0.0-dev",
-  "description": "An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container",
-  "title": "EasyNetQ.DI.SimpleInjector",
-  "name": "EasyNetQ.DI.SimpleInjector",
+  "description": "EasyNetQ.Hosepipe.SetupActions",
+  "title": "EasyNetQ.Hosepipe.SetupActions",
+  "name": "EasyNetQ.Hosepipe.SetupActions",
   "packOptions": {
     "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
     "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
@@ -34,10 +34,8 @@
     }
   },
   "dependencies": {
-    "SimpleInjector": "3.2.7",
     "EasyNetQ": "99.0.0-dev"
   },
-
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",
@@ -50,21 +48,19 @@
     "dn-version": "dotnet gitversion"
   },
   "frameworks": {
-    "netstandard1.5": {
-      "buildOptions": {
-        "define": [
-          "NET_STANDARD"
-        ]
-      },
-      "dependencies": {}
-    },
     "net451": {
       "buildOptions": {
         "define": [
           "NETFX"
         ]
       },
-      "frameworkAssemblies": {}
+      "frameworkAssemblies": {
+        "System.Configuration.Install": "4.0.0.0"
+      }
     }
+  },
+  "runtimes": {
+    "win7-x86": {},
+    "win7-x64": {}
   }
 }

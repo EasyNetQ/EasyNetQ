@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.Tasks
 
         private static void SetupLogging(ContainerBuilder builder)
         {
-            SelfLog.Out = Console.Out;
+            SelfLog.Enable(Console.Out);
 
             var logger = new LoggerConfiguration()
                 .WriteTo.ColoredConsole(LogEventLevel.Debug)

@@ -1,5 +1,5 @@
 {
-  "version": "2.0.3-netcore0001",
+  "version": "99.0.0-dev",
   "description": "An Implementation to use Serilog as a logging component for EasyNetQ",
   "title": "EasyNetQ.Serilog",
   "name": "EasyNetQ.Serilog",
@@ -27,9 +27,15 @@
     "Wiebe Tijsma",
     "Contributors (see GitHub repo) "
   ],
+
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
   "dependencies": {
-    "Serilog": "2.1.0",
-    "EasyNetQ": "2.0.2-netcore0001"
+    "Serilog": "2.3.0",
+    "EasyNetQ": "99.0.0-dev"
   },
   "tools": {
     "dotnet-gitversion": {

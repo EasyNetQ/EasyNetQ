@@ -1,8 +1,8 @@
 {
   "version": "99.0.0-dev",
-  "description": "An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container",
-  "title": "EasyNetQ.DI.SimpleInjector",
-  "name": "EasyNetQ.DI.SimpleInjector",
+  "description": "EasyNetQ.Scheduler.Mongo.Tests",
+  "title": "EasyNetQ.Scheduler.Mongo.Tests",
+  "name": "EasyNetQ.Scheduler.Mongo.Tests",
   "packOptions": {
     "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
     "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
@@ -34,10 +34,12 @@
     }
   },
   "dependencies": {
-    "SimpleInjector": "3.2.7",
-    "EasyNetQ": "99.0.0-dev"
+    "dotnet-test-nunit": "3.4.0-beta-3",
+    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ.Scheduler.Mongo": "99.0.0-dev",
+    "NSubstitute": "2.0.0-rc",
+    "NUnit": "3.5.0"
   },
-
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",
@@ -49,22 +51,15 @@
   "commands": {
     "dn-version": "dotnet gitversion"
   },
+
+  "testRunner": "nunit",
+
   "frameworks": {
-    "netstandard1.5": {
-      "buildOptions": {
-        "define": [
-          "NET_STANDARD"
-        ]
-      },
-      "dependencies": {}
-    },
     "net451": {
-      "buildOptions": {
-        "define": [
-          "NETFX"
-        ]
-      },
-      "frameworkAssemblies": {}
     }
+  },
+  "runtimes": {
+    "win7-x86": {},
+    "win7-x64": {}
   }
 }

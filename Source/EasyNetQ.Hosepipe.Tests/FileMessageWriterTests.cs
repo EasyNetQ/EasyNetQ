@@ -10,7 +10,7 @@ namespace EasyNetQ.Hosepipe.Tests
     [TestFixture]
     public class FileMessageWriterTests
     {
-        private const string tempDirectory = @"C:\temp\MessageOutput";
+        private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), @"MessageOutput");
 
         [SetUp]
         public void SetUp() {}
@@ -19,9 +19,17 @@ namespace EasyNetQ.Hosepipe.Tests
         public void WriteSomeFiles()
         {
             var directory = new DirectoryInfo(tempDirectory);
-            foreach (var file in directory.EnumerateFiles())
+
+            if (!directory.Exists)
             {
-                file.Delete();
+                directory.Create();
+            }
+            else
+            {
+                foreach (var file in directory.EnumerateFiles())
+                {
+                    file.Delete();
+                }
             }
 
             var properties = new MessageProperties();

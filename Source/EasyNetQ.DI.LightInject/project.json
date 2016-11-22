@@ -1,5 +1,5 @@
 {
-  "version": "2.0.3-netcore0001",
+  "version": "99.0.0-dev",
   "description": "An adaptor to allow EasyNetQ to use LightInject as its internal IoC container",
   "title": "EasyNetQ.DI.LightInject",
   "name": "EasyNetQ.DI.LightInject",
@@ -27,10 +27,18 @@
     "Wiebe Tijsma",
     "Contributors (see GitHub repo) "
   ],
+
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
+
   "dependencies": {
     "LightInject": "4.0.11",
-    "EasyNetQ": "2.0.2-netcore0001"
+    "EasyNetQ": "99.0.0-dev"
   },
+
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",

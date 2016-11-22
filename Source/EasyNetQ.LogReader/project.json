@@ -1,8 +1,8 @@
 {
   "version": "99.0.0-dev",
-  "description": "An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container",
-  "title": "EasyNetQ.DI.SimpleInjector",
-  "name": "EasyNetQ.DI.SimpleInjector",
+  "description": "EasyNetQ.LogReader",
+  "title": "EasyNetQ.LogReader",
+  "name": "EasyNetQ.LogReader",
   "packOptions": {
     "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
     "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
@@ -34,10 +34,9 @@
     }
   },
   "dependencies": {
-    "SimpleInjector": "3.2.7",
-    "EasyNetQ": "99.0.0-dev"
+    "EasyNetQ": "99.0.0-dev",
+    "RabbitMQ.Client": "4.1.1"
   },
-
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",
@@ -50,21 +49,12 @@
     "dn-version": "dotnet gitversion"
   },
   "frameworks": {
-    "netstandard1.5": {
-      "buildOptions": {
-        "define": [
-          "NET_STANDARD"
-        ]
-      },
-      "dependencies": {}
-    },
     "net451": {
       "buildOptions": {
         "define": [
           "NETFX"
         ]
-      },
-      "frameworkAssemblies": {}
+      }
     }
   }
 }

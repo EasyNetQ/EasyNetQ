@@ -1,5 +1,5 @@
 {
-  "version": "2.0.3-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ",
   "title": "EasyNetQ",
   "name": "EasyNetQ",
@@ -26,10 +26,17 @@
     "Wiebe Tijsma",
     "Contributors (see GitHub repo) "
   ],
+
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
     "RabbitMQ.Client": "4.1.1"
   },
+
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",

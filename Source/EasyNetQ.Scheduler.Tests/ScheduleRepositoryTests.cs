@@ -1,10 +1,10 @@
 // ReSharper disable InconsistentNaming
-using System;
-using System.Text;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
+using NSubstitute;
 using NUnit.Framework;
-using Rhino.Mocks;
+using System;
+using System.Text;
 
 namespace EasyNetQ.Scheduler.Tests
 {
@@ -17,7 +17,7 @@ namespace EasyNetQ.Scheduler.Tests
         [SetUp]
         public void SetUp()
         {
-            var log = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var log = Substitute.For<IEasyNetQLogger>();
             var configuration = new ScheduleRepositoryConfiguration
             {
                 ProviderName = "System.Data.SqlClient",

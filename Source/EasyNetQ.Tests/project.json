@@ -1,43 +1,46 @@
 {
-  "version": "2.0.2-netcore0001",
+  "version": "99.0.0-dev",
   "description": "EasyNetQ.Tests",
   "title": "EasyNetQ.Tests",
   "name": "EasyNetQ.Tests",
   "buildOptions": {
     "compile": {
       "includeFiles": "..\\Version.cs"
-     }
-    },
-   "dependencies": {
-      "NUnit": "3.5.0",
-      "NSubstitute": "2.0.0-rc",
-      "Newtonsoft.Json": "9.0.1",
-      "dotnet-test-nunit": "3.4.0-beta-3",
-      "RabbitMQ.Client": "4.1.1",
-      "EasyNetQ": "2.0.2-netcore0001",
-      "EasyNetQ.Management.Client": "2.0.0-netcore0001",
-      "EasyNetQ.Tests.Messages": "2.0.2-netcore0001"
-    },
-
-    "testRunner": "nunit",
-
-    "frameworks": {
-      "netcoreapp1.0": {
-        "imports": "portable-net45+win8",
-        "dependencies": {
-          "Microsoft.NETCore.App": {
-            "version": "1.0.0-*",
-            "type": "platform"
-          },
-          "System.Net.Http": "4.1.0"
-        }
-      },
-      "net451": {
-        "frameworkAssemblies": {
-          "System": "4.0.0.0",
-          "System.Net.Http": "4.0.0.0"
-        }
-      }
-
     }
+  },
+  "dependencies": {
+    "NUnit": "3.5.0",
+    "NSubstitute": "2.0.0-rc",
+    "Newtonsoft.Json": "9.0.1",
+    "dotnet-test-nunit": "3.4.0-beta-3",
+    "RabbitMQ.Client": "4.1.1",
+    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ.Management.Client": "2.0.0-netcore0001",
+    "EasyNetQ.Tests.Messages": "99.0.0-dev"
+  },
+
+  "testRunner": "nunit",
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.1",
+          "type": "platform"
+        },
+        "System.Net.Http": "4.1.0"
+      }
+    },
+    "net451": {
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Net.Http": "4.0.0.0"
+      }
+    }
+  },
+  "runtimes": {
+    "win7-x86": {},
+    "win7-x64": {}
   }
+}

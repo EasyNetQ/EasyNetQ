@@ -1,5 +1,5 @@
 {
-  "version": "2.0.3-netcore0001",
+  "version": "99.0.0-dev",
   "description": "An adaptor to allow EasyNetQ to use Castle.Windsor as its internal IoC container",
   "title": "EasyNetQ.DI.Windsor",
   "name": "EasyNetQ.DI.Windsor",
@@ -30,7 +30,7 @@
   "dependencies": {
     "Castle.Core": "3.3.3",
     "Castle.Windsor": "3.3.0",
-    "EasyNetQ": "2.0.2-netcore0001"
+    "EasyNetQ": "99.0.0-dev"
   },
   "tools": {
     "dotnet-gitversion": {
