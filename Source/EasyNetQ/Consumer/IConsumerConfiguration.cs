@@ -6,10 +6,12 @@
         bool CancelOnHaFailover { get; }
         ushort PrefetchCount { get; }
         bool IsExclusive { get; }
+		bool IsManuallyAcked { get; }
 
         IConsumerConfiguration WithPriority(int priority);
         IConsumerConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true);
         IConsumerConfiguration WithPrefetchCount(ushort prefetchCount);
+		IConsumerConfiguration WithManualAck();
         IConsumerConfiguration AsExclusive();
     }
 
@@ -21,13 +23,15 @@
             CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
             IsExclusive = false;
+			IsManuallyAcked = false;
         }
 
         public int Priority { get; private set; }
         public bool IsExclusive { get; private set; }
         public bool CancelOnHaFailover { get; private set; }
         public ushort PrefetchCount { get; private set; }
-
+		public bool IsManuallyAcked { get; private set; }
+		
         public IConsumerConfiguration WithPriority(int priority)
         {
             Priority = priority;
@@ -51,5 +55,11 @@
             IsExclusive = true;
             return this;
         }
+		
+        public IConsumerConfiguration WithManualAck()
+        {
+            IsManuallyAcked = true;
+            return this;
+        }		
     }
 }
