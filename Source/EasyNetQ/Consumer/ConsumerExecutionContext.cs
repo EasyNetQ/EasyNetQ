@@ -19,7 +19,7 @@ namespace EasyNetQ.Consumer
             MessageProperties properties, 
             byte[] body, 
             IBasicConsumer consumer,
-            IConsumerConfiguration configuration))
+            IConsumerConfiguration configuration)
         {
             Preconditions.CheckNotNull(userHandler, "userHandler");
             Preconditions.CheckNotNull(info, "info");
