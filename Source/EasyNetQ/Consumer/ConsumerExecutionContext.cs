@@ -26,7 +26,6 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(properties, "properties");
             Preconditions.CheckNotNull(body, "body");
             Preconditions.CheckNotNull(consumer, "consumer");
-			Preconditions.CheckNotNull(configuration, "configuration");
 
             UserHandler = userHandler;
             Info = info;
