@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Xunit;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -24,3 +25,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("2.0.3.0")]
 [assembly: AssemblyInformationalVersion("2.0.3-netcore.1+1428.Branch.feature/netcore.Sha.cde287238775f88c777ecc1764f659e52832f164")]
 [assembly: AssemblyFileVersion("2.0.3.0")]
+
+// NOTE: Forcing xUnit to not run tests in parallel. This is because the 
+// tests call RegisterAsEasyNetQContainerFactory which results in calling
+// static method RabbitHutch.SetContainerFactory.  As a result, the same 
+// ConnectionConfiguration can be added twice to the same static function.
+// This results in a Castle.Windsor.ComponentRegistrationException.
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
