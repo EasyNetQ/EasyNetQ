@@ -4,7 +4,7 @@ before_build:
 pull_requests:
   do_not_increment_build_number: true
 
-test: off  
+test: off
 
 build:
   project: Build\EasyNetQ.proj
@@ -16,6 +16,7 @@ after_build:
 
 branches:
   only:
+  - master
   - feature/netcore
 
 artifacts:
