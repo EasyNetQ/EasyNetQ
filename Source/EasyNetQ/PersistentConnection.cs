@@ -63,6 +63,12 @@ namespace EasyNetQ
                 throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
             }
 
+            var autoClose = connectionFactory.Configuration.AutoCloseConnection;
+            if (autoClose && !connection.AutoClose)
+            {
+                connection.AutoClose = true;
+            }
+
             return connection.CreateModel();
         }
         
