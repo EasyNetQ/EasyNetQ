@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_parse_host_port()
         {
-            connectionString.Hosts.First().Port.ShouldEqual(1001);
+            connectionString.Hosts.First().Port.ShouldEqual((ushort)1001);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_parse_seond_port()
         {
-            connectionString.Hosts.Last().Port.ShouldEqual(1002);
+            connectionString.Hosts.Last().Port.ShouldEqual((ushort)1002);
         }
 
         [Fact]
@@ -86,13 +86,13 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_parse_port()
         {
-            connectionString.Port.ShouldEqual(12345);
+            connectionString.Port.ShouldEqual((ushort)12345);
         }
 
         [Fact]
         public void Should_parse_heartbeat()
         {
-            connectionString.RequestedHeartbeat.ShouldEqual(3);
+            connectionString.RequestedHeartbeat.ShouldEqual((ushort)3);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_set_default_port()
         {
-            defaults.Port.ShouldEqual(5672);
+            defaults.Port.ShouldEqual((ushort)5672);
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_set_default_requestHeartbeat()
         {
-            defaults.RequestedHeartbeat.ShouldEqual(10);
+            defaults.RequestedHeartbeat.ShouldEqual((ushort)10);
         }
 
         [Fact]
@@ -141,12 +141,12 @@ namespace EasyNetQ.Tests
 
             var parsed = new ConnectionStringParser().Parse(connectionStringAlternateCasing);
             parsed.Hosts.First().Host.ShouldEqual("192.168.1.1");
-            parsed.Hosts.First().Port.ShouldEqual(1001);
+            parsed.Hosts.First().Port.ShouldEqual((ushort)1001);
             parsed.VirtualHost.ShouldEqual("Copa");
             parsed.UserName.ShouldEqual("Copa");
             parsed.Password.ShouldEqual("abc_xyz");
-            parsed.Port.ShouldEqual(12345);
-            parsed.RequestedHeartbeat.ShouldEqual(3);
+            parsed.Port.ShouldEqual((ushort)12345);
+            parsed.RequestedHeartbeat.ShouldEqual((ushort)3);
         }
     }
 }

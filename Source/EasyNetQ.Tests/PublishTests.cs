@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_publish_persistent_messsages()
         {
-            properties.DeliveryMode.ShouldEqual(2);
+            properties.DeliveryMode.ShouldEqual((byte)2);
         }
 
         [Fact]

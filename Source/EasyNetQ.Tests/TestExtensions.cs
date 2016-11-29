@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests
             return obj;
         }
 
-        public static T ShouldEqual<T>(this T actual, object expected)
+        public static T ShouldEqual<T>(this T actual, T expected)
         {
             Assert.Equal(expected, actual);
             return actual;

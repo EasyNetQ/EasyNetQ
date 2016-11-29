@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();
             subscriptionConfiguration.CancelOnHaFailover.ShouldBeTrue();
             subscriptionConfiguration.Expires.ShouldEqual(10);
-            subscriptionConfiguration.PrefetchCount.ShouldEqual(10);
+            subscriptionConfiguration.PrefetchCount.ShouldEqual((ushort)10);
             subscriptionConfiguration.Priority.ShouldEqual(10);
 
         }

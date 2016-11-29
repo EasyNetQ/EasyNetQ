@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
 
             connectionConfiguration.Hosts.Count().ShouldEqual(1);
             connectionConfiguration.Hosts.Single().Host.ShouldEqual("amqphost");
-            connectionConfiguration.Hosts.Single().Port.ShouldEqual(1234);
+            connectionConfiguration.Hosts.Single().Port.ShouldEqual((ushort)1234);
         }
 
         [Fact]
