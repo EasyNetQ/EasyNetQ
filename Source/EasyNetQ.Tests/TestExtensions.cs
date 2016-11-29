@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
 
         public static void ShouldBe<T>(this object actual)
         {
-            Assert.IsType<T>(actual);
+            Assert.IsAssignableFrom<T>(actual);
         }
 
         public static void ShouldBeNull(this object actual)
