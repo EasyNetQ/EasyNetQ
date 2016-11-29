@@ -13,7 +13,6 @@
     "EasyNetQ": "99.0.0-dev",
     "EasyNetQ.Management.Client": "2.0.0-netcore0001",
     "EasyNetQ.Tests.Common": "99.0.0-dev",
-    "EasyNetQ.Tests.Messages": "99.0.0-dev",
     "Newtonsoft.Json": "9.0.1",
     "NSubstitute": "2.0.0-rc",
     "RabbitMQ.Client": "4.1.1",

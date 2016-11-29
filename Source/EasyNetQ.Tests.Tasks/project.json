@@ -37,7 +37,7 @@
     "Autofac": "4.2.0",
     "EasyNetQ": "99.0.0-dev",
     "EasyNetQ.Serilog": "99.0.0-dev",
-    "EasyNetQ.Tests.Messages": "99.0.0-dev",
+    "EasyNetQ.Tests.Common": "99.0.0-dev",
     "Net.Autofac":"0.1.12",
     "Net.Core": "0.1.12",
     "Serilog.Sinks.ColoredConsole": "2.0.0"
