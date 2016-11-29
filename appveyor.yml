@@ -32,9 +32,9 @@ deploy:
       branch: master
   - provider: NuGet
     artifact: /.*\.nupkg/
-    server: https://www.myget.org/F/easynetq-test1/api/v2/package
+    server: https://www.myget.org/F/easynetq-unstable/api/v2/package
     api_key:
-       secure: NulQ1qClvThpFTs6XZfer2DG8Qe2TjK0bt1zhAuvRXe9opfwJIbAEMr1ceUl/N79
+       secure: <add_api_key>
     skip_symbols: true
     on:
       branch: feature/netcore
