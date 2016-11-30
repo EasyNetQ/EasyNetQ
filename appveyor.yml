@@ -1,14 +1,22 @@
+before_build:
+  - dotnet restore --verbosity Error
+  - ps: Build\UpdateGitVersion.ps1 
 pull_requests:
   do_not_increment_build_number: true
+
+test: off  
 
 build:
   project: Build\EasyNetQ.proj
   verbosity: minimal
   publish_nuget: false
 
+after_build:
+  - ps: Build\UploadTestResults.ps1
+
 branches:
   only:
-  - master
+  - feature/netcore
 
 artifacts:
   - path: Package\**\*.nupkg
@@ -19,8 +27,17 @@ deploy:
     server:
     api_key:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
+    skip_symbols: true
     on:
       branch: master
+  - provider: NuGet
+    artifact: /.*\.nupkg/
+    server: https://www.myget.org/F/easynetq-unstable/api/v2/package
+    api_key:
+       secure: <add_api_key>
+    skip_symbols: true
+    on:
+      branch: feature/netcore
 
 skip_commits:
   files:
