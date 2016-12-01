@@ -31,7 +31,7 @@ deploy:
     artifact: /.*\.nupkg/
     server: https://www.myget.org/F/easynetq-unstable/api/v2/package
     api_key:
-       secure: <add_api_key>
+       secure: +0aKxcCHqWvvdJxA4dh1ToRqwA6x8yqhfrYDIeOjQu6Skpg/UrwxAPBik8z6be99
     skip_symbols: true
     on:
       branch: feature/netcore
