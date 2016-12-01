@@ -8,11 +8,11 @@ if (!(Test-Path $sourceFolder)) {
     Write-Error "Cannot find $sourceFolder"
 }
 
-$projects = Get-ChildItem $sourceFolder | ? { $_.PSIsContainer -and !$_.Name.Contains("Tests") -and !$_.Name.Contains("Hosepipe.Setup") }
+$projects = Get-ChildItem $sourceFolder\project.json -Recurse | ? { !$_.Directory.Name.Contains("Tests") }
 
 foreach ($projectJson in $projects) {
 
-    $directory = $projectJson.FullName
+    $directory = $projectJson.DirectoryName
         
     pushd $directory
 
