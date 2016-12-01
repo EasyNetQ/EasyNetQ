@@ -3,20 +3,18 @@
 using System;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using NUnit.Framework;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    [TestFixture]
-    public class When_an_action_is_invoked_that_throws
+    public class When_an_action_is_invoked_that_throws : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_invoked_that_throws()
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
@@ -31,13 +29,12 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_raise_the_exception_on_the_calling_thread()
         {
             var exception = new CrazyTestOnlyException();

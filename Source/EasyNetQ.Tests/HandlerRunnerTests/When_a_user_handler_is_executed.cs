@@ -5,13 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
 {
-    [TestFixture]
     public class When_a_user_handler_is_executed
     {
         private IHandlerRunner handlerRunner;
@@ -29,8 +28,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 
         private IModel channel;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_user_handler_is_executed()
         {
             //var logger = new ConsoleLogger();
             var logger = Substitute.For<IEasyNetQLogger>();
@@ -62,25 +60,25 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             autoResetEvent.WaitOne(1000);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_body()
         {
             deliveredBody.ShouldBeTheSameAs(messageBody);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_properties()
         {
             deliveredProperties.ShouldBeTheSameAs(messageProperties);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_info()
         {
             deliveredInfo.ShouldBeTheSameAs(messageInfo);
         }
 
-        [Test]
+        [Fact]
         public void Should_ACK_message()
         {
             channel.Received().BasicAck(123, false);

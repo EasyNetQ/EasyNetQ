@@ -1,19 +1,18 @@
 ﻿// ReSharper disable InconsistentNaming
-
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
-using RabbitMQ.Client;
 using NSubstitute;
-using System.Linq;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
-    public class When_publish_is_called
+    public class When_publish_is_called : IDisposable
     {
         private const string correlationId = "abc123";
         
@@ -21,8 +20,7 @@ namespace EasyNetQ.Tests
         byte[] body;
         private IBasicProperties properties;
 
-        [SetUp]
-        public void SetUp()
+        public When_publish_is_called()
         {
             mockBuilder = new MockBuilder(x => 
                 x.Register<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId)));
@@ -39,8 +37,7 @@ namespace EasyNetQ.Tests
             WaitForMessageToPublish();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -52,14 +49,14 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_channel_to_publish_on()
         {
             // a channel is also created then disposed to declare the exchange.
             mockBuilder.Channels.Count.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_call_basic_publish()
         {
             mockBuilder.Channels[0].Received().BasicPublish(
@@ -73,25 +70,25 @@ namespace EasyNetQ.Tests
             json.ShouldEqual("{\"Text\":\"Hiya!\"}");
         }
 
-        [Test]
+        [Fact]
         public void Should_put_correlationId_in_properties()
         {
             properties.CorrelationId.ShouldEqual(correlationId);
         }
 
-        [Test]
+        [Fact]
         public void Should_put_message_type_in_message_type_field()
         {
             properties.Type.ShouldEqual("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests");
         }
 
-        [Test]
+        [Fact]
         public void Should_publish_persistent_messsages()
         {
-            properties.DeliveryMode.ShouldEqual(2);
+            properties.DeliveryMode.ShouldEqual((byte)2);
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_exchange()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -102,7 +99,7 @@ namespace EasyNetQ.Tests
                 Arg.Is<Dictionary<string, object>>( x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
-        [Test]
+        [Fact]
         public void Should_write_debug_message_saying_message_was_published()
         {
             mockBuilder.Logger.Received().DebugWrite(
@@ -113,13 +110,11 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_publish_with_topic_is_called
+    public class When_publish_with_topic_is_called : IDisposable
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_publish_with_topic_is_called()
         {
             mockBuilder = new MockBuilder();
 
@@ -128,8 +123,7 @@ namespace EasyNetQ.Tests
             WaitForMessageToPublish();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
@@ -141,7 +135,7 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        [Test]
+        [Fact]
         public void Should_call_basic_publish_with_correct_routing_key()
         {
             mockBuilder.Channels[0].Received().BasicPublish(

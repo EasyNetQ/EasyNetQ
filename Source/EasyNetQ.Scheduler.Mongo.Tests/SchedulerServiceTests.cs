@@ -1,16 +1,14 @@
 ﻿using EasyNetQ.Scheduler.Mongo.Core;
 using EasyNetQ.Topology;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 using System;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
-    [TestFixture]
     public class SchedulerServiceTests
     {
-        [SetUp]
-        public void SetUp()
+        public SchedulerServiceTests()
         {
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();
@@ -38,7 +36,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         private IAdvancedBus advancedBus;
         private IScheduleRepository scheduleRepository;
 
-        [Test]
+        [Fact]
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var id = Guid.NewGuid();
@@ -60,7 +58,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         }
 
 
-        [Test]
+        [Fact]
         public void Should_hadle_publish_timeout_()
         {
             schedulerService.OnHandleTimeoutTimerTick(null);

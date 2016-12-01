@@ -1,36 +1,35 @@
 ﻿using System;
 using EasyNetQ.FluentConfiguration;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.FluentConfiguration
 {
-    [TestFixture]
     public class PublishConfigurationTests
     {
-        [Test]
+        [Fact]
         public void Should_throw_if_default_topic_is_null()
         {
-            Assert.That(() => new PublishConfiguration(null), Throws.InstanceOf<ArgumentNullException>());
+            Assert.Throws<ArgumentNullException>(() => new PublishConfiguration(null));
         }
 
-        [Test]
+        [Fact]
         public void Should_return_default_topic()
         {
             var configuration = new PublishConfiguration("default");
 
             configuration.WithTopic(null);
 
-            Assert.AreEqual(configuration.Topic, "default");
+            Assert.Equal(configuration.Topic, "default");
         }
 
-        [Test]
+        [Fact]
         public void Should_return_custom_topic()
         {
             var configuration = new PublishConfiguration("default");
 
             configuration.WithTopic("custom");
 
-            Assert.AreEqual(configuration.Topic, "custom");
+            Assert.Equal(configuration.Topic, "custom");
         }
     }
 }

@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using NUnit.Framework;
+using Xunit;
 using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ReflectionHelpersTests
     {
-        [Test]
+        [Fact]
         public void ShouldCreateClassWithDefaultConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance<ClassWithDefaultConstuctor>();
-            Assert.IsNotNull(obj);
-            Assert.IsTrue(obj.GetType() == typeof(ClassWithDefaultConstuctor));
+            Assert.NotNull(obj);
+            Assert.True(obj.GetType() == typeof(ClassWithDefaultConstuctor));
         }
 
-        [Test]
+        [Fact]
         public void ShouldFailToCreateClassWithoutDefaultConstructor()
         {
             Assert.Throws<MissingMethodException>(()=>
@@ -26,7 +25,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Fact][Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivator()
         {
             // warmup
@@ -55,19 +54,19 @@ namespace EasyNetQ.Tests
             }
             stopWatch.Stop();
             var activator = stopWatch.Elapsed;
-            Assert.IsTrue(creatorTime < activator);
-            Assert.AreEqual(2000000, count);
+            Assert.True(creatorTime < activator);
+            Assert.Equal(2000000, count);
         }
 
-        [Test]
+        [Fact]
         public void ShouldCreateClassWithSingleParameterConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance(typeof(ClassWithOneParameterConstructor), 1);
-            Assert.IsNotNull(obj);
-            Assert.IsTrue(obj.GetType() == typeof(ClassWithOneParameterConstructor));
+            Assert.NotNull(obj);
+            Assert.True(obj.GetType() == typeof(ClassWithOneParameterConstructor));
         }
 
-        [Test]
+        [Fact]
         public void ShouldFailToCreateClassWithoutSingleParameterConstructor()
         {
             Assert.Throws<MissingMethodException>(() =>
@@ -76,7 +75,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Fact][Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivatorSingleParameter()
         {
             // warmup
@@ -107,19 +106,19 @@ namespace EasyNetQ.Tests
             }
             stopWatch.Stop();
             var activator = stopWatch.Elapsed;
-            Assert.IsTrue(creatorTime < activator);
-            Assert.AreEqual(2000000, count);
+            Assert.True(creatorTime < activator);
+            Assert.Equal(2000000, count);
         }
 
-        [Test]
+        [Fact]
         public void ShouldCreateClassWithDualParameterConstructor()
         {
             var obj = ReflectionHelpers.CreateInstance(typeof(ClassWithTwoParametersConstructor), 1, 2);
-            Assert.IsNotNull(obj);
-            Assert.IsTrue(obj.GetType() == typeof(ClassWithTwoParametersConstructor));
+            Assert.NotNull(obj);
+            Assert.True(obj.GetType() == typeof(ClassWithTwoParametersConstructor));
         }
 
-        [Test]
+        [Fact]
         public void ShouldFailToCreateClassWithoutDualParameterConstructor()
         {
             Assert.Throws<MissingMethodException>(() =>
@@ -128,7 +127,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test, Explicit("Fails on build server.")]
+        [Fact][Explicit("Fails on build server.")]
         public void ShouldPerformFasterThanActivatorDualParameter()
         {
             // warmup
@@ -159,18 +158,18 @@ namespace EasyNetQ.Tests
             }
             stopWatch.Stop();
             var activator = stopWatch.Elapsed;
-            Assert.IsTrue(creatorTime < activator);
-            Assert.AreEqual(6000000, count);
+            Assert.True(creatorTime < activator);
+            Assert.Equal(6000000, count);
         }
 
-        [Test]
+        [Fact]
         public void ShouldGetAttributes()
         {
-            Assert.IsTrue(typeof(TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
-            Assert.IsTrue(typeof(TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
+            Assert.True(typeof(TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
+            Assert.True(typeof(TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
         }
 
-        [Test, Explicit("Fails on build server")]
+        [Fact][Explicit("Fails on build server")]
         public void ShouldPerformFasterThanGetCustomAttributes()
         {
             var type = typeof(TestAttributedClass);
@@ -200,17 +199,17 @@ namespace EasyNetQ.Tests
             }
             stopWatch.Stop();
             var getAttributesTime = stopWatch.Elapsed;
-            Assert.IsTrue(getAttributesTime + getAttributesTime < getCustomAttributesTime);
-            Assert.AreEqual(2000000, count);
+            Assert.True(getAttributesTime + getAttributesTime < getCustomAttributesTime);
+            Assert.Equal(2000000, count);
             Console.WriteLine(getCustomAttributesTime);
             Console.WriteLine(getAttributesTime);
         }
 
-        [Test]
+        [Fact]
         public void ShouldGetAttribute()
         {
-            Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
-            Assert.IsNotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
+            Assert.NotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
+            Assert.NotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
         }
     }
 

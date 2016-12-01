@@ -5,16 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EasyNetQ.ConnectionString;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class ConnectionConfigurationTests
     {
         
-        [Test]
+        [Fact]
         public void The_validate_method_should_apply_AMQPconnection_idempotently()
         {
             ConnectionConfiguration connectionConfiguration = new ConnectionStringParser().Parse("amqp://amqphost:1234/");
@@ -22,10 +21,10 @@ namespace EasyNetQ.Tests
 
             connectionConfiguration.Hosts.Count().ShouldEqual(1);
             connectionConfiguration.Hosts.Single().Host.ShouldEqual("amqphost");
-            connectionConfiguration.Hosts.Single().Port.ShouldEqual(1234);
+            connectionConfiguration.Hosts.Single().Port.ShouldEqual((ushort)1234);
         }
 
-        [Test]
+        [Fact]
         public void The_AuthMechanisms_property_should_default_to_PlainMechanism()
         {
             ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration();

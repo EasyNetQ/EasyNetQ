@@ -3,29 +3,26 @@
 using System;
 using System.Threading;
 using EasyNetQ.Loggers;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a local RabbitMQ instance to work")]
-    public class PolymorphicRpc
+    public class PolymorphicRpc : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public PolymorphicRpc()
         {
             bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger, NullLogger>());
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_request_some_animals()
         {
             var cat = new Cat
@@ -44,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
             bus.RequestAsync<IAnimal, IAnimal>(dog);
         }
 
-        [Test]
+        [Fact]
         public void Should_request_respond_with_correct_message_types()
         {
             bus.Respond<IAnimal, IAnimal>(@interface =>
@@ -80,8 +77,8 @@ namespace EasyNetQ.Tests.Integration
 
             IAnimal response = bus.Request<IAnimal, IAnimal>(request);
 
-            Assert.AreEqual(request.Name, response.Name);
-            Assert.AreSame(request.GetType(), response.GetType());
+            Assert.Equal(request.Name, response.Name);
+            Assert.Same(request.GetType(), response.GetType());
         }
     }
 }

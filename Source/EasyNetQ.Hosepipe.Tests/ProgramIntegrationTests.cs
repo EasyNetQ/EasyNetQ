@@ -1,11 +1,12 @@
-﻿using System;
+﻿using EasyNetQ.Tests;
+using System;
 using System.IO;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture, Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]
+    [Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]
     public class ProgramIntegrationTests
     {
         const string outputPath = @"C:\Temp\MessageOutput";

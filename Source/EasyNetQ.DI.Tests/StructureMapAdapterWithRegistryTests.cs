@@ -1,6 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using EasyNetQ.Tests;
 using StructureMap;
-using System;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -11,16 +12,14 @@ namespace EasyNetQ.DI.Tests
     /// throws an exception. StructureMap has a last-to-register-wins policy 
     /// by default which has been overrided in the Adapter implementation.
     /// </summary>
-    [TestFixture]
     [Explicit("Starts a connection to localhost")]
-    public class StructureMapAdapterWithRegistryTests
+    public class StructureMapAdapterWithRegistryTests : IDisposable
     {
         private StructureMap.IContainer container;
         private IContainer easynetQContainer;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public StructureMapAdapterWithRegistryTests()
         {
             container = new Container(cfg =>
                 {
@@ -34,28 +33,27 @@ namespace EasyNetQ.DI.Tests
             easynetQContainer = bus.Advanced.Container;
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_structure_map_adapter()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_construct_registered_conventions()
         {
-            Assert.Greater(MyConventions.ConventionsCallCount, 0);
+            Assert.True(MyConventions.ConventionsCallCount > 0);
         }
 
-        [Test]
+        [Fact]
         public void Should_use_registered_logger()
         {
-            Assert.Greater(MyLogger.ConstructorCallCount, 0);
+            Assert.True(MyLogger.ConstructorCallCount > 0);
         }
 
         public class MessagingRegistry : Registry

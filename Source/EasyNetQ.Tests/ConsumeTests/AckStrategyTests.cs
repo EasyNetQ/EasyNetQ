@@ -1,48 +1,44 @@
 ﻿using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class Ack_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public Ack_strategy()
         {
             model = Substitute.For<IModel>();
 
             result = AckStrategies.Ack(model, deliveryTag);          
         }
 
-        [Test]
+        [Fact]
         public void Should_ack_message()
         {
             model.Received().BasicAck(deliveryTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Ack()
         {
-            Assert.AreEqual(AckResult.Ack, result);
+            Assert.Equal(AckResult.Ack, result);
         } 
     }
 
-    [TestFixture]
     public class NackWithoutRequeue_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public NackWithoutRequeue_strategy()
         {
             model = Substitute.For<IModel>();
 
@@ -50,28 +46,26 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
 
-        [Test]
+        [Fact]
         public void Should_nack_message_and_not_requeue()
         {
             model.Received().BasicNack(deliveryTag, false, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Nack()
         {
-            Assert.AreEqual(AckResult.Nack, result);
+            Assert.Equal(AckResult.Nack, result);
         }
     }
 
-    [TestFixture]
     public class NackWithRequeue_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public NackWithRequeue_strategy()
         {
             model = Substitute.For<IModel>();
 
@@ -79,45 +73,43 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
 
-        [Test]
+        [Fact]
         public void Should_nack_message_and_requeue()
         {
             model.Received().BasicNack(deliveryTag, false, true);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Nack()
         {
-            Assert.AreEqual(AckResult.Nack, result);
+            Assert.Equal(AckResult.Nack, result);
         }
     }
 
-    [TestFixture]
     public class Nothing_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public Nothing_strategy()
         {
             model = Substitute.For<IModel>();
 
             result = AckStrategies.Nothing(model, deliveryTag);
         }
 
-        [Test]
+        [Fact]
         public void Should_have_no_interaction_with_model()
         {
             var rec = model.ReceivedCalls();
-            Assert.AreEqual(rec.GetEnumerator().MoveNext(), false);
+            Assert.Equal(rec.GetEnumerator().MoveNext(), false);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Nothing()
         {
-            Assert.AreEqual(AckResult.Nothing, result);
+            Assert.Equal(AckResult.Nothing, result);
         }
     }
 }

@@ -2,30 +2,27 @@
 
 using System;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received
+    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received()
         {
             mockBuilder = new MockBuilder();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_an_EasyNetQException()
         {
             Assert.Throws<EasyNetQException>(() =>

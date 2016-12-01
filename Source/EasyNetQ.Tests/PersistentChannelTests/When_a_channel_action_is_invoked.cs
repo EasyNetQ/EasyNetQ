@@ -2,13 +2,12 @@
 
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    [TestFixture]
     public class When_a_channel_action_is_invoked
     {
         private IPersistentChannel persistentChannel;
@@ -16,8 +15,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private IModel channel;
         private IEventBus eventBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_channel_action_is_invoked()
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel>();
@@ -32,19 +30,19 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
 
-        [Test]
+        [Fact]
         public void Should_open_a_channel()
         {
             persistentConnection.Received().CreateModel();
         }
 
-        [Test]
+        [Fact]
         public void Should_run_action_on_channel()
         {
             channel.Received().ExchangeDeclare("MyExchange", "direct");
         }
 
-        [Test]
+        [Fact]
         public void Should_raise_a_PublishChannelCreatedEvent()
         {
             eventBus.Received().Publish(Arg.Any<PublishChannelCreatedEvent>());

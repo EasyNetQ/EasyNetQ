@@ -1,21 +1,19 @@
 ﻿// ReSharper disable InconsistentNaming
-
+using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
-    public class ConsumerDispatcherFactoryTests
+    public class ConsumerDispatcherFactoryTests : IDisposable
     {
         private IConsumerDispatcherFactory dispatcherFactory;
         private IEasyNetQLogger logger;
 
-        [SetUp]
-        public void SetUp()
+        public ConsumerDispatcherFactoryTests()
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
@@ -23,13 +21,12 @@ namespace EasyNetQ.Tests
             dispatcherFactory = new ConsumerDispatcherFactory(configuration, logger);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcherFactory.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_only_create_a_single_IConsumerDispatcher_instance()
         {
             var dispatcher1 = dispatcherFactory.GetConsumerDispatcher();
@@ -38,7 +35,7 @@ namespace EasyNetQ.Tests
             dispatcher1.ShouldBeTheSameAs(dispatcher2);
         }
 
-        [Test]
+        [Fact]
         public void Should_dispose_dispatcher_when_factory_is_disposed()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
@@ -46,7 +43,7 @@ namespace EasyNetQ.Tests
             ((ConsumerDispatcher)dispatcher).IsDisposed.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_run_actions_on_the_consumer_thread()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
@@ -64,7 +61,7 @@ namespace EasyNetQ.Tests
             threadName.ShouldEqual("EasyNetQ consumer dispatch thread");
         }
 
-        [Test]
+        [Fact]
         public void Should_clear_queue_on_disconnect()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();

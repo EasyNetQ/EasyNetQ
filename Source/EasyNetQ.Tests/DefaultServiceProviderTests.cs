@@ -1,12 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class DefaultServiceProviderTestsX
     {
         private interface IRoot
@@ -52,8 +51,7 @@ namespace EasyNetQ.Tests
 
         private DefaultServiceProvider serviceProvider;
 
-        [SetUp]
-        public void SetUp()
+        public DefaultServiceProviderTestsX()
         {
             serviceProvider = new DefaultServiceProvider();
 
@@ -62,7 +60,7 @@ namespace EasyNetQ.Tests
             serviceProvider.Register<IGrandChild, GrandChild>();
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_class_with_dependencies()
         {
             var service = (IRoot)serviceProvider.Resolve(typeof (IRoot));
@@ -77,7 +75,6 @@ namespace EasyNetQ.Tests
     }
 
 
-    [TestFixture]
     public class DefaultServiceProviderTests
     {
         private IServiceProvider serviceProvider;
@@ -85,8 +82,7 @@ namespace EasyNetQ.Tests
         private IMyFirst myFirst;
         private SomeDelegate someDelegate;
 
-        [SetUp]
-        public void SetUp()
+        public DefaultServiceProviderTests()
         {
             myFirst = Substitute.For<IMyFirst>();
             someDelegate = () => { };
@@ -100,28 +96,28 @@ namespace EasyNetQ.Tests
             serviceProvider = defaultServiceProvider;
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_a_service_interface()
         {
             var resolvedService = serviceProvider.Resolve<IMyFirst>();
             resolvedService.ShouldBeTheSameAs(myFirst);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_a_delegate_service()
         {
             var resolvedService = serviceProvider.Resolve<SomeDelegate>();
             resolvedService.ShouldBeTheSameAs(someDelegate);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_a_service_with_dependencies()
         {
             var resolvedService = serviceProvider.Resolve<IMySecond>();
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_replace_bus_components()
         {
             var logger = Substitute.For<IEasyNetQLogger>();
@@ -130,7 +126,7 @@ namespace EasyNetQ.Tests
             logger.Received().DebugWrite("Trying to connect");
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_sneakily_get_the_service_provider()
         {
             IServiceProvider provider = null;

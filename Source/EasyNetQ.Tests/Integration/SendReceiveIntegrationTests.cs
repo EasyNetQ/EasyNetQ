@@ -2,29 +2,26 @@
 
 using System;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ broker on localhost")]
-    public class SendReceiveIntegrationTests
+    public class SendReceiveIntegrationTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public SendReceiveIntegrationTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_send_and_receive_messages()
         {
             const string queue = "send_receive_test";
@@ -39,7 +36,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(500);
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_handle_a_long_running_consumer()
         {
             const string queue = "send_receive_test";

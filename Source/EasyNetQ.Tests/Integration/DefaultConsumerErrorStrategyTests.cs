@@ -7,13 +7,12 @@ using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class DefaultConsumerErrorStrategyTests
     {
         private DefaultConsumerErrorStrategy consumerErrorStrategy;
@@ -21,8 +20,7 @@ namespace EasyNetQ.Tests
         private ISerializer serializer;
         private IConventions conventions;
 
-        [SetUp]
-        public void SetUp()
+        public DefaultConsumerErrorStrategyTests()
         {
             var configuration = new ConnectionConfiguration
             {
@@ -54,7 +52,7 @@ namespace EasyNetQ.Tests
         /// <summary>
         /// NOTE: Make sure the error queue is empty before running this test.
         /// </summary>
-        [Test, Explicit("Requires a RabbitMQ instance on localhost")]
+        [Fact][Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_handle_an_exception_by_writing_to_the_error_queue()
         {
             const string originalMessage = "{ Text:\"Hello World\"}";
@@ -85,7 +83,7 @@ namespace EasyNetQ.Tests
                 var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(), true);
                 if (getArgs == null)
                 {
-                    Assert.Fail("Nothing on the error queue");
+                    Assert.True(false, "Nothing on the error queue");
                 }
                 else
                 {
@@ -102,7 +100,7 @@ namespace EasyNetQ.Tests
             }
         }
 
-        [Test]
+        [Fact]
         public void Should_not_reconnect_if_has_been_disposed()
         {
             const string originalMessage = "{ Text:\"Hello World\"}";
@@ -140,7 +138,7 @@ namespace EasyNetQ.Tests
             connectionFactory.DidNotReceive().CreateConnection();
             logger.Received().ErrorWrite(Arg.Is<string>(x => x.Contains("DefaultConsumerErrorStrategy was already disposed")), Arg.Any<object[]>());
 
-            Assert.AreEqual(AckStrategies.NackWithRequeue, ackStrategy);
+            Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
         }
     }
 }

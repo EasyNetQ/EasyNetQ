@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class PersistentConnectionTests
     {
-        [Test]
+        [Fact]
         public void If_connects_after_disposal_should_redispose_underlying_connection()
         {
             var logger = Substitute.For<IEasyNetQLogger>();

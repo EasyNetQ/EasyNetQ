@@ -1,12 +1,11 @@
 // ReSharper disable InconsistentNaming
 using System;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
-using NUnit.Framework;
+using Xunit;
 using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class TypeNameSerializerTests
     {
         private readonly string expectedTypeName = "System.String:" + typeof(string).GetTypeInfo().Assembly.GetName().Name;
@@ -14,41 +13,40 @@ namespace EasyNetQ.Tests
 
         private ITypeNameSerializer typeNameSerializer;
 
-        [SetUp]
-        public void SetUp()
+        public TypeNameSerializerTests()
         {
             typeNameSerializer = new TypeNameSerializer();
         }
 
-        [Test]
+        [Fact]
         public void Should_serialize_a_type_name()
         {
             var typeName = typeNameSerializer.Serialize(typeof(string));
             typeName.ShouldEqual(expectedTypeName);
         }
 
-        [Test]
+        [Fact]
         public void Should_serialize_a_custom_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(SomeRandomClass));
             typeName.ShouldEqual(expectedCustomTypeName);
         }
 
-        [Test]
+        [Fact]
         public void Should_deserialize_a_type_name()
         {
             var type = typeNameSerializer.DeSerialize(expectedTypeName);
             type.ShouldEqual(typeof (string));
         }
 
-        [Test]
+        [Fact]
         public void Should_deserialize_a_custom_type()
         {
             var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
             type.ShouldEqual(typeof(SomeRandomClass));
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_exception_when_type_name_is_not_recognised()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -57,7 +55,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_if_type_name_is_too_long()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -69,7 +67,7 @@ namespace EasyNetQ.Tests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_exception_if_type_name_is_null()
         {
             Assert.Throws<ArgumentException>(() =>

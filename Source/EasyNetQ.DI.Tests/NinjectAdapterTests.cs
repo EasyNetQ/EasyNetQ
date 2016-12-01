@@ -1,6 +1,7 @@
-﻿using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+﻿using System;
+using EasyNetQ.Tests.Mocking;
 using Ninject;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -9,15 +10,13 @@ namespace EasyNetQ.DI.Tests
     /// policy. The internal DefaultServiceProvider works this way, as does Windsor.
     /// However, Ninject doesn't allow more than one registration of a service, it 
     /// throws an exception, and StructureMap has a last-to-register-wins policy.
-    /// </summary>    
-    [TestFixture]    
-    public class NinjectAdapterTests
+    /// </summary>        
+    public class NinjectAdapterTests : IDisposable
     {
         private IKernel container;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public NinjectAdapterTests()
         {
             container = new StandardKernel();
 
@@ -28,24 +27,23 @@ namespace EasyNetQ.DI.Tests
             )).Bus;
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_ninject_adapter()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_test_conventions()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
 
             var rabbitBus = (RabbitBus)bus;
 
-            Assert.IsTrue(rabbitBus.Advanced.Conventions is TestConventions);
+            Assert.True(rabbitBus.Advanced.Conventions is TestConventions);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null)
             {

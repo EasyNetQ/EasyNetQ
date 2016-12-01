@@ -5,28 +5,26 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture, Explicit]
-    public class AdvancedApiTransientQueueTests
+    [Explicit]
+    public class AdvancedApiTransientQueueTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public AdvancedApiTransientQueueTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Does_transient_queue_cause_channel_to_close_after_consuming_one_message()
         {
             var queue = bus.Advanced.QueueDeclare("test_transient_queue", durable:false, autoDelete:true);

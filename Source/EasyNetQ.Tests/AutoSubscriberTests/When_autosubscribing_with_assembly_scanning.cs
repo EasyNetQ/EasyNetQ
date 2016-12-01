@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 using System.Linq;
 using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    [TestFixture]
-    public class When_autosubscribing_with_assembly_scanning
+    public class When_autosubscribing_with_assembly_scanning : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -23,8 +22,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private const string expectedQueueName3 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC:EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
 
-        [SetUp]
-        public void SetUp()
+        public When_autosubscribing_with_assembly_scanning()
         {
             mockBuilder = new MockBuilder();
 //            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
@@ -34,13 +32,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_have_declared_the_queues()
         {
             Action<string> assertQueueDeclared = queueName =>
@@ -57,7 +54,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             assertQueueDeclared(expectedQueueName3);
         }
 
-        [Test]
+        [Fact]
         public void Should_have_bound_to_queues()
         {
             Action<int, string, string> assertConsumerStarted = (channelIndex, queueName, topicName) =>
@@ -73,7 +70,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             assertConsumerStarted(3, expectedQueueName3, "Important");
         }
 
-        [Test]
+        [Fact]
         public void Should_have_started_consuming_from_the_correct_queues()
         {
             mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).ShouldBeTrue();

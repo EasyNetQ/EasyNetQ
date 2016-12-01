@@ -1,23 +1,22 @@
-﻿using System.Collections.Generic;
-using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_request_is_sent
+    public class When_a_request_is_sent : IDisposable
     {
         private MockBuilder mockBuilder;
         private TestRequestMessage requestMessage;
         private TestResponseMessage responseMessage;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent()
         {
             mockBuilder = new MockBuilder();
 
@@ -42,30 +41,29 @@ namespace EasyNetQ.Tests.ProducerTests
             responseMessage = task.Result;
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_the_response()
         {
             responseMessage.Text.ShouldEqual("Hello World");
         }
 
-        [Test]
+        [Fact]
         public void Should_publish_request_message()
         {
             mockBuilder.Channels[0].Received().BasicPublish(
                 Arg.Is("easy_net_q_rpc"),
-                Arg.Is("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Messages"),
+                Arg.Is("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Common"),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
                 Arg.Any<byte[]>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_publish_exchange()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -76,7 +74,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_response_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -91,7 +89,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             var properties = new BasicProperties
             {
-                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Messages",
+                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Common",
                 CorrelationId = correlationId
             };
             var body = Encoding.UTF8.GetBytes("{ Id:12, Text:\"Hello World\"}");

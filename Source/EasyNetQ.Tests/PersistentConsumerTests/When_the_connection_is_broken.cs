@@ -1,12 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Events;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
-    [TestFixture]
     public class When_the_connection_is_broken : Given_a_PersistentConsumer
     {
         public override void AdditionalSetup()
@@ -16,7 +15,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             eventBus.Publish(new ConnectionCreatedEvent());
         }
 
-        [Test]
+        [Fact]
         public void Should_re_create_internal_consumer()
         {
             internalConsumerFactory.Received().CreateConsumer();

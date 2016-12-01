@@ -1,5 +1,5 @@
 ﻿using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using System;
@@ -95,9 +95,9 @@ namespace EasyNetQ.Tests.Mocking
                 x.Register(_ => Logger);
             });
 
-            Assert.IsNotNull(Bus);
-            Assert.IsNotNull(Bus.Advanced);
-            Assert.IsNotNull(Bus.Advanced.Container);
+            Assert.NotNull(Bus);
+            Assert.NotNull(Bus.Advanced);
+            Assert.NotNull(Bus.Advanced.Container);
         }
 
     }

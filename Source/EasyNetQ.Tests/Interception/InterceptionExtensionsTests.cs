@@ -1,18 +1,17 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.Interception;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.Interception
 {
-    [TestFixture]
     public partial class InterceptionExtensionsTests
     {
         
 
-        [Test]
+        [Fact]
         public void When_using_EnableInterception_extension_method_required_services_are_registered()
         {
             var serviceRegister = Substitute.For<IServiceRegister>();
@@ -20,7 +19,7 @@ namespace EasyNetQ.Tests.Interception
             serviceRegister.Received().Register(Arg.Any<Func<IServiceProvider, IProduceConsumeInterceptor>>());
         }
 
-        [Test]
+        [Fact]
         public void When_using_EnableGZipCompression_extension_method_required_interceptor_is_added()
         {
             var interceptorRegistrator = Substitute.For<IInterceptorRegistrator>();
@@ -29,7 +28,7 @@ namespace EasyNetQ.Tests.Interception
         }
 
 
-        [Test]
+        [Fact]
         public void When_using_EnableTripleDESEncryption_extension_method_required_interceptor_is_added()
         {
             var interceptorRegistrator = Substitute.For<IInterceptorRegistrator>();

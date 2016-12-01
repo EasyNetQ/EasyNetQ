@@ -3,13 +3,12 @@
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace EasyNetQ.Scheduler.Tests
 {
-    [TestFixture]
     public class SchedulerServiceTests
     {
         private SchedulerService schedulerService;
@@ -17,8 +16,7 @@ namespace EasyNetQ.Scheduler.Tests
         private IAdvancedBus advancedBus;
         private IScheduleRepository scheduleRepository;
 
-        [SetUp]
-        public void SetUp()
+        public SchedulerServiceTests()
         {
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();
@@ -39,7 +37,7 @@ namespace EasyNetQ.Scheduler.Tests
                 });
         }
 
-        [Test]
+        [Fact]
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var pendingSchedule = new List<ScheduleMe>

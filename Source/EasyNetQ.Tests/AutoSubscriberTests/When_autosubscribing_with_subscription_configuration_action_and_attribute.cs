@@ -2,20 +2,18 @@
 using System;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    [TestFixture]
-    public class When_autosubscribing_with_subscription_configuration_action_and_attribute
+    public class When_autosubscribing_with_subscription_configuration_action_and_attribute : IDisposable
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
        
-        [SetUp]
-        public void SetUp()
+        public When_autosubscribing_with_subscription_configuration_action_and_attribute()
         {
             bus = Substitute.For<IBus>();
            
@@ -42,13 +40,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe()
         {
             bus.Received().Subscribe(Arg.Any<string>(),
@@ -56,7 +53,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                      Arg.Any<Action<ISubscriptionConfiguration>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe_with_attribute_values_notaction_values()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
@@ -66,7 +63,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();
             subscriptionConfiguration.CancelOnHaFailover.ShouldBeTrue();
             subscriptionConfiguration.Expires.ShouldEqual(10);
-            subscriptionConfiguration.PrefetchCount.ShouldEqual(10);
+            subscriptionConfiguration.PrefetchCount.ShouldEqual((ushort)10);
             subscriptionConfiguration.Priority.ShouldEqual(10);
 
         }

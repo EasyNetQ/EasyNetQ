@@ -1,24 +1,22 @@
-﻿using System.Collections.Generic;
-using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
-using RabbitMQ.Client;
-using NSubstitute;
+﻿// ReSharper disable InconsistentNaming
 using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using NSubstitute;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder
+    public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IDisposable
     {
         private MockBuilder mockBuilder;
         private TestRequestMessage requestMessage;
         private string _correlationId;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent_but_an_exception_is_thrown_by_responder()
         {
             mockBuilder = new MockBuilder();
 
@@ -32,13 +30,12 @@ namespace EasyNetQ.Tests.ProducerTests
                        });
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_an_EasyNetQResponderException()
         {
             Assert.Throws<EasyNetQResponderException>(() =>
@@ -56,12 +53,11 @@ namespace EasyNetQ.Tests.ProducerTests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
         {
             Assert.Throws<EasyNetQResponderException>(() =>
             {
-
                 try
                 {
                     var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
@@ -72,14 +68,14 @@ namespace EasyNetQ.Tests.ProducerTests
                 {
                     throw aggregateException.InnerException;
                 }
-            },"Why you are so bad with me?");
+            }); // ,"Why you are so bad with me?"
         }
 
         protected void DeliverMessage(string correlationId, string exceptionMessage)
         {
             var properties = new BasicProperties
             {
-                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Messages",
+                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Common",
                 CorrelationId = correlationId,
                 Headers = new Dictionary<string, object>
                 {

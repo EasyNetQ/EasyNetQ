@@ -1,13 +1,12 @@
 ﻿using System;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
     public class PublishConfirmationListenerTest
     {
         private EventBus eventBus;
@@ -15,15 +14,14 @@ namespace EasyNetQ.Tests.ProducerTests
         private IModel model;
         private ulong DeliveryTag = 42;
 
-        [SetUp]
-        public void SetUp()
+        public PublishConfirmationListenerTest()
         {
             eventBus = new EventBus();
             model = Substitute.For<IModel>();
             publishConfirmationListener = new PublishConfirmationListener(eventBus);
         }
 
-        [Test]
+        [Fact]
         public void Should_timeout_without_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
@@ -34,7 +32,7 @@ namespace EasyNetQ.Tests.ProducerTests
             });
         }
 
-        [Test]
+        [Fact]
         public void Should_success_with_ack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
@@ -43,7 +41,7 @@ namespace EasyNetQ.Tests.ProducerTests
             publishConfirmationWaiter.Wait(TimeSpan.FromMilliseconds(10));
         }
 
-        [Test]
+        [Fact]
         public void Should_fail_with_nack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
@@ -52,7 +50,7 @@ namespace EasyNetQ.Tests.ProducerTests
             Assert.Throws<PublishNackedException>(() => publishConfirmationWaiter.Wait(TimeSpan.FromMilliseconds(10)));
         }
 
-        [Test]
+        [Fact]
         public void Should_success_with_multiple_ack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
@@ -63,7 +61,7 @@ namespace EasyNetQ.Tests.ProducerTests
             publishConfirmationWaiter2.Wait(TimeSpan.FromMilliseconds(10));
         }
 
-        [Test]
+        [Fact]
         public void Should_fail_with_multiple_nack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
@@ -74,7 +72,7 @@ namespace EasyNetQ.Tests.ProducerTests
             Assert.Throws<PublishNackedException>(() => publishConfirmationWaiter2.Wait(TimeSpan.FromMilliseconds(10)));
         }
 
-        [Test]
+        [Fact]
         public void Should_work_after_reconnection()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);

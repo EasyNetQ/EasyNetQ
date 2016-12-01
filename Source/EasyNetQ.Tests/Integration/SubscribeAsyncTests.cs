@@ -4,23 +4,20 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
-    public class SubscribeAsyncTests
+    public class SubscribeAsyncTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public SubscribeAsyncTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
@@ -31,7 +28,7 @@ namespace EasyNetQ.Tests.Integration
         // 4. Run this test again to see the message consumed.
         // You should see all 10 messages get processes at once, even though each web request
         // takes 150 ms.
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe_async()
         {
             var countdownEvent = new CountdownEvent(10);
@@ -57,7 +54,7 @@ namespace EasyNetQ.Tests.Integration
         // 4. Run this test again to see the message consumed.
         // You should see all 10 messages get processes at once, even though each web request
         // takes 150 ms.
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_handle_multiple_async_IO_operations_in_a_handler()
         {
             bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
@@ -85,7 +82,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(2000);
         }
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_handle_async_tasks_in_sequence()
         {
             bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
@@ -109,7 +106,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
         // See above
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_a_test_message_for_subscribe_async()
         {
             for (var i = 0; i < 10; i++)

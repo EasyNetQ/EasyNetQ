@@ -4,22 +4,20 @@ using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    [TestFixture]
-    public class When_an_action_is_invoked
+    public class When_an_action_is_invoked : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
         private bool actionWasInvoked;
         private string actionThreadName;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_invoked()
         {
             actionWasInvoked = false;
             actionThreadName = "Not set";
@@ -45,25 +43,24 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             dispatcher.InvokeAsync(action).Wait();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_persistent_channel()
         {
             channel.ShouldNotBeNull();
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_action()
         {
             actionWasInvoked.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_action_on_the_dispatcher_thread()
         {
             actionThreadName.ShouldEqual("Client Command Dispatcher Thread");

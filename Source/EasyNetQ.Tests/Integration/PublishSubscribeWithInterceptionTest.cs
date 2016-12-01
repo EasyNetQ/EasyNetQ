@@ -2,21 +2,18 @@
 using System.Threading;
 using EasyNetQ.Interception;
 using EasyNetQ.Tests.Integration.Scheduling;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
-    public class PublishSubscribeWithInterceptionTest
+    public class PublishSubscribeWithInterceptionTest : IDisposable
     {
-        [SetUp]
-        public void SetUp()
+        public PublishSubscribeWithInterceptionTest()
         {
             bus = RabbitHutch.CreateBus("host=localhost", x => x.EnableInterception(r => r.EnableGZipCompression().EnableTripleDESEncryption(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="))));
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null) bus.Dispose();
         }
@@ -24,7 +21,7 @@ namespace EasyNetQ.Tests.Integration
         private IBus bus;
 
 
-        [Test]
+        [Fact]
         [Explicit("Needs an instance of RabbitMQ on localhost to work")]
         public void Should_be_able_to_get_a_message()
         {
@@ -45,7 +42,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Publish(invitation);
 
             if (! autoResetEvent.WaitOne(100000))
-                Assert.Fail();
+                Assert.True(false);
         }
     }
 }

@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_polymorphic_message_is_sent
+    public class When_a_polymorphic_message_is_sent : IDisposable
     {
         private MockBuilder mockBuilder;
         private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface:EasyNetQ.Tests";
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.ProducerTests
         private byte[] publishedMessage;
         private IBasicProperties properties;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_polymorphic_message_is_sent()
         {
             mockBuilder = new MockBuilder();
 
@@ -38,13 +37,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_name_exchange_after_interface()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -55,20 +53,20 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_name_type_as_actual_object_type()
         {
             properties.Type.ShouldEqual(implementationTypeName);
         }
 
-        [Test]
+        [Fact]
         public void Should_correctly_serialize_implementation()
         {
             var json = Encoding.UTF8.GetString(publishedMessage);
             json.ShouldEqual("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}");
         }
 
-        [Test]
+        [Fact]
         public void Should_publish_to_correct_exchange()
         {
             mockBuilder.Channels[0].Received().BasicPublish(

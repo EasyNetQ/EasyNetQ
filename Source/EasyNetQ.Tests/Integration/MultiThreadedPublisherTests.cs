@@ -3,24 +3,21 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
-    public class MultiThreadedPublisherTests
+    public class MultiThreadedPublisherTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public MultiThreadedPublisherTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
             while(!bus.IsConnected) Thread.Sleep(10);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null)
             {
@@ -28,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit("Requires a local rabbitMq instance to run")]
+        [Fact][Explicit("Requires a local rabbitMq instance to run")]
         public void MultThreaded_publisher_should_not_cause_channel_proliferation()
         {
             var threads = new List<Thread>();
@@ -47,7 +44,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
-        [Test, Explicit("Requires a local RabbitMQ instance to run")]
+        [Fact][Explicit("Requires a local RabbitMQ instance to run")]
         public void MultiThreaded_requester_should_not_cause_channel_proliferation()
         {
             var threads = new List<Thread>();

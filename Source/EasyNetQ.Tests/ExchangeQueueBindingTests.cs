@@ -1,23 +1,22 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
 using NSubstitute;
-using System.Linq;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
-    public class When_a_queue_is_declared
+    public class When_a_queue_is_declared : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared()
         {
             mockBuilder = new MockBuilder();
 
@@ -33,21 +32,19 @@ namespace EasyNetQ.Tests
                 maxPriority: 10);
         }
 
-
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -62,15 +59,13 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange
+    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared_With_NonEmptyDeadLetterExchange()
         {
             mockBuilder = new MockBuilder();
 
@@ -88,20 +83,19 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_routing_key");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -118,15 +112,13 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange
+    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared_With_EmptyDeadLetterExchange()
         {
             mockBuilder = new MockBuilder();
 
@@ -144,20 +136,19 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_queue2");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
@@ -174,14 +165,12 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_deleted
+    public class When_a_queue_is_deleted : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_deleted()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -190,29 +179,26 @@ namespace EasyNetQ.Tests
             advancedBus.QueueDelete(queue);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_delete_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
         }
     }
 
-    [TestFixture]
-    public class When_an_exchange_is_declared
+    public class When_an_exchange_is_declared : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
         private IDictionary arguments;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_declared()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -233,20 +219,19 @@ namespace EasyNetQ.Tests
                 "my.alternate.exchange");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_an_exchange_instance()
         {
             exchange.ShouldNotBeNull();
             exchange.Name.ShouldEqual("my_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_an_exchange()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
@@ -257,7 +242,7 @@ namespace EasyNetQ.Tests
                     Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_add_correct_arguments()
         {
             arguments.ShouldNotBeNull();
@@ -265,15 +250,13 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_an_exchange_is_declared_passively
+    public class When_an_exchange_is_declared_passively : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_declared_passively()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -281,20 +264,19 @@ namespace EasyNetQ.Tests
             exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_return_an_exchange_instance()
         {
             exchange.ShouldNotBeNull();
             exchange.Name.ShouldEqual("my_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_passively_declare_exchange()
         {
             mockBuilder.Channels.Count.ShouldEqual(1);
@@ -302,14 +284,12 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_an_exchange_is_deleted
+    public class When_an_exchange_is_deleted : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_deleted()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -318,28 +298,25 @@ namespace EasyNetQ.Tests
             advancedBus.ExchangeDelete(exchange);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_delete_the_queue()
         {
             mockBuilder.Channels[0].Received().ExchangeDelete("my_exchange", false);
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_bound_to_an_exchange
+    public class When_a_queue_is_bound_to_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IBinding binding;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_bound_to_an_exchange()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -350,13 +327,12 @@ namespace EasyNetQ.Tests
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_binding_instance()
         {
             binding.ShouldNotBeNull();
@@ -366,7 +342,7 @@ namespace EasyNetQ.Tests
             ((IQueue) binding.Bindable).Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_a_binding()
         {
             mockBuilder.Channels[0].Received().QueueBind(
@@ -377,15 +353,13 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_unbound_from_an_exchange
+    public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IBinding binding;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_unbound_from_an_exchange()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -396,13 +370,12 @@ namespace EasyNetQ.Tests
             advancedBus.BindingDelete(binding);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_unbind_the_exchange()
         {
             mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);

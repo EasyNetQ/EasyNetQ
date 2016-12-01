@@ -1,10 +1,9 @@
 // ReSharper disable InconsistentNaming
-using NUnit.Framework;
+using Xunit;
 using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     {
         protected override void AdditionalSetUp()
@@ -13,61 +12,61 @@ namespace EasyNetQ.Tests.ConsumeTests
             DeliverMessage();
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_consumer()
         {
             ConsumerWasInvoked.ShouldBeTrue();
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_the_message_body()
         {
             DeliveredMessageBody.ShouldBeTheSameAs(OriginalBody);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_the_message_properties()
         {
             DeliveredMessageProperties.Type.ShouldBeTheSameAs(OriginalProperties.Type);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_the_consumer_tag()
         {
             DeliveredMessageInfo.ConsumerTag.ShouldEqual(ConsumerTag);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_the_delivery_tag()
         {
             DeliveredMessageInfo.DeliverTag.ShouldEqual(DeliverTag);
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_the_exchange_name()
         {
             DeliveredMessageInfo.Exchange.ShouldEqual("the_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_the_routing_key()
         {
             DeliveredMessageInfo.RoutingKey.ShouldEqual("the_routing_key");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_redelivered_flag()
         {
             DeliveredMessageInfo.Redelivered.ShouldBeFalse();
         }
 
-        [Test]
+        [Fact]
         public void Should_ack_the_message()
         {
             MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_write_debug_message()
         {
             MockBuilder.Logger.Received().DebugWrite("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
