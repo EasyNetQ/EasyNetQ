@@ -41,6 +41,7 @@ namespace EasyNetQ.Tests.Integration
         {
             const string queue = "send_receive_test";
             var are = new AutoResetEvent(false);
+            var waitTime = TimeSpan.FromMinutes(2);
 
             bus.Receive(queue, x => x.Add<MyMessage>(message =>
                 {
@@ -60,7 +61,8 @@ namespace EasyNetQ.Tests.Integration
 
             bus.Send(queue, new MyMessage { Text = "Hello Widgets!" });
 
-            are.WaitOne();
+            var signalReceived = are.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Expected reset event within {waitTime.TotalSeconds} seconds");
         }
     }
 }

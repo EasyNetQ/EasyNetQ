@@ -1,20 +1,23 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
     public class ModelCleanupTests
     {
-        private IBus bus;
-        private MockBuilder mockBuilder;
+        private readonly IBus bus;
+        private readonly MockBuilder mockBuilder;
+        private readonly TimeSpan waitTime;
 
         public ModelCleanupTests()
         {
             mockBuilder = new MockBuilder();
             bus = mockBuilder.Bus;
+            waitTime = TimeSpan.FromMinutes(2);
         }
 
         [Fact]
@@ -34,7 +37,8 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            are.WaitOne();
+            bool signalReceived = are.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
             mockBuilder.Channels[1].Received().Dispose();
         }
@@ -47,7 +51,8 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            are.WaitOne();
+            bool signalReceived = are.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
             mockBuilder.Channels[1].Received().Dispose();
         }
@@ -60,7 +65,8 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            are.WaitOne();
+            bool signalReceived = are.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
             mockBuilder.Channels[1].Received().Dispose();
         }
@@ -73,7 +79,8 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            are.WaitOne();
+            bool signalReceived = are.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
             mockBuilder.Channels[1].Received().Dispose();
         }
