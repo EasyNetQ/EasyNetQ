@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AdvancedBusEventHandlers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AdvancedMessagePolymorphism\AdvancedMessagePolymorphismPublishExchangeDeclareStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AdvancedMessagePolymorphism\AdvancedPolymorphismPublishExchangeDeclareStrategy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AdvancedMessagePolymorphism\AdvancedMessagePolymorphismExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AmqpExceptions\AmpqExceptionGrammar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AmqpExceptions\AmqpException.cs" />
