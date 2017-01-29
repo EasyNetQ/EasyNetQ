@@ -64,7 +64,10 @@
             <NuGetPackageDirectory>$(Package)</NuGetPackageDirectory>
         </PropertyGroup>
         <ItemGroup>
-            <ClientLibraries Include="$(Source)\**\project.json" Exclude="$(Source)\*Tests\project.json" />
+            <ClientLibraries Include="$(Source)\EasyNetQ\project.json" />
+            <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\project.json" Exclude="$(Source)\*Tests*\project.json" />
+            <ClientLibraries Include="$(Source)\EasyNetQ.Serilog\project.json" />
+
             <FilesToDelete Include="$(NuGetPackageDirectory)\*.nupkg" />
         </ItemGroup>
 
