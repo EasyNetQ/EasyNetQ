@@ -49,8 +49,8 @@ namespace EasyNetQ.AdvancedMessagePolymorphism
 
             foreach (var @interface in interfaces)
             {
-                var destinationXxchangeName = conventions.ExchangeNamingConvention(@interface);
-                var destinationExchange = DeclareExchange(advancedBus, destinationXxchangeName, exchangeType);
+                var destinationExchangeName = conventions.ExchangeNamingConvention(@interface);
+                var destinationExchange = DeclareExchange(advancedBus, destinationExchangeName, exchangeType);
                 if (destinationExchange != null)
                 {
                     await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
