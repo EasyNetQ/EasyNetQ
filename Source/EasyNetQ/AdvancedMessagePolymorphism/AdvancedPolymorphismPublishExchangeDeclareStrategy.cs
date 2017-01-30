@@ -5,6 +5,7 @@ using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
+
 namespace EasyNetQ.AdvancedMessagePolymorphism
 {
     public class AdvancedPolymorphismPublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
@@ -50,7 +51,7 @@ namespace EasyNetQ.AdvancedMessagePolymorphism
             foreach (var @interface in interfaces)
             {
                 var destinationExchangeName = conventions.ExchangeNamingConvention(@interface);
-                var destinationExchange = DeclareExchange(advancedBus, destinationExchangeName, exchangeType);
+                var destinationExchange = await DeclareExchangeAsync(advancedBus, destinationExchangeName, exchangeType);
                 if (destinationExchange != null)
                 {
                     await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);

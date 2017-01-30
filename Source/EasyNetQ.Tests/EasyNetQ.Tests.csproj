@@ -90,9 +90,9 @@
     </Compile>
     <Compile Include="AdvancedBusEventHandlersTests.cs" />
     <Compile Include="AdvancedMessagePolymorphismTest\AdvancedPolymorphismPublishExchangeDeclareStrategyTests.cs" />
-    <Compile Include="AdvancedMessagePolymorphismTest\IMessageInterfaceOneTwo.cs" />
+    <Compile Include="AdvancedMessagePolymorphismTest\IMessageInterfaceTwo.cs" />
     <Compile Include="AdvancedMessagePolymorphismTest\IMessageInterfaceOne.cs" />
-    <Compile Include="AdvancedMessagePolymorphismTest\MessageWithMultipleInterfaces.cs" />
+    <Compile Include="AdvancedMessagePolymorphismTest\MessageWithTwoInterfaces.cs" />
     <Compile Include="AmqpExceptionParserTests.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_assembly_scanning.cs" />
     <Compile Include="AutoSubscriberTests\When_autosubscribing_with_subscription_configuration_action_and_attribute.cs" />

@@ -38,7 +38,6 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
 
             var publishExchangeStrategy = new AdvancedPolymorphismPublishExchangeDeclareStrategy();
 
-
             publishExchangeStrategy.DeclareExchangeAsync(advancedBus, typeof(MyMessage), ExchangeType.Topic).Wait();
 
             //ensure that only one exchange is declared
@@ -56,23 +55,96 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
             advancedBus.AssertWasNotCalled(b => b.BindAsync(Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Anything));
         }
 
-        //[Test]
-        //public void When_declaring_exchanges_for_versioned_message_exchange_per_version_created_and_bound_to_superceding_version()
-        //{
-        //    var exchanges = new List<ExchangeStub>();
-        //    var bus = CreateAdvancedBusMock(exchanges.Add, BindExchanges, t => t.Name);
-        //    var publishExchangeStrategy = new AdvancedPolymorphismPublishExchangeDeclareStrategy();
+        [Test]
+        public void When_declaring_exchanges_for_message_with_two_interfaces_exchange_per_interface_created_and_bound_to_concrete_version()
+        {
+            var advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
 
-        //    publishExchangeStrategy.DeclareExchange(bus, typeof(MessageWithMultipleInterfaces), ExchangeType.Topic);
+            advancedBus.Stub(b => b.ExchangeDeclareAsync(
+                Arg<string>.Is.Anything,
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything))
+                                .WhenCalled(m => {
+                                    var returnValue = MockRepository.GenerateStub<IExchange>();
 
-        //    Assert.That(exchanges, Has.Count.EqualTo(3), "Two exchanges should have been created");
-        //    Assert.That(exchanges[0].Name, Is.EqualTo("MessageWithMultipleInterfaces"), "Concrete message exchange should been created first");
+                                    switch (m.Arguments[0].ToString())
+                                    {
+                                        case "EasyNetQ.Tests.AdvancedMessagePolymorphismTest.MessageWithTwoInterfaces:EasyNetQ.Tests":
+                                            returnValue.Stub(e => e.Name).Return("MessageWithTwoInterfaces");
+                                            break;
+                                        case "EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceOne:EasyNetQ.Tests":
+                                            returnValue.Stub(e => e.Name).Return("IMessageInterfaceOne");
+                                            break;
+                                        case "EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceTwo:EasyNetQ.Tests":
+                                            returnValue.Stub(e => e.Name).Return("IMessageInterfaceTwo");
+                                            break;
+                                        default:
+                                            break;
+                                    }
 
-        //    Assert.That(exchanges.Count(m => m.Name == "IMessageInterfaceOne"), Is.EqualTo(1), "One IMessageInterfaceOne exchange should be created");
-        //    Assert.That(exchanges.Count(m => m.Name == "IMessageInterfaceTwo"), Is.EqualTo(1), "One IMessageInterfaceTwo exchange should be created");
-        //    Assert.That(exchanges[0].BoundTo, Is.Null, "Superseded message exchange should route messages anywhere");
-        //    Assert.That(exchanges[1].BoundTo, Is.EqualTo(exchanges[0]), "Superseding message exchange should route message to superseded exchange");
-        //    Assert.That(exchanges[2].BoundTo, Is.EqualTo(exchanges[0]), "Superseding message exchange should route message to superseded exchange");
-        //}
+                                    m.ReturnValue = Task.FromResult<IExchange>(returnValue);
+                                })
+                .Return(null);
+
+            advancedBus.Stub(b => b.BindAsync(Arg<IExchange>.Is.Anything, Arg<IExchange>.Is.Anything, Arg<string>.Is.Anything))
+                .Return(Task.FromResult<IBinding>(MockRepository.GenerateStub<IBinding>()));
+
+            advancedBus.Stub(c => c.Container.Resolve<IConventions>())
+                .Return(new Conventions(new TypeNameSerializer()));
+
+            var publishExchangeStrategy = new AdvancedPolymorphismPublishExchangeDeclareStrategy();
+
+            publishExchangeStrategy.DeclareExchangeAsync(advancedBus, typeof(MessageWithTwoInterfaces), ExchangeType.Topic).Wait();
+
+            //ensure that only one exchange is declared for concrete type
+            advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
+                Arg<string>.Is.Equal("EasyNetQ.Tests.AdvancedMessagePolymorphismTest.MessageWithTwoInterfaces:EasyNetQ.Tests"),
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything), opt => opt.Repeat.Times(1));
+
+            //ensure that only one exchange is declared for IMessageInterfaceOne
+            advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
+                Arg<string>.Is.Equal("EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceOne:EasyNetQ.Tests"),
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything), opt => opt.Repeat.Times(1));
+
+            //ensure that only one exchange is declared for IMessageInterfaceTwo
+            advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
+                Arg<string>.Is.Equal("EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceTwo:EasyNetQ.Tests"),
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<bool>.Is.Anything,
+                Arg<string>.Is.Anything,
+                Arg<bool>.Is.Anything), opt => opt.Repeat.Times(1));
+
+            //ensure the IMessageInterfaceOne exchange is bound to the concreate type version
+            advancedBus.AssertWasCalled(b => b.BindAsync(
+                Arg<IExchange>.Matches( m => m.Name == "MessageWithTwoInterfaces"),
+                Arg<IExchange>.Matches(m => m.Name == "IMessageInterfaceOne"), 
+                Arg<string>.Is.Anything), opt => opt.Repeat.Times(1));
+
+            //ensure the IMessageInterfaceTwo exchange is bound to the concreate type version
+            advancedBus.AssertWasCalled(b => b.BindAsync(
+                Arg<IExchange>.Matches(m => m.Name == "MessageWithTwoInterfaces"),
+                Arg<IExchange>.Matches(m => m.Name == "IMessageInterfaceTwo"),
+                Arg<string>.Is.Anything), opt => opt.Repeat.Times(1));
+        }
     }
 }

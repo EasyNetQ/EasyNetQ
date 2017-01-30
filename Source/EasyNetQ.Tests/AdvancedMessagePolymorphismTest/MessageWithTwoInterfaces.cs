@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
 {
-    public class MessageWithMultipleInterfaces : IMessageInterfaceOne, IMessageInterfaceTwo
+    public class MessageWithTwoInterfaces : IMessageInterfaceOne, IMessageInterfaceTwo
     {
     }
 }
