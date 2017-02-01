@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.DI.Tests",
   "title": "EasyNetQ.DI.Tests",
   "name": "EasyNetQ.DI.Tests",
@@ -12,13 +12,13 @@
   "dependencies": {
     "Autofac": "4.0.0",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "EasyNetQ": "99.0.0-dev",
-    "EasyNetQ.DI.Autofac": "99.0.0-dev",
-    "EasyNetQ.DI.LightInject": "99.0.0-dev",
-    "EasyNetQ.DI.Ninject": "99.0.0-dev",
-    "EasyNetQ.DI.SimpleInjector": "99.0.0-dev",
-    "EasyNetQ.DI.StructureMap": "99.0.0-dev",
-    "EasyNetQ.Tests.Common": "99.0.0-dev",
+    "EasyNetQ": "2.0.4-netcore1435",
+    "EasyNetQ.DI.Autofac": "2.0.4-netcore1435",
+    "EasyNetQ.DI.LightInject": "2.0.4-netcore1435",
+    "EasyNetQ.DI.Ninject": "2.0.4-netcore1435",
+    "EasyNetQ.DI.SimpleInjector": "2.0.4-netcore1435",
+    "EasyNetQ.DI.StructureMap": "2.0.4-netcore1435",
+    "EasyNetQ.Tests.Common": "2.0.4-netcore1435",
     "LightInject": "4.0.11",
     "Newtonsoft.Json": "9.0.1",
     "Ninject": "4.0.0-beta-0134",
@@ -54,7 +54,7 @@
       "dependencies": {
         "Castle.Core": "3.3.3",
         "Castle.Windsor": "3.3.0",
-        "EasyNetQ.DI.Windsor": "99.0.0-dev"
+        "EasyNetQ.DI.Windsor": "2.0.4-netcore1435"
       }
     }
   }

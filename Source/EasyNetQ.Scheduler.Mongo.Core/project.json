@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.Scheduler.Mongo.Core",
   "title": "EasyNetQ.Scheduler.Mongo.Core",
   "name": "EasyNetQ.Scheduler.Mongo.Core",
@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ": "2.0.4-netcore1435",
     "MongoDB.Bson": "2.3.0",
     "mongocsharpdriver": "2.3.0"
   },

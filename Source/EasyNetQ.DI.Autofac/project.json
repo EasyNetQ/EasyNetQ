@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "An adaptor to allow EasyNetQ to use Autofac as its internal IoC container",
   "title": "EasyNetQ.DI.Autofac",
   "name": "EasyNetQ.DI.Autofac",
@@ -27,18 +27,15 @@
     "Wiebe Tijsma",
     "Contributors (see GitHub repo) "
   ],
-
   "buildOptions": {
     "compile": {
       "includeFiles": "..\\Version.cs"
     }
   },
-
   "dependencies": {
     "Autofac": "4.0.0",
-    "EasyNetQ": "99.0.0-dev"
+    "EasyNetQ": "2.0.4-netcore1435"
   },
-
   "tools": {
     "dotnet-gitversion": {
       "version": "1.0.0",

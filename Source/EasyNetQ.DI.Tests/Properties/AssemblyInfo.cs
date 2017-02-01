@@ -22,9 +22,9 @@ using Xunit;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("cf3af8a8-79c8-4d1a-b747-4e9dabf50f3b")]
 
-[assembly: AssemblyVersion("2.0.3.0")]
-[assembly: AssemblyInformationalVersion("2.0.3-netcore.1+1428.Branch.feature/netcore.Sha.cde287238775f88c777ecc1764f659e52832f164")]
-[assembly: AssemblyFileVersion("2.0.3.0")]
+[assembly: AssemblyVersion("2.0.4.0")]
+[assembly: AssemblyInformationalVersion("2.0.4-netcore.1435+Branch.feature/netcore.Sha.a997be04162dfa34c99681e265733c91c0d564f3")]
+[assembly: AssemblyFileVersion("2.0.4.0")]
 
 // NOTE: Forcing xUnit to not run tests in parallel. This is because the 
 // tests call RegisterAsEasyNetQContainerFactory which results in calling

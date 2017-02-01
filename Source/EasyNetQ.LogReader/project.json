@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.LogReader",
   "title": "EasyNetQ.LogReader",
   "name": "EasyNetQ.LogReader",
@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ": "2.0.4-netcore1435",
     "RabbitMQ.Client": "4.1.1"
   },
   "tools": {

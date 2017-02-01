@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.Scheduler.Mongo",
   "title": "EasyNetQ.Scheduler.Mongo",
   "name": "EasyNetQ.Scheduler.Mongo",
@@ -37,8 +37,8 @@
     ]
   },
   "dependencies": {
-    "EasyNetQ": "99.0.0-dev",
-    "EasyNetQ.Scheduler.Mongo.Core": "99.0.0-dev",
+    "EasyNetQ": "2.0.4-netcore1435",
+    "EasyNetQ.Scheduler.Mongo.Core": "2.0.4-netcore1435",
     "log4net": "2.0.5",
     "Topshelf": "3.1.4"
   },

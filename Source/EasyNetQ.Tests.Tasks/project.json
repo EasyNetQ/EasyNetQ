@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.Tests.Tasks",
   "title": "EasyNetQ.Tests.Tasks",
   "name": "EasyNetQ.Tests.Tasks",
@@ -35,9 +35,9 @@
   },
   "dependencies": {
     "Autofac": "4.2.0",
-    "EasyNetQ": "99.0.0-dev",
-    "EasyNetQ.Serilog": "99.0.0-dev",
-    "EasyNetQ.Tests.Common": "99.0.0-dev",
+    "EasyNetQ": "2.0.4-netcore1435",
+    "EasyNetQ.Serilog": "2.0.4-netcore1435",
+    "EasyNetQ.Tests.Common": "2.0.4-netcore1435",
     "Net.Autofac":"0.1.12",
     "Net.Core": "0.1.12",
     "Serilog.Sinks.ColoredConsole": "2.0.0"
