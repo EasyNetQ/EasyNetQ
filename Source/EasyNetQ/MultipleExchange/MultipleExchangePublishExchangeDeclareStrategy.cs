@@ -6,9 +6,9 @@ using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 
-namespace EasyNetQ.AdvancedMessagePolymorphism
+namespace EasyNetQ.MultipleExchange
 {
-    public class AdvancedPolymorphismPublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
+    public class MultipleExchangePublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
         private readonly AsyncSemaphore semaphore = new AsyncSemaphore(1);

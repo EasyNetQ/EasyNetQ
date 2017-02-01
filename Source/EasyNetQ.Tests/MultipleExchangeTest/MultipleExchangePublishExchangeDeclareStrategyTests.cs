@@ -1,15 +1,11 @@
 // ReSharper disable InconsistentNaming
-
-using System;
-using System.Collections.Generic;
-using EasyNetQ.AdvancedMessagePolymorphism;
+using EasyNetQ.MultipleExchange;
 using EasyNetQ.Topology;
 using NUnit.Framework;
 using Rhino.Mocks;
 using System.Threading.Tasks;
-using System.Linq;
 
-namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
+namespace EasyNetQ.Tests.MultipleExchangeTest
 {
     [TestFixture]
     public class AdvancedPolymorphismPublishExchangeDeclareStrategyTests
@@ -36,7 +32,7 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
             advancedBus.Stub(c => c.Container.Resolve<IConventions>())
                 .Return(new Conventions(new TypeNameSerializer()));
 
-            var publishExchangeStrategy = new AdvancedPolymorphismPublishExchangeDeclareStrategy();
+            var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy();
 
             publishExchangeStrategy.DeclareExchangeAsync(advancedBus, typeof(MyMessage), ExchangeType.Topic).Wait();
 
@@ -74,13 +70,13 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
 
                                     switch (m.Arguments[0].ToString())
                                     {
-                                        case "EasyNetQ.Tests.AdvancedMessagePolymorphismTest.MessageWithTwoInterfaces:EasyNetQ.Tests":
+                                        case "EasyNetQ.Tests.MultipleExchangeTest.MessageWithTwoInterfaces:EasyNetQ.Tests":
                                             returnValue.Stub(e => e.Name).Return("MessageWithTwoInterfaces");
                                             break;
-                                        case "EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceOne:EasyNetQ.Tests":
+                                        case "EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceOne:EasyNetQ.Tests":
                                             returnValue.Stub(e => e.Name).Return("IMessageInterfaceOne");
                                             break;
-                                        case "EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceTwo:EasyNetQ.Tests":
+                                        case "EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceTwo:EasyNetQ.Tests":
                                             returnValue.Stub(e => e.Name).Return("IMessageInterfaceTwo");
                                             break;
                                         default:
@@ -97,13 +93,13 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
             advancedBus.Stub(c => c.Container.Resolve<IConventions>())
                 .Return(new Conventions(new TypeNameSerializer()));
 
-            var publishExchangeStrategy = new AdvancedPolymorphismPublishExchangeDeclareStrategy();
+            var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy();
 
             publishExchangeStrategy.DeclareExchangeAsync(advancedBus, typeof(MessageWithTwoInterfaces), ExchangeType.Topic).Wait();
 
             //ensure that only one exchange is declared for concrete type
             advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
-                Arg<string>.Is.Equal("EasyNetQ.Tests.AdvancedMessagePolymorphismTest.MessageWithTwoInterfaces:EasyNetQ.Tests"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.MessageWithTwoInterfaces:EasyNetQ.Tests"),
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,
@@ -114,7 +110,7 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
 
             //ensure that only one exchange is declared for IMessageInterfaceOne
             advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
-                Arg<string>.Is.Equal("EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceOne:EasyNetQ.Tests"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceOne:EasyNetQ.Tests"),
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,
@@ -125,7 +121,7 @@ namespace EasyNetQ.Tests.AdvancedMessagePolymorphismTest
 
             //ensure that only one exchange is declared for IMessageInterfaceTwo
             advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
-                Arg<string>.Is.Equal("EasyNetQ.Tests.AdvancedMessagePolymorphismTest.IMessageInterfaceTwo:EasyNetQ.Tests"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceTwo:EasyNetQ.Tests"),
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,
