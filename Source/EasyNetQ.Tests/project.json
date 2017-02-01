@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.Tests",
   "title": "EasyNetQ.Tests",
   "name": "EasyNetQ.Tests",
@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "EasyNetQ": "99.0.0-dev",
+    "EasyNetQ": "2.0.4-netcore1435",
     "EasyNetQ.Management.Client": "2.0.0-netcore0001",
-    "EasyNetQ.Tests.Common": "99.0.0-dev",
+    "EasyNetQ.Tests.Common": "2.0.4-netcore1435",
     "Newtonsoft.Json": "9.0.1",
     "NSubstitute": "2.0.0-rc",
     "RabbitMQ.Client": "4.1.1",

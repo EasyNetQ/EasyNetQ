@@ -1,5 +1,5 @@
 {
-  "version": "99.0.0-dev",
+  "version": "2.0.4-netcore1435",
   "description": "EasyNetQ.Trace",
   "title": "EasyNetQ.Trace",
   "name": "EasyNetQ.Trace",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "CommandLineParser": "2.1.1-beta",
-    "EasyNetQ": "99.0.0-dev"
+    "EasyNetQ": "2.0.4-netcore1435"
   },
   "tools": {
     "dotnet-gitversion": {
