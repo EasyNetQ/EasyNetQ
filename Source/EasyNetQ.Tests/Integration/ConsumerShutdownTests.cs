@@ -22,6 +22,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact]
         public void Message_can_be_processed_but_not_ACKd()
         {
+            var waitTime = TimeSpan.FromMinutes(2);
             var receivedEvent = new AutoResetEvent(false);
             var processedEvent = new AutoResetEvent(false);
 
@@ -49,13 +50,15 @@ namespace EasyNetQ.Tests.Integration
             bus.Advanced.Publish(Exchange.GetDefault(), queueName, false, new MessageProperties(), message);
             Console.Out.WriteLine("Published");
 
-            receivedEvent.WaitOne();
+            var signalReceived = receivedEvent.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Expected reset event within {waitTime.TotalSeconds} seconds");
 
             Console.Out.WriteLine("Dispose Called");
             bus.Dispose();
             Console.Out.WriteLine("Disposed");
 
-            processedEvent.WaitOne(1000);
+            signalReceived = processedEvent.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Expected reset event within {waitTime.TotalSeconds} seconds");
         }
     }
 }
