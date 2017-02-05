@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AdvancedBusEventHandlers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MultipleExchange\MultipleExchangePublishExchangeDeclareStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MultipleExchange\MultipleExchangeExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AmqpExceptions\AmpqExceptionGrammar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AmqpExceptions\AmqpException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AutoSubscribe\AutoSubscriber.cs" />
