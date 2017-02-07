@@ -1,7 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
 using Xunit;
@@ -20,7 +22,6 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public When_an_action_is_invoked()
         {
             actionWasInvoked = false;
-            actionThreadName = "Not set";
 
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
@@ -31,7 +32,6 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             Action<IModel> action = x =>
                 {
                     actionWasInvoked = true;
-                    actionThreadName = Thread.CurrentThread.Name;
                 };
 
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
@@ -61,9 +61,22 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         }
 
         [Fact]
-        public void Should_invoke_the_action_on_the_dispatcher_thread()
+        public void Should_call_actions_concurrently()
         {
-            actionThreadName.ShouldEqual("Client Command Dispatcher Thread");
+            const int numberOfCalls = 1000;
+            var actionsWereInvoked = new Dictionary<int, bool>();
+            var actions = (from key in Enumerable.Range(0, numberOfCalls)
+                let action = new Action<IModel>(x => actionsWereInvoked[key] = true)
+                select new {Key = key, Action = action}).ToArray();
+
+            Task.WhenAll(actions.Select(x => dispatcher.InvokeAsync(x.Action))).Wait();
+
+            foreach (var action in actions)
+            {
+                var failMessage = string.Format("Action with key {0} was not invoked", action.Key);
+                var wasInvoked = actionsWereInvoked.ContainsKey(action.Key) && actionsWereInvoked[action.Key];
+                Assert.True(wasInvoked, failMessage);
+            }
         }
     }
 }
