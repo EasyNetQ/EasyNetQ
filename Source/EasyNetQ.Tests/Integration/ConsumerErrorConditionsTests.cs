@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests
             Thread.Sleep(1000);
         }
 
-        [Fact][Explicit("Needs a RabbitMQ instance on localhost to run")]
+        [Fact(Skip = "Needs fixing")][Explicit("Needs a RabbitMQ instance on localhost to run")]
         public void Should_wrap_error_messages_correctly()
         {
             var typeNameSerializer = bus.Advanced.Container.Resolve<ITypeNameSerializer>();

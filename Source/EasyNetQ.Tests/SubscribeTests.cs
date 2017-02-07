@@ -296,7 +296,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_write_exception_log_message()
         {
-            // to brittle to put exact message here I think
+            // too brittle to put exact message here I think
             mockBuilder.Logger.Received().ErrorWrite(Arg.Any<string>(), Arg.Any<object[]>());
         }
 

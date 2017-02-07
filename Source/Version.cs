@@ -5,6 +5,7 @@ using System.Reflection;
 [assembly: CLSCompliant(false)]
 
 // Note: until version 1.0 expect breaking changes on 0.X versions.
+// 0.63.6.0 Added support for multiple exchange (creating an exchange per implemented interface for a concreate type)
 // 0.63.5.0 Made some methods protected/virtual in HandlerRunner so we can override the behavior
 // 0.63.4.0 EasyNetQ.Scheduler stability fixes
 // 0.63.3.0 Allow injection of custom implementation of IPersistentConnection

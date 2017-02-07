@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_create_the_correct_connection_string()
         {
-            connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5673;requestedHeartbeat=1");
+            connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5674;requestedHeartbeat=1");
         }
 
         [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
