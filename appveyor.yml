@@ -26,7 +26,8 @@ deploy:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
     skip_symbols: true
     on:
-      branches: 
+      branches:
+        only:
         - master
         - develop
   - provider: NuGet
