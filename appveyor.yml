@@ -27,9 +27,8 @@ deploy:
     skip_symbols: true
     on:
       branches:
-        only:
-        - master
-        - develop
+        develop
+        master
   - provider: NuGet
     artifact: /.*\.nupkg/
     server: https://www.myget.org/F/easynetq-unstable/api/v2/package
