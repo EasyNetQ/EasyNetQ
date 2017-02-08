@@ -27,9 +27,15 @@ deploy:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
     skip_symbols: true
     on:
-      branches:
-        develop
-        master
+      branch: master
+  - provider: NuGet
+    artifact: /.*\.nupkg/
+    server:
+    api_key:
+      secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
+    skip_symbols: true
+    on:
+      branch: develop
   - provider: NuGet
     artifact: /.*\.nupkg/
     server: https://www.myget.org/F/easynetq-unstable/api/v2/package
