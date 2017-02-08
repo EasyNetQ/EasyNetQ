@@ -1,30 +1,29 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using NUnit.Framework;
-using Rhino.Mocks;
+using Xunit;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
-    [TestFixture]
     public class When_a_Persistent_consumer_starts_consuming : Given_a_PersistentConsumer
     {
         public override void AdditionalSetup()
         {
-            persistentConnection.Stub(x => x.IsConnected).Return(true);
+            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_internal_consumer()
         {
-            internalConsumerFactory.AssertWasCalled(x => x.CreateConsumer());
+            internalConsumerFactory.Received().CreateConsumer();
             createConsumerCalled.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_ask_the_internal_consumer_to_start_consuming()
         {
-            internalConsumers[0].AssertWasCalled(x => x.StartConsuming(persistentConnection, queue, onMessage, configuration));
+            internalConsumers[0].Received().StartConsuming(persistentConnection, queue, onMessage, configuration);
         }
     }
 }

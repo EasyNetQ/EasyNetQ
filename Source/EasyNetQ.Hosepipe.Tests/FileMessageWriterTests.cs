@@ -3,25 +3,30 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NUnit.Framework;
+using EasyNetQ.Tests;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class FileMessageWriterTests
     {
-        private const string tempDirectory = @"C:\temp\MessageOutput";
+        private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), @"MessageOutput");
 
-        [SetUp]
-        public void SetUp() {}
-
-        [Test, Explicit("Writes files to the file system")]
+        [Fact][Explicit("Writes files to the file system")]
         public void WriteSomeFiles()
         {
             var directory = new DirectoryInfo(tempDirectory);
-            foreach (var file in directory.EnumerateFiles())
+
+            if (!directory.Exists)
             {
-                file.Delete();
+                directory.Create();
+            }
+            else
+            {
+                foreach (var file in directory.EnumerateFiles())
+                {
+                    file.Delete();
+                }
             }
 
             var properties = new MessageProperties();
@@ -48,7 +53,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        [Test]
+        [Fact]
         public void Should_remove_invalid_file_chars()
         {
             const string originalQueueName = @"\A/B:C*D?E""F<G>H|I";

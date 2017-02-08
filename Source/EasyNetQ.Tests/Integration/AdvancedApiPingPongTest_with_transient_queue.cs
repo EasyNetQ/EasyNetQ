@@ -5,13 +5,12 @@ using System.Threading;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit]
-    public class AdvancedApiPingPongTest_with_transient_queue
+    public class AdvancedApiPingPongTest_with_transient_queue : IDisposable
     {
         private readonly IBus[] buses = new IBus[2];
         private readonly IQueue[] queues = new IQueue[2];
@@ -23,8 +22,7 @@ namespace EasyNetQ.Tests.Integration
         private const long rallyLength = 1000;
         private long rallyCount;
 
-        [SetUp]
-        public void SetUp()
+        public AdvancedApiPingPongTest_with_transient_queue()
         {
             rallyCount = 0;
             for (int i = 0; i < 2; i++)
@@ -35,15 +33,14 @@ namespace EasyNetQ.Tests.Integration
                 exchanges[i] = buses[i].Advanced.ExchangeDeclare(name, "direct");
 
                 // declaring a queue without specifying the name creates a transient, server named queue.
-                queues[i] = buses[i].Advanced.QueueDeclare(); 
+                queues[i] = buses[i].Advanced.QueueDeclare("pong"); 
 
                 buses[i].Advanced.QueuePurge(queues[i]);
                 buses[i].Advanced.Bind(exchanges[i], queues[i], routingKey);
             }
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             for (int i = 0; i < 2; i++)
             {
@@ -51,7 +48,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        [Test, Explicit]
+        [Fact][Explicit]
         public void Ping_pong_with_advances_consumers()
         {
             Consume(0, 1);

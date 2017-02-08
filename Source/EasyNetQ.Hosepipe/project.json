@@ -1,0 +1,78 @@
+{
+  "version": "2.0.4-netcore1435",
+  "description": "EasyNetQ.Hosepipe",
+  "title": "EasyNetQ.Hosepipe",
+  "name": "EasyNetQ.Hosepipe",
+  "packOptions": {
+    "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
+    "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
+    "owners": [
+      "mikehadlow",
+      "micdenny",
+      "pliner",
+      "zidad"
+    ],
+    "tags": [
+      "Autofac",
+      "RabbitMQ",
+      "Messaging",
+      "AMQP",
+      "C#"
+    ]
+  },
+  "authors": [
+    "Mike Hadlow",
+    "Michael Denny",
+    "Yury Pliner",
+    "Wiebe Tijsma",
+    "Contributors (see GitHub repo) "
+  ],
+
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
+  "dependencies": {
+    "EasyNetQ": "2.0.4-netcore1435"
+  },
+
+  "tools": {
+    "dotnet-gitversion": {
+      "version": "1.0.0",
+      "imports": [
+        "dotnet"
+      ]
+    }
+  },
+  "commands": {
+    "dn-version": "dotnet gitversion"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "buildOptions": {
+        "define": [
+          "NET_STANDARD"
+        ]
+      },
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.1",
+          "type": "platform"
+        }
+      },
+      "imports": "dnxcore50"
+    },
+    "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      }
+    }
+  },
+  "runtimes": {
+    "win7-x86": {},
+    "win7-x64": {}
+  }
+}

@@ -1,77 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using Rhino.Mocks;
+using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
-        readonly IConnectionFactory connectionFactory = MockRepository.GenerateStub<IConnectionFactory>();
-        readonly IConnection connection = MockRepository.GenerateStub<IConnection>();
+        readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
+        readonly IConnection connection = Substitute.For<IConnection>();
         readonly List<IModel> channels = new List<IModel>();
         readonly Stack<IModel> channelPool = new Stack<IModel>();
-        readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>(); 
+        readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
         readonly IBasicProperties basicProperties = new BasicProperties();
         readonly List<string> consumerQueueNames = new List<string>();
-        private readonly IEasyNetQLogger logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+        private readonly IEasyNetQLogger logger = Substitute.For<IEasyNetQLogger>();
         private readonly IBus bus;
 
         public const string Host = "my_host";
         public const string VirtualHost = "my_virtual_host";
         public const int PortNumber = 1234;
 
-        public MockBuilder() : this(register => {}){}
+        public MockBuilder() : this(register => { }) { }
 
-        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices){}
+        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices) { }
 
-        public MockBuilder(string connectionString) : this(connectionString, register => {}){}
+        public MockBuilder(string connectionString) : this(connectionString, register => { }) { }
 
         public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
             for (int i = 0; i < 10; i++)
             {
-                channelPool.Push(MockRepository.GenerateStub<IModel>());
+                channelPool.Push(Substitute.For<IModel>());
             }
 
-            connectionFactory.Stub(x => x.CreateConnection()).Return(connection);
-            connectionFactory.Stub(x => x.Next()).Return(false);
-            connectionFactory.Stub(x => x.Succeeded).Return(true);
-            connectionFactory.Stub(x => x.CurrentHost).Return(new HostConfiguration
+            connectionFactory.CreateConnection().Returns(connection);
+            connectionFactory.Next().Returns(false);
+            connectionFactory.Succeeded.Returns(true);
+            connectionFactory.CurrentHost.Returns(new HostConfiguration
             {
                 Host = Host,
                 Port = PortNumber
             });
-            connectionFactory.Stub(x => x.Configuration).Return(new ConnectionConfiguration
+            connectionFactory.Configuration.Returns(new ConnectionConfiguration
             {
                 VirtualHost = VirtualHost,
             });
 
-            connection.Stub(x => x.IsOpen).Return(true);
-            
-            connection.Stub(x => x.CreateModel()).WhenCalled(i =>
-                {
-                    // Console.Out.WriteLine("\n\nMockBuilder - creating model\n{0}\n\n\n", new System.Diagnostics.StackTrace().ToString());
+            connection.IsOpen.Returns(true);
 
-                    var channel = channelPool.Pop();
-                    i.ReturnValue = channel;
-                    channels.Add(channel);
-                    channel.Stub(x => x.CreateBasicProperties()).Return(basicProperties);
-                    channel.Stub(x => x.IsOpen).Return(true);
-                    channel.Stub(x => x.BasicConsume(null, false, null, true, false, null, null))
-                        .IgnoreArguments()
-                        .WhenCalled(consumeInvokation =>
-                        {
-                            var queueName = (string)consumeInvokation.Arguments[0];
-                            var consumerTag = (string)consumeInvokation.Arguments[2];
-                            var consumer = (IBasicConsumer)consumeInvokation.Arguments[6];
+            connection.CreateModel().Returns(i =>
+            {
+                var channel = channelPool.Pop();
+                channels.Add(channel);
+                channel.CreateBasicProperties().Returns(basicProperties);
+                channel.IsOpen.Returns(true);
+                channel.BasicConsume(null, false, null, true, false, null, null)
+                    .ReturnsForAnyArgs(consumeInvokation =>
+                    {
+                        var queueName = (string)consumeInvokation[0];
+                        var consumerTag = (string)consumeInvokation[2];
+                        var consumer = (IBasicConsumer)consumeInvokation[6];
 
-                            ConsumerQueueNames.Add(queueName);
-                            consumer.HandleBasicConsumeOk(consumerTag);
-                            consumers.Add(consumer);
-                        }).Return("");
-                });
+                        ConsumerQueueNames.Add(queueName);
+                        consumer.HandleBasicConsumeOk(consumerTag);
+                        consumers.Add(consumer);
+                        return string.Empty;
+                    });
+
+                return channel;
+            });
 
             bus = RabbitHutch.CreateBus(connectionString, x =>
                 {

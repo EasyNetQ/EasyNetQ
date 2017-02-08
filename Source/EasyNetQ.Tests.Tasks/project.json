@@ -1,0 +1,65 @@
+{
+  "version": "2.0.4-netcore1435",
+  "description": "EasyNetQ.Tests.Tasks",
+  "title": "EasyNetQ.Tests.Tasks",
+  "name": "EasyNetQ.Tests.Tasks",
+  "packOptions": {
+    "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
+    "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
+    "owners": [
+      "mikehadlow",
+      "micdenny",
+      "pliner",
+      "zidad"
+    ],
+    "tags": [
+      "Autofac",
+      "RabbitMQ",
+      "Messaging",
+      "AMQP",
+      "C#"
+    ]
+  },
+  "authors": [
+    "Mike Hadlow",
+    "Michael Denny",
+    "Yury Pliner",
+    "Wiebe Tijsma",
+    "Contributors (see GitHub repo) "
+  ],
+
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
+  "dependencies": {
+    "Autofac": "4.2.0",
+    "EasyNetQ": "2.0.4-netcore1435",
+    "EasyNetQ.Serilog": "2.0.4-netcore1435",
+    "EasyNetQ.Tests.Common": "2.0.4-netcore1435",
+    "Net.Autofac":"0.1.12",
+    "Net.Core": "0.1.12",
+    "Serilog.Sinks.ColoredConsole": "2.0.0"
+  },
+  "tools": {
+    "dotnet-gitversion": {
+      "version": "1.0.0",
+      "imports": [
+        "dotnet"
+      ]
+    }
+  },
+  "commands": {
+    "dn-version": "dotnet gitversion"
+  },
+  "frameworks": {
+    "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      }
+    }
+  }
+}

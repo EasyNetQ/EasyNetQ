@@ -1,0 +1,66 @@
+{
+  "version": "2.0.4-netcore1435",
+  "description": "EasyNetQ.Hosepipe.SetupActions",
+  "title": "EasyNetQ.Hosepipe.SetupActions",
+  "name": "EasyNetQ.Hosepipe.SetupActions",
+  "packOptions": {
+    "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
+    "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
+    "owners": [
+      "mikehadlow",
+      "micdenny",
+      "pliner",
+      "zidad"
+    ],
+    "tags": [
+      "Autofac",
+      "RabbitMQ",
+      "Messaging",
+      "AMQP",
+      "C#"
+    ]
+  },
+  "authors": [
+    "Mike Hadlow",
+    "Michael Denny",
+    "Yury Pliner",
+    "Wiebe Tijsma",
+    "Contributors (see GitHub repo) "
+  ],
+
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
+  "dependencies": {
+    "EasyNetQ": "2.0.4-netcore1435"
+  },
+  "tools": {
+    "dotnet-gitversion": {
+      "version": "1.0.0",
+      "imports": [
+        "dotnet"
+      ]
+    }
+  },
+  "commands": {
+    "dn-version": "dotnet gitversion"
+  },
+  "frameworks": {
+    "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      },
+      "frameworkAssemblies": {
+        "System.Configuration.Install": "4.0.0.0"
+      }
+    }
+  },
+  "runtimes": {
+    "win7-x86": {},
+    "win7-x64": {}
+  }
+}

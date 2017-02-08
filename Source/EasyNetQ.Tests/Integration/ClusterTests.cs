@@ -2,12 +2,11 @@
 
 using System;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
-    public class ClusterTests
+    public class ClusterTests : IDisposable
     {
         private const string clusterHost1 = "ubuntu";
         private const string clusterHost2 = "ubuntu";
@@ -17,8 +16,7 @@ namespace EasyNetQ.Tests.Integration
 
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public ClusterTests()
         {
             const string hostFormat = "{0}:{1}";
             var host1 = string.Format(hostFormat, clusterHost1, clusterPort1);
@@ -29,26 +27,25 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus(connectionString);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_create_the_correct_connection_string()
         {
-            connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5673;requestedHeartbeat=1");
+            connectionString.ShouldEqual("host=ubuntu:5672,ubuntu:5674;requestedHeartbeat=1");
         }
 
-        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_connect_to_the_first_available_node_in_cluster()
         {
             // just watch what happens
             Thread.Sleep(5 * 60 * 1000); // let's give it 5 minutes
         }
 
-        [Test, Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
+        [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_be_able_to_resubscribe_on_reconnection()
         {
             bus.Subscribe<MyMessage>("cluster_test", message => Console.WriteLine(message.Text));

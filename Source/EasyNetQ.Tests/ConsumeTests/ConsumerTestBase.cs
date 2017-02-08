@@ -6,14 +6,13 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    public abstract class ConsumerTestBase
+    public abstract class ConsumerTestBase : IDisposable
     {
         protected MockBuilder MockBuilder;
         protected IConsumerErrorStrategy ConsumerErrorStrategy;
@@ -29,12 +28,11 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected byte[] OriginalBody;
         protected const ulong DeliverTag = 10101;
 
-        [SetUp]
-        protected void SetUp()
+        public ConsumerTestBase()
         {
             Cancellation = new CancellationTokenSource();
 
-            ConsumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
+            ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             
             IConventions conventions = new Conventions(new TypeNameSerializer())
                 {
@@ -49,6 +47,10 @@ namespace EasyNetQ.Tests.ConsumeTests
             AdditionalSetUp();
         }
 
+        public void Dispose()
+        {
+            MockBuilder.Bus.Dispose();
+        }
         protected abstract void AdditionalSetUp();
 
         protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler)

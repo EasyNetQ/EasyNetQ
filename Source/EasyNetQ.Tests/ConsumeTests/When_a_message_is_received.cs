@@ -1,23 +1,22 @@
-﻿using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using RabbitMQ.Client.Framing;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
-    public class When_a_message_is_received
+    public class When_a_message_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
         private MyMessage deliveredMyMessage;
         private MyOtherMessage deliveredMyOtherMessage;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_message_is_received()
         {
             //mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
             mockBuilder = new MockBuilder();
@@ -31,26 +30,31 @@ namespace EasyNetQ.Tests.ConsumeTests
             DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown:EasyNetQ.Tests");
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_deliver_MyMessage()
         {
             deliveredMyMessage.ShouldNotBeNull();
             deliveredMyMessage.Text.ShouldEqual("Hello World :)");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_MyOtherMessage()
         {
             deliveredMyOtherMessage.ShouldNotBeNull();
             deliveredMyOtherMessage.Text.ShouldEqual("Goodbye Cruel World!");
         }
 
-        [Test]
+        [Fact]
         public void Should_put_unrecognised_message_on_error_queue()
         {
-            mockBuilder.Logger.AssertWasCalled(x => x.ErrorWrite(
-                Arg<string>.Matches(errorMessage => errorMessage.StartsWith("Exception thrown by subscription callback")), 
-                Arg<object[]>.Is.Anything));
+            mockBuilder.Logger.Received().ErrorWrite(
+                Arg.Is<string>(errorMessage => errorMessage.StartsWith("Exception thrown by subscription callback")), 
+                Arg.Any<object[]>());
         }
 
         private void DeliverMessage(string message, string type)

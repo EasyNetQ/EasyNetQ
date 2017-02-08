@@ -47,7 +47,7 @@ namespace EasyNetQ.Hosepipe
 
                     var body = errorMessageSerializer.Deserialize(error.Message);
 
-                    model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
+                    model.BasicPublish(error.Exchange, error.RoutingKey, true, properties, body);
                 }
                 catch (OperationInterruptedException)
                 {

@@ -2,20 +2,15 @@
 
 using System;
 using System.Threading;
-
 using EasyNetQ.Consumer;
-
-using NUnit.Framework;
+using EasyNetQ.Tests;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class QueueRetrievalTests
     {
-        [SetUp]
-        public void SetUp() {}
-
-        [Test, Explicit("Requires a RabbitMQ server on localhost")]
+        [Fact][Explicit("Requires a RabbitMQ server on localhost")]
         public void TryGetMessagesFromQueue()
         {
             const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
@@ -36,7 +31,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        [Test, Explicit("Requires a RabbitMQ server on localhost")]
+        [Fact][Explicit("Requires a RabbitMQ server on localhost")]
         public void PublishSomeMessages()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");

@@ -1,0 +1,99 @@
+{
+  "version": "2.0.4-netcore1435",
+  "description": "EasyNetQ",
+  "title": "EasyNetQ",
+  "name": "EasyNetQ",
+  "packOptions": {
+    "licenseUrl": "https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt",
+    "projectUrl": "https://github.com/EasyNetQ/EasyNetQ",
+    "owners": [
+      "mikehadlow",
+      "micdenny",
+      "pliner",
+      "zidad"
+    ],
+    "tags": [
+      "RabbitMQ",
+      "Messaging",
+      "AMQP",
+      "C#"
+    ]
+  },
+  "authors": [
+    "Mike Hadlow",
+    "Michael Denny",
+    "Yury Pliner",
+    "Wiebe Tijsma",
+    "Contributors (see GitHub repo) "
+  ],
+  "buildOptions": {
+    "compile": {
+      "includeFiles": "..\\Version.cs"
+    }
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "9.0.1",
+    "RabbitMQ.Client": "4.1.1"
+  },
+  "tools": {
+    "dotnet-gitversion": {
+      "version": "1.0.0",
+      "imports": [
+        "dotnet"
+      ]
+    }
+  },
+  "commands": {
+    "dn-version": "dotnet gitversion"
+  },
+  "frameworks": {
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [
+          "NET_STANDARD"
+        ]
+      },
+      "dependencies": {
+        "System.Diagnostics.Debug": "4.0.11",
+        "System.Diagnostics.Tools": "4.0.1",
+        "System.Dynamic.Runtime": "4.0.11",
+        "System.Globalization": "4.0.11",
+        "System.IO": "4.1.0",
+        "System.IO.Compression": "4.1.0",
+        "System.IO.FileSystem": "4.0.1",
+        "System.IO.FileSystem.Primitives": "4.0.1",
+        "System.Linq.Expressions": "4.1.0",
+        "System.ObjectModel": "4.0.12",
+        "System.Reflection": "4.1.0",
+        "System.Reflection.Emit": "4.0.1",
+        "System.Reflection.Emit.ILGeneration": "4.0.1",
+        "System.Reflection.Emit.Lightweight": "4.0.1",
+        "System.Reflection.Extensions": "4.0.1",
+        "System.Reflection.Primitives": "4.0.1",
+        "System.Reflection.TypeExtensions": "4.1.0",
+        "System.Resources.ResourceManager": "4.0.1",
+        "System.Runtime.Extensions": "4.1.0",
+        "System.Runtime.Handles": "4.0.1",
+        "System.Runtime.InteropServices": "4.1.0",
+        "System.Text.Encoding": "4.0.11",
+        "System.Text.Encoding.Extensions": "4.0.11",
+        "System.Threading.Tasks": "4.0.11",
+        "System.Threading.Timer": "4.0.1",
+        "Microsoft.Extensions.Logging.TraceSource": "1.0.0"
+      }
+    },
+    "net451": {
+      "buildOptions": {
+        "define": [
+          "NETFX"
+        ]
+      },
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Configuration": "4.0.0.0",
+        "System.Core": "4.0.0.0",
+        "System.IO.Compression": "4.0.0.0"
+      }
+    }
+  }
+}

@@ -1,6 +1,8 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
+using EasyNetQ.Tests;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -10,12 +12,10 @@ namespace EasyNetQ.DI.Tests
     ///     However, Ninject doesn't allow more than one registration of a service, it
     ///     throws an exception, and StructureMap and Autofac have a last-to-register-wins policy.
     /// </summary>
-    [TestFixture]
     [Explicit("Starts a connection to localhost")]
-    public class AutofacAdapterTests
+    public class AutofacAdapterTests : IDisposable
     {
-        [SetUp]
-        public void SetUp()
+        public AutofacAdapterTests()
         {
             builder = new ContainerBuilder();
             builder.RegisterType<TestConventions>().As<IConventions>();
@@ -24,10 +24,9 @@ namespace EasyNetQ.DI.Tests
             bus = container.Resolve<IBus>();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
-            container.Dispose();
+            container?.Dispose();
             RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());
         }
 
@@ -35,22 +34,22 @@ namespace EasyNetQ.DI.Tests
         private IBus bus;
         private Autofac.IContainer container;
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_autofac_module()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_autosubscriber()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
 
-            Assert.IsTrue(bus is RabbitBus);
+            Assert.True(bus is RabbitBus);
 
             var rabbitBus = (RabbitBus)bus;
 
-            Assert.IsTrue(rabbitBus.Advanced.Conventions is TestConventions);
+            Assert.True(rabbitBus.Advanced.Conventions is TestConventions);
         }
     }
 

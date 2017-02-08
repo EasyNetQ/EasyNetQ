@@ -1,22 +1,22 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture, Explicit("Requires a broker on localhost.")]
-    public class PersistentChannelTests
+    [Explicit("Requires a broker on localhost.")]
+    public class PersistentChannelTests : IDisposable
     {
         private IPersistentConnection connection;
         private IPersistentChannel persistentChannel;
 
-        [SetUp]
-        public void SetUp()
+        public PersistentChannelTests()
         {
             var logger = new ConsoleLogger();
             var eventBus = new EventBus();
@@ -29,26 +29,25 @@ namespace EasyNetQ.Tests.Integration
             connection.Initialize();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             connection.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_run_channel_actions()
         {
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "direct", true, false, new Dictionary<string, object>()));
         }
 
-        [Test]
+        [Fact]
         public void Should_allow_non_disconnect_Amqp_exception_to_bubble_up()
         {
             // run test above first
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("myExchange", "topic", true, false, new Dictionary<string, object>()));
         }
 
-        [Test]
+        [Fact]
         public void Should_reconnect_if_connection_goes_away()
         {
             Helpers.CloseConnection();
@@ -57,7 +56,7 @@ namespace EasyNetQ.Tests.Integration
             persistentChannel.InvokeChannelAction(x =>
                 {
                     Console.Out.WriteLine("Running exchange declare");
-                    x.ExchangeDeclare("myExchange", "direct");
+                    x.ExchangeDeclare("myExchange", "direct", true, false, new Dictionary<string, object>());
                     Console.Out.WriteLine("Ran exchange declare");
                 });
 

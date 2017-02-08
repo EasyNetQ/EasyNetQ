@@ -2,21 +2,20 @@
 using System;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.FluentConfiguration;
-using NUnit.Framework;
-using Rhino.Mocks;
+using Xunit;
+using NSubstitute;
+using System.Reflection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    [TestFixture]
-    public class When_autosubscribing_with_subscription_configuration_action
+    public class When_autosubscribing_with_subscription_configuration_action : IDisposable
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
        
-        [SetUp]
-        public void SetUp()
+        public When_autosubscribing_with_subscription_configuration_action()
         {
-            bus = MockRepository.GenerateMock<IBus>();
+            bus = Substitute.For<IBus>();
            
 
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
@@ -29,31 +28,33 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                     .WithPriority(10)
                 };
 
-            bus.Stub(x => x.Subscribe(
-                    Arg<string>.Is.Equal("MyActionTest"),
-                    Arg<Action<MessageA>>.Is.Anything,
-                    Arg<Action<ISubscriptionConfiguration>>.Is.Anything
+            bus.When(x => x.Subscribe(
+                    Arg.Is("MyActionTest"),
+                    Arg.Any<Action<MessageA>>(),
+                    Arg.Any<Action<ISubscriptionConfiguration>>()
                     ))
-                    .WhenCalled(a =>
-                        {
-                           capturedAction= (Action<ISubscriptionConfiguration>)a.Arguments[2];
-                        });
+                    .Do(a =>
+                    {
+                        capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
+                    });
 
-            autoSubscriber.Subscribe(GetType().Assembly);
+            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            bus.Dispose();
+        }
+
+        [Fact]
         public void Should_have_called_subscribe()
         {
-            bus.AssertWasCalled(
-                    x => x.Subscribe(
-                        Arg<string>.Is.Anything, 
-                        Arg<Action<MessageA>>.Is.Anything, 
-                        Arg<Action<ISubscriptionConfiguration>>.Is.Anything));
-
+            bus.Received().Subscribe(Arg.Any<string>(),
+                                     Arg.Any<Action<MessageA>>(),
+                                     Arg.Any<Action<ISubscriptionConfiguration>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_have_called_subscribe_with_action_capable_of_configuring_subscription()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
@@ -63,7 +64,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();
             subscriptionConfiguration.CancelOnHaFailover.ShouldBeTrue();
             subscriptionConfiguration.Expires.ShouldEqual(10);
-            subscriptionConfiguration.PrefetchCount.ShouldEqual(10);
+            subscriptionConfiguration.PrefetchCount.ShouldEqual((ushort)10);
             subscriptionConfiguration.Priority.ShouldEqual(10);
 
         }

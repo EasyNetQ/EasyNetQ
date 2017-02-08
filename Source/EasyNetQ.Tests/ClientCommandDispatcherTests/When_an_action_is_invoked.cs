@@ -1,72 +1,82 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    [TestFixture]
-    public class When_an_action_is_invoked
+    public class When_an_action_is_invoked : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
         private bool actionWasInvoked;
         private string actionThreadName;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_invoked()
         {
             actionWasInvoked = false;
-            actionThreadName = "Not set";
 
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            var connection = MockRepository.GenerateStub<IPersistentConnection>();
-            var channelFactory = MockRepository.GenerateStub<IPersistentChannelFactory>();
-            channel = MockRepository.GenerateStub<IPersistentChannel>();
+            var connection = Substitute.For<IPersistentConnection>();
+            var channelFactory = Substitute.For<IPersistentChannelFactory>();
+            channel = Substitute.For<IPersistentChannel>();
 
             Action<IModel> action = x =>
                 {
                     actionWasInvoked = true;
-                    actionThreadName = Thread.CurrentThread.Name;
                 };
 
-            channelFactory.Stub(x => x.CreatePersistentChannel(connection)).Return(channel);
-            channel.Stub(x => x.InvokeChannelAction(null)).IgnoreArguments().WhenCalled(
-                x => ((Action<IModel>)x.Arguments[0])(null));
+            channelFactory.CreatePersistentChannel(connection).Returns(channel);
+            channel.When(x => x.InvokeChannelAction(Arg.Any<Action<IModel>>()))
+                   .Do(x => ((Action<IModel>)x[0])(null));
 
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
 
             dispatcher.InvokeAsync(action).Wait();
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_create_a_persistent_channel()
         {
             channel.ShouldNotBeNull();
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_action()
         {
             actionWasInvoked.ShouldBeTrue();
         }
 
-        [Test]
-        public void Should_invoke_the_action_on_the_dispatcher_thread()
+        [Fact]
+        public void Should_call_actions_concurrently()
         {
-            actionThreadName.ShouldEqual("Client Command Dispatcher Thread");
+            const int numberOfCalls = 1000;
+            var actionsWereInvoked = new Dictionary<int, bool>();
+            var actions = (from key in Enumerable.Range(0, numberOfCalls)
+                let action = new Action<IModel>(x => actionsWereInvoked[key] = true)
+                select new {Key = key, Action = action}).ToArray();
+
+            Task.WhenAll(actions.Select(x => dispatcher.InvokeAsync(x.Action))).Wait();
+
+            foreach (var action in actions)
+            {
+                var failMessage = string.Format("Action with key {0} was not invoked", action.Key);
+                var wasInvoked = actionsWereInvoked.ContainsKey(action.Key) && actionsWereInvoked[action.Key];
+                Assert.True(wasInvoked, failMessage);
+            }
         }
     }
 }

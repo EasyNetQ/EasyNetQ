@@ -4,7 +4,7 @@ using SimpleInjector;
 
 namespace EasyNetQ.DI
 {
-    class SimpleInjectorMessageDispatcher : IAutoSubscriberMessageDispatcher
+    public class SimpleInjectorMessageDispatcher : IAutoSubscriberMessageDispatcher
     {
         private readonly Container _container;
 

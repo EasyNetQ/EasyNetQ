@@ -3,42 +3,38 @@
 using System;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using NSubstitute;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using Xunit;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    [TestFixture]
-    public class When_an_action_is_invoked_that_throws
+    public class When_an_action_is_invoked_that_throws : IDisposable
     {
         private IClientCommandDispatcher dispatcher;
         private IPersistentChannel channel;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_action_is_invoked_that_throws()
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            var connection = MockRepository.GenerateStub<IPersistentConnection>();
-            var channelFactory = MockRepository.GenerateStub<IPersistentChannelFactory>();
-            channel = MockRepository.GenerateStub<IPersistentChannel>();
+            var connection = Substitute.For<IPersistentConnection>();
+            var channelFactory = Substitute.For<IPersistentChannelFactory>();
+            channel = Substitute.For<IPersistentChannel>();
 
-            channelFactory.Stub(x => x.CreatePersistentChannel(connection)).Return(channel);
-            channel.Stub(x => x.InvokeChannelAction(null)).IgnoreArguments().WhenCalled(
-                x => ((Action<IModel>)x.Arguments[0])(null));
+            channelFactory.CreatePersistentChannel(connection).Returns(channel);
+            channel.WhenForAnyArgs(x => x.InvokeChannelAction(null))
+                   .Do(x => ((Action<IModel>)x[0])(null));
 
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
-
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             dispatcher.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_raise_the_exception_on_the_calling_thread()
         {
             var exception = new CrazyTestOnlyException();
@@ -56,6 +52,26 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             {
                 aggregateException.InnerException.ShouldBeTheSameAs(exception);
             }
+        }
+
+        [Fact]
+        public void Should_call_action_when_previous_throwed_an_exception()
+        {
+            Action<IModel> errorAction = x => { throw new Exception(); };
+            var goodActionWasInvoked = false;
+            Action<IModel> goodAction = x => { goodActionWasInvoked = true; };
+
+            try
+            {
+                dispatcher.InvokeAsync(errorAction).Wait();
+            }
+            catch
+            {
+                // ignore exception
+            }
+
+            dispatcher.InvokeAsync(goodAction).Wait();
+            goodActionWasInvoked.ShouldBeTrue();
         }
 
         private class CrazyTestOnlyException : Exception { }

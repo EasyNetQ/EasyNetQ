@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace EasyNetQ.Hosepipe
 {
@@ -24,7 +25,7 @@ namespace EasyNetQ.Hosepipe
             Password = "guest";
             Purge = false;
             NumberOfMessagesToRetrieve = 1000;
-            MessageFilePath = Environment.CurrentDirectory;
+            MessageFilePath = Directory.GetCurrentDirectory();
         }
     }
 }

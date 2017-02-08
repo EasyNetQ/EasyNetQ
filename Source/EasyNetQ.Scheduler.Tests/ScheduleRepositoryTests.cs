@@ -1,31 +1,32 @@
 // ReSharper disable InconsistentNaming
-using System;
-using System.Text;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using EasyNetQ.Tests;
+using NSubstitute;
+using Xunit;
+using System;
+using System.Text;
 
 namespace EasyNetQ.Scheduler.Tests
 {
-    [TestFixture]
     [Explicit("Required a database")]
     public class ScheduleRepositoryTests
     {
         private ScheduleRepository scheduleRepository;
 
-        [SetUp]
-        public void SetUp()
+        public ScheduleRepositoryTests()
         {
+            var log = Substitute.For<IEasyNetQLogger>();
             var configuration = new ScheduleRepositoryConfiguration
             {
                 ProviderName = "System.Data.SqlClient",
                 ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
                 PurgeBatchSize = 100
             };
-            scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);
+            scheduleRepository = new ScheduleRepository(configuration, log, () => DateTime.UtcNow);
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule()
         {
@@ -39,7 +40,7 @@ namespace EasyNetQ.Scheduler.Tests
             });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule_with_exchange()
         {
@@ -64,7 +65,7 @@ namespace EasyNetQ.Scheduler.Tests
             });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_cancel_a_schedule()
         {
@@ -74,7 +75,7 @@ namespace EasyNetQ.Scheduler.Tests
             });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_get_messages()
         {
@@ -92,7 +93,7 @@ namespace EasyNetQ.Scheduler.Tests
             }
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_purge_messages()
         {

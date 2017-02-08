@@ -179,7 +179,7 @@ namespace EasyNetQ.Hosepipe
 
         public static void PrintUsage()
         {
-            using (var manifest = Assembly.GetExecutingAssembly().GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt"))
+            using (var manifest = typeof(Program).GetTypeInfo().Assembly.GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt"))
             {
                 if(manifest == null)
                 {

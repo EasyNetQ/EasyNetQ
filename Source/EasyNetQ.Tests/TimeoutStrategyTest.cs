@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using Xunit;
 
 namespace EasyNetQ.Tests
 {
@@ -12,21 +12,20 @@ namespace EasyNetQ.Tests
     {
     }
 
-    [TestFixture]
     public class TimeoutStrategyTest
     {
-        [Test]
+        [Fact]
         public void TestWhenMessagetWithAttribute()
         {
             var timeoutStrategy = new TimeoutStrategy(new ConnectionConfiguration {Timeout = 10});
-            Assert.AreEqual(90, timeoutStrategy.GetTimeoutSeconds(typeof(MessageWithTimeoutAttribute)));
+            Assert.Equal((ulong)90, timeoutStrategy.GetTimeoutSeconds(typeof(MessageWithTimeoutAttribute)));
         }
 
-        [Test]
+        [Fact]
         public void TestWhenPersistentMessagesIsFalse()
         {
             var timeoutStrategy = new TimeoutStrategy(new ConnectionConfiguration { Timeout = 10 });
-            Assert.AreEqual(10, timeoutStrategy.GetTimeoutSeconds(typeof(MessageWithoutTimeoutAttribute)));
+            Assert.Equal((ulong)10, timeoutStrategy.GetTimeoutSeconds(typeof(MessageWithoutTimeoutAttribute)));
         }
     }
 }
