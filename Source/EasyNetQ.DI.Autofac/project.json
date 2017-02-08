@@ -33,7 +33,7 @@
     }
   },
   "dependencies": {
-    "Autofac": "4.0.0",
+    "Autofac": "4.3.0",
     "EasyNetQ": "2.0.4-netcore1435"
   },
   "tools": {
