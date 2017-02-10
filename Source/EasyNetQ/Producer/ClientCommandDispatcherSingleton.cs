@@ -1,16 +1,18 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private readonly SemaphoreSlim channelSemaphore;
         private const int queueSize = 1;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
+        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -22,7 +24,8 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
-            channelSemaphore = new SemaphoreSlim(queueSize, queueSize);
+
+            StartDispatcherThread(configuration);
         }
 
         public T Invoke<T>(Func<IModel, T> channelAction)
@@ -49,22 +52,36 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            await channelSemaphore.WaitAsync(cancellation.Token).ConfigureAwait(false);
+            var tcs = new TaskCompletionSource<T>();
+
             try
             {
-                cancellation.Token.ThrowIfCancellationRequested();
-                var result = default(T);
-                persistentChannel.InvokeChannelAction(channel => { result = channelAction(channel); });
-                return result;
+                queue.Add(() =>
+                {
+                    if (cancellation.IsCancellationRequested)
+                    {
+                        tcs.TrySetCanceledSafe();
+                        return;
+                    }
+                    try
+                    {
+                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResultSafe(channelAction(channel)));
+                    }
+                    catch (Exception e)
+                    {
+                        tcs.TrySetExceptionSafe(e);
+                    }
+                }, cancellation.Token);
             }
-            finally
+            catch (OperationCanceledException)
             {
-                channelSemaphore.Release();
+                tcs.TrySetCanceled();
             }
+            return tcs.Task;
         }
 
         public Task InvokeAsync(Action<IModel> channelAction)
@@ -82,7 +99,26 @@ namespace EasyNetQ.Producer
         {
             cancellation.Cancel();
             persistentChannel.Dispose();
-            channelSemaphore.Dispose();
+        }
+
+        private void StartDispatcherThread(ConnectionConfiguration configuration)
+        {
+            var thread = new Thread(() =>
+            {
+                while (!cancellation.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var channelAction = queue.Take(cancellation.Token);
+                        channelAction();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
+            thread.Start();
         }
 
         private struct NoContentStruct

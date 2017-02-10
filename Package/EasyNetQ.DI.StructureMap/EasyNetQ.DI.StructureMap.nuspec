@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2013</copyright>
     <tags>RabbitMQ Messaging AMQP REST API StructureMap</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="1.0.0.0" />
+      <dependency id="EasyNetQ" version="1.0.1.0" />
       <dependency id="structuremap" version="4.0.0.315" />
     </dependencies>
   </metadata>
