@@ -8,7 +8,6 @@ using System.Reflection;
 // MINOR version when you add functionality in a backwards-compatible manner, and
 // PATCH version when you make backwards-compatible bug fixes.
 
-[assembly: AssemblyVersion("1.0.1.0")]
 [assembly: CLSCompliant(false)]
 
 // 1.0.1.0  First stable release
