@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP REST API Autofac</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="1.0.0.0" />
+      <dependency id="EasyNetQ" version="1.0.1.0" />
       <dependency id="Autofac" version="3.3.0.0" />
     </dependencies>
   </metadata>

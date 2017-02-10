@@ -17,7 +17,7 @@
     <copyright>Copyright Wiebe Tijsma 2015</copyright>
     <tags>RabbitMQ Messaging AMQP REST API Serilog</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="1.0.0.0" />
+      <dependency id="EasyNetQ" version="1.0.1.0" />
       <dependency id="Serilog" version="1.5.11" />
     </dependencies>
   </metadata>

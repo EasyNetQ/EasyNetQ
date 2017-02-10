@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Reflection;
 
-// EasyNetQ version number: <major>.<minor>.<non-breaking-feature>.<build>
-// Note: until version 1.0 expect breaking changes on 0.X versions.
-[assembly: AssemblyVersion("1.0.0.0")]
+// EasyNetQ follows the Semantic Versioning 2.0.0 (http://semver.org/)
+
+// Given a version number MAJOR.MINOR.PATCH, increment the:
+// MAJOR version when you make incompatible API changes,
+// MINOR version when you add functionality in a backwards-compatible manner, and
+// PATCH version when you make backwards-compatible bug fixes.
+
+[assembly: AssemblyVersion("1.0.1.0")]
 [assembly: CLSCompliant(false)]
 
-// 1.0.0.0
-// 0.63.7.0 Fix Client Command Dispatcher Thread hijacking
+// 1.0.1.0  First stable release
 // 0.63.6.0 Added support for multiple exchange (creating an exchange per implemented interface for a concreate type)
 // 0.63.5.0 Made some methods protected/virtual in HandlerRunner so we can override the behavior
 // 0.63.4.0 EasyNetQ.Scheduler stability fixes
