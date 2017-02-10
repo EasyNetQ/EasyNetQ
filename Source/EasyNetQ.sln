@@ -1,12 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.csproj", "{640DEC15-3A17-4E85-B38A-CFB379426DC2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6301F5B7-5B36-4EDA-8E37-6C970155F8B4}"
 	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
+		..\build.bat = ..\build.bat
 		..\Package\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec = ..\Package\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec
 		..\Package\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.nuspec = ..\Package\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.nuspec
 		..\Package\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec = ..\Package\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec

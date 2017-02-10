@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2016</copyright>
     <tags>RabbitMQ Messaging AMQP REST API LightInject</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="1.0.0.0" />
+      <dependency id="EasyNetQ" version="1.0.1.0" />
       <dependency id="LightInject" version="3.0.2.7" />
     </dependencies>
   </metadata>

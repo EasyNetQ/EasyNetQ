@@ -17,7 +17,7 @@
     <copyright>Copyright Mike Hadlow 2015</copyright>
     <tags>RabbitMQ Messaging AMQP REST API Ninject</tags>
     <dependencies>
-      <dependency id="EasyNetQ" version="1.0.0.0" />
+      <dependency id="EasyNetQ" version="1.0.1.0" />
       <dependency id="Ninject" version="3.0.1.10" />
     </dependencies>
   </metadata>
