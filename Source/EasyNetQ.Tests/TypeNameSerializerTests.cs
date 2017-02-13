@@ -1,5 +1,7 @@
 // ReSharper disable InconsistentNaming
 using System;
+using System.Reflection;
+using System.Reflection.Emit;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using NUnit.Framework;
 
@@ -8,7 +10,7 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class TypeNameSerializerTests
     {
-        const string expectedTypeName = "System.String:mscorlib";
+        private const string expectedTypeName = "System.String:mscorlib";
         private const string expectedCustomTypeName = "EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests";
 
         private ITypeNameSerializer typeNameSerializer;
@@ -34,6 +36,18 @@ namespace EasyNetQ.Tests
         }
 
         [Test]
+        public void Should_serialize_a_dynamic_type()
+        {
+            var dynamicAssembyName = Guid.NewGuid().ToString("N");
+            var dynamicTypeName = Guid.NewGuid().ToString("N");
+            var dynamicType = CreateDynamicType(dynamicAssembyName, dynamicTypeName);
+            var expectedDynamicTypeName = $"{dynamicTypeName}:{dynamicAssembyName}";
+
+            var typeName = typeNameSerializer.Serialize(dynamicType);
+            typeName.ShouldEqual(expectedDynamicTypeName);
+        }
+
+        [Test]
         public void Should_deserialize_a_type_name()
         {
             var type = typeNameSerializer.DeSerialize(expectedTypeName);
@@ -45,6 +59,18 @@ namespace EasyNetQ.Tests
         {
             var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
             type.ShouldEqual(typeof(SomeRandomClass));
+        }
+
+        [Test]
+        public void Should_deserialize_a_dynamic_type()
+        {
+            var dynamicAssembyName = Guid.NewGuid().ToString("N");
+            var dynamicTypeName = Guid.NewGuid().ToString("N");
+            var dynamicType = CreateDynamicType(dynamicAssembyName, dynamicTypeName);
+            var serializedDynamicTypeName = $"{dynamicTypeName}:{dynamicAssembyName}";
+
+            var type = typeNameSerializer.DeSerialize(serializedDynamicTypeName);
+            type.ShouldEqual(dynamicType);
         }
 
         [Test]
@@ -82,11 +108,19 @@ namespace EasyNetQ.Tests
             var name = typeof (SomeRandomClass).AssemblyQualifiedName;
             Console.Out.WriteLine(name);
         }
+
+        private static Type CreateDynamicType(string assemblyName, string typeName)
+        {
+            var assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
+            var module = assembly.DefineDynamicModule(assemblyName + "_module");
+            var typeBuilder = module.DefineType(typeName, TypeAttributes.Public | TypeAttributes.Class);
+            return typeBuilder.CreateType();
+        }
     }
 
     public class SomeRandomClass
     {
-        
+
     }
 }
 // ReSharper restore InconsistentNaming
