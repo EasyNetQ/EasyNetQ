@@ -217,6 +217,7 @@
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMessage.cs" />
     <Compile Include="OrderedClusterHostSelectionStrategyTests.cs" />
+    <Compile Include="DynamicTypeNameSerializerTests.cs" />
     <Compile Include="TypeNameSerializerTests.cs" />
     <Compile Include="MessageVersioningTests\VersionedMessageSerializationStrategyTests.cs" />
   </ItemGroup>

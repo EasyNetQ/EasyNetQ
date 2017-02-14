@@ -179,6 +179,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Topology\IExchange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Topology\IQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Topology\Queue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicTypeNameSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeNameSerializer.cs" />
   </ItemGroup>
 </Project>
