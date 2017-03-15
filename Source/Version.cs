@@ -2,7 +2,6 @@
 using System.Reflection;
 
 // EasyNetQ follows the Semantic Versioning 2.0.0 (http://semver.org/)
-
 // Given a version number MAJOR.MINOR.PATCH, increment the:
 // MAJOR version when you make incompatible API changes,
 // MINOR version when you add functionality in a backwards-compatible manner, and
@@ -10,6 +9,7 @@ using System.Reflection;
 
 [assembly: CLSCompliant(false)]
 
+// 1.0.2.0 Added start consuming events for failure and success
 // 1.0.1.0  First stable release
 // 0.64.2.0 Add durability queue on subscription
 // 0.64.1.0 Hosepipe custom broker port configuration by separate parameter
