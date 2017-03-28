@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
@@ -13,6 +14,17 @@ namespace EasyNetQ
     /// </summary>
     public interface IAdvancedBus : IDisposable
     {
+        /// <summary>
+        /// Consume a stream of messages
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="queueConumserPairs">Multiple queue - consumer pairs</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume(IEnumerable<QueueConsumerPair> queueConumserPairs, Action<IConsumerConfiguration> configure);
+
+
         /// <summary>
         /// Consume a stream of messages
         /// </summary>

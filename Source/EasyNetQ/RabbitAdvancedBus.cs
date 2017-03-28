@@ -101,6 +101,41 @@ namespace EasyNetQ
         
         // ---------------------------------- consume --------------------------------------
 
+        public IDisposable Consume(IEnumerable<QueueConsumerPair> queueConumserPairs, Action<IConsumerConfiguration> configure)
+        {
+            Preconditions.CheckNotNull(queueConumserPairs, nameof(queueConumserPairs));
+            Preconditions.CheckNotNull(configure, "configure");
+
+            if (disposed)
+                throw new EasyNetQException("This bus has been disposed");
+
+            var queueOnMessages = queueConumserPairs.Select(x =>
+            {
+
+                var onMessage = x.OnMessage;
+                if (onMessage == null)
+                {
+                    var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
+                    x.AddHandlers(handlerCollection);
+
+                    onMessage = (body, properties, messageRecivedInfo) =>
+                    {
+                        var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
+                        var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
+                        return handler(deserializedMessage, messageRecivedInfo);
+                    };
+                }
+
+                return Tuple.Create(x.Queue, onMessage);
+            }).ToList();
+
+
+            var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
+            configure(consumerConfiguration);
+            var consumer = consumerFactory.CreateConsumer(queueOnMessages, connection, consumerConfiguration);
+            return consumer.StartConsuming();
+        }
+
         public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
         {
             return Consume<T>(queue, onMessage, x => { });
