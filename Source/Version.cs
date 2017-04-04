@@ -7,9 +7,10 @@ using System.Reflection;
 // MINOR version when you add functionality in a backwards-compatible manner, and
 // PATCH version when you make backwards-compatible bug fixes.
 
-[assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyVersion("1.0.3.0")]
 [assembly: CLSCompliant(false)]
 
+// 1.0.3.0 Bug Fix, defer execution of serviceCreator parameter in SimpleInjectorAdapter.Register
 // 1.0.2.0 Added start consuming events for failure and success
 // 1.0.1.0  First stable release
 // 0.63.6.0 Added support for multiple exchange (creating an exchange per implemented interface for a concreate type)
