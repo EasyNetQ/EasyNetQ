@@ -115,14 +115,14 @@ namespace EasyNetQ
                 var onMessage = x.OnMessage;
                 if (onMessage == null)
                 {
-                    var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
+                    var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(x.Queue);
                     x.AddHandlers(handlerCollection);
 
-                    onMessage = (body, properties, messageRecivedInfo) =>
+                    onMessage = (body, properties, messageReceivedInfo) =>
                     {
                         var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
                         var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
-                        return handler(deserializedMessage, messageRecivedInfo);
+                        return handler(deserializedMessage, messageReceivedInfo);
                     };
                 }
 
@@ -176,7 +176,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(addHandlers, "addHandlers");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection();
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(queue);
             addHandlers(handlerCollection);
 
             return Consume(queue, (body, properties, messageReceivedInfo) =>

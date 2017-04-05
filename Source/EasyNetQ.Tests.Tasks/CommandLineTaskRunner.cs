@@ -62,7 +62,7 @@ namespace EasyNetQ.Tests.Tasks
                 .WriteTo.ColoredConsole(LogEventLevel.Debug)
                 .CreateLogger();
 
-            builder.RegisterInstance(logger);
+            builder.RegisterInstance(logger).AsImplementedInterfaces().AsSelf();
             builder.RegisterInstance(new SerilogLogger(logger)).As<IEasyNetQLogger>();
         }
 

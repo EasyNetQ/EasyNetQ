@@ -1,17 +1,23 @@
-﻿namespace EasyNetQ.Consumer
+﻿using System.Collections.Concurrent;
+using EasyNetQ.Topology;
+
+namespace EasyNetQ.Consumer
 {
     public class HandlerCollectionFactory : IHandlerCollectionFactory
     {
-        private readonly IEasyNetQLogger logger;
+        readonly ConcurrentDictionary<string, IHandlerCollection> handlerCollections = new ConcurrentDictionary<string, IHandlerCollection>();
+        readonly IEasyNetQLogger logger;
 
         public HandlerCollectionFactory(IEasyNetQLogger logger)
         {
             this.logger = logger;
         }
 
-        public IHandlerCollection CreateHandlerCollection()
+        public IHandlerCollection CreateHandlerCollection(IQueue queue)
         {
-            return new HandlerCollection(logger);
+            return handlerCollections.AddOrUpdate(queue.Name, 
+                queueName => new HandlerCollection(logger), 
+                (queueName, existingCollection) => existingCollection );
         }
     }
 }
