@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
@@ -10,8 +8,6 @@ namespace EasyNetQ
 {
     public class QueueConsumerPair
     {
-        #region Factory methods
-
         public static QueueConsumerPair Create<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
         {
             Preconditions.CheckNotNull(queue, nameof(queue));
@@ -43,9 +39,6 @@ namespace EasyNetQ
 
             return new QueueConsumerPair(queue, onMessage, null);
         }
-
-
-        #endregion
 
         private QueueConsumerPair(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IHandlerRegistration> addHandlers)
         {

@@ -12,7 +12,7 @@ namespace EasyNetQ
     /// </summary>
     public static class RabbitHutch
     {
-        private static Func<IContainer> createContainerInternal = () => new DefaultServiceProvider();
+        private static Func<IContainer> _createContainerInternal = () => new DefaultServiceProvider();
 
         /// <summary>
         /// Set the container creation function. This allows you to replace EasyNetQ's default internal
@@ -23,7 +23,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(createContainer, "createContainer");
 
-            createContainerInternal = createContainer;
+            _createContainerInternal = createContainer;
         }
 
 #if NETFX
@@ -374,7 +374,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
             Preconditions.CheckNotNull(registerServices, "registerServices");
 
-            var container = createContainerInternal();
+            var container = _createContainerInternal();
             if (container == null)
             {
                 throw new EasyNetQException("Could not create container. " +

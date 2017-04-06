@@ -56,9 +56,6 @@ namespace EasyNetQ.Consumer
             disposed = true;
         }
 
-        public bool IsDisposed
-        {
-            get { return disposed; }
-        }
+        public bool IsDisposed => disposed;
     }
 }

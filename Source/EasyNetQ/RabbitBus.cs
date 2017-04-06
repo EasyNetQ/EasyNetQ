@@ -280,15 +280,9 @@ namespace EasyNetQ
             return sendReceive.Receive(queue, addHandlers, configure);
         }
 
-        public virtual bool IsConnected
-        {
-            get { return advancedBus.IsConnected; }
-        }
+        public virtual bool IsConnected => advancedBus.IsConnected;
 
-        public virtual IAdvancedBus Advanced
-        {
-            get { return advancedBus; }
-        }
+        public virtual IAdvancedBus Advanced => advancedBus;
 
         public virtual void Dispose()
         {

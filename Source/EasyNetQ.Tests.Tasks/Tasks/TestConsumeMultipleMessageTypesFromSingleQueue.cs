@@ -1,13 +1,15 @@
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Tasks;
 using Net.CommandLine;
 
 namespace EasyNetQ.Tests.Performance.Consumer
 {
-    public class TestMultipleConsumer : ICommandLineTask, IDisposable
+
+
+    public class TestConsumeMultipleMessageTypesFromSingleQueue : ICommandLineTask, IDisposable
     {
         IBus bus;
 
@@ -18,7 +20,8 @@ namespace EasyNetQ.Tests.Performance.Consumer
             bus = RabbitHutch.CreateBus("host=localhost;product=consumer", 
                 x => x
                     .Register<IEasyNetQLogger>(_ => logger)
-                    .Register<IConventions, SingleQueueConvention>()
+                    .Register<IConventions, SingleQueueNamingConvention>()
+                    .Register<IHandlerCollectionFactory, HandlerCollectionPerQueueFactory>()
             );
 
             bus.SubscribeAsync<MessageA>("multiple", async m => logger.InfoWrite("{0}", m));
@@ -44,14 +47,14 @@ namespace EasyNetQ.Tests.Performance.Consumer
         }
     }
 
-    public class SingleQueueConvention : Conventions
+    public class SingleQueueNamingConvention : Conventions
     {
-        public SingleQueueConvention(ITypeNameSerializer typeNameSerializer) : base(typeNameSerializer)
+        public SingleQueueNamingConvention(ITypeNameSerializer typeNameSerializer) : base(typeNameSerializer)
         {
             QueueNamingConvention = (type, id) => id;
         }
 
-        
+
     }
 
     public class MessageB

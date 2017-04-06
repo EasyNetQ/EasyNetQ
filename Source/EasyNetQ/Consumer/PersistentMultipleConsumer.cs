@@ -11,7 +11,7 @@ namespace EasyNetQ.Consumer
 {
     public class PersistentMultipleConsumer : IConsumer
     {
-        private readonly ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> _queueConsumerPairs;
+        private readonly ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
 
@@ -36,7 +36,7 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-            _queueConsumerPairs = queueConsumerPairs;
+            this.queueConsumerPairs = queueConsumerPairs;
             this.connection = connection;
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
@@ -71,7 +71,7 @@ namespace EasyNetQ.Consumer
 
             internalConsumer.StartConsuming(
                 connection,
-                _queueConsumerPairs,
+                queueConsumerPairs,
                 configuration);
         }
 
@@ -86,7 +86,7 @@ namespace EasyNetQ.Consumer
             StartConsumingInternal();
         }
 
-        private bool disposed = false;
+        private bool disposed;
 
         public void Dispose()
         {
