@@ -17,11 +17,11 @@ namespace Sprache
             _expectations = expectations;
         }
 
-        public string Message { get { return _message(); } }
+        public string Message => _message();
 
-        public IEnumerable<string> Expectations { get { return _expectations(); } }
+        public IEnumerable<string> Expectations => _expectations();
 
-        public Input FailedInput { get { return _input; } }
+        public Input FailedInput => _input;
 
         public override string ToString()
         {

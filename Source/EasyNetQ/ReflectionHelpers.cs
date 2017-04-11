@@ -51,20 +51,20 @@ namespace EasyNetQ
 
         private static class DefaultFactories<T>
         {
-            private static Func<T> factory;
+            private static Func<T> _factory;
 
             public static T Get()
             {
-                if (factory == null)
+                if (_factory == null)
                 {
                     var constructorInfo = typeof(T).GetConstructor(Type.EmptyTypes);
                     if (constructorInfo == null)
                     {
                         throw new MissingMethodException("The type that is specified for T does not have a public parameterless constructor.");
                     }
-                    factory = Expression.Lambda<Func<T>>(Expression.New(constructorInfo)).Compile();
+                    _factory = Expression.Lambda<Func<T>>(Expression.New(constructorInfo)).Compile();
                 }
-                return factory();
+                return _factory();
             }
         }
 

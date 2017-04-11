@@ -29,7 +29,7 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
         private readonly object locker = new object();
-        private bool initialized = false;
+        private bool initialized;
         private IConnection connection;
 
         public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
@@ -66,10 +66,7 @@ namespace EasyNetQ
             return connection.CreateModel();
         }
         
-        public bool IsConnected
-        {
-            get { return connection != null && connection.IsOpen && !disposed; }
-        }
+        public bool IsConnected => connection != null && connection.IsOpen && !disposed;
 
         void StartTryToConnect()
         {
@@ -184,7 +181,7 @@ namespace EasyNetQ
             eventBus.Publish(new ConnectionDisconnectedEvent());
         }
 
-        private bool disposed = false;
+        private bool disposed;
         public void Dispose()
         {
             if (disposed) return;

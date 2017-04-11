@@ -117,7 +117,7 @@ namespace EasyNetQ.Consumer
             StartConsumer();
         }
 
-        private bool disposed = false;
+        private bool disposed;
         private readonly Timer timer;
 
         public void Dispose()

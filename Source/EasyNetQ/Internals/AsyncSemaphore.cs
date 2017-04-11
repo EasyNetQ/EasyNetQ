@@ -15,10 +15,7 @@ namespace EasyNetQ.Internals
             semaphore = new SemaphoreSlim(initial);
         }
 
-        public int Available
-        {
-            get { return semaphore.CurrentCount; }
-        }
+        public int Available => semaphore.CurrentCount;
 
         public void Wait()
         {
