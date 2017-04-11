@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.Tasks
 
         public void InfoWrite(string format, params object[] args)
         {
-
+            logger.InfoWrite(format, args);
         }
 
         public void ErrorWrite(string format, params object[] args)

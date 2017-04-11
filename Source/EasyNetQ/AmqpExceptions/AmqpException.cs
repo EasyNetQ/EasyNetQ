@@ -19,9 +19,9 @@ namespace EasyNetQ.AmqpExceptions
             return Elements.OfType<T>().Select(x => x.Value).SingleOrDefault();
         }
 
-        public int Code { get { return GetElement<AmqpExceptionCodeElement>(); } }
-        public int ClassId { get { return GetElement<AmqpExceptionClassIdElement>(); } }
-        public int MethodId { get { return GetElement<AmqpExceptionMethodIdElement>(); } }
+        public int Code => GetElement<AmqpExceptionCodeElement>();
+        public int ClassId => GetElement<AmqpExceptionClassIdElement>();
+        public int MethodId => GetElement<AmqpExceptionMethodIdElement>();
 
         public static ushort ConnectionClosed = 320;
     }

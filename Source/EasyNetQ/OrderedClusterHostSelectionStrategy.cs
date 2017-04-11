@@ -9,8 +9,8 @@ namespace EasyNetQ
     public class OrderedClusterHostSelectionStrategy<T> : IClusterHostSelectionStrategy<T>, IEnumerable<T> where T : class
     {
         private readonly IList<T> items = new List<T>();
-        private int currentIndex = 0;
-        private int startIndex = 0;
+        private int currentIndex;
+        private int startIndex;
 
         public virtual void Add(T item)
         {
