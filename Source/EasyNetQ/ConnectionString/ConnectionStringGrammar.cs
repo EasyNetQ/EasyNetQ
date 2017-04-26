@@ -44,6 +44,7 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform),
             BuildKeyValueParser("useBackgroundThreads", Bool, c => c.UseBackgroundThreads)
+            BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));
 
         public static Parser<UpdateConfiguration> AMQPAlone =
