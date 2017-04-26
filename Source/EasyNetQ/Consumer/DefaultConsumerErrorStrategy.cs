@@ -201,6 +201,7 @@ namespace EasyNetQ.Consumer
             {
                 RoutingKey = context.Info.RoutingKey,
                 Exchange = context.Info.Exchange,
+                Queue = context.Info.Queue,
                 Exception = exception.ToString(),
                 Message = messageAsString,
                 DateTime = DateTime.UtcNow
