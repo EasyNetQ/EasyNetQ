@@ -22,7 +22,7 @@ namespace EasyNetQ.DI
         {
             if (!IsRegistered<TService>())
             {
-                _simpleInjectorContainer.RegisterSingleton(serviceCreator(this));
+                _simpleInjectorContainer.RegisterSingleton(() => serviceCreator(this));
             }
             
             return this;
