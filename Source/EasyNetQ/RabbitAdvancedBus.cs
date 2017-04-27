@@ -186,6 +186,22 @@ namespace EasyNetQ
             return consumer.StartConsuming();
         }
 
+        public virtual void SendAck(MessageReceivedInfo info)
+        {
+            if (disposed)
+                throw new EasyNetQException("This bus has been disposed");
+
+            AckStrategies.Ack(info.Model, info.DeliverTag);
+        }
+
+        public virtual void SendAckBatch(MessageReceivedInfo info)
+        {
+            if (disposed)
+                throw new EasyNetQException("This bus has been disposed");
+
+            AckStrategies.BatchAck(info.Model, info.DeliverTag);
+        }		
+		
         // -------------------------------- publish ---------------------------------------------
 
         public void Publish(
@@ -668,7 +684,8 @@ namespace EasyNetQ
                     result.Redelivered,
                     result.Exchange,
                     result.RoutingKey,
-                    queue.Name
+                    queue.Name,
+                    null
                     )
                 );
 

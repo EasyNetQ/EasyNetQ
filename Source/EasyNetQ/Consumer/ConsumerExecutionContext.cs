@@ -11,25 +11,29 @@ namespace EasyNetQ.Consumer
         public MessageProperties Properties { get; private set; }
         public byte[] Body { get; private set; }
         public IBasicConsumer Consumer { get; private set; }
+		public IConsumerConfiguration Configuration { get; private set; }
 
         public ConsumerExecutionContext(
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler, 
             MessageReceivedInfo info, 
             MessageProperties properties, 
             byte[] body, 
-            IBasicConsumer consumer)
+            IBasicConsumer consumer,
+            IConsumerConfiguration configuration)
         {
             Preconditions.CheckNotNull(userHandler, "userHandler");
             Preconditions.CheckNotNull(info, "info");
             Preconditions.CheckNotNull(properties, "properties");
             Preconditions.CheckNotNull(body, "body");
             Preconditions.CheckNotNull(consumer, "consumer");
+			Preconditions.CheckNotNull(configuration, "configuration");
 
             UserHandler = userHandler;
             Info = info;
             Properties = properties;
             Body = body;
             Consumer = consumer;
+            Configuration = configuration;
         }
     }
 }

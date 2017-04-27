@@ -29,6 +29,8 @@ namespace EasyNetQ.Consumer
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IEventBus eventBus;
 
+        private IConsumerConfiguration configuration;		
+		
         private Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private IQueue queue;
 
@@ -75,6 +77,8 @@ namespace EasyNetQ.Consumer
 
             this.queue = queue;
             this.onMessage = onMessage;
+            this.configuration = configuration;
+			
             var consumerTag = conventions.ConsumerTagConvention();
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
@@ -173,9 +177,9 @@ namespace EasyNetQ.Consumer
                 return;
             }
 
-            var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
+            var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name, Model);
             var messsageProperties = new MessageProperties(properties);
-            var context = new ConsumerExecutionContext(onMessage, messageReceivedInfo, messsageProperties, body, this);
+            var context = new ConsumerExecutionContext(onMessage, messageReceivedInfo, messsageProperties, body, this, configuration);
 
             consumerDispatcher.QueueAction(() =>
                 {

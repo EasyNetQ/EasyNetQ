@@ -120,6 +120,9 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
         
+        void SendAck(MessageReceivedInfo info);
+        void SendAckBatch(MessageReceivedInfo info);		
+		
         /// <summary>
         /// Publish a message as a byte array
         /// </summary>
