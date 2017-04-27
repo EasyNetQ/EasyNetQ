@@ -60,7 +60,8 @@ namespace EasyNetQ.Consumer
                 return;
             }
             
-            completionTask.ContinueWith(task => DoAck(context, GetAckStrategy(context, task)));
+            if (!context.Configuration.IsManuallyAcked)
+                completionTask.ContinueWith(task => DoAck(context, GetAckStrategy(context, task)));
         }
 
         protected virtual AckStrategy GetAckStrategy(ConsumerExecutionContext context, Task task)
