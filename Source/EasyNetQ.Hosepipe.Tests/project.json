@@ -38,7 +38,7 @@
     "EasyNetQ.Hosepipe": "2.0.4-netcore1435",
     "EasyNetQ.Tests.Common": "2.0.4-netcore1435",
     "xunit": "2.2.0-beta2-build3300",
-    "RabbitMQ.Client": "4.1.1"
+    "RabbitMQ.Client": "4.1.3"
   },
   "tools": {
     "dotnet-gitversion": {

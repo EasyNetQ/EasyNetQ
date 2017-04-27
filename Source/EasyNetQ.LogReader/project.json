@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "EasyNetQ": "2.0.4-netcore1435",
-    "RabbitMQ.Client": "4.1.1"
+    "RabbitMQ.Client": "4.1.3"
   },
   "tools": {
     "dotnet-gitversion": {
