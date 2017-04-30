@@ -30,7 +30,7 @@
           "version": "1.0.1",
           "type": "platform"
         },
-        "System.Net.Http": "4.1.0"
+        "System.Net.Http": "4.3.0"
       }
     },
     "net451": {
