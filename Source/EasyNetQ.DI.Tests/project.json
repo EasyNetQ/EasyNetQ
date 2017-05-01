@@ -25,7 +25,7 @@
     "xunit": "2.2.0-beta2-build3300",
     "RabbitMQ.Client": "4.1.3",
     "SimpleInjector": "3.2.7",
-    "Autofac": "4.3.0"
+    "Autofac": "4.5.0"
   },
 
   "testRunner": "xunit",
