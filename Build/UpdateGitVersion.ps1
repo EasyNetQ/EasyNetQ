@@ -59,12 +59,14 @@ foreach ($projectJson in $projects) {
 
     Write-Host "$($projectJson.Directory.Name): Updating dependencies..."
 
-    if ($json.dependencies -eq $null -or @($json.dependencies).Count -eq 0) {
-        Write-Host "SKIPPING: There are no dependencies in $($projectJson.Directory.Name)."
-        continue
-    }
-
     $dependencies = $json.dependencies.PsObject.Members `
+        | ? { $_.MemberType -eq "NoteProperty" -and $_.Name.StartsWith("EasyNetQ") -and !$ExcludeUpdatingDependencies.Contains($_.Name) } `
+        | foreach {
+                Write-Host "    - $($_.Name): Updating $($_.Value) -> $version"
+                $_.Value = $version
+            }
+
+    $dependencies = $json.frameworks.PsObject.Members | foreach { $_.Value.dependencies.PsObject.Members } `
         | ? { $_.MemberType -eq "NoteProperty" -and $_.Name.StartsWith("EasyNetQ") -and !$ExcludeUpdatingDependencies.Contains($_.Name) } `
         | foreach {
                 Write-Host "    - $($_.Name): Updating $($_.Value) -> $version"
