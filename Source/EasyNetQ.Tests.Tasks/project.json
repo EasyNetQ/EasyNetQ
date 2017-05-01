@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "Autofac": "4.3.0",
+    "Autofac": "4.5.0",
     "EasyNetQ": "2.0.4-netcore1435",
     "EasyNetQ.Serilog": "2.0.4-netcore1435",
     "EasyNetQ.Tests.Common": "2.0.4-netcore1435",
