@@ -42,7 +42,8 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
             BuildKeyValueParser("cancelOnHaFailover", Bool, c => c.CancelOnHaFailover),
             BuildKeyValueParser("product", Text, c => c.Product),
-            BuildKeyValueParser("platform", Text, c => c.Platform)
+            BuildKeyValueParser("platform", Text, c => c.Platform),
+            BuildKeyValueParser("useBackgroundThreads", Bool, c => c.UseBackgroundThreads)
         }.Aggregate((a, b) => a.Or(b));
 
         public static Parser<UpdateConfiguration> AMQPAlone =
