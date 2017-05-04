@@ -1,18 +1,17 @@
 using System;
 using System.Text;
 using EasyNetQ.Scheduler.Mongo.Core;
-using NUnit.Framework;
+using EasyNetQ.Tests;
+using Xunit;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
-    [TestFixture]
     [Explicit("Required a database")]
     public class ScheduleRepositoryTests
     {
         private ScheduleRepository scheduleRepository;
 
-        [SetUp]
-        public void SetUp()
+        public ScheduleRepositoryTests()
         {
             var configuration = new ScheduleRepositoryConfiguration
                 {
@@ -25,7 +24,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule()
         {
@@ -40,14 +39,14 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
                 });
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_cancel_a_schedule()
         {
             scheduleRepository.Cancel("bcd");
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_get_messages()
         {
@@ -63,7 +62,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             }
         }
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_handle_timeout()
         {
@@ -71,7 +70,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         }
 
 
-        [Test]
+        [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_mark_as_published()
         {

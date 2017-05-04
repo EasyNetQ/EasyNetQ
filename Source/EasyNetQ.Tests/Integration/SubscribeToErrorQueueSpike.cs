@@ -3,28 +3,25 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
-    public class SubscribeToErrorQueueSpike
+    public class SubscribeToErrorQueueSpike : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public SubscribeToErrorQueueSpike()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         [Explicit("Requires a RabbitMQ server on localhost")]
         public void Should_create_some_error_messages()
         {
@@ -40,7 +37,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(1000);
         }
 
-        [Test]
+        [Fact]
         [Explicit("Requires a RabbitMQ server on localhost")]
         public void Should_be_able_to_subscribe_to_error_messages()
         {

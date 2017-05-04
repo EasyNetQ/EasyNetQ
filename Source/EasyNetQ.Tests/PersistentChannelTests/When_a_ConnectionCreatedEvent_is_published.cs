@@ -1,42 +1,38 @@
 ﻿using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;    
-using Rhino.Mocks;
+using Xunit;    
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    [TestFixture]
     public class When_a_ConnectionCreatedEvent_is_published
     {
         private IPersistentConnection persistentConnection;
         private IEventBus eventBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_ConnectionCreatedEvent_is_published()
         {
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-            persistentConnection.Stub(x => x.CreateModel());
+            persistentConnection = Substitute.For<IPersistentConnection>();
             var configuration = new ConnectionConfiguration();
             eventBus = new EventBus();
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             var persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
         }
 
-        [Test]
-        [Ignore("It seems to be not actual now, discuss it later. Looks like odd optimization")]
+        [Fact(Skip = "It seems to be not actual now, discuss it later. Looks like odd optimization")]
         public void Should_not_open_a_channel_when_not_connected()
         {
             eventBus.Publish(new ConnectionCreatedEvent());
-            persistentConnection.AssertWasNotCalled(x => x.CreateModel());
+            persistentConnection.DidNotReceive().CreateModel();
         }
 
-        [Test]
+        [Fact]
         public void Should_open_a_channel_when_connected()
         {
-            persistentConnection.Stub(x => x.IsConnected).Return(true);
+            persistentConnection.IsConnected.Returns(true);
             eventBus.Publish(new ConnectionCreatedEvent());
-            persistentConnection.AssertWasCalled(x => x.CreateModel());
+            persistentConnection.Received().CreateModel();
         }
     }
 }

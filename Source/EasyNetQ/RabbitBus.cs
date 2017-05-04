@@ -155,7 +155,7 @@ namespace EasyNetQ
             var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
-            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, expires: configuration.Expires, maxPriority: configuration.MaxPriority);
+            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, durable: configuration.Durable, expires: configuration.Expires, maxPriority: configuration.MaxPriority);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
@@ -280,15 +280,9 @@ namespace EasyNetQ
             return sendReceive.Receive(queue, addHandlers, configure);
         }
 
-        public virtual bool IsConnected
-        {
-            get { return advancedBus.IsConnected; }
-        }
+        public virtual bool IsConnected => advancedBus.IsConnected;
 
-        public virtual IAdvancedBus Advanced
-        {
-            get { return advancedBus; }
-        }
+        public virtual IAdvancedBus Advanced => advancedBus;
 
         public virtual void Dispose()
         {

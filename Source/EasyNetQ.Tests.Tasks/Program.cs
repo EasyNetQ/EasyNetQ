@@ -13,9 +13,7 @@ namespace EasyNetQ.Tests.Tasks
             {
                 try
                 {
-                    var main = interactiveTaskRunner.Run();
-                    Console.ReadLine();
-                    return main;
+                    return interactiveTaskRunner.Run();
                 }
                 catch (Exception e)
                 {

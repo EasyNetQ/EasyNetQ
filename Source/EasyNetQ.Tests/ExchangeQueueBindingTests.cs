@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
-    public class When_a_queue_is_declared
+    public class When_a_queue_is_declared : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared()
         {
             mockBuilder = new MockBuilder();
 
@@ -32,38 +32,40 @@ namespace EasyNetQ.Tests
                 maxPriority: 10);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"), 
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args => 
-                        ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000) &&
-                        ((int)args["x-max-priority"] == 10))));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                   Arg.Is("my_queue"),
+                   Arg.Is(false),
+                   Arg.Is(true),
+                   Arg.Is(true),
+                   Arg.Is<IDictionary<string, object>>(args =>
+                       ((int)args["x-message-ttl"] == 1000) &&
+                       ((int)args["x-expires"] == 2000) &&
+                       ((int)args["x-max-priority"] == 10)));
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange
+    public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared_With_NonEmptyDeadLetterExchange()
         {
             mockBuilder = new MockBuilder();
 
@@ -81,40 +83,42 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_routing_key");
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args =>
-                        ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000) &&
-                        ((int)args["x-max-priority"] == 10) &&
-                        ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
-                        ((string)args["x-dead-letter-routing-key"] == "my_routing_key"))));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                  Arg.Is("my_queue"),
+                  Arg.Is(false),
+                  Arg.Is(true),
+                  Arg.Is(true),
+                  Arg.Is<IDictionary<string, object>>(args =>
+                      ((int)args["x-message-ttl"] == 1000) &&
+                      ((int)args["x-expires"] == 2000) &&
+                      ((int)args["x-max-priority"] == 10) &&
+                      ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
+                      ((string)args["x-dead-letter-routing-key"] == "my_routing_key")));
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange
+    public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IQueue queue;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_declared_With_EmptyDeadLetterExchange()
         {
             mockBuilder = new MockBuilder();
 
@@ -132,39 +136,41 @@ namespace EasyNetQ.Tests
                 deadLetterRoutingKey: "my_queue2");
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_return_a_queue()
         {
             queue.ShouldNotBeNull();
             queue.Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal("my_queue"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Matches(args =>
-                        ((int)args["x-message-ttl"] == 1000) &&
-                        ((int)args["x-expires"] == 2000) &&
-                        ((int)args["x-max-priority"] == 10) &&
-                        ((string)args["x-dead-letter-exchange"] == "") &&
-                        ((string)args["x-dead-letter-routing-key"] == "my_queue2"))));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                 Arg.Is("my_queue"),
+                 Arg.Is(false),
+                 Arg.Is(true),
+                 Arg.Is(true),
+                 Arg.Is<IDictionary<string, object>>(args =>
+                     ((int)args["x-message-ttl"] == 1000) &&
+                     ((int)args["x-expires"] == 2000) &&
+                     ((int)args["x-max-priority"] == 10) &&
+                     ((string)args["x-dead-letter-exchange"] == "") &&
+                     ((string)args["x-dead-letter-routing-key"] == "my_queue2")));
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_deleted
+    public class When_a_queue_is_deleted : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_deleted()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -173,33 +179,35 @@ namespace EasyNetQ.Tests
             advancedBus.QueueDelete(queue);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_delete_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.QueueDelete("my_queue", false, false));
+            mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
         }
     }
 
-    [TestFixture]
-    public class When_an_exchange_is_declared
+    public class When_an_exchange_is_declared : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
         private IDictionary arguments;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_declared()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            mockBuilder.NextModel.Stub(x => x.ExchangeDeclare(null, null, false, false, null))
-                .IgnoreArguments()
-                .WhenCalled(x =>
-                    {
-                        arguments = x.Arguments[4] as IDictionary;
-                    });
+            mockBuilder.NextModel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
+                .Do(x =>
+                {
+                    arguments = x[4] as IDictionary;
+                });
 
             exchange = advancedBus.ExchangeDeclare(
                 "my_exchange", 
@@ -211,26 +219,30 @@ namespace EasyNetQ.Tests
                 "my.alternate.exchange");
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_return_an_exchange_instance()
         {
             exchange.ShouldNotBeNull();
             exchange.Name.ShouldEqual("my_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_an_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.ExchangeDeclare(
-                    Arg<string>.Is.Equal("my_exchange"),
-                    Arg<string>.Is.Equal("direct"),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<bool>.Is.Equal(true),
-                    Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                    Arg.Is("my_exchange"),
+                    Arg.Is("direct"),
+                    Arg.Is(false),
+                    Arg.Is(true),
+                    Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_add_correct_arguments()
         {
             arguments.ShouldNotBeNull();
@@ -238,15 +250,13 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_an_exchange_is_declared_passively
+    public class When_an_exchange_is_declared_passively : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IExchange exchange;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_declared_passively()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -254,30 +264,32 @@ namespace EasyNetQ.Tests
             exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_return_an_exchange_instance()
         {
             exchange.ShouldNotBeNull();
             exchange.Name.ShouldEqual("my_exchange");
         }
 
-        [Test]
+        [Fact]
         public void Should_passively_declare_exchange()
         {
             mockBuilder.Channels.Count.ShouldEqual(1);
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.ExchangeDeclarePassive(Arg<string>.Is.Equal("my_exchange")));
+            mockBuilder.Channels[0].Received().ExchangeDeclarePassive(Arg.Is("my_exchange"));
         }
     }
 
-    [TestFixture]
-    public class When_an_exchange_is_deleted
+    public class When_an_exchange_is_deleted : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_an_exchange_is_deleted()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -286,22 +298,25 @@ namespace EasyNetQ.Tests
             advancedBus.ExchangeDelete(exchange);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_delete_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDelete("my_exchange", false));
+            mockBuilder.Channels[0].Received().ExchangeDelete("my_exchange", false);
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_bound_to_an_exchange
+    public class When_a_queue_is_bound_to_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IBinding binding;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_bound_to_an_exchange()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -312,7 +327,12 @@ namespace EasyNetQ.Tests
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_create_a_binding_instance()
         {
             binding.ShouldNotBeNull();
@@ -322,23 +342,24 @@ namespace EasyNetQ.Tests
             ((IQueue) binding.Bindable).Name.ShouldEqual("my_queue");
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_a_binding()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueBind("my_queue", "my_exchange", "my_routing_key"));
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is("my_queue"),
+                Arg.Is("my_exchange"),
+                Arg.Is("my_routing_key"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
     }
 
-    [TestFixture]
-    public class When_a_queue_is_unbound_from_an_exchange
+    public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private IBinding binding;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_queue_is_unbound_from_an_exchange()
         {
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
@@ -349,11 +370,15 @@ namespace EasyNetQ.Tests
             advancedBus.BindingDelete(binding);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_unbind_the_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => 
-                x.QueueUnbind("my_queue", "my_exchange", "my_routing_key", null));
+            mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);
         }
     }
 }

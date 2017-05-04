@@ -1,40 +1,39 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.Interception;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.Interception
 {
-    [TestFixture]
-    public partial class InterceptionExtensionsTests : UnitTestBase
+    public partial class InterceptionExtensionsTests
     {
         
 
-        [Test]
+        [Fact]
         public void When_using_EnableInterception_extension_method_required_services_are_registered()
         {
-            var serviceRegister = NewMock<IServiceRegister>();
-            serviceRegister.Expect(x => x.Register(Arg<Func<IServiceProvider, IProduceConsumeInterceptor>>.Is.Anything)).TentativeReturn();
+            var serviceRegister = Substitute.For<IServiceRegister>();
             serviceRegister.EnableInterception(x => { });
+            serviceRegister.Received().Register(Arg.Any<Func<IServiceProvider, IProduceConsumeInterceptor>>());
         }
 
-        [Test]
+        [Fact]
         public void When_using_EnableGZipCompression_extension_method_required_interceptor_is_added()
         {
-            var interceptorRegistrator = NewMock<IInterceptorRegistrator>();
-            interceptorRegistrator.Expect(x => x.Add(Arg<GZipInterceptor>.Is.TypeOf)).TentativeReturn();
+            var interceptorRegistrator = Substitute.For<IInterceptorRegistrator>();
             interceptorRegistrator.EnableGZipCompression();
+            interceptorRegistrator.Received().Add(Arg.Any<GZipInterceptor>());
         }
 
 
-        [Test]
+        [Fact]
         public void When_using_EnableTripleDESEncryption_extension_method_required_interceptor_is_added()
         {
-            var interceptorRegistrator = NewMock<IInterceptorRegistrator>();
-            interceptorRegistrator.Expect(x => x.Add(Arg<TripleDESInterceptor>.Is.TypeOf)).TentativeReturn();
+            var interceptorRegistrator = Substitute.For<IInterceptorRegistrator>();
             interceptorRegistrator.EnableTripleDESEncryption(new byte[0], new byte[0]);
+            interceptorRegistrator.Received().Add(Arg.Any<TripleDESInterceptor>());
         }
     }
 }

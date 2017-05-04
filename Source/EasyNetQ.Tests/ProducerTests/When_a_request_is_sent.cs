@@ -1,23 +1,22 @@
-﻿using System.Collections.Generic;
-using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using System;
+using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using NSubstitute;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using RabbitMQ.Client.Framing;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_request_is_sent
+    public class When_a_request_is_sent : IDisposable
     {
         private MockBuilder mockBuilder;
         private TestRequestMessage requestMessage;
         private TestResponseMessage responseMessage;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent()
         {
             mockBuilder = new MockBuilder();
 
@@ -26,11 +25,10 @@ namespace EasyNetQ.Tests.ProducerTests
 
             var correlationId = "";
 
-            mockBuilder.NextModel.Stub(x => x.BasicPublish(null, null, false, null, null))
-                .IgnoreArguments()
-                .WhenCalled(invocation =>
+            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
+                .Do(invocation =>
                     {
-                        var properties = (IBasicProperties)invocation.Arguments[3];
+                        var properties = (IBasicProperties)invocation[3];
                         correlationId = properties.CorrelationId;
                     });
 
@@ -43,50 +41,55 @@ namespace EasyNetQ.Tests.ProducerTests
             responseMessage = task.Result;
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_return_the_response()
         {
             responseMessage.Text.ShouldEqual("Hello World");
         }
 
-        [Test]
+        [Fact]
         public void Should_publish_request_message()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.BasicPublish(
-                Arg<string>.Is.Equal("easy_net_q_rpc"),
-                Arg<string>.Is.Equal("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Messages"),
-                Arg<bool>.Is.Equal(false),
-                Arg<IBasicProperties>.Is.Anything,
-                Arg<byte[]>.Is.Anything));
+            mockBuilder.Channels[0].Received().BasicPublish(
+                Arg.Is("easy_net_q_rpc"),
+                Arg.Is("EasyNetQ.Tests.TestRequestMessage:EasyNetQ.Tests.Common"),
+                Arg.Is(false),
+                Arg.Any<IBasicProperties>(),
+                Arg.Any<byte[]>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_publish_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                Arg<string>.Is.Equal("easy_net_q_rpc"), 
-                Arg<string>.Is.Equal("direct"),
-                Arg<bool>.Is.Equal(true),
-                Arg<bool>.Is.Equal(false),
-                Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is("easy_net_q_rpc"),
+                Arg.Is("direct"),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_response_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.QueueDeclare(
-                Arg<string>.Matches(arg => arg.StartsWith("easynetq.response.")),
-                Arg<bool>.Is.Equal(false),
-                Arg<bool>.Is.Equal(true),
-                Arg<bool>.Is.Equal(true),
-                Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                Arg.Is<string>(arg => arg.StartsWith("easynetq.response.")),
+                Arg.Is(false),
+                Arg.Is(true),
+                Arg.Is(true),
+                Arg.Any<IDictionary<string, object>>());
         }
 
         protected void DeliverMessage(string correlationId)
         {
             var properties = new BasicProperties
             {
-                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Messages",
+                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Common",
                 CorrelationId = correlationId
             };
             var body = Encoding.UTF8.GetBytes("{ Id:12, Text:\"Hello World\"}");

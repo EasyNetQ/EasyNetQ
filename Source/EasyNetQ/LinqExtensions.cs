@@ -43,8 +43,8 @@ namespace EasyNetQ
             }
         }
 
-        [ThreadStatic] private static Random random;
+        [ThreadStatic] private static Random _random;
 
-        private static Random Random { get { return random ?? (random = new Random(Environment.TickCount)); } }
+        private static Random Random => _random ?? (_random = new Random(Environment.TickCount));
     }
 }

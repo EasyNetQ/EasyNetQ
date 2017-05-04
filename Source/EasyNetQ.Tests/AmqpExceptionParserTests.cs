@@ -1,14 +1,13 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.AmqpExceptions;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class AmqpExceptionParserTests
     {
-        [Test]
+        [Fact]
         public void Should_parse_first_Amqp_exception_example()
         {
             const string originalException =
@@ -23,7 +22,7 @@ namespace EasyNetQ.Tests
             amqpException.ClassId.ShouldEqual(0);
         }
 
-        [Test]
+        [Fact]
         public void Should_parse_second_Amqp_exception_example()
         {
             const string originalException =
@@ -39,13 +38,14 @@ namespace EasyNetQ.Tests
             amqpException.ClassId.ShouldEqual(40);
         }
 
-        [Test]
-        [ExpectedException(typeof(Sprache.ParseException))]
+        [Fact]
         public void Should_fail_on_badly_formatted_exception()
         {
+            Assert.Throws<Sprache.ParseException>(() => { 
             const string originalException = "Do be do od be do do = something else, that I don't know=hello";
 
             AmqpExceptionGrammar.ParseExceptionString(originalException);
+            });
         }
     }
 }

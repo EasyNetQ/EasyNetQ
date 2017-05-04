@@ -36,6 +36,7 @@ namespace EasyNetQ
         public bool UseBackgroundThreads { get; set; }
         public IList<AuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get;  set; }
+        public bool AutoCloseConnection { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -51,6 +52,7 @@ namespace EasyNetQ
             CancelOnHaFailover = false;
             UseBackgroundThreads = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
+            AutoCloseConnection = false;
                          
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -66,8 +68,13 @@ namespace EasyNetQ
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
+            string applicationNameAndPath = null;
+#if !NETFX
+            var version = this.GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
+#else
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+#endif
+            applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
             var applicationName = "unknown";
             var applicationPath = "unknown";
@@ -88,6 +95,7 @@ namespace EasyNetQ
             }
 
             var hostname = Environment.MachineName;
+
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
 

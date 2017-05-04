@@ -4,30 +4,27 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ on localhost")]
-    public class DeleteQueueWhileConsuming
+    public class DeleteQueueWhileConsuming : IDisposable
     {
         private IBus bus;
         private const string queueName = "queue_to_delete";
 
-        [SetUp]
-        public void SetUp()
+        public DeleteQueueWhileConsuming()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Start_consuming_then_delete_a_queue()
         {
             var queue = bus.Advanced.QueueDeclare(queueName);

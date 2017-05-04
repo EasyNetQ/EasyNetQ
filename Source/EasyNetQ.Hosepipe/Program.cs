@@ -82,6 +82,7 @@ namespace EasyNetQ.Hosepipe
 
             var parameters = new QueueParameters();
             arguments.WithKey("s", a => parameters.HostName = a.Value);
+            arguments.WithKey("sp", a => parameters.HostPort = Convert.ToInt32(a.Value));
             arguments.WithKey("v", a => parameters.VHost = a.Value);
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
@@ -178,7 +179,7 @@ namespace EasyNetQ.Hosepipe
 
         public static void PrintUsage()
         {
-            using (var manifest = Assembly.GetExecutingAssembly().GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt"))
+            using (var manifest = typeof(Program).GetTypeInfo().Assembly.GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt"))
             {
                 if(manifest == null)
                 {

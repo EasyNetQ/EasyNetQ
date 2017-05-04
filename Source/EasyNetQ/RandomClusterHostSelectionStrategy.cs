@@ -10,10 +10,7 @@ namespace EasyNetQ
 
         private int CurrentIndex { get; set; }
 
-        private int LastIndex
-        {
-            get { return items.Count - 1; }
-        }
+        private int LastIndex => items.Count - 1;
 
         public RandomClusterHostSelectionStrategy()
         {

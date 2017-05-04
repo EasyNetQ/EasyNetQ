@@ -29,7 +29,7 @@ namespace EasyNetQ
         private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
         private readonly object locker = new object();
-        private bool initialized = false;
+        private bool initialized;
         private IConnection connection;
 
         public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
@@ -63,23 +63,32 @@ namespace EasyNetQ
                 throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
             }
 
+            var autoClose = connectionFactory.Configuration.AutoCloseConnection;
+            if (autoClose && !connection.AutoClose)
+            {
+                connection.AutoClose = true;
+            }
+
             return connection.CreateModel();
         }
         
-        public bool IsConnected
-        {
-            get { return connection != null && connection.IsOpen && !disposed; }
-        }
+        public bool IsConnected => connection != null && connection.IsOpen && !disposed;
 
         void StartTryToConnect()
         {
-            var timer = new Timer(TryToConnect);
+            Timer timer = null;
+#if !NETFX
+            timer = new Timer(delegate { TryToConnect(timer); }, 
+                null, connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
+#else
+            timer = new Timer(TryToConnect);
             timer.Change(connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
+#endif
         }
 
         void TryToConnect(object timer)
         {
-            if(timer != null) ((Timer) timer).Dispose();
+            ((Timer) timer)?.Dispose();
 
             logger.DebugWrite("Trying to connect");
             if (disposed) return;
@@ -178,7 +187,7 @@ namespace EasyNetQ
             eventBus.Publish(new ConnectionDisconnectedEvent());
         }
 
-        private bool disposed = false;
+        private bool disposed;
         public void Dispose()
         {
             if (disposed) return;

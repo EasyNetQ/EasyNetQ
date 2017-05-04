@@ -1,126 +1,115 @@
 ﻿using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
     public class Ack_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public Ack_strategy()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
-            model.Expect(m => m.BasicAck(deliveryTag, false));
+            model = Substitute.For<IModel>();
 
-            result = AckStrategies.Ack(model, deliveryTag);
+            result = AckStrategies.Ack(model, deliveryTag);          
         }
 
-
-        [Test]
+        [Fact]
         public void Should_ack_message()
         {
-            model.VerifyAllExpectations();
+            model.Received().BasicAck(deliveryTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Ack()
         {
-            Assert.AreEqual(AckResult.Ack, result);
+            Assert.Equal(AckResult.Ack, result);
         } 
     }
 
-    [TestFixture]
     public class NackWithoutRequeue_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public NackWithoutRequeue_strategy()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
-            model.Expect(m => m.BasicNack(deliveryTag, false, false));
+            model = Substitute.For<IModel>();
 
             result = AckStrategies.NackWithoutRequeue(model, deliveryTag);
         }
 
 
-        [Test]
+        [Fact]
         public void Should_nack_message_and_not_requeue()
         {
-            model.VerifyAllExpectations();   
+            model.Received().BasicNack(deliveryTag, false, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Nack()
         {
-            Assert.AreEqual(AckResult.Nack, result);
+            Assert.Equal(AckResult.Nack, result);
         }
     }
 
-    [TestFixture]
     public class NackWithRequeue_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public NackWithRequeue_strategy()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
-            model.Expect(m => m.BasicNack(deliveryTag, false, true));
+            model = Substitute.For<IModel>();
 
             result = AckStrategies.NackWithRequeue(model, deliveryTag);
         }
 
 
-        [Test]
+        [Fact]
         public void Should_nack_message_and_requeue()
         {
-            model.VerifyAllExpectations();
+            model.Received().BasicNack(deliveryTag, false, true);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Nack()
         {
-            Assert.AreEqual(AckResult.Nack, result);
+            Assert.Equal(AckResult.Nack, result);
         }
     }
 
-    [TestFixture]
     public class Nothing_strategy
     {
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-        [SetUp]
-        public void Setup()
+        public Nothing_strategy()
         {
-            model = MockRepository.GenerateStrictMock<IModel>();
+            model = Substitute.For<IModel>();
 
             result = AckStrategies.Nothing(model, deliveryTag);
         }
 
-        [Test]
+        [Fact]
         public void Should_have_no_interaction_with_model()
         {
-            model.VerifyAllExpectations();
+            var rec = model.ReceivedCalls();
+            Assert.Equal(rec.GetEnumerator().MoveNext(), false);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_Nothing()
         {
-            Assert.AreEqual(AckResult.Nothing, result);
+            Assert.Equal(AckResult.Nothing, result);
         }
     }
 }

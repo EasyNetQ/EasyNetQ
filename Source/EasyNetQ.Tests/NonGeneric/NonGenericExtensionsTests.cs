@@ -1,26 +1,29 @@
-﻿using RabbitMQ.Client.Framing;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
+using RabbitMQ.Client.Framing;
 using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.NonGeneric
 {
-    [TestFixture]
-    public class NonGenericExtensionsTests
+    public class NonGenericExtensionsTests : IDisposable
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public NonGenericExtensionsTests()
         {
             mockBuilder = new MockBuilder();
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_be_able_to_subscribe_using_non_generic_extensions()
         {
             var are = new AutoResetEvent(false);

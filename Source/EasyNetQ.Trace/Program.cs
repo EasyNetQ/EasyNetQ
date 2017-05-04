@@ -17,46 +17,51 @@ namespace EasyNetQ.Trace
         private const string traceExchange = "amq.rabbitmq.trace";
         private const string publishRoutingKey = "publish.#";
         private const string deliverRoutingKey = "deliver.#";
-        private static readonly CancellationTokenSource tokenSource = 
+        private static readonly CancellationTokenSource tokenSource =
             new CancellationTokenSource();
-        private static readonly BlockingCollection<BasicDeliverEventArgs> deliveryQueue = 
+        private static readonly BlockingCollection<BasicDeliverEventArgs> deliveryQueue =
             new BlockingCollection<BasicDeliverEventArgs>(1);
 
-        private static readonly Options options = new Options();
-        private static CSVFile csvFile;
+        private static Options options;
 
+        private static CSVFile csvFile;
 
         static void Main(string[] args)
         {
-
-            
             Console.CancelKeyPress += (sender, eventArgs) =>
                 {
                     eventArgs.Cancel = true;
                     tokenSource.Cancel();
                 };
 
-            if (Parser.Default.ParseArguments(args, options))
-            {
-
-                if (options.csvoutput != null)
+            ParserResult<Options> parseResults = Parser.Default.ParseArguments<Options>(args);
+            options = parseResults.MapResult(
+                parsed => parsed,
+                notParsed =>
                 {
-                    //Create CSV file and write header row.
-                    csvFile = new CSVFile(options.csvoutput);
+                    return default(Options);
+                });
 
-                    var columnlist = new List<string>
+            if (options == default(Options))
+            {
+                return;
+            }
+
+            if (options.csvoutput != null)
+            {
+                //Create CSV file and write header row.
+                csvFile = new CSVFile(options.csvoutput);
+
+                var columnlist = new List<string>
                         {
-                            "Message#", 
-                            "Date Time", 
-                            "Routing Key", 
-                            "Exchange", 
+                            "Message#",
+                            "Date Time",
+                            "Routing Key",
+                            "Exchange",
                             "Body"
                         };
 
-                    csvFile.WriteRow(columnlist);
-
-                }
-
+                csvFile.WriteRow(columnlist);
 
                 var connectionString = options.AMQP;
 
@@ -77,7 +82,6 @@ namespace EasyNetQ.Trace
                 {
                     Console.Out.WriteLine(e.Message);
                 }
-                
             }
         }
 
@@ -90,40 +94,40 @@ namespace EasyNetQ.Trace
                     {
                         foreach (var deliverEventArgs in deliveryQueue.GetConsumingEnumerable(tokenSource.Token))
                         {
-                            HandleDelivery(deliverEventArgs,msgCount++);
+                            HandleDelivery(deliverEventArgs, msgCount++);
                         }
                     }
                     // deliveryQueue has been disposed so do nothing
                     catch (OperationCanceledException)
-                    {}
+                    { }
                     catch (ObjectDisposedException)
-                    {}
+                    { }
                 })
-                {
-                    Name = "EasyNetQ.Trace - delivery."
-                }.Start();
+            {
+                Name = "EasyNetQ.Trace - delivery."
+            }.Start();
 
-        
+
         }
 
         static IDisposable ConnectAndSubscribe(string connectionString)
         {
             var connectionFactory = new ConnectionFactory
-                {
-                    Uri = connectionString,
-                    ClientProperties = new Dictionary<string, object>
+            {
+                Uri = connectionString,
+                ClientProperties = new Dictionary<string, object>
                         {
                             { "Client", "EasyNetQ.Trace" },
                             { "Host", Environment.MachineName }
                         },
-                    RequestedHeartbeat = 10
-                };
+                RequestedHeartbeat = 10
+            };
 
             var connection = connectionFactory.CreateConnection();
-            var disposable = new Disposable{ ToBeDisposed = connection };
+            var disposable = new Disposable { ToBeDisposed = connection };
             connection.ConnectionShutdown += (connection1, reason) =>
                 {
-                    if(!tokenSource.IsCancellationRequested)
+                    if (!tokenSource.IsCancellationRequested)
                     {
                         Console.Out.WriteLine("\nConnection closed.\nReason {0}\nNow reconnecting", reason.ToString());
                         disposable.ToBeDisposed = ConnectAndSubscribe(connectionString);
@@ -158,17 +162,17 @@ namespace EasyNetQ.Trace
                     }
                     // deliveryQueue has been disposed, so do nothing
                     catch (OperationCanceledException)
-                    {}
+                    { }
                     catch (ObjectDisposedException)
-                    {}
+                    { }
                     Console.Out.WriteLine("Subscription to exchange {0}, routingKey {1} closed", exchangeName, routingKey);
                 })
-                {
-                    Name = string.Format("EasyNetQ.Trace - subscription {0} {1}", exchangeName, routingKey)
-                }.Start();
+            {
+                Name = string.Format("EasyNetQ.Trace - subscription {0} {1}", exchangeName, routingKey)
+            }.Start();
         }
 
-        static void HandleDelivery(BasicDeliverEventArgs basicDeliverEventArgs,int msgCount)
+        static void HandleDelivery(BasicDeliverEventArgs basicDeliverEventArgs, int msgCount)
         {
             if (basicDeliverEventArgs == null) return;
 
@@ -227,19 +231,13 @@ namespace EasyNetQ.Trace
     /// </summary>
     class Options
     {
-        [Option('a', "amqp-connection-string", Required = false, DefaultValue = "amqp://localhost/", HelpText = "AMQP Connection string.")]
+        [Option('a', "amqp-connection-string", Required = false, Default = "amqp://localhost/", HelpText = "AMQP Connection string.")]
         public string AMQP { get; set; }
 
-        [Option('q', "quiet", DefaultValue = false, HelpText = "Switch off verbose console output")]
+        [Option('q', "quiet", Default = false, HelpText = "Switch off verbose console output")]
         public bool quiet { get; set; }
 
         [Option('o', "output-csv", Required = false, HelpText = "CSV File name for output")]
         public string csvoutput { get; set; }
-
-        [HelpOption]
-        public string GetUsage()
-        {
-            return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
-        }
     }
 }

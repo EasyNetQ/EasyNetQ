@@ -1,7 +1,8 @@
 ﻿using System;
+using EasyNetQ.Tests;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
 using StructureMap;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -12,16 +13,14 @@ namespace EasyNetQ.DI.Tests
     /// throws an exception. StructureMap has a last-to-register-wins policy 
     /// by default which has been overrided in the Adapter implementation.
     /// </summary>
-    [TestFixture]
     [Explicit("Starts a connection to localhost")]
-    public class StructureMapAdapterTests
+    public class StructureMapAdapterTests : IDisposable
     {
         private StructureMap.IContainer container;
         private IContainer easynetQContainer;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public StructureMapAdapterTests()
         {
             container = new Container();
 
@@ -32,13 +31,13 @@ namespace EasyNetQ.DI.Tests
             easynetQContainer = bus.Advanced.Container;
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_structure_map_adapter()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_utilize_first_in_wins_registration_strategy_for_an_interface()
         {
             easynetQContainer.Register<IComponent>(sp => new FirstComponent());
@@ -47,26 +46,25 @@ namespace EasyNetQ.DI.Tests
             Assert.IsAssignableFrom<FirstComponent>(easynetQContainer.Resolve<IComponent>());
         }
 
-        [Test]
+        [Fact]
         public void Should_utilize_first_in_wins_registration_strategy_for_a_named_method()
         {
             easynetQContainer.Register<Func<int>>(sp => One);
             easynetQContainer.Register<Func<int>>(sp => Two);
 
-            Assert.AreEqual(1, easynetQContainer.Resolve<Func<int>>()());
+            Assert.Equal(1, easynetQContainer.Resolve<Func<int>>()());
         }
 
-        [Test]
+        [Fact]
         public void Should_utilize_first_in_wins_registration_strategy_for_a_lambda_expression()
         {
             easynetQContainer.Register<Func<int>>(sp => () => 1);
             easynetQContainer.Register<Func<int>>(sp => () => 2);
 
-            Assert.AreEqual(1, easynetQContainer.Resolve<Func<int>>()());
+            Assert.Equal(1, easynetQContainer.Resolve<Func<int>>()());
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null)
             {

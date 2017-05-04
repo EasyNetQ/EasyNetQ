@@ -36,15 +36,15 @@ namespace Sprache
             return new Input(_source, _position + 1, Current == '\n' ? _line + 1 : _line, Current == '\n' ? 1 : _column + 1);
         }
 
-        public char Current { get { return _source[_position]; } }
+        public char Current => _source[_position];
 
-        public bool AtEnd { get { return _position == _source.Length; } }
+        public bool AtEnd => _position == _source.Length;
 
-        public int Position { get { return _position; } }
+        public int Position => _position;
 
-        public int Line { get { return _line; } }
+        public int Line => _line;
 
-        public int Column { get { return _column; } }
+        public int Column => _column;
 
         public override string ToString()
         {

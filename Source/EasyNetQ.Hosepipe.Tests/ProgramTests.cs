@@ -6,11 +6,10 @@ using System.IO;
 
 using EasyNetQ.Consumer;
 
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class ProgramTests
     {
         private Program program;
@@ -22,8 +21,7 @@ namespace EasyNetQ.Hosepipe.Tests
         private Conventions conventions;
         private IErrorMessageSerializer defaultErrorMessageSerializer;
 
-        [SetUp]
-        public void SetUp()
+        public ProgramTests()
         {
             messageWriter = new MockMessageWriter();
             queueRetrieval = new MockQueueRetrieval();
@@ -44,9 +42,9 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         private readonly string expectedDumpOutput =
-            "2 Messages from queue 'EasyNetQ_Default_Error_Queue'\r\noutput to directory '" + Environment.CurrentDirectory + "'\r\n";
+            "2 Messages from queue 'EasyNetQ_Default_Error_Queue'\r\noutput to directory '" + Directory.GetCurrentDirectory() + "'\r\n";
 
-        [Test]
+        [Fact]
         public void Should_output_messages_to_directory_with_dump()
         {
             var args = new[]
@@ -68,9 +66,9 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         private readonly string expectedInsertOutput =
-            "2 Messages from directory '" + Environment.CurrentDirectory + "'\r\ninserted into queue ''\r\n";
+            "2 Messages from directory '" + Directory.GetCurrentDirectory() + "'\r\ninserted into queue ''\r\n";
 
-        [Test]
+        [Fact]
         public void Should_insert_messages_with_insert()
         {
             var args = new[]
@@ -90,10 +88,10 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         private readonly string expectedRetryOutput =
-            "2 Error messages from directory '" + Environment.CurrentDirectory + "' republished\r\n";
+            "2 Error messages from directory '" + Directory.GetCurrentDirectory() + "' republished\r\n";
 
 
-        [Test]
+        [Fact]
         public void Should_retry_errors_with_retry()
         {
             var args = new[]

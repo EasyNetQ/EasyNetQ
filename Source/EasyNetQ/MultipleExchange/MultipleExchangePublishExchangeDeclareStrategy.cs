@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;

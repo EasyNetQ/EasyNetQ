@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
@@ -13,6 +14,16 @@ namespace EasyNetQ
     /// </summary>
     public interface IAdvancedBus : IDisposable
     {
+        /// <summary>
+        /// Consume a stream of messages
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="queueConsumerPairs">Multiple queue - consumer pairs</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        IDisposable Consume(IEnumerable<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure);
+
         /// <summary>
         /// Consume a stream of messages
         /// </summary>
@@ -41,7 +52,6 @@ namespace EasyNetQ
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
         IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class;
-
 
         /// <summary>
         /// Consume a stream of messages asynchronously
@@ -289,14 +299,6 @@ namespace EasyNetQ
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null);
-
-        /// <summary>
-        /// Declare a transient server named queue. Note, this queue will only last for duration of the
-        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
-        /// consumers.
-        /// </summary>
-        /// <returns>The queue</returns>
-        IQueue QueueDeclare();
 
         /// <summary>
         /// Delete a queue

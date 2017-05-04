@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
+using System.Linq;
 
 namespace EasyNetQ.Consumer
 {
@@ -27,6 +29,8 @@ namespace EasyNetQ.Consumer
                     consumers.TryRemove(stoppedConsumingEvent.Consumer, out value);
                 });
         }
+
+       
 
         public IConsumer CreateConsumer(
             IQueue queue, 
@@ -66,6 +70,19 @@ namespace EasyNetQ.Consumer
                 return new ExclusiveConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
             return new PersistentConsumer(queue, onMessage, connection, configuration, internalConsumerFactory, eventBus);
         }
+
+        public IConsumer CreateConsumer(
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, 
+            IPersistentConnection connection, 
+            IConsumerConfiguration configuration)
+        {
+            if (configuration.IsExclusive || queueConsumerPairs.Any(x => x.Item1.IsExclusive))
+                throw new NotSupportedException("Exclusive multiple consuming is not supported.");
+
+            return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
+
+        }
+
 
         public void Dispose()
         {

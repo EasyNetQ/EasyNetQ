@@ -1,14 +1,14 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System.Collections.Generic;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
-using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using Xunit;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EasyNetQ.Scheduler.Tests
 {
-    [TestFixture]
     public class SchedulerServiceTests
     {
         private SchedulerService schedulerService;
@@ -16,20 +16,19 @@ namespace EasyNetQ.Scheduler.Tests
         private IAdvancedBus advancedBus;
         private IScheduleRepository scheduleRepository;
 
-        [SetUp]
-        public void SetUp()
+        public SchedulerServiceTests()
         {
-            bus = MockRepository.GenerateStub<IBus>();
-            advancedBus = MockRepository.GenerateStub<IAdvancedBus>();
+            bus = Substitute.For<IBus>();
+            advancedBus = Substitute.For<IAdvancedBus>();
 
-            bus.Stub(x => x.IsConnected).Return(true);
-            bus.Stub(x => x.Advanced).Return(advancedBus);
+            bus.IsConnected.Returns(true);
+            bus.Advanced.Returns(advancedBus);
 
-            scheduleRepository = MockRepository.GenerateStub<IScheduleRepository>();
+            scheduleRepository = Substitute.For<IScheduleRepository>();
 
             schedulerService = new SchedulerService(
                 bus, 
-                MockRepository.GenerateStub<IEasyNetQLogger>(), 
+                Substitute.For<IEasyNetQLogger>(), 
                 scheduleRepository,
                 new SchedulerServiceConfiguration
                 {
@@ -38,32 +37,32 @@ namespace EasyNetQ.Scheduler.Tests
                 });
         }
 
-        [Test]
+        [Fact]
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var pendingSchedule = new List<ScheduleMe>
             {
-                new ScheduleMe { BindingKey = "msg1"},
-                new ScheduleMe { BindingKey = "msg2"},
+                new ScheduleMe { RoutingKey = "msg1"},
+                new ScheduleMe { RoutingKey = "msg2"},
             };
 
-            scheduleRepository.Stub(x => x.GetPending()).Return(pendingSchedule);
+            scheduleRepository.GetPending().Returns(pendingSchedule);
 
             schedulerService.OnPublishTimerTick(null);
 
-            advancedBus.AssertWasCalled(x => x.Publish(
-                Arg<Exchange>.Is.Anything, 
-                Arg<string>.Is.Equal("msg1"),
-                Arg<bool>.Is.Anything,
-                Arg<MessageProperties>.Is.Anything,
-                Arg<byte[]>.Is.Anything));
+            advancedBus.Received().Publish(
+                Arg.Any<IExchange>(),
+                Arg.Is<string>("msg1"),
+                Arg.Any<bool>(),
+                Arg.Any<MessageProperties>(),
+                Arg.Any<byte[]>());
 
-            advancedBus.AssertWasCalled(x => x.Publish(
-                Arg<Exchange>.Is.Anything, 
-                Arg<string>.Is.Equal("msg2"),
-                Arg<bool>.Is.Anything,
-                Arg<MessageProperties>.Is.Anything,
-                Arg<byte[]>.Is.Anything));
+            advancedBus.Received().Publish(
+                Arg.Any<IExchange>(),
+                Arg.Is<string>("msg2"),
+                Arg.Any<bool>(),
+                Arg.Any<MessageProperties>(),
+                Arg.Any<byte[]>());
         }
     }
 }

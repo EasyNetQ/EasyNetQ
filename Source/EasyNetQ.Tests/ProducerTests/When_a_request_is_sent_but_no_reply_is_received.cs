@@ -2,33 +2,38 @@
 
 using System;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_request_is_sent_but_no_reply_is_received
+    public class When_a_request_is_sent_but_no_reply_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent_but_no_reply_is_received()
         {
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
         }
 
-        [Test]
-        [ExpectedException(typeof(TimeoutException))]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_throw_a_timeout_exception()
         {
-            try
+            Assert.Throws<TimeoutException>(() =>
             {
-                mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage()).Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+                try
+                {
+                    mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage()).Wait();
+                }
+                catch (AggregateException aggregateException)
+                {
+                    throw aggregateException.InnerException;
+                }
+            });
         }         
     }
 }

@@ -1,10 +1,12 @@
 using System;
+using System.IO;
 
 namespace EasyNetQ.Hosepipe
 {
     public class QueueParameters
     {
         public string HostName { get; set; }
+        public int HostPort { get; set; }
         public string VHost { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
@@ -17,12 +19,13 @@ namespace EasyNetQ.Hosepipe
         {
             // set some defaults
             HostName = "localhost";
+            HostPort = -1;
             VHost = "/";
             Username = "guest";
             Password = "guest";
             Purge = false;
             NumberOfMessagesToRetrieve = 1000;
-            MessageFilePath = Environment.CurrentDirectory;
+            MessageFilePath = Directory.GetCurrentDirectory();
         }
     }
 }

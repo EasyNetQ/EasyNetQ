@@ -5,9 +5,9 @@ namespace EasyNetQ.Consumer
 {
     public class SubscriptionResult : ISubscriptionResult
     {
-        public IExchange Exchange { get; private set; }
-        public IQueue Queue { get; private set; }
-        public IDisposable ConsumerCancellation { get; private set; }
+        public IExchange Exchange { get; }
+        public IQueue Queue { get; }
+        public IDisposable ConsumerCancellation { get; }
 
         public SubscriptionResult(IExchange exchange, IQueue queue, IDisposable consumerCancellation)
         {
@@ -22,10 +22,7 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
-            if (ConsumerCancellation != null)
-            {
-                ConsumerCancellation.Dispose();
-            }
+            ConsumerCancellation?.Dispose();
         }
     }
 }

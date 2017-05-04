@@ -2,30 +2,27 @@
 
 using System;
 using System.Threading;
-using NUnit.Framework;
+using Xunit;
 using EasyNetQ.NonGeneric;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ instance on localhost to work")]
-    public class NonGenericExtensionsIntegrationTests
+    public class NonGenericExtensionsIntegrationTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public NonGenericExtensionsIntegrationTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Should_be_able_to_use_the_non_generic_subscribe_method()
         {
             var are = new AutoResetEvent(false);

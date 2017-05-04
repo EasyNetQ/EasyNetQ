@@ -11,9 +11,9 @@
             _remainder = remainder;
         }
 
-        public T Result { get { return _result; } }
+        public T Result => _result;
 
-        public Input Remainder { get { return _remainder; } }
+        public Input Remainder => _remainder;
 
         public override string ToString()
         {
