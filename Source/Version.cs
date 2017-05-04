@@ -9,6 +9,7 @@ using System.Reflection;
 
 [assembly: CLSCompliant(false)]
 
+// 1.1.0.0 Add useBackgroundThreads as connection string part
 // 1.0.4.0 Included queue name in Error message
 // 1.0.3.0 Bug Fix, defer execution of serviceCreator parameter in SimpleInjectorAdapter.Register
 // 1.0.2.0 Added start consuming events for failure and success
