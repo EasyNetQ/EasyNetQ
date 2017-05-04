@@ -14,8 +14,9 @@ namespace EasyNetQ.Tests.ConnectionString
         private ConnectionStringParser connectionStringParser;
 
         private const string connectionString =
-            "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" + 
-            "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;cancelOnHaFailover=true";
+            "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
+            "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;cancelOnHaFailover=true;" +
+            "useBackgroundThreads=true";
 
         [SetUp]
         public void SetUp()
@@ -38,6 +39,7 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.Timeout.ShouldEqual(12);
             connectionConfiguration.PublisherConfirms.ShouldBeTrue();
             connectionConfiguration.CancelOnHaFailover.ShouldBeTrue();
+            connectionConfiguration.UseBackgroundThreads.ShouldBeTrue();
         }
 
         [Test]
