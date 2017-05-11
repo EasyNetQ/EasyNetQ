@@ -8,7 +8,8 @@
         public string Exchange { get; set; }
         public string RoutingKey { get; set; }
         public string Queue { get; set; }
-
+        public RabbitMQ.Client.IModel Model { get; set; }
+		
         public MessageReceivedInfo() {}
 
         public MessageReceivedInfo(
@@ -17,7 +18,18 @@
             bool redelivered, 
             string exchange, 
             string routingKey,
-            string queue)
+            string queue) : this(consumerTag, deliverTag, redelivered, exchange, routingKey, queue, null) 
+        {
+        }		
+		
+        public MessageReceivedInfo(
+            string consumerTag, 
+            ulong deliverTag, 
+            bool redelivered, 
+            string exchange, 
+            string routingKey,
+            string queue,
+            RabbitMQ.Client.IModel model)
         {
             Preconditions.CheckNotNull(consumerTag, "consumerTag");
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -30,6 +42,7 @@
             Exchange = exchange;
             RoutingKey = routingKey;
             Queue = queue;
+            Model = model;			
         }
     }
 }
