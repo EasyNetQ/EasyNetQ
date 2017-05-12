@@ -7,10 +7,10 @@ using System.Reflection;
 // MINOR version when you add functionality in a backwards-compatible manner, and
 // PATCH version when you make backwards-compatible bug fixes.
 
-[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.1.0")]
 [assembly: CLSCompliant(false)]
 
-// 1.1.0.1 Add support for connection_name in connection configuration and possibility to specify connection properties during setup
+// 1.1.1.0 Add support for connection_name in connection configuration and possibility to specify connection properties during setup
 // 1.1.0.0 Add useBackgroundThreads as connection string part
 // 1.0.4.0 Included queue name in Error message
 // 1.0.3.0 Bug Fix, defer execution of serviceCreator parameter in SimpleInjectorAdapter.Register
