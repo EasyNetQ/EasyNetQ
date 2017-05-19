@@ -152,7 +152,7 @@ namespace EasyNetQ
             var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
-            var queueName = conventions.QueueNamingConvention(typeof(T), subscriptionId);
+            var queueName = configuration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
             var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, durable: configuration.Durable, expires: configuration.Expires, maxPriority: configuration.MaxPriority);
@@ -183,9 +183,16 @@ namespace EasyNetQ
             where TRequest : class
             where TResponse : class
         {
+            return Request<TRequest, TResponse>(request, x => { });
+        }
+
+        public virtual TResponse Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+            where TRequest : class
+            where TResponse : class
+        {
             Preconditions.CheckNotNull(request, "request");
 
-            var task = RequestAsync<TRequest, TResponse>(request);
+            var task = RequestAsync<TRequest, TResponse>(request, configure);
             task.Wait();
             return task.Result;
         }
@@ -196,7 +203,16 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(request, "request");
 
-            return rpc.Request<TRequest, TResponse>(request);
+            return rpc.Request<TRequest, TResponse>(request, x => { });
+        }
+
+        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+            where TRequest : class
+            where TResponse : class
+        {
+            Preconditions.CheckNotNull(request, "request");
+
+            return rpc.Request<TRequest, TResponse>(request, configure);
         }
 
         public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
