@@ -10,6 +10,7 @@ namespace EasyNetQ
     public class ConnectionConfiguration
     {
         private const int DefaultPort = 5672;
+        private const int DefaultAmqpsPort = 5671;
         public ushort Port { get; set; }
         public string VirtualHost { get; set; }
         public string UserName { get; set; }
@@ -111,8 +112,17 @@ namespace EasyNetQ
         {
             if (AMQPConnectionString != null && !Hosts.Any(h => h.Host == AMQPConnectionString.Host))
             {
-                if(Port == DefaultPort && AMQPConnectionString.Port > 0) 
-                        Port = (ushort) AMQPConnectionString.Port;
+                if (Port == DefaultPort)
+                {
+                    if (AMQPConnectionString.Port > 0)
+                        Port = (ushort)AMQPConnectionString.Port;
+                    else if(AMQPConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase))
+                        Port = DefaultAmqpsPort;
+                }
+                if (AMQPConnectionString.Segments.Length > 1)
+                {
+                    VirtualHost = AMQPConnectionString.Segments.Last();
+                }
                 Hosts = Hosts.Concat(new[] {new HostConfiguration {Host = AMQPConnectionString.Host}});
             }
             if (!Hosts.Any())
