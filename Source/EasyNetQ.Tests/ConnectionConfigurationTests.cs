@@ -25,6 +25,42 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
+        public void The_validate_method_should_apply_Default_AmqpsPort_Correctly()
+        {
+            ConnectionConfiguration connectionConfiguration = new ConnectionStringParser().Parse("amqps://user:pass@host/vhost");
+            connectionConfiguration.Validate(); 
+
+            connectionConfiguration.Port.ShouldEqual((ushort)5671);
+        }
+
+        [Fact]
+        public void The_validate_method_should_apply_Default_AmqpPort_Correctly()
+        {
+            ConnectionConfiguration connectionConfiguration = new ConnectionStringParser().Parse("amqp://user:pass@host/vhost");
+            connectionConfiguration.Validate();
+
+            connectionConfiguration.Port.ShouldEqual((ushort)5672);
+        }
+
+        [Fact]
+        public void The_validate_method_should_apply_NonDefault_VirtualHost_Correctly()
+        {
+            ConnectionConfiguration connectionConfiguration = new ConnectionStringParser().Parse("amqp://user:pass@host/vhost");
+            connectionConfiguration.Validate();
+
+            connectionConfiguration.VirtualHost.ShouldEqual("vhost");
+        }
+
+        [Fact]
+        public void The_validate_method_should_apply_Default_VirtualHost_Correctly()
+        {
+            ConnectionConfiguration connectionConfiguration = new ConnectionStringParser().Parse("amqp://user:pass@host/");
+            connectionConfiguration.Validate();
+
+            connectionConfiguration.VirtualHost.ShouldEqual("/");
+        }
+
+        [Fact]
         public void The_AuthMechanisms_property_should_default_to_PlainMechanism()
         {
             ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration();
