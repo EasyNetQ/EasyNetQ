@@ -389,7 +389,7 @@ namespace EasyNetQ
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null)
-            {
+	        {
             Preconditions.CheckNotNull(name, "name");
 
             if (passive)
@@ -594,48 +594,52 @@ namespace EasyNetQ
             logger.DebugWrite("Deleted Exchange: {0}", exchange.Name);
         }
 
-        public virtual IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
+        public virtual IBinding Bind(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers = null)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
-            clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey, new Dictionary<string, object>()));
-            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",queue.Name, exchange.Name, routingKey);
-            return new Binding(queue, exchange, routingKey);
+            var arguments = headers ?? new Dictionary<string, object>();
+            clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments));
+            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2} and {3} arguments",queue.Name, exchange.Name, routingKey, arguments.Count);
+            return new Binding(queue, exchange, routingKey, arguments);
         }
 
-        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
+        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers = null)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
-            await clientCommandDispatcher.InvokeAsync(x => x.QueueBind(queue.Name, exchange.Name, routingKey, new Dictionary<string, object>())).ConfigureAwait(false);
-            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}", queue.Name, exchange.Name, routingKey);
-            return new Binding(queue, exchange, routingKey);
+            var arguments = headers ?? new Dictionary<string, object>();
+            await clientCommandDispatcher.InvokeAsync(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments)).ConfigureAwait(false);
+            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2} and {3} arguments", queue.Name, exchange.Name, routingKey, arguments.Count);
+            return new Binding(queue, exchange, routingKey, arguments);
         }
 
-        public virtual IBinding Bind(IExchange source, IExchange destination, string routingKey)
+        public virtual IBinding Bind(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers = null)
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
-            clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey, new Dictionary<string, object>()));
-            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}", destination.Name, source.Name, routingKey);
-            return new Binding(destination, source, routingKey);
+            var arguments = headers ?? new Dictionary<string, object>();
+            clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments));
+            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2} and {3} arguments", destination.Name, source.Name, routingKey, arguments.Count);
+            return new Binding(destination, source, routingKey, arguments);
         }
 
-        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
+        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers = null)
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
-            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeBind(destination.Name, source.Name, routingKey, new Dictionary<string, object>())).ConfigureAwait(false);
-            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}", destination.Name, source.Name, routingKey);
-            return new Binding(destination, source, routingKey);
+            var arguments = headers ?? new Dictionary<string, object>();
+            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments)).ConfigureAwait(false);
+            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2} and {3} arguments", destination.Name, source.Name, routingKey, arguments.Count);
+            return new Binding(destination, source, routingKey, arguments);
         }
 
         public virtual void BindingDelete(IBinding binding)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Events;
+using System.Collections.Generic;
 
 namespace EasyNetQ
 {
@@ -371,8 +372,9 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to bind</param>
         /// <param name="queue">The queue to bind</param>
         /// <param name="routingKey">The routing key</param>
+        /// <param name="headers">The headers</param>
         /// <returns>A binding</returns>
-        IBinding Bind(IExchange exchange, IQueue queue, string routingKey);
+        IBinding Bind(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers = null);
 
         /// <summary>
         /// Bind an exchange to a queue. Does nothing if the binding already exists.
@@ -380,8 +382,9 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to bind</param>
         /// <param name="queue">The queue to bind</param>
         /// <param name="routingKey">The routing key</param>
+        /// <param name="headers">The headers</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey);
+        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers = null);
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -389,8 +392,9 @@ namespace EasyNetQ
         /// <param name="source">The source exchange</param>
         /// <param name="destination">The destination exchange</param>
         /// <param name="routingKey">The routing key</param>
+        /// <param name="headers">The headers</param>
         /// <returns>A binding</returns>
-        IBinding Bind(IExchange source, IExchange destination, string routingKey);
+        IBinding Bind(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers = null);
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -398,8 +402,9 @@ namespace EasyNetQ
         /// <param name="source">The source exchange</param>
         /// <param name="destination">The destination exchange</param>
         /// <param name="routingKey">The routing key</param>
+        /// <param name="headers">The headers</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey);
+        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers = null);
 
         /// <summary>
         /// Delete a binding
