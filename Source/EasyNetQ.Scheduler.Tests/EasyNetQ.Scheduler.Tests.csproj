@@ -24,6 +24,14 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
 
+  <!-- This is for GitVersionTask because the version of JetBrains.Annotations
+    and YamlDotNet it references was not built with versions that target
+    .NET Standard. See:
+    https://docs.microsoft.com/en-us/nuget/schema/msbuild-targets#packagetargetfallback -->
+  <PropertyGroup>
+    <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\Version.cs" />
     <None Include="App.config" />
@@ -40,6 +48,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
     <PackageReference Include="NSubstitute" Version="2.0.0-rc" />
     <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+    <PackageReference Include="GitVersionTask " Version="4.0.0-beta0012" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
@@ -50,9 +59,5 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
     <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-gitversion" Version="1.0.0" />
-  </ItemGroup>
 
 </Project>

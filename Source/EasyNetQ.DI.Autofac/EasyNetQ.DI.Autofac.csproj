@@ -22,6 +22,14 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
 
+  <!-- This is for GitVersionTask because the version of JetBrains.Annotations
+    and YamlDotNet it references was not built with versions that target
+    .NET Standard. See:
+    https://docs.microsoft.com/en-us/nuget/schema/msbuild-targets#packagetargetfallback -->
+  <PropertyGroup>
+    <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\Version.cs" />
     <None Include="App.config" />
@@ -33,6 +41,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.5.0" />
+    <PackageReference Include="GitVersionTask " Version="4.0.0-beta0012" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
@@ -47,9 +56,5 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
     <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-gitversion" Version="1.0.0" />
-  </ItemGroup>
 
 </Project>
