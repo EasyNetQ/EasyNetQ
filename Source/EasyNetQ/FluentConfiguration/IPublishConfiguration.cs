@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.FluentConfiguration
+﻿using System;
+
+namespace EasyNetQ.FluentConfiguration
 {
     /// <summary>
     /// Allows publish configuration to be fluently extended without adding overloads to IBus
@@ -28,6 +30,13 @@
         /// <param name="expires">The TTL to set in milliseconds</param>
         /// <returns>IPublishConfiguration</returns>
         IPublishConfiguration WithExpires(int expires);
+
+        /// <summary>
+        /// Sets the queue name to publish to
+        /// </summary>
+        /// <param name="queueName">The queue name</param>
+        /// <returns>IPublishConfiguration</returns>
+        IPublishConfiguration WithQueueName(string queueName);
     }
 
     public class PublishConfiguration : IPublishConfiguration
@@ -59,6 +68,12 @@
             return this;
         }
 
+        public IPublishConfiguration WithQueueName(string queueName)
+        {
+            QueueName = queueName;
+            return this;
+        }
+
         public byte? Priority { get; private set; }
 
         private string topic;
@@ -70,5 +85,6 @@
         }
 
         public int? Expires { get; private set; }
+        public string QueueName { get; private set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
+using EasyNetQ.FluentConfiguration;
 
 namespace EasyNetQ.Producer
 {
@@ -73,7 +74,7 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request)
+        public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
             where TRequest : class
             where TResponse : class
         {
@@ -84,6 +85,9 @@ namespace EasyNetQ.Producer
             var tcs = new TaskCompletionSource<TResponse>();
 
             var requestType = typeof(TRequest);
+
+            var configuration = new RequestConfiguration();
+            configure(configuration);
 
             Timer timer = null;
 #if !NETFX
@@ -105,7 +109,7 @@ namespace EasyNetQ.Producer
             RegisterErrorHandling(correlationId, timer, tcs);
 
             var queueName = SubscribeToResponse<TRequest, TResponse>();
-            var routingKey = conventions.RpcRoutingKeyNamingConvention(requestType);
+            var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
             RequestPublish(request, routingKey, queueName, correlationId);
 
             return tcs.Task;
@@ -242,7 +246,7 @@ namespace EasyNetQ.Producer
             var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
-            var routingKey = conventions.RpcRoutingKeyNamingConvention(requestType);
+            var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
             var exchange = advancedBus.ExchangeDeclare(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
             var queue = advancedBus.QueueDeclare(routingKey);

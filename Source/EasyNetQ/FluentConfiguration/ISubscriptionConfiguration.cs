@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.FluentConfiguration
 {
@@ -73,6 +74,13 @@ namespace EasyNetQ.FluentConfiguration
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithMaxPriority(byte priority);
+
+        /// <summary>
+        /// Sets the queue name
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithQueueName(string queueName);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -87,6 +95,7 @@ namespace EasyNetQ.FluentConfiguration
         public bool IsExclusive { get; private set; }
         public byte? MaxPriority { get; private set; }
         public bool Durable { get; private set; }
+        public string QueueName { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -150,6 +159,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithMaxPriority(byte priority)
         {
             MaxPriority = priority;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithQueueName(string queueName)
+        {
+            QueueName = queueName;
             return this;
         }
     }
