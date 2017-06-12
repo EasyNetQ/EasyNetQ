@@ -613,7 +613,7 @@ namespace EasyNetQ
 
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
         {
-            return await BindAsync(exchange, queue, routingKey);
+            return await BindAsync(exchange, queue, routingKey, null);
         }
 
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers)
