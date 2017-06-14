@@ -215,7 +215,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
 
-            Assert.Equal(deserializedMessage.MessageType, typeof(MyMessageV2));
+            Assert.Equal(typeof(MyMessageV2), deserializedMessage.MessageType);
             Assert.Equal(((Message<MyMessageV2>)deserializedMessage).Body.Text, message.Body.Text);
             Assert.Equal(((Message<MyMessageV2>)deserializedMessage).Body.Number, message.Body.Number);
         }
