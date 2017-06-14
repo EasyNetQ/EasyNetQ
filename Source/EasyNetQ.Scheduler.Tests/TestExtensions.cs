@@ -7,7 +7,7 @@ namespace EasyNetQ.Scheduler.Tests
 {
     public static class TestExtensions
     {
-        public static T ShouldNotBeNull<T>(this T obj)
+        public static T ShouldNotBeNull<T>(this T obj) where T : class
         {
             Assert.NotNull(obj);
             return obj;
