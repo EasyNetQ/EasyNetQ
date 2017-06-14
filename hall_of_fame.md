@@ -63,3 +63,5 @@ No particular order. Don't forget to add your name with your pull request.
 * Georg Pfeiffer
 * Thomas T
 * Brett Janer
+* Alina Popa
+* Connie Yau
