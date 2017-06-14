@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta3-build3705" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
