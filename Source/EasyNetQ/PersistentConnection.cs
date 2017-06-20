@@ -138,7 +138,7 @@ namespace EasyNetQ
             // if there is an inner exception, surface its message since it has more detailed information on why connection failed
             if (exception.InnerException != null)
             {
-                exceptionMessage = exception.InnerException.Message;
+                exceptionMessage = $"{exceptionMessage} ({exception.InnerException.Message})";
             }
 
             logger.ErrorWrite("Failed to connect to Broker: '{0}', Port: {1} VHost: '{2}'. " +
