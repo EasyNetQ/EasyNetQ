@@ -137,12 +137,19 @@ namespace EasyNetQ
 
         void LogException(Exception exception)
         {
+            var exceptionMessage = exception.Message;
+            // if there is an inner exception, surface its message since it has more detailed information on why connection failed
+            if (exception.InnerException != null)
+            {
+                exceptionMessage = $"{exceptionMessage} ({exception.InnerException.Message})";
+            }
+
             logger.ErrorWrite("Failed to connect to Broker: '{0}', Port: {1} VHost: '{2}'. " +
                     "ExceptionMessage: '{3}'",
                 connectionFactory.CurrentHost.Host,
                 connectionFactory.CurrentHost.Port,
                 connectionFactory.Configuration.VirtualHost,
-                exception.Message);
+                exceptionMessage);
         }
 
         void OnConnectionShutdown(object sender, ShutdownEventArgs e)
