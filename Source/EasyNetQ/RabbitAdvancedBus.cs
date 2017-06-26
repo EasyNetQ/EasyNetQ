@@ -96,7 +96,7 @@ namespace EasyNetQ
             connection.Initialize();
         }
 
-        
+
         // ---------------------------------- consume --------------------------------------
         public IDisposable Consume(IEnumerable<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure)
         {
@@ -206,7 +206,7 @@ namespace EasyNetQ
 
             if (disposed)
                 throw new EasyNetQException("This bus has been disposed");
-            
+
             var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receivedInfo) =>
@@ -219,13 +219,13 @@ namespace EasyNetQ
 
         // -------------------------------- publish ---------------------------------------------
         public void Publish(
-            IExchange exchange, 
-            string routingKey, 
-            bool mandatory, 
-            MessageProperties messageProperties, 
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            MessageProperties messageProperties,
             byte[] body)
         {
-            // Fix me: It's very hard now to move publish logic to separate abstraction, just leave it here. 
+            // Fix me: It's very hard now to move publish logic to separate abstraction, just leave it here.
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
@@ -276,9 +276,9 @@ namespace EasyNetQ
         }
 
         public void Publish<T>(
-            IExchange exchange, 
-            string routingKey, 
-            bool mandatory, 
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
             IMessage<T> message) where T : class
         {
 
@@ -326,7 +326,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
 
-            // Fix me: It's very hard now to move publish logic to separate abstraction, just leave it here. 
+            // Fix me: It's very hard now to move publish logic to separate abstraction, just leave it here.
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
@@ -372,24 +372,24 @@ namespace EasyNetQ
                 }).ConfigureAwait(false);
             }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);                
+            logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
         }
 
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
         public virtual IQueue QueueDeclare(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
-            bool exclusive = false, 
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
             int? maxPriority = null,
-            string deadLetterExchange = null, 
+            string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null)
-            {
+	        {
             Preconditions.CheckNotNull(name, "name");
 
             if (passive)
@@ -439,15 +439,15 @@ namespace EasyNetQ
         }
 
         public async Task<IQueue> QueueDeclareAsync(
-            string name, 
-            bool passive = false, 
-            bool durable = true, 
-            bool exclusive = false, 
+            string name,
+            bool passive = false,
+            bool durable = true,
+            bool exclusive = false,
             bool autoDelete = false,
             int? perQueueMessageTtl  = null,
             int? expires = null,
             int? maxPriority = null,
-            string deadLetterExchange = null, 
+            string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null)
@@ -494,7 +494,7 @@ namespace EasyNetQ
                 arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
-            await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);             
+            await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);
             logger.DebugWrite("Declared Queue: '{0}', durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}", name, durable, exclusive, autoDelete, string.Join(", ", arguments.Select(kvp =>
                 $"{kvp.Key}={kvp.Value}")));
             return new Queue(name, exclusive);
@@ -554,12 +554,12 @@ namespace EasyNetQ
         }
 
         public async Task<IExchange> ExchangeDeclareAsync(
-            string name, 
-            string type, 
-            bool passive = false, 
-            bool durable = true, 
-            bool autoDelete = false, 
-            bool @internal = false, 
+            string name,
+            string type,
+            bool passive = false,
+            bool durable = true,
+            bool autoDelete = false,
+            bool @internal = false,
             string alternateExchange = null,
             bool delayed = false)
         {
@@ -596,46 +596,70 @@ namespace EasyNetQ
 
         public virtual IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckShortString(routingKey, "routingKey");
+            return Bind(exchange, queue, routingKey, null);
+        }
 
-            clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey, new Dictionary<string, object>()));
-            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}",queue.Name, exchange.Name, routingKey);
-            return new Binding(queue, exchange, routingKey);
+        public virtual IBinding Bind(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers)
+        {
+            Preconditions.CheckNotNull(exchange, "exchange");
+            Preconditions.CheckShortString(routingKey, "routingKey");
+            Preconditions.CheckNotNull(queue, "headers");
+
+            var arguments = headers ?? new Dictionary<string, object>();
+            clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments));
+            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2} and {3} arguments", queue.Name, exchange.Name, routingKey, arguments.Count);
+            return new Binding(queue, exchange, routingKey, arguments);
         }
 
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
         {
+            return await BindAsync(exchange, queue, routingKey, null);
+        }
+
+        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers)
+        {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
-            await clientCommandDispatcher.InvokeAsync(x => x.QueueBind(queue.Name, exchange.Name, routingKey, new Dictionary<string, object>())).ConfigureAwait(false);
-            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2}", queue.Name, exchange.Name, routingKey);
-            return new Binding(queue, exchange, routingKey);
+            var arguments = headers ?? new Dictionary<string, object>();
+            await clientCommandDispatcher.InvokeAsync(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments)).ConfigureAwait(false);
+            logger.DebugWrite("Bound queue {0} to exchange {1} with routing key {2} and {3} arguments", queue.Name, exchange.Name, routingKey, arguments.Count);
+            return new Binding(queue, exchange, routingKey, arguments);
         }
 
         public virtual IBinding Bind(IExchange source, IExchange destination, string routingKey)
         {
-            Preconditions.CheckNotNull(source, "source");
-            Preconditions.CheckNotNull(destination, "destination");
-            Preconditions.CheckShortString(routingKey, "routingKey");
-
-            clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey, new Dictionary<string, object>()));
-            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}", destination.Name, source.Name, routingKey);
-            return new Binding(destination, source, routingKey);
+            return Bind(source, destination, routingKey, null);
         }
 
-        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
+        public virtual IBinding Bind(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers)
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
-            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeBind(destination.Name, source.Name, routingKey, new Dictionary<string, object>())).ConfigureAwait(false);
-            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2}", destination.Name, source.Name, routingKey);
-            return new Binding(destination, source, routingKey);
+            var arguments = headers ?? new Dictionary<string, object>();
+            clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments));
+            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2} and {3} arguments", destination.Name, source.Name, routingKey, arguments.Count);
+            return new Binding(destination, source, routingKey, arguments);
+        }
+
+        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
+        {
+            return await BindAsync(source, destination, routingKey, null);
+        }
+
+        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers)
+        {
+            Preconditions.CheckNotNull(source, "source");
+            Preconditions.CheckNotNull(destination, "destination");
+            Preconditions.CheckShortString(routingKey, "routingKey");
+
+            var arguments = headers ?? new Dictionary<string, object>();
+            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments)).ConfigureAwait(false);
+            logger.DebugWrite("Bound destination exchange {0} to source exchange {1} with routing key {2} and {3} arguments", destination.Name, source.Name, routingKey, arguments.Count);
+            return new Binding(destination, source, routingKey, arguments);
         }
 
         public virtual void BindingDelete(IBinding binding)
@@ -651,7 +675,7 @@ namespace EasyNetQ
             else
             {
                 var destination = binding.Bindable as IExchange;
-                if (destination == null) 
+                if (destination == null)
                     return;
                 clientCommandDispatcher.InvokeAsync(x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, new Dictionary<string, object>()));
                 logger.DebugWrite("Unbound destination exchange {0} from source exchange {1} with routing key {2}", destination.Name, binding.Exchange.Name, binding.RoutingKey);
@@ -681,7 +705,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, "queue");
 
             var result = clientCommandDispatcher.Invoke(x => x.BasicGet(queue.Name, true));
-            if (result == null) 
+            if (result == null)
                 return null;
             var getResult = new BasicGetResult(
                 result.Body,

@@ -353,6 +353,52 @@ namespace EasyNetQ.Tests
         }
     }
 
+    public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
+    {
+        private MockBuilder mockBuilder;
+        private IAdvancedBus advancedBus;
+        private IBinding binding;
+
+        public When_a_queue_is_bound_to_an_exchange_with_headers()
+        {
+            mockBuilder = new MockBuilder();
+            advancedBus = mockBuilder.Bus.Advanced;
+
+            var exchange = new Exchange("my_exchange");
+            var queue = new Topology.Queue("my_queue", false);
+
+            binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
+        }
+
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
+        public void Should_create_a_binding_instance()
+        {
+            binding.ShouldNotBeNull();
+            binding.RoutingKey.ShouldEqual("my_routing_key");
+            binding.Exchange.Name.ShouldEqual("my_exchange");
+            binding.Headers["header1"].ShouldEqual("value1");
+            binding.Bindable.ShouldBe<IQueue>();
+            ((IQueue)binding.Bindable).Name.ShouldEqual("my_queue");
+        }
+
+        [Fact]
+        public void Should_declare_a_binding()
+        {
+            var expectedHeaders = new Dictionary<string, object> {["header1"] = "value1"};
+
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is("my_queue"),
+                Arg.Is("my_exchange"),
+                Arg.Is("my_routing_key"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(expectedHeaders)));
+        }
+    }
+
     public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     {
         private MockBuilder mockBuilder;
