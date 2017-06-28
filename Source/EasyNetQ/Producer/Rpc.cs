@@ -80,16 +80,21 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(request, "request");
 
             var correlationId = Guid.NewGuid();
-
+            var requestType = typeof(TRequest);
             var tcs = new TaskCompletionSource<TResponse>();
-            var timer = new Timer(state =>
+
+            var timeout = timeoutStrategy.GetTimeoutSeconds(requestType);
+            Timer timer = null;
+            if (timeout > 0)
+            {
+                timer = new Timer(state =>
                 {
                     ((Timer) state).Dispose();
                     tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 });
+                timer.Change(TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
+            }
 
-            var requestType = typeof(TRequest);
-            timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
             RegisterErrorHandling(correlationId, timer, tcs);
 
             var queueName = SubscribeToResponse<TRequest, TResponse>();
@@ -106,7 +111,7 @@ namespace EasyNetQ.Producer
             {
                 OnSuccess = message =>
                 {
-                    timer.Dispose();
+                    timer?.Dispose();
 
                     var msg = ((IMessage<TResponse>)message);
 
@@ -135,7 +140,7 @@ namespace EasyNetQ.Producer
                 },
                 OnFailure = () =>
                 {
-                    timer.Dispose();
+                    timer?.Dispose();
                     tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
                 }
             });
