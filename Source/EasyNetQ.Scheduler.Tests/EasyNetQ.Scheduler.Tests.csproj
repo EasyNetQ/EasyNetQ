@@ -1,35 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>EasyNetQ.Scheduler.Tests</Description>
-    <AssemblyTitle>EasyNetQ.Scheduler.Tests</AssemblyTitle>
-    <VersionPrefix>2.0.4-netcore1435</VersionPrefix>
-    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
     <TargetFramework>net451</TargetFramework>
-    <AssemblyName>EasyNetQ.Scheduler.Tests</AssemblyName>
-    <PackageId>EasyNetQ.Scheduler.Tests</PackageId>
-    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
-    <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-  </PropertyGroup>
-
-  <!-- This is for GitVersionTask because the version of JetBrains.Annotations
-    and YamlDotNet it references was not built with versions that target
-    .NET Standard. See:
-    https://docs.microsoft.com/en-us/nuget/schema/msbuild-targets#packagetargetfallback -->
-  <PropertyGroup>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

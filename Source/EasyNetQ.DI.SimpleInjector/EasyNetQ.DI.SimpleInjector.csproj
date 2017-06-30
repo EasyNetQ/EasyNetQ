@@ -1,30 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container</Description>
-    <AssemblyTitle>EasyNetQ.DI.SimpleInjector</AssemblyTitle>
-    <VersionPrefix>2.0.4-netcore1435</VersionPrefix>
-    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
-    <AssemblyName>EasyNetQ.DI.SimpleInjector</AssemblyName>
-    <PackageId>EasyNetQ.DI.SimpleInjector</PackageId>
-    <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-  </PropertyGroup>
-
-  <!-- This is for GitVersionTask because the version of JetBrains.Annotations
-    and YamlDotNet it references was not built with versions that target
-    .NET Standard. See:
-    https://docs.microsoft.com/en-us/nuget/schema/msbuild-targets#packagetargetfallback -->
-  <PropertyGroup>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>

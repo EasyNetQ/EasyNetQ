@@ -1,33 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>EasyNetQ.Tests.Tasks</Description>
-    <AssemblyTitle>EasyNetQ.Tests.Tasks</AssemblyTitle>
-    <VersionPrefix>2.0.4-netcore1435</VersionPrefix>
-    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
     <TargetFramework>net452</TargetFramework>
-    <AssemblyName>EasyNetQ.Tests.Tasks</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>EasyNetQ.Tests.Tasks</PackageId>
-    <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-  </PropertyGroup>
-
-  <!-- This is for GitVersionTask because the version of JetBrains.Annotations
-    and YamlDotNet it references was not built with versions that target
-    .NET Standard. See:
-    https://docs.microsoft.com/en-us/nuget/schema/msbuild-targets#packagetargetfallback -->
-  <PropertyGroup>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
