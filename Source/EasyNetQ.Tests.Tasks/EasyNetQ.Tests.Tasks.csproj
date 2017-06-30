@@ -22,7 +22,9 @@
     <PackageReference Include="Net.Autofac" Version="0.1.12" />
     <PackageReference Include="Net.Core" Version="0.1.12" />
     <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="2.0.0" />
-    <PackageReference Include="GitVersionTask " Version="4.0.0-beta0012" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

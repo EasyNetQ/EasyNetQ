@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitVersionTask " Version="4.0.0-beta0012" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

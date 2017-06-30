@@ -21,7 +21,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta3-build3705" />
     <PackageReference Include="NSubstitute" Version="2.0.3" />
     <PackageReference Include="xunit" Version="2.3.0-beta3-build3705" />
-    <PackageReference Include="GitVersionTask " Version="4.0.0-beta0012" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta3-build3705" />
   </ItemGroup>
 
