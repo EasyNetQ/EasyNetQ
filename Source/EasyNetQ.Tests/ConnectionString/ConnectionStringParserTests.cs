@@ -77,7 +77,7 @@ namespace EasyNetQ.Tests.ConnectionString
         }
 
         [Theory]
-        [MemberData("AppendixAExamples")]
+        [MemberData(nameof(AppendixAExamples))]
         public void Should_parse_Examples(AmqpSpecification spec)
         {
             ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("" + spec.amqpUri);
@@ -89,7 +89,7 @@ namespace EasyNetQ.Tests.ConnectionString
         }
 
 // ReSharper disable UnusedMethodReturnValue.Local
-        private static IEnumerable<object[]> AppendixAExamples()
+        public static IEnumerable<object[]> AppendixAExamples()
 // ReSharper restore UnusedMethodReturnValue.Local
         {
             yield return new[] { new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000) };

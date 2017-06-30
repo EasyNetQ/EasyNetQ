@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
-    <Description>EasyNetQ.Scheduler.Mongo.Core</Description>
+    <Description>An Implementation to use Serilog as a logging component for EasyNetQ</Description>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
   </PropertyGroup>
 
@@ -15,8 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Bson" Version="2.3.0" />
-    <PackageReference Include="mongocsharpdriver" Version="2.3.0" />
+    <PackageReference Include="Serilog" Version="2.3.0" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

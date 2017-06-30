@@ -36,25 +36,29 @@
         </ProjectToBuild>
     </ItemGroup>
 
-    <!-- Restore all the packages in directory first and then msbuild solution. -->
-    <Target Name="Build" DependsOnTargets="Version">
-        <Exec WorkingDirectory="$(Source)" Command="dotnet restore" />
+    <!-- Restore all packages in solution -->
+    <Target Name="Restore" DependsOnTargets="Version">
+        <Exec WorkingDirectory="$(Source)" Command="dotnet restore %(ProjectToBuild.FullName)" />
+    </Target>
+
+    <!-- MSBuild only occurs after restore and version. -->
+    <Target Name="Build" DependsOnTargets="Version; Restore">
         <MSBuild Projects="@(ProjectToBuild)" Targets="Rebuild"/>
     </Target>
 
-    <!-- Test all projects against their targeted frameworks. Only tests that 
+    <!-- Test all projects against their targeted frameworks. Only tests that
         are not Integration or Explicit tests. -->
     <Target Name="Test" DependsOnTargets="Build">
         <ItemGroup>
-            <TestProjects Include="$(Source)\EasyNetQ.Tests\project.json" />
-            <TestProjects Include="$(Source)\EasyNetQ.DI.Tests\project.json" />
-            <TestProjects Include="$(Source)\EasyNetQ.Hosepipe.Tests\project.json" />
-            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Tests\project.json" />
-            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Mongo.Tests\project.json" />
+            <TestProjects Include="$(Source)\EasyNetQ.Tests\EasyNetQ.Tests.csproj" />
+            <TestProjects Include="$(Source)\EasyNetQ.DI.Tests\EasyNetQ.DI.Tests.csproj" />
+            <TestProjects Include="$(Source)\EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj" />
+            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj" />
+            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj" />
         </ItemGroup>
 
         <Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
-              Command='dotnet test --configuration $(Configuration) --no-build -notrait "Category=Explicit" -notrait "Category=Integration"'
+              Command='dotnet test --configuration $(Configuration) --no-build --filter "Category!=Explicit&#038;Category!=Integration"'
               ContinueOnError="ErrorAndContinue" />
     </Target>
 
@@ -64,9 +68,9 @@
             <NuGetPackageDirectory>$(Package)</NuGetPackageDirectory>
         </PropertyGroup>
         <ItemGroup>
-            <ClientLibraries Include="$(Source)\EasyNetQ\project.json" />
-            <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\project.json" Exclude="$(Source)\*Tests*\project.json" />
-            <ClientLibraries Include="$(Source)\EasyNetQ.Serilog\project.json" />
+            <ClientLibraries Include="$(Source)\EasyNetQ\EasyNetQ.csproj" />
+            <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\EasyNetQ.DI.*.csproj" Exclude="$(Source)\*Tests*\*.csproj" />
+            <ClientLibraries Include="$(Source)\EasyNetQ.Serilog\EasyNetQ.Serilog.csproj" />
 
             <FilesToDelete Include="$(NuGetPackageDirectory)\*.nupkg" />
         </ItemGroup>

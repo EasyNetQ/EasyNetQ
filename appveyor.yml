@@ -1,5 +1,6 @@
-before_build:
-  - ps: Build\UpdateGitVersion.ps1
+image:
+  - Visual Studio 2017
+
 pull_requests:
   do_not_increment_build_number: true
 

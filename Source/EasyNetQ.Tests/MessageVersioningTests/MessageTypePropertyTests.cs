@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.CreateForMessageType( typeof( MyMessage ), typeNameSerialiser );
 
             var messageType = property.GetMessageType();
-            Assert.Equal( messageType.Type,  typeof( MyMessage ) );
+            Assert.Equal(typeof(MyMessage), messageType.Type);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.CreateForMessageType( typeof( MyMessageV2 ), typeNameSerialiser );
 
             var messageType = property.GetMessageType();
-            Assert.Equal( messageType.Type,  typeof( MyMessageV2 ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.Equal( messageType.Type,  typeof( MyMessage ) );
+            Assert.Equal(typeof(MyMessage), messageType.Type);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.Equal( messageType.Type,  typeof( MyMessageV2 ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.Equal( messageType.Type,  typeof( MyMessageV2 ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.Equal( messageType.Type,  typeof( MyMessageV2 ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
         [Fact]

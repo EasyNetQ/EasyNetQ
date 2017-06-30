@@ -17,15 +17,15 @@ namespace EasyNetQ.Tests.Performance.Consumer
         {
             var logger = new NoDebugLogger();
 
-            bus = RabbitHutch.CreateBus("host=localhost;product=consumer", 
+            bus = RabbitHutch.CreateBus("host=localhost;product=consumer",
                 x => x
                     .Register<IEasyNetQLogger>(_ => logger)
                     .Register<IConventions, SingleQueueNamingConvention>()
                     .Register<IHandlerCollectionFactory, HandlerCollectionPerQueueFactory>()
             );
 
-            bus.SubscribeAsync<MessageA>("multiple", async m => logger.InfoWrite("{0}", m));
-            bus.SubscribeAsync<MessageB>("multiple", async m => logger.InfoWrite("{0}", m));
+            bus.SubscribeAsync<MessageA>("multiple", async m => await Task.Run(() => logger.InfoWrite("{0}", m)).ConfigureAwait(false));
+            bus.SubscribeAsync<MessageB>("multiple", async m => await Task.Run(() => logger.InfoWrite("{0}", m)).ConfigureAwait(false));
 
             for (int i = 0; i < 100; i++)
             {

@@ -103,7 +103,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_have_no_interaction_with_model()
         {
             var rec = model.ReceivedCalls();
-            Assert.Equal(rec.GetEnumerator().MoveNext(), false);
+            Assert.False(rec.GetEnumerator().MoveNext());
         }
 
         [Fact]
