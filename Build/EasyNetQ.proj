@@ -38,7 +38,7 @@
 
     <!-- Restore all packages in solution -->
     <Target Name="Restore" DependsOnTargets="Version">
-        <MSBuild Projects="@(ProjectToBuild)" Targets="Restore" />
+        <Exec WorkingDirectory="$(Source)" Command="dotnet restore %(ProjectToBuild.FullName)" />
     </Target>
 
     <!-- MSBuild only occurs after restore and version. -->
@@ -77,7 +77,6 @@
 
         <MakeDir Directories="$(NuGetPackageDirectory)" Condition="!Exists('$(NuGetPackageDirectory)')" />
         <Delete Files="@(FilesToDelete)" />
-        <MSBuild Projects="@(ClientLibraries)" Targets="Pack"
-            Properties="Configuration=$(Configuration);PackageOutputPath=$(NuGetPackageDirectory)" />
+        <Exec Command='dotnet pack %(ClientLibraries.FullPath) --no-build --output $(NuGetPackageDirectory) --configuration $(Configuration)' />
     </Target>
 </Project>
