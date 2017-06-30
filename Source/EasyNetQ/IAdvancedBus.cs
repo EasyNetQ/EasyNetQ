@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Events;
-using System.Collections.Generic;
 
 namespace EasyNetQ
 {
