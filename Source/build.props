@@ -2,7 +2,6 @@
 <Project>
     <!-- Properties common to all project builds -->
     <PropertyGroup>
-        <!--    <VersionPrefix>2.0.4-netcore1435</VersionPrefix>-->
         <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
         <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
@@ -16,16 +15,6 @@
         <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
         <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
         <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    </PropertyGroup>
-
-    <!-- GitVersionTask does not work using .NET CLI because it calls MSBuild
-        Core rather than the full .NET Framework MSBuild.
-        We need the GitVersionTask to properly version the assemblies, so we use
-        the full .NET Framework MSBuild when calling EasyNetQ.proj: Line 46.
-        Issue: https://github.com/GitTools/GitVersion/issues/1175
-    -->
-    <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'">
-        <ExcludeRestorePackageImports>true</ExcludeRestorePackageImports>
     </PropertyGroup>
 
     <!-- This is for GitVersionTask because the version of JetBrains.Annotations
