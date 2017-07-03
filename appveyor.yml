@@ -44,7 +44,7 @@ deploy:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
     skip_symbols: true
     on:
-      branch: release/*
+      branch: /release\/.+/
   - provider: NuGet
     artifact: /.*\.nupkg/
     server: https://www.myget.org/F/easynetq-unstable/api/v2/package
@@ -52,7 +52,7 @@ deploy:
        secure: +0aKxcCHqWvvdJxA4dh1ToRqwA6x8yqhfrYDIeOjQu6Skpg/UrwxAPBik8z6be99
     skip_symbols: true
     on:
-      branch: feature/*
+      branch: /feature\/.+/
 
 skip_commits:
   files:
