@@ -34,6 +34,7 @@ namespace EasyNetQ
         public bool CancelOnHaFailover { get; set; }
         public string Product { get; set; }
         public string Platform { get; set; }
+        public string Name { get; set; }
         public bool UseBackgroundThreads { get; set; }
         public IList<AuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get;  set; }
@@ -63,6 +64,7 @@ namespace EasyNetQ
             Hosts = new List<HostConfiguration>();
 
             Ssl = new SslOption();
+            ClientProperties = new Dictionary<string, object>();
         }
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
@@ -91,21 +93,29 @@ namespace EasyNetQ
             var hostname = Environment.MachineName;
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
+            var name = Name ?? applicationName;
 
-            clientProperties.Add("client_api", "EasyNetQ");
-            clientProperties.Add("product", product);
-            clientProperties.Add("platform", platform);
-            clientProperties.Add("version", version);
-            clientProperties.Add("easynetq_version", version);
-            clientProperties.Add("application", applicationName);
-            clientProperties.Add("application_location", applicationPath);
-            clientProperties.Add("machine_name", hostname);
-            clientProperties.Add("user", UserName);
-            clientProperties.Add("connected", DateTime.UtcNow.ToString("u")); // UniversalSortableDateTimePattern: yyyy'-'MM'-'dd HH':'mm':'ss'Z'
-            clientProperties.Add("requested_heartbeat", RequestedHeartbeat.ToString());
-            clientProperties.Add("timeout", Timeout.ToString());
-            clientProperties.Add("publisher_confirms", PublisherConfirms.ToString());
-            clientProperties.Add("persistent_messages", PersistentMessages.ToString());
+            AddValueIfNotExists(clientProperties, "client_api", "EasyNetQ");
+            AddValueIfNotExists(clientProperties, "product", product);
+            AddValueIfNotExists(clientProperties, "platform", platform);
+            AddValueIfNotExists(clientProperties, "version", version);
+            AddValueIfNotExists(clientProperties, "connection_name", name);
+            AddValueIfNotExists(clientProperties, "easynetq_version", version);
+            AddValueIfNotExists(clientProperties, "application", applicationName);
+            AddValueIfNotExists(clientProperties, "application_location", applicationPath);
+            AddValueIfNotExists(clientProperties, "machine_name", hostname);
+            AddValueIfNotExists(clientProperties, "user", UserName);
+            AddValueIfNotExists(clientProperties, "connected", DateTime.UtcNow.ToString("u")); // UniversalSortableDateTimePattern: yyyy'-'MM'-'dd HH':'mm':'ss'Z'
+            AddValueIfNotExists(clientProperties, "requested_heartbeat", RequestedHeartbeat.ToString());
+            AddValueIfNotExists(clientProperties, "timeout", Timeout.ToString());
+            AddValueIfNotExists(clientProperties, "publisher_confirms", PublisherConfirms.ToString());
+            AddValueIfNotExists(clientProperties, "persistent_messages", PersistentMessages.ToString());
+        }
+
+        private static void AddValueIfNotExists(IDictionary<string, object> clientProperties, string name, string value)
+        {
+            if (!clientProperties.ContainsKey(name))
+                clientProperties.Add(name, value);
         }
 
         public void Validate()
@@ -137,7 +147,6 @@ namespace EasyNetQ
                 }
             }
 
-            ClientProperties = new Dictionary<string, object>();
             SetDefaultClientProperties(ClientProperties);
         }
     }
