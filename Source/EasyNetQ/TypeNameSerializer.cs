@@ -9,7 +9,7 @@ namespace EasyNetQ
         Type DeSerialize(string typeName);
     }
 
-	
+    
     public class TypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
@@ -43,6 +43,13 @@ namespace EasyNetQ
             return serializedTypes.GetOrAdd(type, t =>
             {
                 var typeName = t.FullName + ":" + t.Assembly.GetName().Name;
+                // Type.FullName uses the longer AssemblyQualifiedName for the GenericTypeArguments so we simplify it 
+                // to reduce the generated typeName length to help to overcome the 255 chars limit
+                foreach (var genericArg in t.GenericTypeArguments)
+                {
+                    string simpleTypeName = genericArg.FullName + ", " + genericArg.Assembly.GetName().Name;
+                    typeName = typeName.Replace(genericArg.AssemblyQualifiedName, simpleTypeName);
+                }
                 if (typeName.Length > 255)
                 {
                     throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP " +

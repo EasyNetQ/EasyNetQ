@@ -8,8 +8,9 @@ namespace EasyNetQ.Tests
     [TestFixture]
     public class TypeNameSerializerTests
     {
-        const string expectedTypeName = "System.String:mscorlib";
+        private const string expectedTypeName = "System.String:mscorlib";
         private const string expectedCustomTypeName = "EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests";
+        private const string expectedCustomGenericTypeName = "EasyNetQ.Tests.SomeRandomGenericClass`1[[System.String, mscorlib]]:EasyNetQ.Tests";
 
         private ITypeNameSerializer typeNameSerializer;
 
@@ -33,6 +34,15 @@ namespace EasyNetQ.Tests
             typeName.ShouldEqual(expectedCustomTypeName);
         }
 
+
+        [Test]
+        public void Should_serialize_a_custom_generic_type()
+        {
+            var typeName = typeNameSerializer.Serialize(typeof(SomeRandomGenericClass<string>));
+            typeName.ShouldEqual(expectedCustomGenericTypeName);
+            Assert.False(typeName.Contains("PublicKeyToken="), "The serialization of a generic arguments type should not use the fully qualified assembly name");
+        }
+
         [Test]
         public void Should_deserialize_a_type_name()
         {
@@ -45,6 +55,13 @@ namespace EasyNetQ.Tests
         {
             var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
             type.ShouldEqual(typeof(SomeRandomClass));
+        }
+
+        [Test]
+        public void Should_deserialize_a_custom_generic_type()
+        {
+            var type = typeNameSerializer.DeSerialize(expectedCustomGenericTypeName);
+            type.ShouldEqual(typeof(SomeRandomGenericClass<string>));
         }
 
         [Test]
@@ -87,6 +104,11 @@ namespace EasyNetQ.Tests
     public class SomeRandomClass
     {
         
+    }
+
+    public class SomeRandomGenericClass<T>
+    {
+
     }
 }
 // ReSharper restore InconsistentNaming
