@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace EasyNetQ
 {
@@ -28,10 +29,21 @@ namespace EasyNetQ
                 var type = Type.GetType(nameParts[0] + ", " + nameParts[1]);
                 if (type == null)
                 {
-                    throw new EasyNetQException("Cannot find type {0}", t);
+                    type = AlternativeGetType(nameParts[0], nameParts[1]);
+                    if (type == null)
+                    {
+                        throw new EasyNetQException("Cannot find type {0}", t);
+                    }
                 }
                 return type;
             });
+        }
+
+        private Type AlternativeGetType(string fullTypeName, string assemblyName)
+        {
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(assembly => assembly.GetName().Name == assemblyName)?
+                .GetType(fullTypeName, false);
         }
 
         private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();
