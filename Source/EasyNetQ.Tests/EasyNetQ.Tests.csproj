@@ -89,6 +89,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AdvancedBusEventHandlersTests.cs" />
+    <Compile Include="DynamicTypeNameSerializerTests.cs" />
     <Compile Include="MultipleExchangeTest\MultipleExchangePublishExchangeDeclareStrategyTests.cs" />
     <Compile Include="MultipleExchangeTest\IMessageInterfaceTwo.cs" />
     <Compile Include="MultipleExchangeTest\IMessageInterfaceOne.cs" />

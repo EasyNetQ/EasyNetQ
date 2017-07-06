@@ -182,5 +182,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Topology\IQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Topology\Queue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeNameSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicTypeNameSerializer.cs" />
   </ItemGroup>
 </Project>
