@@ -4,8 +4,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.Topology;
 using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
 {
@@ -81,30 +81,23 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(request, "request");
 
             var correlationId = Guid.NewGuid();
-
-            var tcs = new TaskCompletionSource<TResponse>();
-
             var requestType = typeof(TRequest);
-
             var configuration = new RequestConfiguration();
             configure(configuration);
 
+            var tcs = new TaskCompletionSource<TResponse>();
+
+            var timeout = timeoutStrategy.GetTimeoutSeconds(requestType);
             Timer timer = null;
-#if !NETFX
-            timer = new Timer(state =>
+            if (timeout > 0)
+            {
+                timer = new Timer(state =>
                 {
-                    timer.Dispose();
+                    ((Timer) state).Dispose();
                     tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 }, null, TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
-#else
-            timer = new Timer(state =>
-            {
-                ((Timer)state).Dispose();
-                tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
-            });
-
-             timer.Change(TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
-#endif
+                timer.Change(TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
+            }
 
             RegisterErrorHandling(correlationId, timer, tcs);
 
@@ -122,7 +115,7 @@ namespace EasyNetQ.Producer
             {
                 OnSuccess = message =>
                 {
-                    timer.Dispose();
+                    timer?.Dispose();
 
                     var msg = ((IMessage<TResponse>)message);
 
@@ -151,7 +144,7 @@ namespace EasyNetQ.Producer
                 },
                 OnFailure = () =>
                 {
-                    timer.Dispose();
+                    timer?.Dispose();
                     tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
                 }
             });
@@ -252,7 +245,7 @@ namespace EasyNetQ.Producer
             var queue = advancedBus.QueueDeclare(routingKey);
             advancedBus.Bind(exchange, queue, routingKey);
 
-            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageReceivedInfo) => ExecuteResponder(responder, requestMessage),
+            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
         }
 

@@ -9,6 +9,7 @@ using System.Reflection;
 
 [assembly: CLSCompliant(false)]
 
+// 1.1.3.0 Fix a bug where timer would end immediately if timeout=0 (= no timeout)
 // 1.1.2.0 Update logging in PersistentConnection.cs so both inner and outer exceptions are logged when connections fail
 // 1.1.1.0 Logging fix to correctly reflect the port and vhost that is connected to
 // 1.1.0.0 Add useBackgroundThreads as connection string part
