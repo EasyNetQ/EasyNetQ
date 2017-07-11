@@ -93,10 +93,10 @@ namespace EasyNetQ.Producer
             {
                 timer = new Timer(state =>
                 {
-                    ((Timer) state).Dispose();
+                    ((Timer)state)?.Dispose();
                     tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
-                }, null, TimeSpan.FromSeconds(timeoutStrategy.GetTimeoutSeconds(requestType)), disablePeriodicSignaling);
-                timer.Change(TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
+                }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
+                //timer.Change(TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
             }
 
             RegisterErrorHandling(correlationId, timer, tcs);
@@ -245,7 +245,7 @@ namespace EasyNetQ.Producer
             var queue = advancedBus.QueueDeclare(routingKey);
             advancedBus.Bind(exchange, queue, routingKey);
 
-            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageRecievedInfo) => ExecuteResponder(responder, requestMessage),
+            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageReceivedInfo) => ExecuteResponder(responder, requestMessage),
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
         }
 

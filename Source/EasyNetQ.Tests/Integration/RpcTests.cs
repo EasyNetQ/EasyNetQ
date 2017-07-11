@@ -6,7 +6,6 @@ using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [Explicit("Requires a RabbitMQ instance on localhost")]
     public class RpcTests : IDisposable
     {
         private class RpcRequest
@@ -31,7 +30,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
-        [Fact]
+        [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_publish_and_receive_response()
         {
             bus.Respond<RpcRequest, RpcResponse>(req => new RpcResponse { Value = req.Value });
@@ -42,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
             Assert.True(request.Value == response.Value);
         }
 
-        [Fact]
+        [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_throw_when_requesting_over_long_message()
         {
             Assert.Throws<EasyNetQException>(() =>
@@ -57,7 +56,7 @@ namespace EasyNetQ.Tests.Integration
             });
         }
 
-        [Fact]
+        [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_throw_when_responding_to_over_long_message()
         {
             Assert.Throws<EasyNetQException>(() =>

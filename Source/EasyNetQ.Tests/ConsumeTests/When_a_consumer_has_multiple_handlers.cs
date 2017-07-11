@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             mockBuilder.Bus.Dispose();
         }
 
-        public void Deliver<T>(T message) where T : class
+        void Deliver<T>(T message) where T : class
         {
             var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(message);
             var properties = new BasicProperties
