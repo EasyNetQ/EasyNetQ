@@ -155,7 +155,14 @@ namespace EasyNetQ
             var queueName = configuration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
-            var queue = advancedBus.QueueDeclare(queueName, autoDelete: configuration.AutoDelete, durable: configuration.Durable, expires: configuration.Expires, maxPriority: configuration.MaxPriority);
+            var queue = advancedBus.QueueDeclare(
+                queueName, 
+                autoDelete: configuration.AutoDelete, 
+                durable: configuration.Durable, 
+                expires: configuration.Expires, 
+                maxPriority: configuration.MaxPriority,
+                maxLength: configuration.MaxLength,
+                maxLengthBytes: configuration.MaxLengthBytes);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))

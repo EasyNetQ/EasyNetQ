@@ -122,7 +122,104 @@ namespace EasyNetQ.Tests
         }
     }
 
-    public class When_a_message_is_delivered : IDisposable
+    public class When_subscribe_with_configuration_is_called
+    {
+        [InlineData("ttt", true, 99, true, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
+        [InlineData(null, false, 0, false, 0, null, false, null, true, "qqq", null, null)]
+        [Theory]
+        public void Queue_should_be_declared_with_correct_options(
+            string topic,
+            bool autoDelete,
+            int priority,
+            bool cancelOnHaFailover,
+            ushort prefetchCount,
+            int? expires,
+            bool isExclusive,
+            byte? maxPriority,
+            bool durable,
+            string queueName,
+            int? maxLength,
+            int? maxLengthBytes)
+        {
+            var mockBuilder = new MockBuilder();
+            using (mockBuilder.Bus)
+            {
+                // Configure subscription
+                mockBuilder.Bus.Subscribe<MyMessage>("x", message => { }, 
+                    c =>
+                    {                        
+                        c.WithAutoDelete(autoDelete)
+                            .WithPriority(priority)
+                            .WithCancelOnHaFailover(cancelOnHaFailover)
+                            .WithPrefetchCount(prefetchCount)
+                            .AsExclusive(isExclusive)
+                            .WithDurable(durable)
+                            .WithQueueName(queueName);
+
+                        if (topic != null)
+                        {
+                            c.WithTopic(topic);
+                        }
+                        if (maxPriority.HasValue)
+                        {
+                            c.WithMaxPriority(maxPriority.Value);
+                        }
+                        if (expires.HasValue)
+                        {
+                            c.WithExpires(expires.Value);
+                        }
+                        if (maxLength.HasValue)
+                        {
+                            c.WithMaxLength(maxLength.Value);
+                        }
+                        if (maxLengthBytes.HasValue)
+                        {
+                            c.WithMaxLengthBytes(maxLengthBytes.Value);
+                        }
+                    }
+                );
+            }
+
+            // Assert that queue got declared correctly
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(durable),
+                    Arg.Is(false), // IsExclusive is set on the Consume call
+                    Arg.Is(autoDelete),
+                    Arg.Is<IDictionary<string, object>>(
+                        x => 
+                        (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
+                        (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
+                        (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
+                        (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"]))
+                    );
+
+            // Assert that consumer was created correctly
+            mockBuilder.Channels[1].Received().BasicConsume(
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(false),
+                    Arg.Any<string>(),
+                    Arg.Is(true),
+                    Arg.Is(isExclusive),
+                    Arg.Is<IDictionary<string, object>>(
+                        x =>
+                        (priority == (int)x["x-priority"]) &&
+                        (cancelOnHaFailover == (bool)x["x-cancel-on-ha-failover"])),
+                    Arg.Any<IBasicConsumer>());
+
+            // Assert that QoS got configured correctly
+            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);
+
+            // Assert that binding got configured correctly
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is(queueName),
+                Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                Arg.Is(topic ?? "#"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+        }
+    }
+
+        public class When_a_message_is_delivered : IDisposable
     {
         private MockBuilder mockBuilder;
 
