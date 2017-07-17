@@ -71,7 +71,9 @@ namespace EasyNetQ
 
         public virtual IConnection CreateConnection()
         {
-            return clusterHostSelectionStrategy.Current().ConnectionFactory.CreateConnection();
+            object connectionNameValue = null;
+            Configuration?.ClientProperties.TryGetValue("connection_name", out connectionNameValue);
+            return clusterHostSelectionStrategy.Current().ConnectionFactory.CreateConnection(connectionNameValue as string);
         }
 
         public virtual HostConfiguration CurrentHost => clusterHostSelectionStrategy.Current().HostConfiguration;
