@@ -2,13 +2,12 @@
 
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
-using Rhino.Mocks;
+using NSubstitute;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    [TestFixture]
     public class When_a_channel_action_is_invoked
     {
         private IPersistentChannel persistentChannel;
@@ -16,38 +15,37 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private IModel channel;
         private IEventBus eventBus;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_channel_action_is_invoked()
         {
-            persistentConnection = MockRepository.GenerateStub<IPersistentConnection>();
-            channel = MockRepository.GenerateStub<IModel>();
+            persistentConnection = Substitute.For<IPersistentConnection>();
+            channel = Substitute.For<IModel>();
             var configuration = new ConnectionConfiguration();
-            eventBus = MockRepository.GenerateStub<IEventBus>();
+            eventBus = Substitute.For<IEventBus>();
 
-            persistentConnection.Stub(x => x.CreateModel()).Return(channel);
-            var logger = MockRepository.GenerateStub<IEasyNetQLogger>();
+            persistentConnection.CreateModel().Returns(channel);
+            var logger = Substitute.For<IEasyNetQLogger>();
 
             persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
 
-        [Test]
+        [Fact]
         public void Should_open_a_channel()
         {
-            persistentConnection.AssertWasCalled(x => x.CreateModel());
+            persistentConnection.Received().CreateModel();
         }
 
-        [Test]
+        [Fact]
         public void Should_run_action_on_channel()
         {
-            channel.AssertWasCalled(x => x.ExchangeDeclare("MyExchange", "direct"));
+            channel.Received().ExchangeDeclare("MyExchange", "direct");
         }
 
-        [Test]
+        [Fact]
         public void Should_raise_a_PublishChannelCreatedEvent()
         {
-            eventBus.AssertWasCalled(x => x.Publish(Arg<PublishChannelCreatedEvent>.Is.Anything));
+            eventBus.Received().Publish(Arg.Any<PublishChannelCreatedEvent>());
         }
     }
 }

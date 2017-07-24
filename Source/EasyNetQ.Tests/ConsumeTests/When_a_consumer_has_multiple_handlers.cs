@@ -1,15 +1,15 @@
 ﻿// ReSharper disable InconsistentNaming
-using EasyNetQ.Internals;
-using RabbitMQ.Client.Framing;
+using System;
 using System.Threading;
+using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using RabbitMQ.Client.Framing;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
-    public class When_a_consumer_has_multiple_handlers
+    public class When_a_consumer_has_multiple_handlers : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -17,8 +17,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private MyOtherMessage myOtherMessageResult;
         private IAnimal animalResult;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_consumer_has_multiple_handlers()
         {
             mockBuilder = new MockBuilder();
 
@@ -50,7 +49,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             countdownEvent.Wait(1000);
         }
 
-        public void Deliver<T>(T message) where T : class
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        void Deliver<T>(T message) where T : class
         {
             var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(message);
             var properties = new BasicProperties
@@ -69,21 +73,21 @@ namespace EasyNetQ.Tests.ConsumeTests
                 );
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_myMessage()
         {
             myMessageResult.ShouldNotBeNull();
             myMessageResult.Text.ShouldEqual("Hello Polymorphs!");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_myOtherMessage()
         {
             myOtherMessageResult.ShouldNotBeNull();
             myOtherMessageResult.Text.ShouldEqual("Hello Isomorphs!");
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_a_ploymorphic_message()
         {
             animalResult.ShouldNotBeNull();

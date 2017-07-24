@@ -18,7 +18,17 @@ namespace EasyNetQ
         private class Handlers
         {
             private readonly object internalHandlersLock = new object();
-            private readonly List<object> internalHandlers = new List<object>(); 
+            private readonly List<object> internalHandlers;
+
+            public Handlers()
+            {
+                internalHandlers = new List<object>();
+            }
+
+            public Handlers(params object[] handlers)
+            {
+                internalHandlers = new List<object>(handlers);
+            }
 
             public void Add(object handler)
             {
@@ -40,7 +50,6 @@ namespace EasyNetQ
         }
 
         private readonly ConcurrentDictionary<Type, Handlers> subscriptions = new ConcurrentDictionary<Type, Handlers>();
-        private readonly object subscriptionLock = new object();
 
         public void Publish<TEvent>(TEvent @event)
         {
@@ -60,12 +69,15 @@ namespace EasyNetQ
         private void AddSubscription<TEvent>(Action<TEvent> handler)
         {
             var type = typeof (TEvent);
-            Handlers handlers;
-            if (!subscriptions.TryGetValue(type, out handlers))
-                lock (subscriptionLock)
-                    if (!subscriptions.TryGetValue(type, out handlers))
-                        subscriptions[type] = handlers = new Handlers();
-            handlers.Add(handler);
+
+            subscriptions.AddOrUpdate(type, 
+                addValue: new Handlers(handler),
+                updateValueFactory: (key, existingHandlers) => 
+                {
+                    existingHandlers.Add(handler);
+                    return existingHandlers;
+                }
+            );
         }
 
         private CancelSubscription GetCancelSubscriptionDelegate<TEvent>(Action<TEvent> eventHandler)

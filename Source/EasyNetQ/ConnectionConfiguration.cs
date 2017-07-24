@@ -69,8 +69,13 @@ namespace EasyNetQ
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
+            string applicationNameAndPath = null;
+#if !NETFX
+            var version = this.GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
+#else
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+#endif
+            applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
             var applicationName = "unknown";
             var applicationPath = "unknown";
@@ -91,6 +96,7 @@ namespace EasyNetQ
             }
 
             var hostname = Environment.MachineName;
+
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
             var name = Name ?? applicationName;

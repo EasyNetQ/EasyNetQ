@@ -2,27 +2,26 @@
 
 using System.Text;
 using EasyNetQ.MessageVersioning;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    [TestFixture]
     public class MessageTypePropertyTests
     {
         private const string AlternativeMessageTypesHeaderKey = "Alternative-Message-Types";
 
         // All types missing - GetType == exception
-        [Test]
+        [Fact]
         public void GetMessageType_returns_message_type_for_an_unversioned_message()
         {
             var typeNameSerialiser = new TypeNameSerializer();
             var property = MessageTypeProperty.CreateForMessageType( typeof( MyMessage ), typeNameSerialiser );
 
             var messageType = property.GetMessageType();
-            Assert.That( messageType.Type, Is.EqualTo( typeof( MyMessage ) ) );
+            Assert.Equal(typeof(MyMessage), messageType.Type);
         }
 
-        [Test]
+        [Fact]
         public void AppendTo_sets_message_type_and_no_alternatives_for_an_unversioned_message()
         {
             var typeNameSerialiser = new TypeNameSerializer();
@@ -31,21 +30,21 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             property.AppendTo( properties );
 
-            Assert.That( properties.Type, Is.EqualTo( typeNameSerialiser.Serialize( typeof( MyMessage ) ) ) );
-            Assert.That( properties.Headers.ContainsKey( AlternativeMessageTypesHeaderKey ), Is.False );
+            Assert.Equal( properties.Type,  typeNameSerialiser.Serialize( typeof( MyMessage ) ) );
+            Assert.False( properties.Headers.ContainsKey( AlternativeMessageTypesHeaderKey ));
         }
 
-        [Test]
+        [Fact]
         public void GetMessageType_returns_message_type_for_a_versioned_message()
         {
             var typeNameSerialiser = new TypeNameSerializer();
             var property = MessageTypeProperty.CreateForMessageType( typeof( MyMessageV2 ), typeNameSerialiser );
 
             var messageType = property.GetMessageType();
-            Assert.That( messageType.Type, Is.EqualTo( typeof( MyMessageV2 ) ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
-        [Test]
+        [Fact]
         public void AppendTo_sets_message_type_and_alternatives_for_a_versioned_message()
         {
             var typeNameSerialiser = new TypeNameSerializer();
@@ -54,11 +53,11 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             property.AppendTo( properties );
 
-            Assert.That( properties.Type, Is.EqualTo( typeNameSerialiser.Serialize( typeof( MyMessageV2 ) ) ) );
-            Assert.That( properties.Headers[ AlternativeMessageTypesHeaderKey ], Is.EqualTo( typeNameSerialiser.Serialize( typeof( MyMessage ) ) ) );
+            Assert.Equal( properties.Type,  typeNameSerialiser.Serialize( typeof( MyMessageV2 ) ) );
+            Assert.Equal( properties.Headers[ AlternativeMessageTypesHeaderKey ],  typeNameSerialiser.Serialize( typeof( MyMessage ) ) );
         }
 
-        [Test]
+        [Fact]
         public void MessageTypeProperty_is_created_correctly_from_message_properties_for_unversioned_message()
         {
             var typeNameSerialiser = new TypeNameSerializer();
@@ -67,10 +66,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.That( messageType.Type, Is.EqualTo( typeof( MyMessage ) ) );
+            Assert.Equal(typeof(MyMessage), messageType.Type);
         }
 
-        [Test]
+        [Fact]
         public void MessageTypeProperty_is_created_correctly_from_message_properties_for_versioned_message()
         {
             var typeNameSerialiser = new TypeNameSerializer();
@@ -81,10 +80,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.That( messageType.Type, Is.EqualTo( typeof( MyMessageV2 ) ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
-        [Test]
+        [Fact]
         public void GetType_returns_first_available_alternative_if_message_type_unavailable()
         {
             var typeNameSerialiser = new TypeNameSerializer();
@@ -100,10 +99,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.That( messageType.Type, Is.EqualTo( typeof( MyMessageV2 ) ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
-        [Test]
+        [Fact]
         public void GetType_returns_first_available_alternative_if_message_type_and_some_alternatives_unavailable()
         {
             var typeNameSerialiser = new TypeNameSerializer();
@@ -120,10 +119,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
             var messageType = property.GetMessageType();
 
-            Assert.That( messageType.Type, Is.EqualTo( typeof( MyMessageV2 ) ) );
+            Assert.Equal(typeof(MyMessageV2), messageType.Type);
         }
 
-        [Test]
+        [Fact]
         public void GetType_throws_exception_if_all_types_unavailable()
         {
             var typeNameSerialiser = new TypeNameSerializer();

@@ -23,8 +23,8 @@ namespace EasyNetQ.ConnectionString
 
         public static Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
-        private static Uri result;
-        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out result)).Select(_ => new Uri(_));
+        private static Uri _result;
+        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _result)).Select(_ => new Uri(_));
 
         public static Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
@@ -99,9 +99,15 @@ namespace EasyNetQ.ConnectionString
             Preconditions.CheckNotNull(property, "getter", "Member is not a property.");
             Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
+#if !NETFX
+            return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+            
+#else
             return (Action<TContaining, TProperty>)
                 Delegate.CreateDelegate(typeof(Action<TContaining, TProperty>),
                     property.GetSetMethod());
+#endif
+
         }
 
         public static IEnumerable<T> Cons<T>(this T head, IEnumerable<T> rest)

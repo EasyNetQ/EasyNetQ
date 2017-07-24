@@ -3,21 +3,18 @@
 using System;
 using System.Text;
 using EasyNetQ.SystemMessages;
-using NUnit.Framework;
+using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using EasyNetQ.Tests;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [TestFixture]
     public class ErrorMessageRepublishSpike
     {
         readonly ISerializer serializer = new JsonSerializer(new TypeNameSerializer());
 
-        [SetUp]
-        public void SetUp() {}
-
-        [Test]
+        [Fact]
         public void Should_deserialise_error_message_correctly()
         {
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));
@@ -26,7 +23,7 @@ namespace EasyNetQ.Hosepipe.Tests
             error.Message.ShouldEqual("{ Text:\"Hello World\"}");
         }
 
-        [Test]
+        [Fact]
         public void Should_fail_to_deseralize_some_other_random_message()
         {
             const string randomMessage = "{\"Text\":\"Hello World\"}";
@@ -34,7 +31,7 @@ namespace EasyNetQ.Hosepipe.Tests
             error.Message.ShouldBeNull();
         }
 
-        [Test, Explicit("Requires a localhost instance of RabbitMQ to run")]
+        [Fact][Explicit("Requires a localhost instance of RabbitMQ to run")]
         public void Should_be_able_to_republish_message()
         {
             var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));

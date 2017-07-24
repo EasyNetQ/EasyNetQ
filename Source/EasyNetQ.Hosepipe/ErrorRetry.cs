@@ -32,7 +32,7 @@ namespace EasyNetQ.Hosepipe
 
         public void RepublishError(Error error, QueueParameters parameters)
         {
-            using (var connection = HosepipeConnection.FromParamters(parameters))
+            using (var connection = HosepipeConnection.FromParameters(parameters))
             using (var model = connection.CreateModel())
             {
                 try
@@ -47,7 +47,7 @@ namespace EasyNetQ.Hosepipe
 
                     var body = errorMessageSerializer.Deserialize(error.Message);
 
-                    model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
+                    model.BasicPublish(error.Exchange, error.RoutingKey, true, properties, body);
                 }
                 catch (OperationInterruptedException)
                 {

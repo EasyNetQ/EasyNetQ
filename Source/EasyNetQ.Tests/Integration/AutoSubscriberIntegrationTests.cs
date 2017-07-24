@@ -4,41 +4,38 @@ using System;
 using System.Reflection;
 using System.Threading;
 using EasyNetQ.AutoSubscribe;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
     [Explicit("Requires a RabbitMQ broker on localhost.")]
-    public class AutoSubscriberIntegrationTests
+    public class AutoSubscriberIntegrationTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public AutoSubscriberIntegrationTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
             var subscriber = new AutoSubscriber(bus, "autosub.integration");
 
-            subscriber.Subscribe(Assembly.GetExecutingAssembly());
+            subscriber.Subscribe(GetType().GetTypeInfo().Assembly);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             // give the message a chance to get devlivered
             Thread.Sleep(500);
             bus.Dispose();
         }
 
-        [Test]
+        [Fact]
         [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithTopic()
         {
             bus.Publish(new AutoSubMessage{ Text = "With topic" }, "mytopic");
         }
 
-        [Test]
+        [Fact]
         [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithoutTopic()
         {

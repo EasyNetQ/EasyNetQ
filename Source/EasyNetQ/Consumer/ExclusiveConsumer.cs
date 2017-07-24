@@ -47,12 +47,21 @@ namespace EasyNetQ.Consumer
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
+#if !NETFX
+            timer = new Timer(s =>
+                {
+                    StartConsumer();
+                    timer.Change(10000, -1);
+                }, null, 10000, Timeout.Infinite);
+#else
             timer = new Timer(s =>
                 {
                     StartConsumer();
                     ((Timer)s).Change(10000, -1);
                 });
-            timer.Change(10000, -1);
+
+             timer.Change(10000, -1);
+#endif
         }
 
         public IDisposable StartConsuming()
@@ -108,7 +117,7 @@ namespace EasyNetQ.Consumer
             StartConsumer();
         }
 
-        private bool disposed = false;
+        private bool disposed;
         private readonly Timer timer;
 
         public void Dispose()

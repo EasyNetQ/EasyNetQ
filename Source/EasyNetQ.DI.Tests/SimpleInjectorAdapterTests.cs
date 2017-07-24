@@ -1,6 +1,7 @@
-﻿using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+﻿using System;
+using EasyNetQ.Tests.Mocking;
 using SimpleInjector;
+using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
@@ -10,14 +11,12 @@ namespace EasyNetQ.DI.Tests
     /// However, Ninject doesn't allow more than one registration of a service, it 
     /// throws an exception, and StructureMap has a last-to-register-wins policy.
     /// </summary>    
-    [TestFixture]
-    public class SimpleInjectorAdapterTests
+    public class SimpleInjectorAdapterTests : IDisposable
     {
         private Container container;
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public SimpleInjectorAdapterTests()
         {
             container = new Container();
 
@@ -28,24 +27,23 @@ namespace EasyNetQ.DI.Tests
             )).Bus;
         }
 
-        [Test]
+        [Fact]
         public void Should_create_bus_with_ninject_adapter()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
         }
 
-        [Test]
+        [Fact]
         public void Should_resolve_test_conventions()
         {
-            Assert.IsNotNull(bus);
+            Assert.NotNull(bus);
 
             var rabbitBus = (RabbitBus)bus;
 
-            Assert.IsTrue(rabbitBus.Advanced.Conventions is TestConventions);
+            Assert.True(rabbitBus.Advanced.Conventions is TestConventions);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if (bus != null)
             {

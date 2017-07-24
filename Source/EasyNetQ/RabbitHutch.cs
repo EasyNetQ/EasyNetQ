@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if NETFX
 using System.Configuration;
+#endif
 using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ
@@ -10,7 +12,7 @@ namespace EasyNetQ
     /// </summary>
     public static class RabbitHutch
     {
-        private static Func<IContainer> createContainerInternal = () => new DefaultServiceProvider();
+        private static Func<IContainer> _createContainerInternal = () => new DefaultServiceProvider();
 
         /// <summary>
         /// Set the container creation function. This allows you to replace EasyNetQ's default internal
@@ -21,9 +23,10 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(createContainer, "createContainer");
 
-            createContainerInternal = createContainer;
+            _createContainerInternal = createContainer;
         }
 
+#if NETFX
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
@@ -71,8 +74,9 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
-            var rabbitConnectionString = ConfigurationManager.ConnectionStrings["rabbit"];
-            if (rabbitConnectionString == null)
+            string rabbitConnectionString;
+            var rabbitConnection = ConfigurationManager.ConnectionStrings["rabbit"];
+            if (rabbitConnection == null)
             {
                 throw new EasyNetQException(
                     "Could not find a connection string for RabbitMQ. " +
@@ -80,8 +84,9 @@ namespace EasyNetQ
                     "of the application's configuration file. For example: " +
                     "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
             }
+            rabbitConnectionString = rabbitConnection.ConnectionString;
 
-            return CreateBus(rabbitConnectionString.ConnectionString, advancedBusEventHandlers, registerServices);
+            return CreateBus(rabbitConnectionString, advancedBusEventHandlers, registerServices);
         }
 
         /// <summary>
@@ -101,6 +106,7 @@ namespace EasyNetQ
         {
             return CreateBus(advancedBusEventHandlers, c => {});
         }
+#endif
 
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
@@ -368,7 +374,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
             Preconditions.CheckNotNull(registerServices, "registerServices");
 
-            var container = createContainerInternal();
+            var container = _createContainerInternal();
             if (container == null)
             {
                 throw new EasyNetQException("Could not create container. " +

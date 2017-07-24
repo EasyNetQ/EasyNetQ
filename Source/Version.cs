@@ -7,7 +7,6 @@ using System.Reflection;
 // MINOR version when you add functionality in a backwards-compatible manner, and
 // PATCH version when you make backwards-compatible bug fixes.
 
-[assembly: AssemblyVersion("1.1.4.0")]
 [assembly: CLSCompliant(false)]
 
 // 1.1.4.0 Add support for connection_name in connection configuration and possibility to specify connection properties during setup
@@ -19,6 +18,9 @@ using System.Reflection;
 // 1.0.3.0 Bug Fix, defer execution of serviceCreator parameter in SimpleInjectorAdapter.Register
 // 1.0.2.0 Added start consuming events for failure and success
 // 1.0.1.0  First stable release
+// 0.64.2.0 Add durability queue on subscription
+// 0.64.1.0 Hosepipe custom broker port configuration by separate parameter
+// 0.64.0.0 Added RabbitMQ broker custom port support to hosepipe
 // 0.63.6.0 Added support for multiple exchange (creating an exchange per implemented interface for a concreate type)
 // 0.63.5.0 Made some methods protected/virtual in HandlerRunner so we can override the behavior
 // 0.63.4.0 EasyNetQ.Scheduler stability fixes
@@ -29,6 +31,7 @@ using System.Reflection;
 // 0.62.1.0 Bug Fix: QueueDeclare does not allow an empty dead letter exchange thus preventing directly publishing to a queue
 // 0.62.0.0 Completed support for topic based routing in future publish
 // 0.61.1.0 Added support for configuring RPC exchange (request and response) names via conventions
+// 0.61.0.0 Support of priority queues to IBus publish methods
 // 0.61.0.0 Added support for EXTERNAL authentication mechanism
 // 0.60.1.0 Added SimpleInjector DI support
 // 0.60.0.0 Remove [Serializable] attribute from messages and exceptions

@@ -20,12 +20,12 @@ namespace EasyNetQ.Internals
         {
             try
             {
-                var taskType = typeof (Task);
+                var taskType = typeof(Task);
                 var continuationField = taskType.GetField("m_continuationObject", BindingFlags.Instance | BindingFlags.NonPublic);
                 var safeScenario = taskType.GetNestedType("SetOnInvokeMres", BindingFlags.NonPublic);
-                if (continuationField != null && continuationField.FieldType == typeof (object) && safeScenario != null)
+                if (continuationField != null && continuationField.FieldType == typeof(object) && safeScenario != null)
                 {
-                    var method = new DynamicMethod("IsSyncSafe", typeof (bool), new[] {typeof (Task)}, typeof (Task), true);
+                    var method = new DynamicMethod("IsSyncSafe", typeof(bool), new[] { typeof(Task) }, typeof(Task), true);
                     var il = method.GetILGenerator();
                     //var hasContinuation = il.DefineLabel();
                     il.Emit(OpCodes.Ldarg_0);
@@ -47,7 +47,7 @@ namespace EasyNetQ.Internals
                     il.Emit(OpCodes.Ldc_I4_0);
                     il.Emit(OpCodes.Ret);
 
-                    IsSyncSafe = (Func<Task, bool>) method.CreateDelegate(typeof (Func<Task, bool>));
+                    IsSyncSafe = (Func<Task, bool>)method.CreateDelegate(typeof(Func<Task, bool>));
 
                     // and test them (check for an exception etc)
                     var tcs = new TaskCompletionSource<int>();

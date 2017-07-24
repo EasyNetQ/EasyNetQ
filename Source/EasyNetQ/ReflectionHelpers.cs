@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+
 
 namespace EasyNetQ
 {
@@ -12,7 +14,7 @@ namespace EasyNetQ
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-            return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
+            return typesAttributes.GetOrAdd(type, t => t.GetTypeInfo().GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));
@@ -49,20 +51,20 @@ namespace EasyNetQ
 
         private static class DefaultFactories<T>
         {
-            private static Func<T> factory;
+            private static Func<T> _factory;
 
             public static T Get()
             {
-                if (factory == null)
+                if (_factory == null)
                 {
                     var constructorInfo = typeof(T).GetConstructor(Type.EmptyTypes);
                     if (constructorInfo == null)
                     {
                         throw new MissingMethodException("The type that is specified for T does not have a public parameterless constructor.");
                     }
-                    factory = Expression.Lambda<Func<T>>(Expression.New(constructorInfo)).Compile();
+                    _factory = Expression.Lambda<Func<T>>(Expression.New(constructorInfo)).Compile();
                 }
-                return factory();
+                return _factory();
             }
         }
 

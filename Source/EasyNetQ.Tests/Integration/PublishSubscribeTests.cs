@@ -5,31 +5,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using EasyNetQ.Loggers;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
-    [TestFixture]
-    public class PublishSubscribeTests
+    public class PublishSubscribeTests : IDisposable
     {
         private IBus bus;
 
-        [SetUp]
-        public void SetUp()
+        public PublishSubscribeTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
             while(!bus.IsConnected) Thread.Sleep(10);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             if(bus != null) bus.Dispose();
         }
 
         // 1. Run this first, should see no messages consumed
         // 3. Run this again (after publishing below), should see published messages appear
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -46,7 +43,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe_as_exlusive()
         {
             var countdownEvent = new CountdownEvent(10);
@@ -72,11 +69,11 @@ namespace EasyNetQ.Tests.Integration
                         Text = "Exclusive " + i
                     });
             countdownEvent.Wait(10 * 1000);
-            Assert.IsTrue(firstCount == 10 && secondCount == 0 || firstCount == 0 && secondCount == 10);
+            Assert.True(firstCount == 10 && secondCount == 0 || firstCount == 0 && secondCount == 10);
             Console.WriteLine("Stopped consuming");
         }
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Long_running_exclusive_subscriber_should_survive_a_rabbit_restart()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -98,7 +95,7 @@ namespace EasyNetQ.Tests.Integration
 
 
         // 2. Run this a few times, should publish some messages
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_publish()
         {
             var message = new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) };
@@ -108,7 +105,7 @@ namespace EasyNetQ.Tests.Integration
 
         // 4. Run this once to setup subscription, publish a few times using '2' above, run again to
         // see messages appear.
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_also_send_messages_to_second_subscriber()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -127,7 +124,7 @@ namespace EasyNetQ.Tests.Integration
 
         // 5. Run this once to setup subscriptions, publish a few times using '2' above, run again.
         // You should see two lots messages
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_two_subscriptions_from_the_same_app_should_also_both_get_all_messages()
         {
             var countdownEvent = new CountdownEvent(8);
@@ -168,7 +165,7 @@ namespace EasyNetQ.Tests.Integration
         // 6. Run publish first using '2' above.
         // 7. Run this test, while it's running, restart the RabbitMQ service.
         // 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Long_running_subscriber_should_survive_a_rabbit_restart()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -189,7 +186,7 @@ namespace EasyNetQ.Tests.Integration
             Console.WriteLine("Stopped consuming");
         }
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_subscribe_OK_before_connection_to_broker_is_complete()
         {
             var autoResetEvent = new AutoResetEvent(false);
@@ -207,7 +204,7 @@ namespace EasyNetQ.Tests.Integration
             testLocalBus.Dispose();
         }
 
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_round_robin_between_subscribers()
         {
             Action<IServiceRegister> setNoDebugLogger = register =>
@@ -239,7 +236,7 @@ namespace EasyNetQ.Tests.Integration
         }
 
         // The test sends multiple messages with different priorities and expects that messages with higher priority will be received first.
-        [Test, Explicit("Needs a Rabbit instance on localhost to work")]
+        [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_respect_message_priority()
         {
             var testLocalBus = RabbitHutch.CreateBus("host=localhost;prefetchcount=1");
@@ -274,8 +271,8 @@ namespace EasyNetQ.Tests.Integration
 
             var done = autoResetEvent.WaitOne(1000);
 
-            Assert.IsTrue(done);
-            CollectionAssert.AreEqual(received, expected);
+            Assert.True(done);
+            Assert.True(expected.SequenceEqual(received));
 
             testLocalBus.Dispose();
         }

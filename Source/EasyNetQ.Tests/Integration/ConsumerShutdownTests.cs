@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using NUnit.Framework;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -16,13 +16,13 @@ namespace EasyNetQ.Tests.Integration
     // code=200, text="Goodbye", classId=0, methodId=0, cause='. 
     // Message remains on RabbitMQ and will be retried. 
     // ConsumerTag: 36c2b0c5-11c9-4f4e-b3f8-9943d113e646, DeliveryTag: 1
-    [TestFixture]
     [Explicit("Requires a RabbitMQ broker on localhost")]
     public class ConsumerShutdownTests
     {
-        [Test]
+        [Fact]
         public void Message_can_be_processed_but_not_ACKd()
         {
+            var waitTime = TimeSpan.FromMinutes(2);
             var receivedEvent = new AutoResetEvent(false);
             var processedEvent = new AutoResetEvent(false);
 
@@ -50,13 +50,15 @@ namespace EasyNetQ.Tests.Integration
             bus.Advanced.Publish(Exchange.GetDefault(), queueName, false, new MessageProperties(), message);
             Console.Out.WriteLine("Published");
 
-            receivedEvent.WaitOne();
+            var signalReceived = receivedEvent.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Expected reset event within {waitTime.TotalSeconds} seconds");
 
             Console.Out.WriteLine("Dispose Called");
             bus.Dispose();
             Console.Out.WriteLine("Disposed");
 
-            processedEvent.WaitOne(1000);
+            signalReceived = processedEvent.WaitOne(waitTime);
+            Assert.True(signalReceived, $"Expected reset event within {waitTime.TotalSeconds} seconds");
         }
     }
 }

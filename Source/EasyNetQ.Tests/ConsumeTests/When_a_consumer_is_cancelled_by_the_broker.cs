@@ -1,22 +1,20 @@
 ﻿// ReSharper disable InconsistentNaming
-
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NUnit.Framework;
-using Rhino.Mocks;
+using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    [TestFixture]
-    public class When_a_consumer_is_cancelled_by_the_broker
+    public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_consumer_is_cancelled_by_the_broker()
         {
             mockBuilder = new MockBuilder();
 
@@ -32,10 +30,15 @@ namespace EasyNetQ.Tests.ConsumeTests
             are.WaitOne(500);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_dispose_of_the_model()
         {
-            mockBuilder.Consumers[0].Model.AssertWasCalled(x => x.Dispose());
+            mockBuilder.Consumers[0].Model.Received().Dispose();
         }
     }
 }

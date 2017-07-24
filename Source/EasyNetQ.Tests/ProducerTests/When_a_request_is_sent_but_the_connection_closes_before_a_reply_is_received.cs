@@ -2,36 +2,42 @@
 
 using System;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
-using Rhino.Mocks;
+using Xunit;
+using NSubstitute;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    [TestFixture]
-    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received
+    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
     {
         private MockBuilder mockBuilder;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received()
         {
             mockBuilder = new MockBuilder();
         }
 
-        [Test]
-        [ExpectedException(typeof(EasyNetQException))]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_throw_an_EasyNetQException()
         {
-            try
+            Assert.Throws<EasyNetQException>(() =>
             {
-                var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
-                mockBuilder.Connection.Raise(x => x.ConnectionShutdown += null, null, null);
-                task.Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                throw aggregateException.InnerException;
-            }
+                try
+                {
+                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+                    mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(new ShutdownInitiator(), 0, null));
+                    task.Wait();
+                }
+                catch (AggregateException aggregateException)
+                {
+                    throw aggregateException.InnerException;
+                }
+            });
         }         
     }
 }

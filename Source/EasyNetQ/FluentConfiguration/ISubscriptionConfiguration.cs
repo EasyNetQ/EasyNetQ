@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.FluentConfiguration
 {
@@ -24,6 +25,11 @@ namespace EasyNetQ.FluentConfiguration
         /// <returns></returns>
         ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
 
+        /// <summary>
+        /// Configures the queue's durability
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithDurable(bool durable = true);
 
         /// <summary>
         /// Configures the consumer's priority
@@ -61,13 +67,32 @@ namespace EasyNetQ.FluentConfiguration
         /// Configures the consumer's to be exclusive
         /// </summary>
         /// <returns></returns>
-        ISubscriptionConfiguration AsExclusive();
+        ISubscriptionConfiguration AsExclusive(bool isExclusive = true);
 
         /// <summary>
         /// Configures the queue's maxPriority
         /// </summary>
         /// <returns></returns>
         ISubscriptionConfiguration WithMaxPriority(byte priority);
+
+        /// <summary>
+        /// Sets the queue name
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithQueueName(string queueName);
+
+        /// <summary>
+        /// The maximum number of ready messages that may exist on the queue. 
+        /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached.
+        /// </summary>
+        ISubscriptionConfiguration WithMaxLength(int maxLength);
+
+        /// <summary>
+        /// The maximum size of the queue in bytes.
+        /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached
+        /// </summary>
+        ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -81,6 +106,10 @@ namespace EasyNetQ.FluentConfiguration
 
         public bool IsExclusive { get; private set; }
         public byte? MaxPriority { get; private set; }
+        public bool Durable { get; private set; }
+        public string QueueName { get; private set; }
+        public int? MaxLength { get; private set; }
+        public int? MaxLengthBytes { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -90,6 +119,7 @@ namespace EasyNetQ.FluentConfiguration
             CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
             IsExclusive = false;
+            Durable = true;
         }
 
         public ISubscriptionConfiguration WithTopic(string topic)
@@ -101,6 +131,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true)
         {
             AutoDelete = autoDelete;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithDurable(bool durable = true)
+        {
+            Durable = durable;
             return this;
         }
 
@@ -128,15 +164,33 @@ namespace EasyNetQ.FluentConfiguration
             return this;
         }
 
-        public ISubscriptionConfiguration AsExclusive()
+        public ISubscriptionConfiguration AsExclusive(bool isExclusive = true)
         {
-            IsExclusive = true;
+            IsExclusive = isExclusive;
             return this;
         }
 
         public ISubscriptionConfiguration WithMaxPriority(byte priority)
         {
             MaxPriority = priority;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithQueueName(string queueName)
+        {
+            QueueName = queueName;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithMaxLength(int maxLength)
+        {
+            MaxLength = maxLength;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
+        {
+            MaxLengthBytes = maxLengthBytes;
             return this;
         }
     }

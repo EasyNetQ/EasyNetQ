@@ -241,8 +241,8 @@ namespace EasyNetQ.Consumer
                 "Failed to write error message to error queue";
         }
 
-        private bool disposed = false;
-        private bool disposing = false;
+        private bool disposed;
+        private bool disposing;
 
         public virtual void Dispose()
         {

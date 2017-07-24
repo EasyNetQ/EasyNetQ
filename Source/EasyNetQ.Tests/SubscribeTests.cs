@@ -1,19 +1,19 @@
-﻿using System.Collections.Generic;
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NUnit.Framework;
+using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using Rhino.Mocks;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
-    public class When_subscribe_is_called
+    public class When_subscribe_is_called : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -24,8 +24,7 @@ namespace EasyNetQ.Tests
 
         private ISubscriptionResult subscriptionResult; 
 
-        [SetUp]
-        public void SetUp()
+        public When_subscribe_is_called()
         {
             var conventions = new Conventions(new TypeNameSerializer())
                 {
@@ -40,7 +39,12 @@ namespace EasyNetQ.Tests
             subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_create_a_new_channel_for_the_consumer()
         {
             // A channel is created for running client originated commands,
@@ -48,72 +52,174 @@ namespace EasyNetQ.Tests
             mockBuilder.Channels.Count.ShouldEqual(2);
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x =>
-                x.QueueDeclare(
-                    Arg<string>.Is.Equal(queueName),
-                    Arg<bool>.Is.Equal(true),  // durable
-                    Arg<bool>.Is.Equal(false), // exclusive
-                    Arg<bool>.Is.Equal(false), // autoDelete
-                    Arg<IDictionary<string, object>>.Is.Anything));
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                    Arg.Is(queueName),
+                    Arg.Is(true),  // durable
+                    Arg.Is(false), // exclusive
+                    Arg.Is(false), // autoDelete
+                    Arg.Any<IDictionary<string, object>>());
         }
 
-        [Test]
+        [Fact]
         public void Should_declare_the_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.ExchangeDeclare(
-                typeName, "topic", true, false, new Dictionary<string, object>()));
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is(typeName),
+                Arg.Is("topic"),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
-        [Test]
+        [Fact]
         public void Should_bind_the_queue_and_exchange()
         {
-            mockBuilder.Channels[0].AssertWasCalled(x => x.QueueBind(queueName, typeName, "#"));
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is(queueName), 
+                Arg.Is(typeName), 
+                Arg.Is("#"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
-        [Test]
+        [Fact]
         public void Should_set_configured_prefetch_count()
         {
             var connectionConfiguration = new ConnectionConfiguration();
-            mockBuilder.Channels[1].AssertWasCalled(x => x.BasicQos(0, connectionConfiguration.PrefetchCount, false));
+            mockBuilder.Channels[1].Received().BasicQos(0, connectionConfiguration.PrefetchCount, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_start_consuming()
         {
-            mockBuilder.Channels[1].AssertWasCalled(x =>
-                x.BasicConsume(
-                    Arg<string>.Is.Equal(queueName),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<string>.Is.Anything,
-                    Arg<bool>.Is.Equal(true),
-                    Arg<bool>.Is.Equal(false),
-                    Arg<IDictionary<string, object>>.Is.Anything,
-                    Arg<IBasicConsumer>.Is.Anything));
+            mockBuilder.Channels[1].Received().BasicConsume(
+                    Arg.Is(queueName),
+                    Arg.Is(false),
+                    Arg.Any<string>(),
+                    Arg.Is(true),
+                    Arg.Is(false),
+                    Arg.Any<IDictionary<string, object>>(),
+                    Arg.Any<IBasicConsumer>());
         }
 
-        [Test]
+        [Fact]
         public void Should_register_consumer()
         {
             mockBuilder.Consumers.Count.ShouldEqual(1);
         }
 
-        [Test]
+        [Fact]
         public void Should_return_non_null_and_with_expected_values_result()
         {
-            Assert.IsNotNull(subscriptionResult);
-            Assert.IsNotNull(subscriptionResult.Exchange);
-            Assert.IsNotNull(subscriptionResult.Queue);
-            Assert.IsNotNull(subscriptionResult.ConsumerCancellation);
-            Assert.IsTrue(subscriptionResult.Exchange.Name == typeName);
-            Assert.IsTrue(subscriptionResult.Queue.Name == queueName);
+            Assert.NotNull(subscriptionResult);
+            Assert.NotNull(subscriptionResult.Exchange);
+            Assert.NotNull(subscriptionResult.Queue);
+            Assert.NotNull(subscriptionResult.ConsumerCancellation);
+            Assert.True(subscriptionResult.Exchange.Name == typeName);
+            Assert.True(subscriptionResult.Queue.Name == queueName);
         }
     }
 
-    [TestFixture]
-    public class When_a_message_is_delivered
+    public class When_subscribe_with_configuration_is_called
+    {
+        [InlineData("ttt", true, 99, true, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
+        [InlineData(null, false, 0, false, 0, null, false, null, true, "qqq", null, null)]
+        [Theory]
+        public void Queue_should_be_declared_with_correct_options(
+            string topic,
+            bool autoDelete,
+            int priority,
+            bool cancelOnHaFailover,
+            ushort prefetchCount,
+            int? expires,
+            bool isExclusive,
+            byte? maxPriority,
+            bool durable,
+            string queueName,
+            int? maxLength,
+            int? maxLengthBytes)
+        {
+            var mockBuilder = new MockBuilder();
+            using (mockBuilder.Bus)
+            {
+                // Configure subscription
+                mockBuilder.Bus.Subscribe<MyMessage>("x", message => { }, 
+                    c =>
+                    {                        
+                        c.WithAutoDelete(autoDelete)
+                            .WithPriority(priority)
+                            .WithCancelOnHaFailover(cancelOnHaFailover)
+                            .WithPrefetchCount(prefetchCount)
+                            .AsExclusive(isExclusive)
+                            .WithDurable(durable)
+                            .WithQueueName(queueName);
+
+                        if (topic != null)
+                        {
+                            c.WithTopic(topic);
+                        }
+                        if (maxPriority.HasValue)
+                        {
+                            c.WithMaxPriority(maxPriority.Value);
+                        }
+                        if (expires.HasValue)
+                        {
+                            c.WithExpires(expires.Value);
+                        }
+                        if (maxLength.HasValue)
+                        {
+                            c.WithMaxLength(maxLength.Value);
+                        }
+                        if (maxLengthBytes.HasValue)
+                        {
+                            c.WithMaxLengthBytes(maxLengthBytes.Value);
+                        }
+                    }
+                );
+            }
+
+            // Assert that queue got declared correctly
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(durable),
+                    Arg.Is(false), // IsExclusive is set on the Consume call
+                    Arg.Is(autoDelete),
+                    Arg.Is<IDictionary<string, object>>(
+                        x => 
+                        (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
+                        (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
+                        (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
+                        (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"]))
+                    );
+
+            // Assert that consumer was created correctly
+            mockBuilder.Channels[1].Received().BasicConsume(
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(false),
+                    Arg.Any<string>(),
+                    Arg.Is(true),
+                    Arg.Is(isExclusive),
+                    Arg.Is<IDictionary<string, object>>(
+                        x =>
+                        (priority == (int)x["x-priority"]) &&
+                        (cancelOnHaFailover == (bool)x["x-cancel-on-ha-failover"])),
+                    Arg.Any<IBasicConsumer>());
+
+            // Assert that QoS got configured correctly
+            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);
+
+            // Assert that binding got configured correctly
+            mockBuilder.Channels[0].Received().QueueBind(
+                Arg.Is(queueName),
+                Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                Arg.Is(topic ?? "#"),
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+        }
+    }
+
+        public class When_a_message_is_delivered : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -126,8 +232,7 @@ namespace EasyNetQ.Tests
         private MyMessage originalMessage;
         private MyMessage deliveredMessage;
 
-        [SetUp]
-        public void SetUp()
+        public When_a_message_is_delivered()
         {
             var conventions = new Conventions(new TypeNameSerializer())
             {
@@ -170,39 +275,42 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_build_bus_successfully()
         {
             // just want to run SetUp()
         }
 
-        [Test]
+        [Fact]
         public void Should_deliver_message()
         {
             deliveredMessage.ShouldNotBeNull();
             deliveredMessage.Text.ShouldEqual(originalMessage.Text);
         }
 
-        [Test]
+        [Fact]
         public void Should_ack_the_message()
         {
-            mockBuilder.Channels[1].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+            mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_write_debug_message()
         {
             const string expectedMessageFormat =
                 "Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
                 "\n\tDeliveryTag: {3}\n\tRedelivered: {4}";
 
-            mockBuilder.Logger.AssertWasCalled(
-                x => x.DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag, deliveryTag, false));
+            mockBuilder.Logger.Received().DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag, deliveryTag, false);
         }
     }
 
-    [TestFixture]
-    public class When_the_handler_throws_an_exception
+    public class When_the_handler_throws_an_exception : IDisposable
     {
         private MockBuilder mockBuilder;
         private IConsumerErrorStrategy consumerErrorStrategy;
@@ -218,22 +326,21 @@ namespace EasyNetQ.Tests
         private ConsumerExecutionContext basicDeliverEventArgs;
         private Exception raisedException;
 
-        [SetUp]
-        public void SetUp()
+        public When_the_handler_throws_an_exception()
         {
             var conventions = new Conventions(new TypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
 
-            consumerErrorStrategy = MockRepository.GenerateStub<IConsumerErrorStrategy>();
-            consumerErrorStrategy.Stub(x => x.HandleConsumerError(null, null))
-                .IgnoreArguments()
-                .WhenCalled(i =>
+            consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+            consumerErrorStrategy.HandleConsumerError(null, null)
+                .ReturnsForAnyArgs(i =>
                 {
-                    basicDeliverEventArgs = (ConsumerExecutionContext)i.Arguments[0];
-                    raisedException = (Exception) i.Arguments[1];
-                }).Return(AckStrategies.Ack);
+                    basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
+                    raisedException = (Exception)i[1];
+                    return AckStrategies.Ack;
+                });
 
             mockBuilder = new MockBuilder(x => x
                 .Register<IConventions>(_ => conventions)
@@ -272,27 +379,31 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_ack()
         {
-            mockBuilder.Channels[1].AssertWasCalled(x => x.BasicAck(deliveryTag, false));
+            mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
 
-        [Test]
+        [Fact]
         public void Should_write_exception_log_message()
         {
-            // to brittle to put exact message here I think
-            mockBuilder.Logger.AssertWasCalled(x => x.ErrorWrite(Arg<string>.Is.Anything, Arg<object[]>.Is.Anything));
+            // too brittle to put exact message here I think
+            mockBuilder.Logger.Received().ErrorWrite(Arg.Any<string>(), Arg.Any<object[]>());
         }
 
-        [Test]
+        [Fact]
         public void Should_invoke_the_consumer_error_strategy()
         {
-            consumerErrorStrategy.AssertWasCalled(x =>
-                x.HandleConsumerError(Arg<ConsumerExecutionContext>.Is.Anything, Arg<Exception>.Is.Anything));
+            consumerErrorStrategy.Received().HandleConsumerError(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>());
         }
 
-        [Test]
+        [Fact]
         public void Should_pass_the_exception_to_consumerErrorStrategy()
         {
             raisedException.ShouldNotBeNull();
@@ -300,7 +411,7 @@ namespace EasyNetQ.Tests
             raisedException.InnerException.ShouldBeTheSameAs(originalException);
         }
 
-        [Test]
+        [Fact]
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
             basicDeliverEventArgs.ShouldNotBeNull();
@@ -310,15 +421,13 @@ namespace EasyNetQ.Tests
         }
     }
 
-    [TestFixture]
-    public class When_a_subscription_is_cancelled_by_the_user
+    public class When_a_subscription_is_cancelled_by_the_user : IDisposable
     {
         private MockBuilder mockBuilder;
         private const string subscriptionId = "the_subscription_id";
         private const string consumerTag = "the_consumer_tag";
 
-        [SetUp]
-        public void SetUp()
+        public When_a_subscription_is_cancelled_by_the_user()
         {
             var conventions = new Conventions(new TypeNameSerializer())
             {
@@ -333,10 +442,15 @@ namespace EasyNetQ.Tests
             are.WaitOne(500);
         }
 
-        [Test]
+        public void Dispose()
+        {
+            mockBuilder.Bus.Dispose();
+        }
+
+        [Fact]
         public void Should_dispose_the_model()
         {
-            mockBuilder.Consumers[0].Model.AssertWasCalled(x => x.Dispose());
+            mockBuilder.Consumers[0].Model.Received().Dispose();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace EasyNetQ.Trace
 
         public CSVFile(string path)
         {
-            Writer = new StreamWriter(path);
+            Writer = new StreamWriter(File.Open(path, FileMode.OpenOrCreate));
         }
 
         //Write each column

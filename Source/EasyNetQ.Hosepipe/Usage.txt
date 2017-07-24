@@ -35,6 +35,7 @@ Commands
 
 Options
 	s	the RabbitMQ broker (server) to connect to. Default is 'localhost'
+	sp  the RabbitMQ broker server port to connect to. Default is '-1' 
 	v	the virtual host. Default is '/'
 	u	the username to connect with. Default is 'guest'
 	p	the password to connect with. Default is 'guest'

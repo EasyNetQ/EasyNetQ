@@ -2,18 +2,17 @@
 
 using System;
 using System.IO;
-using NUnit.Framework;
-using Rhino.Mocks;
+using Xunit;
+using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
-    [TestFixture]
     public class RabbitHutchTests
     {
-        [Test]
+        [Fact]
         public void Should_be_able_to_replace_default_service_provider()
         {
-            var bus = MockRepository.GenerateStub<IBus>();
+            var bus = Substitute.For<IBus>();
             var container = new MyAlternativeContainer(bus);
 
             try

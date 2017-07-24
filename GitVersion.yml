@@ -1,0 +1,11 @@
+assembly-versioning-scheme: MajorMinorPatch
+next-version: 2.0.4
+mode: ContinuousDelivery
+branches:
+  master:
+    mode: ContinuousDelivery
+  feature:
+    regex: features?[/-]
+    mode: ContinuousDeployment
+ignore:
+  sha: []

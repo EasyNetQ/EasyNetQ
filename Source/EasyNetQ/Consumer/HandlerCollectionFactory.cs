@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.Consumer
+﻿using EasyNetQ.Topology;
+
+namespace EasyNetQ.Consumer
 {
     public class HandlerCollectionFactory : IHandlerCollectionFactory
     {
@@ -9,7 +11,7 @@
             this.logger = logger;
         }
 
-        public IHandlerCollection CreateHandlerCollection()
+        public IHandlerCollection CreateHandlerCollection(IQueue queue)
         {
             return new HandlerCollection(logger);
         }

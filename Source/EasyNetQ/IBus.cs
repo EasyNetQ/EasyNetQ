@@ -182,6 +182,28 @@ namespace EasyNetQ
             where TResponse : class;
 
         /// <summary>
+        /// Makes an RPC style request
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        /// <returns>The response</returns>
+        TResponse Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
+        /// Makes an RPC style request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type.</typeparam>
+        /// <typeparam name="TResponse">The response type.</typeparam>
+        /// <param name="request">The request message.</param>
+        /// <returns>A task that completes when the response returns</returns>
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+            where TRequest : class
+            where TResponse : class;
+
+        /// <summary>
         /// Responds to an RPC request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
