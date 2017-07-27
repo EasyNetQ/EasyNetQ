@@ -9,7 +9,7 @@
             IsExclusive = isExclusive;
         }
 
-        public string Name { get; private set; }
-        public bool IsExclusive { get; private set; }
+        public string Name { get; }
+        public bool IsExclusive { get; }
     }
 }

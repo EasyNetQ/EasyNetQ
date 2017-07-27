@@ -13,23 +13,23 @@ namespace EasyNetQ
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Connected"/>.
         /// </summary>
-        public EventHandler Connected { get; private set; }
+        public EventHandler Connected { get; }
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Disconnected"/>.
         /// </summary>
-        public EventHandler Disconnected { get; private set; }
+        public EventHandler Disconnected { get; }
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Blocked"/>.
         /// </summary>
-        public EventHandler<ConnectionBlockedEventArgs> Blocked { get; private set; }
+        public EventHandler<ConnectionBlockedEventArgs> Blocked { get; }
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Unblocked"/>.
         /// </summary>
-        public EventHandler Unblocked { get; private set; }
+        public EventHandler Unblocked { get; }
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.MessageReturned"/>.
         /// </summary>
-        public EventHandler<MessageReturnedEventArgs> MessageReturned { get; private set; }
+        public EventHandler<MessageReturnedEventArgs> MessageReturned { get; }
 
         public AdvancedBusEventHandlers(
             EventHandler connected = null,

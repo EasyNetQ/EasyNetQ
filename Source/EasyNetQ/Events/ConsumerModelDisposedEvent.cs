@@ -2,7 +2,7 @@
 {
     public class ConsumerModelDisposedEvent
     {
-        public string ConsumerTag { get; private set; }
+        public string ConsumerTag { get; }
 
         public ConsumerModelDisposedEvent(string consumerTag)
         {
