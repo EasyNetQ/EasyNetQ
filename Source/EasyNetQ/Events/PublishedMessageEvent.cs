@@ -2,10 +2,10 @@
 {
     public class PublishedMessageEvent
     {
-        public string ExchangeName { get; private set; }
-        public string RoutingKey { get; private set; }
-        public MessageProperties Properties { get; private set; }
-        public byte[] Body { get; private set; }
+        public string ExchangeName { get; }
+        public string RoutingKey { get; }
+        public MessageProperties Properties { get; }
+        public byte[] Body { get; }
 
         public PublishedMessageEvent(string exchangeName, string routingKey, MessageProperties properties, byte[] body)
         {

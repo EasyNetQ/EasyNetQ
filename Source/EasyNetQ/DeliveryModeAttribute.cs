@@ -10,6 +10,6 @@ namespace EasyNetQ
             IsPersistent = isPersistent;
         }
 
-        public bool IsPersistent { get; private set; }
+        public bool IsPersistent { get; }
     }
 }

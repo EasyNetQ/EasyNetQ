@@ -8,7 +8,7 @@
             Body = body;
         }
 
-        public MessageProperties Properties { get; private set; }
-        public byte[] Body { get; private set; }
+        public MessageProperties Properties { get; }
+        public byte[] Body { get; }
     }
 }

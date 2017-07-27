@@ -6,11 +6,11 @@ namespace EasyNetQ.Consumer
 {
     public class ConsumerExecutionContext
     {
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> UserHandler { get; private set; }
-        public MessageReceivedInfo Info { get; private set; }
-        public MessageProperties Properties { get; private set; }
-        public byte[] Body { get; private set; }
-        public IBasicConsumer Consumer { get; private set; }
+        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> UserHandler { get; }
+        public MessageReceivedInfo Info { get; }
+        public MessageProperties Properties { get; }
+        public byte[] Body { get; }
+        public IBasicConsumer Consumer { get; }
 
         public ConsumerExecutionContext(
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler, 

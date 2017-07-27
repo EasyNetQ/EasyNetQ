@@ -23,7 +23,7 @@ namespace EasyNetQ.AutoSubscribe
         /// <summary>
         /// Used when generating the unique SubscriptionId checksum.
         /// </summary>
-        public string SubscriptionIdPrefix { get; private set; }
+        public string SubscriptionIdPrefix { get; }
 
         /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
