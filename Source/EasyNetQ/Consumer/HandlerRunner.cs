@@ -70,7 +70,7 @@ namespace EasyNetQ.Consumer
             {
                 if (task.IsFaulted)
                 {
-                    logger.ErrorWrite(BuildErrorMessage(context, task.Exception));
+                    logger.ErrorWrite(BuildErrorMessage(context, task.Exception).EscapeBraces());
                     ackStrategy = consumerErrorStrategy.HandleConsumerError(context, task.Exception);
                 }
                 else if (task.IsCanceled)
