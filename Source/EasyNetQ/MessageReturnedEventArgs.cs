@@ -4,9 +4,9 @@ namespace EasyNetQ
 {
     public class MessageReturnedEventArgs : EventArgs
     {
-        public byte[] MessageBody { get; private set; }
-        public MessageProperties MessageProperties { get; private set; }
-        public MessageReturnedInfo MessageReturnedInfo { get; private set; }
+        public byte[] MessageBody { get; }
+        public MessageProperties MessageProperties { get; }
+        public MessageReturnedInfo MessageReturnedInfo { get; }
 
         public MessageReturnedEventArgs(byte[] messageBody, MessageProperties messageProperties, MessageReturnedInfo messageReturnedInfo)
         {

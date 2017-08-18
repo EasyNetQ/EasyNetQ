@@ -15,7 +15,7 @@ namespace EasyNetQ
 
     public class ConnectionFactoryWrapper : IConnectionFactory
     {
-        public virtual ConnectionConfiguration Configuration { get; private set; }
+        public virtual ConnectionConfiguration Configuration { get; }
         private readonly IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy;
 
         public ConnectionFactoryWrapper(ConnectionConfiguration connectionConfiguration, IClusterHostSelectionStrategy<ConnectionFactoryInfo> clusterHostSelectionStrategy)
@@ -38,7 +38,7 @@ namespace EasyNetQ
 
                 if (connectionConfiguration.AMQPConnectionString != null)
                 {
-                    connectionFactory.uri = connectionConfiguration.AMQPConnectionString;
+                    connectionFactory.Uri = connectionConfiguration.AMQPConnectionString;
                 }
 
                 connectionFactory.HostName = hostConfiguration.Host;

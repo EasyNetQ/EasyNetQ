@@ -4,7 +4,7 @@
     {
         private static readonly Exchange defaultExchange = new Exchange("");
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public static IExchange GetDefault()
         {

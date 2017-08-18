@@ -8,9 +8,9 @@ namespace EasyNetQ.Events
     /// </summary>
     public class StartConsumingFailedEvent
     {
-        public IConsumer Consumer { get; private set; }
+        public IConsumer Consumer { get; }
 
-        public IQueue Queue { get; private set; }
+        public IQueue Queue { get; }
 
         public StartConsumingFailedEvent(IConsumer consumer, IQueue queue)
         {

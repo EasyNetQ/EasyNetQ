@@ -2,10 +2,10 @@
 {
     public class AckEvent
     {
-        public MessageReceivedInfo ReceivedInfo { get; private set; }
-        public MessageProperties Properties { get; private set; }
-        public byte[] Body { get; private set; }
-        public AckResult AckResult { get; private set; }
+        public MessageReceivedInfo ReceivedInfo { get; }
+        public MessageProperties Properties { get; }
+        public byte[] Body { get; }
+        public AckResult AckResult { get; }
 
         public AckEvent(MessageReceivedInfo info, MessageProperties properties, byte[] body , AckResult ackResult)
         {

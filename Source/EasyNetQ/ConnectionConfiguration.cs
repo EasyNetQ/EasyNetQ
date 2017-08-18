@@ -21,10 +21,10 @@ namespace EasyNetQ
         public ushort RequestedHeartbeat { get; set; }
         public ushort PrefetchCount { get; set; }
         public Uri AMQPConnectionString { get; set; }
-        public IDictionary<string, object> ClientProperties { get; private set; } 
+        public IDictionary<string, object> ClientProperties { get; } 
 
         public IEnumerable<HostConfiguration> Hosts { get; set; }
-        public SslOption Ssl { get; private set; }
+        public SslOption Ssl { get; }
         /// <summary>
         /// Operation timeout seconds. (default is 10)
         /// </summary>
@@ -166,6 +166,6 @@ namespace EasyNetQ
 
         public string Host { get; set; }
         public ushort Port { get; set; }
-        public SslOption Ssl { get; private set; }
+        public SslOption Ssl { get; }
     }
 }
