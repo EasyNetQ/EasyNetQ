@@ -170,21 +170,19 @@ namespace EasyNetQ.Consumer
             catch (BrokerUnreachableException)
             {
                 // thrown if the broker is unreachable during initial creation.
-                logger.ErrorWrite("EasyNetQ Consumer Error Handler cannot connect to Broker\n" +
-                    CreateConnectionCheckMessage());
+                logger.ErrorWrite("EasyNetQ Consumer Error Handler cannot connect to Broker\n{0}", CreateConnectionCheckMessage());
             }
             catch (OperationInterruptedException interruptedException)
             {
                 // thrown if the broker connection is broken during declare or publish.
-                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Broker connection was closed while attempting to publish Error message.\n" +
-                    string.Format("Exception was: '{0}'\n", interruptedException.Message) +
+                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Broker connection was closed while attempting to publish Error message.\nException was: '{0}'\n{1}",
+                    interruptedException.Message,
                     CreateConnectionCheckMessage());
             }
             catch (Exception unexpectedException)
             {
                 // Something else unexpected has gone wrong :(
-                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n"
-                    + unexpectedException);
+                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n{0}", unexpectedException);
             }
             return AckStrategies.Ack;
         }

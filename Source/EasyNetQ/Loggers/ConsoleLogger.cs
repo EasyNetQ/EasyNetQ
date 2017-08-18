@@ -18,34 +18,19 @@ namespace EasyNetQ.Loggers
         public void DebugWrite(string format, params object[] args)
         {
             if (!Debug) return;
-            SafeConsoleWrite("DEBUG: " + format, args);
+            Console.WriteLine("DEBUG: " + format, args);
         }
 
         public void InfoWrite(string format, params object[] args)
         {
             if (!Info) return;
-            SafeConsoleWrite("INFO: " + format, args);
+            Console.WriteLine("INFO: " + format, args);
         }
 
         public void ErrorWrite(string format, params object[] args)
         {
             if (!Error) return;
-            SafeConsoleWrite("ERROR: " + format, args);
-        }
-
-        public void SafeConsoleWrite(string format, params object[] args)
-        {
-            // even a zero length args paramter causes WriteLine to interpret 'format' as
-            // a format string. Rather than escape JSON, better to check the intention of 
-            // the caller.
-            if (args.Length == 0)
-            {
-                Console.WriteLine(format);
-            }
-            else
-            {
-                Console.WriteLine(format, args);
-            }
+            Console.WriteLine("ERROR: " + format, args);
         }
 
         public void ErrorWrite(Exception exception)
