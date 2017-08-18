@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.5.0" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="Net.Autofac" Version="0.1.12" />
     <PackageReference Include="Net.Core" Version="0.1.12" />
     <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="2.0.0" />
