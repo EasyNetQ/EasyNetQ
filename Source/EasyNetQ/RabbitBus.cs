@@ -48,7 +48,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
 
-            Publish(message, conventions.TopicNamingConvention(typeof(T)));
+            Publish(message, conventions.TopicNamingConvention(message.GetType()));
         }
 
         public virtual void Publish<T>(T message, string topic) where T : class
@@ -64,10 +64,10 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            var messageType = message.GetType();
+            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(messageType));
             configure(configuration);
 
-            var messageType = typeof(T);
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
@@ -88,7 +88,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
 
-            return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
+            return PublishAsync(message, conventions.TopicNamingConvention(message.GetType()));
         }
 
         public virtual Task PublishAsync<T>(T message, string topic) where T : class
@@ -104,10 +104,10 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            var messageType = GetType();
+            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(messageType));
             configure(configuration);
-
-            var messageType = typeof(T);
+            
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
