@@ -40,4 +40,5 @@
     <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
 
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
 </Project>
