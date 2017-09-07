@@ -508,5 +508,13 @@ namespace EasyNetQ
         /// The conventions used by EasyNetQ to name its routing topology elements.
         /// </summary>
         IConventions Conventions { get; }
+        
+        /// <summary>
+        /// Declare a transient server named queue. Note, this queue will only last for duration of the
+        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
+        /// consumers.
+        /// </summary>
+        /// <returns>The queue</returns>
+        IQueue QueueDeclare();
     }
 }
