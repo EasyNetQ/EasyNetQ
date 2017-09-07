@@ -27,7 +27,9 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit]
         public void Does_transient_queue_cause_channel_to_close_after_consuming_one_message()
         {
-            var queue = bus.Advanced.QueueDeclare("test_transient_queue", durable:false, autoDelete:true);
+            var queue = bus.Advanced.QueueDeclare();
+
+            Console.WriteLine($"declared queue: {queue.Name}");
 
             bus.Advanced.Consume(queue, (body, properties, info) => Task.Factory.StartNew(() =>
                 {
