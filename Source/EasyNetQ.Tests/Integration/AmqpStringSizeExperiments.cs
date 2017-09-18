@@ -67,7 +67,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var connectionFactory = new ConnectionFactory
                 {
-                    Uri = "amqp://localhost"
+                    Uri = new Uri("amqp://localhost")
                 };
 
             using (var connection = connectionFactory.CreateConnection())

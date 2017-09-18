@@ -17,9 +17,9 @@
             Headers = headers;
         }
 
-        public IBindable Bindable { get; private set; }
-        public IExchange Exchange { get; private set; }
-        public string RoutingKey { get; private set; }
-        public IDictionary<string, object> Headers { get; private set; }
+        public IBindable Bindable { get; }
+        public IExchange Exchange { get; }
+        public string RoutingKey { get; }
+        public IDictionary<string, object> Headers { get; }
     }
 }

@@ -79,7 +79,7 @@ namespace EasyNetQ.Consumer
         {
             Cancel();
             logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
-                             "Consumer tag: " + consumerTag);
+                             "Consumer tag: {0}", consumerTag);
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)

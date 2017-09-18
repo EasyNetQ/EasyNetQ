@@ -375,7 +375,15 @@ namespace EasyNetQ
             logger.DebugWrite("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
         }
 
+
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
+        public virtual IQueue QueueDeclare()
+        {
+            var queueDeclareOk = clientCommandDispatcher.Invoke(x => x.QueueDeclare("", true, true, true, null));
+            logger.DebugWrite("Declared Server Generated Queue '{0}'", queueDeclareOk.QueueName);
+            return new Queue(queueDeclareOk.QueueName, true);
+        }
+
         public virtual IQueue QueueDeclare(
             string name,
             bool passive = false,

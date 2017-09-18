@@ -97,7 +97,7 @@ namespace EasyNetQ.FluentConfiguration
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
     {
-        public IList<string> Topics { get; private set; }
+        public IList<string> Topics { get; }
         public bool AutoDelete { get; private set; }
         public int Priority { get; private set; }
         public bool CancelOnHaFailover { get; private set; }

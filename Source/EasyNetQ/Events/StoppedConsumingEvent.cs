@@ -10,7 +10,7 @@ namespace EasyNetQ.Events
     /// </summary>
     public class StoppedConsumingEvent
     {
-        public IConsumer Consumer { get; private set; }
+        public IConsumer Consumer { get; }
 
         public StoppedConsumingEvent(IConsumer consumer)
         {

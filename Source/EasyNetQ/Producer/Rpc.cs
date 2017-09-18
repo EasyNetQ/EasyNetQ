@@ -96,7 +96,6 @@ namespace EasyNetQ.Producer
                     ((Timer)state)?.Dispose();
                     tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
-                //timer.Change(TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
             }
 
             RegisterErrorHandling(correlationId, timer, tcs);
@@ -259,13 +258,15 @@ namespace EasyNetQ.Producer
             {
                 responder(requestMessage.Body).ContinueWith(task =>
                 {
-                    if (task.IsFaulted)
+                    if (task.IsFaulted || task.IsCanceled)
                     {
-                        if (task.Exception != null)
-                        {
-                            OnResponderFailure<TRequest, TResponse>(requestMessage, task.Exception.InnerException.Message, task.Exception);
-                            tcs.SetException(task.Exception);
-                        }
+                        var exception = task.IsCanceled 
+                            ? new EasyNetQResponderException("The responder task was cancelled.")
+                            : task.Exception?.InnerException ?? new EasyNetQResponderException("The responder faulted while dispatching the message.");
+
+
+                        OnResponderFailure<TRequest, TResponse>(requestMessage, exception.Message, exception);
+                        tcs.SetException(exception);
                     }
                     else
                     {

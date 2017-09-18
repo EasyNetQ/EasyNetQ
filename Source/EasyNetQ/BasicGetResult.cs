@@ -25,7 +25,7 @@ namespace EasyNetQ
     public class BasicGetResult<T> : IBasicGetResult<T> where T : class
     {
         private readonly IMessage<T> message;
-        public bool MessageAvailable { get; private set; }
+        public bool MessageAvailable { get; }
 
         public IMessage<T> Message
         {
@@ -60,9 +60,9 @@ namespace EasyNetQ
 
     public class BasicGetResult : IBasicGetResult
     {
-        public byte[] Body { get; private set; }
-        public MessageProperties Properties { get; private set; }
-        public MessageReceivedInfo Info { get; private set; }
+        public byte[] Body { get; }
+        public MessageProperties Properties { get; }
+        public MessageReceivedInfo Info { get; }
 
         public BasicGetResult(byte[] body, MessageProperties properties, MessageReceivedInfo info)
         {

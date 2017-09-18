@@ -114,7 +114,7 @@ namespace EasyNetQ.Trace
         {
             var connectionFactory = new ConnectionFactory
             {
-                Uri = connectionString,
+                Uri = new Uri(connectionString),
                 ClientProperties = new Dictionary<string, object>
                         {
                             { "Client", "EasyNetQ.Trace" },
