@@ -387,7 +387,7 @@ namespace EasyNetQ
             registerServices(container);
             ComponentRegistration.RegisterServices(container);
 
-            return container.Resolve<IBus>();
+            return container.Resolve<RabbitBus>();
         }
     }
 }
