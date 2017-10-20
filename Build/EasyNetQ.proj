@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Default">
-<!-- GitVersionTask does not work using .NET CLI because it calls MSBuild
-    Core rather than the full .NET Framework MSBuild.
-    We need the GitVersionTask to properly version the assemblies, so we
-    use the full .NET Framework MSBuild when calling EasyNetQ.proj: Line 46.
 
-    Unfortunately, GitVersion_NuGetVersion is not propagated after exiting
-    that MSBuild task, so we have to use the full .NET Framework MSBuild
-    again with the .NET Core SDK to package a NuGet.
-
-    NOTE: This does not currently work with Visual Studio 2017 Build Tools
-    because it does not include the new NuGet targets, nor does it contain the
-    .NET Core SDK.
-
-    Related issues:
-        * https://github.com/GitTools/GitVersion/issues/1175
-        * https://github.com/Microsoft/msbuild/issues/1697
-    -->
     <PropertyGroup>
         <BaseDir>$(MSBuildProjectDirectory)\..</BaseDir>
         <OutputDir>$(BaseDir)\bin</OutputDir>
@@ -52,28 +36,25 @@
         </ProjectToBuild>
     </ItemGroup>
 
-    <!-- Restore all packages in solution -->
-    <Target Name="Restore" DependsOnTargets="Version">
-        <Exec WorkingDirectory="$(Source)" Command="dotnet restore %(ProjectToBuild.FullName)" />
-    </Target>
-
-    <!-- MSBuild only occurs after restore and version. -->
-    <Target Name="Build" DependsOnTargets="Version; Restore">
+    <!-- Restore all the packages in directory first and then msbuild solution. -->
+    <Target Name="Build" DependsOnTargets="Version">
+        <Exec WorkingDirectory="$(Source)" Command="dotnet restore" />
         <MSBuild Projects="@(ProjectToBuild)" Targets="Rebuild"/>
     </Target>
-    <!-- Test all projects against their targeted frameworks. Only tests that
+
+    <!-- Test all projects against their targeted frameworks. Only tests that 
         are not Integration or Explicit tests. -->
     <Target Name="Test" DependsOnTargets="Build">
         <ItemGroup>
-            <TestProjects Include="$(Source)\EasyNetQ.Tests\EasyNetQ.Tests.csproj" />
-            <TestProjects Include="$(Source)\EasyNetQ.DI.Tests\EasyNetQ.DI.Tests.csproj" />
-            <TestProjects Include="$(Source)\EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj" />
-            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj" />
-            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj" />
+            <TestProjects Include="$(Source)\EasyNetQ.Tests\project.json" />
+            <TestProjects Include="$(Source)\EasyNetQ.DI.Tests\project.json" />
+            <TestProjects Include="$(Source)\EasyNetQ.Hosepipe.Tests\project.json" />
+            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Tests\project.json" />
+            <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Mongo.Tests\project.json" />
         </ItemGroup>
 
         <Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
-              Command='dotnet test --configuration $(Configuration) --no-build --filter "Category!=Explicit&#038;Category!=Integration"'
+              Command='dotnet test --configuration $(Configuration) --no-build -notrait "Category=Explicit" -notrait "Category=Integration"'
               ContinueOnError="ErrorAndContinue" />
     </Target>
 
@@ -83,15 +64,15 @@
             <NuGetPackageDirectory>$(Package)</NuGetPackageDirectory>
         </PropertyGroup>
         <ItemGroup>
-            <ClientLibraries Include="$(Source)\EasyNetQ\EasyNetQ.csproj" />
-            <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\EasyNetQ.DI.*.csproj" Exclude="$(Source)\*Tests*\*.csproj" />
-            <ClientLibraries Include="$(Source)\EasyNetQ.Serilog\EasyNetQ.Serilog.csproj" />
+            <ClientLibraries Include="$(Source)\EasyNetQ\project.json" />
+            <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\project.json" Exclude="$(Source)\*Tests*\project.json" />
+            <ClientLibraries Include="$(Source)\EasyNetQ.Serilog\project.json" />
 
             <FilesToDelete Include="$(NuGetPackageDirectory)\*.nupkg" />
         </ItemGroup>
 
         <MakeDir Directories="$(NuGetPackageDirectory)" Condition="!Exists('$(NuGetPackageDirectory)')" />
         <Delete Files="@(FilesToDelete)" />
-        <MSBuild Projects="@(ClientLibraries)" Targets="Pack" Properties="Configuration=$(Configuration);PackageOutputPath=$(NuGetPackageDirectory)" />
+        <Exec Command='dotnet pack %(ClientLibraries.FullPath) --no-build --output $(NuGetPackageDirectory) --configuration $(Configuration)' />
     </Target>
 </Project>

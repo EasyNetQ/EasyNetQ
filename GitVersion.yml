@@ -4,8 +4,7 @@ mode: ContinuousDelivery
 branches:
   master:
     mode: ContinuousDelivery
-  feature:
-    regex: features?[/-]
+  features?[/-]:
     mode: ContinuousDeployment
 ignore:
   sha: []
