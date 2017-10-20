@@ -1,65 +1,237 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <Description>EasyNetQ</Description>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F4139764-3D08-4A46-82E3-151E9212BE6D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EasyNetQ</RootNamespace>
+    <AssemblyName>EasyNetQ</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Version.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
-    <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0" />
-    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
-    <PackageReference Include="System.Globalization" Version="4.3.0" />
-    <PackageReference Include="System.IO" Version="4.3.0" />
-    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Linq.Expressions" Version="4.3.0" />
-    <PackageReference Include="System.ObjectModel" Version="4.3.0" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
-    <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-    <PackageReference Include="System.Text.Encoding" Version="4.3.0" />
-    <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Timer" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.TraceSource" Version="1.0.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <Reference Include="Microsoft.Diagnostics.Tracing.EventSource, Version=1.1.28.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.28\lib\net46\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabbitMQ.Client.5.1.0-pre1\lib\net451\RabbitMQ.Client.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
-    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
+  <ItemGroup>
+    <Compile Include="AdvancedBusEventHandlers.cs" />
+    <Compile Include="AmqpExceptions\AmpqExceptionGrammar.cs" />
+    <Compile Include="AmqpExceptions\AmqpException.cs" />
+    <Compile Include="AutoSubscribe\AutoSubscriber.cs" />
+    <Compile Include="AutoSubscribe\AutoSubscriberConsumerAttribute.cs" />
+    <Compile Include="AutoSubscribe\AutoSubscriberConsumerInfo.cs" />
+    <Compile Include="AutoSubscribe\DefaultAutoSubscriberMessageDispatcher.cs" />
+    <Compile Include="AutoSubscribe\ForTopicAttribute.cs" />
+    <Compile Include="AutoSubscribe\IAutoSubscriberMessageDispatcher.cs" />
+    <Compile Include="AutoSubscribe\IConsume.cs" />
+    <Compile Include="AutoSubscribe\IConsumeAsync.cs" />
+    <Compile Include="AutoSubscribe\SubscriptionConfigurationAttribute.cs" />
+    <Compile Include="BasicGetResult.cs" />
+    <Compile Include="ComponentRegistration.cs" />
+    <Compile Include="ConnectionConfiguration.cs" />
+    <Compile Include="ConnectionString\ConnectionStringGrammar.cs" />
+    <Compile Include="ConnectionString\IConnectionStringParser.cs" />
+    <Compile Include="Consumer\AckStrategies.cs" />
+    <Compile Include="Consumer\Base64ErrorMessageSerializer.cs" />
+    <Compile Include="Consumer\ConsumerCancellation.cs" />
+    <Compile Include="Consumer\ConsumerDispatcher.cs" />
+    <Compile Include="Consumer\ConsumerDispatcherFactory.cs" />
+    <Compile Include="Consumer\ConsumerExecutionContext.cs" />
+    <Compile Include="Consumer\ConsumerFactory.cs" />
+    <Compile Include="Consumer\DefaultConsumerErrorStrategy.cs" />
+    <Compile Include="Consumer\DefaultErrorMessageSerializer.cs" />
+    <Compile Include="Consumer\ExclusiveConsumer.cs" />
+    <Compile Include="Consumer\HandlerCollection.cs" />
+    <Compile Include="Consumer\HandlerCollectionFactory.cs" />
+    <Compile Include="Consumer\HandlerCollectionPerQueueFactory.cs" />
+    <Compile Include="Consumer\HandlerRunner.cs" />
+    <Compile Include="Consumer\IConsumer.cs" />
+    <Compile Include="Consumer\IConsumerConfiguration.cs" />
+    <Compile Include="Consumer\IConsumerDispatcher.cs" />
+    <Compile Include="Consumer\IConsumerDispatcherFactory.cs" />
+    <Compile Include="Consumer\IConsumerErrorStrategy.cs" />
+    <Compile Include="Consumer\IConsumerFactory.cs" />
+    <Compile Include="Consumer\IErrorMessageSerializer.cs" />
+    <Compile Include="Consumer\IHandlerCollectionFactory.cs" />
+    <Compile Include="Consumer\IHandlerRegistration.cs" />
+    <Compile Include="Consumer\InternalConsumer.cs" />
+    <Compile Include="Consumer\InternalConsumerFactory.cs" />
+    <Compile Include="Consumer\IReceiveRegistration.cs" />
+    <Compile Include="Consumer\PersistentConsumer.cs" />
+    <Compile Include="Consumer\PersistentMultipleConsumer.cs" />
+    <Compile Include="Consumer\StartConsumingStatus.cs" />
+    <Compile Include="Consumer\TransientConsumer.cs" />
+    <Compile Include="Conventions.cs" />
+    <Compile Include="DefaultCorrelationIdGenerationStrategy.cs" />
+    <Compile Include="DefaultMessageSerializationStrategy.cs" />
+    <Compile Include="DefaultServiceProvider.cs" />
+    <Compile Include="DeliveryModeAttribute.cs" />
+    <Compile Include="EasyNetQException.cs" />
+    <Compile Include="Events\AckEvent.cs" />
+    <Compile Include="Events\ConnectionBlockedEvent.cs" />
+    <Compile Include="Events\ConnectionCreatedEvent.cs" />
+    <Compile Include="Events\ConnectionDisconnectedEvent.cs" />
+    <Compile Include="Events\ConnectionUnblockedEvent.cs" />
+    <Compile Include="Events\ConsumerModelDisposedEvent.cs" />
+    <Compile Include="Events\DeliveredMessageEvent.cs" />
+    <Compile Include="Events\MessageConfirmationEvent.cs" />
+    <Compile Include="Events\PublishChannelCreatedEvent.cs" />
+    <Compile Include="Events\PublishedMessageEvent.cs" />
+    <Compile Include="Events\ReturnedMessageEvent.cs" />
+    <Compile Include="Events\StartConsumingFailedEvent.cs" />
+    <Compile Include="Events\StartConsumingSucceededEvent.cs" />
+    <Compile Include="Events\StoppedConsumingEvent.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FluentConfiguration\IPublishConfiguration.cs" />
+    <Compile Include="FluentConfiguration\ISubscriptionConfiguration.cs" />
+    <Compile Include="IAdvancedBus.cs" />
+    <Compile Include="IBus.cs" />
+    <Compile Include="IClusterHostSelectionStrategy.cs" />
+    <Compile Include="IConnectionFactory.cs" />
+    <Compile Include="ICorrelationIdGenerationStrategy.cs" />
+    <Compile Include="IEasyNetQLogger.cs" />
+    <Compile Include="IEventBus.cs" />
+    <Compile Include="IMessage.cs" />
+    <Compile Include="IMessageSerializationStrategy.cs" />
+    <Compile Include="Interception\CompositeInterceptor.cs" />
+    <Compile Include="Interception\DefaultInterceptor.cs" />
+    <Compile Include="Interception\GZipInterceptor.cs" />
+    <Compile Include="Interception\InterceptionExtensions.cs" />
+    <Compile Include="Interception\InterceptorRegistrator.cs" />
+    <Compile Include="Interception\IProduceConsumeInterceptor.cs" />
+    <Compile Include="Interception\RawMessage.cs" />
+    <Compile Include="Interception\TripleDESInterceptor.cs" />
+    <Compile Include="Internals\AsyncSemaphore.cs" />
+    <Compile Include="Internals\TaskHelpers.cs" />
+    <Compile Include="IPersistentConnectionFactory.cs" />
+    <Compile Include="ISerializer.cs" />
+    <Compile Include="IServiceProvider.cs" />
+    <Compile Include="ISubscriptionResult.cs" />
+    <Compile Include="ITimeoutStrategy.cs" />
+    <Compile Include="JsonSerializer.cs" />
+    <Compile Include="LinqExtensions.cs" />
+    <Compile Include="Loggers\ConsoleLogger.cs" />
+    <Compile Include="Loggers\DelegateLogger.cs" />
+    <Compile Include="Loggers\NullLogger.cs" />
+    <Compile Include="MessageDeliveryMode.cs" />
+    <Compile Include="MessageDeliveryModeStrategy.cs" />
+    <Compile Include="MessageFactory.cs" />
+    <Compile Include="MessageProperties.cs" />
+    <Compile Include="MessageReceivedInfo.cs" />
+    <Compile Include="MessageReturnedEventArgs.cs" />
+    <Compile Include="MessageReturnedInfo.cs" />
+    <Compile Include="MessageVersioning\ISupersede.cs" />
+    <Compile Include="MessageVersioning\MessageType.cs" />
+    <Compile Include="MessageVersioning\MessageTypeProperty.cs" />
+    <Compile Include="MessageVersioning\MessageVersioningExtensions.cs" />
+    <Compile Include="MessageVersioning\MessageVersionStack.cs" />
+    <Compile Include="MessageVersioning\VersionedMessageSerializationStrategy.cs" />
+    <Compile Include="MessageVersioning\VersionedPublishExchangeDeclareStrategy.cs" />
+    <Compile Include="MultipleExchange\MultipleExchangeExtension.cs" />
+    <Compile Include="MultipleExchange\MultipleExchangePublishExchangeDeclareStrategy.cs" />
+    <Compile Include="NonGeneric\NonGenericExtensions.cs" />
+    <Compile Include="OrderedClusterHostSelectionStrategy.cs" />
+    <Compile Include="PersistentConnection.cs" />
+    <Compile Include="PersistentConnectionFactory.cs" />
+    <Compile Include="Preconditions.cs" />
+    <Compile Include="Producer\ClientCommandDispatcher.cs" />
+    <Compile Include="Producer\ClientCommandDispatcherSingleton.cs" />
+    <Compile Include="Producer\IClientCommandDispatcher.cs" />
+    <Compile Include="Producer\IClientCommandDispatcherFactory.cs" />
+    <Compile Include="Producer\IPersistentChannel.cs" />
+    <Compile Include="Producer\IPersistentChannelFactory.cs" />
+    <Compile Include="Producer\IPublishConfirmationListener.cs" />
+    <Compile Include="Producer\IPublishConfirmationWaiter.cs" />
+    <Compile Include="Producer\IPublishExchangeDeclareStrategy.cs" />
+    <Compile Include="Producer\IResponderConfiguration.cs" />
+    <Compile Include="Producer\IRpc.cs" />
+    <Compile Include="Producer\ISendReceive.cs" />
+    <Compile Include="Producer\PersistentChannel.cs" />
+    <Compile Include="Producer\PublishConfirmationListener.cs" />
+    <Compile Include="Producer\PublishConfirmationWaiter.cs" />
+    <Compile Include="Producer\PublishExchangeDeclareStrategy.cs" />
+    <Compile Include="Producer\PublishInterruptedException.cs" />
+    <Compile Include="Producer\PublishNackedException.cs" />
+    <Compile Include="Producer\Rpc.cs" />
+    <Compile Include="Producer\SendReceive.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueAttribute.cs" />
+    <Compile Include="QueueConsumerPair.cs" />
+    <Compile Include="RabbitAdvancedBus.cs" />
+    <Compile Include="RabbitBus.cs" />
+    <Compile Include="RabbitHutch.cs" />
+    <Compile Include="RandomClusterHostSelectionStrategy.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
+    <Compile Include="Scheduling\BusExtensions.cs" />
+    <Compile Include="Scheduling\DeadLetterExchangeAndMessageTtlScheduler.cs" />
+    <Compile Include="Scheduling\DelayedExchangeScheduler.cs" />
+    <Compile Include="Scheduling\ExternalScheduler.cs" />
+    <Compile Include="Scheduling\IScheduler.cs" />
+    <Compile Include="Scheduling\SchedulingExtensions.cs" />
+    <Compile Include="Sprache\Failure.cs" />
+    <Compile Include="Sprache\IFailure.cs" />
+    <Compile Include="Sprache\Input.cs" />
+    <Compile Include="Sprache\IResultOfT.cs" />
+    <Compile Include="Sprache\ISuccess.cs" />
+    <Compile Include="Sprache\Parse.cs" />
+    <Compile Include="Sprache\ParseException.cs" />
+    <Compile Include="Sprache\ParserOfT.cs" />
+    <Compile Include="Sprache\ResultHelper.cs" />
+    <Compile Include="Sprache\Success.cs" />
+    <Compile Include="SubscriptionResult.cs" />
+    <Compile Include="SystemMessages\Error.cs" />
+    <Compile Include="SystemMessages\ScheduleMe.cs" />
+    <Compile Include="SystemMessages\UnscheduleMe.cs" />
+    <Compile Include="TimeBudget.cs" />
+    <Compile Include="TimeoutSecondsAttribute.cs" />
+    <Compile Include="Topology\Binding.cs" />
+    <Compile Include="Topology\Exchange.cs" />
+    <Compile Include="Topology\ExchangeType.cs" />
+    <Compile Include="Topology\IBindable.cs" />
+    <Compile Include="Topology\IBinding.cs" />
+    <Compile Include="Topology\IExchange.cs" />
+    <Compile Include="Topology\IQueue.cs" />
+    <Compile Include="Topology\Queue.cs" />
+    <Compile Include="TypeNameSerializer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
