@@ -1,26 +1,36 @@
-using System.Reflection;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-[assembly: AssemblyTitle("EasyNetQ.Scheduler.Mongo")]
+// Общие сведения об этой сборке предоставляются следующим набором
+// набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
+// связанные со сборкой.
+[assembly: AssemblyTitle("EasyNetQ.Scheduler.Mongo2")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("EasyNetQ.Scheduler.Mongo")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyProduct("EasyNetQ.Scheduler.Mongo2")]
+[assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+// Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
+// для компонентов COM. Если необходимо обратиться к типу в этой сборке через
+// COM, задайте атрибуту ComVisible значение TRUE для этого типа.
 [assembly: ComVisible(false)]
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("f5512d34-ac6e-415d-9cb8-16427f935b64")]
+// Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
+[assembly: Guid("5a7136d1-e4fd-433d-886c-d154a148bf87")]
 
-[assembly: AssemblyVersion("2.0.4.0")]
-[assembly: AssemblyInformationalVersion("2.0.4-netcore.1435+Branch.feature/netcore.Sha.a997be04162dfa34c99681e265733c91c0d564f3")]
-[assembly: AssemblyFileVersion("2.0.4.0")]
+// Сведения о версии сборки состоят из следующих четырех значений:
+//
+//      Основной номер версии
+//      Дополнительный номер версии
+//   Номер сборки
+//      Редакция
+//
+// Можно задать все значения или принять номер сборки и номер редакции по умолчанию.
+// используя "*", как показано ниже:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
