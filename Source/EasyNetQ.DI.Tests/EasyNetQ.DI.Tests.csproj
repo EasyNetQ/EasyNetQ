@@ -177,11 +177,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacAdapterTests.cs" />
-    <Compile Include="LightInjectAdapterTests.cs" />
     <Compile Include="MockBuilder.cs" />
     <Compile Include="NinjectAdapterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleInjectorAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -195,17 +193,9 @@
       <Project>{3b115671-7791-4b10-9e4f-8132227c939f}</Project>
       <Name>EasyNetQ.DI.Autofac</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj">
-      <Project>{97794CAF-E018-409E-8773-AFB855FA030D}</Project>
-      <Name>EasyNetQ.DI.LightInject</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj">
       <Project>{26DB37F3-C464-41A1-9219-FFD87740F904}</Project>
       <Name>EasyNetQ.DI.Ninject</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj">
-      <Project>{A1F1E839-2D85-4B55-8ED1-3460DA9FB82B}</Project>
-      <Name>EasyNetQ.DI.SimpleInjector</Name>
     </ProjectReference>
     <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj">
       <Project>{F587D5AD-2BBE-461D-B2DB-46143BF8DE48}</Project>
