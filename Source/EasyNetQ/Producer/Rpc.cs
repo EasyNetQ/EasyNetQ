@@ -171,7 +171,11 @@ namespace EasyNetQ.Producer
 
                 var exchange = DeclareRpcExchange(conventions.RpcResponseExchangeNamingConvention(responseType));
 
-                advancedBus.Bind(exchange, queue, queue.Name);
+                // check if exchange name is not the default one
+                if (exchange.Name != Exchange.GetDefault().Name)
+                {
+                    advancedBus.Bind(exchange, queue, queue.Name);
+                }
 
                 advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                     {
