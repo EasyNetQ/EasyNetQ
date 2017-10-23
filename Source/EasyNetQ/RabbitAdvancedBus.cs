@@ -537,6 +537,12 @@ namespace EasyNetQ
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
 
+            // sanity check return the default exchange
+            if (string.IsNullOrEmpty(name))
+            {
+                return Exchange.GetDefault();
+            }
+
             if (passive)
             {
                 clientCommandDispatcher.Invoke(x => x.ExchangeDeclarePassive(name));
@@ -573,6 +579,12 @@ namespace EasyNetQ
         {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
+
+            // sanity check return the default exchange
+            if (string.IsNullOrEmpty(name))
+            {
+                return Exchange.GetDefault();
+            }
 
             if (passive)
             {
