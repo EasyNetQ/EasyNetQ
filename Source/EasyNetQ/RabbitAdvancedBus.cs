@@ -158,7 +158,14 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            return Consume(queue, x => x.Add(onMessage), configure);
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(queue);
+            handlerCollection.Add(onMessage);
+            return Consume(queue, (body, properties, messageReceivedInfo) =>
+            {
+                var deserializedMessage = messageSerializationStrategy.DeserializeMessage<T>(properties, body);
+                var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
+                return handler(deserializedMessage, messageReceivedInfo);
+            }, configure);   
         }
 
         public virtual IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers)
