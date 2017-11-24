@@ -24,7 +24,7 @@ namespace EasyNetQ
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
-
+        private readonly ITypeNameSerializer typeNameSerializer;
         public RabbitAdvancedBus(
             IConnectionFactory connectionFactory,
             IConsumerFactory consumerFactory,
@@ -39,7 +39,8 @@ namespace EasyNetQ
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
             AdvancedBusEventHandlers advancedBusEventHandlers,
-            IPersistentConnectionFactory persistentConnectionFactory)
+            IPersistentConnectionFactory persistentConnectionFactory,
+            ITypeNameSerializer typeNameSerializer)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
@@ -53,6 +54,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
             Preconditions.CheckNotNull(persistentConnectionFactory, "persistentConnectionFactory");
+            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             this.consumerFactory = consumerFactory;
             this.logger = logger;
@@ -64,6 +66,8 @@ namespace EasyNetQ
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
+            this.typeNameSerializer = typeNameSerializer;
+
 
             this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             if (advancedBusEventHandlers.Connected != null)
@@ -158,7 +162,19 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            return Consume(queue, x => x.Add(onMessage), configure);
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(queue);
+            handlerCollection.Add(onMessage);
+            return Consume(queue, (body, properties, messageReceivedInfo) =>
+            {
+                if (!properties.TypePresent)
+                {
+                    properties.Type = typeNameSerializer.Serialize(typeof(T));
+                }
+                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
+
+                var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
+                return handler(deserializedMessage, messageReceivedInfo);
+            }, configure);
         }
 
         public virtual IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers)
@@ -390,14 +406,14 @@ namespace EasyNetQ
             bool durable = true,
             bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? perQueueMessageTtl = null,
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null)
-	        {
+        {
             Preconditions.CheckNotNull(name, "name");
 
             if (passive)
@@ -452,7 +468,7 @@ namespace EasyNetQ
             bool durable = true,
             bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? perQueueMessageTtl = null,
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null,
@@ -592,7 +608,7 @@ namespace EasyNetQ
             await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments)).ConfigureAwait(false);
             logger.DebugWrite("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}, delayed:{4}", name, type, durable, autoDelete, delayed);
             return new Exchange(name);
-       }
+        }
 
         public virtual void ExchangeDelete(IExchange exchange, bool ifUnused = false)
         {
@@ -700,7 +716,7 @@ namespace EasyNetQ
                 return new BasicGetResult<T>();
             }
             var message = messageSerializationStrategy.DeserializeMessage<T>(result.Properties, result.Body);
-            if (message.MessageType == typeof (T))
+            if (message.MessageType == typeof(T))
             {
                 return new BasicGetResult<T>(message);
             }
