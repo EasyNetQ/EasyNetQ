@@ -124,8 +124,8 @@ namespace EasyNetQ.Tests
 
     public class When_subscribe_with_configuration_is_called
     {
-        [InlineData("ttt", true, 99, true, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
-        [InlineData(null, false, 0, false, 0, null, false, null, true, "qqq", null, null)]
+        [InlineData("ttt", true, 99, true, 999, 10, true, (byte)11, false, "qqq", 1001, 10001, "", "")]
+        [InlineData(null, false, 0, false, 0, null, false, null, true, "qqq", null, null, "", "")]
         [Theory]
         public void Queue_should_be_declared_with_correct_options(
             string topic,
@@ -139,7 +139,9 @@ namespace EasyNetQ.Tests
             bool durable,
             string queueName,
             int? maxLength,
-            int? maxLengthBytes)
+            int? maxLengthBytes,
+            string deadLetterExchange,
+            string deadLetterRoutingKey)
         {
             var mockBuilder = new MockBuilder();
             using (mockBuilder.Bus)
@@ -175,6 +177,14 @@ namespace EasyNetQ.Tests
                         if (maxLengthBytes.HasValue)
                         {
                             c.WithMaxLengthBytes(maxLengthBytes.Value);
+                        }
+                        if (!string.IsNullOrEmpty(deadLetterExchange))
+                        {
+                            c.WithDeadLetterExchange(deadLetterExchange);
+                        }
+                        if (!string.IsNullOrEmpty(deadLetterRoutingKey))
+                        {
+                            c.WithDeadLetterRoutingKey(deadLetterRoutingKey);
                         }
                     }
                 );

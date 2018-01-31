@@ -162,7 +162,9 @@ namespace EasyNetQ
                 expires: configuration.Expires, 
                 maxPriority: configuration.MaxPriority,
                 maxLength: configuration.MaxLength,
-                maxLengthBytes: configuration.MaxLengthBytes);
+                maxLengthBytes: configuration.MaxLengthBytes,
+                deadLetterExchange: configuration.DeadLetterExchange,
+                deadLetterRoutingKey: configuration.DeadLetterRoutingKey);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))

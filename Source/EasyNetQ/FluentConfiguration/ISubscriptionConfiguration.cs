@@ -93,6 +93,17 @@ namespace EasyNetQ.FluentConfiguration
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached
         /// </summary>
         ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
+
+        /// <summary>
+        /// The dead-letter-exchange value
+        /// </summary>
+        ISubscriptionConfiguration WithDeadLetterExchange(string deadLetterExchange);
+
+        /// <summary>
+        /// The dead-letter-routingkey value
+        /// </summary>
+        ISubscriptionConfiguration WithDeadLetterRoutingKey(string deadLetterRoutingKey);
+        
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -110,6 +121,8 @@ namespace EasyNetQ.FluentConfiguration
         public string QueueName { get; private set; }
         public int? MaxLength { get; private set; }
         public int? MaxLengthBytes { get; private set; }
+        public string DeadLetterExchange { get; private set; }
+        public string DeadLetterRoutingKey { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -191,6 +204,18 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
         {
             MaxLengthBytes = maxLengthBytes;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithDeadLetterExchange(string deadLetterExchange)
+        {
+            DeadLetterExchange = deadLetterExchange;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithDeadLetterRoutingKey(string deadLetterRoutingKey)
+        {
+            DeadLetterRoutingKey = deadLetterRoutingKey;
             return this;
         }
     }
