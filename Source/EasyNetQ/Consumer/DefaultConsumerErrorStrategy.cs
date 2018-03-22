@@ -58,7 +58,7 @@ namespace EasyNetQ.Consumer
             this.errorMessageSerializer = errorMessageSerializer;
         }
 
-        private void Connect()
+        protected void Connect()
         {
             if (connection == null || !connection.IsOpen)
             {
