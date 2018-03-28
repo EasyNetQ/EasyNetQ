@@ -619,9 +619,9 @@ namespace EasyNetQ
             return new Binding(queue, exchange, routingKey, arguments);
         }
 
-        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
+        public Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
         {
-            return await BindAsync(exchange, queue, routingKey, null);
+            return BindAsync(exchange, queue, routingKey, null);
         }
 
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers)
@@ -653,9 +653,9 @@ namespace EasyNetQ
             return new Binding(destination, source, routingKey, arguments);
         }
 
-        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
+        public Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
         {
-            return await BindAsync(source, destination, routingKey, null);
+            return BindAsync(source, destination, routingKey, null);
         }
 
         public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers)

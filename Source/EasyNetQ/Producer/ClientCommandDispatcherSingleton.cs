@@ -30,26 +30,12 @@ namespace EasyNetQ.Producer
 
         public T Invoke<T>(Func<IModel, T> channelAction)
         {
-            try
-            {
-                return InvokeAsync(channelAction).Result;
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException;
-            }
+            return InvokeAsync(channelAction).GetAwaiter().GetResult();
         }
 
         public void Invoke(Action<IModel> channelAction)
         {
-            try
-            {
-                InvokeAsync(channelAction).Wait();
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException;
-            }
+            InvokeAsync(channelAction).GetAwaiter().GetResult();
         }
 
         public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)

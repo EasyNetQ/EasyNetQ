@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace EasyNetQ.Internals
+namespace EasyNetQ
 {
     internal sealed class TimeBudget
     {
@@ -32,6 +32,5 @@ namespace EasyNetQ.Internals
             var remaining = source.budget - source.watch.Elapsed;
             return remaining < source.precision ? TimeSpan.Zero : remaining;
         }
-
     }
 }
