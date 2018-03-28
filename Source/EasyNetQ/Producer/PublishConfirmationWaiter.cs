@@ -23,7 +23,7 @@ namespace EasyNetQ.Producer
         public void Wait(TimeSpan timeout)
         {
             try
-            {
+            {   
                 if (confirmation.Wait((int)timeout.TotalMilliseconds, cancellation))
                 {
                     return;

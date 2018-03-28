@@ -9,7 +9,7 @@ namespace EasyNetQ.Producer
     public class PublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();   
-        private readonly AsyncSemaphore semaphore = new AsyncSemaphore(1);
+        private readonly AsyncLock asyncLock = new AsyncLock();
 
         public IExchange DeclareExchange(IAdvancedBus advancedBus, string exchangeName, string exchangeType)
         {
@@ -18,8 +18,7 @@ namespace EasyNetQ.Producer
             {
                 return exchange;
             }
-            semaphore.Wait();
-            try
+            using(asyncLock.Acquire())
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange))
                 {
@@ -28,10 +27,6 @@ namespace EasyNetQ.Producer
                 exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
                 exchanges[exchangeName] = exchange;
                 return exchange;
-            }
-            finally
-            {
-                semaphore.Release();
             }
         }
         
@@ -49,8 +44,7 @@ namespace EasyNetQ.Producer
             {
                 return exchange;
             }
-            await semaphore.WaitAsync().ConfigureAwait(false);
-            try
+            using(await asyncLock.AcquireAsync().ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange))
                 {
@@ -59,10 +53,6 @@ namespace EasyNetQ.Producer
                 exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
-            }
-            finally
-            {
-                semaphore.Release();
             }
         }
 

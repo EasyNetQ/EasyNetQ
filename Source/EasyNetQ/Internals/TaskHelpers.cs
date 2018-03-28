@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    public static class TaskHelpers
+    internal static class TaskHelpers
     {
         /// <summary>
         ///     We want to prevent callers hijacking the reader thread; this is a bit nasty, but works;
@@ -74,8 +74,6 @@ namespace EasyNetQ.Internals
                 IsSyncSafe = t => false; // assume: not
         }
 
-        public static readonly Task Completed = FromResult<object>(null);
-
         public static Task ExecuteSynchronously(Action action)
         {
             var tcs = new TaskCompletionSource<object>();
@@ -89,11 +87,6 @@ namespace EasyNetQ.Internals
                 tcs.SetException(e);
             }
             return tcs.Task;
-        }
-
-        public static Task<T> FromResult<T>(T result)
-        {
-            return Task.FromResult(result);
         }
 
         public static Task FromException(Exception ex)
