@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EasyNetQ
 {
-    public static class LinqExtensions
+    internal static class LinqExtensions
     {
         // http://mikehadlow.blogspot.co.uk/2012/04/useful-linq-extension-method.html
         public static IEnumerable<T> Intersperse<T>(this IEnumerable<T> items, T separator)

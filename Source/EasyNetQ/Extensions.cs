@@ -5,20 +5,8 @@ using System.Diagnostics;
 
 namespace EasyNetQ
 {
-    public static class Extensions
+    internal static class Extensions
     {
-        public static void SafeDispose(this IDisposable disposable)
-        {
-            try
-            {
-                disposable.Dispose();
-            }
-            catch(Exception exception)
-            {
-                Trace.TraceError(exception.ToString());
-            }
-        }
-
         public static TimeSpan Double(this TimeSpan timeSpan)
         {
             return timeSpan + timeSpan;

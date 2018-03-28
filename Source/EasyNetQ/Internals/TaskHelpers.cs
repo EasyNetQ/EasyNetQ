@@ -1,14 +1,16 @@
 ﻿using System;
+#if NETFX
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Threading;
+#endif
 using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
     internal static class TaskHelpers
     {
+#if NETFX
         /// <summary>
         ///     We want to prevent callers hijacking the reader thread; this is a bit nasty, but works;
         ///     see http://stackoverflow.com/a/22588431/23354 for more information; a huge
@@ -73,7 +75,7 @@ namespace EasyNetQ.Internals
             if (IsSyncSafe == null)
                 IsSyncSafe = t => false; // assume: not
         }
-
+#endif
         public static Task ExecuteSynchronously(Action action)
         {
             var tcs = new TaskCompletionSource<object>();
@@ -95,18 +97,9 @@ namespace EasyNetQ.Internals
             tcs.SetException(ex);
             return tcs.Task;
         }
-
-        public static Task Delay(TimeSpan delay, CancellationToken cancellation)
-        {
-            return Task.Delay(delay, cancellation);
-        }
-
-        public static Task<Task> WhenAny(params Task[] tasks)
-        {
-            return Task.WhenAny(tasks);
-        }
-
-        public static void TrySetResultSafe<T>(this TaskCompletionSource<T> source, T result)
+        
+#if NETFX
+        public static void TrySetResultAsynchronously<T>(this TaskCompletionSource<T> source, T result)
         {
             if (IsSyncSafe(source.Task))
             {
@@ -118,7 +111,7 @@ namespace EasyNetQ.Internals
             }
         }
 
-        public static void TrySetCanceledSafe<T>(this TaskCompletionSource<T> source)
+        public static void TrySetCanceledAsynchronously<T>(this TaskCompletionSource<T> source)
         {
             if (IsSyncSafe(source.Task))
             {
@@ -130,7 +123,7 @@ namespace EasyNetQ.Internals
             }
         }
 
-        public static void TrySetExceptionSafe<T>(this TaskCompletionSource<T> source, Exception exception)
+        public static void TrySetExceptionAsynchronously<T>(this TaskCompletionSource<T> source, Exception exception)
         {
             if (IsSyncSafe(source.Task))
             {
@@ -141,5 +134,6 @@ namespace EasyNetQ.Internals
                 Task.Run(() => source.TrySetException(exception));
             }
         }
+#endif
     }
 }

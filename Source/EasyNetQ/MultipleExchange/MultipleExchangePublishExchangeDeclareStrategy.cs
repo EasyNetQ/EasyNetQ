@@ -13,6 +13,7 @@ namespace EasyNetQ.MultipleExchange
     {
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
         private readonly AsyncLock asyncLock = new AsyncLock();
+        
         public IExchange DeclareExchange(IAdvancedBus advancedBus, Type messageType, string exchangeType)
         {
             return DeclareExchangeAsync(advancedBus, messageType, exchangeType).Result;
