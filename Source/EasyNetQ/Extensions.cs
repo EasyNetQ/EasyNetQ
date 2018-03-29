@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace EasyNetQ
 {
-    internal static class Extensions
+    public static class Extensions
     {
         public static TimeSpan Double(this TimeSpan timeSpan)
         {

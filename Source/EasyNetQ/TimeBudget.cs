@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace EasyNetQ
 {
-    internal sealed class TimeBudget
+    public sealed class TimeBudget
     {
         private readonly TimeSpan budget;
         private readonly TimeSpan precision;

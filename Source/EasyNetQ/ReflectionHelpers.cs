@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace EasyNetQ
 {
-    internal static class ReflectionHelpers
+    public static class ReflectionHelpers
     {
         private static readonly ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>> typesAttributes = new ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>>();
 

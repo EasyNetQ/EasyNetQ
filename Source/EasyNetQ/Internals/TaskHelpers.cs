@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    internal static class TaskHelpers
+    public static class TaskHelpers
     {
 #if NETFX
         /// <summary>

@@ -7,7 +7,7 @@ namespace EasyNetQ.Internals
     /// <summary>
     ///     AsyncSemaphore should be used with a lot of care.
     /// </summary>
-    internal class AsyncLock
+    public class AsyncLock
     {
         private readonly SemaphoreSlim semaphore;
         private readonly SemaphoreSlimReleaser semaphoreReleaser;
