@@ -50,7 +50,7 @@ namespace EasyNetQ.Producer
             var isNack = @event.IsNack;
             if (multiple)
             {
-                foreach (var sequenceNumber in requests.Select(x => x.Key).Where(x => x <= deliveryTag))
+                foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
                 {
                     TaskCompletionSource<object> confirmation;
                     if (requests.TryGetValue(sequenceNumber, out confirmation))
