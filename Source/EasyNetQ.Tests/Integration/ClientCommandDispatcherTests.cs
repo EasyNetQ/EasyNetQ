@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.ConnectionString;
-using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
 using Xunit;
 
@@ -21,13 +20,12 @@ namespace EasyNetQ.Tests.Integration
         public ClientCommandDispatcherTests()
         {
             var eventBus = new EventBus();
-            var logger = new ConsoleLogger();
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
             var hostSelectionStrategy = new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>();
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
-            connection = new PersistentConnection(connectionFactory, logger, eventBus);
-            var persistentChannelFactory = new PersistentChannelFactory(logger, configuration, eventBus);
+            connection = new PersistentConnection(connectionFactory, eventBus);
+            var persistentChannelFactory = new PersistentChannelFactory(configuration, eventBus);
             dispatcher = new ClientCommandDispatcher(configuration, connection, persistentChannelFactory);
             connection.Initialize();
         }

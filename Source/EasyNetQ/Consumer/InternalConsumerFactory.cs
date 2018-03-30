@@ -11,7 +11,6 @@ namespace EasyNetQ.Consumer
     public class InternalConsumerFactory : IInternalConsumerFactory
     {
         private readonly IHandlerRunner handlerRunner;
-        private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IConsumerDispatcherFactory consumerDispatcherFactory;
@@ -19,20 +18,17 @@ namespace EasyNetQ.Consumer
 
         public InternalConsumerFactory(
             IHandlerRunner handlerRunner, 
-            IEasyNetQLogger logger, 
             IConventions conventions, 
             ConnectionConfiguration connectionConfiguration, 
             IConsumerDispatcherFactory consumerDispatcherFactory, 
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
-            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(consumerDispatcherFactory, "consumerDispatcherFactory");
 
             this.handlerRunner = handlerRunner;
-            this.logger = logger;
             this.conventions = conventions;
             this.connectionConfiguration = connectionConfiguration;
             this.consumerDispatcherFactory = consumerDispatcherFactory;
@@ -42,7 +38,7 @@ namespace EasyNetQ.Consumer
         public IInternalConsumer CreateConsumer()
         {
             var dispatcher = consumerDispatcherFactory.GetConsumerDispatcher();
-            return new InternalConsumer(handlerRunner, logger, dispatcher, conventions, connectionConfiguration, eventBus);
+            return new InternalConsumer(handlerRunner, dispatcher, conventions, connectionConfiguration, eventBus);
         }
 
         public void OnDisconnected()
@@ -55,7 +51,5 @@ namespace EasyNetQ.Consumer
             consumerDispatcherFactory.Dispose();
             handlerRunner.Dispose();
         }
-
-
     }
 }

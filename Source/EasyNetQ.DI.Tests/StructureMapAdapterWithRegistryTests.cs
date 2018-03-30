@@ -50,45 +50,12 @@ namespace EasyNetQ.DI.Tests
             Assert.True(MyConventions.ConventionsCallCount > 0);
         }
 
-        [Fact]
-        public void Should_use_registered_logger()
-        {
-            Assert.True(MyLogger.ConstructorCallCount > 0);
-        }
-
         public class MessagingRegistry : Registry
         {
             public MessagingRegistry()
             {
-                For<IEasyNetQLogger>().Singleton().Use<MyLogger>();
                 For<IConventions>().Singleton().Use<MyConventions>();
             }
-        }
-
-        public class MyLogger : IEasyNetQLogger
-        {
-            public MyLogger()
-            {
-                ConstructorCallCount++;
-            }
-
-            public void DebugWrite(string format, params object[] args)
-            {                
-            }
-
-            public void InfoWrite(string format, params object[] args)
-            {
-            }
-
-            public void ErrorWrite(string format, params object[] args)
-            {
-            }
-
-            public void ErrorWrite(Exception exception)
-            {
-            }
-
-            public static int ConstructorCallCount { get; private set; }
         }
 
         public class MyConventions : IConventions

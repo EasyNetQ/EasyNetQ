@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Tests.Tasks;
 using EasyNetQ.Tests.Tasks.Tasks;
 using Net.CommandLine;
+using Serilog;
 
 namespace EasyNetQ.Tests.Performance.Producer
 {
@@ -32,8 +33,7 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer",
-                x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer");
 
             var messageCount = 0;
             var faultMessageCount = 0;

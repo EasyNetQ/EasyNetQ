@@ -15,9 +15,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             persistentConnection = Substitute.For<IPersistentConnection>();
             var configuration = new ConnectionConfiguration();
             eventBus = new EventBus();
-            var logger = Substitute.For<IEasyNetQLogger>();
-
-            var persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
+            var persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
         }
 
         [Fact(Skip = "It seems to be not actual now, discuss it later. Looks like odd optimization")]

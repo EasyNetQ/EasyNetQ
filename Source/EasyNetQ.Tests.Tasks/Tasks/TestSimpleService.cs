@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Tasks.Tasks
         public Task Run(CancellationToken cancellationToken)
         {
 
-            bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => new NoDebugLogger()));
+            bus = RabbitHutch.CreateBus("host=localhost");
 
             bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => customRpcRequestConventionDictionary.ContainsKey(type) ? customRpcRequestConventionDictionary[type] : defaultRpcExchange;
             bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => customRpcResponseConventionDictionary.ContainsKey(type) ? customRpcResponseConventionDictionary[type] : defaultRpcExchange;

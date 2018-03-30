@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
+using EasyNetQ.Logging;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer
@@ -15,17 +16,15 @@ namespace EasyNetQ.Consumer
 
     public class HandlerRunner : IHandlerRunner
     {
-        private readonly IEasyNetQLogger logger;
+        private readonly ILog logger = LogProvider.For<HandlerRunner>();
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
         private readonly IEventBus eventBus;
 
-        public HandlerRunner(IEasyNetQLogger logger, IConsumerErrorStrategy consumerErrorStrategy, IEventBus eventBus)
+        public HandlerRunner(IConsumerErrorStrategy consumerErrorStrategy, IEventBus eventBus)
         {
-            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(consumerErrorStrategy, "consumerErrorStrategy");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
-            this.logger = logger;
             this.consumerErrorStrategy = consumerErrorStrategy;
             this.eventBus = eventBus;
         }
@@ -34,7 +33,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(context, "context");
 
-            logger.DebugWrite("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
+            logger.DebugFormat("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
                 "\n\tDeliveryTag: {3}\n\tRedelivered: {4}",
                 context.Info.RoutingKey,
                 context.Properties.CorrelationId,
@@ -55,7 +54,7 @@ namespace EasyNetQ.Consumer
             
             if (completionTask.Status == TaskStatus.Created)
             {
-                logger.ErrorWrite("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
+                logger.ErrorFormat("Task returned from consumer callback is not started. ConsumerTag: '{0}'",
                     context.Info.ConsumerTag);
                 return;
             }
@@ -70,7 +69,7 @@ namespace EasyNetQ.Consumer
             {
                 if (task.IsFaulted)
                 {
-                    logger.ErrorWrite(BuildErrorMessage(context, task.Exception).EscapeBraces());
+                    logger.ErrorFormat(BuildErrorMessage(context, task.Exception).EscapeBraces());
                     ackStrategy = consumerErrorStrategy.HandleConsumerError(context, task.Exception);
                 }
                 else if (task.IsCanceled)
@@ -80,7 +79,7 @@ namespace EasyNetQ.Consumer
             }
             catch (Exception consumerErrorStrategyError)
             {
-                logger.ErrorWrite("Exception in ConsumerErrorStrategy:\n{0}",
+                logger.ErrorFormat("Exception in ConsumerErrorStrategy:\n{0}",
                                   consumerErrorStrategyError);
                 ackStrategy = AckStrategies.Nothing;
             }
@@ -104,21 +103,21 @@ namespace EasyNetQ.Consumer
             }
             catch (AlreadyClosedException alreadyClosedException)
             {
-                logger.InfoWrite(failedToAckMessage,
+                logger.InfoFormat(failedToAckMessage,
                                  alreadyClosedException.Message,
                                  context.Info.ConsumerTag,
                                  context.Info.DeliverTag);
             }
             catch (IOException ioException)
             {
-                logger.InfoWrite(failedToAckMessage,
+                logger.InfoFormat(failedToAckMessage,
                                  ioException.Message,
                                  context.Info.ConsumerTag,
                                  context.Info.DeliverTag);
             }
             catch (Exception exception)
             {
-                logger.ErrorWrite("Unexpected exception when attempting to ACK or NACK\n{0}", exception);
+                logger.ErrorFormat("Unexpected exception when attempting to ACK or NACK\n{0}", exception);
             }
             finally
             {

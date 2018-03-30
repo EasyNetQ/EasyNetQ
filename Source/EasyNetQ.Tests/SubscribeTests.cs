@@ -293,16 +293,6 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
-
-        [Fact]
-        public void Should_write_debug_message()
-        {
-            const string expectedMessageFormat =
-                "Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
-                "\n\tDeliveryTag: {3}\n\tRedelivered: {4}";
-
-            mockBuilder.Logger.Received().DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag, deliveryTag, false);
-        }
     }
 
     public class When_the_handler_throws_an_exception : IDisposable
@@ -383,13 +373,6 @@ namespace EasyNetQ.Tests
         public void Should_ack()
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
-        }
-
-        [Fact]
-        public void Should_write_exception_log_message()
-        {
-            // too brittle to put exact message here I think
-            mockBuilder.Logger.Received().ErrorWrite(Arg.Any<string>(), Arg.Any<object[]>());
         }
 
         [Fact]

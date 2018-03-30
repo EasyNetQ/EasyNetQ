@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Consumer;
-using EasyNetQ.Loggers;
 using EasyNetQ.SystemMessages;
 using Xunit;
 using RabbitMQ.Client;
@@ -42,7 +41,6 @@ namespace EasyNetQ.Tests
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(
                 connectionFactory, 
                 serializer, 
-                new ConsoleLogger(), 
                 conventions,
                 typeNameSerializer,
                 errorMessageSerializer);
@@ -120,13 +118,11 @@ namespace EasyNetQ.Tests
                 Substitute.For<IBasicConsumer>()
                 );
 
-            var logger = Substitute.For<IEasyNetQLogger>();
             connectionFactory = Substitute.For<IConnectionFactory>();
 
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(
                 connectionFactory,
                 Substitute.For<ISerializer>(),
-                logger,
                 Substitute.For<IConventions>(),
                 Substitute.For<ITypeNameSerializer>(),
                 Substitute.For<IErrorMessageSerializer>());
@@ -136,7 +132,6 @@ namespace EasyNetQ.Tests
             var ackStrategy = consumerErrorStrategy.HandleConsumerError(context, exception);
 
             connectionFactory.DidNotReceive().CreateConnection();
-            logger.Received().ErrorWrite(Arg.Is<string>(x => x.Contains("DefaultConsumerErrorStrategy was already disposed")), Arg.Any<object[]>());
 
             Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
         }

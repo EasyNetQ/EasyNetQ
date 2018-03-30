@@ -36,9 +36,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                     throw exception;
                 });
 
-            var logger = Substitute.For<IEasyNetQLogger>();
-
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
+            persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
 
         }
 

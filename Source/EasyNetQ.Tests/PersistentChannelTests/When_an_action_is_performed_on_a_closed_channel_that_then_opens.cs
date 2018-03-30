@@ -34,10 +34,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                                                        x => channel,
                                                        x => channel); 
                 
-
-            var logger = Substitute.For<IEasyNetQLogger>();
-
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
+            persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
 
             new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent()), null, 10, Timeout.Infinite);
 

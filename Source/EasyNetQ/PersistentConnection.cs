@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using EasyNetQ.Events;
+using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -25,21 +26,20 @@ namespace EasyNetQ
     /// </summary>
     public class PersistentConnection : IPersistentConnection
     {
+        private readonly ILog logger = LogProvider.For<PersistentConnection>();
+        
         private readonly IConnectionFactory connectionFactory;
-        private readonly IEasyNetQLogger logger;
         private readonly IEventBus eventBus;
         private readonly object locker = new object();
         private bool initialized;
         private IConnection connection;
 
-        public PersistentConnection(IConnectionFactory connectionFactory, IEasyNetQLogger logger, IEventBus eventBus)
+        public PersistentConnection(IConnectionFactory connectionFactory, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
-            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.connectionFactory = connectionFactory;
-            this.logger = logger;
             this.eventBus = eventBus;
         }
 
@@ -84,7 +84,7 @@ namespace EasyNetQ
         {
             ((Timer) timer)?.Dispose();
 
-            logger.DebugWrite("Trying to connect");
+            logger.Debug("Trying to connect");
             if (disposed) return;
 
             connectionFactory.Reset();
@@ -119,7 +119,7 @@ namespace EasyNetQ
                 connection.ConnectionUnblocked += OnConnectionUnblocked;
 
                 OnConnected();
-                logger.InfoWrite("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
+                logger.InfoFormat("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
                     connectionFactory.CurrentHost.Host,
                     connectionFactory.CurrentHost.Port,
                     connectionFactory.Configuration.VirtualHost);
@@ -128,7 +128,7 @@ namespace EasyNetQ
             {
                 if (!disposed)
                 {
-                    logger.ErrorWrite("Failed to connect to any Broker. Retrying in {0}",
+                    logger.InfoFormat("Failed to connect to any Broker. Retrying in {0}",
                         connectionFactory.Configuration.ConnectIntervalAttempt);
                     StartTryToConnect();
                 }
@@ -144,7 +144,7 @@ namespace EasyNetQ
                 exceptionMessage = $"{exceptionMessage} ({exception.InnerException.Message})";
             }
 
-            logger.ErrorWrite("Failed to connect to Broker: '{0}', Port: {1} VHost: '{2}'. " +
+            logger.ErrorFormat("Failed to connect to Broker: '{0}', Port: {1} VHost: '{2}'. " +
                     "ExceptionMessage: '{3}'",
                 connectionFactory.CurrentHost.Host,
                 connectionFactory.CurrentHost.Port,
@@ -158,28 +158,28 @@ namespace EasyNetQ
             OnDisconnected();
 
             // try to reconnect and re-subscribe
-            logger.InfoWrite("Disconnected from RabbitMQ Broker");
+            logger.InfoFormat("Disconnected from RabbitMQ Broker");
 
             TryToConnect(null);
         }
 
         void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            logger.InfoWrite("Connection blocked. Reason: '{0}'", e.Reason);
+            logger.InfoFormat("Connection blocked. Reason: '{0}'", e.Reason);
 
             eventBus.Publish(new ConnectionBlockedEvent(e.Reason));
         }
 
         void OnConnectionUnblocked(object sender, EventArgs e)
         {
-            logger.InfoWrite("Connection unblocked.");
+            logger.InfoFormat("Connection unblocked.");
 
             eventBus.Publish(new ConnectionUnblockedEvent());
         }
 
         public void OnConnected()
         {
-            logger.DebugWrite("OnConnected event fired");
+            logger.Debug("OnConnected event fired");
             eventBus.Publish(new ConnectionCreatedEvent());
         }
 
@@ -201,7 +201,7 @@ namespace EasyNetQ
                 }
                 catch (IOException exception)
                 {
-                    logger.DebugWrite(
+                    logger.InfoFormat(
                         "IOException thrown on connection dispose. Message: '{0}'. " + 
                         "This is not normally a cause for concern.", 
                         exception.Message);

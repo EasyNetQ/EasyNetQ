@@ -20,7 +20,6 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
 
             schedulerService = new SchedulerService(
                 bus,
-                Substitute.For<IEasyNetQLogger>(),
                 scheduleRepository,
                 new SchedulerServiceConfiguration
                     {
