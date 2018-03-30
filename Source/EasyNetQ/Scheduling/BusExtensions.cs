@@ -20,7 +20,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IBus bus, DateTime futurePublishDate, T message) where T : class
         {
-            bus.Scheduler().FuturePublishAsync(futurePublishDate, message).Wait();
+            bus.Scheduler().FuturePublishAsync(futurePublishDate, message).GetAwaiter().GetResult();;
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="topic">The topic string</param>
         public static void FuturePublish<T>(this IBus bus, DateTime futurePublishDate, T message, string topic) where T : class
         {
-            bus.Scheduler().FuturePublishAsync(futurePublishDate, message, topic: topic).Wait();
+            bus.Scheduler().FuturePublishAsync(futurePublishDate, message, topic: topic).GetAwaiter().GetResult();;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IBus bus, DateTime futurePublishDate, string cancellationKey, T message) where T : class
         {
-            bus.Scheduler().FuturePublishAsync(futurePublishDate, message, cancellationKey).Wait();
+            bus.Scheduler().FuturePublishAsync(futurePublishDate, message, cancellationKey).GetAwaiter().GetResult();;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="topic">The topic string</param>
         public static void FuturePublish<T>(this IBus bus, DateTime futurePublishDate, string topic, string cancellationKey, T message) where T : class
         {
-            bus.Scheduler().FuturePublishAsync(futurePublishDate, message, topic, cancellationKey).Wait();
+            bus.Scheduler().FuturePublishAsync(futurePublishDate, message, topic, cancellationKey).GetAwaiter().GetResult();;
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="message">The message to response with</param>
         public static void FuturePublish<T>(this IBus bus, TimeSpan messageDelay, T message) where T : class
         {
-            bus.Scheduler().FuturePublishAsync(messageDelay, message).Wait();
+            bus.Scheduler().FuturePublishAsync(messageDelay, message).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="topic">The topic string</param>
         public static void FuturePublish<T>(this IBus bus, TimeSpan messageDelay, T message, string topic) where T : class
         {
-            bus.Scheduler().FuturePublishAsync(messageDelay, message, topic:topic).Wait();
+            bus.Scheduler().FuturePublishAsync(messageDelay, message, topic:topic).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace EasyNetQ.Scheduling
         /// <param name="cancellationKey">The identifier that was used when originally scheduling the message with FuturePublish</param>
         public static void CancelFuturePublish(this IBus bus, string cancellationKey)
         {
-            bus.Scheduler().CancelFuturePublishAsync(cancellationKey).Wait();
+            bus.Scheduler().CancelFuturePublishAsync(cancellationKey).GetAwaiter().GetResult();;
         }
 
         /// <summary>

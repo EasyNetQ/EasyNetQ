@@ -229,8 +229,8 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var timeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout)).Start();
-                while (!timeBudget.IsExpired())
+                var timeout = TimeBudget.Start(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+                while (!timeout.IsExpired())
                 {
                     var confirmsWaiter = clientCommandDispatcher.Invoke(model =>
                     {
@@ -254,7 +254,7 @@ namespace EasyNetQ
 
                     try
                     {
-                        confirmsWaiter.Wait(timeBudget.GetRemainingTime());
+                        confirmsWaiter.Wait(timeout);
                         break;
                     }
                     catch (PublishInterruptedException)
@@ -330,8 +330,8 @@ namespace EasyNetQ
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
             if (connectionConfiguration.PublisherConfirms)
             {
-                var timeBudget = new TimeBudget(TimeSpan.FromSeconds(connectionConfiguration.Timeout)).Start();
-                while (!timeBudget.IsExpired())
+                var timeout = TimeBudget.Start(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
+                while (!timeout.IsExpired())
                 {
                     var confirmsWaiter = await clientCommandDispatcher.InvokeAsync(model =>
                     {
@@ -354,7 +354,7 @@ namespace EasyNetQ
 
                     try
                     {
-                        await confirmsWaiter.WaitAsync(timeBudget.GetRemainingTime()).ConfigureAwait(false);
+                        await confirmsWaiter.WaitAsync(timeout).ConfigureAwait(false);
                         break;
                     }
                     catch (PublishInterruptedException)
@@ -619,9 +619,9 @@ namespace EasyNetQ
             return new Binding(queue, exchange, routingKey, arguments);
         }
 
-        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
+        public Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey)
         {
-            return await BindAsync(exchange, queue, routingKey, null);
+            return BindAsync(exchange, queue, routingKey, null);
         }
 
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers)
@@ -653,9 +653,9 @@ namespace EasyNetQ
             return new Binding(destination, source, routingKey, arguments);
         }
 
-        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
+        public Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey)
         {
-            return await BindAsync(source, destination, routingKey, null);
+            return BindAsync(source, destination, routingKey, null);
         }
 
         public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers)

@@ -5,28 +5,20 @@ namespace EasyNetQ
 {
     public sealed class TimeBudget
     {
-        public TimeBudget(TimeSpan budget, TimeSpan precision)
+        private readonly TimeSpan budget;
+        private readonly TimeSpan precision;
+        private readonly Stopwatch watch;
+
+        private TimeBudget(Stopwatch watch, TimeSpan budget, TimeSpan precision)
         {
+            this.watch = watch;
             this.budget = budget;
             this.precision = precision;
-            watch = new Stopwatch();
         }
 
-        public TimeBudget(TimeSpan budget)
-            : this(budget, TimeSpan.FromMilliseconds(5)) { }
-
-        public TimeBudget Start()
+        public static TimeBudget Start(TimeSpan budget)
         {
-            watch.Start();
-            return this;
-        }
-
-        public TimeSpan GetRemainingTime()
-        {
-            var remaining = budget - watch.Elapsed;
-            return remaining < precision
-                ? TimeSpan.Zero
-                : remaining;
+            return new TimeBudget(Stopwatch.StartNew(), budget, TimeSpan.FromMilliseconds(1));
         }
 
         public bool IsExpired()
@@ -35,8 +27,10 @@ namespace EasyNetQ
             return remaining < precision;
         }
 
-        private readonly TimeSpan budget;
-        private readonly TimeSpan precision;
-        private readonly Stopwatch watch;
+        public static implicit operator TimeSpan(TimeBudget source)
+        {
+            var remaining = source.budget - source.watch.Elapsed;
+            return remaining < source.precision ? TimeSpan.Zero : remaining;
+        }
     }
 }
