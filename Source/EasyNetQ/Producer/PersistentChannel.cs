@@ -64,14 +64,13 @@ namespace EasyNetQ.Producer
 
                 retryTimeout = retryTimeout.Double();
             }
-            logger.Error("Channel action timed out. Throwing exception to client.");
-            throw new TimeoutException("The operation requested on PersistentChannel timed out.");
+            logger.Error("Channel action timed out");
+            throw new TimeoutException("The operation requested on PersistentChannel timed out");
         }
 
         public void Dispose()
         {
             CloseChannel();
-            logger.Debug("Persistent internalChannel disposed.");
         }
 
         private void WireUpEvents()
@@ -119,7 +118,7 @@ namespace EasyNetQ.Producer
                 internalChannel = channel;
             }
 
-            logger.Debug("Persistent channel connected.");
+            logger.Debug("Persistent channel connected");
             return channel;
         }
 
@@ -170,7 +169,7 @@ namespace EasyNetQ.Producer
                 internalChannel = null;
             }
 
-            logger.Debug("Persistent channel disconnected.");
+            logger.Debug("Persistent channel disconnected");
         }
 
         private static bool NeedRethrow(OperationInterruptedException exception)

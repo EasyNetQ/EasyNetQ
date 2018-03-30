@@ -270,7 +270,14 @@ namespace EasyNetQ
                 });
             }
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-            logger.DebugFormat("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Published to exchange {exchange} with routing key {routingKey} and correlationId {correlationId}",
+                    exchange.Name, routingKey, messageProperties.CorrelationId
+                );
+            }
         }
 
         public void Publish<T>(
@@ -369,8 +376,16 @@ namespace EasyNetQ
                     model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                 }).ConfigureAwait(false);
             }
+            
             eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-            logger.DebugFormat("Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'", exchange.Name, routingKey, messageProperties.CorrelationId);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Published to exchange {exchange} with routing key {routingKey} and correlationId {correlationId}",
+                    exchange.Name, routingKey, messageProperties.CorrelationId
+                );
+            }
         }
 
 
@@ -378,7 +393,12 @@ namespace EasyNetQ
         public virtual IQueue QueueDeclare()
         {
             var queueDeclareOk = clientCommandDispatcher.Invoke(x => x.QueueDeclare("", true, true, true, null));
-            logger.DebugFormat("Declared Server Generated Queue '{0}'", queueDeclareOk.QueueName);
+            
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Declared server generated queue {queue}", queueDeclareOk.QueueName);
+            }
+
             return new Queue(queueDeclareOk.QueueName, true);
         }
 
@@ -439,7 +459,15 @@ namespace EasyNetQ
             }
 
             clientCommandDispatcher.Invoke(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments));
-            logger.DebugFormat("Declared Queue: '{0}', durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}", name, durable, exclusive, autoDelete, string.Join(", ", arguments.Select(kvp => $"{kvp.Key}={kvp.Value}")));
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Declared queue {queue} (durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments})",
+                    name, durable, exclusive, autoDelete, arguments.Stringify()
+                );
+            }
+
             return new Queue(name, exclusive);
         }
 
@@ -500,7 +528,15 @@ namespace EasyNetQ
             }
 
             await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);
-            logger.DebugFormat("Declared Queue: '{0}', durable:{1}, exclusive:{2}, autoDelete:{3}, args:{4}", name, durable, exclusive, autoDelete, string.Join(", ", arguments.Select(kvp => $"{kvp.Key}={kvp.Value}")));
+            
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Declared queue {queue} (durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments}",
+                    name, durable, exclusive, autoDelete, arguments.Stringify()
+                );
+            }
+
             return new Queue(name, exclusive);
         }
 
@@ -509,7 +545,11 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, "queue");
 
             clientCommandDispatcher.Invoke(x => x.QueueDelete(queue.Name, ifUnused, ifEmpty));
-            logger.DebugFormat("Deleted Queue: {0}", queue.Name);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Deleted queue {queue}", queue.Name);
+            }
         }
 
         public virtual void QueuePurge(IQueue queue)
@@ -517,7 +557,11 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, "queue");
 
             clientCommandDispatcher.Invoke(x => x.QueuePurge(queue.Name));
-            logger.DebugFormat("Purged Queue: {0}", queue.Name);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Purged queue {queue}", queue.Name);
+            }
         }
 
         public virtual IExchange ExchangeDeclare(
@@ -544,16 +588,23 @@ namespace EasyNetQ
             {
                 arguments.Add("alternate-exchange", alternateExchange);
             }
+            
             if (delayed)
             {
                 arguments.Add("x-delayed-type", type);
                 type = "x-delayed-message";
             }
-            clientCommandDispatcher.Invoke(x =>
+            
+            clientCommandDispatcher.Invoke(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments));
+
+            if (logger.IsDebugEnabled())
             {
-                x.ExchangeDeclare(name, type, durable, autoDelete, arguments);
-            });
-            logger.DebugFormat("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}, delayed:{4}", name, type, durable, autoDelete, delayed);
+                logger.DebugFormat(
+                    "Declared exchange {exchange} (type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments: {arguments})", 
+                    name, type, durable, autoDelete, arguments.Stringify()
+                );
+            }
+
             return new Exchange(name);
         }
 
@@ -575,6 +626,7 @@ namespace EasyNetQ
                 await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclarePassive(name)).ConfigureAwait(false);
                 return new Exchange(name);
             }
+            
             IDictionary<string, object> arguments = new Dictionary<string, object>();
             if (alternateExchange != null)
             {
@@ -585,8 +637,17 @@ namespace EasyNetQ
                 arguments.Add("x-delayed-type", type);
                 type = "x-delayed-message";
             }
+            
             await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments)).ConfigureAwait(false);
-            logger.DebugFormat("Declared Exchange: {0} type:{1}, durable:{2}, autoDelete:{3}, delayed:{4}", name, type, durable, autoDelete, delayed);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Declared exchange {exchange} (type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments={arguments})",
+                    name, type, durable, autoDelete, arguments.Stringify()
+                );
+            }
+
             return new Exchange(name);
        }
 
@@ -595,7 +656,11 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(exchange, "exchange");
 
             clientCommandDispatcher.Invoke(x => x.ExchangeDelete(exchange.Name, ifUnused));
-            logger.DebugFormat("Deleted Exchange: {0}", exchange.Name);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Deleted exchange {exchange}", exchange.Name);
+            }
         }
 
         public virtual IBinding Bind(IExchange exchange, IQueue queue, string routingKey)
@@ -611,7 +676,15 @@ namespace EasyNetQ
 
             var arguments = headers ?? new Dictionary<string, object>();
             clientCommandDispatcher.Invoke(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments));
-            logger.DebugFormat("Bound queue {0} to exchange {1} with routing key {2} and {3} arguments", queue.Name, exchange.Name, routingKey, arguments.Count);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                    queue.Name, exchange.Name, routingKey, arguments.Stringify()
+                );
+            }
+
             return new Binding(queue, exchange, routingKey, arguments);
         }
 
@@ -628,7 +701,15 @@ namespace EasyNetQ
 
             var arguments = headers ?? new Dictionary<string, object>();
             await clientCommandDispatcher.InvokeAsync(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments)).ConfigureAwait(false);
-            logger.DebugFormat("Bound queue {0} to exchange {1} with routing key {2} and {3} arguments", queue.Name, exchange.Name, routingKey, arguments.Count);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                    queue.Name, exchange.Name, routingKey, arguments.Stringify()
+                );
+            }
+
             return new Binding(queue, exchange, routingKey, arguments);
         }
 
@@ -645,7 +726,15 @@ namespace EasyNetQ
 
             var arguments = headers ?? new Dictionary<string, object>();
             clientCommandDispatcher.Invoke(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments));
-            logger.DebugFormat("Bound destination exchange {0} to source exchange {1} with routing key {2} and {3} arguments", destination.Name, source.Name, routingKey, arguments.Count);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routing key {routingKey} and arguments {arguments}",
+                    destination.Name, source.Name, routingKey, arguments.Stringify()
+                );
+            }
+
             return new Binding(destination, source, routingKey, arguments);
         }
 
@@ -662,7 +751,15 @@ namespace EasyNetQ
 
             var arguments = headers ?? new Dictionary<string, object>();
             await clientCommandDispatcher.InvokeAsync(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments)).ConfigureAwait(false);
-            logger.DebugFormat("Bound destination exchange {0} to source exchange {1} with routing key {2} and {3} arguments", destination.Name, source.Name, routingKey, arguments.Count);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routing key {routingKey} and arguments {arguments}",
+                    destination.Name, source.Name, routingKey, arguments.Stringify()
+                );
+            }
+
             return new Binding(destination, source, routingKey, arguments);
         }
 
@@ -674,15 +771,30 @@ namespace EasyNetQ
             if (queue != null)
             {
                 clientCommandDispatcher.Invoke(x => x.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null));
-                logger.DebugFormat("Unbound queue {0} from exchange {1} with routing key {2}", queue.Name, binding.Exchange.Name, binding.RoutingKey);
+
+                if (logger.IsDebugEnabled())
+                {
+                    logger.DebugFormat(
+                        "Unbound queue {queue} from exchange {exchange} with routing key {routingKey}",
+                        queue.Name, binding.Exchange.Name, binding.RoutingKey
+                    );
+                }
             }
             else
             {
                 var destination = binding.Bindable as IExchange;
                 if (destination == null)
                     return;
+                
                 clientCommandDispatcher.InvokeAsync(x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, new Dictionary<string, object>()));
-                logger.DebugFormat("Unbound destination exchange {0} from source exchange {1} with routing key {2}", destination.Name, binding.Exchange.Name, binding.RoutingKey);
+
+                if (logger.IsDebugEnabled())
+                {
+                    logger.DebugFormat(
+                        "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey}", 
+                        destination.Name, binding.Exchange.Name, binding.RoutingKey
+                    );
+                }
             }
         }
 
@@ -692,7 +804,11 @@ namespace EasyNetQ
             var result = Get(queue);
             if (result?.Body == null)
             {
-                logger.DebugFormat("... but no message was available on queue '{0}'", queue.Name);
+                if (logger.IsDebugEnabled())
+                {
+                    logger.DebugFormat("No message was available on queue {queue}", queue.Name);
+                }
+
                 return new BasicGetResult<T>();
             }
             var message = messageSerializationStrategy.DeserializeMessage<T>(result.Properties, result.Body);
@@ -700,8 +816,17 @@ namespace EasyNetQ
             {
                 return new BasicGetResult<T>(message);
             }
-            logger.DebugFormat("Incorrect message type returned from Get. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
-            throw new EasyNetQException("Incorrect message type returned from Get. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
+
+            //As for me, we shouldn't log here at all, just throw an exception
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Incorrect message type returned. Expected {expectedType}, but was {actualType}",
+                    typeof(T).Name, message.MessageType.Name
+                );
+            }
+
+            throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
         }
 
         public IBasicGetResult Get(IQueue queue)
@@ -711,6 +836,7 @@ namespace EasyNetQ
             var result = clientCommandDispatcher.Invoke(x => x.BasicGet(queue.Name, true));
             if (result == null)
                 return null;
+            
             var getResult = new BasicGetResult(
                 result.Body,
                 new MessageProperties(result.BasicProperties),
@@ -724,7 +850,10 @@ namespace EasyNetQ
                     )
                 );
 
-            logger.DebugFormat("Message Get from queue '{0}'", queue.Name);
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Got message from queue {queue}", queue.Name);
+            }
 
             return getResult;
         }
@@ -732,8 +861,14 @@ namespace EasyNetQ
         public uint MessageCount(IQueue queue)
         {
             Preconditions.CheckNotNull(queue, "queue");
+            
             var messageCount = clientCommandDispatcher.Invoke(x => x.QueueDeclarePassive(queue.Name)).MessageCount;
-            logger.DebugFormat("{0} messages in queue '{1}'", messageCount, queue.Name);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("{messagesCount} messages in queue {queue}", messageCount, queue.Name);
+            }
+
             return messageCount;
         }
 
@@ -776,8 +911,6 @@ namespace EasyNetQ
             connection.Dispose();
 
             disposed = true;
-
-            logger.Debug("Connection disposed");
         }
     }
 }
