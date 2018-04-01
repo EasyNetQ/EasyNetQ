@@ -176,7 +176,6 @@ namespace EasyNetQ
                 x =>
                     {
                         x.WithPriority(configuration.Priority)
-                         .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
                          .WithPrefetchCount(configuration.PrefetchCount);
                         if (configuration.IsExclusive)
                         {
