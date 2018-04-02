@@ -51,8 +51,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                                                    "my_queue",
                                                    ConsumerTag,
                                                    (ushort)50,
-                                                   0,
-                                                   false);
+                                                   0);
         }
     }
 }
