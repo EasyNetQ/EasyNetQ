@@ -183,8 +183,7 @@ namespace EasyNetQ.Consumer
 
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
-                    {"x-priority", configuration.Priority},
-                    {"x-cancel-on-ha-failover", configuration.CancelOnHaFailover || connectionConfiguration.CancelOnHaFailover}
+                    {"x-priority", configuration.Priority}
                 };
             try
             {
@@ -214,8 +213,8 @@ namespace EasyNetQ.Consumer
                             basicConsumers); // consumer
                         this.basicConsumers.Add(basicConsumers);
 
-                        logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
-                            queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
+                        logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
+                            queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority);
                     }
                     catch (Exception ex)
                     {
@@ -224,7 +223,6 @@ namespace EasyNetQ.Consumer
                         return StartConsumingStatus.Failed;
                     }
                 }
-                
             }
             catch (Exception exception)
             {
@@ -250,8 +248,7 @@ namespace EasyNetQ.Consumer
             var consumerTag = conventions.ConsumerTagConvention();
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
-                    {"x-priority", configuration.Priority},
-                    {"x-cancel-on-ha-failover", configuration.CancelOnHaFailover || connectionConfiguration.CancelOnHaFailover}
+                    {"x-priority", configuration.Priority}
                 };
             try
             {
@@ -272,8 +269,8 @@ namespace EasyNetQ.Consumer
                     arguments,          // arguments
                     basicConsumers);              // consumer
 
-                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
-                                  queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
+                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
+                                  queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority);
             }
             catch (Exception exception)
             {

@@ -21,7 +21,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                 {
                         ConfigureSubscriptionConfiguration =
                                 c => c.WithAutoDelete(false)
-                                    .WithCancelOnHaFailover(false)
                                     .WithExpires(11)
                                     .WithPrefetchCount(11)
                                     .WithPriority(11)
@@ -61,7 +60,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();
-            subscriptionConfiguration.CancelOnHaFailover.ShouldBeTrue();
             subscriptionConfiguration.Expires.ShouldEqual(10);
             subscriptionConfiguration.PrefetchCount.ShouldEqual((ushort)10);
             subscriptionConfiguration.Priority.ShouldEqual(10);
@@ -72,7 +70,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private class MyConsumerWithActionAndAttribute : IConsume<MessageA>
         {
             [AutoSubscriberConsumer(SubscriptionId = "MyActionAndAttributeTest")]
-            [SubscriptionConfiguration(AutoDelete = true, CancelOnHaFailover = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
+            [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
             public void Consume(MessageA message)
             {
             }
