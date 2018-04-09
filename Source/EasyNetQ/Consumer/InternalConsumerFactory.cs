@@ -12,25 +12,21 @@ namespace EasyNetQ.Consumer
     {
         private readonly IHandlerRunner handlerRunner;
         private readonly IConventions conventions;
-        private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IConsumerDispatcherFactory consumerDispatcherFactory;
         private readonly IEventBus eventBus;
 
         public InternalConsumerFactory(
             IHandlerRunner handlerRunner, 
             IConventions conventions, 
-            ConnectionConfiguration connectionConfiguration, 
             IConsumerDispatcherFactory consumerDispatcherFactory, 
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(consumerDispatcherFactory, "consumerDispatcherFactory");
 
             this.handlerRunner = handlerRunner;
             this.conventions = conventions;
-            this.connectionConfiguration = connectionConfiguration;
             this.consumerDispatcherFactory = consumerDispatcherFactory;
             this.eventBus = eventBus;
         }
@@ -38,7 +34,7 @@ namespace EasyNetQ.Consumer
         public IInternalConsumer CreateConsumer()
         {
             var dispatcher = consumerDispatcherFactory.GetConsumerDispatcher();
-            return new InternalConsumer(handlerRunner, dispatcher, conventions, connectionConfiguration, eventBus);
+            return new InternalConsumer(handlerRunner, dispatcher, conventions, eventBus);
         }
 
         public void OnDisconnected()
