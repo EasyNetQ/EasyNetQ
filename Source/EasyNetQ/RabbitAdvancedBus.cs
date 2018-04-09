@@ -463,7 +463,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared queue {queue} (durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments})",
+                    "Declared queue {queue} durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments}",
                     name, durable, exclusive, autoDelete, arguments.Stringify()
                 );
             }
@@ -532,7 +532,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared queue {queue} (durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments}",
+                    "Declared queue {queue} durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments",
                     name, durable, exclusive, autoDelete, arguments.Stringify()
                 );
             }
@@ -600,7 +600,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared exchange {exchange} (type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments: {arguments})", 
+                    "Declared exchange {exchange} type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments: {arguments}", 
                     name, type, durable, autoDelete, arguments.Stringify()
                 );
             }
@@ -643,7 +643,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared exchange {exchange} (type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments={arguments})",
+                    "Declared exchange {exchange} type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments={arguments}",
                     name, type, durable, autoDelete, arguments.Stringify()
                 );
             }

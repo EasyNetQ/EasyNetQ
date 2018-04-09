@@ -142,7 +142,7 @@ namespace EasyNetQ
         {
             logger.Error(
                 exception,
-                "Failed to connect to broker {broker}, port {port}, vhost {vhost} ",
+                "Failed to connect to broker {broker}, port {port}, vhost {vhost}",
                 connectionFactory.CurrentHost.Host,
                 connectionFactory.CurrentHost.Port,
                 connectionFactory.Configuration.VirtualHost
