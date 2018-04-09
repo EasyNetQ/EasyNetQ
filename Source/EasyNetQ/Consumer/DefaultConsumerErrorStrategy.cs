@@ -141,9 +141,8 @@ namespace EasyNetQ.Consumer
             if (disposed || disposing)
             {
                 logger.ErrorFormat(
-                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message(consumerTag: {consumerTag}, deliveryTag: {deliveryTag}) will be requeed",
-                    context.Info.ConsumerTag,
-                    context.Info.DeliverTag
+                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo {receivedInfo} will be requeed",
+                    context.Info
                 );
                 
                 return AckStrategies.NackWithRequeue;
