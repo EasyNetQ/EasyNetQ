@@ -65,7 +65,7 @@ namespace EasyNetQ.Consumer
 
             if (ThrowOnNoMatchingHandler)
             {
-                logger.ErrorFormat("No handler found for message type {0}", messageType.Name);
+                logger.ErrorFormat("No handler found for message type {messageType}", messageType.Name);
                 throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
             }
 

@@ -79,7 +79,7 @@ namespace EasyNetQ.Consumer
                             {
                                 if (connection.CloseReason != null)
                                 {
-                                    logger.InfoFormat("Connection {0} has shutdown. Reason: {1}", connection.ToString(), connection.CloseReason.Cause);
+                                    logger.InfoFormat("Connection {connection} has shutdown with reason {reason}", connection.ToString(), connection.CloseReason.Cause);
                                 }
                                 else
                                 {
@@ -141,7 +141,7 @@ namespace EasyNetQ.Consumer
             if (disposed || disposing)
             {
                 logger.ErrorFormat(
-                    "EasyNetQ Consumer Error Handler: DefaultConsumerErrorStrategy was already disposed, when attempting to handle consumer error.  This can occur when messaging is being shut down through disposal of the IBus.  Message will not be ackd to RabbitMQ server and will remain on the RabbitMQ queue. Error message will not be published to error queue. ConsumerTag: {0}, DeliveryTag: {1}",
+                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message(consumerTag: {consumerTag}, deliveryTag: {deliveryTag}) will be requeed",
                     context.Info.ConsumerTag,
                     context.Info.DeliverTag
                 );
@@ -165,23 +165,28 @@ namespace EasyNetQ.Consumer
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
                 }
             }
-            catch (BrokerUnreachableException)
+            catch (BrokerUnreachableException unreachableException)
             {
-                // thrown if the broker is unreachable during initial creation.
-                logger.ErrorFormat("EasyNetQ Consumer Error Handler cannot connect to Broker\n{0}", CreateConnectionCheckMessage());
+                // thrown if the broker is unreachable duringe initial creation.
+                logger.Error(
+                    unreachableException,
+                    "Cannot connect to broker while attempting to publish error message"
+                );
             }
             catch (OperationInterruptedException interruptedException)
             {
                 // thrown if the broker connection is broken during declare or publish.
-                logger.ErrorFormat("EasyNetQ Consumer Error Handler: Broker connection was closed while attempting to publish Error message.\nException was: '{0}'\n{1}",
-                    interruptedException.Message,
-                    CreateConnectionCheckMessage());
+                logger.Error(
+                    interruptedException,
+                    "Broker connection was closed while attempting to publish error message"
+                );
             }
             catch (Exception unexpectedException)
-            {
+            {                
                 // Something else unexpected has gone wrong :(
-                logger.ErrorFormat("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n{0}", unexpectedException);
+                logger.Error(unexpectedException, "Failed to publish error message");
             }
+            
             return AckStrategies.Ack;
         }
 
@@ -225,16 +230,6 @@ namespace EasyNetQ.Consumer
             }
 
             return serializer.MessageToBytes(error);
-        }
-
-        private string CreateConnectionCheckMessage()
-        {
-            return
-                "Please check EasyNetQ connection information and that the RabbitMQ Service is running at the specified endpoint.\n" +
-                string.Format("\tHostname: '{0}'\n", connectionFactory.CurrentHost.Host) +
-                string.Format("\tVirtualHost: '{0}'\n", connectionFactory.Configuration.VirtualHost) +
-                string.Format("\tUserName: '{0}'\n", connectionFactory.Configuration.UserName) +
-                "Failed to write error message to error queue";
         }
 
         private bool disposed;
