@@ -274,8 +274,10 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Published to exchange {exchange} with routing key {routingKey} and correlationId {correlationId}",
-                    exchange.Name, routingKey, messageProperties.CorrelationId
+                    "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                    exchange.Name, 
+                    routingKey,
+                    messageProperties.CorrelationId
                 );
             }
         }
@@ -382,8 +384,10 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Published to exchange {exchange} with routing key {routingKey} and correlationId {correlationId}",
-                    exchange.Name, routingKey, messageProperties.CorrelationId
+                    "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                    exchange.Name, 
+                    routingKey,
+                    messageProperties.CorrelationId
                 );
             }
         }
@@ -463,8 +467,12 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared queue {queue} durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments}",
-                    name, durable, exclusive, autoDelete, arguments.Stringify()
+                    "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
+                    name,
+                    durable,
+                    exclusive,
+                    autoDelete,
+                    arguments.Stringify()
                 );
             }
 
@@ -532,8 +540,12 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared queue {queue} durable:{durable}, exclusive:{exclusive}, autoDelete:{autoDelete}, arguments:{arguments",
-                    name, durable, exclusive, autoDelete, arguments.Stringify()
+                    "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
+                    name,
+                    durable,
+                    exclusive,
+                    autoDelete,
+                    arguments.Stringify()
                 );
             }
 
@@ -600,8 +612,12 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared exchange {exchange} type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments: {arguments}", 
-                    name, type, durable, autoDelete, arguments.Stringify()
+                    "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}", 
+                    name,
+                    type,
+                    durable,
+                    autoDelete,
+                    arguments.Stringify()
                 );
             }
 
@@ -643,8 +659,12 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Declared exchange {exchange} type:{type}, durable:{durable}, autoDelete:{autoDelete}, arguments={arguments}",
-                    name, type, durable, autoDelete, arguments.Stringify()
+                    "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
+                    name,
+                    type,
+                    durable,
+                    autoDelete,
+                    arguments.Stringify()
                 );
             }
 
@@ -680,8 +700,11 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
-                    queue.Name, exchange.Name, routingKey, arguments.Stringify()
+                    "Bound queue {queue} to exchange {exchange} with routingKey={routingKey} and arguments={arguments}",
+                    queue.Name,
+                    exchange.Name,
+                    routingKey, 
+                    arguments.Stringify()
                 );
             }
 
@@ -705,8 +728,11 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
-                    queue.Name, exchange.Name, routingKey, arguments.Stringify()
+                    "Bound queue {queue} to exchange {exchange} with routingKey={routingKey} and arguments={arguments}",
+                    queue.Name,
+                    exchange.Name,
+                    routingKey,
+                    arguments.Stringify()
                 );
             }
 
@@ -730,8 +756,11 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routing key {routingKey} and arguments {arguments}",
-                    destination.Name, source.Name, routingKey, arguments.Stringify()
+                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routingKey={routingKey} and arguments={arguments}",
+                    destination.Name, 
+                    source.Name,
+                    routingKey,
+                    arguments.Stringify()
                 );
             }
 
@@ -755,8 +784,11 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routing key {routingKey} and arguments {arguments}",
-                    destination.Name, source.Name, routingKey, arguments.Stringify()
+                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routingKey={routingKey} and arguments={arguments}",
+                    destination.Name,
+                    source.Name, 
+                    routingKey,
+                    arguments.Stringify()
                 );
             }
 
@@ -776,7 +808,9 @@ namespace EasyNetQ
                 {
                     logger.DebugFormat(
                         "Unbound queue {queue} from exchange {exchange} with routing key {routingKey}",
-                        queue.Name, binding.Exchange.Name, binding.RoutingKey
+                        queue.Name,
+                        binding.Exchange.Name,
+                        binding.RoutingKey
                     );
                 }
             }
@@ -792,7 +826,9 @@ namespace EasyNetQ
                 {
                     logger.DebugFormat(
                         "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey}", 
-                        destination.Name, binding.Exchange.Name, binding.RoutingKey
+                        destination.Name,
+                        binding.Exchange.Name,
+                        binding.RoutingKey
                     );
                 }
             }
@@ -822,7 +858,8 @@ namespace EasyNetQ
             {
                 logger.DebugFormat(
                     "Incorrect message type returned. Expected {expectedType}, but was {actualType}",
-                    typeof(T).Name, message.MessageType.Name
+                    typeof(T).Name,
+                    message.MessageType.Name
                 );
             }
 

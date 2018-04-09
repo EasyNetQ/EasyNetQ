@@ -141,7 +141,6 @@ namespace EasyNetQ.Consumer
         private readonly IHandlerRunner handlerRunner;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
-        private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IEventBus eventBus;
 
         private ICollection<BasicConsumer> basicConsumers;
@@ -156,22 +155,18 @@ namespace EasyNetQ.Consumer
             IHandlerRunner handlerRunner,
             IConsumerDispatcher consumerDispatcher,
             IConventions conventions,
-            ConnectionConfiguration connectionConfiguration,
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
             Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.handlerRunner = handlerRunner;
             this.consumerDispatcher = consumerDispatcher;
             this.conventions = conventions;
-            this.connectionConfiguration = connectionConfiguration;
             this.eventBus = eventBus;
         }
-
 
         public StartConsumingStatus StartConsuming(IPersistentConnection connection, ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, IConsumerConfiguration configuration)
         {
@@ -209,10 +204,12 @@ namespace EasyNetQ.Consumer
                             true,
                             configuration.IsExclusive,
                             arguments, // arguments
-                            basicConsumers); // consumer
+                            basicConsumers // consumer
+                        );
+                        
                         this.basicConsumers.Add(basicConsumers);
 
-                        logger.InfoFormat("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
+                        logger.InfoFormat("Declared Consumer queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
                             queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority);
                     }
                     catch (Exception ex)

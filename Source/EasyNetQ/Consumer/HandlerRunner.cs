@@ -57,7 +57,7 @@ namespace EasyNetQ.Consumer
                 {
                     logger.Error(
                         task.Exception,
-                        "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties: {properties}, message: {message}", 
+                        "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}", 
                         context.Info,
                         context.Properties,
                         Convert.ToBase64String(context.Body)

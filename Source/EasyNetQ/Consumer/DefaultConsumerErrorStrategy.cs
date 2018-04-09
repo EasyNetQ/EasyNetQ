@@ -79,7 +79,7 @@ namespace EasyNetQ.Consumer
                             {
                                 if (connection.CloseReason != null)
                                 {
-                                    logger.InfoFormat("Connection {connection} has shutdown with reason {reason}", connection.ToString(), connection.CloseReason.Cause);
+                                    logger.InfoFormat("Connection {connection} has shutdown with reason={reason}", connection.ToString(), connection.CloseReason.Cause);
                                 }
                                 else
                                 {
@@ -141,7 +141,7 @@ namespace EasyNetQ.Consumer
             if (disposed || disposing)
             {
                 logger.ErrorFormat(
-                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo {receivedInfo} will be requeed",
+                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeed",
                     context.Info
                 );
                 
