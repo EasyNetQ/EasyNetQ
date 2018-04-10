@@ -41,5 +41,10 @@
             IsExclusive = true;
             return this;
         }
+
+        public override string ToString()
+        {
+            return $"[Priority={Priority}, IsExclusive={IsExclusive}, PrefetchCount={PrefetchCount}]";
+        }
     }
 }
