@@ -98,16 +98,6 @@ namespace EasyNetQ.Tests
                 Arg.Is(false),
                 Arg.Is<Dictionary<string, object>>( x => x.SequenceEqual(new Dictionary<string, object>())));
         }
-
-        [Fact]
-        public void Should_write_debug_message_saying_message_was_published()
-        {
-            mockBuilder.Logger.Received().DebugWrite(
-                "Published to exchange: '{0}', routing key: '{1}', correlationId: '{2}'",
-                "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests",
-                "",
-                correlationId);
-        }
     }
 
     public class When_publish_with_topic_is_called : IDisposable

@@ -23,9 +23,8 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             eventBus = Substitute.For<IEventBus>();
 
             persistentConnection.CreateModel().Returns(channel);
-            var logger = Substitute.For<IEasyNetQLogger>();
 
-            persistentChannel = new PersistentChannel(persistentConnection, logger, configuration, eventBus);
+            persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }

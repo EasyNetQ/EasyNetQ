@@ -8,7 +8,6 @@ using EasyNetQ.Tests.Mocking;
 using Xunit;
 using NSubstitute;
 using System.Linq;
-using EasyNetQ.Loggers;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -29,7 +28,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public When_autosubscribing()
         {
             //mockBuilder = new MockBuilder();
-            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
+            mockBuilder = new MockBuilder();
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
             parameters = new Dictionary<string, object>();

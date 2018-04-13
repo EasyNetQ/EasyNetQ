@@ -46,13 +46,11 @@ namespace EasyNetQ.Tests
 
             eventBus = new EventBus();
 
-            var logger = Substitute.For<IEasyNetQLogger>();
-            var persistentConnectionFactory = new PersistentConnectionFactory(logger, connectionFactory, eventBus);            
+            var persistentConnectionFactory = new PersistentConnectionFactory(connectionFactory, eventBus);            
 
             var advancedBus = new RabbitAdvancedBus(
                 connectionFactory,
                 Substitute.For<IConsumerFactory>(),
-                logger,
                 Substitute.For<IClientCommandDispatcherFactory>(),
                 Substitute.For<IPublishConfirmationListener>(),
                 eventBus,

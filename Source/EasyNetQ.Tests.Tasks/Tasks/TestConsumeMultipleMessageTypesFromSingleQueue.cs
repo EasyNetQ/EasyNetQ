@@ -4,28 +4,31 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Tasks;
 using Net.CommandLine;
+using Serilog;
 
 namespace EasyNetQ.Tests.Performance.Consumer
 {
-
-
     public class TestConsumeMultipleMessageTypesFromSingleQueue : ICommandLineTask, IDisposable
     {
-        IBus bus;
+        private readonly ILogger logger;
+        
+        private IBus bus;
+
+        public TestConsumeMultipleMessageTypesFromSingleQueue(ILogger logger)
+        {
+            this.logger = logger;
+        }
 
         public Task Run(CancellationToken cancellationToken)
         {
-            var logger = new NoDebugLogger();
-
             bus = RabbitHutch.CreateBus("host=localhost;product=consumer",
                 x => x
-                    .Register<IEasyNetQLogger>(_ => logger)
                     .Register<IConventions, SingleQueueNamingConvention>()
                     .Register<IHandlerCollectionFactory, HandlerCollectionPerQueueFactory>()
             );
 
-            bus.SubscribeAsync<MessageA>("multiple", async m => await Task.Run(() => logger.InfoWrite("{0}", m)).ConfigureAwait(false));
-            bus.SubscribeAsync<MessageB>("multiple", async m => await Task.Run(() => logger.InfoWrite("{0}", m)).ConfigureAwait(false));
+            bus.SubscribeAsync<MessageA>("multiple", async m => await Task.Run(() => logger.Information("{0}", m)).ConfigureAwait(false));
+            bus.SubscribeAsync<MessageB>("multiple", async m => await Task.Run(() => logger.Information("{0}", m)).ConfigureAwait(false));
 
             for (int i = 0; i < 100; i++)
             {

@@ -21,11 +21,5 @@ namespace EasyNetQ
         {
             ((IDictionary<TKey, TValue>)source).Add(key, value);        
         }
-
-        public static string EscapeBraces(this string s)
-        {
-            return s?.Replace("{", "{{").Replace("}", "}}");
-        }
     }
-
 }

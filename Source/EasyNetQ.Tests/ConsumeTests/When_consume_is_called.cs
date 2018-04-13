@@ -42,16 +42,5 @@ namespace EasyNetQ.Tests.ConsumeTests
                    })),
                Arg.Is(MockBuilder.Consumers[0]));
         }
-
-        [Fact]
-        public void Should_write_debug_message()
-        {
-            MockBuilder.Logger.Received().InfoWrite(
-                                                   "Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3}",
-                                                   "my_queue",
-                                                   ConsumerTag,
-                                                   (ushort)50,
-                                                   0);
-        }
     }
 }

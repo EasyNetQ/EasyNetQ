@@ -10,16 +10,13 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests
 {
-    using EasyNetQ.Loggers;
-
     public class ConsumerErrorConditionsTests : IDisposable
     {
         private IBus bus;
 
         public ConsumerErrorConditionsTests()
         {
-            bus = RabbitHutch.CreateBus(new ConnectionConfiguration() {Hosts = new HostConfiguration[] {new HostConfiguration() { Host = "localhost"} }},
-                reg => { reg.Register<IEasyNetQLogger>(p => new ConsoleLogger()); });
+            bus = RabbitHutch.CreateBus(new ConnectionConfiguration() {Hosts = new HostConfiguration[] {new HostConfiguration() { Host = "localhost"} }}, c => {});
         }
 
         public void Dispose()

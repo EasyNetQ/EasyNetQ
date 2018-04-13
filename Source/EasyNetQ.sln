@@ -14,7 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec = ..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec
 		..\Package\EasyNetQ\EasyNetQ.nuspec = ..\Package\EasyNetQ\EasyNetQ.nuspec
 		..\Build\EasyNetQ.proj = ..\Build\EasyNetQ.proj
-		..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec = ..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec
 		..\global.json = ..\global.json
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
@@ -59,8 +58,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.StructureMap", "EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj", "{0EBE99EE-56D8-47C0-9ED6-C6BCC88C4453}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Windsor", "EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj", "{456AD3EC-2759-4054-A31A-35EA086493E3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serilog", "EasyNetQ.Serilog\EasyNetQ.Serilog.csproj", "{23A533BE-64FB-47B2-B9D6-AF48644162DD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.csproj", "{62BBFFCE-4E84-42C8-86F5-0164ACD12031}"
 EndProject
@@ -124,10 +121,6 @@ Global
 		{456AD3EC-2759-4054-A31A-35EA086493E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{456AD3EC-2759-4054-A31A-35EA086493E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{456AD3EC-2759-4054-A31A-35EA086493E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Release|Any CPU.ActiveCfg = Release|Any CPU

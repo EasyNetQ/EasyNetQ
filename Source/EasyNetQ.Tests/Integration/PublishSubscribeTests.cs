@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using EasyNetQ.Loggers;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -207,14 +206,11 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_round_robin_between_subscribers()
         {
-            Action<IServiceRegister> setNoDebugLogger = register =>
-                register.Register<IEasyNetQLogger>(_ => new DelegateLogger());
-
             const string connectionString = "host=localhost;prefetchcount=100";
 
-            var publishBus = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
-            var subscribeBus1 = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
-            var subscribeBus2 = RabbitHutch.CreateBus(connectionString, setNoDebugLogger);
+            var publishBus = RabbitHutch.CreateBus(connectionString);
+            var subscribeBus1 = RabbitHutch.CreateBus(connectionString);
+            var subscribeBus2 = RabbitHutch.CreateBus(connectionString);
 
             // first set up the subscribers
             subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message => 

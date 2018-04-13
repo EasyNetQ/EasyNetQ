@@ -14,7 +14,7 @@ namespace EasyNetQ.Consumer
         private volatile bool isStarted;
 
         private readonly IQueue queue;
-        private readonly Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
 

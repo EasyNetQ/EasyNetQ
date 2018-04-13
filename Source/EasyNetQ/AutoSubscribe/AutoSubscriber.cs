@@ -284,9 +284,6 @@ namespace EasyNetQ.AutoSubscribe
                 if (subscriptionInfos.Any())
                     yield return new KeyValuePair<Type, AutoSubscriberConsumerInfo[]>(concreteType, subscriptionInfos);
             }
-
         }
-
-       
     }
 }

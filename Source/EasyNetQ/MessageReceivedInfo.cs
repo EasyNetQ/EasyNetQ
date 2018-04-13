@@ -31,5 +31,10 @@
             RoutingKey = routingKey;
             Queue = queue;
         }
+
+        public override string ToString()
+        {
+            return $"[ConsumerTag={ConsumerTag}, DeliverTag={DeliverTag}, Redelivered={Redelivered}, Exchange={Exchange}, RoutingKey={RoutingKey}, Queue={Queue}]";
+        }
     }
 }

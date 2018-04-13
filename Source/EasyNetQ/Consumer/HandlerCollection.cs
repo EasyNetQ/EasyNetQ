@@ -4,21 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using System.Reflection;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
 {
     public class HandlerCollection : IHandlerCollection
     {
+        private readonly ILog logger = LogProvider.For<HandlerCollection>();
+        
         private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, Task>> handlers =
             new Dictionary<Type, Func<IMessage, MessageReceivedInfo, Task>>();
 
-        private readonly IEasyNetQLogger logger;
 
-        public HandlerCollection(IEasyNetQLogger logger)
+        public HandlerCollection()
         {
-            Preconditions.CheckNotNull(logger, "logger");
-
-            this.logger = logger;
             ThrowOnNoMatchingHandler = true;
         }
 
@@ -66,7 +65,7 @@ namespace EasyNetQ.Consumer
 
             if (ThrowOnNoMatchingHandler)
             {
-                logger.ErrorWrite("No handler found for message type {0}", messageType.Name);
+                logger.ErrorFormat("No handler found for message type {messageType}", messageType.Name);
                 throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
             }
 
