@@ -21,7 +21,6 @@ namespace EasyNetQ.Tests.Mocking
         public List<IBasicConsumer> Consumers { get; } = new List<IBasicConsumer>();
         public IBasicProperties BasicProperties { get; } = new BasicProperties();
         public List<string> ConsumerQueueNames { get; } = new List<string>();
-        public IEasyNetQLogger Logger { get; } = Substitute.For<IEasyNetQLogger>();    
         public IBus Bus { get; private set; }
         public IServiceProvider ServiceProvider
         {
@@ -92,7 +91,6 @@ namespace EasyNetQ.Tests.Mocking
             {
                 registerServices(x);
                 x.Register(_ => ConnectionFactory);
-                x.Register(_ => Logger);
             });
 
             Assert.NotNull(Bus);

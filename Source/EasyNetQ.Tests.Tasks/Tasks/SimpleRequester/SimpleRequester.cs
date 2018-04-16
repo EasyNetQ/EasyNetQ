@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Loggers;
-using EasyNetQ.Tests.Tasks;
-using EasyNetQ.Tests.Tasks.Tasks;
 using Net.CommandLine;
 
 namespace EasyNetQ.Tests.SimpleRequester
 {
     public class SimpleRequester : ICommandLineTask, IDisposable
     {
-        private static readonly IBus bus = RabbitHutch.CreateBus("host=localhost",
-            x => x.Register(_ => new NoDebugLogger()));
+        private static readonly IBus bus = RabbitHutch.CreateBus("host=localhost");
 
         private static long count = 0;
 

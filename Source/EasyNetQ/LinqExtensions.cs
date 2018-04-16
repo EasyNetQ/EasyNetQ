@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EasyNetQ
 {
@@ -43,8 +44,13 @@ namespace EasyNetQ
             }
         }
 
-        [ThreadStatic] private static Random _random;
+        internal static string Stringify(this IDictionary<string, object> source)
+        {
+            return string.Join(", ", source.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+        }
 
-        private static Random Random => _random ?? (_random = new Random(Environment.TickCount));
+        [ThreadStatic] private static Random random;
+
+        private static Random Random => random ?? (random = new Random(Environment.TickCount));
     }
 }

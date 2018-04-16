@@ -67,12 +67,12 @@ namespace EasyNetQ.NonGeneric
 
         public static void Publish(this IBus bus, Type messageType, object message)
         {
-            PublishAsync(bus, messageType, message).Wait();
+            PublishAsync(bus, messageType, message).GetAwaiter().GetResult();
         }
 
         public static void Publish(this IBus bus, Type messageType, object message, string topic)
         {
-            PublishAsync(bus, messageType, message, topic).Wait();
+            PublishAsync(bus, messageType, message, topic).GetAwaiter().GetResult();
         }
 
         public static Task PublishAsync(this IBus bus, Type messageType, object message)

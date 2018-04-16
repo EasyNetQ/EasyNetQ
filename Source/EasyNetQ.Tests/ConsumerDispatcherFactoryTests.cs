@@ -11,14 +11,12 @@ namespace EasyNetQ.Tests
     public class ConsumerDispatcherFactoryTests : IDisposable
     {
         private IConsumerDispatcherFactory dispatcherFactory;
-        private IEasyNetQLogger logger;
 
         public ConsumerDispatcherFactoryTests()
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            logger = Substitute.For<IEasyNetQLogger>();
-            dispatcherFactory = new ConsumerDispatcherFactory(configuration, logger);
+            dispatcherFactory = new ConsumerDispatcherFactory(configuration);
         }
 
         public void Dispose()

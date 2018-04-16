@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using EasyNetQ.Loggers;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using Xunit;
 
@@ -18,11 +17,21 @@ namespace EasyNetQ.Tests.Integration
             public int Value { get; set; }
         }
 
+        private class RpcResponseWithoutParameterlessConstructor
+        {
+            private readonly int _value;
+
+            public RpcResponseWithoutParameterlessConstructor(int value)
+            {
+                _value = value;
+            }
+        }
+
         private IBus bus;
 
         public RpcTests()
         {
-            bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger>(_ => new ConsoleLogger()));
+            bus = RabbitHutch.CreateBus("host=localhost");
         }
 
         public void Dispose()
@@ -69,6 +78,66 @@ namespace EasyNetQ.Tests.Integration
 
                 Thread.Sleep(2000);
             });
+        }
+
+        [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
+        public void Should_reply_with_the_exception_using_classes_with_parameterless_constructor_as_message()
+        {
+            var ex = Assert.ThrowsAny<Exception>(() =>
+            {
+                bus.Respond<RpcRequest, RpcResponse>(req =>
+                {
+                    throw new Exception("Simulated Exception!");
+                });
+                var request = new RpcRequest { Value = 5 };
+
+                var response = bus.Request<RpcRequest, RpcResponse>(request);
+
+                Thread.Sleep(2000);
+            });
+            Assert.IsType<AggregateException>(ex);
+            Assert.NotNull(ex.InnerException);
+            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+        }
+
+        [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
+        public void Should_reply_with_the_exception_using_string_as_message()
+        {
+            var ex = Assert.ThrowsAny<Exception>(() =>
+            {
+                bus.Respond<string, string>(req =>
+                {
+                    throw new Exception("Simulated Exception!");
+                });
+                var request = "Hello";
+
+                var response = bus.Request<string, string>(request);
+
+                Thread.Sleep(2000);
+            });
+            Assert.IsType<AggregateException>(ex);
+            Assert.NotNull(ex.InnerException);
+            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+        }
+
+        [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
+        public void Should_reply_with_the_exception_using_classes_without_parameterless_constructor_as_message()
+        {
+            var ex = Assert.ThrowsAny<Exception>(() =>
+            {
+                bus.Respond<RpcRequest, RpcResponseWithoutParameterlessConstructor>(req =>
+                {
+                    throw new Exception("Simulated Exception!");
+                });
+                var request = new RpcRequest { Value = 5 };
+
+                var response = bus.Request<RpcRequest, RpcResponseWithoutParameterlessConstructor>(request);
+
+                Thread.Sleep(2000);
+            });
+            Assert.IsType<AggregateException>(ex);
+            Assert.NotNull(ex.InnerException);
+            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
         }
     }
 }

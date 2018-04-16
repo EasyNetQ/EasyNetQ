@@ -65,18 +65,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
         }
-
-        [Fact]
-        public void Should_write_debug_message()
-        {
-            MockBuilder.Logger.Received().DebugWrite("Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
-                    "\n\tDeliveryTag: {3}\n\tRedelivered: {4}",
-                            "the_routing_key",
-                            "the_correlation_id",
-                            ConsumerTag,
-                            DeliverTag,
-                            false);
-        }
     }
 }
 // ReSharper restore InconsistentNaming

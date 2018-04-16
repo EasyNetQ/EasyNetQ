@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Topology;
+using Newtonsoft.Json;
 
 namespace EasyNetQ.Producer
 {
@@ -306,7 +307,12 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class
         {
-            var body = ReflectionHelpers.CreateInstance<TResponse>();
+            // HACK: I think we can live with this, because it will run only on exception, 
+            // it tries to preserve the default serialization behavior, 
+            // being able to also deserialize POCO objects that has constructors with parameters
+            // this avoids to introduce a custom class wraper that will change the message payload
+            var body = JsonConvert.DeserializeObject<TResponse>(typeof(TResponse) == typeof(string) ? "''" : "{}");
+
             var responseMessage = new Message<TResponse>(body);
             responseMessage.Properties.Headers.Add(isFaultedKey, true);
             responseMessage.Properties.Headers.Add(exceptionMessageKey, exceptionMessage);

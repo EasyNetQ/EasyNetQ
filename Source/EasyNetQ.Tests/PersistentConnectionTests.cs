@@ -15,11 +15,10 @@ namespace EasyNetQ.Tests
         [Fact]
         public void If_connects_after_disposal_should_redispose_underlying_connection()
         {
-            var logger = Substitute.For<IEasyNetQLogger>();
             var eventBus = Substitute.For<IEventBus>();
             var connectionFactory = Substitute.For<IConnectionFactory>();
             var mockConnection = Substitute.For<IConnection>();
-            PersistentConnection mockPersistentConnection = Substitute.For<PersistentConnection>(connectionFactory, logger, eventBus);
+            PersistentConnection mockPersistentConnection = Substitute.For<PersistentConnection>(connectionFactory, eventBus);
 
             // This test is constructed using small delays, such that the IConnectionFactory will return a connection just _after the IPersistentConnection has been disposed.
             TimeSpan shimDelay = TimeSpan.FromSeconds(0.5);

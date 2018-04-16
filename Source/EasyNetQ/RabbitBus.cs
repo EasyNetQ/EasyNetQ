@@ -178,7 +178,6 @@ namespace EasyNetQ
                 x =>
                     {
                         x.WithPriority(configuration.Priority)
-                         .WithCancelOnHaFailover(configuration.CancelOnHaFailover)
                          .WithPrefetchCount(configuration.PrefetchCount);
                         if (configuration.IsExclusive)
                         {
@@ -201,9 +200,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(request, "request");
 
-            var task = RequestAsync<TRequest, TResponse>(request, configure);
-            task.Wait();
-            return task.Result;
+            return RequestAsync<TRequest, TResponse>(request, configure).GetAwaiter().GetResult();
         }
 
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)

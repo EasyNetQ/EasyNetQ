@@ -73,7 +73,7 @@
         </ItemGroup>
 
         <Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
-              Command='dotnet test --configuration $(Configuration) --no-build --filter "Category!=Explicit&#038;Category!=Integration"'
+              Command='dotnet test --configuration $(Configuration) --no-build --filter "(Category!=Explicit) &#038; (Category!=Integration)"'
               ContinueOnError="ErrorAndContinue" />
     </Target>
 
@@ -85,8 +85,7 @@
         <ItemGroup>
             <ClientLibraries Include="$(Source)\EasyNetQ\EasyNetQ.csproj" />
             <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\EasyNetQ.DI.*.csproj" Exclude="$(Source)\*Tests*\*.csproj" />
-            <ClientLibraries Include="$(Source)\EasyNetQ.Serilog\EasyNetQ.Serilog.csproj" />
-
+       
             <FilesToDelete Include="$(NuGetPackageDirectory)\*.nupkg" />
         </ItemGroup>
 

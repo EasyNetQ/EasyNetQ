@@ -22,7 +22,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                 {
                         ConfigureSubscriptionConfiguration =
                                 c => c.WithAutoDelete()
-                                    .WithCancelOnHaFailover()
                                     .WithExpires(10)
                                     .WithPrefetchCount(10)
                                     .WithPriority(10)
@@ -62,7 +61,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.ShouldBeTrue();
-            subscriptionConfiguration.CancelOnHaFailover.ShouldBeTrue();
             subscriptionConfiguration.Expires.ShouldEqual(10);
             subscriptionConfiguration.PrefetchCount.ShouldEqual((ushort)10);
             subscriptionConfiguration.Priority.ShouldEqual(10);
