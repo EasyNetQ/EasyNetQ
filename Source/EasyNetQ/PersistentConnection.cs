@@ -99,42 +99,38 @@ namespace EasyNetQ
                         break;
                     }
 
-                    connectionFactory.Success();
+                    try
+                    {
+                        OnConnected();
+                    }
+                    catch
+                    {
+                        connection.Dispose();
+                        throw;
+                    }
                     
+                    connection.ConnectionShutdown += OnConnectionShutdown;
+                    connection.ConnectionBlocked += OnConnectionBlocked;
+                    connection.ConnectionUnblocked += OnConnectionUnblocked;
+
+                    logger.InfoFormat("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
+                        connectionFactory.CurrentHost.Host,
+                        connectionFactory.CurrentHost.Port,
+                        connectionFactory.Configuration.VirtualHost);
+
+                    connectionFactory.Success();
                 }
-                catch (SocketException socketException)
+                catch (Exception ex) when (ex is SocketException || ex is BrokerUnreachableException || ex is TimeoutException)
                 {
-                    LogException(socketException);
-                }
-                catch (BrokerUnreachableException brokerUnreachableException)
-                {
-                    LogException(brokerUnreachableException);
+                    LogException(ex);
                 }
             } while (!disposed && connectionFactory.Next());
 
-            if (connectionFactory.Succeeded)
+            if (!connectionFactory.Succeeded && !disposed)
             {
-                connection.ConnectionShutdown += OnConnectionShutdown;
-                connection.ConnectionBlocked += OnConnectionBlocked;
-                connection.ConnectionUnblocked += OnConnectionUnblocked;
-
-                OnConnected();
-                
-                logger.InfoFormat(
-                    "Connected to broker {broker}, port {port}, vhost {vhost}",
-                    connectionFactory.CurrentHost.Host,
-                    connectionFactory.CurrentHost.Port,
-                    connectionFactory.Configuration.VirtualHost
-                );
-            }
-            else
-            {
-                if (!disposed)
-                {
-                    logger.InfoFormat("Failed to connect to any broker. Retrying in {retryInterval}", connectionFactory.Configuration.ConnectIntervalAttempt);
-                    
-                    StartTryToConnect();
-                }
+                logger.ErrorFormat("Failed to connect to any Broker. Retrying in {0}",
+                    connectionFactory.Configuration.ConnectIntervalAttempt);
+                StartTryToConnect();
             }
         }
 
