@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Events;
+using EasyNetQ.Tests.Mocking;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Tests
 {
@@ -46,6 +47,96 @@ namespace EasyNetQ.Tests
             // Ensure that PersistentConnection does not retry after was disposed.
             connectionFactory.DidNotReceive().Next();
 
+        }
+
+        private void ThrowException(Type exceptionType)
+        {
+            if (exceptionType == typeof(Exception))
+            {
+                throw new Exception("Test");
+            }
+            if (exceptionType == typeof(BrokerUnreachableException))
+            {
+                throw new BrokerUnreachableException(new Exception("Test"));
+            }
+            if (exceptionType == typeof(SocketException))
+            {
+                throw new SocketException();
+            }
+            if (exceptionType == typeof(TimeoutException))
+            {
+                throw new TimeoutException();
+            }
+        }
+
+        [InlineData(typeof(BrokerUnreachableException))]
+        [InlineData(typeof(SocketException))]
+        [Theory]
+        public void Should_retry_connection_for_expected_connection_types_CreateConnection(Type exceptionType)
+        {
+            var mockBuilder = new MockBuilder();
+            using (mockBuilder.Bus)
+            {
+                mockBuilder.ConnectionFactory.Configuration.ConnectIntervalAttempt = TimeSpan.FromSeconds(1);
+                mockBuilder.ConnectionFactory.Succeeded.Returns(false, true);
+                mockBuilder.ConnectionFactory.CreateConnection().Returns(c =>
+                {
+                    ThrowException(exceptionType);
+                    return null;
+                }, c => mockBuilder.Connection);
+                var connection = new PersistentConnection(mockBuilder.ConnectionFactory, mockBuilder.EventBus);
+                connection.Initialize();
+                connection.IsConnected.ShouldEqual(false);
+                Thread.Sleep(TimeSpan.FromSeconds(2));
+                connection.IsConnected.ShouldEqual(true);
+                mockBuilder.ConnectionFactory.Received(3).CreateConnection();
+            }
+        }
+
+        [InlineData(typeof(TimeoutException))]
+        [Theory]
+        public void Should_retry_connection_for_expected_connection_types_OnConnected(Type exceptionType)
+        {
+            var mockBuilder = new MockBuilder();
+
+            using (mockBuilder.Bus)
+            {
+                var first = true;
+                var succeeded = false;
+                mockBuilder.ConnectionFactory.Succeeded.Returns(c => succeeded);
+                mockBuilder.ConnectionFactory.When(x => x.Success()).Do(c => succeeded = true);
+                mockBuilder.ConnectionFactory.Configuration.ConnectIntervalAttempt = TimeSpan.FromSeconds(1);          
+                var connection = new PersistentConnection(mockBuilder.ConnectionFactory, mockBuilder.EventBus);
+                mockBuilder.EventBus.Subscribe<ConnectionCreatedEvent>(e => {
+                    if (first)
+                    {
+                        first = false;
+                        ThrowException(exceptionType);
+                    }
+                });
+
+                connection.Initialize();
+                Thread.Sleep(TimeSpan.FromSeconds(2));
+                mockBuilder.ConnectionFactory.Received(3).CreateConnection();
+                first.ShouldEqual(false);
+            }
+        }
+
+        [Fact]
+        public void Should_not_retry_connection_for_unexpected_connection_types()
+        {
+            var mockBuilder = new MockBuilder();
+            using (mockBuilder.Bus)
+            {
+                mockBuilder.ConnectionFactory.Configuration.ConnectIntervalAttempt = TimeSpan.FromSeconds(1);
+                mockBuilder.ConnectionFactory.CreateConnection().Returns(c =>
+                {
+                    ThrowException(typeof(Exception));
+                    return null;
+                });
+                var connection = new PersistentConnection(mockBuilder.ConnectionFactory, mockBuilder.EventBus);
+                Assert.Throws<Exception>(() => connection.Initialize());
+            }
         }
     }
 }
