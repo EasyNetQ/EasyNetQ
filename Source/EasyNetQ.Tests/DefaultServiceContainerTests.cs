@@ -76,23 +76,23 @@ namespace EasyNetQ.Tests
     }
 
 
-    public class DefaultServiceProviderTests
+    public class DefaultServiceContainerTests
     {
         private IServiceResolver resolver;
 
         private IMyFirst myFirst;
         private SomeDelegate someDelegate;
 
-        public DefaultServiceProviderTests()
+        public DefaultServiceContainerTests()
         {
             myFirst = Substitute.For<IMyFirst>();
             someDelegate = () => { };
 
             var defaultServiceProvider = new DefaultServiceContainer();
             
-            defaultServiceProvider.Register(x => myFirst);
-            defaultServiceProvider.Register(x => someDelegate);
-            defaultServiceProvider.Register<IMySecond>(x => new MySecond(x.Resolve<IMyFirst>()));
+            defaultServiceProvider.Register(myFirst);
+            defaultServiceProvider.Register(someDelegate);
+            defaultServiceProvider.Register<IMySecond, MySecond>();
 
             resolver = defaultServiceProvider;
         }

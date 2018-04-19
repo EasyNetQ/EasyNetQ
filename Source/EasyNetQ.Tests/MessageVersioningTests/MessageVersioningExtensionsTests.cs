@@ -32,15 +32,15 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 Assert.Equal(typeof(TImplementation), _services[ typeof( TService ) ]); // "Implementation registered for service type {0} is not the expected type {1}", typeof( TService ).Name, typeof( TImplementation ).Name );
             }
 
-            public IServiceRegister Register<TService>(Func<IServiceResolver, TService> serviceCreator, Lifetime lifetime = Lifetime.Singleton) where TService : class
-            {
-                throw new NotImplementedException();
-            }
-
             public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
             {
                 _services.Add( typeof( TService ), typeof( TImplementation ) );
                 return this;
+            }
+
+            public IServiceRegister Register<TService>(TService instance) where TService : class
+            {
+                throw new NotImplementedException();
             }
         }
     }

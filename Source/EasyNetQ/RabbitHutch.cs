@@ -362,15 +362,10 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(registerServices, "registerServices");
 
             var container = new DefaultServiceContainer();
-            if (container == null)
-            {
-                throw new EasyNetQException("Could not create container. " +
-                    "Have you called SetContainerFactory(...) with a function that returns null?");
-            }
 
             connectionConfiguration.Validate();
-            container.Register(_ => connectionConfiguration);
-            container.Register(_ => advancedBusEventHandlers);
+            container.Register(connectionConfiguration);
+            container.Register(advancedBusEventHandlers);
             registerServices(container);
             ComponentRegistration.RegisterServices(container);
 

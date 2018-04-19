@@ -15,8 +15,8 @@ namespace EasyNetQ.DI
 
         public DefaultServiceContainer()
         {
-            container.Register<IServiceResolver>(this).AsSingleton();
-            container.Register<IServiceRegister>(this).AsSingleton();
+            container.Register<IServiceResolver>(this);
+            container.Register<IServiceRegister>(this);
         }
 
         public TService Resolve<TService>() where TService : class
@@ -24,47 +24,24 @@ namespace EasyNetQ.DI
             return container.Resolve<TService>();
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> serviceCreator, Lifetime lifetime = Lifetime.Singleton) where TService : class
-        {
-            if (container.CanResolve<TService>())
-            {
-                return this;
-            }
-
-            switch (lifetime)
-            {
-                case Lifetime.Transient:
-                    container.Register((c, o) => serviceCreator(this)).AsMultiInstance();
-                    break;
-                case Lifetime.Singleton:
-                    container.Register((c, o) => serviceCreator(this)).AsSingleton();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
-
-            return this;
-        }
-
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            if (container.CanResolve<TService>())
-            {
-                return this;
-            }
-
             switch (lifetime)
             {
                 case Lifetime.Transient:
                     container.Register<TService, TImplementation>().AsMultiInstance();
-                    break;
+                    return this;
                 case Lifetime.Singleton:
                     container.Register<TService, TImplementation>().AsSingleton();
-                    break;
+                    return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
-            
+        }
+
+        public IServiceRegister Register<TService>(TService instance) where TService : class
+        {
+            container.Register(instance);
             return this;
         }
     }
