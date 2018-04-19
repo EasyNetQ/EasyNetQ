@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
-
+    
 namespace EasyNetQ.AutoSubscribe
 {
     /// <summary>
@@ -223,7 +223,6 @@ namespace EasyNetQ.AutoSubscribe
 
                     configuration
                         .WithAutoDelete(configSettings.AutoDelete)
-                        .WithCancelOnHaFailover(configSettings.CancelOnHaFailover)
                         .WithPriority(configSettings.Priority);
                 };
         }
@@ -285,9 +284,6 @@ namespace EasyNetQ.AutoSubscribe
                 if (subscriptionInfos.Any())
                     yield return new KeyValuePair<Type, AutoSubscriberConsumerInfo[]>(concreteType, subscriptionInfos);
             }
-
         }
-
-       
     }
 }

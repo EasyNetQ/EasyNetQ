@@ -49,14 +49,6 @@ namespace EasyNetQ.Tests.ConsumeTests
             deliveredMyOtherMessage.Text.ShouldEqual("Goodbye Cruel World!");
         }
 
-        [Fact]
-        public void Should_put_unrecognised_message_on_error_queue()
-        {
-            mockBuilder.Logger.Received().ErrorWrite(
-                Arg.Is<string>(errorMessage => errorMessage.StartsWith("Exception thrown by subscription callback")), 
-                Arg.Any<object[]>());
-        }
-
         private void DeliverMessage(string message, string type)
         {
             var properties = new BasicProperties

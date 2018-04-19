@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading;
-using EasyNetQ.Loggers;
 using EasyNetQ.Scheduling;
 using Xunit;
 
@@ -12,14 +11,11 @@ namespace EasyNetQ.Tests.Integration.Scheduling
     public class DeadLetterExchangeAndMessageTtlSchedulerTests : IDisposable
     {
         private IBus bus;
-        private ConsoleLogger logger;
 
         public DeadLetterExchangeAndMessageTtlSchedulerTests()
         {
-            logger = new ConsoleLogger();
             bus = RabbitHutch.CreateBus("host=localhost", x =>
             {
-                x.Register<IEasyNetQLogger>(_ => logger);
                 x.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
             });
         }
@@ -54,8 +50,6 @@ namespace EasyNetQ.Tests.Integration.Scheduling
         [Fact]
         public void High_volume_scheduling_test_with_delay()
         {
-            logger.Debug = false;
-
             bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
                 Console.WriteLine("Got scheduled message: {0}", message.Text));
 
@@ -99,8 +93,6 @@ namespace EasyNetQ.Tests.Integration.Scheduling
         [Fact]
         public void High_volume_scheduling_test_with_future_date()
         {
-            logger.Debug = false;
-
             bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
                 Console.WriteLine("Got scheduled message: {0}", message.Text));
 

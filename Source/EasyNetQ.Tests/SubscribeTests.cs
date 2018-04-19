@@ -124,14 +124,13 @@ namespace EasyNetQ.Tests
 
     public class When_subscribe_with_configuration_is_called
     {
-        [InlineData("ttt", true, 99, true, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
-        [InlineData(null, false, 0, false, 0, null, false, null, true, "qqq", null, null)]
+        [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
+        [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
         [Theory]
         public void Queue_should_be_declared_with_correct_options(
             string topic,
             bool autoDelete,
             int priority,
-            bool cancelOnHaFailover,
             ushort prefetchCount,
             int? expires,
             bool isExclusive,
@@ -150,7 +149,6 @@ namespace EasyNetQ.Tests
                     {                        
                         c.WithAutoDelete(autoDelete)
                             .WithPriority(priority)
-                            .WithCancelOnHaFailover(cancelOnHaFailover)
                             .WithPrefetchCount(prefetchCount)
                             .AsExclusive(isExclusive)
                             .WithDurable(durable)
@@ -201,10 +199,7 @@ namespace EasyNetQ.Tests
                     Arg.Any<string>(),
                     Arg.Is(true),
                     Arg.Is(isExclusive),
-                    Arg.Is<IDictionary<string, object>>(
-                        x =>
-                        (priority == (int)x["x-priority"]) &&
-                        (cancelOnHaFailover == (bool)x["x-cancel-on-ha-failover"])),
+                    Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
                     Arg.Any<IBasicConsumer>());
 
             // Assert that QoS got configured correctly
@@ -298,16 +293,6 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
-
-        [Fact]
-        public void Should_write_debug_message()
-        {
-            const string expectedMessageFormat =
-                "Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
-                "\n\tDeliveryTag: {3}\n\tRedelivered: {4}";
-
-            mockBuilder.Logger.Received().DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag, deliveryTag, false);
-        }
     }
 
     public class When_the_handler_throws_an_exception : IDisposable
@@ -388,13 +373,6 @@ namespace EasyNetQ.Tests
         public void Should_ack()
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
-        }
-
-        [Fact]
-        public void Should_write_exception_log_message()
-        {
-            // too brittle to put exact message here I think
-            mockBuilder.Logger.Received().ErrorWrite(Arg.Any<string>(), Arg.Any<object[]>());
         }
 
         [Fact]

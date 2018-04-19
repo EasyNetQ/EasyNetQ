@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading;
-using EasyNetQ.Loggers;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -14,17 +13,7 @@ namespace EasyNetQ.Tests.Integration
 
         public PublisherConfirmsIntegrationTests()
         {
-            var dlogger = new DelegateLogger
-                {
-                    InfoWriteDelegate = (s, o) => Console.WriteLine(s, o),
-                    ErrorWriteDelegate = (s, o) => Console.WriteLine(s, o)
-                };
-
-
-            var logger = new ConsoleLogger();
-
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10", 
-                x => x.Register<IEasyNetQLogger>(_ => dlogger));
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10");
         }
 
         public void Dispose()

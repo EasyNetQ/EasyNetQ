@@ -7,7 +7,6 @@ namespace EasyNetQ.AutoSubscribe
     {
         public bool AutoDelete { get;  set; }
         public int Priority { get;  set; }
-        public bool CancelOnHaFailover { get;  set; }
         public ushort PrefetchCount { get;  set; }
         public int Expires { get; set; }
     }

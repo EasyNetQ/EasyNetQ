@@ -116,32 +116,6 @@ namespace EasyNetQ.Tests
             var resolvedService = serviceProvider.Resolve<IMySecond>();
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
-
-        [Fact]
-        public void Should_be_able_to_replace_bus_components()
-        {
-            var logger = Substitute.For<IEasyNetQLogger>();
-            new MockBuilder(x => x.Register(_ => logger));
-
-            logger.Received().DebugWrite("Trying to connect");
-        }
-
-        [Fact]
-        public void Should_be_able_to_sneakily_get_the_service_provider()
-        {
-            IServiceProvider provider = null;
-            var logger = Substitute.For<IEasyNetQLogger>();
-
-            new MockBuilder(x => x.Register(sp =>
-            {
-                provider = sp;
-                return logger;
-            }));
-            var retrievedLogger = provider.Resolve<IEasyNetQLogger>();
-            retrievedLogger.DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
-
-            logger.Received().DebugWrite("Hey, I'm pretending to be EasyNetQ :)");
-        }
     }
 
     public interface IMyFirst

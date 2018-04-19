@@ -9,11 +9,9 @@ namespace EasyNetQ.Scheduler.Mongo
         public static ISchedulerService CreateScheduler()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
-            var logger = new Logger(LogManager.GetLogger("EasyNetQ.Scheduler"));
 
             return new SchedulerService(
                 bus,
-                logger,
                 new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow),
                 SchedulerServiceConfiguration.FromConfigFile());
         }

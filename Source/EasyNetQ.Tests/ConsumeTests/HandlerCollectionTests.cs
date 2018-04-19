@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
-using EasyNetQ.Loggers;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -15,7 +14,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public HandlerCollectionTests()
         {
-            handlerCollection = new HandlerCollection(new NullLogger());
+            handlerCollection = new HandlerCollection();
 
             handlerCollection.Add<MyMessage>((message, info) => 
                 {

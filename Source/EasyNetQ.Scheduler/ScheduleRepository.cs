@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading;
 using EasyNetQ.SystemMessages;
+using log4net;
 using Newtonsoft.Json;
 
 namespace EasyNetQ.Scheduler
@@ -18,17 +19,17 @@ namespace EasyNetQ.Scheduler
 
     public class ScheduleRepository : IScheduleRepository
     {
+        private readonly ILog logger = LogManager.GetLogger(typeof(ScheduleRepository));
+        
         private readonly ScheduleRepositoryConfiguration configuration;
-        private readonly IEasyNetQLogger log;
         private readonly Func<DateTime> now;
         private readonly ISqlDialect dialect;
 
-        public ScheduleRepository(ScheduleRepositoryConfiguration configuration, IEasyNetQLogger log, Func<DateTime> now)
+        public ScheduleRepository(ScheduleRepositoryConfiguration configuration, Func<DateTime> now)
         {
             this.configuration = configuration;
-            this.log = log;
             this.now = now;
-            this.dialect = SqlDialectResolver.Resolve(configuration.ProviderName);
+            dialect = SqlDialectResolver.Resolve(configuration.ProviderName);
         }
 
         public void Store(ScheduleMe scheduleMe)
@@ -61,7 +62,7 @@ namespace EasyNetQ.Scheduler
                     }
                     catch (Exception ex)
                     {
-                        log.ErrorWrite("ScheduleRepository.Cancel threw an exception {0}", ex);
+                        logger.ErrorFormat("ScheduleRepository.Cancel threw an exception {0}", ex);
                     }
                 })
             );
@@ -127,7 +128,7 @@ namespace EasyNetQ.Scheduler
                     }
                     catch (Exception ex)
                     {
-                        log.ErrorWrite("ScheduleRepository.MarkItemsForPurge threw an exception {0}", ex);
+                        logger.ErrorFormat("ScheduleRepository.MarkItemsForPurge threw an exception {0}", ex);
                     }
                 })
             );

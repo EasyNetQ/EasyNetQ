@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
 {
     public class ConsumerDispatcher : IConsumerDispatcher
     {
+        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly BlockingCollection<Action> queue;
         private bool disposed;
 
-        public ConsumerDispatcher(ConnectionConfiguration configuration, IEasyNetQLogger logger)
+        public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(logger, "logger");
 
             queue = new BlockingCollection<Action>();
 
@@ -27,7 +28,7 @@ namespace EasyNetQ.Consumer
                     }
                     catch (Exception exception)
                     {
-                        logger.ErrorWrite(exception);
+                        logger.ErrorException(string.Empty, exception);
                     }
                 }
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};

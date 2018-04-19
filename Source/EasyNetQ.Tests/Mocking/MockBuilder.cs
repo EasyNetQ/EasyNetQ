@@ -15,7 +15,6 @@ namespace EasyNetQ.Tests.Mocking
         readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
         readonly IBasicProperties basicProperties = new BasicProperties();
         readonly List<string> consumerQueueNames = new List<string>();
-        private readonly IEasyNetQLogger logger = Substitute.For<IEasyNetQLogger>();
         private readonly IBus bus;
 
         public const string Host = "my_host";
@@ -76,7 +75,6 @@ namespace EasyNetQ.Tests.Mocking
                 {
                     registerServices(x);
                     x.Register(_ => connectionFactory);
-                    x.Register(_ => logger);
                 });
 
             bus.ShouldNotBeNull();
@@ -107,11 +105,6 @@ namespace EasyNetQ.Tests.Mocking
         public IBasicProperties BasicProperties
         {
             get { return basicProperties; }
-        }
-
-        public IEasyNetQLogger Logger
-        {
-            get { return logger; }
         }
 
         public IBus Bus

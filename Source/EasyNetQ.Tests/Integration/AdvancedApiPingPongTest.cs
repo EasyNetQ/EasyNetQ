@@ -5,11 +5,9 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Text;
 using System.Threading.Tasks;
-using EasyNetQ.Loggers;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Topology;
 using Xunit;
-using NSubstitute;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -28,16 +26,10 @@ namespace EasyNetQ.Tests.Integration
 
         public AdvancedApiPingPongTest()
         {
-            var loggers = new[]
-                {
-                    new ConsoleLogger(), 
-                    Substitute.For<IEasyNetQLogger>()
-                };
-
             rallyCount = 0;
             for (int i = 0; i < 2; i++)
             {
-                buses[i] = RabbitHutch.CreateBus("host=localhost", x => x.Register(_ => loggers[i]));
+                buses[i] = RabbitHutch.CreateBus("host=localhost");
                 var name = string.Format("advanced_ping_pong_{0}", i);
 
                 exchanges[i] = buses[i].Advanced.ExchangeDeclare(name, "direct");

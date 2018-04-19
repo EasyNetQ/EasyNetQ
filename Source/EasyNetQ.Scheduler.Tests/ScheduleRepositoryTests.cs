@@ -16,14 +16,13 @@ namespace EasyNetQ.Scheduler.Tests
 
         public ScheduleRepositoryTests()
         {
-            var log = Substitute.For<IEasyNetQLogger>();
             var configuration = new ScheduleRepositoryConfiguration
             {
                 ProviderName = "System.Data.SqlClient",
                 ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
                 PurgeBatchSize = 100
             };
-            scheduleRepository = new ScheduleRepository(configuration, log, () => DateTime.UtcNow);
+            scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);
         }
 
         [Fact]
