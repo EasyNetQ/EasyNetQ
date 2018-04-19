@@ -80,72 +80,82 @@ namespace EasyNetQ.Tests
     {
         private IServiceResolver resolver;
 
-        private IMyFirst myFirst;
+        private IFirst first;
         private SomeDelegate someDelegate;
+        private IThird third;
 
         public DefaultServiceContainerTests()
         {
-            myFirst = Substitute.For<IMyFirst>();
+            first = Substitute.For<IFirst>();
             someDelegate = () => { };
+            third = Substitute.For<IThird>();
 
             var defaultServiceProvider = new DefaultServiceContainer();
-            
-            defaultServiceProvider.Register(myFirst);
-            defaultServiceProvider.Register(someDelegate);
-            defaultServiceProvider.Register<IMySecond, MySecond>();
 
+            defaultServiceProvider.Register(first);
+            defaultServiceProvider.Register(someDelegate);
+            defaultServiceProvider.Register<ISecond, Second>();
+            defaultServiceProvider.Register(Substitute.For<IThird>());
+            defaultServiceProvider.Register(third);
+          
             resolver = defaultServiceProvider;
         }
 
         [Fact]
         public void Should_resolve_a_service_interface()
         {
-            var resolvedService = resolver.Resolve<IMyFirst>();
-            resolvedService.ShouldBeTheSameAs(myFirst);
+            var resolvedService = resolver.Resolve<IFirst>();
+            resolvedService.ShouldBeTheSameAs(first);
         }
 
         [Fact]
         public void Should_resolve_a_delegate_service()
         {
-            var resolvedService = resolver.Resolve<SomeDelegate>();
+            var resolvedService  = resolver.Resolve<SomeDelegate>();
             resolvedService.ShouldBeTheSameAs(someDelegate);
         }
 
         [Fact]
         public void Should_resolve_a_service_with_dependencies()
         {
-            var resolvedService = resolver.Resolve<IMySecond>();
-            resolvedService.First.ShouldBeTheSameAs(myFirst);
+            var resolvedService = resolver.Resolve<ISecond>();
+            resolvedService.First.ShouldBeTheSameAs(first);
+        }
+
+        [Fact]
+        public void Should_resolve_first_registered_implementation()
+        {
+            var resolvedService = resolver.Resolve<IThird>();
+            resolvedService.ShouldBeTheSameAs(third);
         }
     }
 
-    public interface IMyFirst
+    public interface IFirst
     {
-        
     }
 
     public delegate void SomeDelegate();
 
-    public interface IMySecond
+    public interface ISecond
     {
-        IMyFirst First { get; }
+        IFirst First { get; }
     }
 
-    public class MySecond : IMySecond
+    public interface IThird
     {
-        private readonly IMyFirst myFirst;
-
-        public MySecond(IMyFirst myFirst)
-        {
-            this.myFirst = myFirst;
-        }
-
-
-        public IMyFirst First
-        {
-            get { return myFirst; }
-        }
     }
+
+    public class Second : ISecond
+    {
+        public Second(IFirst first)
+        {
+            First = first;
+        }
+
+        public IFirst First { get; }
+    }
+
+
 }
 
 // ReSharper restore InconsistentNaming

@@ -366,8 +366,8 @@ namespace EasyNetQ
             connectionConfiguration.Validate();
             container.Register(connectionConfiguration);
             container.Register(advancedBusEventHandlers);
+            container.RegisterDefaultServices();
             registerServices(container);
-            ComponentRegistration.RegisterServices(container);
 
             return container.Resolve<IBus>();
         }

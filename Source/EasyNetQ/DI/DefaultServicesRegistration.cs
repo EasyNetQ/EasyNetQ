@@ -8,9 +8,9 @@ namespace EasyNetQ.DI
     /// <summary>
     /// Registers the default EasyNetQ components in our internal super-simple IoC container.
     /// </summary>
-    public class ComponentRegistration
+    public static class DefaultServicesRegistration
     {
-        public static void RegisterServices(IServiceRegister container)
+        public static void RegisterDefaultServices(this IServiceRegister container)
         {
             Preconditions.CheckNotNull(container, "container");
 

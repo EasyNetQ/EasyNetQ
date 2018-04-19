@@ -1,84 +1,60 @@
 ﻿using System;
 using Autofac;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.Autofac
 {
-    public class AutofacAdapter : IContainer, IDisposable
+    public class AutofacAdapter : IServiceRegister
     {
-        private ContainerBuilder initialBuilder;
-        private Autofac.IContainer container;
-        private bool ownsContainer;
+        private readonly ContainerBuilder containerBuilder;
 
-        public AutofacAdapter(ContainerBuilder initialBuilder = null)
+        public AutofacAdapter(ContainerBuilder containerBuilder)
         {
-            this.initialBuilder = initialBuilder ?? new ContainerBuilder();
+            this.containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
 
-            this.initialBuilder
-                .RegisterInstance(this)
-                .AsImplementedInterfaces()
-                .AsSelf()
-                .SingleInstance();
+            this.containerBuilder.RegisterInstance((IServiceRegister) this);
+            this.containerBuilder.Register(c => new AutofacResolver(c))
+                                 .As<IServiceResolver>()
+                                 .SingleInstance();
         }
 
-        public Autofac.IContainer Container 
-        { 
-            get
+        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
+        {
+            switch (lifetime)
             {
-                if (container != null) 
-                    return container;
-
-                container = initialBuilder.Build();
-                initialBuilder = null;
-                ownsContainer = true;
-
-                return container;
+                case Lifetime.Transient:
+                    containerBuilder.RegisterType<TImplementation>()
+                                    .As<TService>()
+                                    .InstancePerDependency();
+                    return this;
+                case Lifetime.Singleton:
+                    containerBuilder.RegisterType<TImplementation>()
+                                    .As<TService>()
+                                    .SingleInstance();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
-            set { container = value; }
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
+        public IServiceRegister Register<TService>(TService instance) where TService : class
         {
-            if (serviceCreator == null) 
-                throw new ArgumentNullException("serviceCreator");
-
-            var builder = initialBuilder ?? new ContainerBuilder();
-
-            builder
-                .Register(c => serviceCreator(this))
-                .SingleInstance();
-
-            if (container != null && !container.IsRegistered<TService>())
-                builder.Update(container);
-
+            containerBuilder.RegisterInstance(instance);
             return this;
         }
 
-        public IServiceRegister Register<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService
+        private class AutofacResolver : IServiceResolver
         {
-            var builder = initialBuilder ?? new ContainerBuilder();
+            private readonly IComponentContext componentContext;
 
-            builder
-                .RegisterType<TImplementation>()
-                .As<TService>()
-                .SingleInstance();
+            public AutofacResolver(IComponentContext componentContext)
+            {
+                this.componentContext = componentContext;
+            }
 
-            if (container != null && !container.IsRegistered<TService>())
-                builder.Update(container);
-            
-            return this;
-        }
-
-        public TService Resolve<TService>() where TService : class
-        {
-            return Container.Resolve<TService>();
-        }
-
-        public void Dispose()
-        {
-            if(ownsContainer && container != null)
-                container.Dispose();
+            public TService Resolve<TService>() where TService : class
+            {
+                return componentContext.Resolve<TService>();
+            }
         }
     }
 }

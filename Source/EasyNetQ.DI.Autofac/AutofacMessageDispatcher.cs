@@ -2,7 +2,7 @@
 using Autofac;
 using EasyNetQ.AutoSubscribe;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.Autofac
 {
     public class AutofacMessageDispatcher : IAutoSubscriberMessageDispatcher
     {
@@ -21,30 +21,12 @@ namespace EasyNetQ.DI
                 scope.Resolve<TConsumer>().Consume(message);
         }
 
-        public Task DispatchAsync<TMessage, TConsumer>(TMessage message)
+        public async Task DispatchAsync<TMessage, TConsumer>(TMessage message)
             where TMessage : class
             where TConsumer : IConsumeAsync<TMessage>
         {
-            var scope = component.BeginLifetimeScope("async-message");
-            var consumer = scope.Resolve<TConsumer>();
-            var tsc = new TaskCompletionSource<object>();
-            consumer
-                .Consume(message)
-                .ContinueWith(task =>
-                {
-                    scope.Dispose();
-
-                    if (task.IsFaulted && task.Exception != null)
-                    {
-                        tsc.SetException(task.Exception);
-                    }
-                    else
-                    {
-                        tsc.SetResult(null);
-                    }
-                });
-
-            return tsc.Task;
+            using (var scope = component.BeginLifetimeScope("async-message"))
+                await scope.Resolve<TConsumer>().Consume(message).ConfigureAwait(false);
         }
     }
 }

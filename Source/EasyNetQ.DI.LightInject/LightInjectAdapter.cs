@@ -1,50 +1,44 @@
 ﻿using System;
 using LightInject;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.LightInject
 {    
-    public class LightInjectAdapter : IContainer, IDisposable
+    public class LightInjectAdapter : IServiceResolver, IServiceRegister
     {
-        private readonly IServiceContainer _lightInjectContainer;
+        private readonly IServiceContainer container;
 
-        public LightInjectAdapter(IServiceContainer lightInjectContainer)
+        public LightInjectAdapter(IServiceContainer container)
         {
-            if (lightInjectContainer == null)
-            {
-                throw new ArgumentNullException("lightInjectContainer");
-            }
+            this.container = container ?? throw new ArgumentNullException(nameof(container));
 
-            _lightInjectContainer = lightInjectContainer;
+            container.RegisterInstance((IServiceResolver)this);
+            container.RegisterInstance((IServiceRegister)this);
         }
 
         public TService Resolve<TService>() where TService : class
         {
-            return _lightInjectContainer.GetInstance<TService>();
+            return container.GetInstance<TService>();
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
+        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            if (!_lightInjectContainer.CanGetInstance(typeof(TService), string.Empty))
+            switch (lifetime)
             {
-                _lightInjectContainer.Register<TService>(ctx => serviceCreator(this), new PerContainerLifetime());
+                case Lifetime.Transient:
+                    container.Register<TService, TImplementation>(new PerRequestLifeTime());
+                    return this;
+                case Lifetime.Singleton:
+                    container.Register<TService, TImplementation>(new PerContainerLifetime());
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
-            return this;
         }
 
-        public IServiceRegister Register<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService
+        public IServiceRegister Register<TService>(TService instance) where TService : class
         {
-            if (!_lightInjectContainer.CanGetInstance(typeof(TService), string.Empty))
-            {
-                _lightInjectContainer.Register<TService, TImplementation>(new PerContainerLifetime());
-            }
+            container.RegisterInstance(instance);
             return this;
-        }
-
-        public void Dispose()
-        {
-            // Intentionally empty
         }
     }
 }
