@@ -1,4 +1,5 @@
 ﻿using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
@@ -55,7 +56,7 @@ namespace EasyNetQ.Tests
                 Substitute.For<IPublishConfirmationListener>(),
                 eventBus,
                 Substitute.For<IHandlerCollectionFactory>(),
-                Substitute.For<IContainer>(),
+                Substitute.For<IServiceResolver>(),
                 Substitute.For<ConnectionConfiguration>(),
                 Substitute.For<IProduceConsumeInterceptor>(),
                 Substitute.For<IMessageSerializationStrategy>(),

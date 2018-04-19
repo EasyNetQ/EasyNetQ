@@ -50,7 +50,7 @@ namespace EasyNetQ.DI.Tests
                 bus.Dispose();
                 ((WindsorAdapter)bus.Advanced.Container).Dispose();
             }
-            RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());
+            RabbitHutch.SetContainerFactory(() => new DefaultServiceContainer());
         }
     }
 }

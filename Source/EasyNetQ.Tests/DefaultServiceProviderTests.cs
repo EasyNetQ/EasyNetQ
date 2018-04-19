@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 using NSubstitute;
@@ -49,21 +50,21 @@ namespace EasyNetQ.Tests
         {
         }
 
-        private DefaultServiceProvider serviceProvider;
+        private DefaultServiceContainer container;
 
         public DefaultServiceProviderTestsX()
         {
-            serviceProvider = new DefaultServiceProvider();
+            container = new DefaultServiceContainer();
 
-            serviceProvider.Register<IRoot, Root>();
-            serviceProvider.Register<IChild, Child>();
-            serviceProvider.Register<IGrandChild, GrandChild>();
+            container.Register<IRoot, Root>();
+            container.Register<IChild, Child>();
+            container.Register<IGrandChild, GrandChild>();
         }
 
         [Fact]
         public void Should_resolve_class_with_dependencies()
         {
-            var service = (IRoot)serviceProvider.Resolve(typeof (IRoot));
+            var service = container.Resolve<IRoot>();
 
             service.ShouldNotBeNull();
             service.Child.ShouldNotBeNull();
@@ -77,7 +78,7 @@ namespace EasyNetQ.Tests
 
     public class DefaultServiceProviderTests
     {
-        private IServiceProvider serviceProvider;
+        private IServiceResolver resolver;
 
         private IMyFirst myFirst;
         private SomeDelegate someDelegate;
@@ -87,33 +88,33 @@ namespace EasyNetQ.Tests
             myFirst = Substitute.For<IMyFirst>();
             someDelegate = () => { };
 
-            var defaultServiceProvider = new DefaultServiceProvider();
+            var defaultServiceProvider = new DefaultServiceContainer();
             
             defaultServiceProvider.Register(x => myFirst);
             defaultServiceProvider.Register(x => someDelegate);
             defaultServiceProvider.Register<IMySecond>(x => new MySecond(x.Resolve<IMyFirst>()));
 
-            serviceProvider = defaultServiceProvider;
+            resolver = defaultServiceProvider;
         }
 
         [Fact]
         public void Should_resolve_a_service_interface()
         {
-            var resolvedService = serviceProvider.Resolve<IMyFirst>();
+            var resolvedService = resolver.Resolve<IMyFirst>();
             resolvedService.ShouldBeTheSameAs(myFirst);
         }
 
         [Fact]
         public void Should_resolve_a_delegate_service()
         {
-            var resolvedService = serviceProvider.Resolve<SomeDelegate>();
+            var resolvedService = resolver.Resolve<SomeDelegate>();
             resolvedService.ShouldBeTheSameAs(someDelegate);
         }
 
         [Fact]
         public void Should_resolve_a_service_with_dependencies()
         {
-            var resolvedService = serviceProvider.Resolve<IMySecond>();
+            var resolvedService = resolver.Resolve<IMySecond>();
             resolvedService.First.ShouldBeTheSameAs(myFirst);
         }
     }

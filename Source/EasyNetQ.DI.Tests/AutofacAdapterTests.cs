@@ -27,7 +27,7 @@ namespace EasyNetQ.DI.Tests
         public void Dispose()
         {
             container?.Dispose();
-            RabbitHutch.SetContainerFactory(() => new DefaultServiceProvider());
+            RabbitHutch.SetContainerFactory(() => new DefaultServiceContainer());
         }
 
         private ContainerBuilder builder;

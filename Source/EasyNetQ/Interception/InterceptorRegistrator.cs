@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.Interception
+﻿using EasyNetQ.DI;
+
+namespace EasyNetQ.Interception
 {
     public interface IInterceptorRegistrator
     {

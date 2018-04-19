@@ -3,22 +3,21 @@ using EasyNetQ.Interception;
 using EasyNetQ.Producer;
 using EasyNetQ.Scheduling;
 
-namespace EasyNetQ
+namespace EasyNetQ.DI
 {
     /// <summary>
     /// Registers the default EasyNetQ components in our internal super-simple IoC container.
     /// </summary>
     public class ComponentRegistration
     {
-        public static void RegisterServices(IContainer container)
+        public static void RegisterServices(IServiceRegister container)
         {
             Preconditions.CheckNotNull(container, "container");
 
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
 
             // default service registration
-            container
-                .Register(_ => container)       
+            container   
                 .Register<ISerializer, JsonSerializer>()
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()

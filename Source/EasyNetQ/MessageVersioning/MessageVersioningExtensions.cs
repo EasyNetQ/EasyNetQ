@@ -1,4 +1,5 @@
-﻿using EasyNetQ.Producer;
+﻿using EasyNetQ.DI;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.MessageVersioning
 {

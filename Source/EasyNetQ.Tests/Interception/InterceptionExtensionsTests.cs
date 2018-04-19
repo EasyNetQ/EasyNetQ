@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.DI;
 using Xunit;
 using EasyNetQ.Interception;
 using NSubstitute;
@@ -16,7 +17,7 @@ namespace EasyNetQ.Tests.Interception
         {
             var serviceRegister = Substitute.For<IServiceRegister>();
             serviceRegister.EnableInterception(x => { });
-            serviceRegister.Received().Register(Arg.Any<Func<IServiceProvider, IProduceConsumeInterceptor>>());
+            serviceRegister.Received().Register(Arg.Any<Func<IServiceResolver, IProduceConsumeInterceptor>>());
         }
 
         [Fact]

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 #endif
 using EasyNetQ.ConnectionString;
+using EasyNetQ.DI;
 
 namespace EasyNetQ
 {
@@ -12,20 +13,6 @@ namespace EasyNetQ
     /// </summary>
     public static class RabbitHutch
     {
-        private static Func<IContainer> _createContainerInternal = () => new DefaultServiceProvider();
-
-        /// <summary>
-        /// Set the container creation function. This allows you to replace EasyNetQ's default internal
-        /// IoC container. Note that all components should be registered as singletons. EasyNetQ will
-        /// also call Dispose on components that are no longer required.
-        /// </summary>
-        public static void SetContainerFactory(Func<IContainer> createContainer)
-        {
-            Preconditions.CheckNotNull(createContainer, "createContainer");
-
-            _createContainerInternal = createContainer;
-        }
-
 #if NETFX
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
@@ -374,7 +361,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
             Preconditions.CheckNotNull(registerServices, "registerServices");
 
-            var container = _createContainerInternal();
+            var container = new DefaultServiceContainer();
             if (container == null)
             {
                 throw new EasyNetQException("Could not create container. " +
