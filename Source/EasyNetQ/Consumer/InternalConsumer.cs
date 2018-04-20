@@ -63,8 +63,8 @@ namespace EasyNetQ.Consumer
         private void Cancel()
         {
             // copy to temp variable to be thread safe.
-            var cancelled = this.cancelled;
-            cancelled?.Invoke(this);
+            var localCancelled = cancelled;
+            localCancelled?.Invoke(this);
 
             var consumerCancelled = ConsumerCancelled;
             consumerCancelled?.Invoke(this, new ConsumerEventArgs(ConsumerTag));
@@ -202,7 +202,7 @@ namespace EasyNetQ.Consumer
                     var consumerTag = conventions.ConsumerTagConvention();
                     try
                     {
-                        var basicConsumers = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
+                        var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
 
                         Model.BasicConsume(
                             queue.Name, // queue
@@ -211,8 +211,9 @@ namespace EasyNetQ.Consumer
                             true,
                             configuration.IsExclusive,
                             arguments, // arguments
-                            basicConsumers); // consumer
-                        this.basicConsumers.Add(basicConsumers);
+                            basicConsumer); // consumer
+
+                        basicConsumers.Add(basicConsumer);
 
                         logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
                             queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
@@ -257,9 +258,9 @@ namespace EasyNetQ.Consumer
             {
                 Model = connection.CreateModel();
 
-                var basicConsumers = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
+                var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
 
-                this.basicConsumers = new[] { new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model) };
+                basicConsumers = new[] { basicConsumer };
 
                 Model.BasicQos(0, configuration.PrefetchCount, false);
 
@@ -270,7 +271,7 @@ namespace EasyNetQ.Consumer
                     true,
                     configuration.IsExclusive,
                     arguments,          // arguments
-                    basicConsumers);              // consumer
+                    basicConsumer);              // consumer
 
                 logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
                                   queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
@@ -292,7 +293,7 @@ namespace EasyNetQ.Consumer
                 cancelledConsumer = new HashSet<BasicConsumer>();
             cancelledConsumer.Add(consumer);
 
-            if (cancelledConsumer.Count == basicConsumers.Count())
+            if (cancelledConsumer.Count == basicConsumers.Count)
             {
                 cancelledConsumer = null;
                 Cancelled?.Invoke(this);
