@@ -44,6 +44,7 @@ namespace EasyNetQ.Hosepipe.Tests
             bus.Dispose();
         }
 
+        [Fact][Explicit("Requires a RabbitMQ server on localhost")]
         public void ConsumeMessages()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");

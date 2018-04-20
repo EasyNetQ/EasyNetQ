@@ -66,8 +66,8 @@ namespace EasyNetQ.Consumer
         private void Cancel()
         {
             // copy to temp variable to be thread safe.
-            var cancelled = this.cancelled;
-            cancelled?.Invoke(this);
+            var localCancelled = cancelled;
+            localCancelled?.Invoke(this);
 
             var consumerCancelled = ConsumerCancelled;
             consumerCancelled?.Invoke(this, new ConsumerEventArgs(ConsumerTag));
@@ -268,7 +268,7 @@ namespace EasyNetQ.Consumer
 
                 var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
 
-                basicConsumers = new[] { new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model) };
+                basicConsumers = new[] { basicConsumer };
 
                 Model.BasicQos(0, configuration.PrefetchCount, false);
 
@@ -311,7 +311,7 @@ namespace EasyNetQ.Consumer
                 cancelledConsumer = new HashSet<BasicConsumer>();
             cancelledConsumer.Add(consumer);
 
-            if (cancelledConsumer.Count == basicConsumers.Count())
+            if (cancelledConsumer.Count == basicConsumers.Count)
             {
                 cancelledConsumer = null;
                 Cancelled?.Invoke(this);
