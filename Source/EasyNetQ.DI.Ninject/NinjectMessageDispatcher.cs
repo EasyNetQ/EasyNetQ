@@ -2,45 +2,29 @@
 using EasyNetQ.AutoSubscribe;
 using Ninject;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.Ninject
 {
 	public class NinjectMessageDispatcher : IAutoSubscriberMessageDispatcher
 	{
-		private readonly IKernel _kernel;
+		private readonly IKernel kernel;
 
 		public NinjectMessageDispatcher(IKernel kernel)
 		{
-			this._kernel = kernel;
+			this.kernel = kernel;
 		}
 
 		public void Dispatch<TMessage, TConsumer>(TMessage message)
 			where TMessage : class
 			where TConsumer : IConsume<TMessage>
 		{
-			_kernel.Get<TConsumer>().Consume(message);
+			kernel.Get<TConsumer>().Consume(message);
 		}
 
-		public Task DispatchAsync<TMessage, TConsumer>(TMessage message)
+		public async Task DispatchAsync<TMessage, TConsumer>(TMessage message)
 			where TMessage : class
 			where TConsumer : IConsumeAsync<TMessage>
 		{
-			var consumer = _kernel.Get<TConsumer>();
-			var tsc = new TaskCompletionSource<object>();
-			consumer
-				.Consume(message)
-				.ContinueWith(task =>
-				{
-					if (task.IsFaulted && task.Exception != null)
-					{
-						tsc.SetException(task.Exception);
-					}
-					else
-					{
-						tsc.SetResult(null);
-					}
-				});
-
-			return tsc.Task;
+			await kernel.Get<TConsumer>().Consume(message).ConfigureAwait(false);
 		}
 	}
 }

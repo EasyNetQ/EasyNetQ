@@ -1,57 +1,43 @@
 ﻿using System;
 using Ninject;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.Ninject
 {
-    public class NinjectAdapter : IContainer, IDisposable
+    public class NinjectAdapter : IServiceRegister, IServiceResolver
     {
-        private readonly IKernel _ninjectContainer;
+        private readonly IKernel kernel;
 
-        public NinjectAdapter(IKernel ninjectContainer)
+        public NinjectAdapter(IKernel kernel)
         {
-            _ninjectContainer = ninjectContainer;
+            this.kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+
+            this.kernel.Rebind<IServiceResolver, IServiceRegister>().ToConstant(this);
         }
 
         public TService Resolve<TService>() where TService : class
         {
-            return _ninjectContainer.Get<TService>();
+            return kernel.Get<TService>();
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
+        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            if (!IsAlreadyRegistered<TService>())
+            switch (lifetime)
             {
-                _ninjectContainer.Bind<TService>().ToMethod(ctx => serviceCreator(this)).InSingletonScope();
+                case Lifetime.Transient:
+                    kernel.Rebind<TService>().To<TImplementation>().InTransientScope();
+                    return this;
+                case Lifetime.Singleton:
+                    kernel.Rebind<TService>().To<TImplementation>().InSingletonScope();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
+        }
+
+        public IServiceRegister Register<TService>(TService instance) where TService : class
+        {
+            kernel.Rebind<TService>().ToConstant(instance);
             return this;
-        }
-
-        public IServiceRegister Register<TService, TImplementation>() 
-            where TService : class 
-            where TImplementation : class, TService
-        {
-            if (!IsAlreadyRegistered<TService>())
-            {
-                _ninjectContainer.Bind<TService>().ToMethod(ctx => ctx.Kernel.Get<TImplementation>()).InSingletonScope();
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Checking if TService can be resolved is a workaround to the issue that Ninject
-        /// does not allow TService to be registered multiple times such that the behavior 
-        /// of DefaultServiceProvider can be emulated using Ninject. 
-        /// </summary>
-        /// <typeparam name="TService"></typeparam>
-        /// <returns></returns>
-        private bool IsAlreadyRegistered<TService>() where TService : class
-        {
-            return _ninjectContainer.CanResolve<TService>();
-        }
-
-        public void Dispose()
-        {
-            _ninjectContainer.Dispose();
         }
     }
 }

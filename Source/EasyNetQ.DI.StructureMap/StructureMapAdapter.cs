@@ -1,50 +1,44 @@
 ﻿using System;
-using System.Linq;
+using StructureMap;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.StructureMap
 {
-    public class StructureMapAdapter : IContainer, IDisposable
+    public class StructureMapAdapter : IServiceRegister, IServiceResolver
     {
-        private readonly StructureMap.IContainer structureMapContainer;
+        private readonly IContainer container;
 
-        public StructureMapAdapter(StructureMap.IContainer structureMapContainer)
+        public StructureMapAdapter(IContainer container)
         {
-            this.structureMapContainer = structureMapContainer;
+            this.container = container ?? throw new ArgumentNullException(nameof(container));
+            
+            this.container.Configure(c => c.For<IServiceRegister>().Singleton().Use(this));
+            this.container.Configure(c => c.For<IServiceResolver>().Singleton().Use(this));
         }
 
         public TService Resolve<TService>() where TService : class
         {
-            return structureMapContainer.GetInstance<TService>();
+            return container.GetInstance<TService>();
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
+        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            if (ServiceRegistered<TService>()) return this;
-            structureMapContainer.Configure(
-                c => c.For<TService>().Singleton().Use(() => serviceCreator(this))
-                );
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    container.Configure(c => c.For<TService>().Transient().Use<TImplementation>());
+                    return this;
+                case Lifetime.Singleton:
+                    container.Configure(c => c.For<TService>().Singleton().Use<TImplementation>());
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            } 
+        }
+
+        public IServiceRegister Register<TService>(TService instance) where TService : class
+        {
+            container.Configure(c => c.For<TService>().Singleton().Use(instance));
             return this;
-        }
-
-        public IServiceRegister Register<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService
-        {
-            if (ServiceRegistered<TService>()) return this;
-            structureMapContainer.Configure(
-                c => c.For<TService>().Singleton().Use(ctx => ctx.GetInstance<TImplementation>())
-                );
-            return this;
-        }
-
-        private bool ServiceRegistered<T>()
-        {
-            return structureMapContainer.Model.AllInstances.Any(x=>x.PluginType == typeof(T));           
-        }
-
-        public void Dispose()
-        {
-            structureMapContainer.Dispose();
         }
     }
 }

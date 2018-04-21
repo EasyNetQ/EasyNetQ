@@ -7,6 +7,9 @@
     <PackageTags>SimpleInjector;RabbitMQ;Messaging;AMQP;C#</PackageTags>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Version.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
