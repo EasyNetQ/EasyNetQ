@@ -5,6 +5,7 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <PackageTags>Ninject;RabbitMQ;Messaging;AMQP;C#</PackageTags>
+    <TargetFrameworks>net451;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
