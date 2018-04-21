@@ -8,12 +8,4 @@
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
     </PropertyGroup>
-
-    <!-- This is for GitVersionTask because the version of JetBrains.Annotations
-        and YamlDotNet it references was not built with versions that target
-        .NET Standard. See:
-        https://docs.microsoft.com/en-us/nuget/schema/msbuild-targets#packagetargetfallback -->
-    <PropertyGroup>
-        <PackageTargetFallback>$(PackageTargetFallback);dotnet</PackageTargetFallback>
-    </PropertyGroup>
 </Project>
