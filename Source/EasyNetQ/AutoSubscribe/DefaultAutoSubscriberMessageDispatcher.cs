@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using EasyNetQ.DI;
 
@@ -13,7 +14,7 @@ namespace EasyNetQ.AutoSubscribe
         }
 
         public DefaultAutoSubscriberMessageDispatcher()
-            : this(new ReflectionBasedResolver())
+            : this(new ActivatorBasedResolver())
         {   
         }
 
@@ -21,21 +22,23 @@ namespace EasyNetQ.AutoSubscribe
             where TMessage : class
             where TConsumer : class, IConsume<TMessage>
         {
-            resolver.Resolve<TConsumer>().Consume(message);
+            var consumer = resolver.Resolve<TConsumer>();
+            consumer.Consume(message);
         }
 
-        public async Task DispatchAsync<TMessage, TConsumer>(TMessage message)
+        public async Task DispatchAsync<TMessage, TAsyncConsumer>(TMessage message)
             where TMessage : class
-            where TConsumer : class, IConsumeAsync<TMessage>
+            where TAsyncConsumer : class, IConsumeAsync<TMessage>
         {
-            await resolver.Resolve<TConsumer>().ConsumeAsync(message).ConfigureAwait(false);
+            var asynConsumer = resolver.Resolve<TAsyncConsumer>();
+            await asynConsumer.ConsumeAsync(message).ConfigureAwait(false);
         }
 
-        private class ReflectionBasedResolver : IServiceResolver
+        private class ActivatorBasedResolver : IServiceResolver
         {
             public TService Resolve<TService>() where TService : class
             {
-                return ReflectionHelpers.CreateInstance<TService>();
+                return Activator.CreateInstance<TService>();
             }
         }
     }
