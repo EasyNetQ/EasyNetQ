@@ -1,25 +1,42 @@
 using System.Threading.Tasks;
+using EasyNetQ.DI;
 
 namespace EasyNetQ.AutoSubscribe
 {
     public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDispatcher
     {
-        public void Dispatch<TMessage, TConsumer>(TMessage message) 
-            where TMessage : class
-            where TConsumer : IConsume<TMessage>
-        {
-            var consumer = (IConsume<TMessage>)ReflectionHelpers.CreateInstance<TConsumer>();
+        private readonly IServiceResolver resolver;
 
-            consumer.Consume(message);
+        public DefaultAutoSubscriberMessageDispatcher(IServiceResolver resolver)
+        {
+            this.resolver = resolver;
         }
 
-        public Task DispatchAsync<TMessage, TConsumer>(TMessage message)
-            where TMessage : class
-            where TConsumer : IConsumeAsync<TMessage>
-        {
-            var consumer = (IConsumeAsync<TMessage>)ReflectionHelpers.CreateInstance<TConsumer>();
+        public DefaultAutoSubscriberMessageDispatcher()
+            : this(new ReflectionBasedResolver())
+        {   
+        }
 
-            return consumer.Consume(message);
+        public void Dispatch<TMessage, TConsumer>(TMessage message) 
+            where TMessage : class
+            where TConsumer : class, IConsume<TMessage>
+        {
+            resolver.Resolve<TConsumer>().Consume(message);
+        }
+
+        public async Task DispatchAsync<TMessage, TConsumer>(TMessage message)
+            where TMessage : class
+            where TConsumer : class, IConsumeAsync<TMessage>
+        {
+            await resolver.Resolve<TConsumer>().ConsumeAsync(message).ConfigureAwait(false);
+        }
+
+        private class ReflectionBasedResolver : IServiceResolver
+        {
+            public TService Resolve<TService>() where TService : class
+            {
+                return ReflectionHelpers.CreateInstance<TService>();
+            }
         }
     }
 }
