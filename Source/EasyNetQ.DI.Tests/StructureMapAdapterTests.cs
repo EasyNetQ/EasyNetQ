@@ -3,9 +3,9 @@ using StructureMap;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class StructureMapAdapterTest : ContainerAdapterTest<StructureMapAdapter>
+    public class StructureMapAdapterTests : ContainerAdapterTests<StructureMapAdapter>
     {
-        public StructureMapAdapterTest()
+        public StructureMapAdapterTests()
             : base(() => new StructureMapAdapter(new Container()))
         {
         }

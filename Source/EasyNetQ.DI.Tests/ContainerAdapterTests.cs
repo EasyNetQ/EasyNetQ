@@ -1,21 +1,20 @@
 ﻿using System;
-using NSubstitute;
 using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class ContainerAdapterTest<TContainer> where TContainer : IServiceRegister, IServiceResolver
+    public abstract class ContainerAdapterTests<TContainer> where TContainer : class, IServiceRegister, IServiceResolver
     {
         private readonly TContainer container;
         private readonly ILastRegistrationWins last;
 
-        public ContainerAdapterTest(Func<TContainer> factory)
+        protected ContainerAdapterTests(Func<TContainer> factory)
         {
             container = factory.Invoke();
 
-            last = Substitute.For<ILastRegistrationWins>();
+            last = new LastRegistrationWins();
 
-            container.Register(Substitute.For<ILastRegistrationWins>());
+            container.Register(new LastRegistrationWins());
             container.Register(last);
 
             container.Register<ISingleton, Singleton>();
@@ -37,7 +36,7 @@ namespace EasyNetQ.DI.Tests
         [Fact]
         public void Should_transient_created_every_time()
         {
-            Assert.NotSame(container.Resolve<ISingleton>(), container.Resolve<ISingleton>());
+            Assert.NotSame(container.Resolve<ITransient>(), container.Resolve<ITransient>());
         }
 
         [Fact]
@@ -52,23 +51,27 @@ namespace EasyNetQ.DI.Tests
             Assert.Same(container, container.Resolve<IServiceRegister>());
         }
 
-        private interface ILastRegistrationWins
-        {
-        }
-        
-        private interface ISingleton
+        public interface ILastRegistrationWins
         {
         }
 
-        private class Singleton : ISingleton
-        {
-        }
-        
-        private interface ITransient
+        public class LastRegistrationWins : ILastRegistrationWins
         {
         }
 
-        private class Transient : ITransient
+        public interface ISingleton
+        {
+        }
+
+        public class Singleton : ISingleton
+        {
+        }
+
+        public interface ITransient
+        {
+        }
+
+        public class Transient : ITransient
         {
         }
     }

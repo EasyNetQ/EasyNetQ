@@ -3,9 +3,9 @@ using EasyNetQ.DI.Windsor;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class WindsorAdapterTest : ContainerAdapterTest<WindsorAdapter>
+    public class WindsorAdapterTests : ContainerAdapterTests<WindsorAdapter>
     {
-        public WindsorAdapterTest()
+        public WindsorAdapterTests()
             : base(() => new WindsorAdapter(new WindsorContainer()))
         {
         }

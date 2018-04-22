@@ -3,9 +3,9 @@ using Ninject;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class NInjectAdapterTest : ContainerAdapterTest<NinjectAdapter>
+    public class NInjectAdapterTests : ContainerAdapterTests<NinjectAdapter>
     {
-        public NInjectAdapterTest()
+        public NInjectAdapterTests()
             : base(() => new NinjectAdapter(new StandardKernel()))
         {
         }

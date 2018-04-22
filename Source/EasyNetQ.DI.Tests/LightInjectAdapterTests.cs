@@ -3,9 +3,9 @@ using LightInject;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class LightInjectAdapterTest : ContainerAdapterTest<LightInjectAdapter>
+    public class LightInjectAdapterTests : ContainerAdapterTests<LightInjectAdapter>
     {
-        public LightInjectAdapterTest()
+        public LightInjectAdapterTests()
             : base(() => new LightInjectAdapter(new ServiceContainer()))
         {
         }
