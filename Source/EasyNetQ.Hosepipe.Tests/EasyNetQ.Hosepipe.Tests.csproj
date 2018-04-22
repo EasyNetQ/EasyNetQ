@@ -37,7 +37,7 @@
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta3-build3705">
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1">
       <PrivateAssets>all</PrivateAssets>
     </DotNetCliToolReference>
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
