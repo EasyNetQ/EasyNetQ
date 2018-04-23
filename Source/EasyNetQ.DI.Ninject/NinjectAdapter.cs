@@ -19,6 +19,11 @@ namespace EasyNetQ.DI.Ninject
             return kernel.Get<TService>();
         }
 
+        public IServiceResolver CreateScope()
+        {
+            return this;
+        }
+
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             switch (lifetime)

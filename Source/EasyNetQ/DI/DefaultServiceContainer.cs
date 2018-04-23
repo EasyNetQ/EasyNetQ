@@ -24,6 +24,11 @@ namespace EasyNetQ.DI
             return container.Resolve<TService>();
         }
 
+        public IServiceResolver CreateScope()
+        {
+            return this;
+        }
+
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             switch (lifetime)

@@ -43,6 +43,11 @@ namespace EasyNetQ.DI.Windsor
             return container.Resolve<TService>();
         }
 
+        public IServiceResolver CreateScope()
+        {
+            return this;
+        }
+
         private LifestyleType GetLifestyleType(Lifetime lifetime)
         {
             switch (lifetime)

@@ -10,7 +10,6 @@ namespace EasyNetQ.DI.LightInject
         public LightInjectAdapter(IServiceContainer container)
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
-
             container.RegisterInstance((IServiceResolver)this);
             container.RegisterInstance((IServiceRegister)this);
         }
@@ -18,6 +17,11 @@ namespace EasyNetQ.DI.LightInject
         public TService Resolve<TService>() where TService : class
         {
             return container.GetInstance<TService>();
+        }
+
+        public IServiceResolver CreateScope()
+        {
+            return this; // TODO: 
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService

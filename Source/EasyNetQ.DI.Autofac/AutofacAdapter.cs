@@ -12,7 +12,7 @@ namespace EasyNetQ.DI.Autofac
             this.containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
 
             this.containerBuilder.RegisterInstance((IServiceRegister) this);
-            this.containerBuilder.Register(c => new AutofacResolver(c))
+            this.containerBuilder.Register(c => new AutofacResolver(c.Resolve<ILifetimeScope>()))
                                  .As<IServiceResolver>()
                                  .SingleInstance();
         }
@@ -44,16 +44,36 @@ namespace EasyNetQ.DI.Autofac
 
         private class AutofacResolver : IServiceResolver
         {
-            private readonly IComponentContext componentContext;
+            private readonly ILifetimeScope lifetime;
 
-            public AutofacResolver(IComponentContext componentContext)
+            public AutofacResolver(ILifetimeScope lifetime)
             {
-                this.componentContext = componentContext;
+                this.lifetime = lifetime;
             }
 
             public TService Resolve<TService>() where TService : class
             {
-                return componentContext.Resolve<TService>();
+                return lifetime.Resolve<TService>();
+            }
+
+            public IServiceResolver CreateScope()
+            {
+                return new AutofacResolverScope(lifetime.BeginLifetimeScope());
+            }
+        }
+
+        private class AutofacResolverScope : AutofacResolver, IDisposable
+        {
+            readonly ILifetimeScope scope;
+
+            public AutofacResolverScope(ILifetimeScope scope) : base(scope)
+            {
+                this.scope = scope;
+            }
+
+            public void Dispose()
+            {
+                scope.Dispose();
             }
         }
     }

@@ -1,54 +1,66 @@
 ﻿using System;
+using Autofac.Features.ResolveAnything;
 using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
-    public abstract class ContainerAdapterTests<TContainer> where TContainer : class, IServiceRegister, IServiceResolver
+    public abstract class ContainerAdapterTests
     {
-        private readonly TContainer container;
-        private readonly ILastRegistrationWins last;
+        protected abstract IServiceRegister CreateServiceRegister();
+        protected abstract IServiceResolver CreateServiceResolver();
 
-        protected ContainerAdapterTests(Func<TContainer> factory)
+        IServiceRegister register;
+        IServiceResolver resolver;
+        private ILastRegistrationWins last;
+
+        protected ContainerAdapterTests()
         {
-            container = factory.Invoke();
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            this.register = CreateServiceRegister();
 
             last = new LastRegistrationWins();
 
-            container.Register(new LastRegistrationWins());
-            container.Register(last);
+            this.register.Register(last);
+            this.register.Register(new LastRegistrationWins());
+            this.register.Register<ISingleton, Singleton>();
+            this.register.Register<ITransient, Transient>(Lifetime.Transient);
 
-            container.Register<ISingleton, Singleton>();
-            container.Register<ITransient, Transient>(Lifetime.Transient);
+            this.resolver = CreateServiceResolver();
         }
+
 
         [Fact]
         public void Should_last_registration_win()
         {
-            Assert.Equal(last, container.Resolve<ILastRegistrationWins>());
+            Assert.Equal(last, resolver.Resolve<ILastRegistrationWins>());
         }
 
         [Fact]
         public void Should_singleton_created_once()
         {
-            Assert.Same(container.Resolve<ISingleton>(), container.Resolve<ISingleton>());
+            Assert.Same(resolver.Resolve<ISingleton>(), resolver.Resolve<ISingleton>());
         }
 
         [Fact]
         public void Should_transient_created_every_time()
         {
-            Assert.NotSame(container.Resolve<ITransient>(), container.Resolve<ITransient>());
+            Assert.NotSame(resolver.Resolve<ITransient>(), resolver.Resolve<ITransient>());
         }
 
         [Fact]
         public void Should_resolve_service_resolver()
         {
-            Assert.Same(container, container.Resolve<IServiceResolver>());
+            Assert.Same(resolver, resolver.Resolve<IServiceResolver>());
         }
         
         [Fact]
         public void Should_resolve_service_register()
         {
-            Assert.Same(container, container.Resolve<IServiceRegister>());
+            Assert.Same(register, resolver.Resolve<IServiceRegister>());
         }
 
         public interface ILastRegistrationWins

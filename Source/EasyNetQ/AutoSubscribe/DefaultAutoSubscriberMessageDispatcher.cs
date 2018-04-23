@@ -22,16 +22,34 @@ namespace EasyNetQ.AutoSubscribe
             where TMessage : class
             where TConsumer : class, IConsume<TMessage>
         {
-            var consumer = resolver.Resolve<TConsumer>();
-            consumer.Consume(message);
+            var scope = resolver.CreateScope();
+            try
+            {
+                var consumer = scope.Resolve<TConsumer>();
+                consumer.Consume(message);
+            }
+            finally
+            {
+                if (scope is IDisposable disposable)
+                    disposable.Dispose();
+            }
         }
 
         public async Task DispatchAsync<TMessage, TAsyncConsumer>(TMessage message)
             where TMessage : class
             where TAsyncConsumer : class, IConsumeAsync<TMessage>
         {
-            var asynConsumer = resolver.Resolve<TAsyncConsumer>();
-            await asynConsumer.ConsumeAsync(message).ConfigureAwait(false);
+            var scope = resolver.CreateScope();
+            try
+            {
+                var asynConsumer = scope.Resolve<TAsyncConsumer>();
+                await asynConsumer.ConsumeAsync(message).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (scope is IDisposable disposable)
+                    disposable.Dispose();
+            }
         }
 
         private class ActivatorBasedResolver : IServiceResolver
@@ -39,6 +57,11 @@ namespace EasyNetQ.AutoSubscribe
             public TService Resolve<TService>() where TService : class
             {
                 return Activator.CreateInstance<TService>();
+            }
+
+            public IServiceResolver CreateScope()
+            {
+                return this;
             }
         }
     }

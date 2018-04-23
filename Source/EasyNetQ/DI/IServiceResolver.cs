@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.DI
+﻿using System;
+
+namespace EasyNetQ.DI
 {
     /// <summary>
     /// Provides service instances
@@ -12,5 +14,7 @@
         /// <typeparam name="TService">The type of serivce to return</typeparam>
         /// <returns>The single instance of the service</returns>
         TService Resolve<TService>() where TService : class;
+
+        IServiceResolver CreateScope();
     }
 }
