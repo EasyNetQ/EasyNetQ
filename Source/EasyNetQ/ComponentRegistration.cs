@@ -46,7 +46,7 @@ namespace EasyNetQ
                 .Register<IRpc, Rpc>()
                 .Register<ISendReceive, SendReceive>()
                 .Register<IScheduler, ExternalScheduler>()
-                .Register<IBus, RabbitBus>();
+                .Register<RabbitBus, RabbitBus>();
         }
     }
 }
