@@ -61,7 +61,8 @@ namespace EasyNetQ.Tests
                 Substitute.For<IMessageSerializationStrategy>(),
                 Substitute.For<IConventions>(),
                 advancedBusEventHandlers,
-                persistentConnectionFactory);
+                persistentConnectionFactory,
+                new TypeNameSerializer());
         }
 
         [Fact]
