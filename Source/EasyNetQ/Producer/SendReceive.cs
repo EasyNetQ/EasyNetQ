@@ -25,24 +25,6 @@ namespace EasyNetQ.Producer
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public void Send<T>(string queue, T message)
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(message, "message");
-
-            DeclareQueue(queue);
-            
-            var wrappedMessage = new Message<T>(message)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
-                }
-            };
-
-            advancedBus.Publish(Exchange.GetDefault(), queue, false, wrappedMessage);
-        }
-
         public Task SendAsync<T>(string queue, T message)
         {
             Preconditions.CheckNotNull(queue, "queue");

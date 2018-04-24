@@ -13,31 +13,6 @@ namespace EasyNetQ
     {
         /// <summary>
         /// Publishes a message.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="message">The message to publish</param>
-        void Publish<T>(T message);
-
-        /// <summary>
-        /// Publishes a message.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="message">The message to publish</param>
-        /// <param name="configure">
-        /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
-        /// </param>
-        void Publish<T>(T message, Action<IPublishConfiguration> configure);
-
-        /// <summary>
-        /// Publishes a message with a topic
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="message">The message to publish</param>
-        /// <param name="topic">The topic string</param>
-        void Publish<T>(T message, string topic);
-
-        /// <summary>
-        /// Publishes a message.
         /// When used with publisher confirms the task completes when the publish is confirmed.
         /// Task will throw an exception if the confirm is NACK'd or times out.
         /// </summary>
@@ -158,15 +133,6 @@ namespace EasyNetQ
         ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure);
 
         /// <summary>
-        /// Makes an RPC style request
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="request">The request message.</param>
-        /// <returns>The response</returns>
-        TResponse Request<TRequest, TResponse>(TRequest request);
-
-        /// <summary>
         /// Makes an RPC style request.
         /// </summary>
         /// <typeparam name="TRequest">The request type.</typeparam>
@@ -174,15 +140,6 @@ namespace EasyNetQ
         /// <param name="request">The request message.</param>
         /// <returns>A task that completes when the response returns</returns>
         Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request);
-
-        /// <summary>
-        /// Makes an RPC style request
-        /// </summary>
-        /// <typeparam name="TRequest">The request type.</typeparam>
-        /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="request">The request message.</param>
-        /// <returns>The response</returns>
-        TResponse Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure);
 
         /// <summary>
         /// Makes an RPC style request.
@@ -238,14 +195,6 @@ namespace EasyNetQ
         /// A function for responder configuration
         /// </param>
         IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure);
-
-        /// <summary>
-        /// Send a message directly to a queue
-        /// </summary>
-        /// <typeparam name="T">The type of message to send</typeparam>
-        /// <param name="queue">The queue to send to</param>
-        /// <param name="message">The message</param>
-        void Send<T>(string queue, T message);
 
         /// <summary>
         /// Send a message directly to a queue

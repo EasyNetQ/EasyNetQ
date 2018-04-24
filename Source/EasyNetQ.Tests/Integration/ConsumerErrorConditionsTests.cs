@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests
             // also allow the DefaultConsumerErrorStrategy time to spin up its connection
             Thread.Sleep(1000);
 
-            var errorMessage = this.bus.Advanced.Get<Error>(errorQueue);
+            var errorMessage = this.bus.Advanced.GetMessage<Error>(errorQueue);
             errorMessage.MessageAvailable.Should().BeTrue();
 
             var error = errorMessage.Message.Body;
