@@ -28,16 +28,6 @@ namespace EasyNetQ.Producer
             StartDispatcherThread(configuration);
         }
 
-        public T Invoke<T>(Func<IModel, T> channelAction)
-        {
-            return InvokeAsync(channelAction).GetAwaiter().GetResult();
-        }
-
-        public void Invoke(Action<IModel> channelAction)
-        {
-            InvokeAsync(channelAction).GetAwaiter().GetResult();
-        }
-
         public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");

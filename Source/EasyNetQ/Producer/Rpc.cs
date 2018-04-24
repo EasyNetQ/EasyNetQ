@@ -75,7 +75,7 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
             where TRequest : class
             where TResponse : class
         {

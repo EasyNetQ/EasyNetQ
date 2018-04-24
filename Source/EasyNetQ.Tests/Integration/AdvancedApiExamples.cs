@@ -113,7 +113,7 @@ namespace EasyNetQ.Tests.Integration
             var binding = advancedBus.Bind(exchange, queue, "routing_key");
 
             // and then delete them
-            advancedBus.BindingDelete(binding);
+            advancedBus.Unbind(binding);
             advancedBus.ExchangeDelete(exchange);
             advancedBus.QueueDelete(queue);
         }
@@ -137,7 +137,7 @@ namespace EasyNetQ.Tests.Integration
             var queue = advancedBus.QueueDeclare("get_test");
             advancedBus.Publish(Exchange.GetDefault(), "get_test", false, new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
 
-            var getResult = advancedBus.Get<MyMessage>(queue);
+            var getResult = advancedBus.GetMessage<MyMessage>(queue);
 
             if (getResult.MessageAvailable)
             {
@@ -153,7 +153,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_set_MessageAvailable_to_false_when_queue_is_empty()
         {
             var queue = advancedBus.QueueDeclare("get_empty_queue_test");
-            var getResult = advancedBus.Get<MyMessage>(queue);
+            var getResult = advancedBus.GetMessage<MyMessage>(queue);
 
             if (!getResult.MessageAvailable)
             {
@@ -166,7 +166,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var queue = advancedBus.QueueDeclare("count_test");
             advancedBus.Publish(Exchange.GetDefault(), "count_test", false, new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
-            uint messageCount = advancedBus.MessageCount(queue);
+            var messageCount = advancedBus.GetMessagesCount(queue);
             Console.WriteLine("{0} messages in queue", messageCount);
         }
 

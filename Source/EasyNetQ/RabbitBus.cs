@@ -44,46 +44,6 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
         }
 
-        public virtual void Publish<T>(T message) where T : class
-        {
-            Preconditions.CheckNotNull(message, "message");
-
-            Publish(message, conventions.TopicNamingConvention(typeof(T)));
-        }
-
-        public virtual void Publish<T>(T message, string topic) where T : class
-        {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(topic, "topic");
-
-            Publish(message, c => c.WithTopic(topic));
-        }
-
-        public virtual void Publish<T>(T message, Action<IPublishConfiguration> configure) where T : class
-        {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(configure, "configure");
-
-            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
-            configure(configuration);
-
-            var messageType = typeof(T);
-            var easyNetQMessage = new Message<T>(message)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
-                }
-            };
-            if (configuration.Priority != null)
-                easyNetQMessage.Properties.Priority = configuration.Priority.Value;
-            if (configuration.Expires != null)
-                easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
-
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(messageType, ExchangeType.Topic);
-            advancedBus.Publish(exchange, configuration.Topic, false, easyNetQMessage);
-        }
-
         public virtual Task PublishAsync<T>(T message) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
@@ -185,29 +145,13 @@ namespace EasyNetQ
             return new SubscriptionResult(exchange, queue, consumerCancellation);
         }
 
-        public virtual TResponse Request<TRequest, TResponse>(TRequest request)
-            where TRequest : class
-            where TResponse : class
-        {
-            return Request<TRequest, TResponse>(request, x => { });
-        }
-
-        public virtual TResponse Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
-            where TRequest : class
-            where TResponse : class
-        {
-            Preconditions.CheckNotNull(request, "request");
-
-            return RequestAsync<TRequest, TResponse>(request, configure).GetAwaiter().GetResult();
-        }
-
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
             where TRequest : class
             where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
 
-            return rpc.Request<TRequest, TResponse>(request, x => { });
+            return rpc.RequestAsync<TRequest, TResponse>(request, x => { });
         }
 
         public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
@@ -216,7 +160,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(request, "request");
 
-            return rpc.Request<TRequest, TResponse>(request, configure);
+            return rpc.RequestAsync<TRequest, TResponse>(request, configure);
         }
 
         public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder)
@@ -252,12 +196,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(configure, "configure");
 
             return rpc.Respond(responder, configure);
-        }
-
-        public virtual void Send<T>(string queue, T message)
-            where T : class
-        {
-            sendReceive.Send(queue, message);
         }
 
         public virtual Task SendAsync<T>(string queue, T message)
