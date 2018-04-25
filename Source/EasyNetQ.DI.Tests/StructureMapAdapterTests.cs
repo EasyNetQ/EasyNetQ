@@ -3,18 +3,11 @@ using StructureMap;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class StructureMapAdapterTests : ContainerAdapterTests
+    public class StructureMapAdapterTests : ContainerAdapterTests<StructureMapAdapter>
     {
-        StructureMapAdapter adapter;
-
-        protected override IServiceRegister CreateServiceRegister()
+        public StructureMapAdapterTests()
+            : base(new StructureMapAdapter(new Container()), s => s, s => s)
         {
-            return this.adapter = new StructureMapAdapter(new Container());
-        }
-
-        protected override IServiceResolver CreateServiceResolver()
-        {
-            return adapter;
         }
     }
 }

@@ -1,37 +1,27 @@
 ﻿using System;
-using Autofac.Features.ResolveAnything;
 using Xunit;
 
 namespace EasyNetQ.DI.Tests
 {
-    public abstract class ContainerAdapterTests
+    public abstract class ContainerAdapterTests<TState> : IDisposable
     {
-        protected abstract IServiceRegister CreateServiceRegister();
-        protected abstract IServiceResolver CreateServiceResolver();
-
-        IServiceRegister register;
-        IServiceResolver resolver;
-        private ILastRegistrationWins last;
-
-        protected ContainerAdapterTests()
+        private readonly IServiceRegister register;
+        private readonly IServiceResolver resolver;
+        private readonly ILastRegistrationWins last;        
+        
+        protected ContainerAdapterTests(TState state, Func<TState, IServiceRegister> registerFactory, Func<TState, IServiceResolver> resolverFactory)
         {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            this.register = CreateServiceRegister();
-
+            register = registerFactory.Invoke(state);
+            
             last = new LastRegistrationWins();
 
-            this.register.Register(last);
-            this.register.Register(new LastRegistrationWins());
-            this.register.Register<ISingleton, Singleton>();
-            this.register.Register<ITransient, Transient>(Lifetime.Transient);
+            register.Register(last);
+            register.Register(new LastRegistrationWins());
+            register.Register<ISingleton, Singleton>();
+            register.Register<ITransient, Transient>(Lifetime.Transient);
 
-            this.resolver = CreateServiceResolver();
+            resolver = resolverFactory.Invoke(state);
         }
-
 
         [Fact]
         public void Should_last_registration_win()
@@ -85,6 +75,11 @@ namespace EasyNetQ.DI.Tests
 
         public class Transient : ITransient
         {
+        }
+
+        public void Dispose()
+        {
+            resolver.Dispose();
         }
     }
 }

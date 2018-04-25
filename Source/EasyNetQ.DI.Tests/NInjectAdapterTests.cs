@@ -3,22 +3,11 @@ using Ninject;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class NInjectAdapterTests : ContainerAdapterTests
+    public class NInjectAdapterTests : ContainerAdapterTests<NinjectAdapter>
     {
-        NinjectAdapter adapter;
-
         public NInjectAdapterTests()
+            : base(new NinjectAdapter(new StandardKernel()), s => s, s => s)
         {
-        }
-
-        protected override IServiceRegister CreateServiceRegister()
-        {
-            return this.adapter = new NinjectAdapter(new StandardKernel());
-        }
-
-        protected override IServiceResolver CreateServiceResolver()
-        {
-            return this.adapter;
         }
     }
 }

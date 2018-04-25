@@ -3,20 +3,11 @@ using LightInject;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class LightInjectAdapterTests : ContainerAdapterTests
+    public class LightInjectAdapterTests : ContainerAdapterTests<LightInjectAdapter>
     {
-        LightInjectAdapter adapter;
-
-        protected override IServiceRegister CreateServiceRegister()
+        public LightInjectAdapterTests()
+            : base(new LightInjectAdapter(new ServiceContainer()), s => s, s => s)
         {
-            var serviceContainer = new ServiceContainer();
-           
-            return adapter =  new LightInjectAdapter(serviceContainer);
-        }
-
-        protected override IServiceResolver CreateServiceResolver()
-        {
-            return adapter;
         }
     }
 }

@@ -44,5 +44,10 @@ namespace EasyNetQ.DI.Ninject
             kernel.Rebind<TService>().ToConstant(instance);
             return this;
         }
+
+        public void Dispose()
+        {
+            kernel.Dispose();
+        }
     }
 }

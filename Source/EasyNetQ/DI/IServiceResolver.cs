@@ -5,7 +5,7 @@ namespace EasyNetQ.DI
     /// <summary>
     /// Provides service instances
     /// </summary>
-    public interface IServiceResolver
+    public interface IServiceResolver : IDisposable
     {
         /// <summary>
         /// Get an instance of the requested services. Note all services are singletons; multiple calls

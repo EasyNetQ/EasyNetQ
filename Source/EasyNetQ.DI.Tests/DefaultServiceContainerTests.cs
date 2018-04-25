@@ -1,17 +1,9 @@
 ﻿namespace EasyNetQ.DI.Tests
 {
-    public class DefaultServiceContainerTests : ContainerAdapterTests
+    public class DefaultServiceContainerTests : ContainerAdapterTests<DefaultServiceContainer>
     {
-        DefaultServiceContainer container;
-
-        protected override IServiceRegister CreateServiceRegister()
+        public DefaultServiceContainerTests() : base(new DefaultServiceContainer(), s => s, s => s)
         {
-            return this.container = new DefaultServiceContainer();
-        }
-
-        protected override IServiceResolver CreateServiceResolver()
-        {
-            return this.container;
         }
     }
 }

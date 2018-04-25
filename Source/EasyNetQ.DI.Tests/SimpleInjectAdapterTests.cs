@@ -3,20 +3,11 @@ using SimpleInjector;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class SimpleInjectAdapterTests : ContainerAdapterTests
+    public class SimpleInjectAdapterTests : ContainerAdapterTests<SimpleInjectorAdapter>
     {
-        SimpleInjectorAdapter adapter;
-
-        protected override IServiceRegister CreateServiceRegister()
+        public SimpleInjectAdapterTests() 
+            : base(new SimpleInjectorAdapter(new Container { Options = { AllowOverridingRegistrations = true } }), s => s, s => s)
         {
-            var container = new Container { Options = { AllowOverridingRegistrations = true } };
-
-            return this.adapter = new SimpleInjectorAdapter(container);
-        }
-
-        protected override IServiceResolver CreateServiceResolver()
-        {
-            return this.adapter;
         }
     }
 }

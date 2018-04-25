@@ -58,22 +58,12 @@ namespace EasyNetQ.DI.Autofac
 
             public IServiceResolver CreateScope()
             {
-                return new AutofacResolverScope(lifetime.BeginLifetimeScope());
-            }
-        }
-
-        private class AutofacResolverScope : AutofacResolver, IDisposable
-        {
-            readonly ILifetimeScope scope;
-
-            public AutofacResolverScope(ILifetimeScope scope) : base(scope)
-            {
-                this.scope = scope;
+                return new AutofacResolver(lifetime.BeginLifetimeScope());
             }
 
             public void Dispose()
             {
-                scope.Dispose();
+                lifetime.Dispose();
             }
         }
     }

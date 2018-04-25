@@ -3,18 +3,11 @@ using EasyNetQ.DI.Windsor;
 
 namespace EasyNetQ.DI.Tests
 {
-    public class WindsorAdapterTests : ContainerAdapterTests
+    public class WindsorAdapterTests : ContainerAdapterTests<WindsorAdapter>
     {
-        WindsorAdapter adapter;
-
-        protected override IServiceRegister CreateServiceRegister()
+        public WindsorAdapterTests()
+            : base(new WindsorAdapter(new WindsorContainer()), s => s, s => s)
         {
-            return adapter = new WindsorAdapter(new WindsorContainer());
-        }
-
-        protected override IServiceResolver CreateServiceResolver()
-        {
-            return adapter;
         }
     }
 }
