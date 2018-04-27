@@ -322,7 +322,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue from which to retreive the message</param>
         /// <returns>An IBasicGetResult.</returns>
         Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue) where T : class;
-
+ 
         /// <summary>
         /// Get the raw message from the given queue.
         /// </summary>
