@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,12 +17,6 @@ namespace EasyNetQ.Internals
         {
             semaphore = new SemaphoreSlim(1);
             semaphoreReleaser = new SemaphoreSlimReleaser(semaphore);
-        }
-
-        public IDisposable Acquire()
-        {
-            semaphore.Wait();
-            return semaphoreReleaser;
         }
 
         public async Task<IDisposable> AcquireAsync()

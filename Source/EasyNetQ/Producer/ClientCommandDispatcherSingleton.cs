@@ -9,10 +9,10 @@ namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private const int queueSize = 1;
+        private const int QueueSize = 1;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
+        private readonly AsyncBlockingQueue<Action> queue = new AsyncBlockingQueue<Action>(QueueSize);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -28,7 +28,7 @@ namespace EasyNetQ.Producer
             StartDispatcherThread(configuration);
         }
 
-        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -40,7 +40,7 @@ namespace EasyNetQ.Producer
 
             try
             {
-                queue.Add(() =>
+                await queue.EnqueueAsync(() =>
                 {
                     if (cancellation.IsCancellationRequested)
                     {
@@ -71,13 +71,14 @@ namespace EasyNetQ.Producer
                         tcs.TrySetException(e);
 #endif
                     }
-                }, cancellation.Token);
+                }, cancellation.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 tcs.TrySetCanceled();
             }
-            return tcs.Task;
+            
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         public Task InvokeAsync(Action<IModel> channelAction)
@@ -105,7 +106,7 @@ namespace EasyNetQ.Producer
                 {
                     try
                     {
-                        var channelAction = queue.Take(cancellation.Token);
+                        var channelAction = queue.Dequeue(cancellation.Token);
                         channelAction();
                     }
                     catch (OperationCanceledException)
