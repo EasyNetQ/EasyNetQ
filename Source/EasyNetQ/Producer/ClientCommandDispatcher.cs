@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -22,16 +23,16 @@ namespace EasyNetQ.Producer
                 () => new ClientCommandDispatcherSingleton(configuration, connection, persistentChannelFactory));
         }
 
-        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            return dispatcher.Value.InvokeAsync(channelAction);
+            return dispatcher.Value.InvokeAsync(channelAction, cancellation);
         }
 
-        public Task InvokeAsync(Action<IModel> channelAction)
+        public Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            return dispatcher.Value.InvokeAsync(channelAction);
+            return dispatcher.Value.InvokeAsync(channelAction, cancellation);
         }
 
         public void Dispose()

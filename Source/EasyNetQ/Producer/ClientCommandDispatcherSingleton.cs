@@ -10,7 +10,7 @@ namespace EasyNetQ.Producer
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
         private const int QueueSize = 1;
-        private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+        private readonly CancellationTokenSource dispatchCts = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
         private readonly AsyncBlockingQueue<Action> queue = new AsyncBlockingQueue<Action>(QueueSize);
 
@@ -28,60 +28,76 @@ namespace EasyNetQ.Producer
             StartDispatcherThread(configuration);
         }
 
-        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
+            using (var invocationCts = CancellationTokenSource.CreateLinkedTokenSource(dispatchCts.Token, cancellation))
+            {
+                var invocationCancellation = invocationCts.Token;
 #if NETFX
-            var tcs = new TaskCompletionSource<T>();
+                var tcs = new TaskCompletionSource<T>();
 #else
-            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+                var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
 #endif
 
-            try
-            {
-                await queue.EnqueueAsync(() =>
+                try
                 {
-                    if (cancellation.IsCancellationRequested)
+                    await queue.EnqueueAsync(() =>
                     {
-#if NETFX                               
-                        tcs.TrySetCanceledAsynchronously();   
+                        if (invocationCancellation.IsCancellationRequested)
+                        {
+#if NETFX
+                            tcs.TrySetCanceledAsynchronously();   
 #else
-                        tcs.TrySetCanceled();
+                            tcs.TrySetCanceled();
 #endif
 
-                        return;
-                    }
-                    try
-                    {
-                        persistentChannel.InvokeChannelAction(channel =>
+                            return;
+                        }
+
+                        try
                         {
-#if NETFX                               
-                            tcs.TrySetResultAsynchronously(channelAction(channel));   
+                            persistentChannel.InvokeChannelAction(channel =>
+                            {
+                                if (invocationCancellation.IsCancellationRequested)
+                                {
+#if NETFX
+                                    tcs.TrySetCanceledAsynchronously();   
 #else
-                            tcs.TrySetResult(channelAction(channel));
-#endif                      
-                        });
-                    }
-                    catch (Exception e)
-                    {
-#if NETFX                               
-                        tcs.TrySetExceptionAsynchronously(e);   
-#else
-                        tcs.TrySetException(e);
+                                    tcs.TrySetCanceled();
 #endif
-                    }
-                }, cancellation.Token).ConfigureAwait(false);
+                                }
+                                else
+                                {
+#if NETFX
+                                    tcs.TrySetResultAsynchronously(channelAction(channel));   
+#else
+                                    tcs.TrySetResult(channelAction(channel));
+#endif
+                                }
+                            });
+                        }
+                        catch (Exception e)
+                        {
+#if NETFX
+                            tcs.TrySetExceptionAsynchronously(e);   
+#else
+                            tcs.TrySetException(e);
+#endif
+                        }
+                    }, invocationCancellation).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    tcs.TrySetCanceled();
+                }
+
+                return await tcs.Task.ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
-            {
-                tcs.TrySetCanceled();
-            }
-            
-            return await tcs.Task.ConfigureAwait(false);
         }
 
-        public Task InvokeAsync(Action<IModel> channelAction)
+        public Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -89,12 +105,12 @@ namespace EasyNetQ.Producer
             {
                 channelAction(x);
                 return new NoContentStruct();
-            });
+            }, cancellation);
         }
 
         public void Dispose()
         {
-            cancellation.Cancel();
+            dispatchCts.Cancel();
             persistentChannel.Dispose();
         }
 
@@ -102,11 +118,11 @@ namespace EasyNetQ.Producer
         {
             var thread = new Thread(() =>
             {
-                while (!cancellation.IsCancellationRequested)
+                while (!dispatchCts.IsCancellationRequested)
                 {
                     try
                     {
-                        var channelAction = queue.Dequeue(cancellation.Token);
+                        var channelAction = queue.Dequeue(dispatchCts.Token);
                         channelAction();
                     }
                     catch (OperationCanceledException)
