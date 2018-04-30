@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 #if NETFX
 using System.Diagnostics;
 using System.Reflection;
@@ -84,10 +85,15 @@ namespace EasyNetQ.Internals
                 action();
                 tcs.SetResult(null);
             }
+            catch (OperationCanceledException e)
+            {
+                tcs.SetCanceled();
+            }
             catch (Exception e)
             {
                 tcs.SetException(e);
             }
+
             return tcs.Task;
         }
 

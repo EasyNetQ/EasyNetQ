@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    public class AsyncBlockingQueue<T> : IDisposable
+    public class AsyncBlockingQueue<T>
     {
         private readonly ConcurrentQueue<T> queue;
         private readonly SemaphoreSlim releaseDequeueEvent;
@@ -26,17 +26,23 @@ namespace EasyNetQ.Internals
             return item;
         }
 
-        public async Task EnqueueAsync(T item, CancellationToken cancellation = default(CancellationToken))
+        public bool TryDequeue(out T item)
         {
-            await releaseEnqueueEvent.WaitAsync(cancellation);
-            queue.Enqueue(item); 
-            releaseDequeueEvent.Release();
+            if (releaseDequeueEvent.Wait(0) && queue.TryDequeue(out item))
+            {
+                releaseEnqueueEvent.Release();
+                return true;
+            }
+
+            item = default(T);
+            return false;
         }
 
-        public void Dispose()
+        public async Task EnqueueAsync(T item, CancellationToken cancellation = default(CancellationToken))
         {
-            releaseEnqueueEvent.Dispose();
-            releaseDequeueEvent.Dispose();
+            await releaseEnqueueEvent.WaitAsync(cancellation).ConfigureAwait(false);
+            queue.Enqueue(item); 
+            releaseDequeueEvent.Release();
         }
     }
 }

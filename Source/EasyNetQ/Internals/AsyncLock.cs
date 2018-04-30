@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    /// <summary>
-    ///     AsyncSemaphore should be used with a lot of care.
-    /// </summary>
     public class AsyncLock
     {
         private readonly SemaphoreSlim semaphore;
