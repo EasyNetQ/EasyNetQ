@@ -3,12 +3,6 @@ using EasyNetQ.TinyIoC;
 
 namespace EasyNetQ.DI
 {
-    /// <summary>
-    /// Minimum IoC container inspired by
-    /// http://ayende.com/blog/2886/building-an-ioc-container-in-15-lines-of-code
-    /// 
-    /// Note all components are singletons. Only one instance of each will be created.
-    /// </summary>
     public class DefaultServiceContainer : IServiceResolver, IServiceRegister
     {
         private readonly TinyIoCContainer container = new TinyIoCContainer();
@@ -54,6 +48,5 @@ namespace EasyNetQ.DI
         {
             container.Dispose();
         }
-
     }
 }

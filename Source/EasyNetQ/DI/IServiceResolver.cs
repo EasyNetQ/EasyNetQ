@@ -6,13 +6,17 @@
     public interface IServiceResolver
     {
         /// <summary>
-        /// Get an instance of the requested services. Note all services are singletons; multiple calls
-        /// to Resolve will all return the same instance.
+        /// Get an instance of the requested services
         /// </summary>
-        /// <typeparam name="TService">The type of serivce to return</typeparam>
-        /// <returns>The single instance of the service</returns>
+        /// <typeparam name="TService">The type of service to return</typeparam>
+        /// <returns>The instance of the service</returns>
         TService Resolve<TService>() where TService : class;
 
+        /// <summary>
+        /// Begin a new scope. Component instances created via the new scope
+        /// will be disposed along with it
+        /// </summary>
+        /// <returns>A new scope</returns>
         IServiceResolverScope CreateScope();
     }
 }
