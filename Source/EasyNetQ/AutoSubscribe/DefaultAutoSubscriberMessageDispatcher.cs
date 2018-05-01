@@ -35,8 +35,8 @@ namespace EasyNetQ.AutoSubscribe
         {
             using (var scope = resolver.CreateScope())
             {
-                var asynConsumer = scope.Resolve<TAsyncConsumer>();
-                await asynConsumer.ConsumeAsync(message).ConfigureAwait(false);
+                var asyncConsumer = scope.Resolve<TAsyncConsumer>();
+                await asyncConsumer.ConsumeAsync(message).ConfigureAwait(false);
             }
         }
 
