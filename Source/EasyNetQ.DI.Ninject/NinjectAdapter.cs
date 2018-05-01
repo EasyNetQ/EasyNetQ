@@ -11,7 +11,7 @@ namespace EasyNetQ.DI.Ninject
         {
             this.kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
 
-            this.kernel.Rebind<IServiceResolver, IServiceRegister>().ToConstant(this);
+            this.kernel.Rebind<IServiceResolver>().ToConstant(this);
         }
 
         public TService Resolve<TService>() where TService : class

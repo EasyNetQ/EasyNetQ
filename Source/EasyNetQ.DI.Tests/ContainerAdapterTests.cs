@@ -65,16 +65,7 @@ namespace EasyNetQ.DI.Tests
 
             Assert.NotNull(resolver.Resolve<IServiceResolver>());
         }
-        
-        [Theory]
-        [MemberData(nameof(GetContainerAdapters))]
-        public void Should_resolve_service_register(ResolverFactory resolverFactory)
-        {
-            var resolver = resolverFactory.Invoke(c => {});
-            
-            Assert.NotNull(resolver.Resolve<IServiceRegister>());
-        }
-        
+
         public static IEnumerable<object[]> GetContainerAdapters()
         {
             object[] T<TContainer>(TContainer container) where TContainer : IServiceRegister, IServiceResolver

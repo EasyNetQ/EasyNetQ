@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.Windsor
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
 
-            this.container.Register(Component.For<IServiceResolver, IServiceRegister>().Instance(this).LifestyleSingleton());
+            this.container.Register(Component.For<IServiceResolver>().Instance(this).LifestyleSingleton());
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService

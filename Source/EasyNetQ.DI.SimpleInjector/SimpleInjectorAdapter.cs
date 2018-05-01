@@ -12,7 +12,6 @@ namespace EasyNetQ.DI.SimpleInjector
             this.container = container ?? throw new ArgumentNullException(nameof(container));
 
             container.RegisterSingleton((IServiceResolver) this);
-            container.RegisterSingleton((IServiceRegister) this);
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton)

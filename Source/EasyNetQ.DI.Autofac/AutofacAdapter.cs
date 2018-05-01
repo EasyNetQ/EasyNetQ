@@ -11,7 +11,6 @@ namespace EasyNetQ.DI.Autofac
         {
             this.containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
 
-            this.containerBuilder.RegisterInstance((IServiceRegister) this);
             this.containerBuilder.Register(c => new AutofacResolver(c.Resolve<ILifetimeScope>()))
                                  .As<IServiceResolver>()
                                  .InstancePerLifetimeScope();

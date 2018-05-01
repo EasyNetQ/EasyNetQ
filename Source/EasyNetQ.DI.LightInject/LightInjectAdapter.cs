@@ -12,7 +12,6 @@ namespace EasyNetQ.DI.LightInject
             this.container = container ?? throw new ArgumentNullException(nameof(container));
 
             container.RegisterInstance((IServiceResolver)this);
-            container.RegisterInstance((IServiceRegister)this);
         }
 
         public TService Resolve<TService>() where TService : class

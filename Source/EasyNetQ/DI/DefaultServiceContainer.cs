@@ -10,7 +10,6 @@ namespace EasyNetQ.DI
         public DefaultServiceContainer()
         {
             container.Register<IServiceResolver>(this);
-            container.Register<IServiceRegister>(this);
         }
 
         public TService Resolve<TService>() where TService : class

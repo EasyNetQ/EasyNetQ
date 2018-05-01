@@ -11,7 +11,6 @@ namespace EasyNetQ.DI.StructureMap
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
             
-            this.container.Configure(c => c.For<IServiceRegister>().Singleton().Use(this));
             this.container.Configure(c => c.For<IServiceResolver>().Singleton().Use(this));
         }
 
