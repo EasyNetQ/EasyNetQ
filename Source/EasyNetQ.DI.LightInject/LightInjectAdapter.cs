@@ -2,7 +2,7 @@
 using LightInject;
 
 namespace EasyNetQ.DI.LightInject
-{    
+{
     public class LightInjectAdapter : IServiceResolver, IServiceRegister
     {
         private readonly IServiceContainer container;
