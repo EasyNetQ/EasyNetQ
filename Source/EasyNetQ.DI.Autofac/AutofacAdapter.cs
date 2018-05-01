@@ -42,7 +42,7 @@ namespace EasyNetQ.DI.Autofac
             return this;
         }
 
-        private class AutofacResolver : IServiceResolver
+        private class AutofacResolver : IServiceResolverScope
         {
             private readonly ILifetimeScope lifetime;
 
@@ -56,7 +56,7 @@ namespace EasyNetQ.DI.Autofac
                 return lifetime.Resolve<TService>();
             }
 
-            public IServiceResolver CreateScope()
+            public IServiceResolverScope CreateScope()
             {
                 return new AutofacResolver(lifetime.BeginLifetimeScope());
             }

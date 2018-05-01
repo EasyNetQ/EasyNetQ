@@ -43,9 +43,9 @@ namespace EasyNetQ.DI.Windsor
             return container.Resolve<TService>();
         }
 
-        public IServiceResolver CreateScope()
+        public IServiceResolverScope CreateScope()
         {
-            return new EmptyScope(this);
+            return new ServiceResolverScope(this);
         }
 
         private LifestyleType GetLifestyleType(Lifetime lifetime)
@@ -58,34 +58,6 @@ namespace EasyNetQ.DI.Windsor
                     return LifestyleType.Singleton;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
-        }
-
-        public void Dispose()
-        {
-        }
-                
-        private class EmptyScope : IServiceResolver
-        {
-            private readonly IServiceResolver resolver;
-
-            public EmptyScope(IServiceResolver resolver)
-            {
-                this.resolver = resolver;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public TService Resolve<TService>() where TService : class
-            {
-                return resolver.Resolve<TService>();
-            }
-
-            public IServiceResolver CreateScope()
-            {
-                return this;
             }
         }
     }

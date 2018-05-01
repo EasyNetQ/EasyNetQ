@@ -10,19 +10,9 @@ namespace EasyNetQ.DI.SimpleInjector
         public SimpleInjectorAdapter(Container container)
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
-            
-            container.RegisterSingleton((IServiceResolver)this);
-            container.RegisterSingleton((IServiceRegister)this);
-        }
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return container.GetInstance<TService>();
-        }
-
-        public IServiceResolver CreateScope()
-        {
-            return new EmptyScope(this);
+            container.RegisterSingleton((IServiceResolver) this);
+            container.RegisterSingleton((IServiceRegister) this);
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton)
@@ -48,32 +38,14 @@ namespace EasyNetQ.DI.SimpleInjector
             return this;
         }
 
-        public void Dispose()
+        public TService Resolve<TService>() where TService : class
         {
+            return container.GetInstance<TService>();
         }
-                
-        private class EmptyScope : IServiceResolver
+
+        public IServiceResolverScope CreateScope()
         {
-            private readonly IServiceResolver resolver;
-
-            public EmptyScope(IServiceResolver resolver)
-            {
-                this.resolver = resolver;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public TService Resolve<TService>() where TService : class
-            {
-                return resolver.Resolve<TService>();
-            }
-
-            public IServiceResolver CreateScope()
-            {
-                return this;
-            }
+            return new ServiceResolverScope(this);
         }
     }
 }

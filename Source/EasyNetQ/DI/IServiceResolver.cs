@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace EasyNetQ.DI
+﻿namespace EasyNetQ.DI
 {
     /// <summary>
     /// Provides service instances
     /// </summary>
-    public interface IServiceResolver : IDisposable
+    public interface IServiceResolver
     {
         /// <summary>
         /// Get an instance of the requested services. Note all services are singletons; multiple calls
@@ -15,6 +13,6 @@ namespace EasyNetQ.DI
         /// <returns>The single instance of the service</returns>
         TService Resolve<TService>() where TService : class;
 
-        IServiceResolver CreateScope();
+        IServiceResolverScope CreateScope();
     }
 }

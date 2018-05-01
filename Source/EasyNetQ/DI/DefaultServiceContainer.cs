@@ -24,9 +24,9 @@ namespace EasyNetQ.DI
             return container.Resolve<TService>();
         }
 
-        public IServiceResolver CreateScope()
+        public IServiceResolverScope CreateScope()
         {
-            return new EmptyScope(this);
+            return new ServiceResolverScope(this);
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -55,28 +55,5 @@ namespace EasyNetQ.DI
             container.Dispose();
         }
 
-        private class EmptyScope : IServiceResolver
-        {
-            private readonly IServiceResolver resolver;
-
-            public EmptyScope(IServiceResolver resolver)
-            {
-                this.resolver = resolver;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public TService Resolve<TService>() where TService : class
-            {
-                return resolver.Resolve<TService>();
-            }
-
-            public IServiceResolver CreateScope()
-            {
-                return this;
-            }
-        }
     }
 }

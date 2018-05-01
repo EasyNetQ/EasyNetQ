@@ -38,10 +38,6 @@
     <PackageReference Include="Autofac" Version="4.6.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta3-build3705" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <Compile Remove="WindsorAdapterTests.cs" />
-    <Compile Remove="NinjectAdapterTests.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

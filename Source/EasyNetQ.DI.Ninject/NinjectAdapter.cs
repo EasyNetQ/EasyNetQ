@@ -19,9 +19,9 @@ namespace EasyNetQ.DI.Ninject
             return kernel.Get<TService>();
         }
 
-        public IServiceResolver CreateScope()
+        public IServiceResolverScope CreateScope()
         {
-            return this;
+            return new ServiceResolverScope(this);
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -43,11 +43,6 @@ namespace EasyNetQ.DI.Ninject
         {
             kernel.Rebind<TService>().ToConstant(instance);
             return this;
-        }
-
-        public void Dispose()
-        {
-            kernel.Dispose();
         }
     }
 }

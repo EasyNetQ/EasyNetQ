@@ -47,13 +47,9 @@ namespace EasyNetQ.AutoSubscribe
                 return Activator.CreateInstance<TService>();
             }
 
-            public IServiceResolver CreateScope()
+            public IServiceResolverScope CreateScope()
             {
-                return this;
-            }
-
-            public void Dispose()
-            {
+                return new ServiceResolverScope(this);
             }
         }
     }
