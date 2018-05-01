@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
@@ -139,19 +140,20 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="exchange">The exchange to publish to</param>
         /// <param name="routingKey">
-        /// The routing key for the message. The routing key is used for routing messages depending on the
-        /// exchange configuration.</param>
+        ///     The routing key for the message. The routing key is used for routing messages depending on the
+        ///     exchange configuration.</param>
         /// <param name="mandatory">
-        /// This flag tells the server how to react if the message cannot be routed to a queue.
-        /// If this flag is true, the server will return an unroutable message with a Return method.
-        /// If this flag is false, the server silently drops the message.
+        ///     This flag tells the server how to react if the message cannot be routed to a queue.
+        ///     If this flag is true, the server will return an unroutable message with a Return method.
+        ///     If this flag is false, the server silently drops the message.
         /// </param>
         /// <param name="message">The message to publish</param>
-        Task PublishAsync(
-            IExchange exchange,
+        /// <param name="cancellation">The cancellation token</param>
+        Task PublishAsync(IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage message);
+            IMessage message,
+            CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Publish a message as a .NET type
@@ -161,19 +163,20 @@ namespace EasyNetQ
         /// <typeparam name="T"></typeparam>
         /// <param name="exchange">The exchange to publish to</param>
         /// <param name="routingKey">
-        /// The routing key for the message. The routing key is used for routing messages depending on the
-        /// exchange configuration.</param>
+        ///     The routing key for the message. The routing key is used for routing messages depending on the
+        ///     exchange configuration.</param>
         /// <param name="mandatory">
-        /// This flag tells the server how to react if the message cannot be routed to a queue.
-        /// If this flag is true, the server will return an unroutable message with a Return method.
-        /// If this flag is false, the server silently drops the message.
+        ///     This flag tells the server how to react if the message cannot be routed to a queue.
+        ///     If this flag is true, the server will return an unroutable message with a Return method.
+        ///     If this flag is false, the server silently drops the message.
         /// </param>
         /// <param name="message">The message to publish</param>
-        Task PublishAsync<T>(
-            IExchange exchange,
+        /// <param name="cancellation">The cancellation token</param>
+        Task PublishAsync<T>(IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class;
+            IMessage<T> message,
+            CancellationToken cancellation = default(CancellationToken)) where T : class;
 
         /// <summary>
         /// Publish a message as a byte array.
@@ -182,21 +185,22 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="exchange">The exchange to publish to</param>
         /// <param name="routingKey">
-        /// The routing key for the message. The routing key is used for routing messages depending on the
-        /// exchange configuration.</param>
+        ///     The routing key for the message. The routing key is used for routing messages depending on the
+        ///     exchange configuration.</param>
         /// <param name="mandatory">
-        /// This flag tells the server how to react if the message cannot be routed to a queue.
-        /// If this flag is true, the server will return an unroutable message with a Return method.
-        /// If this flag is false, the server silently drops the message.
+        ///     This flag tells the server how to react if the message cannot be routed to a queue.
+        ///     If this flag is true, the server will return an unroutable message with a Return method.
+        ///     If this flag is false, the server silently drops the message.
         /// </param>
         /// <param name="messageProperties">The message properties</param>
         /// <param name="body">The message body</param>
-        Task PublishAsync(
-            IExchange exchange,
+        /// <param name="cancellation">The cancellation token</param>
+        Task PublishAsync(IExchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body);
+            byte[] body,
+            CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -213,20 +217,21 @@ namespace EasyNetQ
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
         /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(
-            string name,
+        Task<IQueue> QueueDeclareAsync(string name,
             bool passive = false,
             bool durable = true,
             bool exclusive = false,
             bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
+            int? perQueueMessageTtl = null,
             int? expires = null,
             int? maxPriority = null,
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null);
+            int? maxLengthBytes = null,
+            CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Delete a queue
@@ -234,13 +239,15 @@ namespace EasyNetQ
         /// <param name="queue">The queue to delete</param>
         /// <param name="ifUnused">Only delete if unused</param>
         /// <param name="ifEmpty">Only delete if empty</param>
-        Task QueueDeleteAsync(IQueue queue, bool ifUnused = false, bool ifEmpty = false);
+        /// <param name="cancellation">The cancellation token</param>
+        Task QueueDeleteAsync(IQueue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Purges a queue
         /// </summary>
         /// <param name="queue">The queue to purge</param>
-        Task QueuePurgeAsync(IQueue queue);
+        /// <param name="cancellation">The cancellation token</param>
+        Task QueuePurgeAsync(IQueue queue, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Declare an exchange
@@ -253,23 +260,25 @@ namespace EasyNetQ
         /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>The exchange</returns>
-        Task<IExchange> ExchangeDeclareAsync(
-            string name,
+        Task<IExchange> ExchangeDeclareAsync(string name,
             string type,
             bool passive = false,
             bool durable = true,
             bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false);
+            bool delayed = false,
+            CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Delete an exchange
         /// </summary>
         /// <param name="exchange">The exchange to delete</param>
         /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
-        Task ExchangeDeleteAsync(IExchange exchange, bool ifUnused = false);
+        /// <param name="cancellation">The cancellation token</param>
+        Task ExchangeDeleteAsync(IExchange exchange, bool ifUnused = false, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Bind an exchange to a queue. Does nothing if the binding already exists.
@@ -277,8 +286,9 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to bind</param>
         /// <param name="queue">The queue to bind</param>
         /// <param name="routingKey">The routing key</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey);
+        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Bind an exchange to a queue. Does nothing if the binding already exists.
@@ -287,8 +297,9 @@ namespace EasyNetQ
         /// <param name="queue">The queue to bind</param>
         /// <param name="routingKey">The routing key</param>
         /// <param name="headers">The headers</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers);
+        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -296,8 +307,9 @@ namespace EasyNetQ
         /// <param name="source">The source exchange</param>
         /// <param name="destination">The destination exchange</param>
         /// <param name="routingKey">The routing key</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey);
+        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -306,36 +318,41 @@ namespace EasyNetQ
         /// <param name="destination">The destination exchange</param>
         /// <param name="routingKey">The routing key</param>
         /// <param name="headers">The headers</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers);
+        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Delete a binding
         /// </summary>
         /// <param name="binding">the binding to delete</param>
-        Task UnbindAsync(IBinding binding);
+        /// <param name="cancellation">The cancellation token</param>
+        Task UnbindAsync(IBinding binding, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Get a message from the given queue.
         /// </summary>
         /// <typeparam name="T">The message type to get</typeparam>
         /// <param name="queue">The queue from which to retreive the message</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>An IBasicGetResult.</returns>
-        Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue) where T : class;
- 
+        Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue, CancellationToken cancellation = default(CancellationToken)) where T : class;
+
         /// <summary>
         /// Get the raw message from the given queue.
         /// </summary>
         /// <param name="queue">The queue from which to retreive the message</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>An IBasicGetResult</returns>
-        Task<IBasicGetResult> GetMessageAsync(IQueue queue);
+        Task<IBasicGetResult> GetMessageAsync(IQueue queue, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// Counts messages in the given queue
         /// </summary>
         /// <param name="queue">The queue in which to count messages</param>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>The number of counted messages</returns>
-        Task<uint> GetMessagesCountAsync(IQueue queue);
+        Task<uint> GetMessagesCountAsync(IQueue queue, CancellationToken cancellation = default(CancellationToken));
 
         /// <summary>
         /// True if the bus is connected, False if it is not.
@@ -382,7 +399,8 @@ namespace EasyNetQ
         /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
         /// consumers.
         /// </summary>
+        /// <param name="cancellation">The cancellation token</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync();
+        Task<IQueue> QueueDeclareAsync(CancellationToken cancellation = default(CancellationToken));
     }
 }

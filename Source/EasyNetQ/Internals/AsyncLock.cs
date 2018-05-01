@@ -15,9 +15,9 @@ namespace EasyNetQ.Internals
             semaphoreReleaser = new SemaphoreSlimReleaser(semaphore);
         }
 
-        public async Task<IDisposable> AcquireAsync()
+        public async Task<IDisposable> AcquireAsync(CancellationToken cancellation = default(CancellationToken))
         {
-            await semaphore.WaitAsync().ConfigureAwait(false);
+            await semaphore.WaitAsync(cancellation).ConfigureAwait(false);
             return semaphoreReleaser;
         }
 
