@@ -153,7 +153,7 @@ namespace EasyNetQ.Producer
         private static void TrySetResult<T>(TaskCompletionSource<T> tcs, T result)
         {
 #if NETFX
-            tcs.TrySetResult(result);
+            tcs.TrySetResultAsynchronously(result);
 #else
             tcs.TrySetResult(result);
 #endif
