@@ -31,8 +31,8 @@ namespace EasyNetQ
         /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
         /// </summary>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -53,8 +53,8 @@ namespace EasyNetQ
         /// before instantiation is the only way to catch the first <see cref="AdvancedBusEventHandlers.Connected"/> event.
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -153,8 +153,8 @@ namespace EasyNetQ
         /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -184,8 +184,8 @@ namespace EasyNetQ
         /// before instantiation is the only way to catch the first <see cref="AdvancedBusEventHandlers.Connected"/> event.
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -225,8 +225,8 @@ namespace EasyNetQ
         /// The initially requested heartbeat interval, in seconds; zero for none.
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -277,8 +277,8 @@ namespace EasyNetQ
         /// before instantiation is the only way to catch the first <see cref="AdvancedBusEventHandlers.Connected"/> event.
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -322,8 +322,8 @@ namespace EasyNetQ
         /// An <see cref="ConnectionConfiguration"/> instance.
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
@@ -349,8 +349,8 @@ namespace EasyNetQ
         /// before instantiation is the only way to catch the first <see cref="AdvancedBusEventHandlers.Connected"/> event.
         /// </param>
         /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="IEasyNetQLogger"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{IEasyNetQLogger}(_ => myLogger));
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
         /// <returns>
         /// A new <see cref="RabbitBus"/> instance.
