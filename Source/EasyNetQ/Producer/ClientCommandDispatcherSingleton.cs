@@ -12,8 +12,8 @@ namespace EasyNetQ.Producer
         private const int QueueSize = 1;
         private readonly CancellationTokenSource dispatchCts = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly AsyncBlockingQueue<Action> dispatchQueue = new AsyncBlockingQueue<Action>(QueueSize);
-        private readonly ManualResetEventSlim dispatchEndEvent = new ManualResetEventSlim(false);
+        private readonly AsyncBlockingQueue<Action<CancellationToken>> dispatchQueue;
+        private readonly ManualResetEventSlim dispatchCompletedEvent = new ManualResetEventSlim(false);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -25,7 +25,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
-
+            dispatchQueue = new AsyncBlockingQueue<Action<CancellationToken>>(QueueSize, dispatchCts.Token);
             StartDispatcherThread(configuration);
         }
 
@@ -33,17 +33,16 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
                 
-            using (var invocationCts = CancellationTokenSource.CreateLinkedTokenSource(dispatchCts.Token, cancellation))
+            var tcs = CreateTsc<T>();
+            using (cancellation.Register(() => TrySetCancelled(tcs, cancellation), false))
             {
-                var tcs = CreateTsc<T>();
-                var invocationCancellation = invocationCts.Token;
-                using (invocationCancellation.Register(() => TrySetCancelled(tcs, invocationCancellation), false))
+                await dispatchQueue.EnqueueAsync(c =>
                 {
-                    await dispatchQueue.EnqueueAsync(() =>
+                    using (var actionCts = CancellationTokenSource.CreateLinkedTokenSource(c, cancellation))
                     {
                         try
                         {
-                            var result = persistentChannel.InvokeChannelAction(channelAction, invocationCancellation);
+                            var result = persistentChannel.InvokeChannelAction(channelAction, actionCts.Token);
                             TrySetResult(tcs, result);
                         }
                         catch (OperationCanceledException exception)
@@ -54,10 +53,10 @@ namespace EasyNetQ.Producer
                         {
                             TrySetException(tcs, exception);
                         }
-                    }, invocationCancellation).ConfigureAwait(false);
-                    
-                    return await tcs.Task.ConfigureAwait(false);
-                }
+                    }
+                }, cancellation).ConfigureAwait(false);
+                
+                return await tcs.Task.ConfigureAwait(false);
             }
         }
 
@@ -65,20 +64,17 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            Preconditions.CheckNotNull(channelAction, "channelAction");
-                
-            using (var invocationCts = CancellationTokenSource.CreateLinkedTokenSource(dispatchCts.Token, cancellation))
+            var tcs = CreateTsc<NoContentStruct>();
+            using (cancellation.Register(() => TrySetCancelled(tcs, cancellation), false))
             {
-                var tcs = CreateTsc<NoContentStruct>();
-                var invocationCancellation = invocationCts.Token;
-                using (invocationCancellation.Register(() => TrySetCancelled(tcs, invocationCancellation), false))
+                await dispatchQueue.EnqueueAsync(c =>
                 {
-                    await dispatchQueue.EnqueueAsync(() =>
+                    using (var actionCts = CancellationTokenSource.CreateLinkedTokenSource(c, cancellation))
                     {
                         try
                         {
-                            persistentChannel.InvokeChannelAction(channelAction, invocationCancellation);
-                            TrySetResult(tcs, new NoContentStruct());
+                            persistentChannel.InvokeChannelAction(channelAction, actionCts.Token);
+                            TrySetResult(tcs, default(NoContentStruct));
                         }
                         catch (OperationCanceledException exception)
                         {
@@ -88,17 +84,17 @@ namespace EasyNetQ.Producer
                         {
                             TrySetException(tcs, exception);
                         }
-                    }, invocationCancellation).ConfigureAwait(false);
-                    
-                    await tcs.Task.ConfigureAwait(false);
-                }
+                    }
+                }, cancellation).ConfigureAwait(false);
+                
+                await tcs.Task.ConfigureAwait(false);
             }
         }
 
         public void Dispose()
         {
             dispatchCts.Cancel();
-            dispatchEndEvent.Wait();
+            dispatchCompletedEvent.Wait();
             persistentChannel.Dispose();
         }
 
@@ -110,20 +106,15 @@ namespace EasyNetQ.Producer
                 {
                     try
                     {
-                        var channelAction = dispatchQueue.Dequeue(dispatchCts.Token);
-                        channelAction();
+                        var channelAction = dispatchQueue.Dequeue();
+                        channelAction(dispatchCts.Token);
                     }
                     catch (OperationCanceledException)
                     {
                         break;
                     }
                 }
-
-                while (dispatchQueue.TryDequeue(out _))
-                {
-                }
-
-                dispatchEndEvent.Set();
+                dispatchCompletedEvent.Set();
             }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }
