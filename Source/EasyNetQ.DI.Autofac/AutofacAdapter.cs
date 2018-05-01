@@ -14,7 +14,7 @@ namespace EasyNetQ.DI.Autofac
             this.containerBuilder.RegisterInstance((IServiceRegister) this);
             this.containerBuilder.Register(c => new AutofacResolver(c.Resolve<ILifetimeScope>()))
                                  .As<IServiceResolver>()
-                                 .SingleInstance();
+                                 .InstancePerLifetimeScope();
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
