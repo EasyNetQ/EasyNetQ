@@ -11,9 +11,9 @@ namespace EasyNetQ.DI.Autofac
         {
             this.containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
 
-            this.containerBuilder.Register(c => new AutofacResolver(c.Resolve<ILifetimeScope>()))
+            this.containerBuilder.RegisterType<AutofacResolver>()
                                  .As<IServiceResolver>()
-                                 .InstancePerDependency();
+                                 .InstancePerLifetimeScope();
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -29,7 +29,6 @@ namespace EasyNetQ.DI.Autofac
                     containerBuilder.RegisterType<TImplementation>()
                                     .As<TService>()
                                     .SingleInstance();
-                    
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);

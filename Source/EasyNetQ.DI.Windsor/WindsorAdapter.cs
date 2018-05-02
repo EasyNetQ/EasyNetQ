@@ -15,8 +15,8 @@ namespace EasyNetQ.DI.Windsor
             this.container = container ?? throw new ArgumentNullException(nameof(container));
 
             this.container.Register(Component.For<IServiceResolver>()
-                          .UsingFactoryMethod(x => new WindsorResolver(x))
-                          .LifestyleTransient());
+                          .ImplementedBy<WindsorResolver>()
+                          .LifestyleScoped());
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -51,7 +51,7 @@ namespace EasyNetQ.DI.Windsor
             container.Register(registration);
             return this;
         }
-        
+
         private class WindsorResolver : IServiceResolver
         {
             private readonly IKernel kernel;

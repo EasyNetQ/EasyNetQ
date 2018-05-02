@@ -11,22 +11,13 @@ namespace EasyNetQ.DI.LightInject
         {
             this.serviceRegistry = serviceRegistry ?? throw new ArgumentNullException(nameof(serviceRegistry));
 
-            serviceRegistry.Register<IServiceResolver>(x => new LightInjectResolver(x), new PerRequestLifeTime());
+            this.serviceRegistry.Register<IServiceResolver>(x => new LightInjectResolver(x), new PerRequestLifeTime());
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            switch (lifetime)
-            {
-                case Lifetime.Transient:
-                    serviceRegistry.Register<TService, TImplementation>(new PerRequestLifeTime());
-                    return this;
-                case Lifetime.Singleton:
-                    serviceRegistry.Register<TService, TImplementation>(new PerContainerLifetime());
-                    return this;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
+            serviceRegistry.Register<TService, TImplementation>(ToLifetime(lifetime));
+            return this;
         }
 
         public IServiceRegister Register<TService>(TService instance) where TService : class
@@ -37,19 +28,23 @@ namespace EasyNetQ.DI.LightInject
 
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
+            serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), ToLifetime(lifetime));
+            return this;
+        }
+
+        private static ILifetime ToLifetime(Lifetime lifetime)
+        {
             switch (lifetime)
             {
                 case Lifetime.Transient:
-                    serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), new PerRequestLifeTime());
-                    return this;
+                    return new PerRequestLifeTime();
                 case Lifetime.Singleton:
-                    serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), new PerContainerLifetime());
-                    return this;
+                    return new PerContainerLifetime();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
-        
+
         private class LightInjectResolver : IServiceResolver
         {
             private readonly IServiceFactory serviceFactory;

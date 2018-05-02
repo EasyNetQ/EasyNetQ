@@ -120,15 +120,13 @@ namespace EasyNetQ.DI.Tests
                 c(new SimpleInjectorAdapter(container));
                 return container.GetInstance<IServiceResolver>();
             })};
-            
+
             yield return new object[] {(ResolverFactory) (c =>
             {
-                var container = new StructureMapContainer();
-                c(new StructureMapAdapter(container));
+                var container = new StructureMapContainer(r => c(new StructureMapAdapter(r)));
                 return container.GetInstance<IServiceResolver>();
             })};
 
-            
             yield return new object[] {(ResolverFactory) (c =>
             {
                 var containerBuilder = new ContainerBuilder();

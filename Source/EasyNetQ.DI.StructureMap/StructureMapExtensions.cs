@@ -5,7 +5,7 @@ namespace EasyNetQ.DI.StructureMap
 {
     public static class StructureMapExtensions
     {
-        public static Container RegisterEasyNetQ(this Container container, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+        public static IRegistry RegisterEasyNetQ(this IRegistry container, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {

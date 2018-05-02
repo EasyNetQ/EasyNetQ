@@ -1,17 +1,18 @@
 ﻿using System;
 using StructureMap;
+using StructureMap.Pipeline;
 
 namespace EasyNetQ.DI.StructureMap
 {
     public class StructureMapAdapter : IServiceRegister
     {
-        private readonly IContainer container;
+        private readonly IRegistry registry;
 
-        public StructureMapAdapter(IContainer container)
+        public StructureMapAdapter(IRegistry registry)
         {
-            this.container = container ?? throw new ArgumentNullException(nameof(container));
+            this.registry = registry ?? throw new ArgumentNullException(nameof(registry));
 
-            this.container.Configure(x => x.For<IServiceResolver>().Use(Guid.NewGuid().ToString(), y => new StructureMapResolver(y)).Transient());
+            this.registry.For<IServiceResolver>(Lifecycles.Container).Use<StructureMapResolver>();
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -19,19 +20,19 @@ namespace EasyNetQ.DI.StructureMap
             switch (lifetime)
             {
                 case Lifetime.Transient:
-                    container.Configure(c => c.For<TService>().Use<TImplementation>().Transient());
+                    registry.For<TService>(Lifecycles.Transient).Use<TImplementation>();
                     return this;
                 case Lifetime.Singleton:
-                    container.Configure(c => c.For<TService>().Use<TImplementation>().Singleton());
+                    registry.For<TService>(Lifecycles.Singleton).Use<TImplementation>();
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
+            } 
         }
 
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
-            container.Configure(c => c.For<TService>().Use(instance).Singleton());
+            registry.For<TService>(Lifecycles.Singleton).Use(instance);
             return this;
         }
 
@@ -40,10 +41,10 @@ namespace EasyNetQ.DI.StructureMap
             switch (lifetime)
             {
                 case Lifetime.Transient:
-                    container.Configure(x => x.For<TService>().Use(Guid.NewGuid().ToString(), y => factory(y.GetInstance<IServiceResolver>())).Transient());
+                    registry.For<TService>(Lifecycles.Transient).Use(y => factory(y.GetInstance<IServiceResolver>()));
                     return this;
                 case Lifetime.Singleton:
-                    container.Configure(x => x.For<TService>().Use(Guid.NewGuid().ToString(), y => factory(y.GetInstance<IServiceResolver>())).Singleton());
+                    registry.For<TService>(Lifecycles.Singleton).Use(y => factory(y.GetInstance<IServiceResolver>()));
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -52,16 +53,16 @@ namespace EasyNetQ.DI.StructureMap
 
         private class StructureMapResolver : IServiceResolver
         {
-            private readonly IContext context;
+            private readonly IContainer container;
 
-            public StructureMapResolver(IContext context)
+            public StructureMapResolver(IContainer container)
             {
-                this.context = context;
+                this.container = container;
             }
 
             public TService Resolve<TService>() where TService : class
             {
-                return context.GetInstance<TService>();
+                return container.GetInstance<TService>();
             }
 
             public IServiceResolverScope CreateScope()
