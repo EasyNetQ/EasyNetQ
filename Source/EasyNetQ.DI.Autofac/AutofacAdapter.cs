@@ -29,6 +29,7 @@ namespace EasyNetQ.DI.Autofac
                     containerBuilder.RegisterType<TImplementation>()
                                     .As<TService>()
                                     .SingleInstance();
+                    
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
