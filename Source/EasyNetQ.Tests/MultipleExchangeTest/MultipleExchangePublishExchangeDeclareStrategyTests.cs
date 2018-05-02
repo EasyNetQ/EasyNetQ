@@ -2,6 +2,7 @@
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Topology;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using NSubstitute;
 using Xunit;
 
@@ -34,7 +35,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
 
             var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy(conventions, advancedBus);
 
-            publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic).Wait();
+            publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
 
 /*
             //ensure that only one exchange is declared
