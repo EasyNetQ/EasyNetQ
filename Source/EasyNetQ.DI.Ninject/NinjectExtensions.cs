@@ -5,7 +5,7 @@ namespace EasyNetQ.DI.Ninject
 {
     public static class NinjectExtensions
     {
-        public static IKernel RegisterEasyNetQ(this IKernel kernel, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        public static IKernel RegisterEasyNetQ(this IKernel kernel, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             if (kernel == null)
             {
@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.Ninject
             }
             
             var serviceRegistry = new NinjectAdapter(kernel);
-            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
+            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
             return kernel;
         }
     }

@@ -27,6 +27,7 @@ namespace EasyNetQ.DI
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
                 .Register<ITimeoutStrategy, TimeoutStrategy>()
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
+                .Register(AdvancedBusEventHandlers.Default)
                 .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()

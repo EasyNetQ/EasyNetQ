@@ -5,7 +5,7 @@ namespace EasyNetQ.DI.Windsor
 {
     public static class WindsorExtensions
     {
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {
@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.Windsor
             }
             
             var serviceRegistry = new WindsorAdapter(container);
-            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
+            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
             return container;
         }
     }

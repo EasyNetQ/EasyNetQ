@@ -5,7 +5,7 @@ namespace EasyNetQ.DI.StructureMap
 {
     public static class StructureMapExtensions
     {
-        public static Container RegisterEasyNetQ(this Container container, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        public static Container RegisterEasyNetQ(this Container container, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {
@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.StructureMap
             }
             
             var serviceRegistry = new StructureMapAdapter(container);
-            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
+            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
             return container;
         }
     }

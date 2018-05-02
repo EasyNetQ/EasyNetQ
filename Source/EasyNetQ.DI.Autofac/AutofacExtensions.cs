@@ -5,7 +5,7 @@ namespace EasyNetQ.DI.Autofac
 {
     public static class AutofacExtensions
     {
-        public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
             if (containerBuilder == null)
             {
@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.Autofac
             }
             
             var serviceRegistry = new AutofacAdapter(containerBuilder);
-            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
+            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
             return containerBuilder;
         }
     }

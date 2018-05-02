@@ -5,7 +5,7 @@ namespace EasyNetQ.DI.LightInject
 {
     public static class LightInjectExtensions
     {
-        public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices) 
+        public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices) 
         {
             if (serviceContainer == null)
             {
@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.LightInject
             }
             
             var serviceRegistry = new LightInjectAdapter(serviceContainer);
-            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
+            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
             return serviceContainer;
         }
     }
