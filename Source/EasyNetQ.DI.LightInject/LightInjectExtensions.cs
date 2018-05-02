@@ -5,31 +5,15 @@ namespace EasyNetQ.DI.LightInject
 {
     public static class LightInjectExtensions
     {
-        public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer)
-        {
-            if (serviceContainer == null)
-            {
-                throw new ArgumentNullException(nameof(serviceContainer));
-            }
-
-            return serviceContainer.RegisterEasyNetQ(c => {});
-        }
-
-        public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, Action<IServiceRegister> registerServices) 
+        public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices) 
         {
             if (serviceContainer == null)
             {
                 throw new ArgumentNullException(nameof(serviceContainer));
             }
             
-            if (registerServices == null)
-            {
-                throw new ArgumentNullException(nameof(registerServices));
-            }
-
             var serviceRegistry = new LightInjectAdapter(serviceContainer);
-            serviceRegistry.RegisterDefaultServices();
-            registerServices(serviceRegistry);
+            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
             return serviceContainer;
         }
     }

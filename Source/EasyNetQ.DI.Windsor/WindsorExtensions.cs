@@ -5,31 +5,15 @@ namespace EasyNetQ.DI.Windsor
 {
     public static class WindsorExtensions
     {
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container)
+        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {
                 throw new ArgumentNullException(nameof(container));
-            }
-
-            return container.RegisterEasyNetQ(c => {});
-        }
-        
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Action<IServiceRegister> registerServices)
-        {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-            
-            if (registerServices == null)
-            {
-                throw new ArgumentNullException(nameof(registerServices));
             }
             
             var serviceRegistry = new WindsorAdapter(container);
-            serviceRegistry.RegisterDefaultServices();
-            registerServices(serviceRegistry);
+            serviceRegistry.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
             return container;
         }
     }

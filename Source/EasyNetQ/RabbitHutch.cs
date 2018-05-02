@@ -110,8 +110,6 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString)
         {
-            Preconditions.CheckNotNull(connectionString, "connectionString");
-
             return CreateBus(connectionString, AdvancedBusEventHandlers.Default);
         }
 
@@ -136,9 +134,6 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, AdvancedBusEventHandlers advancedBusEventHandlers)
         {
-            Preconditions.CheckNotNull(connectionString, "connectionString");
-            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
-
             return CreateBus(connectionString, advancedBusEventHandlers, x => { });
         }
 
@@ -161,9 +156,6 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
         {
-            Preconditions.CheckNotNull(connectionString, "connectionString");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
-
             return CreateBus(connectionString, AdvancedBusEventHandlers.Default, registerServices);
         }
 
@@ -192,14 +184,8 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
-            Preconditions.CheckNotNull(connectionString, "connectionString");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
-            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
-
             var connectionStringParser = new ConnectionStringParser();
-
             var connectionConfiguration = connectionStringParser.Parse(connectionString);
-
             return CreateBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
         }
 
@@ -244,7 +230,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(virtualHost, "virtualHost");
             Preconditions.CheckNotNull(username, "username");
             Preconditions.CheckNotNull(password, "password");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
 
             return CreateBus(hostName, hostPort, virtualHost, username, password, requestedHeartbeat, AdvancedBusEventHandlers.Default, registerServices);
         }
@@ -298,7 +283,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(username, "username");
             Preconditions.CheckNotNull(password, "password");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
 
             var connectionConfiguration = new ConnectionConfiguration
             {
@@ -357,19 +341,23 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
         {
+            var container = new DefaultServiceContainer();
+            container.RegisterBus(connectionConfiguration, advancedBusEventHandlers, registerServices);
+            return container.Resolve<IBus>();
+        }
+
+        public static void RegisterBus(this IServiceRegister serviceRegister, ConnectionConfiguration connectionConfiguration, AdvancedBusEventHandlers advancedBusEventHandlers, Action<IServiceRegister> registerServices)
+        {
+            Preconditions.CheckNotNull(serviceRegister, "serviceRegister");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
             Preconditions.CheckNotNull(registerServices, "registerServices");
-
-            var container = new DefaultServiceContainer();
-
+            
             connectionConfiguration.Validate();
-            container.Register(connectionConfiguration);
-            container.Register(advancedBusEventHandlers);
-            container.RegisterDefaultServices();
-            registerServices(container);
-
-            return container.Resolve<IBus>();
+            serviceRegister.Register(connectionConfiguration);
+            serviceRegister.Register(advancedBusEventHandlers);
+            serviceRegister.RegisterDefaultServices();
+            registerServices(serviceRegister);
         }
     }
 }

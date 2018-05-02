@@ -42,7 +42,6 @@ namespace EasyNetQ.DI.Autofac
             return this;
         }
 
-
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;
