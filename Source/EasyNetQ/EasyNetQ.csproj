@@ -48,9 +48,6 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TinyIoC" />
-  </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
     <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
   </PropertyGroup>

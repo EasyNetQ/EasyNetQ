@@ -7,7 +7,7 @@ namespace EasyNetQ.DI.LightInject
     {
         private readonly IServiceRegistry serviceRegistry;
 
-        public LightInjectAdapter(IServiceRegistry  serviceRegistry)
+        public LightInjectAdapter(IServiceRegistry serviceRegistry)
         {
             this.serviceRegistry = serviceRegistry ?? throw new ArgumentNullException(nameof(serviceRegistry));
 
@@ -64,6 +64,5 @@ namespace EasyNetQ.DI.LightInject
                 return new ServiceResolverScope(this);
             }
         }
-
     }
 }

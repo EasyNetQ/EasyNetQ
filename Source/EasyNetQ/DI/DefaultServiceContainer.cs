@@ -1,81 +1,71 @@
-﻿using System;
-using EasyNetQ.TinyIoC;
+﻿
+using System;
 
 namespace EasyNetQ.DI
 {
     public class DefaultServiceContainer : IServiceRegister
     {
-        private readonly TinyIoCContainer container = new TinyIoCContainer();
+        private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer();
 
         public DefaultServiceContainer()
         {
-            container.Register<IServiceResolver>((x, _) => new TinyIoCContainerResolver(x));
-        }
-
-        public TService Resolve<TService>() where TService : class
-        {
-            return container.Resolve<TService>();
+            container.Register<IServiceResolver>(x => new LightInjectResolver(x), new LightInject.PerRequestLifeTime());
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            switch (lifetime)
-            {
-                case Lifetime.Transient:
-                    container.Register<TService, TImplementation>().AsMultiInstance();
-                    return this;
-                case Lifetime.Singleton:
-                    container.Register<TService, TImplementation>().AsSingleton();
-                    return this;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
+            container.Register<TService, TImplementation>(ToLifetime(lifetime));
+            return this;
         }
 
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
-            container.Register(instance);
+            container.RegisterInstance(instance);
             return this;
         }
 
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
+            container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
+            return this;
+        }
+
+        public TService Resolve<TService>()
+        {
+            return (TService)container.GetInstance(typeof(TService));
+        }
+
+        private static LightInject.ILifetime ToLifetime(Lifetime lifetime)
+        {
             switch (lifetime)
             {
                 case Lifetime.Transient:
-                    container.Register((x , _) => factory(x.Resolve<IServiceResolver>()));
-                    return this;
+                    return new LightInject.PerRequestLifeTime();
                 case Lifetime.Singleton:
-                    container.Register((x, _) => factory(x.Resolve<IServiceResolver>()));
-                    return this;
+                    return new LightInject.PerContainerLifetime();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
 
-        private class TinyIoCContainerResolver : IServiceResolver
+        private class LightInjectResolver : IServiceResolver
         {
-            private readonly TinyIoCContainer container;
+            private readonly LightInject.IServiceFactory serviceFactory;
 
-            public TinyIoCContainerResolver(TinyIoCContainer container)
+            public LightInjectResolver(LightInject.IServiceFactory serviceFactory)
             {
-                this.container = container;
+                this.serviceFactory = serviceFactory;
             }
 
             public TService Resolve<TService>() where TService : class
             {
-                return container.Resolve<TService>();
+                return (TService) serviceFactory.GetInstance(typeof(TService));
             }
 
             public IServiceResolverScope CreateScope()
             {
                 return new ServiceResolverScope(this);
             }
-        }
-
-        public void Dispose()
-        {
-            container.Dispose();
         }
     }
 }
