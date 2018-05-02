@@ -68,25 +68,24 @@ namespace EasyNetQ.DI.Tests
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_resolve_service_resolver(ResolverFactory resolverFactory)
-        {            
+        {
             var resolver = resolverFactory(c => {});
 
             Assert.NotNull(resolver.Resolve<IServiceResolver>());
         }
-        
-                 
+
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
-        public void Should_singleton_called_once(ResolverFactory resolverFactory)
+        public void Should_singleton_factory_called_once(ResolverFactory resolverFactory)
         {
             var resolver = resolverFactory(c => c.Register<IService>(x => new Service()));
 
             var first = resolver.Resolve<IService>();
             var second = resolver.Resolve<IService>();
-            
+
             Assert.Same(first, second);
         }
-        
+
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_transient_factory_call_every_time(ResolverFactory resolverFactory)
@@ -105,9 +104,9 @@ namespace EasyNetQ.DI.Tests
             {
                 var container = new DefaultServiceContainer();
                 c(container);
-                return container;
+                return container.Resolve<IServiceResolver>();
             })};
-            
+
             yield return new object[] {(ResolverFactory) (c =>
             {
                 var container = new LightInjectContainer();

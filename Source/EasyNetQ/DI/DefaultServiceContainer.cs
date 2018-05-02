@@ -3,23 +3,18 @@ using EasyNetQ.TinyIoC;
 
 namespace EasyNetQ.DI
 {
-    public class DefaultServiceContainer : IServiceResolver, IServiceRegister
+    public class DefaultServiceContainer : IServiceRegister
     {
         private readonly TinyIoCContainer container = new TinyIoCContainer();
 
         public DefaultServiceContainer()
         {
-            container.Register<IServiceResolver>(this);
+            container.Register<IServiceResolver>((x, _) => new TinyIoCContainerResolver(x));
         }
 
         public TService Resolve<TService>() where TService : class
         {
             return container.Resolve<TService>();
-        }
-
-        public IServiceResolverScope CreateScope()
-        {
-            return new ServiceResolverScope(this);
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -45,7 +40,37 @@ namespace EasyNetQ.DI
 
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
-            throw new NotImplementedException();
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    container.Register((x , _) => factory(x.Resolve<IServiceResolver>()));
+                    return this;
+                case Lifetime.Singleton:
+                    container.Register((x, _) => factory(x.Resolve<IServiceResolver>()));
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
+        private class TinyIoCContainerResolver : IServiceResolver
+        {
+            private readonly TinyIoCContainer container;
+
+            public TinyIoCContainerResolver(TinyIoCContainer container)
+            {
+                this.container = container;
+            }
+
+            public TService Resolve<TService>() where TService : class
+            {
+                return container.Resolve<TService>();
+            }
+
+            public IServiceResolverScope CreateScope()
+            {
+                return new ServiceResolverScope(this);
+            }
         }
 
         public void Dispose()
