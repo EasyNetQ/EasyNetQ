@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Autofac;
 using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.LightInject;
@@ -13,6 +14,7 @@ using StructureMapContainer = StructureMap.Container;
 #if NETFX
 using EasyNetQ.DI.Windsor;
 using EasyNetQ.DI.Ninject;
+using Ninject;
 using WindsorContainer = Castle.Windsor.WindsorContainer;
 using NinjectContainer = Ninject.StandardKernel;
 #endif
@@ -30,7 +32,7 @@ namespace EasyNetQ.DI.Tests
             var first = new Service();
             var last = new Service();
             
-            var resolver = resolverFactory.Invoke(c =>
+            var resolver = resolverFactory(c =>
             {
                 c.Register<IService>(first);
                 c.Register<IService>(last);
@@ -43,48 +45,91 @@ namespace EasyNetQ.DI.Tests
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_singleton_created_once(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory.Invoke(c => c.Register<IService, Service>());
+            var resolver = resolverFactory(c => c.Register<IService, Service>());
 
-            Assert.Same(resolver.Resolve<IService>(), resolver.Resolve<IService>());
+            var first = resolver.Resolve<IService>();
+            var second = resolver.Resolve<IService>();
+            
+            Assert.Same(first, second);
         }
 
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_transient_created_every_time(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory.Invoke(c => c.Register<IService, Service>(Lifetime.Transient));
+            var resolver = resolverFactory(c => c.Register<IService, Service>(Lifetime.Transient));
 
-            Assert.NotSame(resolver.Resolve<IService>(), resolver.Resolve<IService>());
+            var first = resolver.Resolve<IService>();
+            var second = resolver.Resolve<IService>();
+
+            Assert.NotSame(first, second);
         }
 
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_resolve_service_resolver(ResolverFactory resolverFactory)
         {            
-            var resolver = resolverFactory.Invoke(c => {});
+            var resolver = resolverFactory(c => {});
 
             Assert.NotNull(resolver.Resolve<IServiceResolver>());
+        }
+        
+                 
+        [Theory]
+        [MemberData(nameof(GetContainerAdapters))]
+        public void Should_singleton_called_once(ResolverFactory resolverFactory)
+        {
+            var resolver = resolverFactory(c => c.Register<IService>(x => new Service()));
+
+            var first = resolver.Resolve<IService>();
+            var second = resolver.Resolve<IService>();
+            
+            Assert.Same(first, second);
+        }
+        
+        [Theory]
+        [MemberData(nameof(GetContainerAdapters))]
+        public void Should_transient_factory_call_every_time(ResolverFactory resolverFactory)
+        {
+            var resolver = resolverFactory(c => c.Register<IService>(x => new Service(), Lifetime.Transient));
+
+            var first = resolver.Resolve<IService>();
+            var second = resolver.Resolve<IService>();
+
+            Assert.NotSame(first, second);
         }
 
         public static IEnumerable<object[]> GetContainerAdapters()
         {
-            object[] T<TContainer>(TContainer container) where TContainer : IServiceRegister, IServiceResolver
+            yield return new object[] {(ResolverFactory) (c =>
             {
-                return new object[] {(ResolverFactory) (c =>
-                {
-                    c(container);
-                    return container;
-                })};
-            }
+                var container = new DefaultServiceContainer();
+                c(container);
+                return container;
+            })};
+            
+            yield return new object[] {(ResolverFactory) (c =>
+            {
+                var container = new LightInjectContainer();
+                c(new LightInjectAdapter(container));
+                return container.GetInstance<IServiceResolver>();
+            })};
 
-            yield return T(new DefaultServiceContainer());
-            yield return T(new LightInjectAdapter(new LightInjectContainer()));
-            yield return T(new SimpleInjectorAdapter(new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } }));
-            yield return T(new StructureMapAdapter(new StructureMapContainer()));
-#if NETFX
-            yield return T(new WindsorAdapter(new WindsorContainer()));
-            yield return T(new NinjectAdapter(new NinjectContainer()));
-#endif
+            yield return new object[] {(ResolverFactory) (c =>
+            {
+                var container = new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } };
+                c(new SimpleInjectorAdapter(container));
+                return container.GetInstance<IServiceResolver>();
+            })};
+            
+            yield return new object[] {(ResolverFactory) (c =>
+            {
+                var container = new StructureMapContainer();
+                c(new StructureMapAdapter(container));
+                return container.GetInstance<IServiceResolver>();
+            })};
+
+            
             yield return new object[] {(ResolverFactory) (c =>
             {
                 var containerBuilder = new ContainerBuilder();
@@ -92,6 +137,21 @@ namespace EasyNetQ.DI.Tests
                 var container = containerBuilder.Build();
                 return container.Resolve<IServiceResolver>();
             })};
+#if NETFX
+            yield return new object[] {(ResolverFactory) (c =>
+            {
+                var container = new WindsorContainer();
+                c(new WindsorAdapter(container));
+                return container.Resolve<IServiceResolver>();
+            })};
+            
+            yield return new object[] {(ResolverFactory) (c =>
+            {
+                var container = new NinjectContainer();
+                c(new NinjectAdapter(container));
+                return container.Get<IServiceResolver>();
+            })};
+#endif
         }
 
         public interface IService
@@ -100,6 +160,19 @@ namespace EasyNetQ.DI.Tests
 
         public class Service : IService
         {
+            private static volatile int sequenceNumber = 0;
+
+            private readonly int number;
+            
+            public Service()
+            {
+                number = Interlocked.Increment(ref sequenceNumber);
+            }
+
+            public override string ToString()
+            {
+                return number.ToString();
+            }
         }
     }
 }

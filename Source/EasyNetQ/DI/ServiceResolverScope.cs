@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EasyNetQ.DI
+﻿namespace EasyNetQ.DI
 {
     public class ServiceResolverScope : IServiceResolverScope
     {

@@ -13,7 +13,7 @@ namespace EasyNetQ.DI.Autofac
 
             this.containerBuilder.Register(c => new AutofacResolver(c.Resolve<ILifetimeScope>()))
                                  .As<IServiceResolver>()
-                                 .InstancePerLifetimeScope();
+                                 .InstancePerDependency();
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -42,6 +42,25 @@ namespace EasyNetQ.DI.Autofac
             return this;
         }
 
+        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    containerBuilder.Register(c => factory(c.Resolve<IServiceResolver>()))
+                                    .As<TService>()
+                                    .InstancePerDependency();
+                    return this;
+                case Lifetime.Singleton:
+                    containerBuilder.Register(c => factory(c.Resolve<IServiceResolver>()))
+                                    .As<TService>()
+                                    .SingleInstance();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+        
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;

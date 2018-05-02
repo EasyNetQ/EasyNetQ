@@ -183,5 +183,22 @@ namespace EasyNetQ
             serviceRegister.RegisterDefaultServices();
             registerServices(serviceRegister);
         }
+        
+        public static void RegisterBus(this IServiceRegister serviceRegister, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        {
+            Preconditions.CheckNotNull(serviceRegister, "serviceRegister");
+            Preconditions.CheckNotNull(connectionConfigurationFactory, "connectionConfiguration");
+            Preconditions.CheckNotNull(registerServices, "registerServices");
+            
+            serviceRegister.Register(c =>
+            {
+                var connectionConfiguration = connectionConfigurationFactory.Invoke(c);
+                connectionConfiguration.Validate();
+                return connectionConfiguration;
+            });
+            
+            serviceRegister.RegisterDefaultServices();
+            registerServices(serviceRegister);
+        }
     }
 }

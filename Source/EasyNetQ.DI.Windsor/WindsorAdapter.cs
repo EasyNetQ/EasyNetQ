@@ -1,11 +1,12 @@
 ﻿using System;
 using Castle.Core;
+using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 
 namespace EasyNetQ.DI.Windsor
 {
-    public class WindsorAdapter : IServiceRegister, IServiceResolver
+    public class WindsorAdapter : IServiceRegister
     {
         private readonly IWindsorContainer container;
 
@@ -13,7 +14,9 @@ namespace EasyNetQ.DI.Windsor
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
 
-            this.container.Register(Component.For<IServiceResolver>().Instance(this).LifestyleSingleton());
+            this.container.Register(Component.For<IServiceResolver>()
+                          .UsingFactoryMethod(x => new WindsorResolver(x))
+                          .LifestyleTransient());
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
@@ -38,14 +41,35 @@ namespace EasyNetQ.DI.Windsor
             return this;
         }
 
-        public TService Resolve<TService>() where TService : class
+        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
-            return container.Resolve<TService>();
+            var registration = Component.For<TService>()
+                                        .Named(Guid.NewGuid().ToString())
+                                        .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
+                                        .LifeStyle.Is(GetLifestyleType(lifetime))
+                                        .IsDefault();
+            container.Register(registration);
+            return this;
         }
-
-        public IServiceResolverScope CreateScope()
+        
+        private class WindsorResolver : IServiceResolver
         {
-            return new ServiceResolverScope(this);
+            private readonly IKernel kernel;
+
+            public WindsorResolver(IKernel kernel)
+            {
+                this.kernel = kernel;
+            }
+
+            public TService Resolve<TService>() where TService : class
+            {
+                return kernel.Resolve<TService>();
+            }
+
+            public IServiceResolverScope CreateScope()
+            {
+                return new ServiceResolverScope(this);
+            }
         }
 
         private LifestyleType GetLifestyleType(Lifetime lifetime)

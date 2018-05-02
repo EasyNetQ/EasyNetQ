@@ -11,7 +11,6 @@ namespace EasyNetQ.DI.SimpleInjector
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
 
-            container.RegisterSingleton((IServiceResolver) this);
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton)
@@ -35,6 +34,11 @@ namespace EasyNetQ.DI.SimpleInjector
         {
             container.RegisterSingleton(instance);
             return this;
+        }
+
+        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        {
+            throw new NotImplementedException();
         }
 
         public TService Resolve<TService>() where TService : class

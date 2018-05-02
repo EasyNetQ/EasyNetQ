@@ -43,6 +43,11 @@ namespace EasyNetQ.DI
             return this;
         }
 
+        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             container.Dispose();
