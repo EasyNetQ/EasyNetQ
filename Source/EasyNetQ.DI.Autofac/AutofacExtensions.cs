@@ -5,15 +5,15 @@ namespace EasyNetQ.DI.Autofac
 {
     public static class AutofacExtensions
     {
-        public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+        public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {
             if (containerBuilder == null)
             {
                 throw new ArgumentNullException(nameof(containerBuilder));
             }
             
-            var serviceRegistry = new AutofacAdapter(containerBuilder);
-            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
+            var serviceRegister = new AutofacAdapter(containerBuilder);
+            RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return containerBuilder;
         }
     }

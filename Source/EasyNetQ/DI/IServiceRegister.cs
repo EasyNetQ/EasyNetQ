@@ -29,7 +29,6 @@ namespace EasyNetQ.DI
         IServiceRegister Register<TService>(TService instance)
             where TService : class;
         
-        
         /// <summary>
         /// Register a service. Note that the first registration wins. All subsequent registrations
         /// will be ignored.

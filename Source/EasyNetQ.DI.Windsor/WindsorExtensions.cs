@@ -5,15 +5,15 @@ namespace EasyNetQ.DI.Windsor
 {
     public static class WindsorExtensions
     {
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {
                 throw new ArgumentNullException(nameof(container));
             }
-            
-            var serviceRegistry = new WindsorAdapter(container);
-            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
+
+            var serviceRegister = new WindsorAdapter(container);
+            RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return container;
         }
     }

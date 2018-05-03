@@ -89,9 +89,9 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
         {
-            var connectionStringParser = new ConnectionStringParser();
-            var connectionConfiguration = connectionStringParser.Parse(connectionString);
-            return CreateBus(connectionConfiguration, registerServices);
+            Preconditions.CheckNotNull(connectionString, "connectionString");
+            
+            return CreateBus(x => x.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
         }
         
         /// <summary>
@@ -151,7 +151,6 @@ namespace EasyNetQ
             return CreateBus(connectionConfiguration, registerServices);
         }
 
-
         /// <summary>
         /// Creates a new instance of <see cref="RabbitBus"/>.
         /// </summary>
@@ -167,24 +166,48 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
-            var container = new DefaultServiceContainer();
-            container.RegisterBus(connectionConfiguration, registerServices);
-            return container.Resolve<IBus>();
-        }
-
-        public static void RegisterBus(this IServiceRegister serviceRegister, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
-        {
-            Preconditions.CheckNotNull(serviceRegister, "serviceRegister");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
             
-            connectionConfiguration.Validate();
-            serviceRegister.Register(connectionConfiguration);
-            serviceRegister.RegisterDefaultServices();
-            registerServices(serviceRegister);
+            return CreateBus(_ => connectionConfiguration, registerServices);
         }
         
-        public static void RegisterBus(this IServiceRegister serviceRegister, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        /// <summary>
+        /// Creates a new instance of <see cref="RabbitBus"/>.
+        /// </summary>
+        /// <param name="connectionConfigurationFactory">
+        /// A factory of <see cref="ConnectionConfiguration"/> instance.
+        /// </param>
+        /// <param name="registerServices">
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static IBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        {
+            var container = new DefaultServiceContainer();
+            RegisterBus(container, connectionConfigurationFactory, registerServices);
+            return container.Resolve<IBus>();
+        }
+        
+        /// <summary>
+        /// Registers components of a <see cref="RabbitBus"/>.
+        /// </summary>
+        /// <param name="serviceRegister"/>
+        /// <param name="connectionConfigurationFactory">
+        /// A factory of <see cref="ConnectionConfiguration"/> instance.
+        /// </param>
+        /// <param name="registerServices">
+        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RabbitBus"/> instance.
+        /// </returns>
+        public static void RegisterBus(IServiceRegister serviceRegister,
+                                       Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
+                                       Action<IServiceRegister> registerServices)
         {
             Preconditions.CheckNotNull(serviceRegister, "serviceRegister");
             Preconditions.CheckNotNull(connectionConfigurationFactory, "connectionConfiguration");

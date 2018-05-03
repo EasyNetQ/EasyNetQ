@@ -5,15 +5,15 @@ namespace EasyNetQ.DI.Ninject
 {
     public static class NinjectExtensions
     {
-        public static IKernel RegisterEasyNetQ(this IKernel kernel, ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+        public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {
             if (kernel == null)
             {
                 throw new ArgumentNullException(nameof(kernel));
             }
-            
-            var serviceRegistry = new NinjectAdapter(kernel);
-            serviceRegistry.RegisterBus(connectionConfiguration, registerServices);
+
+            var serviceRegister = new NinjectAdapter(kernel);
+            RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return kernel;
         }
     }
