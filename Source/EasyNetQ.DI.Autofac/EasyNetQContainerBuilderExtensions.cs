@@ -1,10 +1,13 @@
 ﻿using System;
-using Autofac;
+using EasyNetQ;
 using EasyNetQ.ConnectionString;
+using EasyNetQ.DI;
+using EasyNetQ.DI.Autofac;
 
-namespace EasyNetQ.DI.Autofac
+// ReSharper disable once CheckNamespace
+namespace Autofac
 {
-    public static class AutofacExtensions
+    public static class EasyNetQContainerBuilderExtensions
     {
         public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {

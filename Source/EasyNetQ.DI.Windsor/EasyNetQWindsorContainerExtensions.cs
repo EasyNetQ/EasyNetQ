@@ -1,10 +1,13 @@
 ﻿using System;
-using Castle.Windsor;
+using EasyNetQ;
 using EasyNetQ.ConnectionString;
+using EasyNetQ.DI;
+using EasyNetQ.DI.Windsor;
 
-namespace EasyNetQ.DI.Windsor
+// ReSharper disable once CheckNamespace
+namespace Castle.Windsor
 {
-    public static class WindsorExtensions
+    public static class EasyNetQWindsorContainerExtensions
     {
         public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {

@@ -1,10 +1,13 @@
 ﻿using System;
+using EasyNetQ;
 using EasyNetQ.ConnectionString;
-using Ninject;
+using EasyNetQ.DI;
+using EasyNetQ.DI.Ninject;
 
-namespace EasyNetQ.DI.Ninject
+// ReSharper disable once CheckNamespace
+namespace Ninject
 {
-    public static class NinjectExtensions
+    public static class EasyNetQKernelExtensions
     {
         public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {

@@ -1,24 +1,27 @@
 ﻿using System;
+using EasyNetQ;
 using EasyNetQ.ConnectionString;
-using StructureMap;
+using EasyNetQ.DI;
+using EasyNetQ.DI.SimpleInjector;
 
-namespace EasyNetQ.DI.StructureMap
+// ReSharper disable once CheckNamespace
+namespace SimpleInjector
 {
-    public static class StructureMapExtensions
+    public static class EasyNetQContainerExtensions
     {
-        public static IRegistry RegisterEasyNetQ(this IRegistry container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        public static Container RegisterEasyNetQ(this Container container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {
                 throw new ArgumentNullException(nameof(container));
             }
 
-            var serviceRegister = new StructureMapAdapter(container);
+            var serviceRegister = new SimpleInjectorAdapter(container);
             RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return container;
         }
         
-        public static IRegistry RegisterEasyNetQ(this IRegistry container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
+        public static Container RegisterEasyNetQ(this Container container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
         {
             if (container == null)
             {
@@ -28,7 +31,7 @@ namespace EasyNetQ.DI.StructureMap
             return container.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
         }
         
-        public static IRegistry RegisterEasyNetQ(this IRegistry container, string connectionString, Action<IServiceRegister> registerServices)
+        public static Container RegisterEasyNetQ(this Container container, string connectionString, Action<IServiceRegister> registerServices)
         {
             if (container == null)
             {
@@ -38,7 +41,7 @@ namespace EasyNetQ.DI.StructureMap
             return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
         }
         
-        public static IRegistry RegisterEasyNetQ(this IRegistry container, string connectionString)
+        public static Container RegisterEasyNetQ(this Container container, string connectionString)
         {
             if (container == null)
             {

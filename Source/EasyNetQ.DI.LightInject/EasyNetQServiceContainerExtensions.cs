@@ -1,10 +1,14 @@
 ﻿using System;
+using EasyNetQ;
 using EasyNetQ.ConnectionString;
-using LightInject;
+using EasyNetQ.DI;
+using EasyNetQ.DI.LightInject;
 
-namespace EasyNetQ.DI.LightInject
+
+// ReSharper disable once CheckNamespace
+namespace LightInject
 {
-    public static class LightInjectExtensions
+    public static class EasyNetQServiceContainerExtensions
     {
         public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices) 
         {
