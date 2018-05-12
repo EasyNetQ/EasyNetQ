@@ -12,7 +12,7 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class ErrorMessageRepublishSpike
     {
-        readonly ISerializer serializer = new JsonSerializer(new LegacyTypeNameSerializer());
+        readonly ISerializer serializer = new JsonSerializer();
 
         [Fact]
         public void Should_deserialise_error_message_correctly()

@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         void Deliver<T>(T message) where T : class
         {
-            var body = new JsonSerializer(new DefaultTypeNameSerializer()).MessageToBytes(message);
+            var body = new JsonSerializer().MessageToBytes(message);
             var properties = new BasicProperties
             {
                 Type = new DefaultTypeNameSerializer().Serialize(typeof(T))
