@@ -6,9 +6,6 @@
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Version.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">

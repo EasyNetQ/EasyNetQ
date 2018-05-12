@@ -4,9 +4,7 @@
     <Description>EasyNetQ.Hosepipe.Tests</Description>
     <TargetFrameworks>netcoreapp1.0;net452</TargetFrameworks>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Include="..\Version.cs" />
     <None Include="App.config" />
     <Reference Include="EasyNetQ.Management.Client, Version=0.51.2.115, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EasyNetQ.Management.Client.0.51.2.115\lib\net40\EasyNetQ.Management.Client.dll</HintPath>
@@ -27,13 +25,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     <ProjectReference Include="..\EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj" />
     <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170601-03" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta3-build3705" />
@@ -46,23 +42,18 @@
       <PrivateAssets>all</PrivateAssets>
     </DotNetCliToolReference>
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
 </Project>
