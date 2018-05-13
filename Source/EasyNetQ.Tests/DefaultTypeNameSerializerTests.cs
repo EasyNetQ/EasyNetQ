@@ -6,13 +6,13 @@ using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    public class TypeNameSerializerTests
+    public class DefaultTypeNameSerializerTests
     {
         private readonly ITypeNameSerializer typeNameSerializer;
 
-        public TypeNameSerializerTests()
+        public DefaultTypeNameSerializerTests()
         {
-            typeNameSerializer = new TypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
         }
 
 #if NETCOREAPP1_0
@@ -20,14 +20,14 @@ namespace EasyNetQ.Tests
         public void Should_serialize_hashset_of_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
-            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
+            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Collections");
         }
 #else
         [Fact]
         public void Should_serialize_hashset_of_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
-            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:System.Core");
+            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core");
         }
 #endif
 
@@ -36,14 +36,14 @@ namespace EasyNetQ.Tests
         public void Should_serialize_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(string));
-            typeName.ShouldEqual("System.String:System.Private.CoreLib");
+            typeName.ShouldEqual("System.String, System.Private.CoreLib");
         }
 #else
         [Fact]
         public void Should_serialize_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(string));
-            typeName.ShouldEqual("System.String:mscorlib");
+            typeName.ShouldEqual("System.String, mscorlib");
         }
 #endif
 
@@ -51,13 +51,13 @@ namespace EasyNetQ.Tests
         public void Should_serialize_some_random_class_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(SomeRandomClass));
-            typeName.ShouldEqual("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
+            typeName.ShouldEqual("EasyNetQ.Tests.SomeRandomClass, EasyNetQ.Tests");
         }
 
         [Fact]
         public void Should_deserialize_string_type_name()
         {
-            var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
+            var type = typeNameSerializer.DeSerialize("System.String, mscorlib");
             type.ShouldEqual(typeof (string));
         }
 
@@ -65,23 +65,22 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_deserialize_hashset_of_string_type()
         {
-            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
+            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Collections");
             type.ShouldEqual(typeof(HashSet<string>));
         }
 #else
         [Fact]
-        public void Should_not_deserialize_hashset_of_string_type()
+        public void Should_deserialize_hashset_of_string_type()
         {
-            Assert.Throws<EasyNetQException>(() => {
-                typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:System.Core");
-            });
+            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, mscorlib]], System.Core");
+            type.ShouldEqual(typeof(HashSet<string>));
         }
 #endif
 
         [Fact]
         public void Should_deserialize_some_random_class_type_name()
         {
-            var type = typeNameSerializer.DeSerialize("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
+            var type = typeNameSerializer.DeSerialize("EasyNetQ.Tests.SomeRandomClass, EasyNetQ.Tests");
             type.ShouldEqual(typeof(SomeRandomClass));
         }
 
@@ -90,7 +89,7 @@ namespace EasyNetQ.Tests
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                typeNameSerializer.DeSerialize("EasyNetQ.TypeNameSerializer.None:EasyNetQ");
+                typeNameSerializer.DeSerialize("EasyNetQ.TypeNameSerializer.None, EasyNetQ");
             });
         }
 

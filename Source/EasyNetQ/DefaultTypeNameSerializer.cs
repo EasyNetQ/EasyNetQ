@@ -15,7 +15,15 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(type, "type");
             
-            return serializedTypes.GetOrAdd(type, t => RemoveAssemblyDetails(t.AssemblyQualifiedName));
+            return serializedTypes.GetOrAdd(type, t =>
+            {
+                var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
+                if (typeName.Length > 255)
+                {
+                    throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP maximum short string length of 255 characters.", t.Name);
+                }
+                return typeName;
+            });
         }
 
         public Type DeSerialize(string typeName)
