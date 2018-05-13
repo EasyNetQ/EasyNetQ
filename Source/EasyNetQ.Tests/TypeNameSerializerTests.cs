@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 using System;
+using System.Collections.Generic;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using Xunit;
 using System.Reflection;
@@ -8,10 +9,7 @@ namespace EasyNetQ.Tests
 {
     public class TypeNameSerializerTests
     {
-        private readonly string expectedTypeName = "System.String:" + typeof(string).GetTypeInfo().Assembly.GetName().Name;
-        private const string expectedCustomTypeName = "EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests";
-
-        private ITypeNameSerializer typeNameSerializer;
+        private readonly ITypeNameSerializer typeNameSerializer;
 
         public TypeNameSerializerTests()
         {
@@ -19,30 +17,37 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_serialize_a_type_name()
+        public void Should_serialize_hashset_of_string_type()
+        {
+            var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
+            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Core");
+        }
+
+        [Fact]
+        public void Should_serialize_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(string));
-            typeName.ShouldEqual(expectedTypeName);
+            typeName.ShouldEqual("System.String:mscorlib");
         }
 
         [Fact]
-        public void Should_serialize_a_custom_type()
+        public void Should_serialize_some_random_class_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(SomeRandomClass));
-            typeName.ShouldEqual(expectedCustomTypeName);
+            typeName.ShouldEqual("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
         }
 
         [Fact]
-        public void Should_deserialize_a_type_name()
+        public void Should_deserialize_string_type_name()
         {
-            var type = typeNameSerializer.DeSerialize(expectedTypeName);
+            var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
             type.ShouldEqual(typeof (string));
         }
 
         [Fact]
-        public void Should_deserialize_a_custom_type()
+        public void Should_deserialize_some_random_class_type_name()
         {
-            var type = typeNameSerializer.DeSerialize(expectedCustomTypeName);
+            var type = typeNameSerializer.DeSerialize("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
             type.ShouldEqual(typeof(SomeRandomClass));
         }
 
@@ -75,23 +80,10 @@ namespace EasyNetQ.Tests
                 typeNameSerializer.DeSerialize(null);
             });
         }
-
-        public void Spike()
-        {
-            var type = Type.GetType("EasyNetQ.Tests.SomeRandomClass, EasyNetQ.Tests");
-            type.ShouldEqual(typeof (SomeRandomClass));
-        }
-
-        public void Spike2()
-        {
-            var name = typeof (SomeRandomClass).AssemblyQualifiedName;
-            Console.Out.WriteLine(name);
-        }
     }
 
     public class SomeRandomClass
     {
-        
     }
 }
 // ReSharper restore InconsistentNaming
