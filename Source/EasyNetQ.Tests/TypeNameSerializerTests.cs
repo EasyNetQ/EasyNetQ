@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using Xunit;
-using System.Reflection;
 
 namespace EasyNetQ.Tests
 {
@@ -16,19 +15,37 @@ namespace EasyNetQ.Tests
             typeNameSerializer = new TypeNameSerializer();
         }
 
+#if NETCOREAPP1_0
         [Fact]
         public void Should_serialize_hashset_of_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
-            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Core");
+            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
         }
+#else
+        [Fact]
+        public void Should_serialize_hashset_of_string_type()
+        {
+            var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
+            typeName.ShouldEqual("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:System.Core");
+        }
+#endif
 
+#if NETCOREAPP1_0
+        [Fact]
+        public void Should_serialize_string_type()
+        {
+            var typeName = typeNameSerializer.Serialize(typeof(string));
+            typeName.ShouldEqual("System.String:System.Private.CoreLib");
+        }
+#else
         [Fact]
         public void Should_serialize_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(string));
             typeName.ShouldEqual("System.String:mscorlib");
         }
+#endif
 
         [Fact]
         public void Should_serialize_some_random_class_type()
@@ -43,6 +60,23 @@ namespace EasyNetQ.Tests
             var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
             type.ShouldEqual(typeof (string));
         }
+
+#if NETCOREAPP1_0
+        [Fact]
+        public void Should_deserialize_hashset_of_string_type()
+        {
+            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
+            type.ShouldEqual(typeof(HashSet<string>));
+        }
+#else
+        [Fact]
+        public void Should_not_deserialize_hashset_of_string_type()
+        {
+            Assert.Throws<EasyNetQException>(() => {
+                typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:System.Core");
+            });
+        }
+#endif
 
         [Fact]
         public void Should_deserialize_some_random_class_type_name()
