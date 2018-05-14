@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
 
 		public When_using_default_conventions()
 		{
-            typeNameSerializer = new LegacyTypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
 			conventions = new Conventions(typeNameSerializer);
 		}
 
@@ -90,7 +90,7 @@ namespace EasyNetQ.Tests
 
         public When_using_QueueAttribute()
         {
-            typeNameSerializer = new LegacyTypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
             conventions = new Conventions(typeNameSerializer);
         }
 
@@ -151,7 +151,7 @@ namespace EasyNetQ.Tests
 
 		public When_publishing_a_message()
 		{
-            typeNameSerializer = new LegacyTypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
             var customConventions = new Conventions(typeNameSerializer)
             {
                 ExchangeNamingConvention = x => "CustomExchangeNamingConvention",
@@ -208,7 +208,7 @@ namespace EasyNetQ.Tests
 
         public When_registering_response_handler()
         {
-            var customConventions = new Conventions(new LegacyTypeNameSerializer())
+            var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 RpcRequestExchangeNamingConvention = messageType => "CustomRpcExchangeName",
                 RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
@@ -257,7 +257,7 @@ namespace EasyNetQ.Tests
 
         public When_using_default_consumer_error_strategy()
         {
-            var customConventions = new Conventions(new LegacyTypeNameSerializer())
+            var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
@@ -267,9 +267,9 @@ namespace EasyNetQ.Tests
 
             errorStrategy = new DefaultConsumerErrorStrategy(
                 mockBuilder.ConnectionFactory, 
-                new JsonSerializer(new LegacyTypeNameSerializer()), 
+                new JsonSerializer(new DefaultTypeNameSerializer()), 
                 customConventions,
-                new LegacyTypeNameSerializer(),
+                new DefaultTypeNameSerializer(),
                 new DefaultErrorMessageSerializer());
 
             const string originalMessage = "";

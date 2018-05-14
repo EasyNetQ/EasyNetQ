@@ -12,8 +12,8 @@ namespace EasyNetQ.Tests.ProducerTests
     public class When_a_polymorphic_message_is_sent : IDisposable
     {
         private MockBuilder mockBuilder;
-        private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface:EasyNetQ.Tests";
-        private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation:EasyNetQ.Tests";
+        private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
+        private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
         private byte[] publishedMessage;
         private IBasicProperties properties;
 
