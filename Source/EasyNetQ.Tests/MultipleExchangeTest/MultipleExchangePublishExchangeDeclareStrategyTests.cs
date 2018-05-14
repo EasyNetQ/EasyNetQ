@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
                 .Returns(Task.FromResult<IBinding>(Substitute.For<IBinding>()));
 
             advancedBus.Container.Resolve<IConventions>()
-                .Returns(new Conventions(new TypeNameSerializer()));
+                .Returns(new Conventions(new LegacyTypeNameSerializer()));
 
             var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy();
 

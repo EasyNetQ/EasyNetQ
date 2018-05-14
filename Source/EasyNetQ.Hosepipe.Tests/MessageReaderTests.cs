@@ -13,7 +13,7 @@ namespace EasyNetQ.Hosepipe.Tests
 
         public MessageReaderTests()
         {
-            conventions = new Conventions(new TypeNameSerializer());
+            conventions = new Conventions(new LegacyTypeNameSerializer());
             messageReader = new MessageReader();
         }
 

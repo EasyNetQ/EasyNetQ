@@ -6,13 +6,13 @@ using Xunit;
 
 namespace EasyNetQ.Tests
 {
-    public class TypeNameSerializerTests
+    public class LegacyTypeNameSerializerTests
     {
         private readonly ITypeNameSerializer typeNameSerializer;
 
-        public TypeNameSerializerTests()
+        public LegacyTypeNameSerializerTests()
         {
-            typeNameSerializer = new TypeNameSerializer();
+            typeNameSerializer = new LegacyTypeNameSerializer();
         }
 
 #if NETCOREAPP1_0

@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace EasyNetQ
 {
-    public class TypeNameSerializer : ITypeNameSerializer
+    public class LegacyTypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
 

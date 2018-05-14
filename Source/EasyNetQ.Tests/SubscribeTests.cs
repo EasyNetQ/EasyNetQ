@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
 
         public When_subscribe_is_called()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new LegacyTypeNameSerializer())
                 {
                     ConsumerTagConvention = () => consumerTag
                 };
@@ -228,7 +228,7 @@ namespace EasyNetQ.Tests
 
         public When_a_message_is_delivered()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new LegacyTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
@@ -248,7 +248,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(originalMessage);
+            var body = new JsonSerializer(new LegacyTypeNameSerializer()).MessageToBytes(originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -311,7 +311,7 @@ namespace EasyNetQ.Tests
 
         public When_the_handler_throws_an_exception()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new LegacyTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
@@ -339,7 +339,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(originalMessage);
+            var body = new JsonSerializer(new LegacyTypeNameSerializer()).MessageToBytes(originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -404,7 +404,7 @@ namespace EasyNetQ.Tests
 
         public When_a_subscription_is_cancelled_by_the_user()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new LegacyTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };

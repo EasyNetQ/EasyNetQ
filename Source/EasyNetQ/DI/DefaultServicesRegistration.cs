@@ -23,7 +23,7 @@ namespace EasyNetQ.DI
                 .Register<ISerializer, JsonSerializer>()
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
-                .Register<ITypeNameSerializer, TypeNameSerializer>()
+                .Register<ITypeNameSerializer, DefaultTypeNameSerializer>()
                 .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()                
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()

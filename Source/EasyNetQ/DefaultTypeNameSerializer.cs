@@ -20,7 +20,7 @@ namespace EasyNetQ
                 var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
                 if (typeName.Length > 255)
                 {
-                    throw new EasyNetQException("The serialized name of type '{0}' exceeds the AMQP maximum short string length of 255 characters.", t.Name);
+                    throw new EasyNetQException($"The serialized name of type '{t.Name}' exceeds the AMQP maximum short string length of 255 characters");
                 }
                 return typeName;
             });
@@ -137,7 +137,7 @@ namespace EasyNetQ
 #endif
                 if (assembly == null)
                 {
-                    throw new EasyNetQException("Could not load assembly '{0}'", assemblyName);
+                    throw new EasyNetQException($"Could not load assembly '{assemblyName}'");
                 }
 
                 var type = assembly.GetType(typeName);
@@ -159,7 +159,7 @@ namespace EasyNetQ
 
                     if (type == null)
                     {
-                        throw new EasyNetQException($"Could not find type '{typeName}' in assembly '{assembly.FullName}'.");
+                        throw new EasyNetQException($"Could not find type '{typeName}' in assembly '{assembly.FullName}'");
                     }
                 }
 
