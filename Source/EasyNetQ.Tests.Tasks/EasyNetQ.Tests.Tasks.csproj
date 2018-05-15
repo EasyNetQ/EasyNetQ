@@ -6,7 +6,6 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Version.cs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>

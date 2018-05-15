@@ -5,7 +5,6 @@
     <TargetFramework>net451</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Version.cs" />
     <None Update="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

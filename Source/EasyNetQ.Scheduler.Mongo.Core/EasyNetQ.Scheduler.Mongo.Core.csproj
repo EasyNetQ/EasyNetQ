@@ -5,7 +5,6 @@
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Version.cs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
