@@ -4,6 +4,7 @@
     <Title>EasyNetQ</Title>
     <Description>EasyNetQ</Description>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />

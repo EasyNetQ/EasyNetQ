@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use Autofac as its internal IoC container</Description>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />

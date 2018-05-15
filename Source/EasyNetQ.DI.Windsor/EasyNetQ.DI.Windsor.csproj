@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use Castle.Windsor as its internal IoC container</Description>
     <TargetFramework>net451</TargetFramework>
+    <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
+    <PackageTags>Windsor;RabbitMQ;Messaging;AMQP;C#</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
