@@ -3,6 +3,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using System;
 using System.Collections.Generic;
+using EasyNetQ.DI;
 
 namespace EasyNetQ.Tests.Mocking
 {
@@ -74,7 +75,7 @@ namespace EasyNetQ.Tests.Mocking
             bus = RabbitHutch.CreateBus(connectionString, x =>
                 {
                     registerServices(x);
-                    x.Register(_ => connectionFactory);
+                    x.Register(connectionFactory);
                 });
 
             bus.ShouldNotBeNull();
@@ -112,7 +113,7 @@ namespace EasyNetQ.Tests.Mocking
             get { return bus; }
         }
 
-        public IServiceProvider ServiceProvider
+        public IServiceResolver ServiceProvider
         {
             get { return bus.Advanced.Container; }
         }

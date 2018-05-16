@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
@@ -33,7 +34,7 @@ namespace EasyNetQ
             IPublishConfirmationListener confirmationListener,
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
-            IContainer container,
+            IServiceResolver container,
             ConnectionConfiguration connectionConfiguration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
@@ -932,7 +933,7 @@ namespace EasyNetQ
 
         public virtual bool IsConnected => connection.IsConnected;
 
-        public IContainer Container { get; }
+        public IServiceResolver Container { get; }
 
         public IConventions Conventions { get; }
 

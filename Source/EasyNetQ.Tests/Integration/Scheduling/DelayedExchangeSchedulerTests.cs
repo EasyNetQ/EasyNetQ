@@ -14,10 +14,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
 
         public DelayedExchangeSchedulerTests()
         {
-            bus = RabbitHutch.CreateBus("host=localhost", x =>
-            {
-                x.Register<IScheduler, DelayedExchangeScheduler>();
-            });
+            bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IScheduler, DelayedExchangeScheduler>());
         }
 
         public void Dispose()
@@ -93,8 +90,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
         [Fact]
         public void High_volume_scheduling_test_with_future_date()
         {
-            bus.Subscribe<PartyInvitation>("schedulingTest1", message =>
-                Console.WriteLine("Got scheduled message: {0}", message.Text));
+            bus.Subscribe<PartyInvitation>("schedulingTest1", m => Console.WriteLine("Got scheduled message: {0}", m.Text));
 
             var count = 0;
             while (true)

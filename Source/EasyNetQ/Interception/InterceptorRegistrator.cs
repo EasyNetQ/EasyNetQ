@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.Interception
+﻿using EasyNetQ.DI;
+
+namespace EasyNetQ.Interception
 {
     public interface IInterceptorRegistrator
     {
@@ -18,7 +20,7 @@
 
         public IServiceRegister Register()
         {
-            serviceRegister.Register<IProduceConsumeInterceptor>(_ => compositeInterceptor);
+            serviceRegister.Register<IProduceConsumeInterceptor>(compositeInterceptor);
             return serviceRegister;
         }
 

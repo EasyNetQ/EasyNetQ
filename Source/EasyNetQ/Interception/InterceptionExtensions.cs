@@ -1,4 +1,5 @@
 ﻿using System;
+using EasyNetQ.DI;
 
 namespace EasyNetQ.Interception
 {

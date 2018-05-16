@@ -159,7 +159,7 @@ namespace EasyNetQ.Tests
                 TopicNamingConvention = x => "CustomTopicNamingConvention"
             };
 
-            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
             mockBuilder.Bus.Publish(new TestMessage());
 		}
 
@@ -214,7 +214,7 @@ namespace EasyNetQ.Tests
                 RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
             };
 
-            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
             mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }

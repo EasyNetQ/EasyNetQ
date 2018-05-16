@@ -32,8 +32,7 @@ namespace EasyNetQ.Tests
                 };
 
             mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(_ => conventions)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                .Register<IConventions>(conventions)
                 );
 
             subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
@@ -235,8 +234,7 @@ namespace EasyNetQ.Tests
             };
 
             mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(_ => conventions)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                .Register<IConventions>(conventions)
                 );
 
             var autoResetEvent = new AutoResetEvent(false);
@@ -328,9 +326,8 @@ namespace EasyNetQ.Tests
                 });
 
             mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(_ => conventions)
-                .Register(_ => consumerErrorStrategy)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                .Register<IConventions>(conventions)
+                .Register(consumerErrorStrategy)
                 );
 
             mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
@@ -412,7 +409,7 @@ namespace EasyNetQ.Tests
                 ConsumerTagConvention = () => consumerTag
             };
 
-            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => conventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
             var subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
              var are = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());

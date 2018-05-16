@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests
         public When_publish_is_called()
         {
             mockBuilder = new MockBuilder(x => 
-                x.Register<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId)));
+                x.Register<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
 
             mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
                 .Do( x =>

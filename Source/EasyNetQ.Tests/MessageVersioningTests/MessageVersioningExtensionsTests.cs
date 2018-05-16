@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using EasyNetQ.DI;
 using EasyNetQ.Producer;
 using Xunit;
 using EasyNetQ.MessageVersioning;
@@ -23,23 +24,28 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
         private class ServiceRegisterStub : IServiceRegister
         {
-            private readonly Dictionary<Type, Type> _services = new Dictionary<Type, Type>();
+            private readonly Dictionary<Type, Type> services = new Dictionary<Type, Type>();
 
-            public IServiceRegister Register<TService>( Func<IServiceProvider, TService> serviceCreator ) where TService : class
+            public void AssertServiceRegistered<TService, TImplementation>()
+            {
+                Assert.True(services.ContainsKey(typeof(TService)), $"No service of type {typeof(TService).Name} registered");
+                Assert.Equal(typeof(TImplementation), services[typeof(TService)]); // "Implementation registered for service type {0} is not the expected type {1}", typeof( TService ).Name, typeof( TImplementation ).Name );
+            }
+
+            public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
+            {
+                services.Add(typeof(TService), typeof(TImplementation));
+                return this;
+            }
+
+            public IServiceRegister Register<TService>(TService instance) where TService : class
             {
                 throw new NotImplementedException();
             }
 
-            public IServiceRegister Register<TService, TImplementation>() where TService : class where TImplementation : class, TService
+            public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
             {
-                _services.Add( typeof( TService ), typeof( TImplementation ) );
-                return this;
-            }
-
-            public void AssertServiceRegistered<TService, TImplementation>()
-            {
-                Assert.True( _services.ContainsKey( typeof(TService)), $"No service of type {typeof(TService).Name} registered");
-                Assert.Equal(typeof(TImplementation), _services[ typeof( TService ) ]); // "Implementation registered for service type {0} is not the expected type {1}", typeof( TService ).Name, typeof( TImplementation ).Name );
+                throw new NotImplementedException();
             }
         }
     }

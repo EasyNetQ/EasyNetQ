@@ -1,16 +1,17 @@
-﻿using EasyNetQ.Consumer;
+﻿using EasyNetQ.ConnectionString;
+using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
 using EasyNetQ.Scheduling;
 
-namespace EasyNetQ
+namespace EasyNetQ.DI
 {
     /// <summary>
-    /// Registers the default EasyNetQ components in our internal super-simple IoC container.
+    /// Registers the default EasyNetQ components
     /// </summary>
-    public class ComponentRegistration
+    public static class DefaultServicesRegistration
     {
-        public static void RegisterServices(IContainer container)
+        public static void RegisterDefaultServices(this IServiceRegister container)
         {
             Preconditions.CheckNotNull(container, "container");
 
@@ -18,7 +19,7 @@ namespace EasyNetQ
 
             // default service registration
             container
-                .Register(_ => container)       
+                .Register<IConnectionStringParser, ConnectionStringParser>()
                 .Register<ISerializer, JsonSerializer>()
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
@@ -28,6 +29,7 @@ namespace EasyNetQ
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
                 .Register<ITimeoutStrategy, TimeoutStrategy>()
                 .Register<IClusterHostSelectionStrategy<ConnectionFactoryInfo>, RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>>()
+                .Register(AdvancedBusEventHandlers.Default)
                 .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()

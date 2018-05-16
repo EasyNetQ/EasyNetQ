@@ -103,18 +103,18 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         //Discovered by reflection over test assembly, do not remove.
         private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
         {
-            public Task Consume(MessageA message)
+            public Task ConsumeAsync(MessageA message)
             {
                 throw new NotImplementedException();
             }
 
             [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public Task Consume(MessageB message)
+            public Task ConsumeAsync(MessageB message)
             {
                 throw new NotImplementedException();
             }
 
-            public Task Consume(MessageC message)
+            public Task ConsumeAsync(MessageC message)
             {
                 throw new NotImplementedException();
             }

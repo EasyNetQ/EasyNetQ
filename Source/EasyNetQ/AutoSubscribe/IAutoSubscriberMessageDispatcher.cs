@@ -6,10 +6,10 @@ namespace EasyNetQ.AutoSubscribe
     {
         void Dispatch<TMessage, TConsumer>(TMessage message)
             where TMessage : class
-            where TConsumer : IConsume<TMessage>;
+            where TConsumer : class, IConsume<TMessage>;
 
         Task DispatchAsync<TMessage, TConsumer>(TMessage message)
             where TMessage : class
-            where TConsumer : IConsumeAsync<TMessage>;
+            where TConsumer : class, IConsumeAsync<TMessage>;
     }
 }

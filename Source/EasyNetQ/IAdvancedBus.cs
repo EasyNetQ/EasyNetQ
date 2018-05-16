@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Events;
 
@@ -502,7 +503,7 @@ namespace EasyNetQ
         /// <summary>
         /// The IoC container that EasyNetQ uses to resolve its services.
         /// </summary>
-        IContainer Container { get; }
+        IServiceResolver Container { get; }
 
         /// <summary>
         /// The conventions used by EasyNetQ to name its routing topology elements.

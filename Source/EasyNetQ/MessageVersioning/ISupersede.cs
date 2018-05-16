@@ -1,3 +1,5 @@
+using EasyNetQ.DI;
+
 namespace EasyNetQ.MessageVersioning
 {
     /// <summary>
