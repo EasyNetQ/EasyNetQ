@@ -2,9 +2,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use LightInject as its internal IoC container</Description>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <PackageTags>LightInject;RabbitMQ;Messaging;AMQP;C#</PackageTags>
+    <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -22,7 +22,7 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">

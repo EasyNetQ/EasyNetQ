@@ -2,9 +2,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use Castle.Windsor as its internal IoC container</Description>
-    <TargetFramework>net451</TargetFramework>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <PackageTags>Windsor;RabbitMQ;Messaging;AMQP;C#</PackageTags>
+    <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -13,8 +13,8 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="3.3.3" />
-    <PackageReference Include="Castle.Windsor" Version="3.3.0" />
+    <PackageReference Include="Castle.Core" Version="4.2.0" />
+    <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -23,6 +23,9 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
     <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
