@@ -1,6 +1,6 @@
 
 namespace EasyNetQ.MessageVersioning
-{
+{ 
     public class VersionedMessageSerializationStrategy : IMessageSerializationStrategy
     {
         private readonly ITypeNameSerializer typeNameSerializer;
@@ -27,13 +27,6 @@ namespace EasyNetQ.MessageVersioning
             return new SerializedMessage(messageProperties, messageBody);
         }
 
-        public IMessage<T> DeserializeMessage<T>(MessageProperties properties, byte[] body) where T : class
-        {
-            var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
-            messageTypeProperty.AppendTo(properties);
-            var messageBody = serializer.BytesToMessage<T>(body);
-            return new Message<T>(messageBody, properties);
-        }
 
         public IMessage DeserializeMessage(MessageProperties properties, byte[] body)
         {
