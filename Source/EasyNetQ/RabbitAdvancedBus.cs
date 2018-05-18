@@ -838,30 +838,17 @@ namespace EasyNetQ
         public IBasicGetResult<T> Get<T>(IQueue queue) where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
+            
             var result = Get(queue);
-            if (result?.Body == null)
+            if (result == null)
             {
-                if (logger.IsDebugEnabled())
-                {
-                    logger.DebugFormat("No message was available on queue {queue}", queue.Name);
-                }
-
-                return new BasicGetResult<T>();
+                return null;
             }
-            var message = messageSerializationStrategy.DeserializeMessage<T>(result.Properties, result.Body);
-            if (message.MessageType == typeof (T))
+            
+            var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
+            if (typeof(T).IsAssignableFrom(message.MessageType))
             {
-                return new BasicGetResult<T>(message);
-            }
-
-            //As for me, we shouldn't log here at all, just throw an exception
-            if (logger.IsDebugEnabled())
-            {
-                logger.DebugFormat(
-                    "Incorrect message type returned. Expected {expectedType}, but was {actualType}",
-                    typeof(T).Name,
-                    message.MessageType.Name
-                );
+                return new BasicGetResult<T>(new Message<T>(message.GetBody() as T, message.Properties));
             }
 
             throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
