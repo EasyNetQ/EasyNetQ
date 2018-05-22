@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests
             typeNameSerializer = new LegacyTypeNameSerializer();
         }
 
-#if NETCOREAPP1_0
+#if NET_CORE
         [Fact]
         public void Should_serialize_hashset_of_string_type()
         {
@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests
         }
 #endif
 
-#if NETCOREAPP1_0
+#if NET_CORE
         [Fact]
         public void Should_serialize_string_type()
         {
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests
             type.ShouldEqual(typeof (string));
         }
 
-#if NETCOREAPP1_0
+#if NET_CORE
         [Fact]
         public void Should_deserialize_hashset_of_string_type()
         {
