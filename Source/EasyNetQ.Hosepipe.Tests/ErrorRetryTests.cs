@@ -14,7 +14,7 @@ namespace EasyNetQ.Hosepipe.Tests
 
         public ErrorRetryTests()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new LegacyTypeNameSerializer();
             conventions = new Conventions(typeNameSerializer);
             errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer), new DefaultErrorMessageSerializer());
         }

@@ -46,7 +46,7 @@ namespace EasyNetQ.Hosepipe
 
         public static void Main(string[] args)
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new LegacyTypeNameSerializer();
             var argParser = new ArgParser();
             var arguments = argParser.Parse(args);
 

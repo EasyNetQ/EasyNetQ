@@ -14,13 +14,13 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private MockBuilder mockBuilder;
 
         private const string expectedQueueName1 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA:EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
 
         private const string expectedQueueName2 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageB:EasyNetQ.Tests_MyExplicitId";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageB, EasyNetQ.Tests_MyExplicitId";
 
         private const string expectedQueueName3 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC:EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC, EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
 
         public When_autosubscribing_with_assembly_scanning()
         {

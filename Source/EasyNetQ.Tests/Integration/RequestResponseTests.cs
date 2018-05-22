@@ -182,7 +182,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Service_should_handle_sychronous_message_of_the_wrong_type()
         {
-            const string routingKey = "EasyNetQ_Tests_TestRequestMessage:EasyNetQ_Tests_Messages";
+            const string routingKey = "EasyNetQ_Tests_TestRequestMessage, EasyNetQ_Tests_Messages";
             const string type = "not_the_type_you_are_expecting";
 
             MakeRpcRequest(type, routingKey);
@@ -196,7 +196,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Service_should_handle_asychronous_message_of_the_wrong_type()
         {
-            const string routingKey = "EasyNetQ_Tests_TestAsyncRequestMessage:EasyNetQ_Tests_Messages";
+            const string routingKey = "EasyNetQ_Tests_TestAsyncRequestMessage, EasyNetQ_Tests_Messages";
             const string type = "not_the_type_you_are_expecting";
 
             MakeRpcRequest(type, routingKey);

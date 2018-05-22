@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests
         public void Should_call_basic_publish()
         {
             mockBuilder.Channels[0].Received().BasicPublish(
-                    Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                    Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                     Arg.Is(""),
                     Arg.Is(false),
                     Arg.Is(mockBuilder.BasicProperties), 
@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_put_message_type_in_message_type_field()
         {
-            properties.Type.ShouldEqual("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests");
+            properties.Type.ShouldEqual("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace EasyNetQ.Tests
         public void Should_declare_exchange()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
-                Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
@@ -129,7 +129,7 @@ namespace EasyNetQ.Tests
         public void Should_call_basic_publish_with_correct_routing_key()
         {
             mockBuilder.Channels[0].Received().BasicPublish(
-                    Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                    Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                     Arg.Is("X.A"),
                     Arg.Is(false),
                     Arg.Is(mockBuilder.BasicProperties),

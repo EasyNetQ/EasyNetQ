@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string queueName = typeName + "_" + subscriptionId;
         private const string consumerTag = "the_consumer_tag";
@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
 
         public When_subscribe_is_called()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
                 {
                     ConsumerTagConvention = () => consumerTag
                 };
@@ -179,7 +179,7 @@ namespace EasyNetQ.Tests
 
             // Assert that queue got declared correctly
             mockBuilder.Channels[0].Received().QueueDeclare(
-                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                     Arg.Is(durable),
                     Arg.Is(false), // IsExclusive is set on the Consume call
                     Arg.Is(autoDelete),
@@ -193,7 +193,7 @@ namespace EasyNetQ.Tests
 
             // Assert that consumer was created correctly
             mockBuilder.Channels[1].Received().BasicConsume(
-                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                     Arg.Is(false),
                     Arg.Any<string>(),
                     Arg.Is(true),
@@ -207,7 +207,7 @@ namespace EasyNetQ.Tests
             // Assert that binding got configured correctly
             mockBuilder.Channels[0].Received().QueueBind(
                 Arg.Is(queueName),
-                Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
                 Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
@@ -217,7 +217,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
@@ -228,7 +228,7 @@ namespace EasyNetQ.Tests
 
         public When_a_message_is_delivered()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
@@ -248,7 +248,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(originalMessage);
+            var body = new JsonSerializer(new DefaultTypeNameSerializer()).MessageToBytes(originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -298,7 +298,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IConsumerErrorStrategy consumerErrorStrategy;
 
-        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
@@ -311,7 +311,7 @@ namespace EasyNetQ.Tests
 
         public When_the_handler_throws_an_exception()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
@@ -339,7 +339,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(originalMessage);
+            var body = new JsonSerializer(new DefaultTypeNameSerializer()).MessageToBytes(originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -404,7 +404,7 @@ namespace EasyNetQ.Tests
 
         public When_a_subscription_is_cancelled_by_the_user()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };

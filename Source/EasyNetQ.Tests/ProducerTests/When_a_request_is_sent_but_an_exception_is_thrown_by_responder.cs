@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             var properties = new BasicProperties
             {
-                Type = "EasyNetQ.Tests.TestResponseMessage:EasyNetQ.Tests.Common",
+                Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests.Common",
                 CorrelationId = correlationId,
                 Headers = new Dictionary<string, object>
                 {

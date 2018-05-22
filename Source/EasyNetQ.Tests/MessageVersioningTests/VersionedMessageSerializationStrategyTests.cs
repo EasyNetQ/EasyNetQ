@@ -77,7 +77,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_using_the_versioned_serialization_strategy_messages_are_correctly_round_tripped()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new DefaultTypeNameSerializer();
             var serializer = new JsonSerializer(typeNameSerializer);
 
             const string correlationId = "CorrelationId";
@@ -172,7 +172,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_using_the_versioned_serialization_strategy_versioned_messages_are_correctly_round_tripped()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new DefaultTypeNameSerializer();
             var serializer = new JsonSerializer(typeNameSerializer);
             const string correlationId = "CorrelationId";
 
@@ -196,7 +196,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_deserializing_versioned_message_use_first_available_message_type()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new DefaultTypeNameSerializer();
             var serializer = new JsonSerializer(typeNameSerializer);
             const string correlationId = "CorrelationId";
 

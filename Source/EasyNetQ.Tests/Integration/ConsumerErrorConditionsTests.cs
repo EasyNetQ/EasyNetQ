@@ -28,8 +28,8 @@ namespace EasyNetQ.Tests
         // run this test. You should see the following on the console:
         //
         //    ERROR: Exception thrown by subscription calback.
-        //	    Exchange:    'EasyNetQ_Tests_MyErrorTestMessage:EasyNetQ_Tests'
-        //	    Routing Key: 'EasyNetQ_Tests_MyErrorTestMessage:EasyNetQ_Tests'
+        //	    Exchange:    'EasyNetQ_Tests_MyErrorTestMessage, EasyNetQ_Tests'
+        //	    Routing Key: 'EasyNetQ_Tests_MyErrorTestMessage, EasyNetQ_Tests'
         //	    Redelivered: 'False'
         //    Message:
         //    {"Id":444,"Name":"I cause an error. Naughty me!"}

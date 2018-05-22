@@ -4,14 +4,7 @@ using System.Reflection;
 
 namespace EasyNetQ
 {
-    public interface ITypeNameSerializer
-    {
-        string Serialize(Type type);
-        Type DeSerialize(string typeName);
-    }
-
-	
-    public class TypeNameSerializer : ITypeNameSerializer
+    public class LegacyTypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
 
@@ -43,7 +36,6 @@ namespace EasyNetQ
 
             return serializedTypes.GetOrAdd(type, t =>
             {
-                
                 var typeName = t.FullName + ":" + t.GetTypeInfo().Assembly.GetName().Name;
                 if (typeName.Length > 255)
                 {

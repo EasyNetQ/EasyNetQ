@@ -43,7 +43,7 @@ namespace EasyNetQ.Scheduler.Tests
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule_with_exchange()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new LegacyTypeNameSerializer();
             var conventions = new Conventions(typeNameSerializer);
             var jsonSerializer = new JsonSerializer(typeNameSerializer);
             var messageSerializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, jsonSerializer, new DefaultCorrelationIdGenerationStrategy());

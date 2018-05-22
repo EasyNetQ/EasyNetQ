@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             
-            IConventions conventions = new Conventions(new TypeNameSerializer())
+            IConventions conventions = new Conventions(new DefaultTypeNameSerializer())
                 {
                     ConsumerTagConvention = () => ConsumerTag
                 };

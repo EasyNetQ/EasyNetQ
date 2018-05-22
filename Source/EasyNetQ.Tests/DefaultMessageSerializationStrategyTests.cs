@@ -69,7 +69,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new DefaultTypeNameSerializer();
             var serializer = new JsonSerializer(typeNameSerializer);
             const string correlationId = "CorrelationId";
 
