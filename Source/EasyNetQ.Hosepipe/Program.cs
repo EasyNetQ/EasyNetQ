@@ -71,7 +71,7 @@ namespace EasyNetQ.Hosepipe
                 new FileMessageWriter(),
                 new MessageReader(), 
                 new QueueInsertion(errorMessageSerializer),
-                new ErrorRetry(new JsonSerializer(typeNameSerializer), errorMessageSerializer),
+                new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
                 new Conventions(typeNameSerializer));
             program.Start(args);
         }

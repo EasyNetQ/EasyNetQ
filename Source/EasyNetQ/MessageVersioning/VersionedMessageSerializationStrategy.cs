@@ -32,9 +32,9 @@ namespace EasyNetQ.MessageVersioning
         {
             var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
             var messageType = messageTypeProperty.GetMessageType();
-            var messageBody = serializer.BytesToMessage(messageType.TypeString, body);
+            var messageBody = serializer.BytesToMessage(messageType, body);
             messageTypeProperty.AppendTo(properties);
-            return MessageFactory.CreateInstance(messageType.Type, messageBody, properties);
+            return MessageFactory.CreateInstance(messageType, messageBody, properties);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests
             var typeNameSerializer = new DefaultTypeNameSerializer();
             var errorMessageSerializer = new DefaultErrorMessageSerializer();
             connectionFactory = new ConnectionFactoryWrapper(configuration, new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>());
-            serializer = new JsonSerializer(typeNameSerializer);
+            serializer = new JsonSerializer();
             conventions = new Conventions(typeNameSerializer);
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(
                 connectionFactory, 

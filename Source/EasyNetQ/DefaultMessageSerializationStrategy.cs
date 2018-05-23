@@ -30,7 +30,7 @@ namespace EasyNetQ
         public IMessage DeserializeMessage(MessageProperties properties, byte[] body)
         {
             var messageType = typeNameSerializer.DeSerialize(properties.Type);
-            var messageBody = serializer.BytesToMessage(properties.Type, body);
+            var messageBody = serializer.BytesToMessage(messageType, body);
             return MessageFactory.CreateInstance(messageType, messageBody, properties);
         }
     }

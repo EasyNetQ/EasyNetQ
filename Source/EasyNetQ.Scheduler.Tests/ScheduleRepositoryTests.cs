@@ -45,7 +45,7 @@ namespace EasyNetQ.Scheduler.Tests
         {
             var typeNameSerializer = new LegacyTypeNameSerializer();
             var conventions = new Conventions(typeNameSerializer);
-            var jsonSerializer = new JsonSerializer(typeNameSerializer);
+            var jsonSerializer = new JsonSerializer();
             var messageSerializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, jsonSerializer, new DefaultCorrelationIdGenerationStrategy());
             var testScheduleMessage = new TestScheduleMessage { Text = "Hello World" };
 

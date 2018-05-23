@@ -70,7 +70,7 @@ namespace EasyNetQ.Tests
         public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped()
         {
             var typeNameSerializer = new DefaultTypeNameSerializer();
-            var serializer = new JsonSerializer(typeNameSerializer);
+            var serializer = new JsonSerializer();
             const string correlationId = "CorrelationId";
 
             var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
@@ -115,7 +115,7 @@ namespace EasyNetQ.Tests
             typeNameSerializer.DeSerialize(message.Properties.Type).Returns(message.Body.GetType());
 
             var serializer = Substitute.For<ISerializer>();
-            serializer.BytesToMessage(message.Properties.Type, messageBody).Returns(message.Body);
+            serializer.BytesToMessage(message.Body.GetType(), messageBody).Returns(message.Body);
 
             return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
