@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using EasyNetQ.DI;
 using EasyNetQ.MessageVersioning;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using Xunit;
 using NSubstitute;
@@ -22,25 +22,26 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             IExchange exchange = new Exchange(exchangeName);
 
             advancedBus.ExchangeDeclare(exchangeName, "topic").Returns(
-                x =>
-                {
-                    throw (new Exception());
-                },
+                x => throw (new Exception()),
                 x =>
                 {
                     exchangeDeclareCount++;
                     return exchange;
                 });
 
-            var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy();
+            var conventions = Substitute.For<IConventions>();
+            conventions.ExchangeNamingConvention = t => t.Name;
+
+            var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy(conventions, advancedBus);
             try
             {
-                publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+                publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             }
             catch (Exception)
             {
             }
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Topic);
+
+            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             advancedBus.Received(2).ExchangeDeclare(exchangeName, "topic");
             declaredExchange.ShouldBeTheSameAs(exchange);
             exchangeDeclareCount.ShouldEqual(1);
@@ -53,11 +54,31 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         public void When_declaring_exchanges_for_unversioned_message_one_exchange_created()
         {
             var exchanges = new List<ExchangeStub>();
-            var bus = CreateAdvancedBusMock( exchanges.Add, BindExchanges, t => t.Name );
+            IAdvancedBus ret;
+            var advancedBus = Substitute.For<IAdvancedBus>();
+            advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
+                .ReturnsForAnyArgs(mi =>
+                {
+                    var exchange = new ExchangeStub { Name = (string)mi[0] };
+                    exchanges.Add(exchange);
+                    return exchange;
+                });
 
-            var publishExchangeStrategy = new VersionedPublishExchangeDeclareStrategy();
+            advancedBus.Bind(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+                .Returns(mi =>
+                {
+                    var source = (ExchangeStub)mi[0];
+                    var destination = (ExchangeStub)mi[1];
+                    source.BoundTo = destination;
+                    return Substitute.For<IBinding>();
+                });
 
-            publishExchangeStrategy.DeclareExchange( bus, typeof( MyMessage ), ExchangeType.Topic );
+            var conventions = Substitute.For<IConventions>();
+            conventions.ExchangeNamingConvention = t => t.Name;
+
+            var publishExchangeStrategy = new VersionedPublishExchangeDeclareStrategy(conventions, advancedBus);
+
+            publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
 
             Assert.Equal(1, exchanges.Count); //, "Single exchange should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name);//, "Exchange should have used naming convection to name the exchange" );
@@ -68,52 +89,37 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         public void When_declaring_exchanges_for_versioned_message_exchange_per_version_created_and_bound_to_superceding_version()
         {
             var exchanges = new List<ExchangeStub>();
-            var bus = CreateAdvancedBusMock( exchanges.Add, BindExchanges, t => t.Name );
-            var publishExchangeStrategy = new VersionedPublishExchangeDeclareStrategy();
+            
+            var advancedBus = Substitute.For<IAdvancedBus>();
+            advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
+                .ReturnsForAnyArgs(mi =>
+                {
+                    var exchange = new ExchangeStub { Name = (string)mi[0] };
+                    exchanges.Add(exchange);
+                    return exchange;
+                });
 
-            publishExchangeStrategy.DeclareExchange( bus, typeof( MyMessageV2 ), ExchangeType.Topic );
+            advancedBus.Bind(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+                .Returns(mi =>
+                {
+                    var source = (ExchangeStub)mi[0];
+                    var destination = (ExchangeStub)mi[1];
+                    source.BoundTo = destination;
+                    return Substitute.For<IBinding>();
+                });
+
+            var conventions = Substitute.For<IConventions>();
+            conventions.ExchangeNamingConvention = t => t.Name;
+            
+            var publishExchangeStrategy = new VersionedPublishExchangeDeclareStrategy(conventions, advancedBus);
+
+            publishExchangeStrategy.DeclareExchange(typeof(MyMessageV2), ExchangeType.Topic);
 
             Assert.Equal(2, exchanges.Count); //, "Two exchanges should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name); //, "Superseded message exchange should been created first" );
             Assert.Equal("MyMessageV2", exchanges[1].Name); //, "Superseding message exchange should been created second" );
             Assert.Equal(exchanges[0] , exchanges[1].BoundTo); //, "Superseding message exchange should route message to superseded exchange" );
             Assert.Null( exchanges[0].BoundTo); //, "Superseded message exchange should route messages anywhere" );
-        }
-
-        private IAdvancedBus CreateAdvancedBusMock( Action<ExchangeStub> exchangeCreated, Action<ExchangeStub, ExchangeStub> exchangeBound, Func<Type,string> nameExchange  )
-        {
-            var advancedBus = Substitute.For<IAdvancedBus>();
-            advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
-                       .ReturnsForAnyArgs(mi =>
-                         {
-                             var exchange = new ExchangeStub { Name = (string)mi[0] };
-                             exchangeCreated(exchange);
-                             return exchange;
-                         });
-
-            advancedBus.Bind(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
-                       .Returns(mi =>
-                         {
-                             var source = (ExchangeStub)mi[0];
-                             var destination = (ExchangeStub)mi[1];
-                             exchangeBound(source, destination);
-                             return Substitute.For<IBinding>();
-                         });
-
-            var conventions = Substitute.For<IConventions>();
-            conventions.ExchangeNamingConvention = t => nameExchange( t );
-
-            var container = Substitute.For<IServiceResolver>();
-            container.Resolve<IConventions>().Returns( conventions );
-
-            advancedBus.Container.Returns( container );
-
-            return advancedBus;
-        }
-
-        private void BindExchanges( ExchangeStub source, ExchangeStub destination )
-        {
-            source.BoundTo = destination;
         }
 
         private class ExchangeStub : IExchange
