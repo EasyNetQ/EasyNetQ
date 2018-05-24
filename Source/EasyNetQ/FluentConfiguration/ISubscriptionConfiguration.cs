@@ -38,13 +38,6 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithPriority(int priority);
 
         /// <summary>
-        /// Configures the consumer's x-cancel-on-ha-failover attribute
-        /// </summary>
-        /// <returns></returns>
-        ISubscriptionConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true);
-
-
-        /// <summary>
         /// Configures the consumer's prefetch count
         /// </summary>
         /// <returns></returns>
@@ -100,7 +93,6 @@ namespace EasyNetQ.FluentConfiguration
         public IList<string> Topics { get; }
         public bool AutoDelete { get; private set; }
         public int Priority { get; private set; }
-        public bool CancelOnHaFailover { get; private set; }
         public ushort PrefetchCount { get; private set; }
         public int? Expires { get; private set; }
 
@@ -116,7 +108,6 @@ namespace EasyNetQ.FluentConfiguration
             Topics = new List<string>();
             AutoDelete = false;
             Priority = 0;
-            CancelOnHaFailover = false;
             PrefetchCount = defaultPrefetchCount;
             IsExclusive = false;
             Durable = true;
@@ -143,12 +134,6 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithPriority(int priority)
         {
             Priority = priority;
-            return this;
-        }
-
-        public ISubscriptionConfiguration WithCancelOnHaFailover(bool cancelOnHaFailover = true)
-        {
-            CancelOnHaFailover = cancelOnHaFailover;
             return this;
         }
 

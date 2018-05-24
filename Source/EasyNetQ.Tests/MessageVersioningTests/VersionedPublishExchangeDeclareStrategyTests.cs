@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using EasyNetQ.DI;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Topology;
 using Xunit;
@@ -102,7 +103,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => nameExchange( t );
 
-            var container = Substitute.For<IContainer>();
+            var container = Substitute.For<IServiceResolver>();
             container.Resolve<IConventions>().Returns( conventions );
 
             advancedBus.Container.Returns( container );

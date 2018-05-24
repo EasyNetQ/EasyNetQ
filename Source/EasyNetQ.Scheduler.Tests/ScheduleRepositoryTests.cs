@@ -16,14 +16,13 @@ namespace EasyNetQ.Scheduler.Tests
 
         public ScheduleRepositoryTests()
         {
-            var log = Substitute.For<IEasyNetQLogger>();
             var configuration = new ScheduleRepositoryConfiguration
             {
                 ProviderName = "System.Data.SqlClient",
                 ConnectionString = "Data Source=localhost;Initial Catalog=EasyNetQ.Scheduler;Integrated Security=SSPI;",
                 PurgeBatchSize = 100
             };
-            scheduleRepository = new ScheduleRepository(configuration, log, () => DateTime.UtcNow);
+            scheduleRepository = new ScheduleRepository(configuration, () => DateTime.UtcNow);
         }
 
         [Fact]
@@ -44,9 +43,9 @@ namespace EasyNetQ.Scheduler.Tests
         [Explicit("Required a database")]
         public void Should_be_able_to_store_a_schedule_with_exchange()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new LegacyTypeNameSerializer();
             var conventions = new Conventions(typeNameSerializer);
-            var jsonSerializer = new JsonSerializer(typeNameSerializer);
+            var jsonSerializer = new JsonSerializer();
             var messageSerializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, jsonSerializer, new DefaultCorrelationIdGenerationStrategy());
             var testScheduleMessage = new TestScheduleMessage { Text = "Hello World" };
 

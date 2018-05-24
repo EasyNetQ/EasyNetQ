@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.Integration
                 var bus = RabbitHutch.CreateBus("host=localhost");
 
                 var subscriptionId = "TestSubscriptionWithExpires";
-                var conventions = new Conventions(new TypeNameSerializer());
+                var conventions = new Conventions(new DefaultTypeNameSerializer());
                 var queueName = conventions.QueueNamingConvention(typeof(MyMessage), subscriptionId);
                 var client = new ManagementClient("http://localhost", "guest", "guest");
                 var vhost = new Vhost { Name = "/" };
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
             var bus = RabbitHutch.CreateBus("host=localhost");
 
             var subscriptionId = "TestSubscriptionWithoutExpires";
-            var conventions = new Conventions(new TypeNameSerializer());
+            var conventions = new Conventions(new DefaultTypeNameSerializer());
             var queueName = conventions.QueueNamingConvention(typeof(MyMessage), subscriptionId);
             var client = new ManagementClient("http://localhost", "guest", "guest");
             var vhost = new Vhost { Name = "/" };

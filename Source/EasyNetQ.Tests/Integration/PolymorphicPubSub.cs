@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading;
-using EasyNetQ.Loggers;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -14,7 +13,7 @@ namespace EasyNetQ.Tests.Integration
 
         public PolymorphicPubSub()
         {
-            bus = RabbitHutch.CreateBus("host=localhost", x => x.Register<IEasyNetQLogger, NullLogger>());
+            bus = RabbitHutch.CreateBus("host=localhost");
         }
 
         public void Dispose()

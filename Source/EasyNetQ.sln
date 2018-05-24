@@ -7,15 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor.yml = ..\appveyor.yml
 		..\build.bat = ..\build.bat
-		..\Package\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec = ..\Package\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.nuspec
-		..\Package\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.nuspec = ..\Package\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.nuspec
-		..\Package\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec = ..\Package\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.nuspec
-		..\Package\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.nuspec = ..\Package\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.nuspec
-		..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec = ..\Package\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.nuspec
-		..\Package\EasyNetQ\EasyNetQ.nuspec = ..\Package\EasyNetQ\EasyNetQ.nuspec
 		..\Build\EasyNetQ.proj = ..\Build\EasyNetQ.proj
-		..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec = ..\Package\EasyNetQ.Serilog\EasyNetQ.Serilog.nuspec
-		..\global.json = ..\global.json
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
 		NuGet.Config = NuGet.Config
@@ -46,49 +38,47 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postgres", "postgres", "{CD
 		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspWorkItemsSelfPurge.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ", "EasyNetQ\EasyNetQ.csproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ", "EasyNetQ\EasyNetQ.csproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Autofac", "EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj", "{9D8E2017-010D-4A62-8634-CB702A99D6BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Autofac", "EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj", "{9D8E2017-010D-4A62-8634-CB702A99D6BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.LightInject", "EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj", "{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.LightInject", "EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj", "{CAA56DEC-6D0C-4141-B7DC-66DB1BB1EF72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Ninject", "EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj", "{D293E3B3-D90F-4161-9987-1B9F1B880D83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Ninject", "EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj", "{D293E3B3-D90F-4161-9987-1B9F1B880D83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.SimpleInjector", "EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj", "{48C6E960-A3FC-48A1-97B4-6173A348D0FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.SimpleInjector", "EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj", "{48C6E960-A3FC-48A1-97B4-6173A348D0FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.StructureMap", "EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj", "{0EBE99EE-56D8-47C0-9ED6-C6BCC88C4453}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.StructureMap", "EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj", "{0EBE99EE-56D8-47C0-9ED6-C6BCC88C4453}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Windsor", "EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj", "{456AD3EC-2759-4054-A31A-35EA086493E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Windsor", "EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj", "{456AD3EC-2759-4054-A31A-35EA086493E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serilog", "EasyNetQ.Serilog\EasyNetQ.Serilog.csproj", "{23A533BE-64FB-47B2-B9D6-AF48644162DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.csproj", "{62BBFFCE-4E84-42C8-86F5-0164ACD12031}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests", "EasyNetQ.Tests\EasyNetQ.Tests.csproj", "{62BBFFCE-4E84-42C8-86F5-0164ACD12031}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Tests", "EasyNetQ.DI.Tests\EasyNetQ.DI.Tests.csproj", "{76A3A0C3-10D8-465F-9ACA-5D0D3F61B445}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.DI.Tests", "EasyNetQ.DI.Tests\EasyNetQ.DI.Tests.csproj", "{76A3A0C3-10D8-465F-9ACA-5D0D3F61B445}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe", "EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj", "{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Hosepipe", "EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj", "{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.SetupActions", "EasyNetQ.Hosepipe.SetupActions\EasyNetQ.Hosepipe.SetupActions.csproj", "{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Hosepipe.SetupActions", "EasyNetQ.Hosepipe.SetupActions\EasyNetQ.Hosepipe.SetupActions.csproj", "{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.Tests", "EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj", "{DA597678-7873-4156-8112-8C70B164381A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Hosepipe.Tests", "EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj", "{DA597678-7873-4156-8112-8C70B164381A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj", "{03B93AAD-6CAB-4726-826E-B05684AEC1B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj", "{03B93AAD-6CAB-4726-826E-B05684AEC1B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Mongo.Core", "EasyNetQ.Scheduler.Mongo.Core\EasyNetQ.Scheduler.Mongo.Core.csproj", "{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Mongo.Core", "EasyNetQ.Scheduler.Mongo.Core\EasyNetQ.Scheduler.Mongo.Core.csproj", "{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Mongo", "EasyNetQ.Scheduler.Mongo\EasyNetQ.Scheduler.Mongo.csproj", "{AFD272B4-4A2B-43D4-81ED-666F8918FD01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Mongo", "EasyNetQ.Scheduler.Mongo\EasyNetQ.Scheduler.Mongo.csproj", "{AFD272B4-4A2B-43D4-81ED-666F8918FD01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Mongo.Tests", "EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj", "{4E7F926F-D939-4962-A7EF-112DE41B4236}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Mongo.Tests", "EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj", "{4E7F926F-D939-4962-A7EF-112DE41B4236}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Tests", "EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj", "{530A771C-B12E-48E4-AE10-11B8F6537F4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Scheduler.Tests", "EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj", "{530A771C-B12E-48E4-AE10-11B8F6537F4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.LogReader", "EasyNetQ.LogReader\EasyNetQ.LogReader.csproj", "{AA7F9D04-085B-4B71-8541-B838F5CAF9F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.LogReader", "EasyNetQ.LogReader\EasyNetQ.LogReader.csproj", "{AA7F9D04-085B-4B71-8541-B838F5CAF9F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Trace", "EasyNetQ.Trace\EasyNetQ.Trace.csproj", "{11DF08A9-3D14-44CC-A65E-5933121D3D63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Trace", "EasyNetQ.Trace\EasyNetQ.Trace.csproj", "{11DF08A9-3D14-44CC-A65E-5933121D3D63}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Tests.Common", "EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj", "{5D708FE2-F12B-4337-96BF-A9F79897A928}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests.Common", "EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj", "{5D708FE2-F12B-4337-96BF-A9F79897A928}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -124,10 +114,6 @@ Global
 		{456AD3EC-2759-4054-A31A-35EA086493E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{456AD3EC-2759-4054-A31A-35EA086493E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{456AD3EC-2759-4054-A31A-35EA086493E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23A533BE-64FB-47B2-B9D6-AF48644162DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62BBFFCE-4E84-42C8-86F5-0164ACD12031}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -192,5 +178,8 @@ Global
 		{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2} = {896B72E7-50D5-49B9-987B-4250092E39BB}
 		{F11F4058-9B0E-40B5-800F-628BC884A783} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
 		{CD6358E2-E182-4771-BF73-45704B05237D} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A3DE3E7F-B61C-4398-AA54-A0DDE3BD850E}
 	EndGlobalSection
 EndGlobal

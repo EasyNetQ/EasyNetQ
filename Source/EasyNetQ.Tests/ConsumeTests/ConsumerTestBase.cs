@@ -34,14 +34,13 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             
-            IConventions conventions = new Conventions(new TypeNameSerializer())
+            IConventions conventions = new Conventions(new DefaultTypeNameSerializer())
                 {
                     ConsumerTagConvention = () => ConsumerTag
                 };
             MockBuilder = new MockBuilder(x => x
-                    .Register(_ => conventions)
-                    .Register(_ => ConsumerErrorStrategy)
-                    //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                    .Register(conventions)
+                    .Register(ConsumerErrorStrategy)
                 );
 
             AdditionalSetUp();

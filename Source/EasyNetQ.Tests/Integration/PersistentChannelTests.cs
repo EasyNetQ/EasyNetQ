@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.ConnectionString;
-using EasyNetQ.Loggers;
 using EasyNetQ.Producer;
 using Xunit;
 
@@ -18,14 +17,13 @@ namespace EasyNetQ.Tests.Integration
 
         public PersistentChannelTests()
         {
-            var logger = new ConsoleLogger();
             var eventBus = new EventBus();
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
             var hostSelectionStrategy = new RandomClusterHostSelectionStrategy<ConnectionFactoryInfo>();
             var connectionFactory = new ConnectionFactoryWrapper(configuration, hostSelectionStrategy);
-            connection = new PersistentConnection(connectionFactory, logger, eventBus);
-            persistentChannel = new PersistentChannel(connection, logger, configuration, new EventBus());
+            connection = new PersistentConnection(connectionFactory, eventBus);
+            persistentChannel = new PersistentChannel(connection, configuration, new EventBus());
             connection.Initialize();
         }
 

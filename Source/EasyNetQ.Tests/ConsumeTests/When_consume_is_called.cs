@@ -38,22 +38,9 @@ namespace EasyNetQ.Tests.ConsumeTests
                Arg.Is(false),
                Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(new Dictionary <string, object>
                    {
-                        {"x-priority", 0},
-                        {"x-cancel-on-ha-failover", false}
+                        {"x-priority", 0}
                    })),
                Arg.Is(MockBuilder.Consumers[0]));
-        }
-
-        [Fact]
-        public void Should_write_debug_message()
-        {
-            MockBuilder.Logger.Received().InfoWrite(
-                                                   "Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
-                                                   "my_queue",
-                                                   ConsumerTag,
-                                                   (ushort)50,
-                                                   0,
-                                                   false);
         }
     }
 }

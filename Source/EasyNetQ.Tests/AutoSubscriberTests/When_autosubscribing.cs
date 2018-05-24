@@ -8,7 +8,6 @@ using EasyNetQ.Tests.Mocking;
 using Xunit;
 using NSubstitute;
 using System.Linq;
-using EasyNetQ.Loggers;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -18,18 +17,18 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private Dictionary<string, object> parameters;
 
         private const string expectedQueueName1 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA:EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
 
         private const string expectedQueueName2 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageB:EasyNetQ.Tests_MyExplicitId";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageB, EasyNetQ.Tests_MyExplicitId";
 
         private const string expectedQueueName3 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC:EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC, EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
 
         public When_autosubscribing()
         {
             //mockBuilder = new MockBuilder();
-            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
+            mockBuilder = new MockBuilder();
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
             parameters = new Dictionary<string, object>();
@@ -104,18 +103,18 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         //Discovered by reflection over test assembly, do not remove.
         private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
         {
-            public Task Consume(MessageA message)
+            public Task ConsumeAsync(MessageA message)
             {
                 throw new NotImplementedException();
             }
 
             [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public Task Consume(MessageB message)
+            public Task ConsumeAsync(MessageB message)
             {
                 throw new NotImplementedException();
             }
 
-            public Task Consume(MessageC message)
+            public Task ConsumeAsync(MessageC message)
             {
                 throw new NotImplementedException();
             }

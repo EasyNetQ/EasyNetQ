@@ -66,7 +66,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                     UserId = "Bob"
                 },
             };
-            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, messageType, serializedMessageBody);
+            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof(MyMessage), serializedMessageBody);
 
             var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
@@ -77,8 +77,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_using_the_versioned_serialization_strategy_messages_are_correctly_round_tripped()
         {
-            var typeNameSerializer = new TypeNameSerializer();
-            var serializer = new JsonSerializer(typeNameSerializer);
+            var typeNameSerializer = new DefaultTypeNameSerializer();
+            var serializer = new JsonSerializer();
 
             const string correlationId = "CorrelationId";
 
@@ -162,7 +162,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 },
             };
             message.Properties.Headers.Add("Alternative-Message-Types", Encoding.UTF8.GetBytes(supersededMessageType));
-            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, messageType, serializedMessageBody);
+            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof( MyMessageV2 ), serializedMessageBody);
 
             var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
@@ -172,8 +172,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_using_the_versioned_serialization_strategy_versioned_messages_are_correctly_round_tripped()
         {
-            var typeNameSerializer = new TypeNameSerializer();
-            var serializer = new JsonSerializer(typeNameSerializer);
+            var typeNameSerializer = new DefaultTypeNameSerializer();
+            var serializer = new JsonSerializer();
             const string correlationId = "CorrelationId";
 
             var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
@@ -196,8 +196,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_deserializing_versioned_message_use_first_available_message_type()
         {
-            var typeNameSerializer = new TypeNameSerializer();
-            var serializer = new JsonSerializer(typeNameSerializer);
+            var typeNameSerializer = new DefaultTypeNameSerializer();
+            var serializer = new JsonSerializer();
             const string correlationId = "CorrelationId";
 
             var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
@@ -261,7 +261,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
-        private VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, string expectedMessageType, byte[] messageBody) where T : class
+        private VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, Type expectedMessageType, byte[] messageBody) where T : class
         {
             var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             foreach (var messageType in messageTypes)

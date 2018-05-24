@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -23,9 +24,9 @@ namespace EasyNetQ.Consumer
     /// </summary>
     public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     {
+        private readonly ILog logger = LogProvider.For<DefaultConsumerErrorStrategy>();
         private readonly IConnectionFactory connectionFactory;
         private readonly ISerializer serializer;
-        private readonly IEasyNetQLogger logger;
         private readonly IConventions conventions;
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IErrorMessageSerializer errorMessageSerializer;
@@ -39,26 +40,23 @@ namespace EasyNetQ.Consumer
         public DefaultConsumerErrorStrategy(
             IConnectionFactory connectionFactory, 
             ISerializer serializer,
-            IEasyNetQLogger logger,
             IConventions conventions, 
             ITypeNameSerializer typeNameSerializer,
             IErrorMessageSerializer errorMessageSerializer)
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(serializer, "serializer");
-            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             this.connectionFactory = connectionFactory;
             this.serializer = serializer;
-            this.logger = logger;
             this.conventions = conventions;
             this.typeNameSerializer = typeNameSerializer;
             this.errorMessageSerializer = errorMessageSerializer;
         }
 
-        private void Connect()
+        protected void Connect()
         {
             if (connection == null || !connection.IsOpen)
             {
@@ -81,8 +79,7 @@ namespace EasyNetQ.Consumer
                             {
                                 if (connection.CloseReason != null)
                                 {
-                                    this.logger.InfoWrite("Connection '{0}' has shutdown. Reason: '{1}'", 
-                                        connection, connection.CloseReason.Cause);
+                                    logger.InfoFormat("Connection {connection} has shutdown with reason={reason}", connection.ToString(), connection.CloseReason.Cause);
                                 }
                                 else
                                 {
@@ -143,11 +140,11 @@ namespace EasyNetQ.Consumer
 
             if (disposed || disposing)
             {
-                logger.ErrorWrite(
-                    "EasyNetQ Consumer Error Handler: DefaultConsumerErrorStrategy was already disposed, when attempting to handle consumer error.  This can occur when messaging is being shut down through disposal of the IBus.  Message will not be ackd to RabbitMQ server and will remain on the RabbitMQ queue.  Error message will not be published to error queue.\n" +
-                    "ConsumerTag: {0}, DeliveryTag: {1}\n",
-                    context.Info.ConsumerTag,
-                    context.Info.DeliverTag);
+                logger.ErrorFormat(
+                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeed",
+                    context.Info
+                );
+                
                 return AckStrategies.NackWithRequeue;
             }
 
@@ -167,23 +164,28 @@ namespace EasyNetQ.Consumer
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
                 }
             }
-            catch (BrokerUnreachableException)
+            catch (BrokerUnreachableException unreachableException)
             {
-                // thrown if the broker is unreachable during initial creation.
-                logger.ErrorWrite("EasyNetQ Consumer Error Handler cannot connect to Broker\n{0}", CreateConnectionCheckMessage());
+                // thrown if the broker is unreachable duringe initial creation.
+                logger.Error(
+                    unreachableException,
+                    "Cannot connect to broker while attempting to publish error message"
+                );
             }
             catch (OperationInterruptedException interruptedException)
             {
                 // thrown if the broker connection is broken during declare or publish.
-                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Broker connection was closed while attempting to publish Error message.\nException was: '{0}'\n{1}",
-                    interruptedException.Message,
-                    CreateConnectionCheckMessage());
+                logger.Error(
+                    interruptedException,
+                    "Broker connection was closed while attempting to publish error message"
+                );
             }
             catch (Exception unexpectedException)
-            {
+            {                
                 // Something else unexpected has gone wrong :(
-                logger.ErrorWrite("EasyNetQ Consumer Error Handler: Failed to publish error message\nException is:\n{0}", unexpectedException);
+                logger.Error(unexpectedException, "Failed to publish error message");
             }
+            
             return AckStrategies.Ack;
         }
 
@@ -227,16 +229,6 @@ namespace EasyNetQ.Consumer
             }
 
             return serializer.MessageToBytes(error);
-        }
-
-        private string CreateConnectionCheckMessage()
-        {
-            return
-                "Please check EasyNetQ connection information and that the RabbitMQ Service is running at the specified endpoint.\n" +
-                string.Format("\tHostname: '{0}'\n", connectionFactory.CurrentHost.Host) +
-                string.Format("\tVirtualHost: '{0}'\n", connectionFactory.Configuration.VirtualHost) +
-                string.Format("\tUserName: '{0}'\n", connectionFactory.Configuration.UserName) +
-                "Failed to write error message to error queue";
         }
 
         private bool disposed;

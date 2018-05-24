@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string queueName = typeName + "_" + subscriptionId;
         private const string consumerTag = "the_consumer_tag";
@@ -26,14 +26,13 @@ namespace EasyNetQ.Tests
 
         public When_subscribe_is_called()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
                 {
                     ConsumerTagConvention = () => consumerTag
                 };
 
             mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(_ => conventions)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                .Register<IConventions>(conventions)
                 );
 
             subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
@@ -124,14 +123,13 @@ namespace EasyNetQ.Tests
 
     public class When_subscribe_with_configuration_is_called
     {
-        [InlineData("ttt", true, 99, true, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
-        [InlineData(null, false, 0, false, 0, null, false, null, true, "qqq", null, null)]
+        [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
+        [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
         [Theory]
         public void Queue_should_be_declared_with_correct_options(
             string topic,
             bool autoDelete,
             int priority,
-            bool cancelOnHaFailover,
             ushort prefetchCount,
             int? expires,
             bool isExclusive,
@@ -150,7 +148,6 @@ namespace EasyNetQ.Tests
                     {                        
                         c.WithAutoDelete(autoDelete)
                             .WithPriority(priority)
-                            .WithCancelOnHaFailover(cancelOnHaFailover)
                             .WithPrefetchCount(prefetchCount)
                             .AsExclusive(isExclusive)
                             .WithDurable(durable)
@@ -182,7 +179,7 @@ namespace EasyNetQ.Tests
 
             // Assert that queue got declared correctly
             mockBuilder.Channels[0].Received().QueueDeclare(
-                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                     Arg.Is(durable),
                     Arg.Is(false), // IsExclusive is set on the Consume call
                     Arg.Is(autoDelete),
@@ -196,15 +193,12 @@ namespace EasyNetQ.Tests
 
             // Assert that consumer was created correctly
             mockBuilder.Channels[1].Received().BasicConsume(
-                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests_x"),
+                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                     Arg.Is(false),
                     Arg.Any<string>(),
                     Arg.Is(true),
                     Arg.Is(isExclusive),
-                    Arg.Is<IDictionary<string, object>>(
-                        x =>
-                        (priority == (int)x["x-priority"]) &&
-                        (cancelOnHaFailover == (bool)x["x-cancel-on-ha-failover"])),
+                    Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
                     Arg.Any<IBasicConsumer>());
 
             // Assert that QoS got configured correctly
@@ -213,7 +207,7 @@ namespace EasyNetQ.Tests
             // Assert that binding got configured correctly
             mockBuilder.Channels[0].Received().QueueBind(
                 Arg.Is(queueName),
-                Arg.Is("EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"),
+                Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
                 Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
@@ -223,7 +217,7 @@ namespace EasyNetQ.Tests
     {
         private MockBuilder mockBuilder;
 
-        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
@@ -234,14 +228,13 @@ namespace EasyNetQ.Tests
 
         public When_a_message_is_delivered()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
 
             mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(_ => conventions)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                .Register<IConventions>(conventions)
                 );
 
             var autoResetEvent = new AutoResetEvent(false);
@@ -255,7 +248,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(originalMessage);
+            var body = new JsonSerializer().MessageToBytes(originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -298,16 +291,6 @@ namespace EasyNetQ.Tests
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
         }
-
-        [Fact]
-        public void Should_write_debug_message()
-        {
-            const string expectedMessageFormat =
-                "Received \n\tRoutingKey: '{0}'\n\tCorrelationId: '{1}'\n\tConsumerTag: '{2}'" +
-                "\n\tDeliveryTag: {3}\n\tRedelivered: {4}";
-
-            mockBuilder.Logger.Received().DebugWrite(expectedMessageFormat, "#", correlationId, consumerTag, deliveryTag, false);
-        }
     }
 
     public class When_the_handler_throws_an_exception : IDisposable
@@ -315,7 +298,7 @@ namespace EasyNetQ.Tests
         private MockBuilder mockBuilder;
         private IConsumerErrorStrategy consumerErrorStrategy;
 
-        private const string typeName = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests";
+        private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
@@ -328,7 +311,7 @@ namespace EasyNetQ.Tests
 
         public When_the_handler_throws_an_exception()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
@@ -343,9 +326,8 @@ namespace EasyNetQ.Tests
                 });
 
             mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(_ => conventions)
-                .Register(_ => consumerErrorStrategy)
-                //.Register<IEasyNetQLogger>(_ => new ConsoleLogger())
+                .Register<IConventions>(conventions)
+                .Register(consumerErrorStrategy)
                 );
 
             mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
@@ -357,7 +339,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer(new TypeNameSerializer()).MessageToBytes(originalMessage);
+            var body = new JsonSerializer().MessageToBytes(originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -388,13 +370,6 @@ namespace EasyNetQ.Tests
         public void Should_ack()
         {
             mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
-        }
-
-        [Fact]
-        public void Should_write_exception_log_message()
-        {
-            // too brittle to put exact message here I think
-            mockBuilder.Logger.Received().ErrorWrite(Arg.Any<string>(), Arg.Any<object[]>());
         }
 
         [Fact]
@@ -429,12 +404,12 @@ namespace EasyNetQ.Tests
 
         public When_a_subscription_is_cancelled_by_the_user()
         {
-            var conventions = new Conventions(new TypeNameSerializer())
+            var conventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ConsumerTagConvention = () => consumerTag
             };
 
-            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => conventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
             var subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
              var are = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());

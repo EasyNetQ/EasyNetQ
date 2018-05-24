@@ -30,33 +30,23 @@ namespace EasyNetQ.Producer
 
         public T Invoke<T>(Func<IModel, T> channelAction)
         {
-            try
-            {
-                return InvokeAsync(channelAction).Result;
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException;
-            }
+            return InvokeAsync(channelAction).GetAwaiter().GetResult();
         }
 
         public void Invoke(Action<IModel> channelAction)
         {
-            try
-            {
-                InvokeAsync(channelAction).Wait();
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException;
-            }
+            InvokeAsync(channelAction).GetAwaiter().GetResult();
         }
 
         public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
+#if NETFX
             var tcs = new TaskCompletionSource<T>();
+#else
+            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
 
             try
             {
@@ -64,16 +54,32 @@ namespace EasyNetQ.Producer
                 {
                     if (cancellation.IsCancellationRequested)
                     {
-                        tcs.TrySetCanceledSafe();
+#if NETFX                               
+                        tcs.TrySetCanceledAsynchronously();   
+#else
+                        tcs.TrySetCanceled();
+#endif
+
                         return;
                     }
                     try
                     {
-                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResultSafe(channelAction(channel)));
+                        persistentChannel.InvokeChannelAction(channel =>
+                        {
+#if NETFX                               
+                            tcs.TrySetResultAsynchronously(channelAction(channel));   
+#else
+                            tcs.TrySetResult(channelAction(channel));
+#endif                      
+                        });
                     }
                     catch (Exception e)
                     {
-                        tcs.TrySetExceptionSafe(e);
+#if NETFX                               
+                        tcs.TrySetExceptionAsynchronously(e);   
+#else
+                        tcs.TrySetException(e);
+#endif
                     }
                 }, cancellation.Token);
             }

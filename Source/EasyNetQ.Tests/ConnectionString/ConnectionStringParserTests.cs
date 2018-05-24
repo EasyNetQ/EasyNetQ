@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.ConnectionString
 
         private const string connectionString =
             "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
-            "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;cancelOnHaFailover=true;" +
+            "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;" +
             "useBackgroundThreads=true;" +
             "name=unit-test";
 
@@ -37,7 +37,6 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.PrefetchCount.ShouldEqual((ushort)2);
             connectionConfiguration.Timeout.ShouldEqual((ushort)12);
             connectionConfiguration.PublisherConfirms.ShouldBeTrue();
-            connectionConfiguration.CancelOnHaFailover.ShouldBeTrue();
             connectionConfiguration.UseBackgroundThreads.ShouldBeTrue();
             connectionConfiguration.Name.ShouldEqual("unit-test");
         }
@@ -82,22 +81,23 @@ namespace EasyNetQ.Tests.ConnectionString
         [MemberData(nameof(AppendixAExamples))]
         public void Should_parse_Examples(AmqpSpecification spec)
         {
-            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("" + spec.amqpUri);
+            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse(spec.amqpUri.ToString());
 
             connectionConfiguration.Port.ShouldEqual((ushort)spec.port);
             connectionConfiguration.AMQPConnectionString.ShouldEqual(spec.amqpUri);
             connectionConfiguration.Hosts.First().Host.ShouldEqual(spec.host);
             connectionConfiguration.Hosts.First().Port.ShouldEqual((ushort)spec.port);
+            connectionConfiguration.VirtualHost.ShouldEqual(spec.vhost);
         }
 
 // ReSharper disable UnusedMethodReturnValue.Local
         public static IEnumerable<object[]> AppendixAExamples()
 // ReSharper restore UnusedMethodReturnValue.Local
         {
-            yield return new[] { new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000) };
-            yield return new[] { new AmqpSpecification(new Uri("amqp://"), "", 5672) };
-            yield return new[] { new AmqpSpecification(new Uri("amqp://host"), "host", 5672) };
-            yield return new[] { new AmqpSpecification(new Uri("amqps://host"), "host", 5671) };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000, "vhost") };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://"), "", 5672, "/") };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://host"), "host", 5672, "/") };
+            yield return new[] { new AmqpSpecification(new Uri("amqps://host"), "host", 5671, "/") };
         }
 
         [Fact]
@@ -134,10 +134,13 @@ namespace EasyNetQ.Tests.ConnectionString
 
             public readonly Uri amqpUri;
 
-            public AmqpSpecification(Uri amqpUri, string host, int port)
+            public readonly string vhost;
+
+            public AmqpSpecification(Uri amqpUri, string host, int port, string vhost)
             {
                 this.host = host;
                 this.port = port;
+                this.vhost = vhost;
                 this.amqpUri = amqpUri;
             }
 

@@ -1,4 +1,5 @@
 ﻿using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
@@ -46,18 +47,16 @@ namespace EasyNetQ.Tests
 
             eventBus = new EventBus();
 
-            var logger = Substitute.For<IEasyNetQLogger>();
-            var persistentConnectionFactory = new PersistentConnectionFactory(logger, connectionFactory, eventBus);            
+            var persistentConnectionFactory = new PersistentConnectionFactory(connectionFactory, eventBus);            
 
             var advancedBus = new RabbitAdvancedBus(
                 connectionFactory,
                 Substitute.For<IConsumerFactory>(),
-                logger,
                 Substitute.For<IClientCommandDispatcherFactory>(),
                 Substitute.For<IPublishConfirmationListener>(),
                 eventBus,
                 Substitute.For<IHandlerCollectionFactory>(),
-                Substitute.For<IContainer>(),
+                Substitute.For<IServiceResolver>(),
                 Substitute.For<ConnectionConfiguration>(),
                 Substitute.For<IProduceConsumeInterceptor>(),
                 Substitute.For<IMessageSerializationStrategy>(),

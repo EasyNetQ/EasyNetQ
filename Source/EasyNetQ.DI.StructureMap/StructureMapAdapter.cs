@@ -1,50 +1,74 @@
 ﻿using System;
-using System.Linq;
+using StructureMap;
+using StructureMap.Pipeline;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI.StructureMap
 {
-    public class StructureMapAdapter : IContainer, IDisposable
+    public class StructureMapAdapter : IServiceRegister
     {
-        private readonly StructureMap.IContainer structureMapContainer;
+        private readonly IRegistry registry;
 
-        public StructureMapAdapter(StructureMap.IContainer structureMapContainer)
+        public StructureMapAdapter(IRegistry registry)
         {
-            this.structureMapContainer = structureMapContainer;
+            this.registry = registry ?? throw new ArgumentNullException(nameof(registry));
+
+            this.registry.For<IServiceResolver>(Lifecycles.Container).Use<StructureMapResolver>();
         }
 
-        public TService Resolve<TService>() where TService : class
+        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
-            return structureMapContainer.GetInstance<TService>();
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    registry.For<TService>(Lifecycles.Transient).Use<TImplementation>();
+                    return this;
+                case Lifetime.Singleton:
+                    registry.For<TService>(Lifecycles.Singleton).Use<TImplementation>();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            } 
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceProvider, TService> serviceCreator) where TService : class
+        public IServiceRegister Register<TService>(TService instance) where TService : class
         {
-            if (ServiceRegistered<TService>()) return this;
-            structureMapContainer.Configure(
-                c => c.For<TService>().Singleton().Use(() => serviceCreator(this))
-                );
+            registry.For<TService>(Lifecycles.Singleton).Use(instance);
             return this;
         }
 
-        public IServiceRegister Register<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService
-        {
-            if (ServiceRegistered<TService>()) return this;
-            structureMapContainer.Configure(
-                c => c.For<TService>().Singleton().Use(ctx => ctx.GetInstance<TImplementation>())
-                );
-            return this;
+        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        { 
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    registry.For<TService>(Lifecycles.Transient).Use(y => factory(y.GetInstance<IServiceResolver>()));
+                    return this;
+                case Lifetime.Singleton:
+                    registry.For<TService>(Lifecycles.Singleton).Use(y => factory(y.GetInstance<IServiceResolver>()));
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            } 
         }
 
-        private bool ServiceRegistered<T>()
+        private class StructureMapResolver : IServiceResolver
         {
-            return structureMapContainer.Model.AllInstances.Any(x=>x.PluginType == typeof(T));           
-        }
+            private readonly IContainer container;
 
-        public void Dispose()
-        {
-            structureMapContainer.Dispose();
+            public StructureMapResolver(IContainer container)
+            {
+                this.container = container;
+            }
+
+            public TService Resolve<TService>() where TService : class
+            {
+                return container.GetInstance<TService>();
+            }
+
+            public IServiceResolverScope CreateScope()
+            {
+                return new ServiceResolverScope(this);
+            }
         }
     }
 }

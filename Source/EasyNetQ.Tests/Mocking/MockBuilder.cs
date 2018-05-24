@@ -3,6 +3,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using System;
 using System.Collections.Generic;
+using EasyNetQ.DI;
 
 namespace EasyNetQ.Tests.Mocking
 {
@@ -15,7 +16,6 @@ namespace EasyNetQ.Tests.Mocking
         readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
         readonly IBasicProperties basicProperties = new BasicProperties();
         readonly List<string> consumerQueueNames = new List<string>();
-        private readonly IEasyNetQLogger logger = Substitute.For<IEasyNetQLogger>();
         private readonly IBus bus;
 
         public const string Host = "my_host";
@@ -75,8 +75,7 @@ namespace EasyNetQ.Tests.Mocking
             bus = RabbitHutch.CreateBus(connectionString, x =>
                 {
                     registerServices(x);
-                    x.Register(_ => connectionFactory);
-                    x.Register(_ => logger);
+                    x.Register(connectionFactory);
                 });
 
             bus.ShouldNotBeNull();
@@ -109,17 +108,12 @@ namespace EasyNetQ.Tests.Mocking
             get { return basicProperties; }
         }
 
-        public IEasyNetQLogger Logger
-        {
-            get { return logger; }
-        }
-
         public IBus Bus
         {
             get { return bus; }
         }
 
-        public IServiceProvider ServiceProvider
+        public IServiceResolver ServiceProvider
         {
             get { return bus.Advanced.Container; }
         }

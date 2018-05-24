@@ -31,7 +31,6 @@ namespace EasyNetQ
         public ushort Timeout { get; set; }
         public bool PublisherConfirms { get; set; }
         public bool PersistentMessages { get; set; }
-        public bool CancelOnHaFailover { get; set; }
         public string Product { get; set; }
         public string Platform { get; set; }
         public string Name { get; set; }
@@ -50,7 +49,6 @@ namespace EasyNetQ
             Timeout = 10; // seconds
             PublisherConfirms = false;
             PersistentMessages = true;
-            CancelOnHaFailover = false;
             UseBackgroundThreads = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
                          

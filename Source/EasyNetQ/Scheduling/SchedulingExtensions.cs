@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.Scheduling
+﻿using EasyNetQ.DI;
+
+namespace EasyNetQ.Scheduling
 {
     public static class SchedulingExtensions
     {

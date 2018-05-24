@@ -10,14 +10,6 @@ namespace EasyNetQ
         public EasyNetQException(string message, Exception inner) : base(message, inner) {}
     }
 
-    public class EasyNetQInvalidMessageTypeException : EasyNetQException
-    {
-        public EasyNetQInvalidMessageTypeException() {}
-        public EasyNetQInvalidMessageTypeException(string message) : base(message) {}
-        public EasyNetQInvalidMessageTypeException(string format, params string[] args) : base(format, args) {}
-        public EasyNetQInvalidMessageTypeException(string message, Exception inner) : base(message, inner) {}
-    }
-
     public class EasyNetQResponderException : EasyNetQException
     {
         public EasyNetQResponderException() { }

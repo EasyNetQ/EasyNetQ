@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Scheduling;
-using EasyNetQ.Serilog;
 using Net.CommandLine;
 using Serilog;
 
@@ -20,10 +19,7 @@ namespace EasyNetQ.Tests.Tasks
 
         public Task Run(int delay, CancellationToken cancellationToken)
         {
-            bus = RabbitHutch.CreateBus("host=localhost", x =>
-            {
-                    x.Register<IEasyNetQLogger>(serviceProvider => new SerilogLogger(logger));
-            });
+            bus = RabbitHutch.CreateBus("host=localhost");
 
             bus.Subscribe<ScheduleTestMessage>("scheduled-message", OnMessage, configuration => configuration.WithAutoDelete());
             bus.FuturePublish(TimeSpan.FromSeconds(delay), new ScheduleTestMessage());

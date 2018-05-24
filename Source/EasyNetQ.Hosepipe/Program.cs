@@ -46,7 +46,7 @@ namespace EasyNetQ.Hosepipe
 
         public static void Main(string[] args)
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new LegacyTypeNameSerializer();
             var argParser = new ArgParser();
             var arguments = argParser.Parse(args);
 
@@ -71,7 +71,7 @@ namespace EasyNetQ.Hosepipe
                 new FileMessageWriter(),
                 new MessageReader(), 
                 new QueueInsertion(errorMessageSerializer),
-                new ErrorRetry(new JsonSerializer(typeNameSerializer), errorMessageSerializer),
+                new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
                 new Conventions(typeNameSerializer));
             program.Start(args);
         }

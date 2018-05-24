@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.NonGeneric
 
             var properties = new BasicProperties
                 {
-                    Type = "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests"
+                    Type = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"
                 };
 
             var body = Encoding.UTF8.GetBytes("{ Text:\"Hello World\" }");

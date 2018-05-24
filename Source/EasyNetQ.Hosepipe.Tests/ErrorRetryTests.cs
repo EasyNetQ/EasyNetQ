@@ -14,9 +14,9 @@ namespace EasyNetQ.Hosepipe.Tests
 
         public ErrorRetryTests()
         {
-            var typeNameSerializer = new TypeNameSerializer();
+            var typeNameSerializer = new LegacyTypeNameSerializer();
             conventions = new Conventions(typeNameSerializer);
-            errorRetry = new ErrorRetry(new JsonSerializer(typeNameSerializer), new DefaultErrorMessageSerializer());
+            errorRetry = new ErrorRetry(new JsonSerializer(), new DefaultErrorMessageSerializer());
         }
 
         [Fact][Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]

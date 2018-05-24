@@ -25,9 +25,9 @@ namespace EasyNetQ.Tests.ConsumeTests
                 .Add<MyMessage>(message => deliveredMyMessage = message)
                 .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
-            DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage:EasyNetQ.Tests");
-            DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage:EasyNetQ.Tests");
-            DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown:EasyNetQ.Tests");
+            DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
+            DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");
+            DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
         }
 
         public void Dispose()
@@ -47,14 +47,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             deliveredMyOtherMessage.ShouldNotBeNull();
             deliveredMyOtherMessage.Text.ShouldEqual("Goodbye Cruel World!");
-        }
-
-        [Fact]
-        public void Should_put_unrecognised_message_on_error_queue()
-        {
-            mockBuilder.Logger.Received().ErrorWrite(
-                Arg.Is<string>(errorMessage => errorMessage.StartsWith("Exception thrown by subscription callback")), 
-                Arg.Any<object[]>());
         }
 
         private void DeliverMessage(string message, string type)

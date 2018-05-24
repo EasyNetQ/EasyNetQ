@@ -23,7 +23,7 @@ namespace EasyNetQ.Producer
         public void Wait(TimeSpan timeout)
         {
             try
-            {
+            {   
                 if (confirmation.Wait((int)timeout.TotalMilliseconds, cancellation))
                 {
                     return;
@@ -49,8 +49,8 @@ namespace EasyNetQ.Producer
                 {
                     using (var compositeCancellation = CancellationTokenSource.CreateLinkedTokenSource(timeoutCancellation.Token, cancellation))
                     {
-                        var timeoutTask = TaskHelpers.Delay(timeout, compositeCancellation.Token);
-                        if (timeoutTask == await TaskHelpers.WhenAny(confirmation, timeoutTask).ConfigureAwait(false))
+                        var timeoutTask = Task.Delay(timeout, compositeCancellation.Token);
+                        if (timeoutTask == await Task.WhenAny(confirmation, timeoutTask).ConfigureAwait(false))
                         {
                             throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int)timeout.TotalSeconds, deliveryTag));
                         }

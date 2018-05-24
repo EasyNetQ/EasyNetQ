@@ -23,9 +23,13 @@ namespace EasyNetQ.Producer
         {
             var deliveryTag = model.NextPublishSeqNo;
             var requests = unconfirmedChannelRequests.GetOrAdd(model, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
-            var confirmation = new TaskCompletionSource<object>();
-            requests.Add(deliveryTag, confirmation);
-            return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
+#if NETFX
+            var comfirmation = new TaskCompletionSource<object>();
+#else
+            var comfirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
+            requests.Add(deliveryTag, comfirmation);
+            return new PublishConfirmationWaiter(deliveryTag, comfirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
 
         public void Dispose()
@@ -46,7 +50,6 @@ namespace EasyNetQ.Producer
             var isNack = @event.IsNack;
             if (multiple)
             {
-                // Fix me: ConcurrentDictionary.Keys acquires all locks, it is very expensive operation and could perform slowly.
                 foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
                 {
                     TaskCompletionSource<object> confirmation;
@@ -82,7 +85,12 @@ namespace EasyNetQ.Producer
                     {
                         continue;
                     }
-                    confirmation.TrySetExceptionSafe(new PublishInterruptedException());
+
+#if NETFX                               
+                    confirmation.TrySetExceptionAsynchronously(new PublishInterruptedException());     
+#else
+                    confirmation.TrySetException(new PublishInterruptedException());
+#endif
                 }
             }
             unconfirmedChannelRequests.Add(@event.Channel, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
@@ -92,11 +100,19 @@ namespace EasyNetQ.Producer
         {
             if (isNack)
             {
-                tcs.TrySetExceptionSafe(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
+#if NETFX                               
+                tcs.TrySetExceptionAsynchronously(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));     
+#else
+                tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
+#endif
             }
             else
             {
-                tcs.TrySetResultSafe(null);
+#if NETFX                               
+                tcs.TrySetResultAsynchronously(null);     
+#else
+                tcs.TrySetResult(null);
+#endif
             }
         }
     }

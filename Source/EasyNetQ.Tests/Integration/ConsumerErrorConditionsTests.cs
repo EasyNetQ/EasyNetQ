@@ -10,16 +10,14 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests
 {
-    using EasyNetQ.Loggers;
-
     public class ConsumerErrorConditionsTests : IDisposable
     {
         private IBus bus;
 
         public ConsumerErrorConditionsTests()
         {
-            bus = RabbitHutch.CreateBus(new ConnectionConfiguration() {Hosts = new HostConfiguration[] {new HostConfiguration() { Host = "localhost"} }},
-                reg => { reg.Register<IEasyNetQLogger>(p => new ConsoleLogger()); });
+            var connectionConfiguration = new ConnectionConfiguration {Hosts = new[] {new HostConfiguration { Host = "localhost"} }};
+            bus = RabbitHutch.CreateBus(connectionConfiguration, c => {});
         }
 
         public void Dispose()
@@ -30,8 +28,8 @@ namespace EasyNetQ.Tests
         // run this test. You should see the following on the console:
         //
         //    ERROR: Exception thrown by subscription calback.
-        //	    Exchange:    'EasyNetQ_Tests_MyErrorTestMessage:EasyNetQ_Tests'
-        //	    Routing Key: 'EasyNetQ_Tests_MyErrorTestMessage:EasyNetQ_Tests'
+        //	    Exchange:    'EasyNetQ_Tests_MyErrorTestMessage, EasyNetQ_Tests'
+        //	    Routing Key: 'EasyNetQ_Tests_MyErrorTestMessage, EasyNetQ_Tests'
         //	    Redelivered: 'False'
         //    Message:
         //    {"Id":444,"Name":"I cause an error. Naughty me!"}

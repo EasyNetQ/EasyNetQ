@@ -30,12 +30,10 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 
         public When_a_user_handler_is_executed()
         {
-            //var logger = new ConsoleLogger();
-            var logger = Substitute.For<IEasyNetQLogger>();
             var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             var eventBus = new EventBus();
 
-            handlerRunner = new HandlerRunner(logger, consumerErrorStrategy, eventBus);
+            handlerRunner = new HandlerRunner(consumerErrorStrategy, eventBus);
 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler = (body, properties, info) => 
                 Task.Factory.StartNew(() =>

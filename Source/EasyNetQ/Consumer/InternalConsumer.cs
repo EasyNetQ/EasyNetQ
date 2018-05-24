@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Logging;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -29,20 +31,22 @@ namespace EasyNetQ.Consumer
 
     public class BasicConsumer : IBasicConsumer, IDisposable
     {
+        private readonly ILog logger = LogProvider.For<BasicConsumer>();
         private readonly Action<BasicConsumer> cancelled;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
-        private readonly IEasyNetQLogger logger;
-        public BasicConsumer(Action<BasicConsumer> cancelled, IConsumerDispatcher consumerDispatcher, IQueue queue, IEventBus eventBus, IHandlerRunner handlerRunner, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, IEasyNetQLogger logger, IModel model)
+        
+        public BasicConsumer(Action<BasicConsumer> cancelled, IConsumerDispatcher consumerDispatcher, IQueue queue, IEventBus eventBus, IHandlerRunner handlerRunner, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, IModel model)
         {
+            Preconditions.CheckNotNull(onMessage, "onMessage");
+            
             Queue = queue;
             OnMessage = onMessage;
             this.cancelled = cancelled;
             this.consumerDispatcher = consumerDispatcher;
             this.eventBus = eventBus;
             this.handlerRunner = handlerRunner;
-            this.logger = logger;
             Model = model;
         }
 
@@ -78,32 +82,35 @@ namespace EasyNetQ.Consumer
         public void HandleBasicCancel(string consumerTag)
         {
             Cancel();
-            logger.InfoWrite("BasicCancel(Consumer Cancel Notification from broker) event received. " +
-                             "Consumer tag: {0}", consumerTag);
+            logger.InfoFormat(
+                "Consumer with consumerTag {consumerTag} has cancelled", 
+                consumerTag
+            );
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
-            logger.InfoWrite("Consumer '{0}', consuming from queue '{1}', has shutdown. Reason: '{2}'",
-                ConsumerTag, Queue.Name, reason.Cause);
+            logger.InfoFormat(
+                "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
+                ConsumerTag,
+                Queue.Name,
+                reason
+            );
         }
+        
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
         {
-            logger.DebugWrite("HandleBasicDeliver on consumer: {0}, deliveryTag: {1}", consumerTag, deliveryTag);
+            logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
 
             if (disposed)
             {
                 // this message's consumer has stopped, so just return
-                logger.InfoWrite("Consumer has stopped running. Consumer '{0}' on queue '{1}'. Ignoring message",
-                    ConsumerTag, Queue.Name);
-                return;
-            }
-
-            if (OnMessage == null)
-            {
-                logger.ErrorWrite("User consumer callback, 'onMessage' has not been set for consumer '{0}'." +
-                    "Please call InternalConsumer.StartConsuming before passing the consumer to basic.consume",
-                    ConsumerTag);
+                logger.InfoFormat(
+                    "Consumer with consumerTag {consumerTag} on queue {queue} has stopped running. Ignoring message",
+                    ConsumerTag,
+                    Queue.Name
+                );
+                
                 return;
             }
 
@@ -135,11 +142,11 @@ namespace EasyNetQ.Consumer
 
     public class InternalConsumer : IInternalConsumer
     {
+        private readonly ILog logger = LogProvider.For<InternalConsumer>();
+        
         private readonly IHandlerRunner handlerRunner;
-        private readonly IEasyNetQLogger logger;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
-        private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IEventBus eventBus;
 
         private ICollection<BasicConsumer> basicConsumers;
@@ -152,27 +159,20 @@ namespace EasyNetQ.Consumer
 
         public InternalConsumer(
             IHandlerRunner handlerRunner,
-            IEasyNetQLogger logger,
             IConsumerDispatcher consumerDispatcher,
             IConventions conventions,
-            ConnectionConfiguration connectionConfiguration,
             IEventBus eventBus)
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
-            Preconditions.CheckNotNull(logger, "logger");
             Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.handlerRunner = handlerRunner;
-            this.logger = logger;
             this.consumerDispatcher = consumerDispatcher;
             this.conventions = conventions;
-            this.connectionConfiguration = connectionConfiguration;
             this.eventBus = eventBus;
         }
-
 
         public StartConsumingStatus StartConsuming(IPersistentConnection connection, ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, IConsumerConfiguration configuration)
         {
@@ -183,15 +183,13 @@ namespace EasyNetQ.Consumer
 
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
-                    {"x-priority", configuration.Priority},
-                    {"x-cancel-on-ha-failover", configuration.CancelOnHaFailover || connectionConfiguration.CancelOnHaFailover}
+                    {"x-priority", configuration.Priority}
                 };
             try
             {
                 Model = connection.CreateModel();
 
                 Model.BasicQos(0, configuration.PrefetchCount, true);
-
 
                 basicConsumers = new List<BasicConsumer>();
 
@@ -202,7 +200,7 @@ namespace EasyNetQ.Consumer
                     var consumerTag = conventions.ConsumerTagConvention();
                     try
                     {
-                        var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
+                        var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
 
                         Model.BasicConsume(
                             queue.Name, // queue
@@ -211,29 +209,41 @@ namespace EasyNetQ.Consumer
                             true,
                             configuration.IsExclusive,
                             arguments, // arguments
-                            basicConsumer); // consumer
-
+                            basicConsumer // consumer
+                        );
+                        
                         basicConsumers.Add(basicConsumer);
 
-                        logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
-                            queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
+                        logger.InfoFormat(
+                            "Declared consumer with consumerTag {consumerTag} on queue={queue} and configuration {configuration}",
+                            queue.Name,
+                            consumerTag, 
+                            configuration
+                        );
                     }
-                    catch (Exception ex)
+                    catch (Exception exception)
                     {
-                        logger.ErrorWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
-                            queue.Name, consumerTag, ex.Message);
+                        logger.Error(
+                            exception,
+                            "Consume with consumerTag {consumerTag} on queue {queue} failed",
+                            queue.Name,
+                            consumerTag
+                        );
                         return StartConsumingStatus.Failed;
                     }
                 }
                 
+                return StartConsumingStatus.Succeed;
             }
             catch (Exception exception)
             {
-                logger.ErrorWrite("Consume failed. queue='{0}', message='{1}'",
-                    string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name)), exception.Message);
+                logger.Error(
+                    exception,
+                    "Consume on queue {queue} failed",
+                    string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name))
+                );
                 return StartConsumingStatus.Failed;
             }
-            return StartConsumingStatus.Succeed;
         }
 
         public StartConsumingStatus StartConsuming(
@@ -251,14 +261,13 @@ namespace EasyNetQ.Consumer
             var consumerTag = conventions.ConsumerTagConvention();
             IDictionary<string, object> arguments = new Dictionary<string, object>
                 {
-                    {"x-priority", configuration.Priority},
-                    {"x-cancel-on-ha-failover", configuration.CancelOnHaFailover || connectionConfiguration.CancelOnHaFailover}
+                    {"x-priority", configuration.Priority}
                 };
             try
             {
                 Model = connection.CreateModel();
 
-                var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, logger, Model);
+                var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
 
                 basicConsumers = new[] { basicConsumer };
 
@@ -271,22 +280,32 @@ namespace EasyNetQ.Consumer
                     true,
                     configuration.IsExclusive,
                     arguments,          // arguments
-                    basicConsumer);              // consumer
+                    basicConsumer);     // consumer
 
-                logger.InfoWrite("Declared Consumer. queue='{0}', consumer tag='{1}' prefetchcount={2} priority={3} x-cancel-on-ha-failover={4}",
-                                  queue.Name, consumerTag, configuration.PrefetchCount, configuration.Priority, configuration.CancelOnHaFailover);
+                logger.InfoFormat(
+                    "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
+                    consumerTag,
+                    queue.Name,
+                    configuration
+                );
+                
+                
+                return StartConsumingStatus.Succeed;
             }
             catch (Exception exception)
             {
-                logger.ErrorWrite("Consume failed. queue='{0}', consumer tag='{1}', message='{2}'",
-                                 queue.Name, consumerTag, exception.Message);
+                logger.Error(
+                    exception,
+                    "Consume with consumerTag {consumerTag} from queue {queue} has failed",
+                    consumerTag,
+                    queue.Name
+                );
                 return StartConsumingStatus.Failed;
             }
-            return StartConsumingStatus.Succeed;
         }
 
-
         private HashSet<BasicConsumer> cancelledConsumer;
+        
         private void SingleBasicConsumerCancelled(BasicConsumer consumer)
         {
             if (cancelledConsumer == null)
@@ -300,7 +319,6 @@ namespace EasyNetQ.Consumer
             }
         }
 
-
         private bool disposed;
 
         public void Dispose()
@@ -308,19 +326,20 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
             disposed = true;
 
-          
 
             var model = Model;
             if (model != null)
             {
                 // Queued because we may be on the RabbitMQ.Client dispatch thread.
+                var disposedEvent = new AutoResetEvent(false);
                 consumerDispatcher.QueueAction(() =>
                     {
                         Model.Dispose();
                         foreach (var c in basicConsumers)
                             c.Dispose();
-                        
+                        disposedEvent.Set();
                     });
+                disposedEvent.WaitOne();
             }
         }
     }

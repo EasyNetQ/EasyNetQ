@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
 
 		public When_using_default_conventions()
 		{
-            typeNameSerializer = new TypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
 			conventions = new Conventions(typeNameSerializer);
 		}
 
@@ -90,7 +90,7 @@ namespace EasyNetQ.Tests
 
         public When_using_QueueAttribute()
         {
-            typeNameSerializer = new TypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
             conventions = new Conventions(typeNameSerializer);
         }
 
@@ -151,7 +151,7 @@ namespace EasyNetQ.Tests
 
 		public When_publishing_a_message()
 		{
-            typeNameSerializer = new TypeNameSerializer();
+            typeNameSerializer = new DefaultTypeNameSerializer();
             var customConventions = new Conventions(typeNameSerializer)
             {
                 ExchangeNamingConvention = x => "CustomExchangeNamingConvention",
@@ -159,7 +159,7 @@ namespace EasyNetQ.Tests
                 TopicNamingConvention = x => "CustomTopicNamingConvention"
             };
 
-            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
             mockBuilder.Bus.Publish(new TestMessage());
 		}
 
@@ -208,13 +208,13 @@ namespace EasyNetQ.Tests
 
         public When_registering_response_handler()
         {
-            var customConventions = new Conventions(new TypeNameSerializer())
+            var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 RpcRequestExchangeNamingConvention = messageType => "CustomRpcExchangeName",
                 RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
             };
 
-            mockBuilder = new MockBuilder(x => x.Register<IConventions>(_ => customConventions));
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
             mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
@@ -257,7 +257,7 @@ namespace EasyNetQ.Tests
 
         public When_using_default_consumer_error_strategy()
         {
-            var customConventions = new Conventions(new TypeNameSerializer())
+            var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
                 ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
@@ -267,10 +267,9 @@ namespace EasyNetQ.Tests
 
             errorStrategy = new DefaultConsumerErrorStrategy(
                 mockBuilder.ConnectionFactory, 
-                new JsonSerializer(new TypeNameSerializer()), 
-                Substitute.For<IEasyNetQLogger>(), 
+                new JsonSerializer(), 
                 customConventions,
-                new TypeNameSerializer(),
+                new DefaultTypeNameSerializer(),
                 new DefaultErrorMessageSerializer());
 
             const string originalMessage = "";

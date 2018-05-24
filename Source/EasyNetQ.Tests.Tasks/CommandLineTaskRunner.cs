@@ -3,10 +3,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
-using EasyNetQ.Serilog;
 using Net.Autofac.CommandLine;
 using Serilog;
-using Serilog.Debugging;
 using Serilog.Events;
 
 namespace EasyNetQ.Tests.Tasks
@@ -56,14 +54,11 @@ namespace EasyNetQ.Tests.Tasks
 
         private static void SetupLogging(ContainerBuilder builder)
         {
-            SelfLog.Enable(Console.Out);
-
-            var logger = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .WriteTo.ColoredConsole(LogEventLevel.Debug)
                 .CreateLogger();
 
-            builder.RegisterInstance(logger).AsImplementedInterfaces().AsSelf();
-            builder.RegisterInstance(new SerilogLogger(logger)).As<IEasyNetQLogger>();
+            builder.RegisterInstance(Log.Logger).AsImplementedInterfaces().AsSelf();
         }
 
         private CancellationToken CreateCancellationToken()
