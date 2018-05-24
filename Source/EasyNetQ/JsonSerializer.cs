@@ -6,10 +6,20 @@ namespace EasyNetQ
 {
     public class JsonSerializer : ISerializer
     {
-        private readonly JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+        private readonly JsonSerializerSettings serializerSettings;
+
+        public JsonSerializer()
         {
-            TypeNameHandling = TypeNameHandling.Auto
-        };
+            serializerSettings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            };
+        }
+
+        public JsonSerializer(JsonSerializerSettings serializerSettings)
+        {
+            this.serializerSettings = serializerSettings;
+        }
 
         public byte[] MessageToBytes<T>(T message) where T : class
         {
