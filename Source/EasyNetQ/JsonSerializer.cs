@@ -35,6 +35,7 @@ namespace EasyNetQ
 
         public object BytesToMessage(Type type, byte[] bytes)
         {
+            Preconditions.CheckNotNull(type, "type");
             Preconditions.CheckNotNull(bytes, "bytes");
             return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type, serializerSettings);
         }
