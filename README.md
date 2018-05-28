@@ -3,7 +3,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/3k82vjb7ugg3okwt?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
 
-[![NuGet status](https://img.shields.io/nuget/v/EasyNetQ.png?maxAge=2592000)](https://www.nuget.org/packages/EasyNetQ)
+[![NuGet status](https://img.shields.io/nuget/v/EasyNetQ.png?maxAge=3600)](https://www.nuget.org/packages/EasyNetQ)
 
 --
 
