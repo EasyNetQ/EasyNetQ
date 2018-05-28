@@ -46,7 +46,7 @@ namespace EasyNetQ.Scheduling
         {
             Preconditions.CheckNotNull(message, "message");
             var scheduleMeType = typeof(ScheduleMe);
-            var scheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, scheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
+            var scheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
             var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
@@ -86,7 +86,7 @@ namespace EasyNetQ.Scheduling
         {
             Preconditions.CheckNotNull(message, "message");
             var scheduleMeType = typeof(ScheduleMe);
-            var scheduleMeExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, scheduleMeType, ExchangeType.Topic);
+            var scheduleMeExchange = publishExchangeDeclareStrategy.DeclareExchange(scheduleMeType, ExchangeType.Topic);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
             var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
@@ -139,7 +139,7 @@ namespace EasyNetQ.Scheduling
         public async Task CancelFuturePublishAsync(string cancellationKey)
         {
             var uncheduleMeType = typeof(UnscheduleMe);
-            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, uncheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
+            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
             var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
             var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
             {
@@ -154,7 +154,7 @@ namespace EasyNetQ.Scheduling
         public void CancelFuturePublish(string cancellationKey)
         {
             var uncheduleMeType = typeof(UnscheduleMe);
-            var unscheduleMeExchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, uncheduleMeType, ExchangeType.Topic);
+            var unscheduleMeExchange = publishExchangeDeclareStrategy.DeclareExchange(uncheduleMeType, ExchangeType.Topic);
             var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
             var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
             {

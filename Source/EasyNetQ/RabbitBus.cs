@@ -80,7 +80,7 @@ namespace EasyNetQ
             if (configuration.Expires != null)
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, messageType, ExchangeType.Topic);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(messageType, ExchangeType.Topic);
             advancedBus.Publish(exchange, configuration.Topic, false, easyNetQMessage);
         }
 
@@ -120,7 +120,7 @@ namespace EasyNetQ
             if (configuration.Expires != null)
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
-            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(advancedBus, messageType, ExchangeType.Topic).ConfigureAwait(false);
+            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic).ConfigureAwait(false);
             await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage).ConfigureAwait(false);
         }
 
