@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Title>EasyNetQ</Title>
     <Description>EasyNetQ</Description>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <PackageTags>RabbitMQ;Messaging;AMQP;C#</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
   </PropertyGroup>
