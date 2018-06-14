@@ -4,6 +4,7 @@
     <Description>An adaptor to allow EasyNetQ to use Autofac as its internal IoC container</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
+    <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
