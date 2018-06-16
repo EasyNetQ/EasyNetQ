@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests
 
             connectionConfiguration.Hosts.Count().Should().Be(1);
             connectionConfiguration.Hosts.Single().Host.Should().Be("amqphost");
-            connectionConfiguration.Hosts.Single().Port.Should().Be((ushort)1234);
+            connectionConfiguration.Hosts.Single().Port.Should().Be(1234);
         }
 
         [Fact]

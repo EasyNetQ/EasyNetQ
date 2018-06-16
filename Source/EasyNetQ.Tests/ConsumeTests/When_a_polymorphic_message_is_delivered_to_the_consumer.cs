@@ -57,7 +57,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_correctly_deserialize_message()
         {
             receivedMessage.Should().NotBeNull();
-            receivedMessage.GetType().Should().Be(typeof (Implementation));
+            receivedMessage.Should().BeOfType<Implementation>();
             receivedMessage.Text.Should().Be("Hello Polymorphs!");
         }
     }

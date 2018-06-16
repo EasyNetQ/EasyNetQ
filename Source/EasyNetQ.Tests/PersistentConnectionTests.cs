@@ -119,7 +119,7 @@ namespace EasyNetQ.Tests
                 connection.Initialize();
                 Thread.Sleep(TimeSpan.FromSeconds(2));
                 mockBuilder.ConnectionFactory.Received(3).CreateConnection();
-                first.Should().Be(false);
+                first.Should().BeFalse();
             }
         }
 
