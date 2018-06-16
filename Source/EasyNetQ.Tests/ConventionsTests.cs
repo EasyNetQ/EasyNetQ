@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests
 {
@@ -27,14 +28,14 @@ namespace EasyNetQ.Tests
 		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
 		{
 			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
+		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
 		}
 
 		[Fact]
 		public void The_default_topic_naming_convention_should_return_an_empty_string()
 		{
 			var result = conventions.TopicNamingConvention(typeof (TestMessage));
-			result.ShouldEqual("");
+		    result.Should().Be("");
 		}
 
 		[Fact]
@@ -42,14 +43,14 @@ namespace EasyNetQ.Tests
 		{
 			const string subscriptionId = "test";
 			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
+		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
 		}
 
         [Fact]
         public void The_default_error_queue_name_should_be()
         {
             var result = conventions.ErrorQueueNamingConvention();
-            result.ShouldEqual("EasyNetQ_Default_Error_Queue");
+            result.Should().Be("EasyNetQ_Default_Error_Queue");
         }
 
         [Fact]
@@ -58,28 +59,28 @@ namespace EasyNetQ.Tests
             var info = new MessageReceivedInfo("consumer_tag", 0, false, "exchange", "routingKey", "queue");
 
             var result = conventions.ErrorExchangeNamingConvention(info);
-            result.ShouldEqual("ErrorExchange_routingKey");
+            result.Should().Be("ErrorExchange_routingKey");
         }
 
         [Fact]
         public void The_default_rpc_request_exchange_name_should_be()
         {
             var result = conventions.RpcRequestExchangeNamingConvention(typeof (object));
-            result.ShouldEqual("easy_net_q_rpc");
+            result.Should().Be("easy_net_q_rpc");
         }
 
         [Fact]
         public void The_default_rpc_reply_exchange_name_should_be()
         {
             var result = conventions.RpcResponseExchangeNamingConvention(typeof(object));
-            result.ShouldEqual("easy_net_q_rpc");
+            result.Should().Be("easy_net_q_rpc");
         }
 
         [Fact]
         public void The_default_rpc_routingkey_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
         {
             var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
+            result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
         }        
 	}
 
@@ -101,7 +102,7 @@ namespace EasyNetQ.Tests
         {
             const string subscriptionId = "test";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual("MyQueue" + "_" + subscriptionId);
+            result.Should().Be("MyQueue" + "_" + subscriptionId);
         }
 
         [Theory]
@@ -111,7 +112,7 @@ namespace EasyNetQ.Tests
         {
             const string subscriptionId = "";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual("MyQueue");
+            result.Should().Be("MyQueue");
         }
 
 
@@ -122,7 +123,7 @@ namespace EasyNetQ.Tests
         {
             const string subscriptionId = "test";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(messageType) + "_" + subscriptionId);
+            result.Should().Be(typeNameSerializer.Serialize(messageType) + "_" + subscriptionId);
         }
 
         [Theory]
@@ -131,7 +132,7 @@ namespace EasyNetQ.Tests
         public void The_exchange_name_convention_should_use_attribute_exchangeName(Type messageType)
         {
             var result = conventions.ExchangeNamingConvention(messageType);
-            result.ShouldEqual("MyExchange");
+            result.Should().Be("MyExchange");
         }
 
         [Theory]
@@ -140,7 +141,7 @@ namespace EasyNetQ.Tests
         public void And_exchangeName_not_specified_the_exchange_name_convention_should_use_the_TypeNameSerializers_Serialize_method(Type messageType)
         {
             var result = conventions.ExchangeNamingConvention(messageType);
-            result.ShouldEqual(typeNameSerializer.Serialize(messageType));
+            result.Should().Be(typeNameSerializer.Serialize(messageType));
         }
     }
 

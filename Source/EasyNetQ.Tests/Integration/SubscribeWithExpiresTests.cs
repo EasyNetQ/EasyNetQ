@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -23,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
                 bus.Subscribe<MyMessage>(subscriptionId, message => { }, x => x.WithExpires(1000));
 
                 var queue = client.GetQueue(queueName, vhost);
-                queue.ShouldNotBeNull();
+                queue.Should().NotBeNull();
 
                 // this will abandon the queue... poor queue!
                 bus.Dispose();
@@ -31,7 +32,7 @@ namespace EasyNetQ.Tests.Integration
                 Thread.Sleep(1500);
 
                 queue = client.GetQueue(queueName, vhost);
-                queue.ShouldBeNull();
+                queue.Should().BeNull();
             });
         }
 
@@ -49,7 +50,7 @@ namespace EasyNetQ.Tests.Integration
             bus.Subscribe<MyMessage>(subscriptionId, message => { });
 
             var queue = client.GetQueue(queueName, vhost);
-            queue.ShouldNotBeNull();
+            queue.Should().NotBeNull();
 
             // this will abandon the queue... poor queue!
             bus.Dispose();
@@ -57,7 +58,7 @@ namespace EasyNetQ.Tests.Integration
             Thread.Sleep(1500);
 
             queue = client.GetQueue(queueName, vhost);
-            queue.ShouldNotBeNull();
+            queue.Should().NotBeNull();
         }
     }
 }

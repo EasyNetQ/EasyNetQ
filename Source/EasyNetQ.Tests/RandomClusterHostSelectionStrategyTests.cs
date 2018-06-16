@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -35,7 +36,7 @@ namespace EasyNetQ.Tests
             Assert.True(hosts.Contains("1"));
             Assert.True(hosts.Contains("2"));
             Assert.True(hosts.Contains("3"));
-            clusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
+            clusterHostSelectionStrategy.Succeeded.Should().BeFalse();
         }
 
         [Fact]
@@ -46,9 +47,10 @@ namespace EasyNetQ.Tests
                 clusterHostSelectionStrategy.Current();
                 clusterHostSelectionStrategy.Success();
             } while (clusterHostSelectionStrategy.Next());
-            clusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
+
+            clusterHostSelectionStrategy.Succeeded.Should().BeTrue();
             clusterHostSelectionStrategy.Reset();
-            clusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
+            clusterHostSelectionStrategy.Succeeded.Should().BeFalse();
         }
 
         [Fact]
@@ -65,7 +67,7 @@ namespace EasyNetQ.Tests
 
             } while (clusterHostSelectionStrategy.Next());
 
-            clusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
+            clusterHostSelectionStrategy.Succeeded.Should().BeTrue();
         }
 
     }

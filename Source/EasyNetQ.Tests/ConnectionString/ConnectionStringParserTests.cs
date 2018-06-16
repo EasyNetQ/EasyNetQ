@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EasyNetQ.ConnectionString;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConnectionString
@@ -28,17 +29,17 @@ namespace EasyNetQ.Tests.ConnectionString
         {
             var connectionConfiguration = connectionStringParser.Parse(connectionString);
 
-            connectionConfiguration.Hosts.First().Host.ShouldEqual("192.168.1.1");
-            connectionConfiguration.VirtualHost.ShouldEqual("Copa");
-            connectionConfiguration.UserName.ShouldEqual("Copa");
-            connectionConfiguration.Password.ShouldEqual("abc_xyz");
-            connectionConfiguration.Port.ShouldEqual((ushort)12345);
-            connectionConfiguration.RequestedHeartbeat.ShouldEqual((ushort)3);
-            connectionConfiguration.PrefetchCount.ShouldEqual((ushort)2);
-            connectionConfiguration.Timeout.ShouldEqual((ushort)12);
-            connectionConfiguration.PublisherConfirms.ShouldBeTrue();
-            connectionConfiguration.UseBackgroundThreads.ShouldBeTrue();
-            connectionConfiguration.Name.ShouldEqual("unit-test");
+            connectionConfiguration.Hosts.First().Host.Should().Be("192.168.1.1");
+            connectionConfiguration.VirtualHost.Should().Be("Copa");
+            connectionConfiguration.UserName.Should().Be("Copa");
+            connectionConfiguration.Password.Should().Be("abc_xyz");
+            connectionConfiguration.Port.Should().Be((ushort)12345);
+            connectionConfiguration.RequestedHeartbeat.Should().Be((ushort)3);
+            connectionConfiguration.PrefetchCount.Should().Be((ushort)2);
+            connectionConfiguration.Timeout.Should().Be((ushort)12);
+            connectionConfiguration.PublisherConfirms.Should().BeTrue();
+            connectionConfiguration.UseBackgroundThreads.Should().BeTrue();
+            connectionConfiguration.Name.Should().Be("unit-test");
         }
 
         [Fact]
@@ -47,7 +48,7 @@ namespace EasyNetQ.Tests.ConnectionString
             const string connectionStringWithTimeout = "host=localhost;timeout=13";
             var connectionConfiguration = connectionStringParser.Parse(connectionStringWithTimeout);
 
-            connectionConfiguration.Timeout.ShouldEqual((ushort)13);
+            connectionConfiguration.Timeout.Should().Be(13);
         }
 
         [Fact]
@@ -56,7 +57,7 @@ namespace EasyNetQ.Tests.ConnectionString
             const string connectionStringWithPersistenMessages = "host=localhost;persistentMessages=false";
             var connectionConfiguration = connectionStringParser.Parse(connectionStringWithPersistenMessages);
 
-            connectionConfiguration.PersistentMessages.ShouldBeFalse();
+            connectionConfiguration.PersistentMessages.Should().BeFalse();
         }
 
         [Fact]
@@ -81,13 +82,13 @@ namespace EasyNetQ.Tests.ConnectionString
         [MemberData(nameof(AppendixAExamples))]
         public void Should_parse_Examples(AmqpSpecification spec)
         {
-            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse(spec.amqpUri.ToString());
+            var connectionConfiguration = connectionStringParser.Parse(spec.amqpUri.ToString());
 
-            connectionConfiguration.Port.ShouldEqual((ushort)spec.port);
-            connectionConfiguration.AMQPConnectionString.ShouldEqual(spec.amqpUri);
-            connectionConfiguration.Hosts.First().Host.ShouldEqual(spec.host);
-            connectionConfiguration.Hosts.First().Port.ShouldEqual((ushort)spec.port);
-            connectionConfiguration.VirtualHost.ShouldEqual(spec.vhost);
+            connectionConfiguration.Port.Should().Be((ushort)spec.port);
+            connectionConfiguration.AMQPConnectionString.Should().Be(spec.amqpUri);
+            connectionConfiguration.Hosts.First().Host.Should().Be(spec.host);
+            connectionConfiguration.Hosts.First().Port.Should().Be((ushort)spec.port);
+            connectionConfiguration.VirtualHost.Should().Be(spec.vhost);
         }
 
 // ReSharper disable UnusedMethodReturnValue.Local
@@ -103,27 +104,27 @@ namespace EasyNetQ.Tests.ConnectionString
         [Fact]
         public void Should_UsePort_From_ConnectionString()
         {
-            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host/;port=123");
+            var connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host/;port=123");
 
-            connectionConfiguration.Port.ShouldEqual((ushort)123);
+            connectionConfiguration.Port.Should().Be(123);
         }
 
         [Fact]
         public void Should_NotUsePort_From_ConnectionString()
         {
-            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host:1234/");
+            var connectionConfiguration = connectionStringParser.Parse("amqp=amqp://host:1234/");
 
-            connectionConfiguration.Port.ShouldEqual((ushort)1234);
+            connectionConfiguration.Port.Should().Be(1234);
         }
 
         [Fact]
         public void Should_AddHost_ToHosts()
         {
-            ConnectionConfiguration connectionConfiguration = connectionStringParser.Parse("host=local;amqp=amqp://amqphost:1234/");
+            var connectionConfiguration = connectionStringParser.Parse("host=local;amqp=amqp://amqphost:1234/");
 
-            connectionConfiguration.Hosts.Count().ShouldEqual(2);
-            connectionConfiguration.Hosts.First().Host.ShouldEqual("local");
-            connectionConfiguration.Hosts.Last().Host.ShouldEqual("amqphost");
+            connectionConfiguration.Hosts.Count().Should().Be(2);
+            connectionConfiguration.Hosts.First().Host.Should().Be("local");
+            connectionConfiguration.Hosts.Last().Host.Should().Be("amqphost");
         }
 
         public class AmqpSpecification

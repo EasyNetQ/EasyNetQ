@@ -7,6 +7,7 @@ using Xunit;
 
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests
 {
@@ -101,17 +102,17 @@ namespace EasyNetQ.Tests
             Thread.Sleep(1000);
 
             var errorMessage = this.bus.Advanced.Get<Error>(errorQueue);
-            errorMessage.MessageAvailable.ShouldBeTrue();
+            errorMessage.MessageAvailable.Should().BeTrue();
 
             var error = errorMessage.Message.Body;
             Console.WriteLine(error.ToString());
 
 
-            error.BasicProperties.Type.ShouldEqual(typeNameSerializer.Serialize(typeof(MyErrorTestMessage)));
-            error.BasicProperties.CorrelationId.ShouldEqual(correlationId);
-            error.BasicProperties.Headers.ShouldEqual(headers);
-            error.BasicProperties.Headers["AString"].ShouldEqual("ThisIsAString");
-            error.BasicProperties.Headers["AnInt"].ShouldEqual(123);
+            error.BasicProperties.Type.Should().Be(typeNameSerializer.Serialize(typeof(MyErrorTestMessage)));
+            error.BasicProperties.CorrelationId.Should().Be(correlationId);
+            error.BasicProperties.Headers.Should().BeEquivalentTo(headers);
+            error.BasicProperties.Headers["AString"].Should().Be("ThisIsAString");
+            error.BasicProperties.Headers["AnInt"].Should().Be(123);
         }
     }
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using FluentAssertions;
 using NSubstitute;
 using Xunit;
 
@@ -40,8 +41,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_a_queue()
         {
-            queue.ShouldNotBeNull();
-            queue.Name.ShouldEqual("my_queue");
+            queue.Should().NotBeNull();
+            queue.Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -91,8 +92,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_a_queue()
         {
-            queue.ShouldNotBeNull();
-            queue.Name.ShouldEqual("my_queue");
+            queue.Should().NotBeNull();
+            queue.Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -144,8 +145,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_a_queue()
         {
-            queue.ShouldNotBeNull();
-            queue.Name.ShouldEqual("my_queue");
+            queue.Should().NotBeNull();
+            queue.Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -227,8 +228,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_an_exchange_instance()
         {
-            exchange.ShouldNotBeNull();
-            exchange.Name.ShouldEqual("my_exchange");
+            exchange.Should().NotBeNull();
+            exchange.Name.Should().Be("my_exchange");
         }
 
         [Fact]
@@ -245,8 +246,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_add_correct_arguments()
         {
-            arguments.ShouldNotBeNull();
-            arguments["alternate-exchange"].ShouldEqual("my.alternate.exchange");
+            arguments.Should().NotBeNull();
+            arguments["alternate-exchange"].Should().Be("my.alternate.exchange");
         }
     }
 
@@ -272,14 +273,14 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_an_exchange_instance()
         {
-            exchange.ShouldNotBeNull();
-            exchange.Name.ShouldEqual("my_exchange");
+            exchange.Should().NotBeNull();
+            exchange.Name.Should().Be("my_exchange");
         }
 
         [Fact]
         public void Should_passively_declare_exchange()
         {
-            mockBuilder.Channels.Count.ShouldEqual(1);
+            mockBuilder.Channels.Count.Should().Be(1);
             mockBuilder.Channels[0].Received().ExchangeDeclarePassive(Arg.Is("my_exchange"));
         }
     }
@@ -335,11 +336,11 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_create_a_binding_instance()
         {
-            binding.ShouldNotBeNull();
-            binding.RoutingKey.ShouldEqual("my_routing_key");
-            binding.Exchange.Name.ShouldEqual("my_exchange");
-            binding.Bindable.ShouldBe<IQueue>();
-            ((IQueue) binding.Bindable).Name.ShouldEqual("my_queue");
+            binding.Should().NotBeNull();
+            binding.RoutingKey.Should().Be("my_routing_key");
+            binding.Exchange.Name.Should().Be("my_exchange");
+            binding.Bindable.Should().BeAssignableTo<IQueue>();
+            ((IQueue) binding.Bindable).Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -378,12 +379,12 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_create_a_binding_instance()
         {
-            binding.ShouldNotBeNull();
-            binding.RoutingKey.ShouldEqual("my_routing_key");
-            binding.Exchange.Name.ShouldEqual("my_exchange");
-            binding.Headers["header1"].ShouldEqual("value1");
-            binding.Bindable.ShouldBe<IQueue>();
-            ((IQueue)binding.Bindable).Name.ShouldEqual("my_queue");
+            binding.Should().NotBeNull();
+            binding.RoutingKey.Should().Be("my_routing_key");
+            binding.Exchange.Name.Should().Be("my_exchange");
+            binding.Headers["header1"].Should().Be("value1");
+            binding.Bindable.Should().BeAssignableTo<IQueue>();
+            ((IQueue)binding.Bindable).Name.Should().Be("my_queue");
         }
 
         [Fact]

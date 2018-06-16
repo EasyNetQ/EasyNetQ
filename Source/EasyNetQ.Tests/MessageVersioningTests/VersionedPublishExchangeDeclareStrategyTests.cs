@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
+using FluentAssertions;
 using Xunit;
 using NSubstitute;
 
@@ -43,8 +44,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             advancedBus.Received(2).ExchangeDeclare(exchangeName, "topic");
-            declaredExchange.ShouldBeTheSameAs(exchange);
-            exchangeDeclareCount.ShouldEqual(1);
+            declaredExchange.Should().BeSameAs(exchange);
+            exchangeDeclareCount.Should().Be(1);
         }
 
 

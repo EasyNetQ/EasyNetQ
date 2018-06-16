@@ -1,4 +1,6 @@
 // ReSharper disable InconsistentNaming
+
+using FluentAssertions;
 using Xunit;
 using NSubstitute;
 
@@ -15,49 +17,49 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_invoke_consumer()
         {
-            ConsumerWasInvoked.ShouldBeTrue();
+            ConsumerWasInvoked.Should().BeTrue();
         }
 
         [Fact]
         public void Should_deliver_the_message_body()
         {
-            DeliveredMessageBody.ShouldBeTheSameAs(OriginalBody);
+            DeliveredMessageBody.Should().BeSameAs(OriginalBody);
         }
 
         [Fact]
         public void Should_deliver_the_message_properties()
         {
-            DeliveredMessageProperties.Type.ShouldBeTheSameAs(OriginalProperties.Type);
+            DeliveredMessageProperties.Type.Should().BeSameAs(OriginalProperties.Type);
         }
 
         [Fact]
         public void Should_deliver_the_consumer_tag()
         {
-            DeliveredMessageInfo.ConsumerTag.ShouldEqual(ConsumerTag);
+            DeliveredMessageInfo.ConsumerTag.Should().Be(ConsumerTag);
         }
 
         [Fact]
         public void Should_deliver_the_delivery_tag()
         {
-            DeliveredMessageInfo.DeliverTag.ShouldEqual(DeliverTag);
+            DeliveredMessageInfo.DeliverTag.Should().Be(DeliverTag);
         }
 
         [Fact]
         public void Should_deliver_the_exchange_name()
         {
-            DeliveredMessageInfo.Exchange.ShouldEqual("the_exchange");
+            DeliveredMessageInfo.Exchange.Should().Be("the_exchange");
         }
 
         [Fact]
         public void Should_deliver_the_routing_key()
         {
-            DeliveredMessageInfo.RoutingKey.ShouldEqual("the_routing_key");
+            DeliveredMessageInfo.RoutingKey.Should().Be("the_routing_key");
         }
 
         [Fact]
         public void Should_deliver_redelivered_flag()
         {
-            DeliveredMessageInfo.Redelivered.ShouldBeFalse();
+            DeliveredMessageInfo.Redelivered.Should().BeFalse();
         }
 
         [Fact]
