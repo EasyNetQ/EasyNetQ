@@ -13,7 +13,7 @@ namespace EasyNetQ.Hosepipe
         public string QueueName { get; set; }
         public bool Purge { get; set; }
         public int NumberOfMessagesToRetrieve { get; set; }
-        public string MessageFilePath { get; set; }
+        public string MessagesOutputDirectory { get; set; }
 
         public QueueParameters()
         {
@@ -25,7 +25,7 @@ namespace EasyNetQ.Hosepipe
             Password = "guest";
             Purge = false;
             NumberOfMessagesToRetrieve = 1000;
-            MessageFilePath = Directory.GetCurrentDirectory();
+            MessagesOutputDirectory = Directory.GetCurrentDirectory();
         }
     }
 }

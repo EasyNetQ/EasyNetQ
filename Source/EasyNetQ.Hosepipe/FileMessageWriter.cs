@@ -7,41 +7,41 @@ namespace EasyNetQ.Hosepipe
 {
     public class FileMessageWriter : IMessageWriter
     {
-        readonly static Regex invalidCharRegex = new Regex(@"[\\\/:\*\?\""\<\>|]");
+        private static readonly Regex InvalidCharRegex = new Regex(@"[\\\/:\*\?\""\<\>|]", RegexOptions.Compiled);
 
         public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
         {
+            if (!Directory.Exists(parameters.MessagesOutputDirectory))
+            {
+                Console.WriteLine("Creating messages output directory: {0}", parameters.MessagesOutputDirectory);
+                Directory.CreateDirectory(parameters.MessagesOutputDirectory);
+            }
+
             var count = 0;
             foreach (var message in messages)
             {
-                var uniqueFileName = SanitiseQueueName(parameters.QueueName) + "." + count.ToString();
+                var uniqueFileName = SanitiseQueueName(parameters.QueueName) + "." + count;
 
-                var bodyPath = Path.Combine(parameters.MessageFilePath, uniqueFileName + ".message.txt");
-                var propertiesPath = Path.Combine(parameters.MessageFilePath, uniqueFileName + ".properties.txt");
-                var infoPath = Path.Combine(parameters.MessageFilePath, uniqueFileName + ".info.txt");
+                var bodyPath = Path.Combine(parameters.MessagesOutputDirectory, uniqueFileName + ".message.txt");
+                var propertiesPath = Path.Combine(parameters.MessagesOutputDirectory, uniqueFileName + ".properties.txt");
+                var infoPath = Path.Combine(parameters.MessagesOutputDirectory, uniqueFileName + ".info.txt");
                 
                 if(File.Exists(bodyPath))
                 {
                     Console.WriteLine("Overwriting existing messsage file: {0}", bodyPath);
                 }
-                try
-                {
-                    File.WriteAllText(bodyPath, message.Body);
-                    File.WriteAllText(propertiesPath, Newtonsoft.Json.JsonConvert.SerializeObject(message.Properties));
-                    File.WriteAllText(infoPath, Newtonsoft.Json.JsonConvert.SerializeObject(message.Info));
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    throw new EasyNetQHosepipeException(
-                        string.Format("Directory '{0}' does not exist", parameters.MessageFilePath));
-                }
+                
+                File.WriteAllText(bodyPath, message.Body);
+                File.WriteAllText(propertiesPath, Newtonsoft.Json.JsonConvert.SerializeObject(message.Properties));
+                File.WriteAllText(infoPath, Newtonsoft.Json.JsonConvert.SerializeObject(message.Info));
+
                 count++;
             }
         }
 
         public static string SanitiseQueueName(string queueName)
         {
-            return invalidCharRegex.Replace(queueName, "_");
+            return InvalidCharRegex.Replace(queueName, "_");
         }
     }
 }

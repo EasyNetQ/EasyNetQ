@@ -27,7 +27,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             var parameters = new QueueParameters
             {
-                MessageFilePath = @"C:\temp\MessageOutput"
+                MessagesOutputDirectory = @"C:\temp\MessageOutput"
             };
 
             var messages = messageReader.ReadMessages(parameters);
@@ -45,7 +45,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             var parameters = new QueueParameters
             {
-                MessageFilePath = @"C:\temp\MessageOutput"
+                MessagesOutputDirectory = @"C:\temp\MessageOutput"
             };
 
             var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention());
