@@ -5,6 +5,7 @@ using EasyNetQ.FluentConfiguration;
 using Xunit;
 using NSubstitute;
 using System.Reflection;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -59,11 +60,10 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             
             capturedAction(subscriptionConfiguration);
 
-            subscriptionConfiguration.AutoDelete.ShouldBeTrue();
-            subscriptionConfiguration.Expires.ShouldEqual(10);
-            subscriptionConfiguration.PrefetchCount.ShouldEqual((ushort)10);
-            subscriptionConfiguration.Priority.ShouldEqual(10);
-
+            subscriptionConfiguration.AutoDelete.Should().BeTrue();
+            subscriptionConfiguration.Expires.Should().Be(10);
+            subscriptionConfiguration.PrefetchCount.Should().Be(10);
+            subscriptionConfiguration.Priority.Should().Be(10);
         }
 
         // Discovered by reflection over test assembly, do not remove.

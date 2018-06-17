@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.IO;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -32,8 +33,8 @@ namespace EasyNetQ.Tests
                 writer.Write(item);
             } while (defaultClusterHostSelectionStrategy.Next());
 
-            writer.ToString().ShouldEqual("0123");
-            defaultClusterHostSelectionStrategy.Succeeded.ShouldBeFalse();
+            writer.ToString().Should().Be("0123");
+            defaultClusterHostSelectionStrategy.Succeeded.Should().BeFalse();
         }
 
         [Fact]
@@ -50,8 +51,8 @@ namespace EasyNetQ.Tests
 
             } while (defaultClusterHostSelectionStrategy.Next());
 
-            writer.ToString().ShouldEqual("01");
-            defaultClusterHostSelectionStrategy.Succeeded.ShouldBeTrue();
+            writer.ToString().Should().Be("01");
+            defaultClusterHostSelectionStrategy.Succeeded.Should().BeTrue();
         }
 
         [Fact]
@@ -73,7 +74,7 @@ namespace EasyNetQ.Tests
                 writer.Write("_");
             }
 
-            writer.ToString().ShouldEqual("012_301_230_123_012_301_230_123_012_301_");
+            writer.ToString().Should().Be("012_301_230_123_012_301_230_123_012_301_");
         }
     }
 }

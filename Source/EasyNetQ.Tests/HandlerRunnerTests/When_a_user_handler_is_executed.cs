@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
+using FluentAssertions;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
@@ -61,19 +62,19 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         [Fact]
         public void Should_deliver_body()
         {
-            deliveredBody.ShouldBeTheSameAs(messageBody);
+            deliveredBody.Should().BeSameAs(messageBody);
         }
 
         [Fact]
         public void Should_deliver_properties()
         {
-            deliveredProperties.ShouldBeTheSameAs(messageProperties);
+            deliveredProperties.Should().BeSameAs(messageProperties);
         }
 
         [Fact]
         public void Should_deliver_info()
         {
-            deliveredInfo.ShouldBeTheSameAs(messageInfo);
+            deliveredInfo.Should().BeSameAs(messageInfo);
         }
 
         [Fact]

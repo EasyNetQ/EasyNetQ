@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using FluentAssertions;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
@@ -19,10 +20,10 @@ namespace EasyNetQ.Tests
             var eventBus = Substitute.For<IEventBus>();
             var connectionFactory = Substitute.For<IConnectionFactory>();
             var mockConnection = Substitute.For<IConnection>();
-            PersistentConnection mockPersistentConnection = Substitute.For<PersistentConnection>(connectionFactory, eventBus);
+            var mockPersistentConnection = Substitute.For<PersistentConnection>(connectionFactory, eventBus);
 
             // This test is constructed using small delays, such that the IConnectionFactory will return a connection just _after the IPersistentConnection has been disposed.
-            TimeSpan shimDelay = TimeSpan.FromSeconds(0.5);
+            var shimDelay = TimeSpan.FromSeconds(0.5);
             connectionFactory.CreateConnection().Returns(a =>
             {
                 Thread.Sleep(shimDelay.Double());
@@ -86,9 +87,9 @@ namespace EasyNetQ.Tests
                 }, c => mockBuilder.Connection);
                 var connection = new PersistentConnection(mockBuilder.ConnectionFactory, mockBuilder.EventBus);
                 connection.Initialize();
-                connection.IsConnected.ShouldEqual(false);
+                connection.IsConnected.Should().BeFalse();
                 Thread.Sleep(TimeSpan.FromSeconds(2));
-                connection.IsConnected.ShouldEqual(true);
+                connection.IsConnected.Should().BeTrue();
                 mockBuilder.ConnectionFactory.Received(3).CreateConnection();
             }
         }
@@ -118,7 +119,7 @@ namespace EasyNetQ.Tests
                 connection.Initialize();
                 Thread.Sleep(TimeSpan.FromSeconds(2));
                 mockBuilder.ConnectionFactory.Received(3).CreateConnection();
-                first.ShouldEqual(false);
+                first.Should().BeFalse();
             }
         }
 

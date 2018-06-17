@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -32,7 +33,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             var handler = handlerCollection.GetHandler<MyMessage>();
 
             handler(new Message<MyMessage>(new MyMessage()), null);
-            myMessageHandlerExecuted.ShouldBeTrue();
+            myMessageHandlerExecuted.Should().BeTrue();
         }
 
         [Fact]
@@ -41,7 +42,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             var handler = handlerCollection.GetHandler<Dog>();
 
             handler(new Message<Dog>(new Dog()), null);
-            animalHandlerExecuted.ShouldBeTrue();
+            animalHandlerExecuted.Should().BeTrue();
         }
 
         [Fact]
@@ -59,7 +60,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
             handler(new Message<MyMessage>(new MyMessage()), null);
-            myMessageHandlerExecuted.ShouldBeTrue();
+            myMessageHandlerExecuted.Should().BeTrue();
         }
 
         [Fact]
@@ -68,7 +69,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             var handler = handlerCollection.GetHandler(typeof(Dog));
 
             handler(new Message<Dog>(new Dog()), null);
-            animalHandlerExecuted.ShouldBeTrue();
+            animalHandlerExecuted.Should().BeTrue();
         }
 
         [Fact]
@@ -78,8 +79,8 @@ namespace EasyNetQ.Tests.ConsumeTests
             var handler = handlerCollection.GetHandler<MyOtherMessage>();
 
             handler(new Message<MyOtherMessage>(new MyOtherMessage()), null);
-            myMessageHandlerExecuted.ShouldBeFalse();
-            animalHandlerExecuted.ShouldBeFalse();
+            myMessageHandlerExecuted.Should().BeFalse();
+            animalHandlerExecuted.Should().BeFalse();
         }
 
         [Fact]

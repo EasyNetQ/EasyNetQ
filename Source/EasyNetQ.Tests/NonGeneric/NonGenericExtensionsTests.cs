@@ -6,6 +6,7 @@ using System.Threading;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 using EasyNetQ.NonGeneric;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests.NonGeneric
 {
@@ -54,8 +55,8 @@ namespace EasyNetQ.Tests.NonGeneric
                 body);
 
             are.WaitOne(1000);
-            deliveredMessage.ShouldNotBeNull();
-            deliveredMessage.Text.ShouldEqual("Hello World");
+            deliveredMessage.Should().NotBeNull();
+            deliveredMessage.Text.Should().Be("Hello World");
         }
     }
 }

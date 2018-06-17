@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentAssertions;
 // ReSharper disable InconsistentNaming
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,9 +56,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_correctly_deserialize_message()
         {
-            receivedMessage.ShouldNotBeNull();
-            receivedMessage.GetType().ShouldEqual(typeof (Implementation));
-            receivedMessage.Text.ShouldEqual("Hello Polymorphs!");
+            receivedMessage.Should().NotBeNull();
+            receivedMessage.Should().BeOfType<Implementation>();
+            receivedMessage.Text.Should().Be("Hello Polymorphs!");
         }
     }
 

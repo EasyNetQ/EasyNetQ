@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
+using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
@@ -56,14 +57,14 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_name_type_as_actual_object_type()
         {
-            properties.Type.ShouldEqual(implementationTypeName);
+            properties.Type.Should().Be(implementationTypeName);
         }
 
         [Fact]
         public void Should_correctly_serialize_implementation()
         {
             var json = Encoding.UTF8.GetString(publishedMessage);
-            json.ShouldEqual("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}");
+            json.Should().Be("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}");
         }
 
         [Fact]
