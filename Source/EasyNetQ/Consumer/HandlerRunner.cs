@@ -75,7 +75,7 @@ namespace EasyNetQ.Consumer
             catch (Exception exception)
             {
                 logger.Error(exception, "Consumer error strategy has failed");
-                return AckStrategies.Nothing;
+                return AckStrategies.NackWithRequeue;
             }
         }
 
@@ -121,10 +121,7 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
-            if (consumerErrorStrategy != null)
-            {
-                consumerErrorStrategy.Dispose();
-            }
+            consumerErrorStrategy?.Dispose();
         }
     }
 }
