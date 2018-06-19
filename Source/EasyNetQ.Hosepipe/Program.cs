@@ -86,7 +86,7 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("v", a => parameters.VHost = a.Value);
             arguments.WithKey("u", a => parameters.Username = a.Value);
             arguments.WithKey("p", a => parameters.Password = a.Value);
-            arguments.WithKey("o", a => parameters.MessageFilePath = a.Value);
+            arguments.WithKey("o", a => parameters.MessagesOutputDirectory = a.Value);
             arguments.WithKey("q", a => parameters.QueueName = a.Value);
             arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
                 .FailWith(messsage("Invalid number of messages to retrieve"));
@@ -133,7 +133,7 @@ namespace EasyNetQ.Hosepipe
             messageWriter.Write(WithEach(queueRetreival.GetMessagesFromQueue(parameters), () => count++), parameters);
             
             Console.WriteLine("{0} Messages from queue '{1}'\r\noutput to directory '{2}'", 
-                count, parameters.QueueName, parameters.MessageFilePath);
+                count, parameters.QueueName, parameters.MessagesOutputDirectory);
         }
 
         private void Insert(QueueParameters parameters)
@@ -143,7 +143,7 @@ namespace EasyNetQ.Hosepipe
                 WithEach(messageReader.ReadMessages(parameters), () => count++), parameters);       
             
             Console.WriteLine("{0} Messages from directory '{1}'\r\ninserted into queue '{2}'",
-                count, parameters.MessageFilePath, parameters.QueueName);
+                count, parameters.MessagesOutputDirectory, parameters.QueueName);
         }
 
         private void ErrorDump(QueueParameters parameters)
@@ -165,7 +165,7 @@ namespace EasyNetQ.Hosepipe
                 parameters);
 
             Console.WriteLine("{0} Error messages from directory '{1}' republished",
-                count, parameters.MessageFilePath);
+                count, parameters.MessagesOutputDirectory);
         }
 
         private IEnumerable<HosepipeMessage> WithEach(IEnumerable<HosepipeMessage> messages, Action action)
