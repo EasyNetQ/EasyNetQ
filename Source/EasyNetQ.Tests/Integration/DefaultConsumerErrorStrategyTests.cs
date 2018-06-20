@@ -7,11 +7,11 @@ using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 using FluentAssertions;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     public class DefaultConsumerErrorStrategyTests
     {
