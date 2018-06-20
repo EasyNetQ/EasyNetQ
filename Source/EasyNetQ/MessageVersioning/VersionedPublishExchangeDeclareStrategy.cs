@@ -23,24 +23,6 @@ namespace EasyNetQ.MessageVersioning
             this.advancedBus = advancedBus;
         }
 
-        public IExchange DeclareExchange(string exchangeName, string exchangeType)
-        {
-            if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (asyncLock.Acquire())
-            {
-                if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
-                exchanges[exchangeName] = exchange;
-                return exchange;
-            }
-        }
-
-        public IExchange DeclareExchange(Type messageType, string exchangeType)
-        {
-            var messageVersions = new MessageVersionStack(messageType);
-            return DeclareVersionedExchanges(messageVersions, exchangeType);
-        }
-
         public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType)
         {
             if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
@@ -69,21 +51,6 @@ namespace EasyNetQ.MessageVersioning
                 var sourceExchange = await DeclareExchangeAsync(exchangeName, exchangeType).ConfigureAwait(false);
                 if (destinationExchange != null)
                     await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
-                destinationExchange = sourceExchange;
-            }
-
-            return destinationExchange;
-        }
-
-        private IExchange DeclareVersionedExchanges(MessageVersionStack messageVersions, string exchangeType)
-        {
-            IExchange destinationExchange = null;
-            while (!messageVersions.IsEmpty())
-            {
-                var messageType = messageVersions.Pop();
-                var exchangeName = conventions.ExchangeNamingConvention(messageType);
-                var sourceExchange = DeclareExchange(exchangeName, exchangeType);
-                if (destinationExchange != null) advancedBus.Bind(sourceExchange, destinationExchange, "#");
                 destinationExchange = sourceExchange;
             }
 

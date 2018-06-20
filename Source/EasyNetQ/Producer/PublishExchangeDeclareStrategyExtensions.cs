@@ -7,26 +7,24 @@ namespace EasyNetQ.Producer
     {
         public static IExchange DeclareExchange(
             this IPublishExchangeDeclareStrategy strategy, 
-            IAdvancedBus advancedBus,
             string exchangeName,
             string exchangeType)
         {
             Preconditions.CheckNotNull(strategy, "strategy");
-            
-            return strategy.DeclareExchangeAsync(advancedBus, exchangeName, exchangeType)
+
+            return strategy.DeclareExchangeAsync(exchangeName, exchangeType)
                 .GetAwaiter()
                 .GetResult();
         }
         
         public static IExchange DeclareExchange(
             this IPublishExchangeDeclareStrategy strategy, 
-            IAdvancedBus advancedBus,
             Type messageType,
             string exchangeType)
         {
             Preconditions.CheckNotNull(strategy, "strategy");
-            
-            return strategy.DeclareExchangeAsync(advancedBus, messageType, exchangeType)
+
+            return strategy.DeclareExchangeAsync(messageType, exchangeType)
                 .GetAwaiter()
                 .GetResult();
         }
