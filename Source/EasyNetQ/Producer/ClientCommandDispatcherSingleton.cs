@@ -9,10 +9,11 @@ namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private const int queueSize = 1;
-        private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+        private const int QueueSize = 1;
+        private readonly CancellationTokenSource dispatchCts = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
+        private readonly AsyncBlockingQueue<Action<CancellationToken>> dispatchQueue;
+        private readonly ManualResetEventSlim dispatchCompletedEvent = new ManualResetEventSlim(false);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -24,86 +25,76 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
-
+            dispatchQueue = new AsyncBlockingQueue<Action<CancellationToken>>(QueueSize, dispatchCts.Token);
             StartDispatcherThread(configuration);
         }
 
-        public T Invoke<T>(Func<IModel, T> channelAction)
-        {
-            return InvokeAsync(channelAction).GetAwaiter().GetResult();
-        }
-
-        public void Invoke(Action<IModel> channelAction)
-        {
-            InvokeAsync(channelAction).GetAwaiter().GetResult();
-        }
-
-        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-
-#if NETFX
-            var tcs = new TaskCompletionSource<T>();
-#else
-            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
-
-            try
+                
+            var tcs = CreateTsc<T>();
+            using (cancellation.Register(() => TrySetCancelled(tcs, cancellation), false))
             {
-                queue.Add(() =>
+                await dispatchQueue.EnqueueAsync(c =>
                 {
-                    if (cancellation.IsCancellationRequested)
+                    using (var actionCts = CancellationTokenSource.CreateLinkedTokenSource(c, cancellation))
                     {
-#if NETFX                               
-                        tcs.TrySetCanceledAsynchronously();   
-#else
-                        tcs.TrySetCanceled();
-#endif
-
-                        return;
-                    }
-                    try
-                    {
-                        persistentChannel.InvokeChannelAction(channel =>
+                        try
                         {
-#if NETFX                               
-                            tcs.TrySetResultAsynchronously(channelAction(channel));   
-#else
-                            tcs.TrySetResult(channelAction(channel));
-#endif                      
-                        });
+                            var result = persistentChannel.InvokeChannelAction(channelAction, actionCts.Token);
+                            TrySetResult(tcs, result);
+                        }
+                        catch (OperationCanceledException exception)
+                        {
+                            TrySetCancelled(tcs, exception.CancellationToken);
+                        }
+                        catch (Exception exception)
+                        {
+                            TrySetException(tcs, exception);
+                        }
                     }
-                    catch (Exception e)
-                    {
-#if NETFX                               
-                        tcs.TrySetExceptionAsynchronously(e);   
-#else
-                        tcs.TrySetException(e);
-#endif
-                    }
-                }, cancellation.Token);
+                }, cancellation).ConfigureAwait(false);
+                
+                return await tcs.Task.ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
-            {
-                tcs.TrySetCanceled();
-            }
-            return tcs.Task;
         }
 
-        public Task InvokeAsync(Action<IModel> channelAction)
+        public async Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            return InvokeAsync(x =>
+            var tcs = CreateTsc<NoContentStruct>();
+            using (cancellation.Register(() => TrySetCancelled(tcs, cancellation), false))
             {
-                channelAction(x);
-                return new NoContentStruct();
-            });
+                await dispatchQueue.EnqueueAsync(c =>
+                {
+                    using (var actionCts = CancellationTokenSource.CreateLinkedTokenSource(c, cancellation))
+                    {
+                        try
+                        {
+                            persistentChannel.InvokeChannelAction(channelAction, actionCts.Token);
+                            TrySetResult(tcs, default(NoContentStruct));
+                        }
+                        catch (OperationCanceledException exception)
+                        {
+                            TrySetCancelled(tcs, exception.CancellationToken);
+                        }
+                        catch (Exception exception)
+                        {
+                            TrySetException(tcs, exception);
+                        }
+                    }
+                }, cancellation).ConfigureAwait(false);
+                
+                await tcs.Task.ConfigureAwait(false);
+            }
         }
 
         public void Dispose()
         {
-            cancellation.Cancel();
+            dispatchCts.Cancel();
+            dispatchCompletedEvent.Wait();
             persistentChannel.Dispose();
         }
 
@@ -111,24 +102,61 @@ namespace EasyNetQ.Producer
         {
             var thread = new Thread(() =>
             {
-                while (!cancellation.IsCancellationRequested)
+                while (!dispatchCts.IsCancellationRequested)
                 {
                     try
                     {
-                        var channelAction = queue.Take(cancellation.Token);
-                        channelAction();
+                        var channelAction = dispatchQueue.Dequeue();
+                        channelAction(dispatchCts.Token);
                     }
                     catch (OperationCanceledException)
                     {
                         break;
                     }
                 }
+                dispatchCompletedEvent.Set();
             }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }
 
         private struct NoContentStruct
         {
+        }
+
+        private static TaskCompletionSource<T> CreateTsc<T>()
+        {
+#if NETFX
+            return new TaskCompletionSource<T>();
+#else
+            return new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
+        }
+
+        private static void TrySetCancelled<T>(TaskCompletionSource<T> tcs, CancellationToken cancellation)
+        {
+#if NETFX
+            tcs.TrySetCanceledAsynchronously();   
+#else
+            tcs.TrySetCanceled(cancellation);
+#endif
+        }
+
+        private static void TrySetException<T>(TaskCompletionSource<T> tcs, Exception e)
+        {
+#if NETFX
+            tcs.TrySetExceptionAsynchronously(e);
+#else
+            tcs.TrySetException(e);
+#endif
+        }
+        
+        private static void TrySetResult<T>(TaskCompletionSource<T> tcs, T result)
+        {
+#if NETFX
+            tcs.TrySetResultAsynchronously(result);
+#else
+            tcs.TrySetResult(result);
+#endif
         }
     }
 }

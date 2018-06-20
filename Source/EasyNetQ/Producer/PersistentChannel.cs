@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
@@ -34,18 +35,20 @@ namespace EasyNetQ.Producer
             WireUpEvents();
         }
 
-        public void InvokeChannelAction(Action<IModel> channelAction)
+        public T InvokeChannelAction<T>(Func<IModel, T> channelAction, CancellationToken cancellation = default(CancellationToken))
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
+
             var startTime = DateTime.UtcNow;
             var retryTimeout = TimeSpan.FromMilliseconds(50);
             while (!IsTimedOut(startTime))
             {
+                cancellation.ThrowIfCancellationRequested();
+
                 try
                 {
                     var channel = OpenChannel();
-                    channelAction(channel);
-                    return;
+                    return channelAction(channel);
                 }
                 catch (OperationInterruptedException exception)
                 {
@@ -60,12 +63,24 @@ namespace EasyNetQ.Producer
                     CloseChannel();
                 }
 
-                Thread.Sleep(retryTimeout);
+                Task.Delay(retryTimeout, cancellation)
+                    .GetAwaiter()
+                    .GetResult();
 
                 retryTimeout = retryTimeout.Double();
             }
+            
             logger.Error("Channel action timed out");
             throw new TimeoutException("The operation requested on PersistentChannel timed out");
+        }
+
+        public void InvokeChannelAction(Action<IModel> channelAction, CancellationToken cancellation = default(CancellationToken))
+        {
+            InvokeChannelAction<object>(x =>
+                {
+                    channelAction(x);
+                    return null;
+                }, cancellation);
         }
 
         public void Dispose()

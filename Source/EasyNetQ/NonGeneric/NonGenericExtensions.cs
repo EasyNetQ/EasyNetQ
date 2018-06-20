@@ -104,9 +104,9 @@ namespace EasyNetQ.NonGeneric
             var parameters = methodInfo.GetParameters();
 
             return 
-                (parameters.Length == 3) && 
-                (parameters[0].ParameterType == typeof(string) &&
-                parameters[1].ParameterType.Name == "Func`2") &&
+                parameters.Length == 3 && 
+                parameters[0].ParameterType == typeof(string) &&
+                parameters[1].ParameterType.Name == "Func`2" &&
                 parameters[2].ParameterType == typeof(Action<ISubscriptionConfiguration>);
         }
     }

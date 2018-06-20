@@ -23,34 +23,6 @@ namespace EasyNetQ.MultipleExchange
             this.advancedBus = advancedBus;
         }
 
-        public IExchange DeclareExchange(Type messageType, string exchangeType)
-        {
-            var sourceExchangeName = conventions.ExchangeNamingConvention(messageType);
-            var sourceExchange = DeclareExchange(sourceExchangeName, exchangeType);
-            var interfaces = messageType.GetInterfaces();
-
-            foreach (var @interface in interfaces)
-            {
-                var destinationExchangeName = conventions.ExchangeNamingConvention(@interface);
-                var destinationExchange = DeclareExchange(destinationExchangeName, exchangeType);
-                if (destinationExchange != null) advancedBus.Bind(sourceExchange, destinationExchange, "#");
-            }
-
-            return sourceExchange;
-        }
-
-        public IExchange DeclareExchange(string exchangeName, string exchangeType)
-        {
-            if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (asyncLock.Acquire())
-            {
-                if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
-                exchanges[exchangeName] = exchange;
-                return exchange;
-            }
-        }
-
         public async Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType)
         {
             var sourceExchangeName = conventions.ExchangeNamingConvention(messageType);
@@ -60,8 +32,7 @@ namespace EasyNetQ.MultipleExchange
             foreach (var @interface in interfaces)
             {
                 var destinationExchangeName = conventions.ExchangeNamingConvention(@interface);
-                var destinationExchange =
-                    await DeclareExchangeAsync(destinationExchangeName, exchangeType).ConfigureAwait(false);
+                var destinationExchange = await DeclareExchangeAsync(destinationExchangeName, exchangeType).ConfigureAwait(false);
                 if (destinationExchange != null)
                     await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
             }

@@ -16,7 +16,7 @@ namespace EasyNetQ.Producer
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="request">The request message</param>
         /// <returns>Returns a task that yields the result when the response arrives</returns>
-        Task<TResponse> Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
             where TRequest : class
             where TResponse : class;
 

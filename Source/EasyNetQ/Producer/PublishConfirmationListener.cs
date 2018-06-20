@@ -24,12 +24,12 @@ namespace EasyNetQ.Producer
             var deliveryTag = model.NextPublishSeqNo;
             var requests = unconfirmedChannelRequests.GetOrAdd(model, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
 #if NETFX
-            var comfirmation = new TaskCompletionSource<object>();
+            var confirmation = new TaskCompletionSource<object>();
 #else
-            var comfirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var confirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 #endif
-            requests.Add(deliveryTag, comfirmation);
-            return new PublishConfirmationWaiter(deliveryTag, comfirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
+            requests.Add(deliveryTag, confirmation);
+            return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
 
         public void Dispose()
@@ -39,8 +39,7 @@ namespace EasyNetQ.Producer
 
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
         {
-            ConcurrentDictionary<ulong, TaskCompletionSource<object>> requests;
-            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel, out requests))
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel, out var requests))
             {
                 return;
             }
@@ -52,8 +51,7 @@ namespace EasyNetQ.Producer
             {
                 foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
                 {
-                    TaskCompletionSource<object> confirmation;
-                    if (requests.TryGetValue(sequenceNumber, out confirmation))
+                    if (requests.TryGetValue(sequenceNumber, out var confirmation))
                     {
                         Confirm(confirmation, sequenceNumber, isNack);
                     }
@@ -61,8 +59,7 @@ namespace EasyNetQ.Producer
             }
             else
             {
-                TaskCompletionSource<object> confirmation;
-                if (requests.TryGetValue(deliveryTag, out confirmation))
+                if (requests.TryGetValue(deliveryTag, out var confirmation))
                 {
                     Confirm(confirmation, deliveryTag, isNack);
                 }
@@ -73,15 +70,14 @@ namespace EasyNetQ.Producer
         {
             foreach (var channel in unconfirmedChannelRequests.Keys)
             {
-                ConcurrentDictionary<ulong, TaskCompletionSource<object>> confirmations;
-                if (!unconfirmedChannelRequests.TryRemove(channel, out confirmations))
+                if (!unconfirmedChannelRequests.TryRemove(channel, out var confirmations))
                 {
                     continue;
                 }
+                
                 foreach (var deliveryTag in confirmations.Keys)
                 {
-                    TaskCompletionSource<object> confirmation;
-                    if (!confirmations.TryRemove(deliveryTag, out confirmation))
+                    if (!confirmations.TryRemove(deliveryTag, out var confirmation))
                     {
                         continue;
                     }

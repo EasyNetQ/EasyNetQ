@@ -4,9 +4,6 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    /// <summary>
-    ///     AsyncSemaphore should be used with a lot of care.
-    /// </summary>
     public class AsyncLock
     {
         private readonly SemaphoreSlim semaphore;
@@ -18,15 +15,9 @@ namespace EasyNetQ.Internals
             semaphoreReleaser = new SemaphoreSlimReleaser(semaphore);
         }
 
-        public IDisposable Acquire()
+        public async Task<IDisposable> AcquireAsync(CancellationToken cancellation = default(CancellationToken))
         {
-            semaphore.Wait();
-            return semaphoreReleaser;
-        }
-
-        public async Task<IDisposable> AcquireAsync()
-        {
-            await semaphore.WaitAsync().ConfigureAwait(false);
+            await semaphore.WaitAsync(cancellation).ConfigureAwait(false);
             return semaphoreReleaser;
         }
 

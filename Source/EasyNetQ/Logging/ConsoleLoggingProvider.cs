@@ -81,7 +81,7 @@ namespace EasyNetQ.Logging
 
         private class NullDisposable : IDisposable
         {
-            internal static readonly IDisposable Instance = new NullDisposable();
+            public static readonly IDisposable Instance = new NullDisposable();
 
             public void Dispose()
             { }

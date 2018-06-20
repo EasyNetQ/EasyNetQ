@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
                 };
 
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.When(x => x.InvokeChannelAction(Arg.Any<Action<IModel>>()))
+            channel.When(x => x.InvokeChannelAction(Arg.Any<Action<IModel>>(), Arg.Any<CancellationToken>()))
                    .Do(x => ((Action<IModel>)x[0])(null));
 
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
