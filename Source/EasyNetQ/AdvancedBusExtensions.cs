@@ -27,7 +27,8 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body)
+            byte[] body
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -57,7 +58,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class
+            IMessage<T> message
+        ) where T : class
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -112,7 +114,6 @@ namespace EasyNetQ
                       .GetResult();
         }
 
-
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
         /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
@@ -128,7 +129,6 @@ namespace EasyNetQ
                       .GetAwaiter()
                       .GetResult();
         }
-
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -162,7 +162,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null)
+            int? maxLengthBytes = null
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
@@ -202,7 +203,8 @@ namespace EasyNetQ
             IExchange source,
             IExchange destination,
             string routingKey,
-            IDictionary<string, object> headers)
+            IDictionary<string, object> headers
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
@@ -242,7 +244,8 @@ namespace EasyNetQ
             IExchange exchange, 
             IQueue queue,
             string routingKey,
-            IDictionary<string, object> headers)
+            IDictionary<string, object> headers
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
@@ -261,7 +264,6 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
@@ -272,17 +274,16 @@ namespace EasyNetQ
             bool passive = false,
             bool durable = true,
             bool autoDelete = false,
-            bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false)
+            bool delayed = false
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
-            return bus.ExchangeDeclareAsync(name, type, passive, durable, autoDelete, @internal, alternateExchange, delayed)
+            return bus.ExchangeDeclareAsync(name, type, passive, durable, autoDelete, alternateExchange, delayed)
                       .GetAwaiter()
                       .GetResult();
         }
-
 
         /// <summary>
         /// Delete a binding
@@ -327,7 +328,6 @@ namespace EasyNetQ
                .GetAwaiter()
                .GetResult();
         }
-
 
         /// <summary>
         /// Delete an exchange

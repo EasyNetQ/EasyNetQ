@@ -9,7 +9,8 @@
         public MessageReturnedInfo(
             string exchange, 
             string routingKey, 
-            string returnReason)
+            string returnReason
+        )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(routingKey, "routingKey");
