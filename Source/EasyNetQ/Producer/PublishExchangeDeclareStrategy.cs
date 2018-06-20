@@ -22,24 +22,6 @@ namespace EasyNetQ.Producer
             this.advancedBus = advancedBus;
         }
 
-        public IExchange DeclareExchange(string exchangeName, string exchangeType)
-        {
-            if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (asyncLock.Acquire())
-            {
-                if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
-                exchanges[exchangeName] = exchange;
-                return exchange;
-            }
-        }
-
-        public IExchange DeclareExchange(Type messageType, string exchangeType)
-        {
-            var exchangeName = conventions.ExchangeNamingConvention(messageType);
-            return DeclareExchange(exchangeName, exchangeType);
-        }
-
         public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType)
         {
             if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;

@@ -582,7 +582,6 @@ namespace EasyNetQ
         public async Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue, CancellationToken cancellation = default(CancellationToken)) where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
-            var result = Get(queue);
             var result = await GetMessageAsync(queue, cancellation).ConfigureAwait(false);
             if (result == null)
             {

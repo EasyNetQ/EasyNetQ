@@ -34,8 +34,8 @@ namespace EasyNetQ.Tests.ProducerTests
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
             advancedBus.Received().ExchangeDeclareAsync(exchangeName, "topic");
-            declaredExchange.ShouldBeTheSameAs(exchange);
-            exchangeDeclareCount.ShouldEqual(1);
+            declaredExchange.Should().BeSameAs(exchange);
+            exchangeDeclareCount.Should().Be(1);
         }
 
         [Fact]
@@ -56,8 +56,8 @@ namespace EasyNetQ.Tests.ProducerTests
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
             advancedBus.Received().ExchangeDeclareAsync(exchangeName, "topic");
-            declaredExchange.ShouldBeTheSameAs(exchange);
-            exchangeDeclareCount.ShouldEqual(1);
+            declaredExchange.Should().BeSameAs(exchange);
+            exchangeDeclareCount.Should().Be(1);
         }
 
         [Fact]
@@ -86,8 +86,8 @@ namespace EasyNetQ.Tests.ProducerTests
             }
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, "topic");
-            declaredExchange.ShouldBeTheSameAs(exchange);
-            exchangeDeclareCount.ShouldEqual(1);
+            declaredExchange.Should().BeSameAs(exchange);
+            exchangeDeclareCount.Should().Be(1);
         }
     }
 }
