@@ -577,7 +577,6 @@ namespace EasyNetQ
         public async Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue)
         {
             Preconditions.CheckNotNull(queue, "queue");
-            var result = Get(queue);
             var result = await GetMessageAsync(queue).ConfigureAwait(false);
             if (result == null)
             {
