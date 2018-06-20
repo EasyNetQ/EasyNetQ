@@ -13,15 +13,15 @@ namespace EasyNetQ.Hosepipe
 
         public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
         {
-            if (!Directory.Exists(parameters.MessageFilePath))
+            if (!Directory.Exists(parameters.MessagesOutputDirectory))
             {
-                Console.WriteLine("Directory '{0}' does not exist", parameters.MessageFilePath);
+                Console.WriteLine("Directory '{0}' does not exist", parameters.MessagesOutputDirectory);
                 yield break;
             }
 
             var bodyPattern = (messageName ?? "*") + ".*.message.txt";
 
-            foreach (var file in Directory.GetFiles(parameters.MessageFilePath, bodyPattern))
+            foreach (var file in Directory.GetFiles(parameters.MessagesOutputDirectory, bodyPattern))
             {
                 const string messageTag = ".message.";
                 var directoryName = Path.GetDirectoryName(file);

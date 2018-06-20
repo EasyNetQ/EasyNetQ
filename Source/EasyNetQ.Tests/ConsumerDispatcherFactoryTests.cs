@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
+using FluentAssertions;
 using Xunit;
 using NSubstitute;
 
@@ -30,7 +31,7 @@ namespace EasyNetQ.Tests
             var dispatcher1 = dispatcherFactory.GetConsumerDispatcher();
             var dispatcher2 = dispatcherFactory.GetConsumerDispatcher();
 
-            dispatcher1.ShouldBeTheSameAs(dispatcher2);
+            dispatcher1.Should().BeSameAs(dispatcher2);
         }
 
         [Fact]
@@ -38,7 +39,7 @@ namespace EasyNetQ.Tests
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
             dispatcherFactory.Dispose();
-            ((ConsumerDispatcher)dispatcher).IsDisposed.ShouldBeTrue();
+            ((ConsumerDispatcher)dispatcher).IsDisposed.Should().BeTrue();
         }
 
         [Fact]
@@ -56,7 +57,7 @@ namespace EasyNetQ.Tests
 
             autoResetEvent.WaitOne(100);
 
-            threadName.ShouldEqual("EasyNetQ consumer dispatch thread");
+            threadName.Should().Be("EasyNetQ consumer dispatch thread");
         }
 
         [Fact]
@@ -89,7 +90,7 @@ namespace EasyNetQ.Tests
             autoResetEvent2.WaitOne(100);
 
             // check that the second action was never run
-            actionExecuted.ShouldBeFalse();
+            actionExecuted.Should().BeFalse();
         }
     }
 }

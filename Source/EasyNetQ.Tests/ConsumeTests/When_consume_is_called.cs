@@ -5,6 +5,7 @@ using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 using System.Linq;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -18,13 +19,13 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_create_a_consumer()
         {
-            MockBuilder.Consumers.Count.ShouldEqual(1);
+            MockBuilder.Consumers.Count.Should().Be(1);
         }
 
         [Fact]
         public void Should_create_a_channel_to_consume_on()
         {
-            MockBuilder.Channels.Count.ShouldEqual(1);
+            MockBuilder.Channels.Count.Should().Be(1);
         }
 
         [Fact]

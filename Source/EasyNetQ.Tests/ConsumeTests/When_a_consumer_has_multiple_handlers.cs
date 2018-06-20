@@ -4,6 +4,7 @@ using System.Threading;
 using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using FluentAssertions;
 using RabbitMQ.Client.Framing;
 using Xunit;
 
@@ -76,22 +77,22 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_deliver_myMessage()
         {
-            myMessageResult.ShouldNotBeNull();
-            myMessageResult.Text.ShouldEqual("Hello Polymorphs!");
+            myMessageResult.Should().NotBeNull();
+            myMessageResult.Text.Should().Be("Hello Polymorphs!");
         }
 
         [Fact]
         public void Should_deliver_myOtherMessage()
         {
-            myOtherMessageResult.ShouldNotBeNull();
-            myOtherMessageResult.Text.ShouldEqual("Hello Isomorphs!");
+            myOtherMessageResult.Should().NotBeNull();
+            myOtherMessageResult.Text.Should().Be("Hello Isomorphs!");
         }
 
         [Fact]
         public void Should_deliver_a_ploymorphic_message()
         {
-            animalResult.ShouldNotBeNull();
-            animalResult.ShouldBeOfType<Dog>();
+            animalResult.Should().NotBeNull();
+            animalResult.Should().BeOfType<Dog>();
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
+using FluentAssertions;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
@@ -51,19 +52,19 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         [Fact]
         public void Should_create_a_persistent_channel()
         {
-            channel.ShouldNotBeNull();
+            channel.Should().NotBeNull();
         }
 
         [Fact]
         public void Should_invoke_the_action()
         {
-            actionWasInvoked.ShouldBeTrue();
+            actionWasInvoked.Should().BeTrue();
         }
 
         [Fact]
         public void Should_invoke_the_action_on_the_dispatcher_thread()
         {
-            actionThreadName.ShouldEqual("Client Command Dispatcher Thread");
+            actionThreadName.Should().Be("Client Command Dispatcher Thread");
         }
     }
 }

@@ -24,17 +24,17 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
                 Arg.Any<string>(),
                 Arg.Any<bool>()
                 )
-                .Returns(Task.FromResult<IExchange>(Substitute.For<IExchange>()));
+                .Returns(Task.FromResult(Substitute.For<IExchange>()));
 
             advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Queue>(), Arg.Any<string>())
-                .Returns(Task.FromResult<IBinding>(Substitute.For<IBinding>()));
+                .Returns(Task.FromResult(Substitute.For<IBinding>()));
 
-            advancedBus.Container.Resolve<IConventions>()
-                .Returns(new Conventions(new DefaultTypeNameSerializer()));
+            var conventions = Substitute.For<IConventions>();
+            conventions.ExchangeNamingConvention = t => t.Name;
 
-            var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy();
+            var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy(conventions, advancedBus);
 
-            publishExchangeStrategy.DeclareExchangeAsync(advancedBus, typeof(MyMessage), ExchangeType.Topic).Wait();
+            publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic).Wait();
 
 /*
             //ensure that only one exchange is declared
@@ -72,13 +72,13 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
 
                                     switch (m.Arguments[0].ToString())
                                     {
-                                        case "EasyNetQ.Tests.MultipleExchangeTest.MessageWithTwoInterfaces, EasyNetQ.Tests":
+                                        case "EasyNetQ.Tests.MultipleExchangeTest.MessageWithTwoInterfaces:EasyNetQ.Tests":
                                             returnValue.Stub(e => e.Name).Return("MessageWithTwoInterfaces");
                                             break;
-                                        case "EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceOne, EasyNetQ.Tests":
+                                        case "EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceOne:EasyNetQ.Tests":
                                             returnValue.Stub(e => e.Name).Return("IMessageInterfaceOne");
                                             break;
-                                        case "EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceTwo, EasyNetQ.Tests":
+                                        case "EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceTwo:EasyNetQ.Tests":
                                             returnValue.Stub(e => e.Name).Return("IMessageInterfaceTwo");
                                             break;
                                         default:
@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
 
             //ensure that only one exchange is declared for concrete type
             advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
-                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.MessageWithTwoInterfaces, EasyNetQ.Tests"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.MessageWithTwoInterfaces:EasyNetQ.Tests"),
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,
@@ -112,7 +112,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
 
             //ensure that only one exchange is declared for IMessageInterfaceOne
             advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
-                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceOne, EasyNetQ.Tests"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceOne:EasyNetQ.Tests"),
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,
@@ -123,7 +123,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
 
             //ensure that only one exchange is declared for IMessageInterfaceTwo
             advancedBus.AssertWasCalled(m => m.ExchangeDeclareAsync(
-                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceTwo, EasyNetQ.Tests"),
+                Arg<string>.Is.Equal("EasyNetQ.Tests.MultipleExchangeTest.IMessageInterfaceTwo:EasyNetQ.Tests"),
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything,
                 Arg<bool>.Is.Anything,

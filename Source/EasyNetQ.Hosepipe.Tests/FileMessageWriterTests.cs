@@ -42,7 +42,7 @@ namespace EasyNetQ.Hosepipe.Tests
             var parameters = new QueueParameters
             {
                 QueueName = "Queue EasyNetQ_Tests_TestAsyncRequestMessage:EasyNetQ_Tests_Messages",
-                MessageFilePath = tempDirectory
+                MessagesOutputDirectory = tempDirectory
             };
 
             writer.Write(messages, parameters);

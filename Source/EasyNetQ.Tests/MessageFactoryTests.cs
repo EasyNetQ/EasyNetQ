@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests
             Assert.IsType<Message<MyMessage>>(genericMessage);
             Assert.IsType<MyMessage>(genericMessage.GetBody());
             Assert.True(genericMessage.MessageType == typeof(MyMessage));
-            Assert.True(genericMessage.CastTo<Message<MyMessage>>().Body.Text == message.Text);
+            Assert.True(((Message<MyMessage>)genericMessage).Body.Text == message.Text);
 
             var properties = new MessageProperties { CorrelationId = Guid.NewGuid().ToString() };
             var genericMessageWithProperties = MessageFactory.CreateInstance(typeof(MyMessage), message, properties);
@@ -25,8 +25,8 @@ namespace EasyNetQ.Tests
             Assert.IsType<Message<MyMessage>>(genericMessageWithProperties);
             Assert.IsType<MyMessage>(genericMessageWithProperties.GetBody());
             Assert.True(genericMessageWithProperties.MessageType == typeof(MyMessage));
-            Assert.True(genericMessageWithProperties.CastTo<Message<MyMessage>>().Body.Text == message.Text);
-            Assert.True(genericMessageWithProperties.CastTo<Message<MyMessage>>().Properties.CorrelationId == properties.CorrelationId);
+            Assert.True(((Message<MyMessage>)genericMessageWithProperties).Body.Text == message.Text);
+            Assert.True(((Message<MyMessage>)genericMessageWithProperties).Properties.CorrelationId == properties.CorrelationId);
         }
 
         [Fact]

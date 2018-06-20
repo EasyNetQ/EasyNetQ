@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -21,7 +22,7 @@ namespace EasyNetQ.Tests
 
             properties.CopyFrom(originalProperties);
 
-            properties.ReplyTo.ShouldEqual(replyTo);
+            properties.ReplyTo.Should().Be(replyTo);
         }
 
         [Fact]
@@ -34,9 +35,9 @@ namespace EasyNetQ.Tests
 
             properties.CopyTo(destinationProperties);
 
-            destinationProperties.ReplyTo.ShouldEqual(replyTo);
-            destinationProperties.IsReplyToPresent().ShouldBeTrue();
-            destinationProperties.IsMessageIdPresent().ShouldBeFalse();
+            destinationProperties.ReplyTo.Should().Be(replyTo);
+            destinationProperties.IsReplyToPresent().Should().BeTrue();
+            destinationProperties.IsMessageIdPresent().Should().BeFalse();
         }
 
         [Fact]
@@ -55,10 +56,10 @@ namespace EasyNetQ.Tests
 
             var destinationProperties = (MessageProperties)properties.Clone();
 
-            destinationProperties.ReplyTo.ShouldEqual(replyTo);
-            destinationProperties.ReplyToPresent.ShouldBeTrue();
-            destinationProperties.MessageIdPresent.ShouldBeFalse();
-            destinationProperties.Headers.ShouldEqual(properties.Headers);
+            destinationProperties.ReplyTo.Should().Be(replyTo);
+            destinationProperties.ReplyToPresent.Should().BeTrue();
+            destinationProperties.MessageIdPresent.Should().BeFalse();
+            destinationProperties.Headers.Should().BeEquivalentTo(properties.Headers);
         }
 
         [Fact]
@@ -95,7 +96,7 @@ namespace EasyNetQ.Tests
                     UserId = "userid",
                 };
 
-            properties.ToString().ShouldEqual(expectedDebugProperties);
+            properties.ToString().Should().Be(expectedDebugProperties);
         }
 
         [Fact]

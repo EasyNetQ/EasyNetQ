@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -97,7 +98,7 @@ namespace EasyNetQ.Tests.Integration
             }
 
             countdownEvent.Wait(15000);
-            count.ShouldEqual(numberOfCalls);
+            count.Should().Be(numberOfCalls);
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -171,7 +172,7 @@ namespace EasyNetQ.Tests.Integration
                 });
             }
             countdownEvent.Wait(10000);
-            count.ShouldEqual(numberOfCalls);
+            count.Should().Be(numberOfCalls);
         }
 
         /// <summary>

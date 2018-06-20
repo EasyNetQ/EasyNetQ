@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Security;
+using FluentAssertions;
 using Xunit;
 using RabbitMQ.Client;
 
@@ -25,10 +26,10 @@ namespace EasyNetQ.Tests
         {
             InitConnectionFactoryWrapper(amqpConnectionString);
 
-            ConnectionFactory connectionFactory = clusterSelectionStrategy.Current().ConnectionFactory;
-            connectionFactory.VirtualHost.ShouldEqual(VHost);
-            connectionFactory.Endpoint.Port.ShouldEqual(amqpConnectionString.Port);
-            connectionFactory.Endpoint.HostName.ShouldEqual(amqpConnectionString.Host);
+            var connectionFactory = clusterSelectionStrategy.Current().ConnectionFactory;
+            connectionFactory.VirtualHost.Should().Be(VHost);
+            connectionFactory.Endpoint.Port.Should().Be(amqpConnectionString.Port);
+            connectionFactory.Endpoint.HostName.Should().Be(amqpConnectionString.Host);
         }
 
         [Fact]
@@ -36,8 +37,8 @@ namespace EasyNetQ.Tests
         {
             InitConnectionFactoryWrapper(amqpConnectionString);
 
-            ConnectionFactory connectionFactory = clusterSelectionStrategy.Current().ConnectionFactory;
-            connectionFactory.Endpoint.Port.ShouldEqual(amqpConnectionString.Port);
+            var connectionFactory = clusterSelectionStrategy.Current().ConnectionFactory;
+            connectionFactory.Endpoint.Port.Should().Be(amqpConnectionString.Port);
         }
 
         [Fact]
@@ -45,9 +46,9 @@ namespace EasyNetQ.Tests
         {
             InitConnectionFactoryWrapper(amqpConnectionString);
 
-            ConnectionFactory connectionFactory = clusterSelectionStrategy.Current().ConnectionFactory;
-            connectionFactory.UserName.ShouldEqual(UserName);
-            connectionFactory.Password.ShouldEqual(Password);
+            var connectionFactory = clusterSelectionStrategy.Current().ConnectionFactory;
+            connectionFactory.UserName.Should().Be(UserName);
+            connectionFactory.Password.Should().Be(Password);
         }
 
         [Fact]
@@ -55,9 +56,9 @@ namespace EasyNetQ.Tests
         {
             InitConnectionFactoryWrapper(amqpSecureConnectionString);
 
-            AmqpTcpEndpoint amqpTcpEndpoint = clusterSelectionStrategy.Current().ConnectionFactory.Endpoint;
-            amqpTcpEndpoint.Ssl.Enabled.ShouldBeTrue("ssl not enabled");
-            amqpTcpEndpoint.Ssl.AcceptablePolicyErrors.ShouldEqual(SslPolicyErrors.RemoteCertificateNameMismatch);
+            var amqpTcpEndpoint = clusterSelectionStrategy.Current().ConnectionFactory.Endpoint;
+            amqpTcpEndpoint.Ssl.Enabled.Should().BeTrue("ssl not enabled");
+            amqpTcpEndpoint.Ssl.AcceptablePolicyErrors.Should().Be(SslPolicyErrors.RemoteCertificateNameMismatch);
         }
 
         [Fact]
@@ -66,7 +67,7 @@ namespace EasyNetQ.Tests
             var vhost = "12345";
             InitConnectionFactoryWrapper(new Uri(string.Format("amqp://host/{0}", vhost)));
 
-            clusterSelectionStrategy.Current().ConnectionFactory.VirtualHost.ShouldEqual(vhost);
+            clusterSelectionStrategy.Current().ConnectionFactory.VirtualHost.Should().Be(vhost);
         }
         
         [Fact]
@@ -75,7 +76,7 @@ namespace EasyNetQ.Tests
             var userbla = "userDelta";
             InitConnectionFactoryWrapper(new Uri(string.Format("amqp://{0}@host", userbla)));
 
-            clusterSelectionStrategy.Current().ConnectionFactory.UserName.ShouldEqual(userbla);
+            clusterSelectionStrategy.Current().ConnectionFactory.UserName.Should().Be(userbla);
         }
 
         [Fact]
@@ -84,7 +85,7 @@ namespace EasyNetQ.Tests
             var pass = "passDelta";
             InitConnectionFactoryWrapper(new Uri(string.Format("amqp://user:{0}@host", pass)));
 
-            clusterSelectionStrategy.Current().ConnectionFactory.Password.ShouldEqual(pass);
+            clusterSelectionStrategy.Current().ConnectionFactory.Password.Should().Be(pass);
         }
 
         [Fact]
@@ -93,7 +94,7 @@ namespace EasyNetQ.Tests
             var port = "17325";
             InitConnectionFactoryWrapper(new Uri(string.Format("amqp://user:pass@host:{0}", port)));
 
-            clusterSelectionStrategy.Current().ConnectionFactory.Port.ShouldEqual(int.Parse(port));
+            clusterSelectionStrategy.Current().ConnectionFactory.Port.Should().Be(int.Parse(port));
         }
 
         private void InitConnectionFactoryWrapper(Uri connectionString)

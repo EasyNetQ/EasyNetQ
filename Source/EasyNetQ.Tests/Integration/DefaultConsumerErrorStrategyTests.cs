@@ -6,11 +6,12 @@ using System.Text;
 using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
-using Xunit;
-using RabbitMQ.Client;
+using FluentAssertions;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests.Integration
 {
     public class DefaultConsumerErrorStrategyTests
     {
@@ -87,13 +88,13 @@ namespace EasyNetQ.Tests
                 {
                     var message = serializer.BytesToMessage<Error>(getArgs.Body);
 
-                    message.RoutingKey.ShouldEqual(context.Info.RoutingKey);
-                    message.Exchange.ShouldEqual(context.Info.Exchange);
-                    message.Message.ShouldEqual(originalMessage);
-                    message.Exception.ShouldEqual("System.Exception: I just threw!");
-                    message.DateTime.Date.ShouldEqual(DateTime.UtcNow.Date);
-                    message.BasicProperties.CorrelationId.ShouldEqual(context.Properties.CorrelationId);
-                    message.BasicProperties.AppId.ShouldEqual(context.Properties.AppId);
+                    message.RoutingKey.Should().Be(context.Info.RoutingKey);
+                    message.Exchange.Should().Be(context.Info.Exchange);
+                    message.Message.Should().Be(originalMessage);
+                    message.Exception.Should().Be("System.Exception: I just threw!");
+                    message.DateTime.Date.Should().Be(DateTime.UtcNow.Date);
+                    message.BasicProperties.CorrelationId.Should().Be(context.Properties.CorrelationId);
+                    message.BasicProperties.AppId.Should().Be(context.Properties.AppId);
                 }
             }
         }

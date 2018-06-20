@@ -8,6 +8,7 @@ using EasyNetQ.Tests.Mocking;
 using Xunit;
 using NSubstitute;
 using System.Linq;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -75,9 +76,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_started_consuming_from_the_correct_queues()
         {
-            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).ShouldBeTrue();
-            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName2).ShouldBeTrue();
-            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).ShouldBeTrue();
+            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).Should().BeTrue();
+            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName2).Should().BeTrue();
+            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).Should().BeTrue();
         }
 
 

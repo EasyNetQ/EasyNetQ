@@ -1,14 +1,13 @@
 // ReSharper disable InconsistentNaming
 
-using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests
 {
@@ -27,14 +26,14 @@ namespace EasyNetQ.Tests
 		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
 		{
 			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
+		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
 		}
 
 		[Fact]
 		public void The_default_topic_naming_convention_should_return_an_empty_string()
 		{
 			var result = conventions.TopicNamingConvention(typeof (TestMessage));
-			result.ShouldEqual("");
+		    result.Should().Be("");
 		}
 
 		[Fact]
@@ -42,14 +41,14 @@ namespace EasyNetQ.Tests
 		{
 			const string subscriptionId = "test";
 			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
+		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
 		}
 
         [Fact]
         public void The_default_error_queue_name_should_be()
         {
             var result = conventions.ErrorQueueNamingConvention();
-            result.ShouldEqual("EasyNetQ_Default_Error_Queue");
+            result.Should().Be("EasyNetQ_Default_Error_Queue");
         }
 
         [Fact]
@@ -58,28 +57,28 @@ namespace EasyNetQ.Tests
             var info = new MessageReceivedInfo("consumer_tag", 0, false, "exchange", "routingKey", "queue");
 
             var result = conventions.ErrorExchangeNamingConvention(info);
-            result.ShouldEqual("ErrorExchange_routingKey");
+            result.Should().Be("ErrorExchange_routingKey");
         }
 
         [Fact]
         public void The_default_rpc_request_exchange_name_should_be()
         {
             var result = conventions.RpcRequestExchangeNamingConvention(typeof (object));
-            result.ShouldEqual("easy_net_q_rpc");
+            result.Should().Be("easy_net_q_rpc");
         }
 
         [Fact]
         public void The_default_rpc_reply_exchange_name_should_be()
         {
             var result = conventions.RpcResponseExchangeNamingConvention(typeof(object));
-            result.ShouldEqual("easy_net_q_rpc");
+            result.Should().Be("easy_net_q_rpc");
         }
 
         [Fact]
         public void The_default_rpc_routingkey_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
         {
             var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
-            result.ShouldEqual(typeNameSerializer.Serialize(typeof(TestMessage)));
+            result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
         }        
 	}
 
@@ -101,7 +100,7 @@ namespace EasyNetQ.Tests
         {
             const string subscriptionId = "test";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual("MyQueue" + "_" + subscriptionId);
+            result.Should().Be("MyQueue" + "_" + subscriptionId);
         }
 
         [Theory]
@@ -111,7 +110,7 @@ namespace EasyNetQ.Tests
         {
             const string subscriptionId = "";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual("MyQueue");
+            result.Should().Be("MyQueue");
         }
 
 
@@ -122,7 +121,7 @@ namespace EasyNetQ.Tests
         {
             const string subscriptionId = "test";
             var result = conventions.QueueNamingConvention(messageType, subscriptionId);
-            result.ShouldEqual(typeNameSerializer.Serialize(messageType) + "_" + subscriptionId);
+            result.Should().Be(typeNameSerializer.Serialize(messageType) + "_" + subscriptionId);
         }
 
         [Theory]
@@ -131,7 +130,7 @@ namespace EasyNetQ.Tests
         public void The_exchange_name_convention_should_use_attribute_exchangeName(Type messageType)
         {
             var result = conventions.ExchangeNamingConvention(messageType);
-            result.ShouldEqual("MyExchange");
+            result.Should().Be("MyExchange");
         }
 
         [Theory]
@@ -140,7 +139,7 @@ namespace EasyNetQ.Tests
         public void And_exchangeName_not_specified_the_exchange_name_convention_should_use_the_TypeNameSerializers_Serialize_method(Type messageType)
         {
             var result = conventions.ExchangeNamingConvention(messageType);
-            result.ShouldEqual(typeNameSerializer.Serialize(messageType));
+            result.Should().Be(typeNameSerializer.Serialize(messageType));
         }
     }
 
@@ -245,82 +244,6 @@ namespace EasyNetQ.Tests
                 Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
 
-    }
-
-
-    public class When_using_default_consumer_error_strategy
-    {
-        private DefaultConsumerErrorStrategy errorStrategy;
-        private MockBuilder mockBuilder;
-        private AckStrategy errorAckStrategy;
-        private AckStrategy cancelAckStrategy;
-
-        public When_using_default_consumer_error_strategy()
-        {
-            var customConventions = new Conventions(new DefaultTypeNameSerializer())
-            {
-                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
-                ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
-            };
-
-            mockBuilder = new MockBuilder();
-
-            errorStrategy = new DefaultConsumerErrorStrategy(
-                mockBuilder.ConnectionFactory, 
-                new JsonSerializer(), 
-                customConventions,
-                new DefaultTypeNameSerializer(),
-                new DefaultErrorMessageSerializer());
-
-            const string originalMessage = "";
-            var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
-
-            var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
-                new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
-                new MessageProperties
-                    {
-                        CorrelationId = string.Empty,
-                        AppId = string.Empty
-                    },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
-                );
-
-            try
-            {
-                errorAckStrategy = errorStrategy.HandleConsumerError(context, new Exception());
-                cancelAckStrategy = errorStrategy.HandleConsumerCancelled(context);
-            }
-            catch (Exception)
-            {
-                // swallow
-            }
-        }
-
-        [Fact]
-        public void Should_use_exchange_name_from_custom_names_provider()
-        {
-            mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true);
-        }
-
-        [Fact]
-        public void Should_use_queue_name_from_custom_names_provider()
-        {
-            mockBuilder.Channels[0].Received().QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null);
-        }
-
-        [Fact]
-        public void Should_Ack_failed_message()
-        {
-            Assert.Same(AckStrategies.Ack, errorAckStrategy);
-        }
-        
-        [Fact]
-        public void Should_Ack_canceled_message()
-        {
-            Assert.Same(AckStrategies.Ack, cancelAckStrategy);
-        }
     }
 }
 

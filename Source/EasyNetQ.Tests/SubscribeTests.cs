@@ -6,6 +6,7 @@ using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -48,7 +49,7 @@ namespace EasyNetQ.Tests
         {
             // A channel is created for running client originated commands,
             // a second channel is created for the consumer.
-            mockBuilder.Channels.Count.ShouldEqual(2);
+            mockBuilder.Channels.Count.Should().Be(2);
         }
 
         [Fact]
@@ -106,7 +107,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_register_consumer()
         {
-            mockBuilder.Consumers.Count.ShouldEqual(1);
+            mockBuilder.Consumers.Count.Should().Be(1);
         }
 
         [Fact]
@@ -282,8 +283,8 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_deliver_message()
         {
-            deliveredMessage.ShouldNotBeNull();
-            deliveredMessage.Text.ShouldEqual(originalMessage.Text);
+            deliveredMessage.Should().NotBeNull();
+            deliveredMessage.Text.Should().Be(originalMessage.Text);
         }
 
         [Fact]
@@ -381,18 +382,18 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_pass_the_exception_to_consumerErrorStrategy()
         {
-            raisedException.ShouldNotBeNull();
-            raisedException.InnerException.ShouldNotBeNull();
-            raisedException.InnerException.ShouldBeTheSameAs(originalException);
+            raisedException.Should().NotBeNull();
+            raisedException.InnerException.Should().NotBeNull();
+            raisedException.InnerException.Should().BeSameAs(originalException);
         }
 
         [Fact]
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
-            basicDeliverEventArgs.ShouldNotBeNull();
-            basicDeliverEventArgs.Info.ConsumerTag.ShouldEqual(consumerTag);
-            basicDeliverEventArgs.Info.DeliverTag.ShouldEqual(deliveryTag);
-            basicDeliverEventArgs.Info.RoutingKey.ShouldEqual("#");
+            basicDeliverEventArgs.Should().NotBeNull();
+            basicDeliverEventArgs.Info.ConsumerTag.Should().Be(consumerTag);
+            basicDeliverEventArgs.Info.DeliverTag.Should().Be(deliveryTag);
+            basicDeliverEventArgs.Info.RoutingKey.Should().Be("#");
         }
     }
 

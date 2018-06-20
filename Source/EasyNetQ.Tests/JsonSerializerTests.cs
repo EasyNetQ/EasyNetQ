@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FluentAssertions;
 using RabbitMQ.Client.Framing;
 // ReSharper disable InconsistentNaming
 using System;
@@ -25,7 +26,7 @@ namespace EasyNetQ.Tests
             var binaryMessage = serializer.MessageToBytes(message);
             var deseralizedMessage = serializer.BytesToMessage<MyMessage>(binaryMessage);
 
-            message.Text.ShouldEqual(deseralizedMessage.Text);
+            message.Text.Should().Be(deseralizedMessage.Text);
         }
 
         [Fact]
@@ -67,7 +68,7 @@ namespace EasyNetQ.Tests
                 return builder.ToString();
             };
 
-            getPropertiesString(originalProperties).ShouldEqual(getPropertiesString(newProperties));
+            getPropertiesString(originalProperties).Should().Be(getPropertiesString(newProperties));
         }
 
         class A { }

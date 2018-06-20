@@ -113,10 +113,12 @@ namespace EasyNetQ
                     connection.ConnectionBlocked += OnConnectionBlocked;
                     connection.ConnectionUnblocked += OnConnectionUnblocked;
 
-                    logger.InfoFormat("Connected to RabbitMQ. Broker: '{0}', Port: {1}, VHost: '{2}'",
+                    logger.InfoFormat(
+                        "Connected to broker {broker}, port {port}, vhost {vhost}",
                         connectionFactory.CurrentHost.Host,
                         connectionFactory.CurrentHost.Port,
-                        connectionFactory.Configuration.VirtualHost);
+                        connectionFactory.Configuration.VirtualHost
+                    );
 
                     connectionFactory.Success();
                 }
@@ -128,8 +130,7 @@ namespace EasyNetQ
 
             if (!connectionFactory.Succeeded && !disposed)
             {
-                logger.ErrorFormat("Failed to connect to any Broker. Retrying in {0}",
-                    connectionFactory.Configuration.ConnectIntervalAttempt);
+                logger.ErrorFormat("Failed to connect to any Broker. Retrying in {connectInterval}", connectionFactory.Configuration.ConnectIntervalAttempt);
                 StartTryToConnect();
             }
         }

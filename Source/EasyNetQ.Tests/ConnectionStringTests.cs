@@ -2,6 +2,7 @@
 
 using System.Linq;
 using EasyNetQ.ConnectionString;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -24,43 +25,43 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_parse_host()
         {
-            connectionString.Hosts.First().Host.ShouldEqual("192.168.1.1");
+            connectionString.Hosts.First().Host.Should().Be("192.168.1.1");
         }
 
         [Fact]
         public void Should_parse_host_port()
         {
-            connectionString.Hosts.First().Port.ShouldEqual((ushort)1001);
+            connectionString.Hosts.First().Port.Should().Be(1001);
         }
 
         [Fact]
         public void Should_parse_second_host()
         {
-            connectionString.Hosts.Last().Host.ShouldEqual("my.little.host");
+            connectionString.Hosts.Last().Host.Should().Be("my.little.host");
         }
 
         [Fact]
         public void Should_parse_seond_port()
         {
-            connectionString.Hosts.Last().Port.ShouldEqual((ushort)1002);
+            connectionString.Hosts.Last().Port.Should().Be((ushort)1002);
         }
 
         [Fact]
         public void Should_parse_virtualHost()
         {
-            connectionString.VirtualHost.ShouldEqual("Copa");
+            connectionString.VirtualHost.Should().Be("Copa");
         }
 
         [Fact]
         public void Should_parse_username()
         {
-            connectionString.UserName.ShouldEqual("Copa");
+            connectionString.UserName.Should().Be("Copa");
         }
 
         [Fact]
         public void Should_parse_password()
         {
-            connectionString.Password.ShouldEqual("abc_xyz");
+            connectionString.Password.Should().Be("abc_xyz");
         }
 
         [Fact]
@@ -86,50 +87,49 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_parse_port()
         {
-            connectionString.Port.ShouldEqual((ushort)12345);
+            connectionString.Port.Should().Be(12345);
         }
 
         [Fact]
         public void Should_parse_heartbeat()
         {
-            connectionString.RequestedHeartbeat.ShouldEqual((ushort)3);
+            connectionString.RequestedHeartbeat.Should().Be(3);
         }
 
         [Fact]
         public void Should_parse_host_only()
         {
-            defaults.Hosts.First().Host.ShouldEqual("localhost");
+            defaults.Hosts.First().Host.Should().Be("localhost");
         }
 
         [Fact]
         public void Should_set_default_port()
         {
-            defaults.Port.ShouldEqual((ushort)5672);
+            defaults.Port.Should().Be(5672);
         }
 
         [Fact]
         public void Should_set_default_virtual_host()
         {
-            defaults.VirtualHost.ShouldEqual("/");
+            defaults.VirtualHost.Should().Be("/");
         }
 
         [Fact]
         public void Should_set_default_username()
         {
-            defaults.UserName.ShouldEqual("guest");
-
+            defaults.UserName.Should().Be("guest");
         }
 
         [Fact]
         public void Should_set_default_password()
         {
-            defaults.Password.ShouldEqual("guest");
+            defaults.Password.Should().Be("guest");
         }
 
         [Fact]
         public void Should_set_default_requestHeartbeat()
         {
-            defaults.RequestedHeartbeat.ShouldEqual((ushort)10);
+            defaults.RequestedHeartbeat.Should().Be(10);
         }
 
         [Fact]
@@ -140,13 +140,13 @@ namespace EasyNetQ.Tests
                 "Password=abc_xyz;Port=12345;RequestedHeartbeat=3";
 
             var parsed = new ConnectionStringParser().Parse(connectionStringAlternateCasing);
-            parsed.Hosts.First().Host.ShouldEqual("192.168.1.1");
-            parsed.Hosts.First().Port.ShouldEqual((ushort)1001);
-            parsed.VirtualHost.ShouldEqual("Copa");
-            parsed.UserName.ShouldEqual("Copa");
-            parsed.Password.ShouldEqual("abc_xyz");
-            parsed.Port.ShouldEqual((ushort)12345);
-            parsed.RequestedHeartbeat.ShouldEqual((ushort)3);
+            parsed.Hosts.First().Host.Should().Be("192.168.1.1");
+            parsed.Hosts.First().Port.Should().Be(1001);
+            parsed.VirtualHost.Should().Be("Copa");
+            parsed.UserName.Should().Be("Copa");
+            parsed.Password.Should().Be("abc_xyz");
+            parsed.Port.Should().Be(12345);
+            parsed.RequestedHeartbeat.Should().Be(3);
         }
     }
 }

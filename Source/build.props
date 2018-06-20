@@ -4,7 +4,6 @@
     <PropertyGroup>
         <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
         <PackageProduct>EasyNetQ</PackageProduct>
-        <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
     </PropertyGroup>

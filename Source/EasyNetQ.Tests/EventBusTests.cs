@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -28,8 +29,8 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(publishedEvent);
 
-            capturedEvent.ShouldNotBeNull();
-            capturedEvent.ShouldBeTheSameAs(publishedEvent);
+            capturedEvent.Should().NotBeNull();
+            capturedEvent.Should().BeSameAs(publishedEvent);
         }
 
         [Fact]
@@ -46,7 +47,7 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(publishedEvent);
 
-            capturedEvent.ShouldBeNull();
+            capturedEvent.Should().BeNull();
         }
 
         [Fact]
@@ -55,7 +56,7 @@ namespace EasyNetQ.Tests
             var stringsPublished = new List<string>();
 
             var cancelSubscription = eventBus.Subscribe<string>(stringsPublished.Add);
-            cancelSubscription.ShouldNotBeNull();
+            cancelSubscription.Should().NotBeNull();
 
             eventBus.Publish("Before cancellation");
 
@@ -63,8 +64,8 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish("Hello World");
 
-            stringsPublished.Count.ShouldEqual(1);
-            stringsPublished[0].ShouldEqual("Before cancellation");
+            stringsPublished.Count.Should().Be(1);
+            stringsPublished[0].Should().Be("Before cancellation");
         }
 
         [Fact]
@@ -85,7 +86,7 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(publishedEvent1);
 
-            eventFromSubscription.ShouldNotBeNull();
+            eventFromSubscription.Should().NotBeNull();
         }
 
         [Fact]
@@ -108,7 +109,7 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(publishedEvent1);
 
-            eventFromSubscription.ShouldNotBeNull();
+            eventFromSubscription.Should().NotBeNull();
         }
 
         private class Event1

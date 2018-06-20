@@ -13,11 +13,12 @@
     <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj" />
-    <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <ProjectReference Include="..\EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
@@ -29,7 +30,7 @@
     <PackageReference Include="LightInject" Version="4.0.11" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="NSubstitute" Version="2.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
     <PackageReference Include="SimpleInjector" Version="3.2.7" />
     <PackageReference Include="Autofac" Version="4.6.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta3-build3705" />

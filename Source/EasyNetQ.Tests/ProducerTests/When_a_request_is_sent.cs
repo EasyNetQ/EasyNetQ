@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
+using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -49,7 +50,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_return_the_response()
         {
-            responseMessage.Text.ShouldEqual("Hello World");
+            responseMessage.Text.Should().Be("Hello World");
         }
 
         [Fact]
