@@ -4,6 +4,7 @@ using RabbitMQ.Client.Framing;
 using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests.Mocking
 {
@@ -78,9 +79,9 @@ namespace EasyNetQ.Tests.Mocking
                     x.Register(connectionFactory);
                 });
 
-            bus.ShouldNotBeNull();
-            bus.Advanced.ShouldNotBeNull();
-            bus.Advanced.Container.ShouldNotBeNull();
+            bus.Should().NotBeNull();
+            bus.Advanced.Should().NotBeNull();
+            bus.Advanced.Container.Should().NotBeNull();
         }
 
         public IConnectionFactory ConnectionFactory

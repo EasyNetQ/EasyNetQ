@@ -162,6 +162,8 @@ namespace EasyNetQ.Consumer
                     properties.Type = typeNameSerializer.Serialize(typeof (Error));
 
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
+                    
+                    return AckStrategies.Ack;
                 }
             }
             catch (BrokerUnreachableException unreachableException)
@@ -186,12 +188,12 @@ namespace EasyNetQ.Consumer
                 logger.Error(unexpectedException, "Failed to publish error message");
             }
             
-            return AckStrategies.Ack;
+            return AckStrategies.NackWithRequeue;
         }
 
         public AckStrategy HandleConsumerCancelled(ConsumerExecutionContext context)
         {
-            return AckStrategies.Ack;
+            return AckStrategies.NackWithRequeue;
         }
 
         private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)

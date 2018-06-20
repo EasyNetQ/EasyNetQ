@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
@@ -53,7 +54,7 @@ namespace EasyNetQ.Tests
         public void Should_create_a_channel_to_publish_on()
         {
             // a channel is also created then disposed to declare the exchange.
-            mockBuilder.Channels.Count.ShouldEqual(1);
+            mockBuilder.Channels.Count.Should().Be(1);
         }
 
         [Fact]
@@ -67,25 +68,25 @@ namespace EasyNetQ.Tests
                     Arg.Any<byte[]>());
 
             var json = Encoding.UTF8.GetString(body);
-            json.ShouldEqual("{\"Text\":\"Hiya!\"}");
+            json.Should().Be("{\"Text\":\"Hiya!\"}");
         }
 
         [Fact]
         public void Should_put_correlationId_in_properties()
         {
-            properties.CorrelationId.ShouldEqual(correlationId);
+            properties.CorrelationId.Should().Be(correlationId);
         }
 
         [Fact]
         public void Should_put_message_type_in_message_type_field()
         {
-            properties.Type.ShouldEqual("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
+            properties.Type.Should().Be("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
         }
 
         [Fact]
         public void Should_publish_persistent_messsages()
         {
-            properties.DeliveryMode.ShouldEqual((byte)2);
+            properties.DeliveryMode.Should().Be(2);
         }
 
         [Fact]

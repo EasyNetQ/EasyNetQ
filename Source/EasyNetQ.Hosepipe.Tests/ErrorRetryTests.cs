@@ -27,7 +27,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 HostName = "localhost",
                 Username = "guest",
                 Password = "guest",
-                MessageFilePath = @"C:\temp\MessageOutput"
+                MessagesOutputDirectory = @"C:\temp\MessageOutput"
             };
 
             var rawErrorMessages = new MessageReader()
@@ -51,7 +51,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 HostName = "localhost",
                 Username = "guest",
                 Password = "guest",
-                MessageFilePath = @"C:\temp\MessageOutput"
+                MessagesOutputDirectory = @"C:\temp\MessageOutput"
             };
 
             errorRetry.RepublishError(error, parameters);

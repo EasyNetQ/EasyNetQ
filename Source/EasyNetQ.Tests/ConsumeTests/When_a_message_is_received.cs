@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -38,15 +39,15 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_deliver_MyMessage()
         {
-            deliveredMyMessage.ShouldNotBeNull();
-            deliveredMyMessage.Text.ShouldEqual("Hello World :)");
+            deliveredMyMessage.Should().NotBeNull();
+            deliveredMyMessage.Text.Should().Be("Hello World :)");
         }
 
         [Fact]
         public void Should_deliver_MyOtherMessage()
         {
-            deliveredMyOtherMessage.ShouldNotBeNull();
-            deliveredMyOtherMessage.Text.ShouldEqual("Goodbye Cruel World!");
+            deliveredMyOtherMessage.Should().NotBeNull();
+            deliveredMyOtherMessage.Text.Should().Be("Goodbye Cruel World!");
         }
 
         private void DeliverMessage(string message, string type)

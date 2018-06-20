@@ -2,6 +2,7 @@
 
 using Xunit;
 using EasyNetQ.AmqpExceptions;
+using FluentAssertions;
 
 namespace EasyNetQ.Tests
 {
@@ -16,10 +17,10 @@ namespace EasyNetQ.Tests
 
             var amqpException = AmqpExceptionGrammar.ParseExceptionString(originalException);
 
-            amqpException.Preface.Text.ShouldEqual("The AMQP operation was interrupted");
-            amqpException.Code.ShouldEqual(320);
-            amqpException.MethodId.ShouldEqual(0);
-            amqpException.ClassId.ShouldEqual(0);
+            amqpException.Preface.Text.Should().Be("The AMQP operation was interrupted");
+            amqpException.Code.Should().Be(320);
+            amqpException.MethodId.Should().Be(0);
+            amqpException.ClassId.Should().Be(0);
         }
 
         [Fact]
@@ -32,10 +33,10 @@ namespace EasyNetQ.Tests
 
             var amqpException = AmqpExceptionGrammar.ParseExceptionString(originalException);
 
-            amqpException.Preface.Text.ShouldEqual("The AMQP operation was interrupted");
-            amqpException.Code.ShouldEqual(406);
-            amqpException.MethodId.ShouldEqual(10);
-            amqpException.ClassId.ShouldEqual(40);
+            amqpException.Preface.Text.Should().Be("The AMQP operation was interrupted");
+            amqpException.Code.Should().Be(406);
+            amqpException.MethodId.Should().Be(10);
+            amqpException.ClassId.Should().Be(40);
         }
 
         [Fact]

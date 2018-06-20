@@ -203,7 +203,7 @@ namespace EasyNetQ.Producer
             where TRequest : class
         {
             var requestType = typeof(TRequest);
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(advancedBus, conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
                         
             var requestMessage = new Message<TRequest>(request)
             {
@@ -326,7 +326,7 @@ namespace EasyNetQ.Producer
 
         private IExchange DeclareRpcExchange(string exchangeName)
         {
-            return publishExchangeDeclareStrategy.DeclareExchange(advancedBus, exchangeName, ExchangeType.Direct);
+            return publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
         }
     }
 }

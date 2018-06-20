@@ -3,6 +3,7 @@
 using System;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
+using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
@@ -50,7 +51,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             }
             catch (AggregateException aggregateException)
             {
-                aggregateException.InnerException.ShouldBeTheSameAs(exception);
+                aggregateException.InnerException.Should().BeSameAs(exception);
             }
         }
 
@@ -71,7 +72,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             }
 
             dispatcher.InvokeAsync(goodAction).Wait();
-            goodActionWasInvoked.ShouldBeTrue();
+            goodActionWasInvoked.Should().BeTrue();
         }
 
         private class CrazyTestOnlyException : Exception { }

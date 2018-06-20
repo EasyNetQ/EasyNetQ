@@ -13,13 +13,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EasyNetQ.Management.Client" Version="2.0.0-netcore0001" />
+    <PackageReference Include="FluentAssertions" Version="5.4.0" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="NSubstitute" Version="2.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
@@ -40,7 +41,6 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
     <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

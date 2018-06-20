@@ -12,12 +12,8 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
 {
-    public class When_a_user_handler_is_executed
+    public class When_a_user_handler_is_failed
     {
-        private byte[] deliveredBody;
-        private MessageProperties deliveredProperties;
-        private MessageReceivedInfo deliveredInfo;
-
         private readonly MessageProperties messageProperties = new MessageProperties
             {
                 CorrelationId = "correlation_id"
@@ -25,29 +21,24 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 123, false, "exchange", "routingKey", "queue");
         private readonly byte[] messageBody = new byte[0];
 
-        private readonly IModel channel;
+        private readonly IConsumerErrorStrategy consumerErrorStrategy;
+        private readonly ConsumerExecutionContext context;
 
-        public When_a_user_handler_is_executed()
+        public When_a_user_handler_is_failed()
         {
-            var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+            consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             var eventBus = new EventBus();
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy, eventBus);
 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler = (body, properties, info) => 
-                Task.Factory.StartNew(() =>
-                    {
-                        deliveredBody = body;
-                        deliveredProperties = properties;
-                        deliveredInfo = info;
-                    });
+                Task.Run(() => throw new Exception());
 
             var consumer = Substitute.For<IBasicConsumer>();
-            channel = Substitute.For<IModel>();
+            var channel = Substitute.For<IModel>();
             consumer.Model.Returns(channel);
 
-            var context = new ConsumerExecutionContext(
-                userHandler, messageInfo, messageProperties, messageBody, consumer);
+            context = new ConsumerExecutionContext(userHandler, messageInfo, messageProperties, messageBody, consumer);
 
             var autoResetEvent = new AutoResetEvent(false);
             eventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
@@ -58,27 +49,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         }
 
         [Fact]
-        public void Should_deliver_body()
+        public void Should_handle_consumer_error()
         {
-            deliveredBody.Should().BeSameAs(messageBody);
-        }
-
-        [Fact]
-        public void Should_deliver_properties()
-        {
-            deliveredProperties.Should().BeSameAs(messageProperties);
-        }
-
-        [Fact]
-        public void Should_deliver_info()
-        {
-            deliveredInfo.Should().BeSameAs(messageInfo);
-        }
-
-        [Fact]
-        public void Should_ACK_message()
-        {
-            channel.Received().BasicAck(123, false);
+            consumerErrorStrategy.Received().HandleConsumerError(context, Arg.Any<Exception>());
         }
     }
 }
