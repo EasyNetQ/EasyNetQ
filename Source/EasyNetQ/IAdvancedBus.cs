@@ -149,11 +149,13 @@ namespace EasyNetQ
         /// </param>
         /// <param name="message">The message to publish</param>
         /// <param name="cancellation">The cancellation token</param>
-        Task PublishAsync(IExchange exchange,
+        Task PublishAsync(
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             IMessage message,
-            CancellationToken cancellation = default(CancellationToken));
+            CancellationToken cancellation = default(CancellationToken)
+        );
 
         /// <summary>
         /// Publish a message as a .NET type
@@ -172,11 +174,13 @@ namespace EasyNetQ
         /// </param>
         /// <param name="message">The message to publish</param>
         /// <param name="cancellation">The cancellation token</param>
-        Task PublishAsync<T>(IExchange exchange,
+        Task PublishAsync<T>(
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             IMessage<T> message,
-            CancellationToken cancellation = default(CancellationToken)) where T : class;
+            CancellationToken cancellation = default(CancellationToken)
+        ) where T : class;
 
         /// <summary>
         /// Publish a message as a byte array.
@@ -195,12 +199,14 @@ namespace EasyNetQ
         /// <param name="messageProperties">The message properties</param>
         /// <param name="body">The message body</param>
         /// <param name="cancellation">The cancellation token</param>
-        Task PublishAsync(IExchange exchange,
+        Task PublishAsync(
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
             byte[] body,
-            CancellationToken cancellation = default(CancellationToken));
+            CancellationToken cancellation = default(CancellationToken)
+        );
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -219,7 +225,8 @@ namespace EasyNetQ
         /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
         /// <param name="cancellation">The cancellation token</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(string name,
+        Task<IQueue> QueueDeclareAsync(
+            string name,
             bool passive = false,
             bool durable = true,
             bool exclusive = false,
@@ -231,8 +238,19 @@ namespace EasyNetQ
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null,
-            CancellationToken cancellation = default(CancellationToken));
+            CancellationToken cancellation = default(CancellationToken)
+        );
 
+        
+        /// <summary>
+        /// Declare a transient server named queue. Note, this queue will only last for duration of the
+        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
+        /// consumers.
+        /// </summary>
+        /// <param name="cancellation">The cancellation token</param>
+        /// <returns>The queue</returns>
+        Task<IQueue> QueueDeclareAsync(CancellationToken cancellation = default(CancellationToken));
+        
         /// <summary>
         /// Delete a queue
         /// </summary>
@@ -262,7 +280,8 @@ namespace EasyNetQ
         /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
         /// <param name="cancellation">The cancellation token</param>
         /// <returns>The exchange</returns>
-        Task<IExchange> ExchangeDeclareAsync(string name,
+        Task<IExchange> ExchangeDeclareAsync(
+            string name,
             string type,
             bool passive = false,
             bool durable = true,
@@ -270,7 +289,8 @@ namespace EasyNetQ
             bool @internal = false,
             string alternateExchange = null,
             bool delayed = false,
-            CancellationToken cancellation = default(CancellationToken));
+            CancellationToken cancellation = default(CancellationToken)
+        );
 
         /// <summary>
         /// Delete an exchange
@@ -393,14 +413,5 @@ namespace EasyNetQ
         /// The conventions used by EasyNetQ to name its routing topology elements.
         /// </summary>
         IConventions Conventions { get; }
-
-        /// <summary>
-        /// Declare a transient server named queue. Note, this queue will only last for duration of the
-        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
-        /// consumers.
-        /// </summary>
-        /// <param name="cancellation">The cancellation token</param>
-        /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(CancellationToken cancellation = default(CancellationToken));
     }
 }

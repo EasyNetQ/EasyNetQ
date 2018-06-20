@@ -100,7 +100,7 @@ namespace EasyNetQ
         // ---------------------------------- consume --------------------------------------
         public IDisposable Consume(IEnumerable<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure)
         {
-            Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
+            Preconditions.CheckNotNull(queueConsumerPairs, "queueConsumerPairs");
             Preconditions.CheckNotNull(configure, "configure");
 
             if (disposed)
@@ -217,11 +217,13 @@ namespace EasyNetQ
             return consumer.StartConsuming();
         }
 
-        public virtual Task PublishAsync(IExchange exchange,
+        public virtual Task PublishAsync(
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             IMessage message,
-            CancellationToken cancellation = default(CancellationToken))
+            CancellationToken cancellation = default(CancellationToken)
+        )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -231,11 +233,13 @@ namespace EasyNetQ
             return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellation);
         }
 
-        public virtual Task PublishAsync<T>(IExchange exchange,
+        public virtual Task PublishAsync<T>(
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             IMessage<T> message,
-            CancellationToken cancellation = default(CancellationToken)) where T : class
+            CancellationToken cancellation = default(CancellationToken)
+        ) where T : class
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -245,12 +249,14 @@ namespace EasyNetQ
             return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellation);
         }
 
-        public virtual async Task PublishAsync(IExchange exchange,
+        public virtual async Task PublishAsync(
+            IExchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
             byte[] body,
-            CancellationToken cancellation = default(CancellationToken))
+            CancellationToken cancellation = default(CancellationToken)
+        )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -329,7 +335,8 @@ namespace EasyNetQ
             return new Queue(queueDeclareOk.QueueName, true);
         }
 
-        public async Task<IQueue> QueueDeclareAsync(string name,
+        public async Task<IQueue> QueueDeclareAsync(
+            string name,
             bool passive = false,
             bool durable = true,
             bool exclusive = false,
@@ -341,7 +348,8 @@ namespace EasyNetQ
             string deadLetterRoutingKey = null,
             int? maxLength = null,
             int? maxLengthBytes = null,
-            CancellationToken cancellation = default(CancellationToken))
+            CancellationToken cancellation = default(CancellationToken)
+        )
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -426,7 +434,8 @@ namespace EasyNetQ
             }
         }
 
-        public async Task<IExchange> ExchangeDeclareAsync(string name,
+        public async Task<IExchange> ExchangeDeclareAsync(
+            string name,
             string type,
             bool passive = false,
             bool durable = true,
@@ -434,7 +443,8 @@ namespace EasyNetQ
             bool @internal = false,
             string alternateExchange = null,
             bool delayed = false, 
-            CancellationToken cancellation = default(CancellationToken))
+            CancellationToken cancellation = default(CancellationToken)
+        )
         {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");

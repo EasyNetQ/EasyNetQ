@@ -27,7 +27,8 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body)
+            byte[] body
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -57,7 +58,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class
+            IMessage<T> message
+        ) where T : class
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -162,7 +164,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null)
+            int? maxLengthBytes = null
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
@@ -202,7 +205,8 @@ namespace EasyNetQ
             IExchange source,
             IExchange destination,
             string routingKey,
-            IDictionary<string, object> headers)
+            IDictionary<string, object> headers
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
@@ -242,7 +246,8 @@ namespace EasyNetQ
             IExchange exchange, 
             IQueue queue,
             string routingKey,
-            IDictionary<string, object> headers)
+            IDictionary<string, object> headers
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
@@ -274,7 +279,8 @@ namespace EasyNetQ
             bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false)
+            bool delayed = false
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
             
