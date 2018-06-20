@@ -21,7 +21,6 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
                 Arg.Any<bool>(),
                 Arg.Any<bool>(),
                 Arg.Any<bool>(),
-                Arg.Any<bool>(),
                 Arg.Any<string>(),
                 Arg.Any<bool>()
                 )

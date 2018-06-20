@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchanges = new List<ExchangeStub>();
             IAdvancedBus ret;
             var advancedBus = Substitute.For<IAdvancedBus>();
-            advancedBus.ExchangeDeclareAsync(null, null, false, true, false, false, null)
+            advancedBus.ExchangeDeclareAsync(null, null, false, true, false, null)
                 .ReturnsForAnyArgs(mi =>
                 {
                     var exchange = new ExchangeStub { Name = (string)mi[0] };
@@ -94,7 +94,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchanges = new List<ExchangeStub>();
             
             var advancedBus = Substitute.For<IAdvancedBus>();
-            advancedBus.ExchangeDeclareAsync(null, null, false, true, false, false, null)
+            advancedBus.ExchangeDeclareAsync(null, null, false, true, false, null)
                 .ReturnsForAnyArgs(mi =>
                 {
                     var exchange = new ExchangeStub { Name = (string)mi[0] };

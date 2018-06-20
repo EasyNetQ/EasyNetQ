@@ -216,7 +216,6 @@ namespace EasyNetQ.Tests
                 false, 
                 false, 
                 true, 
-                true, 
                 "my.alternate.exchange");
         }
 

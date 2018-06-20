@@ -220,7 +220,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage message)
+            IMessage message
+        )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -234,7 +235,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class
+            IMessage<T> message
+        ) where T : class
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -249,7 +251,8 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body)
+            byte[] body
+        )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -341,7 +344,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null)
+            int? maxLengthBytes = null
+        )
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -432,9 +436,9 @@ namespace EasyNetQ
             bool passive = false,
             bool durable = true,
             bool autoDelete = false,
-            bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false)
+            bool delayed = false
+        )
         {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
@@ -545,8 +549,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(binding, "binding");
 
-            var queue = binding.Bindable as IQueue;
-            if (queue != null)
+            if (binding.Bindable is IQueue queue)
             {
                 await clientCommandDispatcher.InvokeAsync(x => x.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null)).ConfigureAwait(false);
 
@@ -560,12 +563,8 @@ namespace EasyNetQ
                     );
                 }
             }
-            else
+            else if(binding.Bindable is IExchange destination)
             {
-                var destination = binding.Bindable as IExchange;
-                if (destination == null)
-                    return;
-                
                 await clientCommandDispatcher.InvokeAsync(x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, new Dictionary<string, object>())).ConfigureAwait(false);
 
                 if (logger.IsDebugEnabled())

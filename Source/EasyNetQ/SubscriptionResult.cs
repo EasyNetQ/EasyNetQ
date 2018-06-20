@@ -1,7 +1,7 @@
 ﻿using System;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ
 {
     public class SubscriptionResult : ISubscriptionResult
     {

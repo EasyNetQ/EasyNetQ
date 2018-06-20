@@ -151,7 +151,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage message);
+            IMessage message
+        );
 
         /// <summary>
         /// Publish a message as a .NET type
@@ -173,7 +174,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class;
+            IMessage<T> message
+        ) where T : class;
 
         /// <summary>
         /// Publish a message as a byte array.
@@ -196,7 +198,8 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body);
+            byte[] body
+        );
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -226,8 +229,18 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null);
+            int? maxLengthBytes = null
+        );
 
+
+        /// <summary>
+        /// Declare a transient server named queue. Note, this queue will only last for duration of the
+        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
+        /// consumers.
+        /// </summary>
+        /// <returns>The queue</returns>
+        Task<IQueue> QueueDeclareAsync();
+        
         /// <summary>
         /// Delete a queue
         /// </summary>
@@ -250,7 +263,6 @@ namespace EasyNetQ
         /// <param name="passive">Throw an exception rather than create the exchange if it doesn't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <param name="delayed">If set, declares x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
@@ -260,9 +272,9 @@ namespace EasyNetQ
             bool passive = false,
             bool durable = true,
             bool autoDelete = false,
-            bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false);
+            bool delayed = false
+        );
 
         /// <summary>
         /// Delete an exchange
@@ -376,13 +388,5 @@ namespace EasyNetQ
         /// The conventions used by EasyNetQ to name its routing topology elements.
         /// </summary>
         IConventions Conventions { get; }
-
-        /// <summary>
-        /// Declare a transient server named queue. Note, this queue will only last for duration of the
-        /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
-        /// consumers.
-        /// </summary>
-        /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync();
     }
 }

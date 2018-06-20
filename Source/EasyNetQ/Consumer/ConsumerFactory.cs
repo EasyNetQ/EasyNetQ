@@ -29,9 +29,7 @@ namespace EasyNetQ.Consumer
                     consumers.TryRemove(stoppedConsumingEvent.Consumer, out value);
                 });
         }
-
        
-
         public IConsumer CreateConsumer(
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
