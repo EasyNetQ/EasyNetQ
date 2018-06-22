@@ -155,7 +155,7 @@ namespace EasyNetQ.DI.Tests
             {
                 var serviceCollection = new ServiceCollection();
                 c(new ServiceCollectionAdapter(serviceCollection));
-                var serviceProvider = serviceCollection.BuildServiceProvider();
+                var serviceProvider = serviceCollection.BuildServiceProvider(true); //validate scopes
                 return serviceProvider.GetService<IServiceResolver>();
             })};
 #endif
