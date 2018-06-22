@@ -11,13 +11,13 @@ namespace EasyNetQ.Consumer
 {
 
     /// <summary>
-    /// A strategy for dealing with failed messages. When a message consumer thows, HandleConsumerError is invoked.
+    /// A strategy for dealing with failed messages. When a message consumer throws, HandleConsumerError is invoked.
     /// 
-    /// The general priciple is to put all failed messages in a dedicated error queue so that they can be 
+    /// The general principle is to put all failed messages in a dedicated error queue so that they can be 
     /// examined and retried (or ignored).
     /// 
     /// Each failed message is wrapped in a special system message, 'Error' and routed by a special exchange
-    /// named after the orignal message's routing key. This is so that ad-hoc queues can be attached for
+    /// named after the original message's routing key. This is so that ad-hoc queues can be attached for
     /// errors on specific message types.
     /// 
     /// Each exchange is bound to the central EasyNetQ error queue.
@@ -141,7 +141,7 @@ namespace EasyNetQ.Consumer
             if (disposed || disposing)
             {
                 logger.ErrorFormat(
-                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeed",
+                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeued",
                     context.Info
                 );
                 
@@ -168,7 +168,7 @@ namespace EasyNetQ.Consumer
             }
             catch (BrokerUnreachableException unreachableException)
             {
-                // thrown if the broker is unreachable duringe initial creation.
+                // thrown if the broker is unreachable during initial creation.
                 logger.Error(
                     unreachableException,
                     "Cannot connect to broker while attempting to publish error message"
@@ -218,7 +218,7 @@ namespace EasyNetQ.Consumer
                 // we'll need to clone context.Properties as we are mutating the headers dictionary
                 error.BasicProperties = (MessageProperties)context.Properties.Clone();
 
-                // the RabbitMQClient implictly converts strings to byte[] on sending, but reads them back as byte[]
+                // the RabbitMQClient implicitly converts strings to byte[] on sending, but reads them back as byte[]
                 // we're making the assumption here that any byte[] values in the headers are strings
                 // and all others are basic types. RabbitMq client generally throws a nasty exception if you try
                 // to store anything other than basic types in headers anyway.

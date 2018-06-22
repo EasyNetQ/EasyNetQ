@@ -1,7 +1,7 @@
 ﻿namespace EasyNetQ.Tests
 {
     /// <summary>
-    /// Category specifiying that a test has to be explicitly named before it
+    /// Category specifying that a test has to be explicitly named before it
     /// is run.
     /// </summary>
     public class ExplicitAttribute : CategoryAttribute

@@ -71,7 +71,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
             AssertMessageDeserializedCorrectly((Message<MyMessage>)deserializedMessage, messageContent, typeof(MyMessage), p => AssertDefaultMessagePropertiesCorrect(p, messageType, correlationId));
-            Assert.Equal(deserializedMessage.Properties.UserId, message.Properties.UserId); //, "Additional message properties not serialised");
+            Assert.Equal(deserializedMessage.Properties.UserId, message.Properties.UserId); //, "Additional message properties not serialized");
         }
 
         [Fact]
@@ -206,7 +206,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var message = new Message<MyMessageV2>(messageBody);
             var serializedMessage = serializationStrategy.SerializeMessage(message);
 
-            // Mess with the properties to mimic a message serialised as MyMessageV3
+            // Mess with the properties to mimic a message serialized as MyMessageV3
             var messageType = serializedMessage.Properties.Type;
             serializedMessage.Properties.Type = messageType.Replace("MyMessageV2", "SomeCompletelyRandomType");
             var alternativeMessageHeader = (string)serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey];
