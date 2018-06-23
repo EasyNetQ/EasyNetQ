@@ -67,7 +67,7 @@ namespace EasyNetQ.Scheduling
         }
 
         /// <summary>
-        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilities (message time-to-live and dead letter exchange).
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The IBus instance to publish on</param>
@@ -79,7 +79,7 @@ namespace EasyNetQ.Scheduling
         }
 
         /// <summary>
-        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilities (message time-to-live and dead letter exchange).
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The IBus instance to publish on</param>
@@ -158,7 +158,7 @@ namespace EasyNetQ.Scheduling
         }
 
         /// <summary>
-        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilities (message time-to-live and dead letter exchange).
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The IBus instance to publish on</param>
@@ -170,7 +170,7 @@ namespace EasyNetQ.Scheduling
         }
 
         /// <summary>
-        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilites (message time-to-live and dead letter exchange).
+        /// Schedule a message to be published at some time in the future, using bare RabbitMQ's capabilities (message time-to-live and dead letter exchange).
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The IBus instance to publish on</param>

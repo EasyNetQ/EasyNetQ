@@ -94,7 +94,6 @@ namespace EasyNetQ.Producer
             {
                 timer = new Timer(state =>
                 {
-                    ((Timer)state)?.Dispose();
                     tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
                 }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
             }
@@ -230,7 +229,7 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(responder, "responder");
             Preconditions.CheckNotNull(configure, "configure");
-            // We're explicitely validating TResponse here because the type won't be used directly.
+            // We're explicitly validating TResponse here because the type won't be used directly.
             // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
 
@@ -310,7 +309,7 @@ namespace EasyNetQ.Producer
             // HACK: I think we can live with this, because it will run only on exception, 
             // it tries to preserve the default serialization behavior, 
             // being able to also deserialize POCO objects that has constructors with parameters
-            // this avoids to introduce a custom class wraper that will change the message payload
+            // this avoids to introduce a custom class wrapper that will change the message payload
             var body = JsonConvert.DeserializeObject<TResponse>(typeof(TResponse) == typeof(string) ? "''" : "{}");
 
             var responseMessage = new Message<TResponse>(body);

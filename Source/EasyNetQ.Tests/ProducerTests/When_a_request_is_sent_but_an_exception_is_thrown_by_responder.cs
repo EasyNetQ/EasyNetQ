@@ -85,8 +85,8 @@ namespace EasyNetQ.Tests.ProducerTests
 
             if (exceptionMessage != null)
             {
-                // strings are implicitly convertered in byte[] from RabbitMQ client
-                // but not convertered back in string
+                // strings are implicitly converted in byte[] from RabbitMQ client
+                // but not converted back in string
                 // check the source code in the class RabbitMQ.Client.Impl.WireFormatting
                 properties.Headers.Add("ExceptionMessage", Encoding.UTF8.GetBytes(exceptionMessage));
             }

@@ -132,13 +132,13 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
                 Arg<string>.Is.Anything,
                 Arg<bool>.Is.Anything), opt => opt.Repeat.Times(1));
 
-            //ensure the IMessageInterfaceOne exchange is bound to the concreate type version
+            //ensure the IMessageInterfaceOne exchange is bound to the concrete type version
             advancedBus.AssertWasCalled(b => b.BindAsync(
                 Arg<IExchange>.Matches( m => m.Name == "MessageWithTwoInterfaces"),
                 Arg<IExchange>.Matches(m => m.Name == "IMessageInterfaceOne"), 
                 Arg<string>.Is.Anything), opt => opt.Repeat.Times(1));
 
-            //ensure the IMessageInterfaceTwo exchange is bound to the concreate type version
+            //ensure the IMessageInterfaceTwo exchange is bound to the concrete type version
             advancedBus.AssertWasCalled(b => b.BindAsync(
                 Arg<IExchange>.Matches(m => m.Name == "MessageWithTwoInterfaces"),
                 Arg<IExchange>.Matches(m => m.Name == "IMessageInterfaceTwo"),

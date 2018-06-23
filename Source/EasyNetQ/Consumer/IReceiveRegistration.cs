@@ -6,7 +6,7 @@ namespace EasyNetQ.Consumer
     public interface IReceiveRegistration
     {
         /// <summary>
-        /// Add an asychronous message handler to this receiver
+        /// Add an asynchronous message handler to this receiver
         /// </summary>
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="onMessage">The message handler</param>

@@ -9,12 +9,12 @@ namespace EasyNetQ
     public interface IBasicGetResult<T> where T : class
     {
         /// <summary>
-        /// True if a message is availabe, false if not.
+        /// True if a message is available, false if not.
         /// </summary>
         bool MessageAvailable { get; }
 
         /// <summary>
-        /// The message retreived from the queue. 
+        /// The message retrieved from the queue. 
         /// This property will throw a MessageNotAvailableException if no message
         /// was available. You should check the MessageAvailable property before
         /// attempting to access it.

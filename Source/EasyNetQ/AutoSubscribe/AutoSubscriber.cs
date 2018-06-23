@@ -11,7 +11,7 @@ namespace EasyNetQ.AutoSubscribe
 {
     /// <summary>
     /// Lets you scan assemblies for implementations of <see cref="IConsume{T}"/> so that
-    /// these will get registrered as subscribers in the bus.
+    /// these will get registered as subscribers in the bus.
     /// </summary>
     public class AutoSubscriber
     {
