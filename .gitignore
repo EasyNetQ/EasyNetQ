@@ -11,6 +11,7 @@
 _ReSharper.*
 *.orig
 *.dll
+.vscode
 
 # Ignore NCrunch cache files.
 *.crunchproject.local.xml
