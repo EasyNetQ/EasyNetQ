@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Interception
 {
-    public class RawMessage
+    public /*readonly - requires C# 7.2*/ struct RawMessage
     {
         public RawMessage(MessageProperties properties, byte[] body)
         {
