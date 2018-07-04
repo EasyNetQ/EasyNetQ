@@ -11,21 +11,21 @@ using FluentAssertions;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    public class When_autosubscribing : IDisposable
+    public class When_autosubscribing_with_explicit_implementation : IDisposable
     {
         private MockBuilder mockBuilder;
         private Dictionary<string, object> parameters;
 
         private const string expectedQueueName1 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_with_explicit_implementation+MessageA, EasyNetQ.Tests_my_app:fe528c6fdb14f1b5a2216b78ab508ca9";
 
         private const string expectedQueueName2 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageB, EasyNetQ.Tests_MyExplicitId";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_with_explicit_implementation+MessageB, EasyNetQ.Tests_MyExplicitId";
 
         private const string expectedQueueName3 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageC, EasyNetQ.Tests_my_app:8b7980aa5e42959b4202e32ee442fc52";
+            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_with_explicit_implementation+MessageC, EasyNetQ.Tests_my_app:34db9400fe90bb9dc2cf2743a21dadbf";
 
-        public When_autosubscribing()
+        public When_autosubscribing_with_explicit_implementation()
         {
             //mockBuilder = new MockBuilder();
             mockBuilder = new MockBuilder();
@@ -84,17 +84,17 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
-            public void Consume(MessageA message)
+            void IConsume<MessageA>.Consume(MessageA message)
             {
             }
 
             [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public void Consume(MessageB message)
+            void IConsume<MessageB>.Consume(MessageB message)
             {
             }
 
             [ForTopic("Important")]
-            public void Consume(MessageC message)
+            void IConsume<MessageC>.Consume(MessageC message)
             {
             }
           

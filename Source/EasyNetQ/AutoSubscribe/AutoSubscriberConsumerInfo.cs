@@ -1,12 +1,15 @@
 using System;
+using System.Linq;
+using System.Reflection;
 
 namespace EasyNetQ.AutoSubscribe
 {
     public class AutoSubscriberConsumerInfo
     {
-        public readonly Type ConcreteType;
-        public readonly Type InterfaceType;
-        public readonly Type MessageType;
+        public Type ConcreteType{ get; }
+        public Type InterfaceType { get; }
+        public Type MessageType { get; }
+        public MethodInfo ConsumeMethod { get; }
 
         public AutoSubscriberConsumerInfo(Type concreteType, Type interfaceType, Type messageType)
         {
@@ -17,6 +20,8 @@ namespace EasyNetQ.AutoSubscribe
             ConcreteType = concreteType;
             InterfaceType = interfaceType;
             MessageType = messageType;
+            // get implementing method for interface implementation
+            ConsumeMethod = ConcreteType.GetInterfaceMap(InterfaceType).TargetMethods.Single();
         }
     }
 }
