@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
             DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");
-            DeliverMessage("{ Text: \"Shoudn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
+            DeliverMessage("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
         }
 
         public void Dispose()

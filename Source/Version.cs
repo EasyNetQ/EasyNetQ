@@ -21,7 +21,7 @@ using System.Reflection;
 // 0.64.2.0 Add durability queue on subscription
 // 0.64.1.0 Hosepipe custom broker port configuration by separate parameter
 // 0.64.0.0 Added RabbitMQ broker custom port support to hosepipe
-// 0.63.6.0 Added support for multiple exchange (creating an exchange per implemented interface for a concreate type)
+// 0.63.6.0 Added support for multiple exchange (creating an exchange per implemented interface for a concrete type)
 // 0.63.5.0 Made some methods protected/virtual in HandlerRunner so we can override the behavior
 // 0.63.4.0 EasyNetQ.Scheduler stability fixes
 // 0.63.3.0 Allow injection of custom implementation of IPersistentConnection
@@ -54,7 +54,7 @@ using System.Reflection;
 // 0.53.2.0 Bug fix, process did not always exit if bus disposal caused message handlers to error
 // 0.53.1.0 Removed separate test applications in favor of a single task runner
 // 0.53.0.0 fix expires default behavior of subscription configuration attribute
-// 0.52.0.0 Added synchronous callback on Consume(byte[]) methods of the advaced api
+// 0.52.0.0 Added synchronous callback on Consume(byte[]) methods of the advanced api
 // 0.51.0.0 Brand new sync/async implementation, a lot of changes in publish mechanisms. Should be used with care  
 // 0.50.12.0 Added Serilog nuget package 
 // 0.50.11.0 Updated Scheduler for MSSQL to support all properties of the ScheduleMe message 
@@ -138,7 +138,7 @@ using System.Reflection;
 // 0.32.2.0 Updated JSON.Net to the latest version
 // 0.32.1.0 Add support for message versioning
 // 0.32.0.0 Handle Consumer Task Cancellation
-// 0.31.1.0 Added QueueAttribute for controling queue / exchange names.
+// 0.31.1.0 Added QueueAttribute for controlling queue / exchange names.
 // 0.31.0.0 Added FuturePublish based on deadlettering.
 // 0.30.2.0 Upgrade to RabbitMQ.Client 3.3.0
 // 0.30.1.0 Added FuturePublishAsync
@@ -151,7 +151,7 @@ using System.Reflection;
 // 0.28.0.0 Consumer priority
 // 0.27.5.0 Fixed PersistentChannel issue where model invalid after exception thrown. Bug fix.
 // 0.27.4.0 Fixed broken non-connection string RabbitHutch.Create method
-// 0.27.3.0 Can set product/platfrom info (that displays in Management UI) in connection string
+// 0.27.3.0 Can set product/platform info (that displays in Management UI) in connection string
 // 0.27.2.0 Client information now displayed in Management UI Connections list
 // 0.27.1.0 CLS-Compliant
 // 0.27.0.0 RabbitMQ.Client version 3.2.1
@@ -160,20 +160,20 @@ using System.Reflection;
 // 0.26.5.0 Added non-generic publish methods
 // 0.26.4.0 IConsumerErrorStrategy interface change.
 // 0.26.3.0 Added persistentMessages configuration option.
-// 0.26.2.0 Fixed failed reconection issue. Bug fix.
+// 0.26.2.0 Fixed failed reconnection issue. Bug fix.
 // 0.26.1.0 New policy definitions: alternate-exchange, dead-letter-exchange, dead-letter-routing-key, message-ttl, expires, max-length. Add nullability on HaMode and HaSyncMode, to let add a policy without them.
 // 0.26.0.0 Request now throws exception if the responder throws on server. Requests will not timeout anymore on responder exception.
 // 0.25.4.0 Exchange declare accepts alternate-exchange parameter
 // 0.25.3.0 StructureMap and Windsor Container implementations
 // 0.25.2.0 Can cancel Respond.
-// 0.25.1.0 Autosubscriber explict interface implementation bug fix.
+// 0.25.1.0 Autosubscriber explicit interface implementation bug fix.
 // 0.25.0.0 SetContainerFactory on RabbitHutch, allows replacement of EasyNetQ's internal IoC container
 // 0.24.0.0 Non-Generic extension methods. Includes change to ISubscriptionConfiguration (removing generic type argument)
 // 0.23.0.0 ErrorExchangeNameConvention now takes a MessageReceivedInfo argument
 // 0.22.1.0 Fixed problem when executing channel actions on a non-open connection
 // 0.22.0.0 Send-Receive pattern fixed.
 // 0.21.0.0 Send-Receive pattern DO NOT USE THIS VERSION
-// 0.20.0.0 Mutiple handlers per consumer
+// 0.20.0.0 Multiple handlers per consumer
 // 0.19.0.0 Consumer cancellation
 // 0.18.1.0 JsonSerializerSettings not passed when using TypeNameSerializer
 // 0.18.0.0 Publish/Subscribe polymorphism. Exchange/Queue naming conventions changed.
@@ -194,7 +194,7 @@ using System.Reflection;
 // 0.12.3.0 Upgrade to RabbitMQ.Client 3.1.1
 // 0.12.2.0 Requested Heartbeat on by default
 // 0.12.1.0 Factored declares out of AdvancedBus publish and consume.
-// 0.11.1.0 New plugable validation strategy (IMessageValidationStrategy)
+// 0.11.1.0 New pluggable validation strategy (IMessageValidationStrategy)
 // 0.11.0.0 Exchange durability can be configured
 // 0.10.1.0 EasyNetQ.Trace
 // 0.10.0.0 John-Mark Newton's RequestAsync API change

@@ -1,7 +1,7 @@
 ﻿namespace EasyNetQ.Tests
 {
     /// <summary>
-    /// Category specifiying that the following test is an integration test.
+    /// Category specifying that the following test is an integration test.
     /// </summary>
     public class IntegrationAttribute : CategoryAttribute
     {

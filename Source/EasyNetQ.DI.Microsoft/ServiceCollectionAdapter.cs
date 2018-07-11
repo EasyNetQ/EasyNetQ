@@ -11,7 +11,7 @@ namespace EasyNetQ.DI.Microsoft
         {
             this.serviceCollection = serviceCollection;
 
-            this.serviceCollection.AddScoped<IServiceResolver, ServiceProviderAdapter>();
+            this.serviceCollection.AddSingleton<IServiceResolver, ServiceProviderAdapter>();
         }
 
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService

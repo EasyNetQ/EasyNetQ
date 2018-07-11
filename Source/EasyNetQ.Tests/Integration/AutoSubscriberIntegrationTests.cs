@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests.Integration
 
         public void Dispose()
         {
-            // give the message a chance to get devlivered
+            // give the message a chance to get delivered
             Thread.Sleep(500);
             bus.Dispose();
         }

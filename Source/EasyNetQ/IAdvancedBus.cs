@@ -10,7 +10,7 @@ namespace EasyNetQ
 {
     /// <summary>
     /// IAdvancedBus is a lower level API than IBus which gives you fined grained control
-    /// of routing topology, but keeping the EasyNetQ serialisation, persistent connection,
+    /// of routing topology, but keeping the EasyNetQ serialization, persistent connection,
     /// error handling and subscription thread.
     /// </summary>
     public interface IAdvancedBus : IDisposable
@@ -320,12 +320,12 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="name">The exchange name</param>
         /// <param name="type">The type of exchange</param>
-        /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
+        /// <param name="passive">Throw an exception rather than create the exchange if it doesn't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
         /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="delayed">If set, declares x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
         IExchange ExchangeDeclare(
             string name,
@@ -342,12 +342,12 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="name">The exchange name</param>
         /// <param name="type">The type of exchange</param>
-        /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
+        /// <param name="passive">Throw an exception rather than create the exchange if it doesn't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
         /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="delayed">If set, declares x-delayed-type exchange for routing delayed messages.</param>
         /// <returns>The exchange</returns>
         Task<IExchange> ExchangeDeclareAsync(
             string name,
@@ -452,14 +452,14 @@ namespace EasyNetQ
         /// Get a message from the given queue.
         /// </summary>
         /// <typeparam name="T">The message type to get</typeparam>
-        /// <param name="queue">The queue from which to retreive the message</param>
+        /// <param name="queue">The queue from which to retrieve the message</param>
         /// <returns>An IBasicGetResult.</returns>
         IBasicGetResult<T> Get<T>(IQueue queue) where T : class;
 
         /// <summary>
         /// Get the raw message from the given queue.
         /// </summary>
-        /// <param name="queue">The queue from which to retreive the message</param>
+        /// <param name="queue">The queue from which to retrieve the message</param>
         /// <returns>An IBasicGetResult</returns>
         IBasicGetResult Get(IQueue queue);
 

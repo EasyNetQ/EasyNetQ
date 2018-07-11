@@ -7647,7 +7647,7 @@ namespace EasyNetQ.LightInject
 
     /// <summary>
     /// Contains a set of extension method that represents
-    /// a compability layer for reflection methods.
+    /// a compatibility layer for reflection methods.
     /// </summary>
     internal static class TypeHelper
     {
