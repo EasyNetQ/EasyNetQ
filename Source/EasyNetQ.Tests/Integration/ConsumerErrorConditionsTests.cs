@@ -66,7 +66,7 @@ namespace EasyNetQ.Tests
             var serializer = bus.Advanced.Container.Resolve<ISerializer>();
             var conventions = bus.Advanced.Container.Resolve<IConventions>();
 
-            var errorQueue = new Queue(conventions.ErrorQueueNamingConvention(), false);
+            var errorQueue = new Queue(conventions.ErrorQueueNamingConvention(new MessageReceivedInfo()), false);
             bus.Advanced.QueuePurge(errorQueue);
 
             var typeName = typeNameSerializer.Serialize(typeof(MyErrorTestMessage));

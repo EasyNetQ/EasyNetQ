@@ -31,7 +31,7 @@ namespace EasyNetQ.Hosepipe.Tests
             };
 
             var rawErrorMessages = new MessageReader()
-                .ReadMessages(parameters, conventions.ErrorQueueNamingConvention());
+                .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(new MessageReceivedInfo()));
 
             errorRetry.RetryErrors(rawErrorMessages, parameters);
         }

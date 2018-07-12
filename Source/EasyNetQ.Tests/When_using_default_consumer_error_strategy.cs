@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
-                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
+                ErrorQueueNamingConvention = info => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 
@@ -62,7 +62,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_use_exchange_name_from_custom_names_provider()
         {
-            mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true);
+            mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
         }
 
         [Fact]
