@@ -109,7 +109,7 @@ namespace EasyNetQ.Consumer
                 autoDelete: false,
                 arguments: null);
 
-            model.ExchangeDeclare(exchangeName, ExchangeType.Topic, durable: true);
+            model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
             model.QueueBind(queueName, exchangeName, routingKey);
         }
 
