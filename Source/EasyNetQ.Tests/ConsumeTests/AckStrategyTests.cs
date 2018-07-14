@@ -85,31 +85,4 @@ namespace EasyNetQ.Tests.ConsumeTests
             Assert.Equal(AckResult.Nack, result);
         }
     }
-
-    public class Nothing_strategy
-    {
-        private IModel model;
-        private AckResult result;
-        private const ulong deliveryTag = 1234;
-
-        public Nothing_strategy()
-        {
-            model = Substitute.For<IModel>();
-
-            result = AckStrategies.Nothing(model, deliveryTag);
-        }
-
-        [Fact]
-        public void Should_have_no_interaction_with_model()
-        {
-            var rec = model.ReceivedCalls();
-            Assert.False(rec.GetEnumerator().MoveNext());
-        }
-
-        [Fact]
-        public void Should_return_Nothing()
-        {
-            Assert.Equal(AckResult.Nothing, result);
-        }
-    }
 }

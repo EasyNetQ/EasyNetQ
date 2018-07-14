@@ -20,7 +20,6 @@
     {
         Ack,
         Nack,
-        Exception,
-        Nothing
+        Exception
     }
 }
