@@ -31,7 +31,8 @@ namespace EasyNetQ.Tests
                 new JsonSerializer(), 
                 customConventions,
                 new DefaultTypeNameSerializer(),
-                new DefaultErrorMessageSerializer());
+                new DefaultErrorMessageSerializer()
+            );
 
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
