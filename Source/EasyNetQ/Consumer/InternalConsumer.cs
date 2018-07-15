@@ -148,12 +148,9 @@ namespace EasyNetQ.Consumer
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
         private readonly IEventBus eventBus;
-
         private ICollection<BasicConsumer> basicConsumers;
 
         public IModel Model { get; private set; }
-        public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
-
 
         public event Action<IInternalConsumer> Cancelled;
 
