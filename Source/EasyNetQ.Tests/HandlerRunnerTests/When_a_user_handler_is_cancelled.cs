@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Events;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
@@ -25,7 +26,8 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_cancelled()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            
+            consumerErrorStrategy.HandleConsumerCancelled(null).ReturnsForAnyArgs(AckStrategies.Ack);
+
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
             var consumer = Substitute.For<IBasicConsumer>();
@@ -56,7 +58,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         }
 
         [Fact]
-        public void Should_Nack()
+        public void Should_Ack()
         {
             channel.Received().BasicAck(42, false);
         }
