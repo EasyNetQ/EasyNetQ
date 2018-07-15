@@ -44,8 +44,7 @@ namespace EasyNetQ.Tests
                     CorrelationId = string.Empty,
                     AppId = string.Empty
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
+                originalMessageBody
             );
 
             try

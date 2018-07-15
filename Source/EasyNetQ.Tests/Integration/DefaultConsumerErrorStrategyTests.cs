@@ -44,8 +44,8 @@ namespace EasyNetQ.Tests.Integration
                 serializer, 
                 conventions,
                 typeNameSerializer,
-                errorMessageSerializer);
-         
+                errorMessageSerializer
+            );
         }
 
         /// <summary>
@@ -67,9 +67,8 @@ namespace EasyNetQ.Tests.Integration
                     CorrelationId = "123",
                     AppId = "456"
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
-                );
+                originalMessageBody
+            );
 
             consumerErrorStrategy.HandleConsumerError(context, exception);
 
@@ -115,9 +114,8 @@ namespace EasyNetQ.Tests.Integration
                     CorrelationId = "123",
                     AppId = "456"
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
-                );
+                originalMessageBody
+            );
 
             connectionFactory = Substitute.For<IConnectionFactory>();
 
