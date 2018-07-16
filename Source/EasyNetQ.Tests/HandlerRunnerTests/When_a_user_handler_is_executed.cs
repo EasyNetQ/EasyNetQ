@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                     return ackStrategy(channel, 42);
                 })
                 .Unwrap()
-                .Wait();
+                .Wait(1000);
         }
 
         [Fact]

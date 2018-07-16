@@ -42,13 +42,13 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             );
 
             handlerRunner.InvokeUserMessageHandlerAsync(context)
-                         .ContinueWith(async x =>
-                        {
-                            var ackStrategy = await x.ConfigureAwait(false);
-                            return ackStrategy(channel, 42);
-                        })
-                        .Unwrap()
-                        .Wait();
+                .ContinueWith(async x =>
+                {
+                    var ackStrategy = await x.ConfigureAwait(false);
+                    return ackStrategy(channel, 42);
+                })
+                .Unwrap()
+                .Wait(1000);
         }
 
         [Fact]
