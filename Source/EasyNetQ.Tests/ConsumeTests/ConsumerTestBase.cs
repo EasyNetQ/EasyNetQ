@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);
-            MockBuilder.Bus.Advanced.Consume(queue, (body, properties, messageInfo) => Task.Factory.StartNew(() =>
+            MockBuilder.Bus.Advanced.Consume(queue, (body, properties, messageInfo) => Task.Run(() =>
                 {
                     DeliveredMessageBody = body;
                     DeliveredMessageProperties = properties;
@@ -72,7 +72,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             OriginalProperties = new BasicProperties
                 {
                     Type = "the_message_type",
-                    CorrelationId = "the_correlation_id"
+                    CorrelationId = "the_correlation_id",
                 };
             OriginalBody = Encoding.UTF8.GetBytes("Hello World");
 
@@ -94,7 +94,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var autoResetEvent = new AutoResetEvent(false);
             MockBuilder.EventBus.Subscribe<DeliveredMessageEvent>(x => autoResetEvent.Set());
-            autoResetEvent.WaitOne(1000);
+            autoResetEvent.WaitOne(5000);
         }
 
         protected void WaitForMessageDispatchToComplete()
@@ -102,7 +102,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
             MockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
-            autoResetEvent.WaitOne(1000);
+            autoResetEvent.WaitOne(5000);
         }
     }
 }

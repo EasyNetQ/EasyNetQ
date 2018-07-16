@@ -31,9 +31,6 @@ namespace EasyNetQ.Tests.ConsumeTests
                                                            args.Body == OriginalBody),
                 Arg.Is<Exception>(e => e == exception)
             );
-
-            ConsumerErrorStrategy.DidNotReceive()
-                .HandleConsumerCancelled(Arg.Any<ConsumerExecutionContext>());
         }
 
         [Fact]
