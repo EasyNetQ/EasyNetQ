@@ -35,7 +35,7 @@ namespace EasyNetQ.Consumer
                 logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.Info);
             }
 
-            var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context);
+            var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context).ConfigureAwait(false);
             
             return (model, tag) =>
             {
