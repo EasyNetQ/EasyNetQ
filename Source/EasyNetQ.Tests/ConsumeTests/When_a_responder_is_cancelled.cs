@@ -81,7 +81,10 @@ namespace EasyNetQ.Tests.ConsumeTests
             var waiter = new CountdownEvent(2);
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
             mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
-            waiter.Wait(5000);
+            if (!waiter.Wait(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         private class RpcRequest

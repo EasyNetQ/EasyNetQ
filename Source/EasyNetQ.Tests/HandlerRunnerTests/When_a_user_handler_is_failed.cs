@@ -43,14 +43,18 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                 messageBody
             );
 
-            handlerRunner.InvokeUserMessageHandlerAsync(context)
+            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context)
                 .ContinueWith(async x =>
                 {
                     var ackStrategy = await x.ConfigureAwait(false);
                     return ackStrategy(channel, 42);
                 }, TaskContinuationOptions.ExecuteSynchronously)
-                .Unwrap()
-                .Wait(5000);
+                .Unwrap();
+
+            if (!handlerTask.Wait(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         [Fact]

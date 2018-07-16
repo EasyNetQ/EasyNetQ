@@ -94,15 +94,21 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var autoResetEvent = new AutoResetEvent(false);
             MockBuilder.EventBus.Subscribe<DeliveredMessageEvent>(x => autoResetEvent.Set());
-            autoResetEvent.WaitOne(5000);
+            if(!autoResetEvent.WaitOne(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
-        protected void WaitForMessageDispatchToComplete()
+        private void WaitForMessageDispatchToComplete()
         {
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
             MockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
-            autoResetEvent.WaitOne(5000);
+            if (!autoResetEvent.WaitOne(5000))
+            {
+                throw new TimeoutException();
+            }
         }
     }
 }
