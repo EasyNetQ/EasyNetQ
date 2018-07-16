@@ -78,11 +78,10 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         private void WaitForResponse()
         {
-            var waiter = new SemaphoreSlim(0, 2);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Release());
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Release());
-            waiter.Wait(1000);
-            waiter.Wait(1000);
+            var waiter = new CountdownEvent(2);
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
+            waiter.Wait(5000);
         }
 
         private class RpcRequest

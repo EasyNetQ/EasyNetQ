@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                 {
                     var ackStrategy = await x.ConfigureAwait(false);
                     return ackStrategy(channel, 42);
-                })
+                }, TaskContinuationOptions.ExecuteSynchronously)
                 .Unwrap()
                 .Wait(5000);
         }

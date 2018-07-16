@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                (body, properties, info) => Task.Run(() => throw new Exception()),
+                async (body, properties, info) => throw new Exception(),
                 messageInfo,
                 messageProperties,
                 messageBody
@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                 {
                     var ackStrategy = await x.ConfigureAwait(false);
                     return ackStrategy(channel, 42);
-                })
+                }, TaskContinuationOptions.ExecuteSynchronously)
                 .Unwrap()
                 .Wait(5000);
         }

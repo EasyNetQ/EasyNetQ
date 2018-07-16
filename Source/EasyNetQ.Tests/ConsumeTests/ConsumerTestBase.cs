@@ -84,7 +84,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "the_routing_key",
                 OriginalProperties,
                 OriginalBody
-                );
+            );
 
             WaitForMessageDispatchToBegin();
             WaitForMessageDispatchToComplete();

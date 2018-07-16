@@ -131,7 +131,8 @@ namespace EasyNetQ.Consumer
                                     var ackResult = ackStrategy(Model, deliveryTag);
                                     eventBus.Publish(new AckEvent(messageReceivedInfo, messsageProperties, body, ackResult));
                                 });
-                            }
+                            },
+                            TaskContinuationOptions.ExecuteSynchronously
                          );
         }
 
@@ -295,8 +296,7 @@ namespace EasyNetQ.Consumer
                     consumerTag,
                     queue.Name,
                     configuration
-                );
-                
+                );                
                 
                 return StartConsumingStatus.Succeed;
             }
