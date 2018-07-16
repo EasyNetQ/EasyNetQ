@@ -59,6 +59,8 @@ namespace EasyNetQ.Tests.ConsumeTests
             };
             var body = Encoding.UTF8.GetBytes(message);
 
+            var autoResetEvent = new AutoResetEvent(false);
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",
                 0,
@@ -68,20 +70,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                 properties,
                 body
                 );
-
-            WaitForMessageDispatchToComplete();
-        }
-
-        private void WaitForMessageDispatchToComplete()
-        {
-            // wait for the subscription thread to handle the message ...
-            var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
+            
             if (!autoResetEvent.WaitOne(5000))
             {
                 throw new TimeoutException();
             }
-        }        
+        }       
     }
 }
 

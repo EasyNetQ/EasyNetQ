@@ -63,6 +63,10 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             var body = serializer.MessageToBytes(request);
 
+            var waiter = new CountdownEvent(2);
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
+
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",
                 0,
@@ -73,20 +77,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                 body
                 );
 
-            WaitForResponse();
-        }
-
-        private void WaitForResponse()
-        {
-            var waiter = new CountdownEvent(2);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
             if (!waiter.Wait(5000))
             {
                 throw new TimeoutException();
             }
         }
-
+        
         private class RpcRequest
         {
             public int Value { get; set; }
