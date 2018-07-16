@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag");
 
-            are.WaitOne(500);
+            are.WaitOne(5000);
         }
 
         public void Dispose()

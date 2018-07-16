@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 body
                 );
 
-            are.WaitOne(1000);
+            are.WaitOne(5000);
         }
 
         public void Dispose()

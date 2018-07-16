@@ -77,7 +77,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
-            autoResetEvent.WaitOne(1000);
+            autoResetEvent.WaitOne(5000);
         }        
     }
 }
