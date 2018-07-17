@@ -21,7 +21,7 @@ namespace EasyNetQ.Consumer
         private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers =
             new ConcurrentDictionary<IInternalConsumer, object>();
 
-        private readonly IList<CancelSubscription> eventCancellations = new List<CancelSubscription>();
+        private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
 
         public PersistentMultipleConsumer(
             ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs,
@@ -45,8 +45,8 @@ namespace EasyNetQ.Consumer
 
         public IDisposable StartConsuming()
         {
-            eventCancellations.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
-            eventCancellations.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
+            subscriptions.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
+            subscriptions.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
 
             StartConsumingInternal();
 
@@ -59,8 +59,6 @@ namespace EasyNetQ.Consumer
 
             if (!connection.IsConnected)
             {
-                // connection is not connected, so just ignore this call. A consumer will
-                // be created and start consuming when the connection reconnects.
                 return;
             }
 
@@ -72,7 +70,8 @@ namespace EasyNetQ.Consumer
             internalConsumer.StartConsuming(
                 connection,
                 queueConsumerPairs,
-                configuration);
+                configuration
+            );
         }
 
         private void ConnectionOnDisconnected()
@@ -93,12 +92,12 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
 
             disposed = true;
-
+            
             eventBus.Publish(new StoppedConsumingEvent(this));
-
-            foreach (var cancelSubscription in eventCancellations)
+            
+            foreach (var subscription in subscriptions)
             {
-                cancelSubscription();
+                subscription.Dispose();
             }
 
             foreach (var internalConsumer in internalConsumers.Keys)

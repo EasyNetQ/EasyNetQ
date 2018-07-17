@@ -8,7 +8,7 @@ namespace EasyNetQ.Consumer
     public class TransientConsumer : IConsumer
     {
         private readonly IQueue queue;
-        private readonly Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
         private readonly IInternalConsumerFactory internalConsumerFactory;
@@ -22,7 +22,8 @@ namespace EasyNetQ.Consumer
             IPersistentConnection connection, 
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory, 
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -49,7 +50,8 @@ namespace EasyNetQ.Consumer
                 connection,
                 queue,
                 onMessage,
-                configuration);
+                configuration
+            );
 
             if (status == StartConsumingStatus.Succeed)
                 eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
@@ -67,10 +69,8 @@ namespace EasyNetQ.Consumer
             disposed = true;
 
             eventBus.Publish(new StoppedConsumingEvent(this));
-            if (internalConsumer != null)
-            {
-                internalConsumer.Dispose();
-            }
+            
+            internalConsumer?.Dispose();
         }
     }
 }

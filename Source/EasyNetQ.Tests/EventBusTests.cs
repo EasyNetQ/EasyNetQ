@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
@@ -55,12 +56,12 @@ namespace EasyNetQ.Tests
         {
             var stringsPublished = new List<string>();
 
-            var cancelSubscription = eventBus.Subscribe<string>(stringsPublished.Add);
-            cancelSubscription.Should().NotBeNull();
+            var subscription = eventBus.Subscribe<string>(stringsPublished.Add);
+            subscription.Should().NotBeNull();
 
             eventBus.Publish("Before cancellation");
 
-            cancelSubscription();
+            subscription.Dispose();
 
             eventBus.Publish("Hello World");
 
@@ -94,11 +95,11 @@ namespace EasyNetQ.Tests
         {
             Event1 eventFromSubscription = null;
 
-            CancelSubscription cancelEvent = null;
+            IDisposable subscription = null;
 
-            cancelEvent = eventBus.Subscribe<Event1>(@event =>
+            subscription = eventBus.Subscribe<Event1>(@event =>
             {
-                cancelEvent();
+                subscription.Dispose();
                 eventFromSubscription = @event;
             });
 
