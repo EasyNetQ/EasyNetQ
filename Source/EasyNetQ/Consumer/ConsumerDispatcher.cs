@@ -19,8 +19,7 @@ namespace EasyNetQ.Consumer
 
             var thread = new Thread(_ =>
             {
-                Action action;
-                while (!disposed && queue.TryTake(out action, -1))
+                while (!disposed && queue.TryTake(out var action, -1))
                 {
                     try
                     {
@@ -45,8 +44,7 @@ namespace EasyNetQ.Consumer
         {
             // throw away any queued actions. RabbitMQ will redeliver any in-flight
             // messages that have not been acked when the connection is lost.
-            Action result;
-            while (queue.TryTake(out result))
+            while (queue.TryTake(out _))
             {
             }
         }

@@ -234,9 +234,7 @@ namespace EasyNetQ.Tests
                 ConsumerTagConvention = () => consumerTag
             };
 
-            mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(conventions)
-                );
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
 
             var autoResetEvent = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
@@ -331,11 +329,7 @@ namespace EasyNetQ.Tests
                 .Register(consumerErrorStrategy)
                 );
 
-            mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
-            {
-                throw originalException;
-            });
-
+            mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => throw originalException);
 
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
@@ -382,9 +376,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_pass_the_exception_to_consumerErrorStrategy()
         {
-            raisedException.Should().NotBeNull();
-            raisedException.InnerException.Should().NotBeNull();
-            raisedException.InnerException.Should().BeSameAs(originalException);
+            raisedException.Should().BeSameAs(originalException);
         }
 
         [Fact]
