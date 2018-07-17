@@ -18,12 +18,6 @@ namespace EasyNetQ.Internals
             semaphoreReleaser = new SemaphoreSlimReleaser(semaphore);
         }
 
-        public IDisposable Acquire()
-        {
-            semaphore.Wait();
-            return semaphoreReleaser;
-        }
-
         public async Task<IDisposable> AcquireAsync()
         {
             await semaphore.WaitAsync().ConfigureAwait(false);
