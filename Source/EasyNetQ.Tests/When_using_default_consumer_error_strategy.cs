@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
-                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
+                ErrorQueueNamingConvention = info => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 

@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests.Integration
             using(var connection = connectionFactory.CreateConnection())
             using(var model = connection.CreateModel())
             {
-                var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(), true);
+                var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(new MessageReceivedInfo()), true);
                 if (getArgs == null)
                 {
                     Assert.True(false, "Nothing on the error queue");

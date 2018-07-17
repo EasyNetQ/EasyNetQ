@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
         [Explicit("Requires a RabbitMQ server on localhost")]
         public void Should_be_able_to_subscribe_to_error_messages()
         {
-            var errorQueueName = new Conventions(new DefaultTypeNameSerializer()).ErrorQueueNamingConvention();
+            var errorQueueName = new Conventions(new DefaultTypeNameSerializer()).ErrorQueueNamingConvention(new MessageReceivedInfo());
 
             var queue = bus.Advanced.QueueDeclare(errorQueueName);
             var autoResetEvent = new AutoResetEvent(false);
