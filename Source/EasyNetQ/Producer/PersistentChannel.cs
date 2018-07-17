@@ -12,6 +12,9 @@ namespace EasyNetQ.Producer
 {
     public class PersistentChannel : IPersistentChannel
     {
+        private const int MinRetryTimeoutMs = 50;
+        private const int MaxRetryTimeoutMs = 5000;
+        
         private readonly ILog logger = LogProvider.For<PersistentChannel>();
         private readonly ConnectionConfiguration configuration;
         private readonly IPersistentConnection connection;
@@ -21,7 +24,8 @@ namespace EasyNetQ.Producer
         public PersistentChannel(
             IPersistentConnection connection,
             ConnectionConfiguration configuration,
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(configuration, "configuration");
@@ -37,9 +41,13 @@ namespace EasyNetQ.Producer
         public void InvokeChannelAction(Action<IModel> channelAction)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
-            var startTime = DateTime.UtcNow;
-            var retryTimeout = TimeSpan.FromMilliseconds(50);
-            while (!IsTimedOut(startTime))
+            
+            var timeout = configuration.Timeout.Equals(0)
+                ? TimeBudget.Infinite()
+                : TimeBudget.Start(TimeSpan.FromSeconds(configuration.Timeout));
+            
+            var retryTimeoutMs = MinRetryTimeoutMs;
+            while (!timeout.IsExpired())
             {
                 try
                 {
@@ -60,10 +68,11 @@ namespace EasyNetQ.Producer
                     CloseChannel();
                 }
 
-                Thread.Sleep(retryTimeout);
+                Thread.Sleep(retryTimeoutMs);
 
-                retryTimeout = retryTimeout.Double();
+                retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
             }
+            
             logger.Error("Channel action timed out");
             throw new TimeoutException("The operation requested on PersistentChannel timed out");
         }
@@ -183,11 +192,6 @@ namespace EasyNetQ.Producer
             {
                 return true;
             }
-        }
-
-        private bool IsTimedOut(DateTime startTime)
-        {
-            return !configuration.Timeout.Equals(0) && startTime.AddSeconds(configuration.Timeout) < DateTime.UtcNow;
         }
     }
 }
