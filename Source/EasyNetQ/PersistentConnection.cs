@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -52,7 +53,7 @@ namespace EasyNetQ
                     throw new EasyNetQException("This PersistentConnection has already been initialized.");
                 }
                 initialized = true;
-                TryToConnect(null);
+                TryToConnect();
             }
         }
 
@@ -68,22 +69,13 @@ namespace EasyNetQ
         
         public bool IsConnected => connection != null && connection.IsOpen && !disposed;
 
-        void StartTryToConnect()
+        private void StartTryToConnect()
         {
-            Timer timer = null;
-#if !NETFX
-            timer = new Timer(delegate { TryToConnect(timer); }, 
-                null, connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
-#else
-            timer = new Timer(TryToConnect);
-            timer.Change(connectionFactory.Configuration.ConnectIntervalAttempt, Timeout.InfiniteTimeSpan);
-#endif
+            Timers.RunOnce(s => TryToConnect(), connectionFactory.Configuration.ConnectIntervalAttempt);
         }
 
-        void TryToConnect(object timer)
+        private void TryToConnect()
         {
-            ((Timer) timer)?.Dispose();
-
             logger.Debug("Trying to connect");
             if (disposed) return;
 
@@ -135,7 +127,7 @@ namespace EasyNetQ
             }
         }
 
-        void LogException(Exception exception)
+        private void LogException(Exception exception)
         {
             logger.Error(
                 exception,
@@ -146,7 +138,7 @@ namespace EasyNetQ
             );
         }
 
-        void OnConnectionShutdown(object sender, ShutdownEventArgs e)
+        private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
             if (disposed) return;
             OnDisconnected();
@@ -154,30 +146,30 @@ namespace EasyNetQ
             // try to reconnect and re-subscribe
             logger.InfoFormat("Disconnected from broker");
 
-            TryToConnect(null);
+            TryToConnect();
         }
 
-        void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
+        private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
             logger.InfoFormat("Connection blocked with reason {reason}", e.Reason);
 
             eventBus.Publish(new ConnectionBlockedEvent(e.Reason));
         }
 
-        void OnConnectionUnblocked(object sender, EventArgs e)
+        private void OnConnectionUnblocked(object sender, EventArgs e)
         {
             logger.InfoFormat("Connection unblocked");
 
             eventBus.Publish(new ConnectionUnblockedEvent());
         }
 
-        public void OnConnected()
+        private void OnConnected()
         {
             logger.Debug("OnConnected event fired");
             eventBus.Publish(new ConnectionCreatedEvent());
         }
 
-        public void OnDisconnected()
+        private void OnDisconnected()
         {
             eventBus.Publish(new ConnectionDisconnectedEvent());
         }
