@@ -5,6 +5,7 @@ using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using System.Linq;
+using System.Threading;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ
@@ -26,7 +27,8 @@ namespace EasyNetQ
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IRpc rpc,
             ISendReceive sendReceive,
-            ConnectionConfiguration connectionConfiguration)
+            ConnectionConfiguration connectionConfiguration
+        )
         {
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
@@ -44,22 +46,7 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
         }
 
-        public virtual Task PublishAsync<T>(T message) where T : class
-        {
-            Preconditions.CheckNotNull(message, "message");
-
-            return PublishAsync(message, conventions.TopicNamingConvention(typeof(T)));
-        }
-
-        public virtual Task PublishAsync<T>(T message, string topic) where T : class
-        {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(topic, "topic");
-
-            return PublishAsync(message, c => c.WithTopic(topic));
-        }
-
-        public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure) where T : class
+        public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
@@ -145,16 +132,7 @@ namespace EasyNetQ
             return new SubscriptionResult(exchange, queue, consumerCancellation);
         }
 
-        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
-            where TRequest : class
-            where TResponse : class
-        {
-            Preconditions.CheckNotNull(request, "request");
-
-            return rpc.RequestAsync<TRequest, TResponse>(request, x => { });
-        }
-
-        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure, CancellationToken cancellationToken)
             where TRequest : class
             where TResponse : class
         {
@@ -198,7 +176,7 @@ namespace EasyNetQ
             return rpc.Respond(responder, configure);
         }
 
-        public virtual Task SendAsync<T>(string queue, T message)
+        public virtual Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken)
             where T : class
         {
             return sendReceive.SendAsync(queue, message);
