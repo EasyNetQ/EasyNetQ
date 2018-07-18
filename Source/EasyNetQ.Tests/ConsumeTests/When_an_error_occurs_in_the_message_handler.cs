@@ -17,10 +17,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                      .ReturnsForAnyArgs(AckStrategies.Ack);
 
             exception = new Exception("I've had a bad day :(");
-            StartConsumer((body, properties, info) =>
-                {
-                    throw exception;
-                });
+            StartConsumer((body, properties, info) => throw exception);
             DeliverMessage();
         }
 
@@ -32,10 +29,8 @@ namespace EasyNetQ.Tests.ConsumeTests
                                                            args.Info.DeliverTag == DeliverTag &&
                                                            args.Info.Exchange == "the_exchange" &&
                                                            args.Body == OriginalBody),
-                Arg.Is<Exception>(ex => ex.InnerException == exception));
-
-            ConsumerErrorStrategy.DidNotReceive()
-                .HandleConsumerCancelled(Arg.Any<ConsumerExecutionContext>());
+                Arg.Is<Exception>(e => e == exception)
+            );
         }
 
         [Fact]

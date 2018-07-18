@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
-                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
+                ErrorQueueNamingConvention = info => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 
@@ -31,7 +31,8 @@ namespace EasyNetQ.Tests
                 new JsonSerializer(), 
                 customConventions,
                 new DefaultTypeNameSerializer(),
-                new DefaultErrorMessageSerializer());
+                new DefaultErrorMessageSerializer()
+            );
 
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
@@ -44,8 +45,7 @@ namespace EasyNetQ.Tests
                     CorrelationId = string.Empty,
                     AppId = string.Empty
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
+                originalMessageBody
             );
 
             try

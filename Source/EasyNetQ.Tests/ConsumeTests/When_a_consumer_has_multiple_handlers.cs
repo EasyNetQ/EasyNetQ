@@ -47,7 +47,10 @@ namespace EasyNetQ.Tests.ConsumeTests
             Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
             Deliver(new Dog());
 
-            countdownEvent.Wait(1000);
+            if (!countdownEvent.Wait(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         public void Dispose()
@@ -55,7 +58,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             mockBuilder.Bus.Dispose();
         }
 
-        void Deliver<T>(T message) where T : class
+        private void Deliver<T>(T message) where T : class
         {
             var body = new JsonSerializer().MessageToBytes(message);
             var properties = new BasicProperties
@@ -71,7 +74,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "routing_key",
                 properties,
                 body
-                );
+            );
         }
 
         [Fact]

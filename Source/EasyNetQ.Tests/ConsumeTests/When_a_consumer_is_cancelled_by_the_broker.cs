@@ -20,14 +20,17 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             var queue = new Queue("my_queue", false);
 
-            mockBuilder.Bus.Advanced.Consume(queue, (bytes, properties, arg3) => Task.Factory.StartNew(() => { }));
+            mockBuilder.Bus.Advanced.Consume(queue, (bytes, properties, arg3) => Task.Run(() => { }));
 
             var are = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
 
             mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag");
 
-            are.WaitOne(500);
+            if (!are.WaitOne(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         public void Dispose()

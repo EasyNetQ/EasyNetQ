@@ -149,14 +149,14 @@ namespace EasyNetQ.Hosepipe
         private void ErrorDump(QueueParameters parameters)
         {
             if(parameters.QueueName == null)
-                parameters.QueueName = conventions.ErrorQueueNamingConvention();
+                parameters.QueueName = conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
             Dump(parameters);
         }
 
         private void Retry(QueueParameters parameters)
         {
             var count = 0;
-            var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention();
+            var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
             
             errorRetry.RetryErrors(
                 WithEach(

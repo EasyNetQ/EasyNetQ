@@ -8,24 +8,23 @@ using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-
     public class When_a_responder_is_cancelled : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private PublishedMessageEvent publishedMessage;
         private AckEvent ackEvent;
 
-        private readonly IConventions Conventions;
-        private readonly ITypeNameSerializer TypeNameSerializer;
-        private readonly ISerializer Serializer;
+        private readonly IConventions conventions;
+        private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly ISerializer serializer;
 
         public When_a_responder_is_cancelled()
         {
             mockBuilder = new MockBuilder();
 
-            Conventions = mockBuilder.Bus.Advanced.Conventions;
-            TypeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
-            Serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
+            conventions = mockBuilder.Bus.Advanced.Conventions;
+            typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
+            serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
             mockBuilder.Bus.RespondAsync<RpcRequest, RpcResponse>(m =>
             {
@@ -57,12 +56,16 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var properties = new BasicProperties
             {
-                Type = TypeNameSerializer.Serialize(request.GetType()),
+                Type = typeNameSerializer.Serialize(request.GetType()),
                 CorrelationId = "the_correlation_id",
-                ReplyTo = Conventions.RpcReturnQueueNamingConvention()
+                ReplyTo = conventions.RpcReturnQueueNamingConvention()
             };
 
-            var body = Serializer.MessageToBytes(request);
+            var body = serializer.MessageToBytes(request);
+
+            var waiter = new CountdownEvent(2);
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
 
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",
@@ -74,18 +77,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                 body
                 );
 
-            WaitForResponse();
+            if (!waiter.Wait(5000))
+            {
+                throw new TimeoutException();
+            }
         }
-
-        private void WaitForResponse()
-        {
-            var waiter = new SemaphoreSlim(0, 2);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Release());
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Release());
-            waiter.Wait(1000);
-            waiter.Wait(1000);
-        }
-
+        
         private class RpcRequest
         {
             public int Value { get; set; }

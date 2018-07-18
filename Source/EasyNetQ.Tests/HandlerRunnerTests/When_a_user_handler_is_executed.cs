@@ -1,10 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.Events;
 using FluentAssertions;
 using Xunit;
 using RabbitMQ.Client;
@@ -22,7 +20,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             {
                 CorrelationId = "correlation_id"
             };
-        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 123, false, "exchange", "routingKey", "queue");
+        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 42, false, "exchange", "routingKey", "queue");
         private readonly byte[] messageBody = new byte[0];
 
         private readonly IModel channel;
@@ -30,31 +28,37 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_executed()
         {
             var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            var eventBus = new EventBus();
 
-            var handlerRunner = new HandlerRunner(consumerErrorStrategy, eventBus);
-
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler = (body, properties, info) => 
-                Task.Factory.StartNew(() =>
-                    {
-                        deliveredBody = body;
-                        deliveredProperties = properties;
-                        deliveredInfo = info;
-                    });
+            var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
             var consumer = Substitute.For<IBasicConsumer>();
             channel = Substitute.For<IModel>();
             consumer.Model.Returns(channel);
 
             var context = new ConsumerExecutionContext(
-                userHandler, messageInfo, messageProperties, messageBody, consumer);
+                (body, properties, info) => Task.Run(() =>
+                    {
+                        deliveredBody = body;
+                        deliveredProperties = properties;
+                        deliveredInfo = info;
+                    }),
+                messageInfo,
+                messageProperties,
+                messageBody
+            );
 
-            var autoResetEvent = new AutoResetEvent(false);
-            eventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
+            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context)
+                .ContinueWith(async x =>
+                {
+                    var ackStrategy = await x.ConfigureAwait(false);
+                    return ackStrategy(channel, 42);
+                }, TaskContinuationOptions.ExecuteSynchronously)
+                .Unwrap();
 
-            handlerRunner.InvokeUserMessageHandler(context);
-
-            autoResetEvent.WaitOne(1000);
+            if (!handlerTask.Wait(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         [Fact]
@@ -76,9 +80,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         }
 
         [Fact]
-        public void Should_ACK_message()
+        public void Should_ACK()
         {
-            channel.Received().BasicAck(123, false);
+            channel.Received().BasicAck(42, false);
         }
     }
 }

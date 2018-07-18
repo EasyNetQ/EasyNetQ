@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void The_default_error_queue_name_should_be()
         {
-            var result = conventions.ErrorQueueNamingConvention();
+            var result = conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
             result.Should().Be("EasyNetQ_Default_Error_Queue");
         }
 

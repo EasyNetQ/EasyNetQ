@@ -30,8 +30,6 @@ namespace EasyNetQ.Tests.ConsumeTests
                                                         args.Info.DeliverTag == DeliverTag &&
                                                         args.Info.Exchange == "the_exchange" &&
                                                         args.Body == OriginalBody));
-
-            ConsumerErrorStrategy.DidNotReceive().HandleConsumerError(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>());
         }
 
         [Fact]
