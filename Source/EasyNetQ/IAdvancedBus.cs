@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
@@ -147,11 +148,13 @@ namespace EasyNetQ
         /// If this flag is false, the server silently drops the message.
         /// </param>
         /// <param name="message">The message to publish</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync(
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage message
+            IMessage message,
+            CancellationToken cancellationToken = default
         );
 
         /// <summary>
@@ -170,11 +173,13 @@ namespace EasyNetQ
         /// If this flag is false, the server silently drops the message.
         /// </param>
         /// <param name="message">The message to publish</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync<T>(
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message
+            IMessage<T> message,
+            CancellationToken cancellationToken = default
         );
 
         /// <summary>
@@ -193,12 +198,14 @@ namespace EasyNetQ
         /// </param>
         /// <param name="messageProperties">The message properties</param>
         /// <param name="body">The message body</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync(
             IExchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body
+            byte[] body,
+            CancellationToken cancellationToken = default
         );
 
         /// <summary>

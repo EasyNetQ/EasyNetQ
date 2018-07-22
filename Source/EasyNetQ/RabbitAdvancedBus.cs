@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
@@ -219,7 +220,8 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage message
+            IMessage message,
+            CancellationToken cancellationToken
         )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -227,14 +229,15 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body);
+            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken);
         }
 
         public virtual Task PublishAsync<T>(
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message
+            IMessage<T> message,
+            CancellationToken cancellationToken
         )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -242,7 +245,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(message, "message");
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body);
+            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken);
         }
 
         public virtual async Task PublishAsync(
@@ -250,7 +253,8 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body
+            byte[] body,
+            CancellationToken cancellationToken
         )
         {
             Preconditions.CheckNotNull(exchange, "exchange");

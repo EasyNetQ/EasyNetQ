@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -21,18 +22,20 @@ namespace EasyNetQ
         /// </param>
         /// <param name="messageProperties">The message properties</param>
         /// <param name="body">The message body</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         public static void Publish(
             this IAdvancedBus bus,
             IExchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body
+            byte[] body,
+            CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
-            bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body)
+            bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body, cancellationToken)
                .GetAwaiter()
                .GetResult();
         }
@@ -53,17 +56,19 @@ namespace EasyNetQ
         ///     If this flag is false, the server silently drops the message.
         /// </param>
         /// <param name="message">The message to publish</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         public static void Publish<T>(
             this IAdvancedBus bus,
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message
+            IMessage<T> message,
+            CancellationToken cancellationToken = default
         ) where T : class
         {
             Preconditions.CheckNotNull(bus, "bus");
 
-            bus.PublishAsync(exchange, routingKey, mandatory, message)
+            bus.PublishAsync(exchange, routingKey, mandatory, message, cancellationToken)
                .GetAwaiter()
                .GetResult();
         }

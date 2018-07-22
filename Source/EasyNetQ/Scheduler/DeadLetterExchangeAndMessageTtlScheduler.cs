@@ -51,7 +51,7 @@ namespace EasyNetQ.Scheduler
                 }
                 
             };
-            await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
     }
 }
