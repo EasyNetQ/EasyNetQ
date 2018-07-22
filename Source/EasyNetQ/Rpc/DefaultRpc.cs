@@ -177,8 +177,7 @@ namespace EasyNetQ.Rpc
 
                 advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                     {
-                        ResponseAction responseAction;
-                        if(responseActions.TryRemove(message.Properties.CorrelationId, out responseAction))
+                        if(responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
                         {
                             responseAction.OnSuccess(message);
                         }

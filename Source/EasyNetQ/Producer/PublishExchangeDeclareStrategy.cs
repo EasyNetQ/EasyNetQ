@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
@@ -22,10 +23,10 @@ namespace EasyNetQ.Producer
             this.advancedBus = advancedBus;
         }
 
-        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType)
+        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
             if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (await asyncLock.AcquireAsync().ConfigureAwait(false))
+            using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
                 exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
@@ -34,10 +35,10 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType)
+        public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         {
             var exchangeName = conventions.ExchangeNamingConvention(messageType);
-            return DeclareExchangeAsync(exchangeName, exchangeType);
+            return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
@@ -8,11 +9,13 @@ namespace EasyNetQ.Producer
         public static IExchange DeclareExchange(
             this IPublishExchangeDeclareStrategy strategy, 
             string exchangeName,
-            string exchangeType)
+            string exchangeType,
+            CancellationToken cancellationToken = default
+        )
         {
             Preconditions.CheckNotNull(strategy, "strategy");
 
-            return strategy.DeclareExchangeAsync(exchangeName, exchangeType)
+            return strategy.DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }
@@ -20,11 +23,13 @@ namespace EasyNetQ.Producer
         public static IExchange DeclareExchange(
             this IPublishExchangeDeclareStrategy strategy, 
             Type messageType,
-            string exchangeType)
+            string exchangeType,
+            CancellationToken cancellationToken = default     
+        )
         {
             Preconditions.CheckNotNull(strategy, "strategy");
 
-            return strategy.DeclareExchangeAsync(messageType, exchangeType)
+            return strategy.DeclareExchangeAsync(messageType, exchangeType, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }
