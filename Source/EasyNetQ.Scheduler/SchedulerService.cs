@@ -3,6 +3,7 @@ using System.Transactions;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 using System.Collections.Concurrent;
+using EasyNetQ.PubSub;
 using log4net;
 
 namespace EasyNetQ.Scheduler
@@ -40,8 +41,8 @@ namespace EasyNetQ.Scheduler
         public void Start()
         {
             log.DebugFormat("Starting SchedulerService");
-            bus.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
-            bus.Subscribe<UnscheduleMe>(schedulerSubscriptionId, OnMessage);
+            bus.PubSub.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
+            bus.PubSub.Subscribe<UnscheduleMe>(schedulerSubscriptionId, OnMessage);
 
             publishTimer = new System.Threading.Timer(OnPublishTimerTick, null, 0, configuration.PublishIntervalSeconds * 1000);
             purgeTimer = new System.Threading.Timer(OnPurgeTimerTick, null, 0, configuration.PurgeIntervalSeconds * 1000);
@@ -80,7 +81,7 @@ namespace EasyNetQ.Scheduler
         {
             try
             {
-                if (!bus.IsConnected)
+                if (!bus.Advanced.IsConnected)
                 {
                     log.Info("Not connected");
                     return;

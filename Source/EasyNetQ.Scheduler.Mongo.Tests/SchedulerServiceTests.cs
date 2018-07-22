@@ -13,7 +13,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();
 
-            bus.IsConnected.Returns(true);
+            bus.Advanced.IsConnected.Returns(true);
             bus.Advanced.Returns(advancedBus);
 
             scheduleRepository = Substitute.For<IScheduleRepository>();

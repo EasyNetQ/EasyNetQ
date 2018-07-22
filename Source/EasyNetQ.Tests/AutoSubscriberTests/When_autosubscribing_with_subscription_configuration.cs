@@ -1,10 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
 using System;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
 using Xunit;
 using NSubstitute;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using EasyNetQ.PubSub;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
@@ -13,16 +15,19 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
-       
+        private IPubSub pubSub;
+
         public When_autosubscribing_with_subscription_configuration_attribute()
-        {
+        {            
+            pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
+            bus.PubSub.Returns(pubSub);
             
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
-            bus.When(x => x.Subscribe(
+            pubSub.When(x => x.SubscribeAsync(
                     Arg.Is("MyAttrTest"),
-                    Arg.Any<Action<MessageA>>(),
+                    Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                     ))
                     .Do(a =>
@@ -30,7 +35,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                         capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
                     });
 
-            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
+            autoSubscriber.Subscribe(new [] {GetType().GetTypeInfo().Assembly});
         }
 
         public void Dispose()
@@ -41,9 +46,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_called_subscribe()
         {
-            bus.Received().Subscribe(
+            pubSub.Received().SubscribeAsync(
                         Arg.Any<string>(),
-                        Arg.Any<Action<MessageA>>(),
+                        Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                         Arg.Any<Action<ISubscriptionConfiguration>>()
                         );
         }
@@ -66,7 +71,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
             [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
-            public void Consume(MessageA message)
+            public void Consume(MessageA message, CancellationToken cancellationToken)
             {
             }
         }

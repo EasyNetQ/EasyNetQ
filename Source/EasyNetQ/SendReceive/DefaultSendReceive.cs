@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.SendReceive
 {
-    public class SendReceive : ISendReceive
+    public class DefaultSendReceive : ISendReceive
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         
         private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>(); 
 
-        public SendReceive(
+        public DefaultSendReceive(
             IAdvancedBus advancedBus,
-            IMessageDeliveryModeStrategy messageDeliveryModeStrategy)
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy
+        )
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
@@ -25,7 +27,7 @@ namespace EasyNetQ.Producer
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public Task SendAsync<T>(string queue, T message)
+        public Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken)
             where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -44,62 +46,57 @@ namespace EasyNetQ.Producer
             return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage);
         }
 
-        public IDisposable Receive<T>(string queue, Action<T> onMessage)
-            where T : class
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-
-            return Receive<T>(queue, message => TaskHelpers.ExecuteSynchronously(() => onMessage(message)));
-        }
-
-        public IDisposable Receive<T>(string queue, Action<T> onMessage, Action<IConsumerConfiguration> configure)
-            where T : class
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
-
-            return Receive<T>(queue, message => TaskHelpers.ExecuteSynchronously(() => onMessage(message)), configure);
-        }
-
-        public IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
-            where T : class
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-
-            var declaredQueue = DeclareQueue(queue);
-            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body));
-        }
-
-        public IDisposable Receive<T>(string queue, Func<T, Task> onMessage, Action<IConsumerConfiguration> configure)
+        public AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+            string queue, 
+            Func<T, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure,
+            CancellationToken cancellationToken
+        )
             where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var declaredQueue = DeclareQueue(queue);
-            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body), configure);
+            return ReceiveInternalAsync(queue, onMessage, configure, cancellationToken).ToAwaitableDisposable();
         }
 
-        public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers)
+        private async Task<IDisposable> ReceiveInternalAsync<T>(
+            string queue, 
+            Func<T, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure,
+            CancellationToken cancellationToken
+        ) where T : class
         {
             var declaredQueue = DeclareQueue(queue);
-            return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)));
+            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body, default), configure);
         }
 
-        public IDisposable Receive(string queue, Action<IReceiveRegistration> addHandlers, Action<IConsumerConfiguration> configure)
+        public AwaitableDisposable<IDisposable> ReceiveAsync(
+            string queue,
+            Action<IReceiveRegistration> addHandlers,
+            Action<IConsumerConfiguration> configure,
+            CancellationToken cancellationToken
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(addHandlers, "addHandlers");
             Preconditions.CheckNotNull(configure, "configure");
 
+            return ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken).ToAwaitableDisposable();
+        }
+
+        private async Task<IDisposable> ReceiveInternalAsync(
+            string queue, 
+            Action<IReceiveRegistration> addHandlers,
+            Action<IConsumerConfiguration> configure,
+            CancellationToken cancellationToken
+        )
+        {
             var declaredQueue = DeclareQueue(queue);
             return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)), configure);
         }
-
+        
         private IQueue DeclareQueue(string queueName)
         {
             IQueue queue = null;

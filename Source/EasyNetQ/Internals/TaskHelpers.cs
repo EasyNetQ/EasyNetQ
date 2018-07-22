@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 #if NETFX
 using System.Diagnostics;
 using System.Reflection;
@@ -82,19 +83,104 @@ namespace EasyNetQ.Internals
             try
             {
                 action();
-                tcs.SetResult(null);
+                tcs.TrySetResult(null);
+            }
+            catch (OperationCanceledException e)
+            {
+                tcs.TrySetCanceled();
             }
             catch (Exception e)
             {
-                tcs.SetException(e);
+                tcs.TrySetException(e);
             }
+
             return tcs.Task;
         }
 
-        public static Task FromException(Exception ex)
+        public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
+        {
+            return (x, y) =>
+            {
+                var tcs = new TaskCompletionSource<T2>();
+                try
+                {
+                    var result = func(x, y);
+                    tcs.SetResult(result);
+                }
+                catch (OperationCanceledException)
+                {
+                    tcs.SetCanceled();
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            };
+        }
+        
+        public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
+        {
+            return (x, y, z) =>
+            {
+                var tcs = new TaskCompletionSource<object>();
+                try
+                {
+                    action(x, y, z);
+                    tcs.SetResult(null);
+                }
+                catch (OperationCanceledException)
+                {
+                    tcs.SetCanceled();
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            };
+        }
+        
+        public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
+        {
+            return (x, y) =>
+            {
+                var tcs = new TaskCompletionSource<object>();
+                try
+                {
+                    action(x, y);
+                    tcs.SetResult(null);
+                }
+                catch (OperationCanceledException)
+                {
+                    tcs.SetCanceled();
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            };
+        }
+        
+        public static Task<T> FromCancelled<T>()
+        {
+            var tcs = new TaskCompletionSource<T>();
+            tcs.SetCanceled();
+            return tcs.Task;
+        }
+        
+        public static Task FromException(Exception exception)
         {
             var tcs = new TaskCompletionSource<object>();
-            tcs.SetException(ex);
+            tcs.SetException(exception);
+            return tcs.Task;
+        }
+        
+        public static Task<T> FromException<T>(Exception exception)
+        {
+            var tcs = new TaskCompletionSource<T>();
+            tcs.SetException(exception);
             return tcs.Task;
         }
         

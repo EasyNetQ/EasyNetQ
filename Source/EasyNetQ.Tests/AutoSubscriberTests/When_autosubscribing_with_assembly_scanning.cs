@@ -26,11 +26,10 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public When_autosubscribing_with_assembly_scanning()
         {
             mockBuilder = new MockBuilder();
-//            mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
 
-            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
+            autoSubscriber.Subscribe(new [] {GetType().GetTypeInfo().Assembly});
         }
 
         public void Dispose()
