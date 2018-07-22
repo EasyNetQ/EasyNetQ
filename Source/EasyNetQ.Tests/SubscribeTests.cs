@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests
                 .Register<IConventions>(conventions)
                 );
 
-            subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, async (m, c) => {}, c => { });
+            subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => {});
         }
 
         public void Dispose()
@@ -102,7 +102,8 @@ namespace EasyNetQ.Tests
                     Arg.Is(true),
                     Arg.Is(false),
                     Arg.Any<IDictionary<string, object>>(),
-                    Arg.Any<IBasicConsumer>());
+                    Arg.Any<IBasicConsumer>()
+            );
         }
 
         [Fact]
@@ -145,7 +146,9 @@ namespace EasyNetQ.Tests
             using (mockBuilder.Bus)
             {
                 // Configure subscription
-                mockBuilder.PubSub.Subscribe<MyMessage>("x", async (m, c) => { }, 
+                mockBuilder.PubSub.Subscribe<MyMessage>(
+                    "x",
+                    m => { }, 
                     c =>
                     {                        
                         c.WithAutoDelete(autoDelete)

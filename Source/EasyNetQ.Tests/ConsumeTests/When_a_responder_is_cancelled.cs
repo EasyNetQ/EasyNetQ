@@ -30,9 +30,6 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             mockBuilder.Rpc.RespondAsync<RpcRequest, RpcResponse>(m => TaskHelpers.FromCancelled<RpcResponse>());
 
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => publishedMessage = x);
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => ackEvent = x);
-
             DeliverMessage(new RpcRequest { Value = 42 });
         }
 
@@ -61,8 +58,16 @@ namespace EasyNetQ.Tests.ConsumeTests
             var body = serializer.MessageToBytes(request);
 
             var waiter = new CountdownEvent(2);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x =>
+            {
+                publishedMessage = x;
+                waiter.Signal();
+            });
+            mockBuilder.EventBus.Subscribe<AckEvent>(x =>
+            {
+                ackEvent = x;
+                waiter.Signal();
+            });
 
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",

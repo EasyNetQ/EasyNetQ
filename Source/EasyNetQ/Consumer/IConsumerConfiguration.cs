@@ -38,7 +38,7 @@
 
         public IConsumerConfiguration WithExclusive(bool isExclusive)
         {
-            IsExclusive = true;
+            IsExclusive = isExclusive;
             return this;
         }
 
