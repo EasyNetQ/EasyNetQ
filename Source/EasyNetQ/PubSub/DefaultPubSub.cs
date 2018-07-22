@@ -59,7 +59,7 @@ namespace EasyNetQ.PubSub
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
             var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
 
         public virtual AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(

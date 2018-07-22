@@ -60,7 +60,7 @@ namespace EasyNetQ.Scheduler
             Preconditions.CheckNotNull(message, "message");
             
             var scheduleMeType = typeof(ScheduleMe);
-            var scheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
+            var scheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
             var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
@@ -87,7 +87,7 @@ namespace EasyNetQ.Scheduler
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType)
                 }
             };
-            await advancedBus.PublishAsync(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
 
         }
     }

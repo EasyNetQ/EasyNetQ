@@ -43,7 +43,7 @@ namespace EasyNetQ.SendReceive
                 }
             };
 
-            return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage);
+            return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage, cancellationToken);
         }
 
         public AwaitableDisposable<IDisposable> ReceiveAsync<T>(

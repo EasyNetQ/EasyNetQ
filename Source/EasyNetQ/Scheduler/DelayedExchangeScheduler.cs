@@ -47,7 +47,7 @@ namespace EasyNetQ.Scheduler
                     Headers = new Dictionary<string, object> {{"x-delay", (int) delay.TotalMilliseconds}}
                 }
             };
-            await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
     }
 }
