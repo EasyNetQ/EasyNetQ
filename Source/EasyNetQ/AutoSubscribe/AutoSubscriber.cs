@@ -17,6 +17,9 @@ namespace EasyNetQ.AutoSubscribe
     /// </summary>
     public class AutoSubscriber
     {
+        private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+            
         protected readonly IBus Bus;
 
         /// <summary>
@@ -85,31 +88,19 @@ namespace EasyNetQ.AutoSubscribe
         public virtual async Task<IDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
         {
             var subscriptions = new List<IDisposable>();
-            
-            var autoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync));
-            if (autoSubscribeAsyncConsumerMethodInfo == null)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
 
             foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
             {
-                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) autoSubscribeAsyncConsumerMethodInfo
+                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeAsyncConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                     .Invoke(this, new object[] {subscriberConsumerInfo, cancellationToken});
 
                 subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
             }
             
-            var autoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync));
-            if (autoSubscribeConsumerMethodInfo == null)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
             foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
             {
-                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) autoSubscribeConsumerMethodInfo
+                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                     .Invoke(this, new object[] {subscriberConsumerInfo, cancellationToken});
 

@@ -183,6 +183,15 @@ namespace EasyNetQ.Internals
             tcs.SetException(exception);
             return tcs.Task;
         }
+
+        public static Task<T> FromResult<T>(T result)
+        {
+            var tcs = new TaskCompletionSource<T>();
+            tcs.SetResult(result);
+            return tcs.Task;
+        }
+
+        public static Task Completed { get; } = FromResult<object>(null);
         
 #if NETFX
         public static void TrySetResultAsynchronously<T>(this TaskCompletionSource<T> source, T result)

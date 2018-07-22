@@ -113,17 +113,14 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         private class MessageA
         {
-            public string Text { get; set; }
         }
 
         private class MessageB
         {
-            public string Text { get; set; }
         }
 
         private class MessageC
         {
-            public string Text { get; set; }
         }
 
     }

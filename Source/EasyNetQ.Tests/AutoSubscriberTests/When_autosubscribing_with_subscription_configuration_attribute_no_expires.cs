@@ -5,6 +5,7 @@ using NSubstitute;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.PubSub;
 using FluentAssertions;
 
@@ -24,18 +25,15 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
-            pubSub.When(x => x.SubscribeAsync(
-                    Arg.Is($"MyAttrTest"),
+            pubSub.SubscribeAsync(
+                    Arg.Is("MyAttrTest"), 
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
-                ))
-                .Do(a =>
-                {
-                    capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
-                });
+                )
+                .Returns(TaskHelpers.FromResult(Substitute.For<ISubscriptionResult>()).ToAwaitableDisposable())
+                .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            
-            autoSubscriber.Subscribe(new [] {GetType().GetTypeInfo().Assembly});
+            autoSubscriber.Subscribe(new[] {typeof(MyConsumerWithAttr)});
         }
 
         public void Dispose()
@@ -78,7 +76,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         private class MessageA
         {
-            public string Text { get; set; }
         }
     }
 }

@@ -83,7 +83,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         }
 
         //Discovered by reflection over test assembly, do not remove.
-        class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
+        private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
         {
             public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
             {
@@ -103,20 +103,16 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             }
         }
 
-        class MessageA
+        private class MessageA
         {
-            public string Text { get; set; }
         }
 
-        class MessageB
+        private class MessageB
         {
-            public string Text { get; set; }
         }
 
-        class MessageC
+        private class MessageC
         {
-            public string Text { get; set; }
         }
-
     }
 }
