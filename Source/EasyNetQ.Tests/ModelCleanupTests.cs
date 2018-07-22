@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_request_response_model()
         {
-            bus.Rpc.Request<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
