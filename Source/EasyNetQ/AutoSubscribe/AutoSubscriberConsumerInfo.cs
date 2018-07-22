@@ -7,7 +7,6 @@ namespace EasyNetQ.AutoSubscribe
     public class AutoSubscriberConsumerInfo
     {
         public Type ConcreteType{ get; }
-        public Type InterfaceType { get; }
         public Type MessageType { get; }
         public MethodInfo ConsumeMethod { get; }
 
@@ -18,10 +17,8 @@ namespace EasyNetQ.AutoSubscribe
             Preconditions.CheckNotNull(messageType, "messageType");
 
             ConcreteType = concreteType;
-            InterfaceType = interfaceType;
             MessageType = messageType;
-            // get implementing method for interface implementation
-            ConsumeMethod = ConcreteType.GetInterfaceMap(InterfaceType).TargetMethods.Single();
+            ConsumeMethod = ConcreteType.GetInterfaceMap(interfaceType).TargetMethods.Single();
         }
     }
 }

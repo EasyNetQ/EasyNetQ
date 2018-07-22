@@ -6,6 +6,7 @@ using NSubstitute;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.PubSub;
 using FluentAssertions;
 
@@ -32,17 +33,15 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                     .WithPriority(10)
                 };
 
-            pubSub.When(x => x.SubscribeAsync(
-                    Arg.Is("MyActionTest"),
+            pubSub.SubscribeAsync(
+                    Arg.Is("MyActionTest"), 
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
-                    ))
-                    .Do(a =>
-                    {
-                        capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
-                    });
+                )
+                .Returns(TaskHelpers.FromResult(Substitute.For<ISubscriptionResult>()).ToAwaitableDisposable())
+                .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            autoSubscriber.Subscribe(new[] {GetType().GetTypeInfo().Assembly});
+            autoSubscriber.Subscribe(new[] {typeof(MyConsumerWithAction)});
         }
 
         public void Dispose()
@@ -53,7 +52,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_called_subscribe_async()
         {
-            pubSub.Received().Subscribe(
+            pubSub.Received().SubscribeAsync(
                 Arg.Any<string>(),
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -77,18 +76,17 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         // Discovered by reflection over test assembly, do not remove.
         // ReSharper disable once UnusedMember.Local
-        class MyConsumerWithAction : IConsumeAsync<MessageA>
+        private class MyConsumerWithAction : IConsumeAsync<MessageA>
         {
             [AutoSubscriberConsumer(SubscriptionId = "MyActionTest")]
             public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
             {
-                return Task.FromResult(0);
+                return TaskHelpers.Completed;
             }
         }
 
-        class MessageA
+        private class MessageA
         {
-            public string Text { get; set; }
         }
     }
 }

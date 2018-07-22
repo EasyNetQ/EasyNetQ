@@ -2,6 +2,7 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
+using EasyNetQ.PubSub;
 using EasyNetQ.Rpc;
 using EasyNetQ.Scheduler;
 using EasyNetQ.SendReceive;
@@ -47,6 +48,7 @@ namespace EasyNetQ.DI
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
+                .Register<IPubSub, DefaultPubSub>()
                 .Register<IRpc, DefaultRpc>()
                 .Register<ISendReceive, DefaultSendReceive>()
                 .Register<IScheduler, DefaultScheduler>()

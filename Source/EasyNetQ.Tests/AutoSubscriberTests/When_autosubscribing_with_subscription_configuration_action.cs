@@ -6,6 +6,7 @@ using NSubstitute;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.PubSub;
 using FluentAssertions;
 
@@ -31,18 +32,16 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                     .WithPrefetchCount(10)
                                     .WithPriority(10)
                 };
-
-            pubSub.When(x => x.Subscribe(
-                    Arg.Is("MyActionTest"),
+            
+            pubSub.SubscribeAsync(
+                    Arg.Is("MyActionTest"), 
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
-                    ))
-                    .Do(a =>
-                    {
-                        capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
-                    });
+                )
+                .Returns(TaskHelpers.FromResult(Substitute.For<ISubscriptionResult>()).ToAwaitableDisposable())
+                .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            autoSubscriber.Subscribe(new [] {GetType().GetTypeInfo().Assembly});
+            autoSubscriber.Subscribe(new[] {typeof(MyConsumerWithAction)});
         }
 
         public void Dispose()
@@ -53,7 +52,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_called_subscribe()
         {
-            pubSub.Received().Subscribe(
+            pubSub.Received().SubscribeAsync(
                 Arg.Any<string>(),
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -84,7 +83,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         private class MessageA
         {
-            public string Text { get; set; }
         }
     }
 }
