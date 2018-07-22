@@ -9,10 +9,10 @@ namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private const int queueSize = 1;
+        private const int QueueSize = 1;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
+        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(QueueSize);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -28,7 +28,7 @@ namespace EasyNetQ.Producer
             StartDispatcherThread(configuration);
         }
 
-        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -80,7 +80,7 @@ namespace EasyNetQ.Producer
             return tcs.Task;
         }
 
-        public Task InvokeAsync(Action<IModel> channelAction)
+        public Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -88,7 +88,7 @@ namespace EasyNetQ.Producer
             {
                 channelAction(x);
                 return new NoContentStruct();
-            });
+            }, cancellationToken);
         }
 
         public void Dispose()

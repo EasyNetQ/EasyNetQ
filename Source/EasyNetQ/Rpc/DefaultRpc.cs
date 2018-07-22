@@ -97,7 +97,7 @@ namespace EasyNetQ.Rpc
             {
                 timer = new Timer(state =>
                 {
-                    tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+                    tcs.TrySetException(new TimeoutException($"Request timed out. CorrelationId: {correlationId.ToString()}"));
                     responseActions.TryRemove(correlationId.ToString(), out ResponseAction responseAction);
                 }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
             }

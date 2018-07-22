@@ -34,11 +34,11 @@ namespace EasyNetQ.Scheduler
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_delayed";
             var queueName = conventions.QueueNamingConvention(typeof (T), null);
-            var futureExchange = await advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Direct, delayed: true).ConfigureAwait(false);
-            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic).ConfigureAwait(false);
-            await advancedBus.BindAsync(futureExchange, exchange, topic).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(queueName).ConfigureAwait(false);
-            await advancedBus.BindAsync(exchange, queue, topic).ConfigureAwait(false);
+            var futureExchange = await advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Direct, delayed: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await advancedBus.BindAsync(futureExchange, exchange, topic, cancellationToken).ConfigureAwait(false);
+            var queue = await advancedBus.QueueDeclareAsync(queueName, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await advancedBus.BindAsync(exchange, queue, topic, cancellationToken).ConfigureAwait(false);
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
