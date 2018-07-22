@@ -42,7 +42,7 @@ namespace EasyNetQ.Scheduler
         public async Task CancelFuturePublishAsync(string cancellationKey, CancellationToken cancellationToken = default)
         {
             var uncheduleMeType = typeof(UnscheduleMe);
-            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
+            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
             var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
             var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
             {
@@ -51,7 +51,7 @@ namespace EasyNetQ.Scheduler
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(uncheduleMeType)
                 }
             };
-            await advancedBus.PublishAsync(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, easyNetQMessage).ConfigureAwait(false);
+            await advancedBus.PublishAsync(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
 
         //TODO Cache exchange
