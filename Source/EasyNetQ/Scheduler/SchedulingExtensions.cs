@@ -8,10 +8,10 @@ namespace EasyNetQ.Scheduler
         {
             return serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
         }
-
-        public static IServiceRegister EnableExternalScheduler(this IServiceRegister serviceRegister)
+        
+        public static IServiceRegister EnableDeadLetterExchangeAndMessageTtlScheduler(this IServiceRegister serviceRegister)
         {
-            return serviceRegister.Register<IScheduler, ExternalScheduler>();
+            return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         }
     }
 }

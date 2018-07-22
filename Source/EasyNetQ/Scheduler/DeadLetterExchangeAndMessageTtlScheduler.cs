@@ -5,13 +5,13 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Scheduler
 {
-    public class DefaultScheduler : IScheduler
+    public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
-        public DefaultScheduler(
+        public DeadLetterExchangeAndMessageTtlScheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy

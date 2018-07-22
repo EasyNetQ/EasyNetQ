@@ -21,8 +21,8 @@ namespace EasyNetQ.Tests.Scheduling
         public void When_using_EnableDeadLetterExchangeAndMessageTtlScheduler_extension_method_required_services_are_registered()
         {
             var serviceRegister = Substitute.For<IServiceRegister>();
-            serviceRegister.EnableExternalScheduler();
-            serviceRegister.Received().Register<IScheduler, DefaultScheduler>();
+            serviceRegister.EnableDeadLetterExchangeAndMessageTtlScheduler();
+            serviceRegister.Received().Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         }
     }
 }

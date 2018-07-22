@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
         {
             bus = RabbitHutch.CreateBus("host=localhost", x =>
             {
-                x.Register<IScheduler, DefaultScheduler>();
+                x.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
             });
         }
 
