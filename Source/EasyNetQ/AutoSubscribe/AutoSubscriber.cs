@@ -61,21 +61,6 @@ namespace EasyNetQ.AutoSubscribe
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
             ConfigureSubscriptionConfiguration = subscriptionConfiguration => {};
         }
-
-        /// <summary>
-        /// Registers all async consumers in passed assembly. The actual Subscriber instances is
-        /// created using <seealso cref="AutoSubscriberMessageDispatcher"/>. The SubscriptionId per consumer
-        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
-        /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
-        /// </summary>
-        /// <param name="assemblies">The assemblies to scan for consumers.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        public virtual Task<IDisposable> SubscribeAsync(Assembly[] assemblies, CancellationToken cancellationToken = default)
-        {
-            Preconditions.CheckAny(assemblies, nameof(assemblies), "No assemblies specified.");
-
-            return SubscribeAsync(assemblies.SelectMany(a => a.GetTypes()).ToArray(), cancellationToken);
-        }
  
         /// <summary>
         /// Registers all async consumers in passed assembly. The actual Subscriber instances is
@@ -227,8 +212,6 @@ namespace EasyNetQ.AutoSubscribe
             }
             return configuration =>
                 {
-                    //prefetch count is set to a configurable default in RabbitAdvancedBus
-                    //so don't touch it unless SubscriptionConfigurationAttribute value is other than 0.
                     if (configSettings.PrefetchCount > 0)
                         configuration.WithPrefetchCount(configSettings.PrefetchCount);
 
