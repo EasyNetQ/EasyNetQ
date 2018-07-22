@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EasyNetQ.FluentConfiguration
+﻿namespace EasyNetQ.Rpc
 {
     /// <summary>
     /// Allows request configuration to be fluently extended without adding overloads to IBus

@@ -4,16 +4,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using Newtonsoft.Json;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Rpc
 {
     /// <summary>
     /// Default implementation of EasyNetQ's request-response pattern
     /// </summary>
-    public class Rpc : IRpc
+    public class DefaultRpc : IRpc
     {
         private readonly ConnectionConfiguration connectionConfiguration;
         protected readonly IAdvancedBus advancedBus;
@@ -32,7 +33,7 @@ namespace EasyNetQ.Producer
         protected const string isFaultedKey = "IsFaulted";
         protected const string exceptionMessageKey = "ExceptionMessage";
 
-        public Rpc(
+        public DefaultRpc(
             ConnectionConfiguration connectionConfiguration,
             IAdvancedBus advancedBus,
             IEventBus eventBus,
@@ -75,7 +76,11 @@ namespace EasyNetQ.Producer
             }
         }
 
-        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
+        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(
+            TRequest request,
+            Action<IRequestConfiguration> configure,
+            CancellationToken cancellationToken
+        )
         {
             Preconditions.CheckNotNull(request, "request");
 
@@ -214,12 +219,11 @@ namespace EasyNetQ.Producer
             advancedBus.Publish(exchange, routingKey, false, requestMessage);
         }
 
-        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
-        {
-            return Respond(responder, c => { });
-        }
-
-        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
+        public virtual AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+            Func<TRequest, CancellationToken, Task<TResponse>> responder, 
+            Action<IResponderConfiguration> configure,
+            CancellationToken cancellationToken
+        ) 
         {
             Preconditions.CheckNotNull(responder, "responder");
             Preconditions.CheckNotNull(configure, "configure");
@@ -227,6 +231,11 @@ namespace EasyNetQ.Producer
             // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
 
+            return RespondAsyncInternal(responder, configure).ToAwaitableDisposable();
+        }
+
+        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        {
             var requestType = typeof(TRequest);
 
             var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
@@ -234,21 +243,24 @@ namespace EasyNetQ.Producer
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
-            var exchange = advancedBus.ExchangeDeclare(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
-            var queue = advancedBus.QueueDeclare(routingKey);
-            advancedBus.Bind(exchange, queue, routingKey);
+            var exchange = await advancedBus.ExchangeDeclareAsync(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct).ConfigureAwait(false);
+            var queue = await advancedBus.QueueDeclareAsync(routingKey).ConfigureAwait(false);
+            await advancedBus.BindAsync(exchange, queue, routingKey).ConfigureAwait(false);
 
-            return advancedBus.Consume<TRequest>(queue, (requestMessage, messageReceivedInfo) => ExecuteResponder(responder, requestMessage),
-                c => c.WithPrefetchCount(configuration.PrefetchCount));
+            return advancedBus.Consume<TRequest>(
+                queue,
+                (requestMessage, messageReceivedInfo) => ExecuteResponder(responder, requestMessage),
+                c => c.WithPrefetchCount(configuration.PrefetchCount)
+            );
         }
 
-        protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage)
+        protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, IMessage<TRequest> requestMessage)
         {
             var tcs = new TaskCompletionSource<object>();
 
             try
             {
-                responder(requestMessage.Body).ContinueWith(task =>
+                responder(requestMessage.Body, default).ContinueWith(task =>
                 {
                     if (task.IsFaulted || task.IsCanceled)
                     {

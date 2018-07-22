@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
+using EasyNetQ.Rpc;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -26,12 +28,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
             serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
-            mockBuilder.Bus.RespondAsync<RpcRequest, RpcResponse>(m =>
-            {
-                var taskSource = new TaskCompletionSource<RpcResponse>();
-                taskSource.SetCanceled();
-                return taskSource.Task;
-            });
+            mockBuilder.Rpc.RespondAsync<RpcRequest, RpcResponse>(m => TaskHelpers.FromCancelled<RpcResponse>());
 
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => publishedMessage = x);
             mockBuilder.EventBus.Subscribe<AckEvent>(x => ackEvent = x);

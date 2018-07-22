@@ -1,6 +1,6 @@
 ﻿using EasyNetQ.DI;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ.Scheduler
 {
     public static class SchedulingExtensions
     {
@@ -9,9 +9,9 @@ namespace EasyNetQ.Scheduling
             return serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
         }
 
-        public static IServiceRegister EnableDeadLetterExchangeAndMessageTtlScheduler(this IServiceRegister serviceRegister)
+        public static IServiceRegister EnableExternalScheduler(this IServiceRegister serviceRegister)
         {
-            return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
+            return serviceRegister.Register<IScheduler, ExternalScheduler>();
         }
     }
 }

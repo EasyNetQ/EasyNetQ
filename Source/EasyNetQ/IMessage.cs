@@ -29,7 +29,7 @@ namespace EasyNetQ
 
     public class Message<T> : IMessage<T>
     {
-        public MessageProperties Properties { get; private set; }
+        public MessageProperties Properties { get; }
         public Type MessageType { get; }
         public T Body { get; }
 
@@ -50,12 +50,6 @@ namespace EasyNetQ
             Body = body;
             Properties = properties;
             MessageType = body.GetType();
-        }
-
-        public void SetProperties(MessageProperties properties)
-        {
-            Preconditions.CheckNotNull(properties, "properties");
-            Properties = properties;
         }
     }
 }

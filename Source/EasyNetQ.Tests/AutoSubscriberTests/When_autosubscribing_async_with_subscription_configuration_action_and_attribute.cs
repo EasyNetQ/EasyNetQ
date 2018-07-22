@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
+using EasyNetQ.PubSub;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
@@ -11,12 +12,16 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 {
     public class When_autosubscribing_async_with_subscription_configuration_action_and_attribute : IDisposable
     {
-        readonly IBus bus;
-        Action<ISubscriptionConfiguration> capturedAction;
-       
+        private readonly IBus bus;
+        private Action<ISubscriptionConfiguration> capturedAction;
+        private readonly IPubSub pubSub;
+
         public When_autosubscribing_async_with_subscription_configuration_action_and_attribute()
         {
+            pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
+            bus.PubSub.Returns(pubSub);
+
            
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
             {
@@ -27,9 +32,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                         .WithPriority(11)
             };
 
-            bus.When(x => x.SubscribeAsync(
+            pubSub.When(x => x.SubscribeAsync(
                     Arg.Is("MyActionAndAttributeTest"),
-                    Arg.Any<Func<MessageA, Task>>(),
+                    Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                 ))
                 .Do(a =>
@@ -37,7 +42,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                     capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
                 });
 
-            autoSubscriber.SubscribeAsync(GetType().GetTypeInfo().Assembly);
+            autoSubscriber.Subscribe(new[] {GetType().GetTypeInfo().Assembly});
 
         }
 
@@ -49,9 +54,11 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_called_subscribe_async()
         {
-            bus.Received().SubscribeAsync(Arg.Any<string>(),
-                Arg.Any<Func<MessageA, Task>>(),
-                Arg.Any<Action<ISubscriptionConfiguration>>());
+            pubSub.Received().SubscribeAsync(
+                Arg.Any<string>(),
+                Arg.Any<Func<MessageA, CancellationToken, Task>>(),
+                Arg.Any<Action<ISubscriptionConfiguration>>()
+            );
         }
 
         [Fact]
@@ -75,7 +82,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             [AutoSubscriberConsumer(SubscriptionId = "MyActionAndAttributeTest")]
             [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
-            public Task ConsumeAsync(MessageA message)
+            public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
             {
                 return Task.FromResult(0);
             }

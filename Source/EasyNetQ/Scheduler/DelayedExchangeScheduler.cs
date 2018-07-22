@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ.Scheduler
 {
     public class DelayedExchangeScheduler : IScheduler
     {
-        private static readonly TimeSpan MaxMessageDelay = TimeSpan.FromMilliseconds(int.MaxValue);
-
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -27,36 +26,10 @@ namespace EasyNetQ.Scheduling
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
-        {
-            return FuturePublishAsync(futurePublishDate, message, "#", cancellationKey);
-        }
-
-        public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string topic, string cancellationKey = null) where T : class
-        {
-            return FuturePublishInternalAsync(futurePublishDate - DateTime.UtcNow, message, topic, cancellationKey);
-        }
-        
-        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message, string cancellationKey = null) where T : class
-        {
-            return FuturePublishAsync(messageDelay, message, "#", cancellationKey);
-        }
-        
-        public Task FuturePublishAsync<T>(TimeSpan messageDelay, T message, string topic, string cancellationKey = null) where T : class
-        {
-            return FuturePublishInternalAsync(messageDelay, message, topic, cancellationKey);
-        }
-
-        public Task CancelFuturePublishAsync(string cancellationKey)
-        {
-            throw new NotImplementedException("Cancellation is not supported");
-        }
-
-        private async Task FuturePublishInternalAsync<T>(TimeSpan messageDelay, T message, string topic, string cancellationKey = null) where T : class
+        //TODO Cache exchange/queue/bind
+        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default) where T : class
         {
             Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
-            Preconditions.CheckNull(cancellationKey, "cancellationKey");
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_delayed";
@@ -71,7 +44,7 @@ namespace EasyNetQ.Scheduling
                 Properties =
                 {
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof (T)),
-                    Headers = new Dictionary<string, object> {{"x-delay", (int) messageDelay.TotalMilliseconds}}
+                    Headers = new Dictionary<string, object> {{"x-delay", (int) delay.TotalMilliseconds}}
                 }
             };
             await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage).ConfigureAwait(false);

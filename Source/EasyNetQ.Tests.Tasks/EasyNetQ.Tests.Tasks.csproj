@@ -4,6 +4,7 @@
     <Description>EasyNetQ.Tests.Tasks</Description>
     <TargetFramework>net452</TargetFramework>
     <OutputType>Exe</OutputType>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />

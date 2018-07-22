@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 try
                 {
-                    mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage()).Wait();
+                    mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => {}).Wait();
                 }
                 catch (AggregateException aggregateException)
                 {

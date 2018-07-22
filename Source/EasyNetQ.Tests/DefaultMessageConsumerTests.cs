@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading;
 using EasyNetQ.AutoSubscribe;
 using Xunit;
 
@@ -26,7 +27,7 @@ namespace EasyNetQ.Tests
         {
             public static Action<MyMessage> ConsumedMessageFunc { get; set; }
 
-            public void Consume(MyMessage message)
+            public void Consume(MyMessage message, CancellationToken cancellationToken)
             {
                 ConsumedMessageFunc(message);
             }

@@ -2,7 +2,9 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduling;
+using EasyNetQ.Rpc;
+using EasyNetQ.Scheduler;
+using EasyNetQ.SendReceive;
 
 namespace EasyNetQ.DI
 {
@@ -45,9 +47,9 @@ namespace EasyNetQ.DI
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
-                .Register<IRpc, Rpc>()
-                .Register<ISendReceive, SendReceive>()
-                .Register<IScheduler, ExternalScheduler>()
+                .Register<IRpc, DefaultRpc>()
+                .Register<ISendReceive, DefaultSendReceive>()
+                .Register<IScheduler, DefaultScheduler>()
                 .Register<IBus, RabbitBus>();
         }
     }
