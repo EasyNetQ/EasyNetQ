@@ -51,7 +51,7 @@ namespace EasyNetQ.DI
                 .Register<IPubSub, DefaultPubSub>()
                 .Register<IRpc, DefaultRpc>()
                 .Register<ISendReceive, DefaultSendReceive>()
-                .Register<IScheduler, DefaultScheduler>()
+                .Register<IScheduler, ExternalScheduler>()
                 .Register<IBus, RabbitBus>();
         }
     }

@@ -33,7 +33,8 @@ namespace EasyNetQ.Scheduler.Tests
                 {
                     PublishIntervalSeconds = 1,
                     PurgeIntervalSeconds = 1
-                });
+                }
+            );
         }
 
         [Fact]
@@ -51,17 +52,19 @@ namespace EasyNetQ.Scheduler.Tests
 
             advancedBus.Received().Publish(
                 Arg.Any<IExchange>(),
-                Arg.Is<string>("msg1"),
+                Arg.Is("msg1"),
                 Arg.Any<bool>(),
                 Arg.Any<MessageProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<byte[]>()
+            );
 
             advancedBus.Received().Publish(
                 Arg.Any<IExchange>(),
-                Arg.Is<string>("msg2"),
+                Arg.Is("msg2"),
                 Arg.Any<bool>(),
                 Arg.Any<MessageProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<byte[]>()
+            );
         }
     }
 }
