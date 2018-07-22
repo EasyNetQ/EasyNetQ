@@ -99,11 +99,11 @@ namespace EasyNetQ.PubSub
                 maxLengthBytes: configuration.MaxLengthBytes
             ).ConfigureAwait(false);
             
-            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
             {
-                await advancedBus.BindAsync(exchange, queue, topic).ConfigureAwait(false);
+                await advancedBus.BindAsync(exchange, queue, topic, cancellationToken).ConfigureAwait(false);
             }
 
             var consumerCancellation = advancedBus.Consume<T>(
