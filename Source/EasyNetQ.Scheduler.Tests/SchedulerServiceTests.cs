@@ -21,7 +21,7 @@ namespace EasyNetQ.Scheduler.Tests
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();
 
-            bus.Advanced.IsConnected.Returns(true);
+            advancedBus.IsConnected.Returns(true);
             bus.Advanced.Returns(advancedBus);
 
             scheduleRepository = Substitute.For<IScheduleRepository>();
@@ -50,7 +50,7 @@ namespace EasyNetQ.Scheduler.Tests
 
             schedulerService.OnPublishTimerTick(null);
 
-            advancedBus.Received().Publish(
+            advancedBus.Received().PublishAsync(
                 Arg.Any<IExchange>(),
                 Arg.Is("msg1"),
                 Arg.Any<bool>(),
@@ -58,7 +58,7 @@ namespace EasyNetQ.Scheduler.Tests
                 Arg.Any<byte[]>()
             );
 
-            advancedBus.Received().Publish(
+            advancedBus.Received().PublishAsync(
                 Arg.Any<IExchange>(),
                 Arg.Is("msg2"),
                 Arg.Any<bool>(),

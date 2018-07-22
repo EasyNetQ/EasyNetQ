@@ -79,7 +79,8 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                         routingKey,
                         false,
                         properties,
-                        schedule.InnerMessage);
+                        schedule.InnerMessage
+                    );
                     scheduleRepository.MarkAsPublished(schedule.Id);
                     ++published;
                 }
