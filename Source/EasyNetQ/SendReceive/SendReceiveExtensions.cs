@@ -46,7 +46,14 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         ) where T : class
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+            
+            return sendReceive.ReceiveAsync(
+                queue,
+                onMessage,
+                c => { },
+                cancellationToken
+            );
         }
 
         /// <summary>
@@ -67,7 +74,16 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         ) where T : class
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
+
+            return sendReceive.ReceiveAsync(
+                queue,
+                onMessageAsync,
+                configure,
+                cancellationToken
+            );
         }
 
         /// <summary>
@@ -86,7 +102,40 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         ) where T : class
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.ReceiveAsync<T>(
+                queue,
+                (m, c) => onMessage(m),
+                c => { },
+                cancellationToken
+            );
+        }
+        
+                
+        /// <summary>
+        /// Receive a message from the specified queue. Dispatch them to the given handlers
+        /// </summary>
+        /// <param name="sendReceive">The sendReceive instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="addHandlers">A function to add handlers</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
+        public static AwaitableDisposable<IDisposable> ReceiveAsync(
+            this ISendReceive sendReceive,
+            string queue,
+            Action<IReceiveRegistration> addHandlers,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.ReceiveAsync(
+                queue, 
+                addHandlers,
+                c => { },
+                cancellationToken
+            );
         }
 
         /// <summary>
@@ -105,25 +154,9 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         ) where T : class
         {
-            throw new NotImplementedException();
-        }
-        
-        /// <summary>
-        /// Receive a message from the specified queue. Dispatch them to the given handlers
-        /// </summary>
-        /// <param name="sendReceive">The sendReceive instance</param>
-        /// <param name="queue">The queue to take messages from</param>
-        /// <param name="addHandlers">A function to add handlers</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-        public static AwaitableDisposable<IDisposable> ReceiveAsync(
-            this ISendReceive sendReceive,
-            string queue,
-            Action<IReceiveRegistration> addHandlers,
-            CancellationToken cancellationToken = default
-        )
-        {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+            
+            return sendReceive.Receive(queue, onMessage, c => { }, cancellationToken);
         }
 
         /// <summary>
@@ -144,7 +177,16 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         ) where T : class
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
+
+            return sendReceive.Receive(
+                queue,
+                onMessageAsync, 
+                configure,
+                cancellationToken
+            );
         }
 
         /// <summary>
@@ -163,9 +205,45 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         ) where T : class
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.Receive<T>(
+                queue,
+                (m, c) => onMessage(m), 
+                c => { },
+                cancellationToken
+            );
         }
         
+        /// <summary>
+        /// Receive a message from the specified queue
+        /// </summary>
+        /// <typeparam name="T">The type of message to receive</typeparam>
+        /// <param name="sendReceive">The sendReceive instance</param>
+        /// <param name="queue">The queue to receive from</param>
+        /// <param name="onMessage">The asynchronous function that handles the message</param>
+        /// <param name="configure">Action to configure consumer with</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
+        public static IDisposable Receive<T>(
+            this ISendReceive sendReceive,
+            string queue,
+            Func<T, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure,
+            CancellationToken cancellationToken = default
+        ) where T : class
+        {
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.ReceiveAsync(
+                queue,
+                onMessage,
+                configure,
+                cancellationToken
+            ).GetAwaiter().GetResult();
+        }
+
+
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers
         /// </summary>
@@ -181,7 +259,14 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         )
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.Receive(
+                queue, 
+                addHandlers,
+                c => { },
+                cancellationToken
+            );
         }
         
         /// <summary>
@@ -201,7 +286,14 @@ namespace EasyNetQ.SendReceive
             CancellationToken cancellationToken = default
         )
         {
-            throw new NotImplementedException();
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.ReceiveAsync(
+                queue,
+                addHandlers,
+                configure,
+                cancellationToken
+            ).GetAwaiter().GetResult();
         }
     }
 }
