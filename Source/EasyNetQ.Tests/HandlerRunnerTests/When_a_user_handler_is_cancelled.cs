@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
@@ -35,13 +36,13 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                async (body, properties, info) => throw new OperationCanceledException(),
+                (body, properties, info, cancellation) => TaskHelpers.FromCancelled(),
                 messageInfo,
                 messageProperties,
                 messageBody
             );
 
-            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context)
+            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
                 .ContinueWith(async x =>
                 {
                     var ackStrategy = await x.ConfigureAwait(false);

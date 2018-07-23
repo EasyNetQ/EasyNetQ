@@ -1,11 +1,185 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
     public static class AdvancedBusExtensions
     {
+        /// <summary>
+        /// Consume a stream of messages
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, onMessage, c => { });
+        }
+
+        /// <summary>
+        /// Consume a stream of messages
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            var onMessageAsync = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => onMessage(m, i));
+            return bus.Consume(queue, onMessageAsync, configure);
+        }
+
+        /// <summary>
+        /// Consume a stream of messages asynchronously
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, onMessage, c => { });
+        }
+
+        /// <summary>
+        /// Consume a stream of messages asynchronously
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume<T>(queue, (m, i, c) => onMessage(m, i), configure);
+        }
+
+        /// <summary>
+        /// Consume a stream of messages. Dispatch them to the given handlers
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="addHandlers">A function to add handlers to the consumer</param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume(this IAdvancedBus bus, IQueue queue, Action<IHandlerRegistration> addHandlers)
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, addHandlers, c => { });
+        }
+
+        /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the
+        /// receive context.
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume(this IAdvancedBus bus, IQueue queue, Action<byte[], MessageProperties, MessageReceivedInfo> onMessage)
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, onMessage, c => { });
+        }
+  
+        /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the
+        /// receive context.
+        /// </param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume(
+            this IAdvancedBus bus, 
+            IQueue queue, 
+            Action<byte[], MessageProperties, MessageReceivedInfo> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => onMessage(m, p, i));
+
+            return bus.Consume(queue, onMessageAsync, configure);
+        }
+
+        /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the
+        /// receive context. Returns a Task.
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume(
+            this IAdvancedBus bus,
+            IQueue queue, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, onMessage, c => { });
+        }
+        
+        /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the
+        /// receive context. Returns a Task.
+        /// </param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume(
+            this IAdvancedBus bus,
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, (m, p, i, c) => onMessage(m, p, i), configure);
+        }
+
         /// <summary>
         ///     Publish a message as a byte array
         /// </summary>

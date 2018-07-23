@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.SystemMessages;
 using FluentAssertions;
 using NSubstitute;
@@ -60,7 +62,7 @@ namespace EasyNetQ.Tests.Integration
             var exception = new Exception("I just threw!");
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
+                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {
@@ -107,7 +109,7 @@ namespace EasyNetQ.Tests.Integration
             var exception = new Exception("I just threw!");
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
+                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {

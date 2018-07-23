@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
@@ -12,8 +13,8 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, nameof(queue));
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
-
-            return Create<T>(queue, (message, info) => TaskHelpers.ExecuteSynchronously(() => onMessage(message, info)));
+            
+            return new QueueConsumerPair(queue, null, h => h.Add(onMessage));
         }
 
         public static QueueConsumerPair Create<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
@@ -29,7 +30,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, nameof(queue));
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
 
-            return new QueueConsumerPair(queue, (bytes, properties, info) => TaskHelpers.ExecuteSynchronously(() => onMessage(bytes, properties, info)), null);
+            var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => onMessage(m, p, i));
+            return new QueueConsumerPair(queue, onMessageAsync, null);
         }
 
         public static QueueConsumerPair Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
@@ -37,10 +39,10 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, nameof(queue));
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
 
-            return new QueueConsumerPair(queue, onMessage, null);
+            return new QueueConsumerPair(queue, (m, p, i, c) => onMessage(m, p, i), null);
         }
 
-        private QueueConsumerPair(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, Action<IHandlerRegistration> addHandlers)
+        private QueueConsumerPair(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, Action<IHandlerRegistration> addHandlers)
         {
             Queue = queue;
             OnMessage = onMessage;
@@ -48,8 +50,7 @@ namespace EasyNetQ
         }
 
         public IQueue Queue { get; }
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> OnMessage { get; }
+        public Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> OnMessage { get; }
         public Action<IHandlerRegistration> AddHandlers { get; }
-
     }
 }
