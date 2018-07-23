@@ -30,7 +30,7 @@ namespace EasyNetQ.MessageVersioning
             using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
+                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType, cancellationToken: cancellationToken).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
             }
@@ -51,7 +51,7 @@ namespace EasyNetQ.MessageVersioning
                 var exchangeName = conventions.ExchangeNamingConvention(messageType);
                 var sourceExchange = await DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
                 if (destinationExchange != null)
-                    await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
+                    await advancedBus.BindAsync(sourceExchange, destinationExchange, "#", cancellationToken).ConfigureAwait(false);
                 destinationExchange = sourceExchange;
             }
 
