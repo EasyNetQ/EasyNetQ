@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
@@ -16,7 +17,7 @@ namespace EasyNetQ.Consumer
         private volatile bool isStarted;
 
         private readonly IQueue queue;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
 
@@ -29,7 +30,7 @@ namespace EasyNetQ.Consumer
 
         public ExclusiveConsumer(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IPersistentConnection connection,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,

@@ -77,35 +77,37 @@ namespace EasyNetQ.Internals
                 IsSyncSafe = t => false; // assume: not
         }
 #endif
-        public static Task ExecuteSynchronously(Action action)
-        {
-            var tcs = new TaskCompletionSource<object>();
-            try
-            {
-                action();
-                tcs.TrySetResult(null);
-            }
-            catch (OperationCanceledException e)
-            {
-                tcs.TrySetCanceled();
-            }
-            catch (Exception e)
-            {
-                tcs.TrySetException(e);
-            }
-
-            return tcs.Task;
-        }
-
         public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
         {
-            return (x, y) =>
+            return (x, c) =>
             {
                 var tcs = new TaskCompletionSource<T2>();
                 try
                 {
-                    var result = func(x, y);
+                    var result = func(x, c);
                     tcs.SetResult(result);
+                }
+                catch (OperationCanceledException)
+                {
+                    tcs.SetCanceled();
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(exception);
+                }
+                return tcs.Task;
+            };
+        }
+        
+        public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(Action<T1, T2, T3, CancellationToken> action)
+        {
+            return (x, y, z, c) =>
+            {
+                var tcs = new TaskCompletionSource<object>();
+                try
+                {
+                    action(x, y, z, c);
+                    tcs.SetResult(null);
                 }
                 catch (OperationCanceledException)
                 {
@@ -121,12 +123,12 @@ namespace EasyNetQ.Internals
         
         public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
         {
-            return (x, y, z) =>
+            return (x, y, c) =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
                 {
-                    action(x, y, z);
+                    action(x, y, c);
                     tcs.SetResult(null);
                 }
                 catch (OperationCanceledException)
@@ -143,12 +145,12 @@ namespace EasyNetQ.Internals
         
         public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
         {
-            return (x, y) =>
+            return (x, c) =>
             {
                 var tcs = new TaskCompletionSource<object>();
                 try
                 {
-                    action(x, y);
+                    action(x, c);
                     tcs.SetResult(null);
                 }
                 catch (OperationCanceledException)
@@ -161,6 +163,13 @@ namespace EasyNetQ.Internals
                 }
                 return tcs.Task;
             };
+        }
+        
+        public static Task FromCancelled()
+        {
+            var tcs = new TaskCompletionSource<object>();
+            tcs.SetCanceled();
+            return tcs.Task;
         }
         
         public static Task<T> FromCancelled<T>()
