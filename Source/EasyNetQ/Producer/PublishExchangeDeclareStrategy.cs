@@ -29,7 +29,7 @@ namespace EasyNetQ.Producer
             using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
+                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType, cancellationToken: cancellationToken).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
             }

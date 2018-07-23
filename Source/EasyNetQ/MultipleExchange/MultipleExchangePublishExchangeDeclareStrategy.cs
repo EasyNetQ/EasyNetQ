@@ -36,7 +36,7 @@ namespace EasyNetQ.MultipleExchange
                 var destinationExchange =
                     await DeclareExchangeAsync(destinationExchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
                 if (destinationExchange != null)
-                    await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
+                    await advancedBus.BindAsync(sourceExchange, destinationExchange, "#", cancellationToken).ConfigureAwait(false);
             }
 
             return sourceExchange;
@@ -48,7 +48,7 @@ namespace EasyNetQ.MultipleExchange
             using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
+                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType, cancellationToken: cancellationToken).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
             }
