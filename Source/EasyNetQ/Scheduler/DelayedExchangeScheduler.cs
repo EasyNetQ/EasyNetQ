@@ -15,7 +15,8 @@ namespace EasyNetQ.Scheduler
         public DelayedExchangeScheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
-            IMessageDeliveryModeStrategy messageDeliveryModeStrategy)
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy
+        )
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(conventions, "conventions");

@@ -106,7 +106,7 @@ namespace EasyNetQ.SendReceive
             return queue;
         }
 
-        private class HandlerAdder : IReceiveRegistration
+        private sealed class HandlerAdder : IReceiveRegistration
         {
             private readonly IHandlerRegistration handlerRegistration;
 
@@ -115,15 +115,9 @@ namespace EasyNetQ.SendReceive
                 this.handlerRegistration = handlerRegistration;
             }
 
-            public IReceiveRegistration Add<T>(Func<T, Task> onMessage)
+            public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
             {
-                handlerRegistration.Add<T>((message, info) => onMessage(message.Body));
-                return this;
-            }
-
-            public IReceiveRegistration Add<T>(Action<T> onMessage)
-            {
-                handlerRegistration.Add<T>((message, info) => onMessage(message.Body));
+                handlerRegistration.Add<T>((message, info) => onMessage(message.Body, default));
                 return this;
             }
         }

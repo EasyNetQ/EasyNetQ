@@ -19,7 +19,6 @@ namespace EasyNetQ
         /// <summary>
         /// Consume a stream of messages
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="queueConsumerPairs">Multiple queue - consumer pairs</param>
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
@@ -34,7 +33,7 @@ namespace EasyNetQ
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
         IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage);
-
+    
         /// <summary>
         /// Consume a stream of messages
         /// </summary>
