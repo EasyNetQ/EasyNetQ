@@ -22,7 +22,8 @@ namespace EasyNetQ.Scheduler
             ITypeNameSerializer typeNameSerializer,
             IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
-            IMessageSerializationStrategy messageSerializationStrategy)
+            IMessageSerializationStrategy messageSerializationStrategy
+        )
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(conventions, "conventions");

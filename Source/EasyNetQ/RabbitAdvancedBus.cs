@@ -41,7 +41,8 @@ namespace EasyNetQ
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
             AdvancedBusEventHandlers advancedBusEventHandlers,
-            IPersistentConnectionFactory persistentConnectionFactory)
+            IPersistentConnectionFactory persistentConnectionFactory
+        )
         {
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
