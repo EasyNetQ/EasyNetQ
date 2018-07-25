@@ -230,10 +230,10 @@ namespace EasyNetQ.Rpc
             // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
 
-            return RespondAsyncInternal(responder, configure).ToAwaitableDisposable();
+            return RespondAsyncInternal(responder, configure, cancellationToken).ToAwaitableDisposable();
         }
 
-        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, Action<IResponderConfiguration> configure, CancellationToken cancellationToken) where TRequest : class where TResponse : class
         {
             var requestType = typeof(TRequest);
 
@@ -242,9 +242,9 @@ namespace EasyNetQ.Rpc
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
-            var exchange = await advancedBus.ExchangeDeclareAsync(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(routingKey).ConfigureAwait(false);
-            await advancedBus.BindAsync(exchange, queue, routingKey).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var queue = await advancedBus.QueueDeclareAsync(routingKey, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
             return advancedBus.Consume<TRequest>(
                 queue,
