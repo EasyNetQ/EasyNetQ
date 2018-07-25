@@ -24,9 +24,9 @@ namespace EasyNetQ.Rpc
         private readonly ITimeoutStrategy timeoutStrategy;
         private readonly ITypeNameSerializer typeNameSerializer;
 
-        private readonly object responseQueuesAddLock = new object();
+        private readonly AsyncLock responseQueuesAddLock = new AsyncLock();
         private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
-        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
+        private readonly ConcurrentDictionary<Guid, ResponseAction> responseActions = new ConcurrentDictionary<Guid, ResponseAction>();
 
         protected readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
 
@@ -76,7 +76,7 @@ namespace EasyNetQ.Rpc
             }
         }
 
-        public virtual Task<TResponse> RequestAsync<TRequest, TResponse>(
+        public virtual async Task<TResponse> RequestAsync<TRequest, TResponse>(
             TRequest request,
             Action<IRequestConfiguration> configure,
             CancellationToken cancellationToken
@@ -91,40 +91,45 @@ namespace EasyNetQ.Rpc
             var configuration = new RequestConfiguration();
             configure(configuration);
 
-            var tcs = new TaskCompletionSource<TResponse>();
-
-            var timeout = timeoutStrategy.GetTimeoutSeconds(requestType);
-            Timer timer = null;
-            if (timeout > 0)
-            {
-                timer = new Timer(state =>
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            { 
+                var timeoutSeconds = timeoutStrategy.GetTimeoutSeconds(requestType);
+                if (timeoutSeconds > 0)
                 {
-                    tcs.TrySetException(new TimeoutException($"Request timed out. CorrelationId: {correlationId.ToString()}"));
-                }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
+                    cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+                }
+
+                using (cts.Token.Register(() => UnregisterResponseActions(correlationId)))
+                {
+                    //TODO Complete tcs without hijacking
+                    var tcs = new TaskCompletionSource<TResponse>();
+
+                    RegisterResponseActions(correlationId, tcs);
+                    var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cancellationToken).ConfigureAwait(false);
+                    var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
+                    await RequestPublishAsync(request, routingKey, queueName, correlationId, cancellationToken).ConfigureAwait(false);
+                    
+                    return await tcs.Task.ConfigureAwait(false);
+                }                
             }
-
-            RegisterErrorHandling(correlationId, timer, tcs);
-
-            var queueName = SubscribeToResponse<TRequest, TResponse>();
-            var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
-            RequestPublish(request, routingKey, queueName, correlationId);
-
-            return tcs.Task;
         }
 
-        protected void RegisterErrorHandling<TResponse>(Guid correlationId, Timer timer, TaskCompletionSource<TResponse> tcs)
+        protected void UnregisterResponseActions(Guid correlationId)
+        {
+            responseActions.TryRemove(correlationId, out _);
+        }
+
+        protected void RegisterResponseActions<TResponse>(Guid correlationId, TaskCompletionSource<TResponse> tcs)
             where TResponse : class
         {
-            responseActions.TryAdd(correlationId.ToString(), new ResponseAction
+            responseActions.TryAdd(correlationId, new ResponseAction
             {
                 OnSuccess = message =>
                 {
-                    timer?.Dispose();
+                    var msg = (IMessage<TResponse>)message;
 
-                    var msg = ((IMessage<TResponse>)message);
-
-                    bool isFaulted = false;
-                    string exceptionMessage = "The exception message has not been specified.";
+                    var isFaulted = false;
+                    var exceptionMessage = "The exception message has not been specified.";
                     if(msg.Properties.HeadersPresent)
                     {
                         if(msg.Properties.Headers.ContainsKey(isFaultedKey))
@@ -148,43 +153,50 @@ namespace EasyNetQ.Rpc
                 },
                 OnFailure = () =>
                 {
-                    timer?.Dispose();
                     tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
                 }
             });
         }
 
-        protected virtual string SubscribeToResponse<TRequest, TResponse>()
+        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(CancellationToken cancellationToken)
             where TResponse : class
         {
             var responseType = typeof(TResponse);
             var rpcKey = new RpcKey { Request = typeof(TRequest), Response = responseType };
-            string queueName;
-            if (responseQueues.TryGetValue(rpcKey, out queueName))
+            if (responseQueues.TryGetValue(rpcKey, out var queueName))
                 return queueName;
-            lock (responseQueuesAddLock)
+            
+            using(await responseQueuesAddLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (responseQueues.TryGetValue(rpcKey, out queueName))
                     return queueName;
 
-                var queue = advancedBus.QueueDeclare(
+                var queue = await advancedBus.QueueDeclareAsync(
                             conventions.RpcReturnQueueNamingConvention(),
-                            passive: false,
-                            durable: false,
-                            exclusive: true,
-                            autoDelete: true);
+                            false,
+                            false,
+                            true,
+                            true,
+                            cancellationToken: cancellationToken
+                    ).ConfigureAwait(false);
 
-                var exchange = DeclareRpcExchange(conventions.RpcResponseExchangeNamingConvention(responseType));
+                var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(
+                    conventions.RpcResponseExchangeNamingConvention(responseType),
+                    ExchangeType.Direct,
+                    cancellationToken
+                ).ConfigureAwait(false);
 
-                advancedBus.Bind(exchange, queue, queue.Name);
+                await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
 
-                advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
+                //TODO store IDisposable consumer in responseQueues and to dispose it later
+                advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) =>
+                {
+                    if(Guid.TryParse(message.Properties.CorrelationId, out var correlationId) && responseActions.TryRemove(correlationId, out var responseAction))
                     {
-                        if(responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
-                        {
-                            responseAction.OnSuccess(message);
-                        }
-                    }));
+                        responseAction.OnSuccess(message);
+                    }
+                });
+                
                 responseQueues.TryAdd(rpcKey, queue.Name);
                 return queue.Name;
             }
@@ -202,11 +214,20 @@ namespace EasyNetQ.Rpc
             public Action OnFailure { get; set; }
         }
 
-        protected virtual void RequestPublish<TRequest>(TRequest request, string routingKey, string returnQueueName, Guid correlationId)
-            where TRequest : class
+        protected virtual async Task RequestPublishAsync<TRequest>(
+            TRequest request,
+            string routingKey,
+            string returnQueueName, 
+            Guid correlationId,
+            CancellationToken cancellationToken
+        ) where TRequest : class
         {
             var requestType = typeof(TRequest);
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
+            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(
+                conventions.RpcRequestExchangeNamingConvention(requestType),
+                ExchangeType.Direct,
+                cancellationToken
+            ).ConfigureAwait(false);
                         
             var requestMessage = new Message<TRequest>(request)
             {
@@ -219,7 +240,7 @@ namespace EasyNetQ.Rpc
                 }
             };
 
-            advancedBus.Publish(exchange, routingKey, false, requestMessage);
+            await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken).ConfigureAwait(false);
         }
 
         public virtual AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
