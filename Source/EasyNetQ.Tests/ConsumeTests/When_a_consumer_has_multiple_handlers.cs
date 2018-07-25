@@ -1,7 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
+
 using System;
 using System.Threading;
-using EasyNetQ.Internals;
+using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using FluentAssertions;
@@ -12,12 +13,6 @@ namespace EasyNetQ.Tests.ConsumeTests
 {
     public class When_a_consumer_has_multiple_handlers : IDisposable
     {
-        private MockBuilder mockBuilder;
-
-        private MyMessage myMessageResult;
-        private MyOtherMessage myOtherMessageResult;
-        private IAnimal animalResult;
-
         public When_a_consumer_has_multiple_handlers()
         {
             mockBuilder = new MockBuilder();
@@ -26,37 +21,42 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             var countdownEvent = new CountdownEvent(3);
 
-            mockBuilder.Bus.Advanced.Consume(queue, x => x
-                .Add<MyMessage>((message, info) => TaskHelpers.ExecuteSynchronously(() =>
+            mockBuilder.Bus.Advanced.Consume(
+                queue,
+                x => x.Add<MyMessage>((message, info) =>
                     {
                         myMessageResult = message.Body;
                         countdownEvent.Signal();
-                    }))
-                .Add<MyOtherMessage>((message, info) => TaskHelpers.ExecuteSynchronously(() =>
+                    })
+                    .Add<MyOtherMessage>((message, info) =>
                     {
                         myOtherMessageResult = message.Body;
                         countdownEvent.Signal();
-                    }))
-                .Add<IAnimal>((message, info) => TaskHelpers.ExecuteSynchronously(() =>
+                    })
+                    .Add<IAnimal>((message, info) =>
                     {
                         animalResult = message.Body;
                         countdownEvent.Signal();
-                    })));
+                    })
+            );
 
-            Deliver(new MyMessage { Text = "Hello Polymorphs!" });
-            Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
+            Deliver(new MyMessage {Text = "Hello Polymorphs!"});
+            Deliver(new MyOtherMessage {Text = "Hello Isomorphs!"});
             Deliver(new Dog());
 
-            if (!countdownEvent.Wait(5000))
-            {
-                throw new TimeoutException();
-            }
+            if (!countdownEvent.Wait(5000)) throw new TimeoutException();
         }
 
         public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
+
+        private readonly MockBuilder mockBuilder;
+
+        private MyMessage myMessageResult;
+        private MyOtherMessage myOtherMessageResult;
+        private IAnimal animalResult;
 
         private void Deliver<T>(T message) where T : class
         {
@@ -78,6 +78,13 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Fact]
+        public void Should_deliver_a_ploymorphic_message()
+        {
+            animalResult.Should().NotBeNull();
+            animalResult.Should().BeOfType<Dog>();
+        }
+
+        [Fact]
         public void Should_deliver_myMessage()
         {
             myMessageResult.Should().NotBeNull();
@@ -89,13 +96,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             myOtherMessageResult.Should().NotBeNull();
             myOtherMessageResult.Text.Should().Be("Hello Isomorphs!");
-        }
-
-        [Fact]
-        public void Should_deliver_a_ploymorphic_message()
-        {
-            animalResult.Should().NotBeNull();
-            animalResult.Should().BeOfType<Dog>();
         }
     }
 }

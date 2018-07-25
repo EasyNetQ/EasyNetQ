@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -11,7 +12,7 @@ namespace EasyNetQ.Consumer
 {
     public class PersistentMultipleConsumer : IConsumer
     {
-        private readonly ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs;
+        private readonly ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
 
@@ -24,7 +25,7 @@ namespace EasyNetQ.Consumer
         private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
 
         public PersistentMultipleConsumer(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs,
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
             IPersistentConnection connection,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,

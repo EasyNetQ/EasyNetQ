@@ -13,7 +13,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();
 
-            bus.IsConnected.Returns(true);
+            advancedBus.IsConnected.Returns(true);
             bus.Advanced.Returns(advancedBus);
 
             scheduleRepository = Substitute.For<IScheduleRepository>();
@@ -27,7 +27,8 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
                         PublishInterval = TimeSpan.FromSeconds(1),
                         SubscriptionId = "Scheduler",
                         PublishMaxSchedules = 2
-                    });
+                    }
+            );
         }
 
         private SchedulerService schedulerService;
@@ -48,17 +49,18 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             schedulerService.OnPublishTimerTick(null);
 
             scheduleRepository.Received().MarkAsPublished(id);
-            advancedBus.Received().Publish(
+            advancedBus.Received().PublishAsync(
                 Arg.Any<IExchange>(),
-                Arg.Is<string>("msg1"),
+                Arg.Is("msg1"),
                 Arg.Any<bool>(),
                 Arg.Any<MessageProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<byte[]>()
+            );
         }
 
 
         [Fact]
-        public void Should_hadle_publish_timeout_()
+        public void Should_hadle_publish_timeout()
         {
             schedulerService.OnHandleTimeoutTimerTick(null);
             scheduleRepository.Received().HandleTimeout();

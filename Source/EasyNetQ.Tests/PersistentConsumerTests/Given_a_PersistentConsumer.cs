@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using Xunit;
@@ -17,7 +19,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected IConsumer consumer;
         protected List<IInternalConsumer> internalConsumers;
         protected IInternalConsumerFactory internalConsumerFactory;
-        protected Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        protected Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
         protected IQueue queue;
         protected IPersistentConnection persistentConnection;
         protected IEventBus eventBus;
@@ -35,7 +37,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             mockBuilder = new MockBuilder();
 
             queue = new Queue(queueName, false);
-            onMessage = (body, properties, info) => Task.Factory.StartNew(() => { });
+            onMessage = (body, properties, info, cancellation) => TaskHelpers.Completed;
 
             persistentConnection = Substitute.For<IPersistentConnection>();
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();

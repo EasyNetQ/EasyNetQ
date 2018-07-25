@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EasyNetQ.FluentConfiguration
+﻿namespace EasyNetQ.PubSub
 {
     /// <summary>
     /// Allows publish configuration to be fluently extended without adding overloads to IBus

@@ -1,6 +1,4 @@
-﻿using EasyNetQ.Logging;
-
-namespace EasyNetQ.Producer
+﻿namespace EasyNetQ.Producer
 {
     public interface IPersistentChannelFactory
     {

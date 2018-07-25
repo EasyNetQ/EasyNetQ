@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
@@ -23,67 +24,34 @@ namespace EasyNetQ.MessageVersioning
             this.advancedBus = advancedBus;
         }
 
-        public IExchange DeclareExchange(string exchangeName, string exchangeType)
+        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
             if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (asyncLock.Acquire())
+            using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
+                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType, cancellationToken: cancellationToken).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
             }
         }
 
-        public IExchange DeclareExchange(Type messageType, string exchangeType)
+        public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         {
             var messageVersions = new MessageVersionStack(messageType);
-            return DeclareVersionedExchanges(messageVersions, exchangeType);
+            return DeclareVersionedExchangesAsync(messageVersions, exchangeType, cancellationToken);
         }
 
-        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType)
-        {
-            if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (await asyncLock.AcquireAsync().ConfigureAwait(false))
-            {
-                if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
-                exchanges[exchangeName] = exchange;
-                return exchange;
-            }
-        }
-
-        public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType)
-        {
-            var messageVersions = new MessageVersionStack(messageType);
-            return DeclareVersionedExchangesAsync(messageVersions, exchangeType);
-        }
-
-        private async Task<IExchange> DeclareVersionedExchangesAsync(MessageVersionStack messageVersions, string exchangeType)
+        private async Task<IExchange> DeclareVersionedExchangesAsync(MessageVersionStack messageVersions, string exchangeType, CancellationToken cancellationToken)
         {
             IExchange destinationExchange = null;
             while (!messageVersions.IsEmpty())
             {
                 var messageType = messageVersions.Pop();
                 var exchangeName = conventions.ExchangeNamingConvention(messageType);
-                var sourceExchange = await DeclareExchangeAsync(exchangeName, exchangeType).ConfigureAwait(false);
+                var sourceExchange = await DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
                 if (destinationExchange != null)
-                    await advancedBus.BindAsync(sourceExchange, destinationExchange, "#").ConfigureAwait(false);
-                destinationExchange = sourceExchange;
-            }
-
-            return destinationExchange;
-        }
-
-        private IExchange DeclareVersionedExchanges(MessageVersionStack messageVersions, string exchangeType)
-        {
-            IExchange destinationExchange = null;
-            while (!messageVersions.IsEmpty())
-            {
-                var messageType = messageVersions.Pop();
-                var exchangeName = conventions.ExchangeNamingConvention(messageType);
-                var sourceExchange = DeclareExchange(exchangeName, exchangeType);
-                if (destinationExchange != null) advancedBus.Bind(sourceExchange, destinationExchange, "#");
+                    await advancedBus.BindAsync(sourceExchange, destinationExchange, "#", cancellationToken).ConfigureAwait(false);
                 destinationExchange = sourceExchange;
             }
 

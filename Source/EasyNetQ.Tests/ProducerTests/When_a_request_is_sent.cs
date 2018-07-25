@@ -33,13 +33,11 @@ namespace EasyNetQ.Tests.ProducerTests
                         correlationId = properties.CorrelationId;
                     });
 
-            var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
 
             DeliverMessage(correlationId);
 
-            task.Wait();
-
-            responseMessage = task.Result;
+            responseMessage = task.GetAwaiter().GetResult();
         }
 
         public void Dispose()

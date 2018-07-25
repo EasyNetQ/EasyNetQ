@@ -1,5 +1,5 @@
 ﻿using System;
-using EasyNetQ.FluentConfiguration;
+using EasyNetQ.PubSub;
 using Xunit;
 
 namespace EasyNetQ.Tests.FluentConfiguration

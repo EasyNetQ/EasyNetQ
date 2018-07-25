@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -6,13 +7,13 @@ namespace EasyNetQ.Consumer
 {
     public class ConsumerExecutionContext
     {
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> UserHandler { get; }
+        public Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> UserHandler { get; }
         public MessageReceivedInfo Info { get; }
         public MessageProperties Properties { get; }
         public byte[] Body { get; }
 
         public ConsumerExecutionContext(
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> userHandler, 
             MessageReceivedInfo info, 
             MessageProperties properties, 
             byte[] body

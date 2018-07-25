@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests.Tasks
     public class CommandLineTaskRunner : IDisposable
     {
         private CancellationTokenSource cancellationTokenSource;
-        private Autofac.IContainer container;
+        private IContainer container;
 
         private Task Run(CancellationToken cancellationToken)
         {

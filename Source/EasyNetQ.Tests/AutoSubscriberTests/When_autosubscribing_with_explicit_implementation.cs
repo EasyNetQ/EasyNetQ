@@ -7,6 +7,7 @@ using EasyNetQ.Tests.Mocking;
 using Xunit;
 using NSubstitute;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
@@ -32,7 +33,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
             parameters = new Dictionary<string, object>();
-            autoSubscriber.Subscribe(typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>));
+            autoSubscriber.Subscribe(new [] {typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)});
         }
 
         public void Dispose()
@@ -84,17 +85,17 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
-            void IConsume<MessageA>.Consume(MessageA message)
+            void IConsume<MessageA>.Consume(MessageA message, CancellationToken cancellationToken)
             {
             }
 
             [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            void IConsume<MessageB>.Consume(MessageB message)
+            void IConsume<MessageB>.Consume(MessageB message, CancellationToken cancellationToken)
             {
             }
 
             [ForTopic("Important")]
-            void IConsume<MessageC>.Consume(MessageC message)
+            void IConsume<MessageC>.Consume(MessageC message, CancellationToken cancellationToken)
             {
             }
           
@@ -104,7 +105,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private abstract class MyGenericAbstractConsumer<TMessage> : IConsume<TMessage>
           where TMessage : class
         {
-            public virtual void Consume(TMessage message)
+            public virtual void Consume(TMessage message, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
