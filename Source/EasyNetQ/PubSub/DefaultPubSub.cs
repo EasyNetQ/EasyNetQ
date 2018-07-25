@@ -96,7 +96,8 @@ namespace EasyNetQ.PubSub
                 expires: configuration.Expires, 
                 maxPriority: configuration.MaxPriority,
                 maxLength: configuration.MaxLength,
-                maxLengthBytes: configuration.MaxLengthBytes
+                maxLengthBytes: configuration.MaxLengthBytes,
+                cancellationToken: cancellationToken
             ).ConfigureAwait(false);
             
             var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken).ConfigureAwait(false);
