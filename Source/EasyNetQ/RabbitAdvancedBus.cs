@@ -757,7 +757,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routingKey={routingKey} and arguments={arguments}",
+                    "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routingKey={routingKey} and arguments={arguments}",
                     destination.Name, 
                     source.Name,
                     routingKey,
@@ -785,7 +785,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routingKey={routingKey} and arguments={arguments}",
+                    "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routingKey={routingKey} and arguments={arguments}",
                     destination.Name,
                     source.Name, 
                     routingKey,
