@@ -27,7 +27,7 @@ namespace EasyNetQ.DI.Microsoft
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
-            
+
             return this;
         }
 
@@ -70,7 +70,31 @@ namespace EasyNetQ.DI.Microsoft
 
             public IServiceResolverScope CreateScope()
             {
-                return new ServiceResolverScope(this);
+                return new MicrosoftServiceResolverScope(serviceProvider);
+            }
+        }
+
+        private class MicrosoftServiceResolverScope : IServiceResolverScope
+        {
+            private IServiceScope _serviceScope;
+
+            public MicrosoftServiceResolverScope(IServiceProvider serviceProvider)
+            {
+                _serviceScope = serviceProvider.CreateScope();
+            }
+            public IServiceResolverScope CreateScope()
+            {
+                return new MicrosoftServiceResolverScope(_serviceScope.ServiceProvider);
+            }
+
+            public void Dispose()
+            {
+                _serviceScope?.Dispose();
+            }
+
+            public TService Resolve<TService>() where TService : class
+            {
+                return _serviceScope.ServiceProvider.GetService<TService>();
             }
         }
     }
