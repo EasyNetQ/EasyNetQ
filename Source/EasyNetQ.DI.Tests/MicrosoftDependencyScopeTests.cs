@@ -1,3 +1,5 @@
+#if !NETFX
+
 using System;
 using EasyNetQ.DI.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,3 +83,5 @@ namespace EasyNetQ.DI.Tests
         }
     }
 }
+
+#endif
