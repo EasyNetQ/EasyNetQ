@@ -397,14 +397,12 @@ namespace EasyNetQ
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
         public virtual IQueue QueueDeclare()
         {
-            var queueDeclareOk = clientCommandDispatcher.Invoke(x => x.QueueDeclare("", true, true, true, null));
-            
-            if (logger.IsDebugEnabled())
-            {
-                logger.DebugFormat("Declared server generated queue {queue}", queueDeclareOk.QueueName);
-            }
+            return QueueDeclare(string.Empty, durable: true, exclusive: true, autoDelete: true);
+        }
 
-            return new Queue(queueDeclareOk.QueueName, true);
+        public Task<IQueue> QueueDeclareAsync()
+        {
+            return QueueDeclareAsync(string.Empty, durable: true, exclusive: true, autoDelete: true);
         }
 
         public virtual IQueue QueueDeclare(
