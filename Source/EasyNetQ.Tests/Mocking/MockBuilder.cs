@@ -69,6 +69,13 @@ namespace EasyNetQ.Tests.Mocking
                         consumers.Add(consumer);
                         return string.Empty;
                     });
+                channel.QueueDeclare(null, true, false, false, null)
+                    .ReturnsForAnyArgs(queueDeclareInvocation =>
+                    {
+                        var queueName = (string) queueDeclareInvocation[0];
+
+                        return new QueueDeclareOk(queueName, 0, 0);
+                    });
 
                 return channel;
             });
