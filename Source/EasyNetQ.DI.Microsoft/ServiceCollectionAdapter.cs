@@ -76,25 +76,25 @@ namespace EasyNetQ.DI.Microsoft
 
         private class MicrosoftServiceResolverScope : IServiceResolverScope
         {
-            private IServiceScope _serviceScope;
+            private IServiceScope serviceScope;
 
             public MicrosoftServiceResolverScope(IServiceProvider serviceProvider)
             {
-                _serviceScope = serviceProvider.CreateScope();
+                serviceScope = serviceProvider.CreateScope();
             }
             public IServiceResolverScope CreateScope()
             {
-                return new MicrosoftServiceResolverScope(_serviceScope.ServiceProvider);
+                return new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
             }
 
             public void Dispose()
             {
-                _serviceScope?.Dispose();
+                serviceScope?.Dispose();
             }
 
             public TService Resolve<TService>() where TService : class
             {
-                return _serviceScope.ServiceProvider.GetService<TService>();
+                return serviceScope.ServiceProvider.GetService<TService>();
             }
         }
     }
