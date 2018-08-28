@@ -27,7 +27,7 @@ namespace EasyNetQ.DI.StructureMap
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            } 
+            }
         }
 
         public IServiceRegister Register<TService>(TService instance) where TService : class
@@ -37,7 +37,7 @@ namespace EasyNetQ.DI.StructureMap
         }
 
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
-        { 
+        {
             switch (lifetime)
             {
                 case Lifetime.Transient:
@@ -48,26 +48,38 @@ namespace EasyNetQ.DI.StructureMap
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            } 
+            }
         }
 
         private class StructureMapResolver : IServiceResolver
         {
-            private readonly IContainer container;
+            protected readonly IContainer Container;
 
             public StructureMapResolver(IContainer container)
             {
-                this.container = container;
+                this.Container = container;
             }
 
             public TService Resolve<TService>() where TService : class
             {
-                return container.GetInstance<TService>();
+                return Container.GetInstance<TService>();
             }
 
             public IServiceResolverScope CreateScope()
             {
-                return new ServiceResolverScope(this);
+                return new StructureMapResolverScope(Container.GetNestedContainer());
+            }
+        }
+
+        private class StructureMapResolverScope : StructureMapResolver, IServiceResolverScope
+        {
+            public StructureMapResolverScope(IContainer container) : base(container)
+            {
+            }
+
+            public void Dispose()
+            {
+                Container.Dispose();
             }
         }
     }

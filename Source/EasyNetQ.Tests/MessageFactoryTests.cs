@@ -35,5 +35,11 @@ namespace EasyNetQ.Tests
             Assert.Throws<ArgumentNullException>(() => MessageFactory.CreateInstance(typeof(MyMessage), null));
             Assert.Throws<ArgumentNullException>(() => MessageFactory.CreateInstance(typeof(MyMessage), new MyMessage(), null));
         }
+
+        [Fact]
+        public void Should_support_struct_message_body()
+        {
+            MessageFactory.CreateInstance(typeof(Guid), Guid.NewGuid());
+        }
     }
 }

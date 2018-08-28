@@ -397,14 +397,12 @@ namespace EasyNetQ
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
         public virtual IQueue QueueDeclare()
         {
-            var queueDeclareOk = clientCommandDispatcher.Invoke(x => x.QueueDeclare("", true, true, true, null));
-            
-            if (logger.IsDebugEnabled())
-            {
-                logger.DebugFormat("Declared server generated queue {queue}", queueDeclareOk.QueueName);
-            }
+            return QueueDeclare(string.Empty, durable: true, exclusive: true, autoDelete: true);
+        }
 
-            return new Queue(queueDeclareOk.QueueName, true);
+        public Task<IQueue> QueueDeclareAsync()
+        {
+            return QueueDeclareAsync(string.Empty, durable: true, exclusive: true, autoDelete: true);
         }
 
         public virtual IQueue QueueDeclare(
@@ -463,13 +461,13 @@ namespace EasyNetQ
                 arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
-            clientCommandDispatcher.Invoke(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments));
+            var queueDeclareOk = clientCommandDispatcher.Invoke(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments));
 
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
                     "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
-                    name,
+                    queueDeclareOk.QueueName,
                     durable,
                     exclusive,
                     autoDelete,
@@ -477,7 +475,7 @@ namespace EasyNetQ
                 );
             }
 
-            return new Queue(name, exclusive);
+            return new Queue(queueDeclareOk.QueueName, exclusive);
         }
 
         public async Task<IQueue> QueueDeclareAsync(
@@ -536,13 +534,13 @@ namespace EasyNetQ
                 arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
-            await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);
+            var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);
             
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
                     "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
-                    name,
+                    queueDeclareOk.QueueName,
                     durable,
                     exclusive,
                     autoDelete,
@@ -550,7 +548,7 @@ namespace EasyNetQ
                 );
             }
 
-            return new Queue(name, exclusive);
+            return new Queue(queueDeclareOk.QueueName, exclusive);
         }
 
         public virtual void QueueDelete(IQueue queue, bool ifUnused = false, bool ifEmpty = false)
@@ -757,7 +755,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routingKey={routingKey} and arguments={arguments}",
+                    "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routingKey={routingKey} and arguments={arguments}",
                     destination.Name, 
                     source.Name,
                     routingKey,
@@ -785,7 +783,7 @@ namespace EasyNetQ
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
-                    "Bound destination exchange {destinationExchange} to source exchange {destinationExchange} with routingKey={routingKey} and arguments={arguments}",
+                    "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routingKey={routingKey} and arguments={arguments}",
                     destination.Name,
                     source.Name, 
                     routingKey,
