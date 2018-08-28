@@ -95,6 +95,7 @@ namespace EasyNetQ.Producer
                 timer = new Timer(state =>
                 {
                     tcs.TrySetException(new TimeoutException(string.Format("Request timed out. CorrelationId: {0}", correlationId.ToString())));
+                    responseActions.TryRemove(correlationId.ToString(), out ResponseAction responseAction);
                 }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
             }
 
