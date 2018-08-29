@@ -11,7 +11,7 @@ namespace EasyNetQ.Consumer
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="onMessage">The message handler</param>
         /// <returns>'this' for fluent configuration</returns>
-        IReceiveRegistration Add<T>(Func<T, Task> onMessage) where T : class;
+        IReceiveRegistration Add<T>(Func<T, Task> onMessage);
 
         /// <summary>
         /// Add a message handler to this receiver
@@ -19,7 +19,7 @@ namespace EasyNetQ.Consumer
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="onMessage">The message handler</param>
         /// <returns>'this' for fluent configuration</returns>
-        IReceiveRegistration Add<T>(Action<T> onMessage) where T : class;
+        IReceiveRegistration Add<T>(Action<T> onMessage);
     }
 
 

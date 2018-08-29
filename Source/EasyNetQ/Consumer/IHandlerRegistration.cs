@@ -11,8 +11,7 @@ namespace EasyNetQ.Consumer
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="handler">The handler</param>
         /// <returns></returns>
-        IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, Task> handler)
-            where T : class;
+        IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, Task> handler);
         
         /// <summary>
         /// Add a synchronous handler
@@ -20,8 +19,7 @@ namespace EasyNetQ.Consumer
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="handler">The handler</param>
         /// <returns></returns>
-        IHandlerRegistration Add<T>(Action<IMessage<T>, MessageReceivedInfo> handler)
-            where T : class;
+        IHandlerRegistration Add<T>(Action<IMessage<T>, MessageReceivedInfo> handler);
 
         /// <summary>
         /// Set to true if the handler collection should throw an EasyNetQException when no
@@ -41,8 +39,7 @@ namespace EasyNetQ.Consumer
         /// </summary>
         /// <typeparam name="T">The type of handler to return</typeparam>
         /// <returns>The handler</returns>
-        Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>()
-            where T : class;
+        Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>();
 
         /// <summary>
         /// Retrieve a handler from the collection.
