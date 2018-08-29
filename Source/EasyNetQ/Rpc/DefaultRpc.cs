@@ -233,7 +233,7 @@ namespace EasyNetQ.Rpc
             return RespondAsyncInternal(responder, configure, cancellationToken).ToAwaitableDisposable();
         }
 
-        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, Action<IResponderConfiguration> configure, CancellationToken cancellationToken) where TRequest : class where TResponse : class
+        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, Action<IResponderConfiguration> configure, CancellationToken cancellationToken)
         {
             var requestType = typeof(TRequest);
 

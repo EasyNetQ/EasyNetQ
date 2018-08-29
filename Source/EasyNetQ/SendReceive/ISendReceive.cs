@@ -16,7 +16,7 @@ namespace EasyNetQ.SendReceive
         /// <param name="queue">The queue to send the message to</param>
         /// <param name="message">The message to send</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken = default) where T : class;
+        Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Receive a message from the specified queue
@@ -32,7 +32,7 @@ namespace EasyNetQ.SendReceive
             Func<T, CancellationToken, Task> onMessage, 
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class;
+        );
 
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers

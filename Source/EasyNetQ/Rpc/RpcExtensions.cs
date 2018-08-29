@@ -21,8 +21,6 @@ namespace EasyNetQ.Rpc
             TRequest request,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
@@ -45,8 +43,6 @@ namespace EasyNetQ.Rpc
             TRequest request,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
@@ -71,8 +67,6 @@ namespace EasyNetQ.Rpc
             Action<IRequestConfiguration> configure,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
@@ -94,8 +88,6 @@ namespace EasyNetQ.Rpc
             Func<TRequest, Task<TResponse>> responder,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
@@ -115,13 +107,12 @@ namespace EasyNetQ.Rpc
             Func<TRequest, Task<TResponse>> responder,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
             return rpc.Respond(responder, c => { }, cancellationToken);
         }
+
         /// <summary>
         ///     Set up a responder for an RPC service.
         /// </summary>
@@ -135,8 +126,6 @@ namespace EasyNetQ.Rpc
             Func<TRequest, TResponse> responder,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
@@ -160,8 +149,6 @@ namespace EasyNetQ.Rpc
             Action<IResponderConfiguration> configure,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 
@@ -183,8 +170,6 @@ namespace EasyNetQ.Rpc
             Action<IResponderConfiguration> configure,
             CancellationToken cancellationToken = default
         )
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(rpc, "rpc");
 

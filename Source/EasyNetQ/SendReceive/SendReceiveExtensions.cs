@@ -21,7 +21,7 @@ namespace EasyNetQ.SendReceive
             string queue, 
             T message,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
             
@@ -44,7 +44,7 @@ namespace EasyNetQ.SendReceive
             string queue, 
             Action<T> onMessage, 
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
             
@@ -72,7 +72,7 @@ namespace EasyNetQ.SendReceive
             Action<T> onMessage,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
@@ -100,7 +100,7 @@ namespace EasyNetQ.SendReceive
             string queue,
             Func<T, Task> onMessage,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
@@ -152,7 +152,7 @@ namespace EasyNetQ.SendReceive
             string queue, 
             Action<T> onMessage, 
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
             
@@ -175,7 +175,7 @@ namespace EasyNetQ.SendReceive
             Action<T> onMessage,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
@@ -203,7 +203,7 @@ namespace EasyNetQ.SendReceive
             string queue,
             Func<T, Task> onMessage,
             CancellationToken cancellationToken = default
-        ) where T : class
+        ) 
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
@@ -231,7 +231,7 @@ namespace EasyNetQ.SendReceive
             Func<T, CancellationToken, Task> onMessage,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class
+        ) 
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 

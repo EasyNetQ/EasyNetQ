@@ -7,7 +7,6 @@ using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
-using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -285,9 +284,9 @@ namespace EasyNetQ
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
 
 
-        public Task<IQueue> QueueDeclareAsync()
+        public Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken)
         {
-            return QueueDeclareAsync(string.Empty, durable: true, exclusive: true, autoDelete: true);
+            return QueueDeclareAsync(string.Empty, durable: true, exclusive: true, autoDelete: true, cancellationToken: cancellationToken);
         }
 
         public async Task<IQueue> QueueDeclareAsync(
@@ -327,10 +326,6 @@ namespace EasyNetQ
             {
                 arguments.Add("x-max-priority", maxPriority.Value);
             }
-            // Allow empty dead-letter-exchange as it represents the default rabbitmq exchange
-            // and thus is a valid value. To dead-letter a message directly to a queue, you
-            // would set dead-letter-exchange to empty and dead-letter-routing-key to name of the
-            // queue since every queue has a direct binding with default exchange.
             if (deadLetterExchange != null)
             {
                 arguments.Add("x-dead-letter-exchange", deadLetterExchange);
@@ -348,7 +343,7 @@ namespace EasyNetQ
                 arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
             }
 
-            await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments), cancellationToken).ConfigureAwait(false);
+            var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments), cancellationToken).ConfigureAwait(false);
             
             if (logger.IsDebugEnabled())
             {

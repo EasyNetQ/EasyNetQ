@@ -24,6 +24,6 @@ namespace EasyNetQ.Scheduler
             TimeSpan delay,
             string topic = null,
             CancellationToken cancellationToken = default
-        ) where T : class;
+        );
     }
 }

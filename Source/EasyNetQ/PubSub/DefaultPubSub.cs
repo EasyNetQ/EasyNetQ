@@ -37,7 +37,7 @@ namespace EasyNetQ.PubSub
             this.advancedBus = advancedBus;
         }
 
-        public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken) where T : class
+        public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
@@ -67,7 +67,7 @@ namespace EasyNetQ.PubSub
             Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -81,7 +81,7 @@ namespace EasyNetQ.PubSub
             Func<T, CancellationToken, Task> onMessage, 
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken
-        ) where T : class
+        )
         {
             var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);

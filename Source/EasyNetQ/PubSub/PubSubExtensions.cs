@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
@@ -18,7 +17,7 @@ namespace EasyNetQ.PubSub
         /// /// <param name="message">The message to publish</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
-        public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default) where T : class
+        public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -36,7 +35,7 @@ namespace EasyNetQ.PubSub
         /// <param name="topic">The topic string</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
-        public static Task PublishAsync<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default) where T : class
+        public static Task PublishAsync<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
             Preconditions.CheckNotNull(topic, "topic");
@@ -51,7 +50,7 @@ namespace EasyNetQ.PubSub
         /// <param name="pubSub">The pubSub instance</param>
         /// <param name="message">The message to publish</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default) where T : class
+        public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -68,7 +67,7 @@ namespace EasyNetQ.PubSub
         /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default) where T : class
+        public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -85,7 +84,7 @@ namespace EasyNetQ.PubSub
         /// <param name="message">The message to publish</param>
         /// <param name="topic">The topic string</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default) where T : class
+        public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -118,7 +117,7 @@ namespace EasyNetQ.PubSub
             string subscriptionId,
             Action<T> onMessage,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -159,7 +158,7 @@ namespace EasyNetQ.PubSub
             Action<T> onMessage,
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
             
@@ -199,7 +198,7 @@ namespace EasyNetQ.PubSub
             string subscriptionId,
             Func<T, Task> onMessage,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
             
@@ -236,7 +235,7 @@ namespace EasyNetQ.PubSub
             string subscriptionId,
             Action<T> onMessage,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -277,7 +276,7 @@ namespace EasyNetQ.PubSub
             Action<T> onMessage,
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
@@ -317,7 +316,7 @@ namespace EasyNetQ.PubSub
             string subscriptionId,
             Func<T, Task> onMessage,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
             
@@ -359,7 +358,7 @@ namespace EasyNetQ.PubSub
             Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
             

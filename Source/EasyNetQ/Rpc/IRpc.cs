@@ -26,9 +26,7 @@ namespace EasyNetQ.Rpc
             TRequest request,
             Action<IRequestConfiguration> configure,
             CancellationToken cancellationToken = default
-        )
-            where TRequest : class
-            where TResponse : class;
+        );
 
         /// <summary>
         ///     Set up a responder for an RPC service.
@@ -42,8 +40,6 @@ namespace EasyNetQ.Rpc
             Func<TRequest, CancellationToken, Task<TResponse>> responder,
             Action<IResponderConfiguration> configure,
             CancellationToken cancellationToken = default
-        )
-            where TRequest : class
-            where TResponse : class;
+        );
     }
 }

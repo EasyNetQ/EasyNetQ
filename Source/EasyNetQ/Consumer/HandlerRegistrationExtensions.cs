@@ -16,7 +16,7 @@ namespace EasyNetQ.Consumer
         public static IHandlerRegistration Add<T>(
             this IHandlerRegistration handlerRegistration,
             Action<IMessage<T>, MessageReceivedInfo> handler
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
 
@@ -34,7 +34,7 @@ namespace EasyNetQ.Consumer
         public static IHandlerRegistration Add<T>(
             this IHandlerRegistration handlerRegistration,
             Func<IMessage<T>, MessageReceivedInfo, Task> handler
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
 

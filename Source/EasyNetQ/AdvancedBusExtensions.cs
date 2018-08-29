@@ -18,7 +18,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -35,7 +35,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -51,7 +51,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -69,7 +69,7 @@ namespace EasyNetQ
         /// Fluent configuration e.g. x => x.WithPriority(10)
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -238,7 +238,7 @@ namespace EasyNetQ
             bool mandatory,
             IMessage<T> message,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -255,7 +255,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue from which to retreive the message</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>An IBasicGetResult.</returns>
-        public static IBasicGetResult<T> GetMessage<T>(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default) where T : class
+        public static IBasicGetResult<T> GetMessage<T>(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
             

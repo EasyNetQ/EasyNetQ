@@ -12,6 +12,6 @@ namespace EasyNetQ.SendReceive
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="onMessage">The message handler</param>
         /// <returns>'this' for fluent configuration</returns>
-        IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage) where T : class;
+        IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage);
     }
 }

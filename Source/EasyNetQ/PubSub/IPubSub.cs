@@ -24,7 +24,7 @@ namespace EasyNetQ.PubSub
             T message, 
             Action<IPublishConfiguration> configure, 
             CancellationToken cancellationToken = default
-        ) where T : class;
+        );
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -53,6 +53,6 @@ namespace EasyNetQ.PubSub
             Func<T, CancellationToken, Task> onMessage, 
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) where T : class;
+        );
     }
 }

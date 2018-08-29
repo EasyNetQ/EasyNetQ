@@ -1,6 +1,5 @@
 ﻿using System;
 using EasyNetQ.Scheduler.Mongo.Core;
-using log4net;
 
 namespace EasyNetQ.Scheduler.Mongo
 {

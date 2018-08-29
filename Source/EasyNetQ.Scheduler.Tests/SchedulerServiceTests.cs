@@ -5,7 +5,6 @@ using EasyNetQ.Topology;
 using NSubstitute;
 using Xunit;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EasyNetQ.Scheduler.Tests
 {

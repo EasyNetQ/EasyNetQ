@@ -28,7 +28,7 @@ namespace EasyNetQ.Scheduler
         }
 
         //TODO Cache exchange/queue/bind
-        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default) where T : class
+        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(message, "message");
 
