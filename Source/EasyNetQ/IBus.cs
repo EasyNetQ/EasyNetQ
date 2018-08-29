@@ -16,7 +16,7 @@ namespace EasyNetQ
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message to publish</param>
-        void Publish<T>(T message) where T : class;
+        void Publish<T>(T message);
 
         /// <summary>
         /// Publishes a message.
@@ -26,7 +26,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
         /// </param>
-        void Publish<T>(T message, Action<IPublishConfiguration> configure) where T : class;
+        void Publish<T>(T message, Action<IPublishConfiguration> configure);
 
         /// <summary>
         /// Publishes a message with a topic
@@ -34,7 +34,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message to publish</param>
         /// <param name="topic">The topic string</param>
-        void Publish<T>(T message, string topic) where T : class;
+        void Publish<T>(T message, string topic);
 
         /// <summary>
         /// Publishes a message.
@@ -44,7 +44,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message to publish</param>
         /// <returns></returns>
-        Task PublishAsync<T>(T message) where T : class;
+        Task PublishAsync<T>(T message);
 
         /// <summary>
         /// Publishes a message.
@@ -57,7 +57,7 @@ namespace EasyNetQ
         /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
         /// </param>
         /// <returns></returns>
-        Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure) where T : class;
+        Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure);
 
         /// <summary>
         /// Publishes a message with a topic.
@@ -68,7 +68,7 @@ namespace EasyNetQ
         /// <param name="message">The message to publish</param>
         /// <param name="topic">The topic string</param>
         /// <returns></returns>
-        Task PublishAsync<T>(T message, string topic) where T : class;
+        Task PublishAsync<T>(T message, string topic);
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -88,7 +88,7 @@ namespace EasyNetQ
         /// An <see cref="ISubscriptionResult"/>
         /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
         /// </returns>
-        ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage) where T : class;
+        ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage);
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -111,8 +111,7 @@ namespace EasyNetQ
         /// An <see cref="ISubscriptionResult"/>
         /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
         /// </returns>
-        ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure) 
-            where T : class;
+        ISubscriptionResult Subscribe<T>(string subscriptionId, Action<T> onMessage, Action<ISubscriptionConfiguration> configure);
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -133,7 +132,7 @@ namespace EasyNetQ
         /// An <see cref="ISubscriptionResult"/>
         /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
         /// </returns>
-        ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage) where T : class;
+        ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage);
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -156,8 +155,7 @@ namespace EasyNetQ
         /// An <see cref="ISubscriptionResult"/>
         /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
         /// </returns>
-        ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure) 
-            where T : class;
+        ISubscriptionResult SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage, Action<ISubscriptionConfiguration> configure);
 
         /// <summary>
         /// Makes an RPC style request
@@ -166,9 +164,7 @@ namespace EasyNetQ
         /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="request">The request message.</param>
         /// <returns>The response</returns>
-        TResponse Request<TRequest, TResponse>(TRequest request)
-            where TRequest : class
-            where TResponse : class;
+        TResponse Request<TRequest, TResponse>(TRequest request);
 
         /// <summary>
         /// Makes an RPC style request.
@@ -177,9 +173,7 @@ namespace EasyNetQ
         /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="request">The request message.</param>
         /// <returns>A task that completes when the response returns</returns>
-        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request)
-            where TRequest : class
-            where TResponse : class;
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request);
 
         /// <summary>
         /// Makes an RPC style request
@@ -188,9 +182,7 @@ namespace EasyNetQ
         /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="request">The request message.</param>
         /// <returns>The response</returns>
-        TResponse Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
-            where TRequest : class
-            where TResponse : class;
+        TResponse Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure);
 
         /// <summary>
         /// Makes an RPC style request.
@@ -199,9 +191,7 @@ namespace EasyNetQ
         /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="request">The request message.</param>
         /// <returns>A task that completes when the response returns</returns>
-        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
-            where TRequest : class
-            where TResponse : class;
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure);
 
         /// <summary>
         /// Responds to an RPC request.
@@ -211,9 +201,7 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received. It should return the response.
         /// </param>
-        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder) 
-            where TRequest : class
-            where TResponse : class;
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder);
 
         /// <summary>
         /// Responds to an RPC request.
@@ -226,9 +214,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// A function for responder configuration
         /// </param>
-        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure)
-            where TRequest : class
-            where TResponse : class;
+        IDisposable Respond<TRequest, TResponse>(Func<TRequest, TResponse> responder, Action<IResponderConfiguration> configure);
 
         /// <summary>
         /// Responds to an RPC request asynchronously.
@@ -238,9 +224,7 @@ namespace EasyNetQ
         /// <param name="responder">
         /// A function to run when the request is received.
         /// </param>
-        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder) 
-            where TRequest : class
-            where TResponse : class;
+        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder);
 
         /// <summary>
         /// Responds to an RPC request asynchronously.
@@ -253,9 +237,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// A function for responder configuration
         /// </param>
-        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
-            where TRequest : class
-            where TResponse : class;
+        IDisposable RespondAsync<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure);
 
         /// <summary>
         /// Send a message directly to a queue
@@ -263,7 +245,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to send</typeparam>
         /// <param name="queue">The queue to send to</param>
         /// <param name="message">The message</param>
-        void Send<T>(string queue, T message) where T : class;
+        void Send<T>(string queue, T message);
 
         /// <summary>
         /// Send a message directly to a queue
@@ -271,7 +253,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to send</typeparam>
         /// <param name="queue">The queue to send to</param>
         /// <param name="message">The message</param>
-        Task SendAsync<T>(string queue, T message) where T : class;
+        Task SendAsync<T>(string queue, T message);
 
         /// <summary>
         /// Receive messages from a queue.
@@ -281,7 +263,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="queue">The queue to receive from</param>
         /// <param name="onMessage">The message handler</param>
-        IDisposable Receive<T>(string queue, Action<T> onMessage) where T : class;
+        IDisposable Receive<T>(string queue, Action<T> onMessage);
 
         /// <summary>
         /// Receive messages from a queue.
@@ -292,7 +274,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to receive from</param>
         /// <param name="onMessage">The message handler</param>
         /// <param name="configure">Action to configure consumer with</param>
-        IDisposable Receive<T>(string queue, Action<T> onMessage, Action<IConsumerConfiguration> configure) where T : class;
+        IDisposable Receive<T>(string queue, Action<T> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Receive messages from a queue.
@@ -302,7 +284,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="queue">The queue to receive from</param>
         /// <param name="onMessage">The asynchronous message handler</param>
-        IDisposable Receive<T>(string queue, Func<T, Task> onMessage) where T : class;
+        IDisposable Receive<T>(string queue, Func<T, Task> onMessage);
 
         /// <summary>
         /// Receive messages from a queue.
@@ -313,7 +295,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to receive from</param>
         /// <param name="onMessage">The asynchronous message handler</param>
         /// <param name="configure">Action to configure consumer with</param>
-        IDisposable Receive<T>(string queue, Func<T, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class;
+        IDisposable Receive<T>(string queue, Func<T, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers

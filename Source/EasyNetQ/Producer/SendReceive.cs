@@ -26,7 +26,6 @@ namespace EasyNetQ.Producer
         }
 
         public void Send<T>(string queue, T message)
-            where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(message, "message");
@@ -45,7 +44,6 @@ namespace EasyNetQ.Producer
         }
 
         public Task SendAsync<T>(string queue, T message)
-            where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(message, "message");
@@ -64,7 +62,6 @@ namespace EasyNetQ.Producer
         }
 
         public IDisposable Receive<T>(string queue, Action<T> onMessage)
-            where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -73,7 +70,6 @@ namespace EasyNetQ.Producer
         }
 
         public IDisposable Receive<T>(string queue, Action<T> onMessage, Action<IConsumerConfiguration> configure)
-            where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -83,7 +79,6 @@ namespace EasyNetQ.Producer
         }
 
         public IDisposable Receive<T>(string queue, Func<T, Task> onMessage)
-            where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -93,7 +88,6 @@ namespace EasyNetQ.Producer
         }
 
         public IDisposable Receive<T>(string queue, Func<T, Task> onMessage, Action<IConsumerConfiguration> configure)
-            where T : class
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -139,13 +133,13 @@ namespace EasyNetQ.Producer
                 this.handlerRegistration = handlerRegistration;
             }
 
-            public IReceiveRegistration Add<T>(Func<T, Task> onMessage) where T : class
+            public IReceiveRegistration Add<T>(Func<T, Task> onMessage)
             {
                 handlerRegistration.Add<T>((message, info) => onMessage(message.Body));
                 return this;
             }
 
-            public IReceiveRegistration Add<T>(Action<T> onMessage) where T : class
+            public IReceiveRegistration Add<T>(Action<T> onMessage)
             {
                 handlerRegistration.Add<T>((message, info) => onMessage(message.Body));
                 return this;
