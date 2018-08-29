@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using System.Reflection;
-using System.Threading;
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
@@ -13,8 +12,8 @@ namespace EasyNetQ.Consumer
     {
         private readonly ILog logger = LogProvider.For<HandlerCollection>();
         
-        private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, CancellationToken, Task>> handlers =
-            new Dictionary<Type, Func<IMessage, MessageReceivedInfo, CancellationToken, Task>>();
+        private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, Task>> handlers =
+            new Dictionary<Type, Func<IMessage, MessageReceivedInfo, Task>>();
 
 
         public HandlerCollection()
@@ -22,7 +21,7 @@ namespace EasyNetQ.Consumer
             ThrowOnNoMatchingHandler = true;
         }
 
-        public IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler)
+        public IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, Task> handler)
         {
             Preconditions.CheckNotNull(handler, "handler");
 
@@ -31,19 +30,27 @@ namespace EasyNetQ.Consumer
                 throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);
             }
 
-            handlers.Add(typeof(T), (m, i, c) => handler((IMessage<T>)m, i, c));
+            handlers.Add(typeof(T), (iMessage, messageReceivedInfo) => handler((IMessage<T>)iMessage, messageReceivedInfo));
             return this;
         }
 
+        public IHandlerRegistration Add<T>(Action<IMessage<T>, MessageReceivedInfo> handler)
+        {
+            Preconditions.CheckNotNull(handler, "handler");
 
-        public Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> GetHandler<T>()
+            Add<T>((message, info) => TaskHelpers.ExecuteSynchronously(() => handler(message, info)));
+            return this;
+        }
+
+        public Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>()
         {
             return GetHandler(typeof(T));
         }
 
-        public Func<IMessage, MessageReceivedInfo, CancellationToken, Task> GetHandler(Type messageType)
+        public Func<IMessage, MessageReceivedInfo, Task> GetHandler(Type messageType)
         {
-            if (handlers.TryGetValue(messageType, out var func))
+            Func<IMessage, MessageReceivedInfo, Task> func;
+            if (handlers.TryGetValue(messageType, out func))
             {
                 return func;
             }
@@ -62,7 +69,7 @@ namespace EasyNetQ.Consumer
                 throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
             }
 
-            return (m, i, c) => TaskHelpers.Completed;
+            return (message, info) => Task.Factory.StartNew(() => { });
         }
 
         public bool ThrowOnNoMatchingHandler { get; set; }
