@@ -32,7 +32,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class;
+        IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage);
 
         /// <summary>
         /// Consume a stream of messages
@@ -43,7 +43,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure) where T : class;
+        IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Consume a stream of messages asynchronously
@@ -52,7 +52,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage) where T : class;
+        IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage);
 
         /// <summary>
         /// Consume a stream of messages asynchronously
@@ -63,7 +63,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class;
+        IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Consume a stream of messages. Dispatch them to the given handlers
@@ -170,7 +170,7 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class;
+            IMessage<T> message);
 
         /// <summary>
         /// Publish a message as a .NET type when the type is only known at runtime.
@@ -214,7 +214,7 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class;
+            IMessage<T> message);
 
         /// <summary>
         /// Publish a message as a byte array.
@@ -454,7 +454,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The message type to get</typeparam>
         /// <param name="queue">The queue from which to retrieve the message</param>
         /// <returns>An IBasicGetResult.</returns>
-        IBasicGetResult<T> Get<T>(IQueue queue) where T : class;
+        IBasicGetResult<T> Get<T>(IQueue queue);
 
         /// <summary>
         /// Get the raw message from the given queue.

@@ -76,8 +76,6 @@ namespace EasyNetQ.Producer
         }
 
         public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
-            where TRequest : class
-            where TResponse : class
         {
             Preconditions.CheckNotNull(request, "request");
 
@@ -109,7 +107,6 @@ namespace EasyNetQ.Producer
         }
 
         protected void RegisterErrorHandling<TResponse>(Guid correlationId, Timer timer, TaskCompletionSource<TResponse> tcs)
-            where TResponse : class
         {
             responseActions.TryAdd(correlationId.ToString(), new ResponseAction
             {
@@ -151,7 +148,6 @@ namespace EasyNetQ.Producer
         }
 
         protected virtual string SubscribeToResponse<TRequest, TResponse>()
-            where TResponse : class
         {
             var responseType = typeof(TResponse);
             var rpcKey = new RpcKey { Request = typeof(TRequest), Response = responseType };
@@ -200,7 +196,6 @@ namespace EasyNetQ.Producer
         }
 
         protected virtual void RequestPublish<TRequest>(TRequest request, string routingKey, string returnQueueName, Guid correlationId)
-            where TRequest : class
         {
             var requestType = typeof(TRequest);
             var exchange = publishExchangeDeclareStrategy.DeclareExchange(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
@@ -220,13 +215,11 @@ namespace EasyNetQ.Producer
         }
 
         public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder)
-            where TRequest : class
-            where TResponse : class
         {
             return Respond(responder, c => { });
         }
 
-        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure) where TRequest : class where TResponse : class
+        public virtual IDisposable Respond<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, Action<IResponderConfiguration> configure)
         {
             Preconditions.CheckNotNull(responder, "responder");
             Preconditions.CheckNotNull(configure, "configure");
@@ -250,8 +243,6 @@ namespace EasyNetQ.Producer
         }
 
         protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, Task<TResponse>> responder, IMessage<TRequest> requestMessage)
-            where TRequest : class
-            where TResponse : class
         {
             var tcs = new TaskCompletionSource<object>();
 
@@ -286,8 +277,6 @@ namespace EasyNetQ.Producer
         }
 
         protected virtual void OnResponderSuccess<TRequest, TResponse>(IMessage<TRequest> requestMessage, TResponse response)
-            where TRequest : class
-            where TResponse : class
         {
             var responseMessage = new Message<TResponse>(response)
             {
@@ -304,8 +293,6 @@ namespace EasyNetQ.Producer
         }
 
         protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
-            where TRequest : class
-            where TResponse : class
         {
             // HACK: I think we can live with this, because it will run only on exception, 
             // it tries to preserve the default serialization behavior, 

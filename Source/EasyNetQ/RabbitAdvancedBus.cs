@@ -131,12 +131,12 @@ namespace EasyNetQ
             return consumer.StartConsuming();
         }
 
-        public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
+        public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage)
         {
             return Consume<T>(queue, onMessage, x => { });
         }
 
-        public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        public IDisposable Consume<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -146,12 +146,11 @@ namespace EasyNetQ
         }
 
         public virtual IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
-            where T : class
         {
             return Consume(queue, onMessage, x => { });
         }
 
-        public IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure) where T : class
+        public IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -287,7 +286,7 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class
+            IMessage<T> message)
         {
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
@@ -312,7 +311,7 @@ namespace EasyNetQ
             IExchange exchange,
             string routingKey,
             bool mandatory,
-            IMessage<T> message) where T : class
+            IMessage<T> message)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -833,7 +832,7 @@ namespace EasyNetQ
             }
         }
 
-        public IBasicGetResult<T> Get<T>(IQueue queue) where T : class
+        public IBasicGetResult<T> Get<T>(IQueue queue)
         {
             Preconditions.CheckNotNull(queue, "queue");
             
@@ -846,7 +845,7 @@ namespace EasyNetQ
             var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))
             {
-                return new BasicGetResult<T>(new Message<T>(message.GetBody() as T, message.Properties));
+                return new BasicGetResult<T>(new Message<T>((T) message.GetBody(), message.Properties));
             }
 
             throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);

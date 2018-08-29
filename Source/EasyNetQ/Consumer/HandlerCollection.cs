@@ -21,7 +21,7 @@ namespace EasyNetQ.Consumer
             ThrowOnNoMatchingHandler = true;
         }
 
-        public IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, Task> handler) where T : class
+        public IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, Task> handler)
         {
             Preconditions.CheckNotNull(handler, "handler");
 
@@ -34,7 +34,7 @@ namespace EasyNetQ.Consumer
             return this;
         }
 
-        public IHandlerRegistration Add<T>(Action<IMessage<T>, MessageReceivedInfo> handler) where T : class
+        public IHandlerRegistration Add<T>(Action<IMessage<T>, MessageReceivedInfo> handler)
         {
             Preconditions.CheckNotNull(handler, "handler");
 
@@ -42,7 +42,7 @@ namespace EasyNetQ.Consumer
             return this;
         }
 
-        public Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>() where T : class
+        public Func<IMessage<T>, MessageReceivedInfo, Task> GetHandler<T>()
         {
             return GetHandler(typeof(T));
         }
