@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Consumer;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests;
 using Xunit;
 

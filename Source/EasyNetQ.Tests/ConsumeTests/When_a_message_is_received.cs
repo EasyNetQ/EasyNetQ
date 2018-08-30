@@ -3,7 +3,7 @@ using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
-using EasyNetQ.SendReceive;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;

@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.PubSub
+namespace EasyNetQ.Producer
 {
     public class DefaultPubSub : IPubSub
     {

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ.PubSub
+namespace EasyNetQ.Producer
 {
     //TODO Need support of non-generic overloads
     public interface IPubSub

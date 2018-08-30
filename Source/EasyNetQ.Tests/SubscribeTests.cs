@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;

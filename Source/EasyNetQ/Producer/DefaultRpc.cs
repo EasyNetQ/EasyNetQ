@@ -4,12 +4,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using Newtonsoft.Json;
 
-namespace EasyNetQ.Rpc
+namespace EasyNetQ.Producer
 {
     /// <summary>
     /// Default implementation of EasyNetQ's request-response pattern

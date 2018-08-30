@@ -4,7 +4,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration

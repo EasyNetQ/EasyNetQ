@@ -4,10 +4,8 @@ using RabbitMQ.Client.Framing;
 using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
-using EasyNetQ.PubSub;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduler;
-using EasyNetQ.SendReceive;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.Mocking

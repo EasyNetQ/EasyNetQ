@@ -2,8 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.PubSub;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using Xunit;

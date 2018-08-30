@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduler;
 using Net.CommandLine;
 using Serilog;

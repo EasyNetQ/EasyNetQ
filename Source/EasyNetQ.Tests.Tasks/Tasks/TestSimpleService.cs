@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using Net.CommandLine;
-using EasyNetQ.Rpc;
 
 namespace EasyNetQ.Tests.Tasks
 {

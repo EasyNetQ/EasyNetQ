@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ.Rpc
+namespace EasyNetQ.Producer
 {
     public static class RpcExtensions
     {

@@ -7,8 +7,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EasyNetQ.PubSub;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests

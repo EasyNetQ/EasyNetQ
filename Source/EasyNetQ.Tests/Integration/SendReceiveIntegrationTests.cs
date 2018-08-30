@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading;
-using EasyNetQ.SendReceive;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration

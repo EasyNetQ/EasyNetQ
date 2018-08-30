@@ -6,8 +6,9 @@ using NSubstitute;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute.Extensions;
 

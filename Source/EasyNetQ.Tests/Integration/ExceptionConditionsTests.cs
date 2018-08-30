@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Management.Client;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.Tests
 {

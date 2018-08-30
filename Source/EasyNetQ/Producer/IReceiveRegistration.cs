@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EasyNetQ.SendReceive
+namespace EasyNetQ.Producer
 {
     public interface IReceiveRegistration
     {

@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using FluentAssertions;
 using Xunit;
 

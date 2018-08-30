@@ -6,8 +6,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.AutoSubscribe
 {

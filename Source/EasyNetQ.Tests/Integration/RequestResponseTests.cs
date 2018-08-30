@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.Integration

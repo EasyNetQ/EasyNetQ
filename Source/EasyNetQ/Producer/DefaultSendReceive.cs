@@ -6,7 +6,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.SendReceive
+namespace EasyNetQ.Producer
 {
     public class DefaultSendReceive : ISendReceive
     {

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client.Framing;
 using Xunit;

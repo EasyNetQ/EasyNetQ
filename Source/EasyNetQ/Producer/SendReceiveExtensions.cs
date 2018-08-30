@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ.SendReceive
+namespace EasyNetQ.Producer
 {
     public static class SendReceiveExtensions
     {

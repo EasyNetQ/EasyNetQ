@@ -1,7 +1,5 @@
-using EasyNetQ.PubSub;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduler;
-using EasyNetQ.SendReceive;
 
 namespace EasyNetQ
 {

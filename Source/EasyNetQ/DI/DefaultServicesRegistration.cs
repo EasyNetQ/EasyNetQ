@@ -2,10 +2,7 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
-using EasyNetQ.PubSub;
-using EasyNetQ.Rpc;
 using EasyNetQ.Scheduler;
-using EasyNetQ.SendReceive;
 
 namespace EasyNetQ.DI
 {

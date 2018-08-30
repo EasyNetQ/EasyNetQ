@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using FluentAssertions;
 using Xunit;
 

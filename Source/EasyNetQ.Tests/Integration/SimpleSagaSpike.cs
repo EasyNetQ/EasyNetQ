@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
-using EasyNetQ.PubSub;
-using EasyNetQ.Rpc;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.Tests.Integration
 {

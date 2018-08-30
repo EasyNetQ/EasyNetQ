@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Rpc
+﻿namespace EasyNetQ.FluentConfiguration
 {
     /// <summary>
     /// Allows request configuration to be fluently extended without adding overloads to IBus

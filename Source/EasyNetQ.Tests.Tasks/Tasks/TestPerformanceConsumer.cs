@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using Net.CommandLine;
 
 namespace EasyNetQ.Tests.Tasks

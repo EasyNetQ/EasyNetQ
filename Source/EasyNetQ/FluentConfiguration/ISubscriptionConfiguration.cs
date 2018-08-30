@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EasyNetQ.PubSub
+namespace EasyNetQ.FluentConfiguration
 {
     /// <summary>
     /// Allows configuration to be fluently extended without adding overloads to IBus

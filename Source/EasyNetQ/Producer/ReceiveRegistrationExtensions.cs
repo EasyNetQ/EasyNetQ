@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ.SendReceive
+namespace EasyNetQ.Producer
 {
     public static class ReceiveRegistrationExtensions
     {

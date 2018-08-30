@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduler.Mongo.Core.Logging;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using EasyNetQ.Interception;
-using EasyNetQ.PubSub;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Integration.Scheduling;
 using Xunit;
 

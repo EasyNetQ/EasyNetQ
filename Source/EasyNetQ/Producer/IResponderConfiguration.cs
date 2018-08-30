@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Rpc
+﻿namespace EasyNetQ.Producer
 {
     public interface IResponderConfiguration
     {
