@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EasyNetQ.FluentConfiguration
+﻿namespace EasyNetQ.FluentConfiguration
 {
     /// <summary>
     /// Allows publish configuration to be fluently extended without adding overloads to IBus
@@ -41,13 +39,11 @@ namespace EasyNetQ.FluentConfiguration
 
     public class PublishConfiguration : IPublishConfiguration
     {
-        private readonly string defaultTopic;
-
         public PublishConfiguration(string defaultTopic)
         {
             Preconditions.CheckNotNull(defaultTopic, "defaultTopic");
 
-            this.defaultTopic = defaultTopic;
+            Topic = defaultTopic;
         }
 
         public IPublishConfiguration WithPriority(byte priority)
@@ -75,15 +71,7 @@ namespace EasyNetQ.FluentConfiguration
         }
 
         public byte? Priority { get; private set; }
-
-        private string topic;
-
-        public string Topic
-        {
-            get { return topic ?? defaultTopic; }
-            private set { topic = value; }
-        }
-
+        public string Topic { get; private set; }
         public int? Expires { get; private set; }
         public string QueueName { get; private set; }
     }
