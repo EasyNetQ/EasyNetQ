@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduler;
+using EasyNetQ.Scheduling;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.Mocking

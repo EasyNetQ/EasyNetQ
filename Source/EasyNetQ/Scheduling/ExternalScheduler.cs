@@ -5,7 +5,7 @@ using EasyNetQ.Producer;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Scheduler
+namespace EasyNetQ.Scheduling
 {
     public class ExternalScheduler : IScheduler
     {

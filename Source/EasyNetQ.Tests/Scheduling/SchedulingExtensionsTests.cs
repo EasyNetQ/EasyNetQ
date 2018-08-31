@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using EasyNetQ.DI;
-using EasyNetQ.Scheduler;
+using EasyNetQ.Scheduling;
 using Xunit;
 using NSubstitute;
 

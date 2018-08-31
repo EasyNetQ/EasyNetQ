@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Scheduler
+namespace EasyNetQ.Scheduling
 {
     public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
     {

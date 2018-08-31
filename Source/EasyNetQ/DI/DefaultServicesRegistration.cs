@@ -2,7 +2,7 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduler;
+using EasyNetQ.Scheduling;
 
 namespace EasyNetQ.DI
 {

@@ -1,5 +1,5 @@
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduler;
+using EasyNetQ.Scheduling;
 
 namespace EasyNetQ
 {

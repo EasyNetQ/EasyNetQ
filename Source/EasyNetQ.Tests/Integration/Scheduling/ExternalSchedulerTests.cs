@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduler;
+using EasyNetQ.Scheduling;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration.Scheduling

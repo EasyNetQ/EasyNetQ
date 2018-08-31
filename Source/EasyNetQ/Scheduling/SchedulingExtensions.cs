@@ -1,6 +1,6 @@
 ﻿using EasyNetQ.DI;
 
-namespace EasyNetQ.Scheduler
+namespace EasyNetQ.Scheduling
 {
     public static class SchedulingExtensions
     {
