@@ -2,11 +2,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.Tests.Tasks;
+using EasyNetQ.Producer;
 using Net.CommandLine;
 using Serilog;
 
-namespace EasyNetQ.Tests.Performance.Consumer
+namespace EasyNetQ.Tests.Tasks
 {
     public class TestConsumeMultipleMessageTypesFromSingleQueue : ICommandLineTask, IDisposable
     {
@@ -27,13 +27,14 @@ namespace EasyNetQ.Tests.Performance.Consumer
                     .Register<IHandlerCollectionFactory, HandlerCollectionPerQueueFactory>()
             );
 
-            bus.SubscribeAsync<MessageA>("multiple", async m => await Task.Run(() => logger.Information("{0}", m)).ConfigureAwait(false));
-            bus.SubscribeAsync<MessageB>("multiple", async m => await Task.Run(() => logger.Information("{0}", m)).ConfigureAwait(false));
+            var pubSub = bus.PubSub;
+            pubSub.Subscribe<MessageA>("multiple", m => Task.Run(() => logger.Information("{0}", m)), cancellationToken);
+            pubSub.Subscribe<MessageB>("multiple", m => Task.Run(() => logger.Information("{0}", m)), cancellationToken);
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)    
             {
-                bus.Publish(new MessageA());
-                bus.Publish(new MessageB());
+                pubSub.Publish(new MessageA(), cancellationToken);
+                pubSub.Publish(new MessageB(), cancellationToken);
             }
 
             Console.WriteLine("press enter to exit");
@@ -56,8 +57,6 @@ namespace EasyNetQ.Tests.Performance.Consumer
         {
             QueueNamingConvention = (type, id) => id;
         }
-
-
     }
 
     public class MessageB

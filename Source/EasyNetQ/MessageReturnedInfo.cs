@@ -2,14 +2,15 @@
 {
     public class MessageReturnedInfo
     {
-        public string Exchange { get; set; }
-        public string RoutingKey { get; set; }
-        public string ReturnReason { get; set; }
+        public string Exchange { get; }
+        public string RoutingKey { get; }
+        public string ReturnReason { get; }
 
         public MessageReturnedInfo(
             string exchange, 
             string routingKey, 
-            string returnReason)
+            string returnReason
+        )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(routingKey, "routingKey");

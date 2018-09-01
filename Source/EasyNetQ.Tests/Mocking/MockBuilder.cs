@@ -4,19 +4,21 @@ using RabbitMQ.Client.Framing;
 using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
+using EasyNetQ.Producer;
+using EasyNetQ.Scheduling;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
-        readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
-        readonly IConnection connection = Substitute.For<IConnection>();
-        readonly List<IModel> channels = new List<IModel>();
-        readonly Stack<IModel> channelPool = new Stack<IModel>();
-        readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
-        readonly IBasicProperties basicProperties = new BasicProperties();
-        readonly List<string> consumerQueueNames = new List<string>();
+        private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
+        private readonly IConnection connection = Substitute.For<IConnection>();
+        private readonly List<IModel> channels = new List<IModel>();
+        private readonly Stack<IModel> channelPool = new Stack<IModel>();
+        private readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
+        private readonly IBasicProperties basicProperties = new BasicProperties();
+        private readonly List<string> consumerQueueNames = new List<string>();
         private readonly IBus bus;
 
         public const string Host = "my_host";
@@ -31,7 +33,7 @@ namespace EasyNetQ.Tests.Mocking
 
         public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 channelPool.Push(Substitute.For<IModel>());
             }
@@ -91,54 +93,32 @@ namespace EasyNetQ.Tests.Mocking
             bus.Advanced.Container.Should().NotBeNull();
         }
 
-        public IConnectionFactory ConnectionFactory
-        {
-            get { return connectionFactory; }
-        }
+        public IPubSub PubSub => bus.PubSub;
 
-        public IConnection Connection
-        {
-            get { return connection; }
-        }
+        public IRpc Rpc => bus.Rpc;
+        
+        public ISendReceive SendReceive => bus.SendReceive;
+        
+        public IScheduler Scheduler => bus.Scheduler;
+        
+        public IConnectionFactory ConnectionFactory => connectionFactory;
 
-        public List<IModel> Channels
-        {
-            get { return channels; }
-        }
+        public IConnection Connection => connection;
 
-        public List<IBasicConsumer> Consumers
-        {
-            get { return consumers; }
-        }
+        public List<IModel> Channels => channels;
 
-        public IBasicProperties BasicProperties
-        {
-            get { return basicProperties; }
-        }
+        public List<IBasicConsumer> Consumers => consumers;
 
-        public IBus Bus
-        {
-            get { return bus; }
-        }
+        public IBasicProperties BasicProperties => basicProperties;
 
-        public IServiceResolver ServiceProvider
-        {
-            get { return bus.Advanced.Container; }
-        }
+        public IBus Bus => bus;
 
-        public IModel NextModel
-        {
-            get { return channelPool.Peek(); }
-        }
+        public IServiceResolver ServiceProvider => bus.Advanced.Container;
 
-        public IEventBus EventBus
-        {
-            get { return ServiceProvider.Resolve<IEventBus>(); }
-        }
+        public IModel NextModel => channelPool.Peek();
 
-        public List<string> ConsumerQueueNames
-        {
-            get { return consumerQueueNames; }
-        }
+        public IEventBus EventBus => ServiceProvider.Resolve<IEventBus>();
+
+        public List<string> ConsumerQueueNames => consumerQueueNames;
     }
 }

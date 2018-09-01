@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
+using EasyNetQ.Producer;
 using FluentAssertions;
 using Xunit;
 
@@ -21,7 +22,7 @@ namespace EasyNetQ.Tests.Integration
                 var client = new ManagementClient("http://localhost", "guest", "guest");
                 var vhost = new Vhost { Name = "/" };
 
-                bus.Subscribe<MyMessage>(subscriptionId, message => { }, x => x.WithExpires(1000));
+                bus.PubSub.Subscribe<MyMessage>(subscriptionId, message => { }, x => x.WithExpires(1000));
 
                 var queue = client.GetQueue(queueName, vhost);
                 queue.Should().NotBeNull();
@@ -47,7 +48,7 @@ namespace EasyNetQ.Tests.Integration
             var client = new ManagementClient("http://localhost", "guest", "guest");
             var vhost = new Vhost { Name = "/" };
 
-            bus.Subscribe<MyMessage>(subscriptionId, message => { });
+            bus.PubSub.Subscribe<MyMessage>(subscriptionId, message => { });
 
             var queue = client.GetQueue(queueName, vhost);
             queue.Should().NotBeNull();

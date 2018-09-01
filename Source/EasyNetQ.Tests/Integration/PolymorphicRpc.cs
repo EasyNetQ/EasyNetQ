@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -36,14 +37,14 @@ namespace EasyNetQ.Tests.Integration
                 Bark = "Woof"
             };
 
-            bus.RequestAsync<IAnimal, IAnimal>(cat);
-            bus.RequestAsync<IAnimal, IAnimal>(dog);
+            bus.Rpc.RequestAsync<IAnimal, IAnimal>(cat);
+            bus.Rpc.RequestAsync<IAnimal, IAnimal>(dog);
         }
 
         [Fact]
         public void Should_request_respond_with_correct_message_types()
         {
-            bus.Respond<IAnimal, IAnimal>(@interface =>
+            bus.Rpc.Respond<IAnimal, IAnimal>(@interface =>
             {
                 var cat = @interface as Cat;
                 var dog = @interface as Dog;
@@ -74,7 +75,7 @@ namespace EasyNetQ.Tests.Integration
                 Meow = "Purr"
             };
 
-            IAnimal response = bus.Request<IAnimal, IAnimal>(request);
+            IAnimal response = bus.Rpc.Request<IAnimal, IAnimal>(request);
 
             Assert.Equal(request.Name, response.Name);
             Assert.Same(request.GetType(), response.GetType());

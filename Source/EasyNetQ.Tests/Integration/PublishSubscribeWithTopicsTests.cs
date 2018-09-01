@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -28,9 +29,9 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_some_messages_with_topics()
         {
-            bus.Publish(CreateMessage(), "X.A");
-            bus.Publish(CreateMessage(), "X.B");
-            bus.Publish(CreateMessage(), "Y.A");
+            bus.PubSub.Publish(CreateMessage(), "X.A");
+            bus.PubSub.Publish(CreateMessage(), "X.B");
+            bus.PubSub.Publish(CreateMessage(), "Y.A");
         }
 
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
@@ -38,19 +39,19 @@ namespace EasyNetQ.Tests.Integration
         {
             var countdownEvent = new CountdownEvent(7);
 
-            bus.Subscribe<MyMessage>("id1", msg =>
+            bus.PubSub.Subscribe<MyMessage>("id1", msg =>
             {
                 Console.WriteLine("I Get X: {0}", msg.Text);
                 countdownEvent.Signal();
             }, x => x.WithTopic("X.*"));
 
-            bus.Subscribe<MyMessage>("id2", msg =>
+            bus.PubSub.Subscribe<MyMessage>("id2", msg =>
             {
                 Console.WriteLine("I Get A: {0}", msg.Text);
                 countdownEvent.Signal();
             }, x => x.WithTopic("*.A"));
 
-            bus.Subscribe<MyMessage>("id3", msg =>
+            bus.PubSub.Subscribe<MyMessage>("id3", msg =>
             {
                 Console.WriteLine("I Get All: {0}", msg.Text);
                 countdownEvent.Signal();
@@ -63,7 +64,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_subscribe_to_multiple_topic_strings()
         {
             var countdownEvent = new CountdownEvent(7);
-            bus.Subscribe<MyMessage>("id4", msg =>
+            bus.PubSub.Subscribe<MyMessage>("id4", msg =>
             {
                 Console.WriteLine("I Get Y or B: {0}", msg.Text);
                 countdownEvent.Signal();
@@ -75,7 +76,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Publish_a_messages_without_a_topic()
         {
-            bus.Publish(CreateMessage());
+            bus.PubSub.Publish(CreateMessage());
         }
     }
 }

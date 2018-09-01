@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
-namespace EasyNetQ.Tests.SimpleRequester
+namespace EasyNetQ.Tests.Tasks.SimpleRequester
 {
     public class LatencyRecorder : ILatencyRecorder
     {

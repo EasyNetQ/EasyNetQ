@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Consumer;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests;
 using Xunit;
 
@@ -38,7 +39,7 @@ namespace EasyNetQ.Hosepipe.Tests
 
             for (int i = 0; i < 10; i++)
             {
-                bus.Publish(new TestMessage{ Text = string.Format("\n>>>>>> Message {0}\n", i)});
+                bus.PubSub.Publish(new TestMessage{ Text = string.Format("\n>>>>>> Message {0}\n", i)});
             }
 
             bus.Dispose();
@@ -49,7 +50,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+            bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
             Thread.Sleep(1000);
 

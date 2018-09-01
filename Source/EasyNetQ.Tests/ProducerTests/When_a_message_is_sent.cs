@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -17,7 +18,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             mockBuilder = new MockBuilder();
 
-            mockBuilder.Bus.Send(queueName, new MyMessage { Text = "Hello World" });
+            mockBuilder.SendReceive.Send(queueName, new MyMessage { Text = "Hello World" });
         }
 
         public void Dispose()

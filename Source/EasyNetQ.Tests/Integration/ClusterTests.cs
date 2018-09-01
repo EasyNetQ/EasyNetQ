@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using FluentAssertions;
 using Xunit;
 
@@ -49,7 +50,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Requires a running rabbitMQ cluster on server 'ubuntu'")]
         public void Should_be_able_to_resubscribe_on_reconnection()
         {
-            bus.Subscribe<MyMessage>("cluster_test", message => Console.WriteLine(message.Text));
+            bus.PubSub.Subscribe<MyMessage>("cluster_test", message => Console.WriteLine(message.Text));
 
 //            var count = 0;
 //            while (true)

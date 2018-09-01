@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -26,12 +27,12 @@ namespace EasyNetQ.Tests.Integration
         {
             const string queue = "send_receive_test";
 
-            bus.Receive(queue, x => x
+            bus.SendReceive.Receive(queue, x => x
                 .Add<MyMessage>(message => Console.WriteLine("MyMessage: {0}", message.Text))
                 .Add<MyOtherMessage>(message => Console.WriteLine("MyOtherMessage: {0}", message.Text)));
 
-            bus.Send(queue, new MyOtherMessage { Text = "Hello Gadgets!" });
-            bus.Send(queue, new MyMessage { Text = "Hello Widgets!" });
+            bus.SendReceive.Send(queue, new MyOtherMessage { Text = "Hello Gadgets!" });
+            bus.SendReceive.Send(queue, new MyMessage { Text = "Hello Widgets!" });
 
             Thread.Sleep(500);
         }
@@ -43,7 +44,7 @@ namespace EasyNetQ.Tests.Integration
             var are = new AutoResetEvent(false);
             var waitTime = TimeSpan.FromMinutes(2);
 
-            bus.Receive(queue, x => x.Add<MyMessage>(message =>
+            bus.SendReceive.Receive(queue, x => x.Add<MyMessage>(message =>
                 {
                     Console.Out.WriteLine("Got message {0}, now working");
                     Thread.Sleep(TimeSpan.FromMinutes(1));
@@ -51,15 +52,8 @@ namespace EasyNetQ.Tests.Integration
                     are.Set();
                 }));
 
-//            bus.Receive<MyMessage>(queue, message =>
-//                {
-//                    Console.Out.WriteLine("Got message {0}, now working");
-//                    Thread.Sleep(TimeSpan.FromMinutes(1));
-//                    Console.Out.WriteLine("Completed working, should be sending ACK");
-//                    are.Set();
-//                });
 
-            bus.Send(queue, new MyMessage { Text = "Hello Widgets!" });
+            bus.SendReceive.Send(queue, new MyMessage { Text = "Hello Widgets!" });
 
             var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Expected reset event within {waitTime.TotalSeconds} seconds");

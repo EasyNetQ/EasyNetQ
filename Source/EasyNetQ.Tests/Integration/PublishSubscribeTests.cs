@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -15,7 +16,7 @@ namespace EasyNetQ.Tests.Integration
         public PublishSubscribeTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while(!bus.IsConnected) Thread.Sleep(10);
+            while(!bus.Advanced.IsConnected) Thread.Sleep(10);
         }
 
         public void Dispose()
@@ -29,7 +30,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_subscribe()
         {
             var autoResetEvent = new AutoResetEvent(false);
-            bus.Subscribe<MyMessage>("test", message =>
+            bus.PubSub.Subscribe<MyMessage>("test", message =>
             {
                 Console.WriteLine(message.Text);
                 autoResetEvent.Set();
@@ -49,13 +50,13 @@ namespace EasyNetQ.Tests.Integration
             var firstCount = 0;
             var secondCount = 0;
 
-            bus.Subscribe<MyMessage>("test", message =>
+            bus.PubSub.Subscribe<MyMessage>("test", message =>
                 {
                     countdownEvent.Signal();
                     Interlocked.Increment(ref firstCount);
                     Console.WriteLine("[1] " + message.Text);
                 }, x => x.AsExclusive());
-            bus.Subscribe<MyMessage>("test", message =>
+            bus.PubSub.Subscribe<MyMessage>("test", message =>
                 {
                     countdownEvent.Signal();
                     Interlocked.Increment(ref secondCount);
@@ -63,7 +64,7 @@ namespace EasyNetQ.Tests.Integration
                 }, x => x.AsExclusive());
 
             for (var i = 0; i < 10; ++i)
-                bus.Publish(new MyMessage
+                bus.PubSub.Publish(new MyMessage
                     {
                         Text = "Exclusive " + i
                     });
@@ -76,7 +77,7 @@ namespace EasyNetQ.Tests.Integration
         public void Long_running_exclusive_subscriber_should_survive_a_rabbit_restart()
         {
             var autoResetEvent = new AutoResetEvent(false);
-            bus.Subscribe<MyMessage>("test", message =>
+            bus.PubSub.Subscribe<MyMessage>("test", message =>
             {
                 Console.Out.WriteLine("Restart RabbitMQ now.");
                 new Timer(x =>
@@ -98,7 +99,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_publish()
         {
             var message = new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) };
-            bus.Publish(message);
+            bus.PubSub.Publish(message);
             Console.Out.WriteLine("message.Text = {0}", message.Text);
         }
 
@@ -109,7 +110,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var autoResetEvent = new AutoResetEvent(false);
             var messageQueue2 = RabbitHutch.CreateBus("host=localhost");
-            messageQueue2.Subscribe<MyMessage>("test2", msg =>
+            messageQueue2.PubSub.Subscribe<MyMessage>("test2", msg =>
             {
                 Console.WriteLine(msg.Text);
                 autoResetEvent.Set();
@@ -128,32 +129,32 @@ namespace EasyNetQ.Tests.Integration
         {
             var countdownEvent = new CountdownEvent(8);
 
-            bus.Subscribe<MyMessage>("test_a", msg =>
+            bus.PubSub.Subscribe<MyMessage>("test_a", msg =>
             {
                 Console.WriteLine(msg.Text);
                 countdownEvent.Signal();
             });
-            bus.Subscribe<MyOtherMessage>("test_b", msg =>
+            bus.PubSub.Subscribe<MyOtherMessage>("test_b", msg =>
             {
                 Console.WriteLine(msg.Text);
                 countdownEvent.Signal();
             });
-            bus.Subscribe<MyMessage>("test_c", msg =>
+            bus.PubSub.Subscribe<MyMessage>("test_c", msg =>
             {
                 Console.WriteLine(msg.Text);
                 countdownEvent.Signal();
             });
-            bus.Subscribe<MyOtherMessage>("test_d", msg =>
+            bus.PubSub.Subscribe<MyOtherMessage>("test_d", msg =>
             {
                 Console.WriteLine(msg.Text);
                 countdownEvent.Signal();
             });
 
-            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
-            bus.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.PubSub.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.PubSub.Publish(new MyMessage { Text = "Hello! " + Guid.NewGuid().ToString().Substring(0, 5) });
 
-            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
-            bus.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.PubSub.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
+            bus.PubSub.Publish(new MyOtherMessage { Text = "Hello other! " + Guid.NewGuid().ToString().Substring(0, 5) });
 
             // allow time for messages to be consumed
             countdownEvent.Wait(1000);
@@ -168,7 +169,7 @@ namespace EasyNetQ.Tests.Integration
         public void Long_running_subscriber_should_survive_a_rabbit_restart()
         {
             var autoResetEvent = new AutoResetEvent(false);
-            bus.Subscribe<MyMessage>("test", message =>
+            bus.PubSub.Subscribe<MyMessage>("test", message =>
             {
                 Console.Out.WriteLine("Restart RabbitMQ now.");
                 new Timer(x =>
@@ -191,7 +192,7 @@ namespace EasyNetQ.Tests.Integration
             var autoResetEvent = new AutoResetEvent(false);
             var testLocalBus = RabbitHutch.CreateBus("host=localhost");
 
-            testLocalBus.Subscribe<MyMessage>("test", message =>
+            testLocalBus.PubSub.Subscribe<MyMessage>("test", message =>
             {
                 Console.Out.WriteLine("message.Text = {0}", message.Text);
                 autoResetEvent.Set();
@@ -213,15 +214,15 @@ namespace EasyNetQ.Tests.Integration
             var subscribeBus2 = RabbitHutch.CreateBus(connectionString);
 
             // first set up the subscribers
-            subscribeBus1.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus1.PubSub.Subscribe<MyMessage>("roundRobinTest", message => 
                 Console.WriteLine("Subscriber 1: {0}", message.Text));
-            subscribeBus2.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus2.PubSub.Subscribe<MyMessage>("roundRobinTest", message => 
                 Console.WriteLine("Subscriber 2: {0}", message.Text));
 
             // now publish some messages
             for (int i = 0; i < 50; i++)
             {
-                publishBus.Publish(new MyMessage { Text = string.Format("Message{0}", i) });
+                publishBus.PubSub.Publish(new MyMessage { Text = string.Format("Message{0}", i) });
             }
 
             Thread.Sleep(1000);
@@ -243,22 +244,22 @@ namespace EasyNetQ.Tests.Integration
             expected.AddRange(Enumerable.Repeat("1", eachPriorityNumber));
             expected.AddRange(Enumerable.Repeat("0", eachPriorityNumber));
 
-            using (testLocalBus.Subscribe<MyMessage>("messagePriorityTest", message => { }, c => c.WithMaxPriority(10)))
+            using (testLocalBus.PubSub.Subscribe<MyMessage>("messagePriorityTest", message => { }, c => c.WithMaxPriority(10)))
             {
                 // Create the queue at the very first run
             }
 
             for (int i = 0; i < eachPriorityNumber; i++)
             {
-                testLocalBus.Publish(new MyMessage { Text = "0" }, x => x.WithPriority(0));
-                testLocalBus.Publish(new MyMessage { Text = "1" }, x => x.WithPriority(1));
-                testLocalBus.Publish(new MyMessage { Text = "2" }, x => x.WithPriority(2));
+                testLocalBus.PubSub.Publish(new MyMessage { Text = "0" }, x => x.WithPriority(0));
+                testLocalBus.PubSub.Publish(new MyMessage { Text = "1" }, x => x.WithPriority(1));
+                testLocalBus.PubSub.Publish(new MyMessage { Text = "2" }, x => x.WithPriority(2));
             }
 
             var autoResetEvent = new AutoResetEvent(false);
             var received = new List<string>();
 
-            testLocalBus.Subscribe<MyMessage>("messagePriorityTest", message =>
+            testLocalBus.PubSub.Subscribe<MyMessage>("messagePriorityTest", message =>
             {
                 received.Add(message.Text);
                 if (received.Count == totalNumber)

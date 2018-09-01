@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using Net.CommandLine;
 
-namespace EasyNetQ.Tests.SimpleRequester
+namespace EasyNetQ.Tests.Tasks.SimpleRequester
 {
     public class SimpleRequester : ICommandLineTask, IDisposable
     {
@@ -35,7 +36,7 @@ namespace EasyNetQ.Tests.SimpleRequester
             {
                 lock (requestLock)
                 {
-                    bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                    bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
                         new TestRequestMessage
                         {
                             Id = count,

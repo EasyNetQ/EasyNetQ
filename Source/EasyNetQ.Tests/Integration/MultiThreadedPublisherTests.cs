@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -14,7 +15,7 @@ namespace EasyNetQ.Tests.Integration
         public MultiThreadedPublisherTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while(!bus.IsConnected) Thread.Sleep(10);
+            while(!bus.Advanced.IsConnected) Thread.Sleep(10);
         }
 
         public void Dispose()
@@ -32,7 +33,7 @@ namespace EasyNetQ.Tests.Integration
 
             for (int i = 0; i < 10; i++)
             {
-                var thread = new Thread(x => bus.Publish(new MyMessage()));
+                var thread = new Thread(x => bus.PubSub.Publish(new MyMessage()));
                 threads.Add(thread);
                 thread.Start();
             }
@@ -53,9 +54,9 @@ namespace EasyNetQ.Tests.Integration
             {
                 var thread = new Thread(x =>
                 {
-                    bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
-                        new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) })
-                        .ContinueWith(response => Console.WriteLine(response.Result.Text));
+                    bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                        new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) }
+                    ).ContinueWith(response => Console.WriteLine(response.Result.Text));
                 });
                 threads.Add(thread);
                 thread.Start();

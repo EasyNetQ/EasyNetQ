@@ -1,22 +1,23 @@
-﻿using Net.CommandLine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
+using Net.CommandLine;
 
-namespace EasyNetQ.Tests.Tasks.Tasks
+namespace EasyNetQ.Tests.Tasks
 {
     public class TestSimpleService : ICommandLineTask, IDisposable
     {
         private IBus bus;
-        private const string defaultRpcExchange = "easy_net_q_rpc";
+        private const string DefaultRpcExchange = "easy_net_q_rpc";
 
-        private static readonly Dictionary<Type, string> customRpcRequestConventionDictionary = new Dictionary<Type, string>()
+        private static readonly Dictionary<Type, string> CustomRpcRequestConventionDictionary = new Dictionary<Type, string>
         {
             {typeof (TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange"}
         };
 
-        private static readonly Dictionary<Type, string> customRpcResponseConventionDictionary = new Dictionary<Type, string>()
+        private static readonly Dictionary<Type, string> CustomRpcResponseConventionDictionary = new Dictionary<Type, string>
         {
             {typeof (TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange"}
         };
@@ -26,15 +27,17 @@ namespace EasyNetQ.Tests.Tasks.Tasks
 
             bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => customRpcRequestConventionDictionary.ContainsKey(type) ? customRpcRequestConventionDictionary[type] : defaultRpcExchange;
-            bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => customRpcResponseConventionDictionary.ContainsKey(type) ? customRpcResponseConventionDictionary[type] : defaultRpcExchange;
+            bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => CustomRpcRequestConventionDictionary.ContainsKey(type) ? CustomRpcRequestConventionDictionary[type] : DefaultRpcExchange;
+            bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => CustomRpcResponseConventionDictionary.ContainsKey(type) ? CustomRpcResponseConventionDictionary[type] : DefaultRpcExchange;
 
-            
-            bus.RespondAsync<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(HandleModifiedRequestExchangeRequest);
-            bus.RespondAsync<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(HandleModifiedResponseExchangeRequest);
-            bus.RespondAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
-            bus.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
-
+            bus.Rpc.Respond<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(
+                x => HandleModifiedRequestExchangeRequestAsync(x)    
+            );
+            bus.Rpc.Respond<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(
+                x => HandleModifiedResponseExchangeRequestAsync(x)
+            );
+            bus.Rpc.Respond<TestAsyncRequestMessage, TestAsyncResponseMessage>(x => HandleAsyncRequest(x));
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => HandleRequest(x));
 
             Console.WriteLine("Waiting to service requests");
             Console.WriteLine("Press enter to stop");
@@ -73,53 +76,28 @@ namespace EasyNetQ.Tests.Tasks.Tasks
             return new TestResponseMessage { Id = request.Id, Text = request.Text + " all done!" };
         }
 
-        public static Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequest(TestModifiedRequestExhangeRequestMessage request)
+        public static Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequestAsync(TestModifiedRequestExhangeRequestMessage request)
         {
-            Console.Out.WriteLine("Responding to RPC request from exchange : "+ customRpcRequestConventionDictionary[typeof (TestModifiedRequestExhangeRequestMessage)]);
+            Console.Out.WriteLine("Responding to RPC request from exchange : "+ CustomRpcRequestConventionDictionary[typeof (TestModifiedRequestExhangeRequestMessage)]);
             return Task.FromResult(new TestModifiedRequestExhangeResponseMessage
             {
                 Text = request.Text + " response!"
             });
         }
 
-        public static Task<TestModifiedResponseExhangeResponseMessage> HandleModifiedResponseExchangeRequest(TestModifiedResponseExhangeRequestMessage request)
+        public static Task<TestModifiedResponseExhangeResponseMessage> HandleModifiedResponseExchangeRequestAsync(TestModifiedResponseExhangeRequestMessage request)
         {
-            Console.Out.WriteLine("Responding to RPC request from exchange : " + customRpcResponseConventionDictionary[typeof(TestModifiedResponseExhangeResponseMessage)]);
+            Console.Out.WriteLine("Responding to RPC request from exchange : " + CustomRpcResponseConventionDictionary[typeof(TestModifiedResponseExhangeResponseMessage)]);
             return Task.FromResult(new TestModifiedResponseExhangeResponseMessage()
             {
                 Text = request.Text + " response!"
             });
         }
 
-        private static Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)
+        private static async Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)
         {
-            if (func == null)
-            {
-                throw new ArgumentNullException("func");
-            }
-            if (millisecondsDelay < 0)
-            {
-                throw new ArgumentOutOfRangeException("millisecondsDelay");
-            }
-
-            var taskCompletionSource = new TaskCompletionSource<T>();
-
-            var timer = new Timer(self =>
-            {
-                ((Timer)self).Dispose();
-                try
-                {
-                    var result = func();
-                    taskCompletionSource.SetResult(result);
-                }
-                catch (Exception exception)
-                {
-                    taskCompletionSource.SetException(exception);
-                }
-            });
-            timer.Change(millisecondsDelay, millisecondsDelay);
-
-            return taskCompletionSource.Task;
+            await Task.Delay(millisecondsDelay).ConfigureAwait(false);
+            return func();
         }
 
         public void Dispose()

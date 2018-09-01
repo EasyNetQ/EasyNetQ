@@ -23,8 +23,7 @@ namespace EasyNetQ.ConnectionString
 
         public static Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
-        private static Uri _result;
-        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _result)).Select(_ => new Uri(_));
+        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(x => new Uri(x));
 
         public static Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {

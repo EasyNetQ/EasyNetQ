@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -36,14 +37,14 @@ namespace EasyNetQ.Tests.Integration
                 Bark = "Woof"
             };
 
-            bus.Publish<IAnimal>(cat);
-            bus.Publish<IAnimal>(dog);
+            bus.PubSub.Publish<IAnimal>(cat);
+            bus.PubSub.Publish<IAnimal>(dog);
         }
 
         [Fact]
         public void Should_consume_the_correct_message_type()
         {
-            bus.Subscribe<IAnimal>("polymorphic_test", @interface =>
+            bus.PubSub.Subscribe<IAnimal>("polymorphic_test", @interface =>
                 {
                     var cat = @interface as Cat;
                     var dog = @interface as Dog;

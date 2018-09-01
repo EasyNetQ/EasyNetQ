@@ -7,6 +7,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EasyNetQ.Producer;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests
@@ -159,7 +160,7 @@ namespace EasyNetQ.Tests
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
-            mockBuilder.Bus.Publish(new TestMessage());
+            mockBuilder.PubSub.Publish(new TestMessage());
 		}
 
         public void Dispose()
@@ -215,7 +216,7 @@ namespace EasyNetQ.Tests
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-            mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
+            mockBuilder.Rpc.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
         public void Dispose()

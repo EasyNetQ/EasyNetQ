@@ -45,8 +45,9 @@ namespace EasyNetQ.DI
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
-                .Register<IRpc, Rpc>()
-                .Register<ISendReceive, SendReceive>()
+                .Register<IPubSub, DefaultPubSub>()
+                .Register<IRpc, DefaultRpc>()
+                .Register<ISendReceive, DefaultSendReceive>()
                 .Register<IScheduler, ExternalScheduler>()
                 .Register<IBus, RabbitBus>();
         }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduler.Mongo.Core.Logging;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
@@ -15,6 +17,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         private readonly IScheduleRepository scheduleRepository;
         private Timer handleTimeoutTimer;
         private Timer publishTimer;
+        private List<IDisposable> subscriptions;
 
         public SchedulerService(IBus bus, IScheduleRepository scheduleRepository, ISchedulerServiceConfiguration configuration)
         {
@@ -26,8 +29,11 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         public void Start()
         {
             logger.Debug("Starting SchedulerService");
-            bus.Subscribe<ScheduleMe>(configuration.SubscriptionId, OnMessage);
-            bus.Subscribe<UnscheduleMe>(configuration.SubscriptionId, OnMessage);
+            subscriptions = new List<IDisposable>
+            {
+                bus.PubSub.Subscribe<ScheduleMe>(configuration.SubscriptionId, OnMessage),
+                bus.PubSub.Subscribe<UnscheduleMe>(configuration.SubscriptionId, OnMessage),
+            };
             publishTimer = new Timer(OnPublishTimerTick, null, TimeSpan.Zero, configuration.PublishInterval);
             handleTimeoutTimer = new Timer(OnHandleTimeoutTimerTick, null, TimeSpan.Zero, configuration.HandleTimeoutInterval);
         }
@@ -35,18 +41,15 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         public void Stop()
         {
             logger.Debug("Stopping SchedulerService");
-            if (publishTimer != null)
+            
+            publishTimer?.Dispose();
+            handleTimeoutTimer?.Dispose();
+            foreach (var subscription in subscriptions)
             {
-                publishTimer.Dispose();
+                subscription.Dispose();
             }
-            if (handleTimeoutTimer != null)
-            {
-                handleTimeoutTimer.Dispose();
-            }
-            if (bus != null)
-            {
-                bus.Dispose();
-            }
+
+            bus?.Dispose();
         }
 
         public void OnHandleTimeoutTimerTick(object state)
@@ -57,7 +60,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core
 
         public void OnPublishTimerTick(object state)
         {
-            if (!bus.IsConnected) return;
+            if (!bus.Advanced.IsConnected) return;
             try
             {
                 var published = 0;
@@ -76,7 +79,8 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                         routingKey,
                         false,
                         properties,
-                        schedule.InnerMessage);
+                        schedule.InnerMessage
+                    );
                     scheduleRepository.MarkAsPublished(schedule.Id);
                     ++published;
                 }

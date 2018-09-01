@@ -37,7 +37,9 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             try
             {
-                mockBuilder.Bus.Publish(new MyMessage { Text = "Hello World" });
+                mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" }, c => { })
+                    .GetAwaiter()
+                    .GetResult();
             }
             catch (AggregateException aggregateException)
             {
