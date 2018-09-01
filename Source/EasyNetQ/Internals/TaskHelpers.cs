@@ -201,23 +201,11 @@ namespace EasyNetQ.Internals
         }
 
         public static Task Completed { get; } = FromResult<object>(null);
-
-        public static TaskCompletionSource<T> CreateTcs<T>()
-        {
+        
 #if NETFX
-            return new TaskCompletionSource<T>();
-#else
-            return new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
-        }
-
         public static void TrySetResultAsynchronously<T>(this TaskCompletionSource<T> source, T result)
         {
-#if NETFX
             if (IsSyncSafe(source.Task))
-#else
-            if ((source.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
-#endif
             {
                 source.TrySetResult(result);
             }
@@ -229,11 +217,7 @@ namespace EasyNetQ.Internals
 
         public static void TrySetCanceledAsynchronously<T>(this TaskCompletionSource<T> source)
         {
-#if NETFX
             if (IsSyncSafe(source.Task))
-#else
-            if ((source.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
-#endif
             {
                 source.TrySetCanceled();
             }
@@ -245,11 +229,7 @@ namespace EasyNetQ.Internals
 
         public static void TrySetExceptionAsynchronously<T>(this TaskCompletionSource<T> source, Exception exception)
         {
-#if NETFX
             if (IsSyncSafe(source.Task))
-#else
-            if ((source.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
-#endif
             {
                 source.TrySetException(exception);
             }
@@ -258,5 +238,6 @@ namespace EasyNetQ.Internals
                 Task.Run(() => source.TrySetException(exception));
             }
         }
+#endif
     }
 }
