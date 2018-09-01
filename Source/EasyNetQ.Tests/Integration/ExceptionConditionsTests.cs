@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using EasyNetQ.Management.Client;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.Tests
 {
@@ -21,7 +22,7 @@ namespace EasyNetQ.Tests
                     Thread.Sleep(2000);
                     try
                     {
-                        bus.Publish(new MyMessage { Text = "Hello" });
+                        bus.PubSub.Publish(new MyMessage { Text = "Hello" });
                         Console.WriteLine("Published OK");
                     }
                     catch (EasyNetQException exception)
@@ -37,8 +38,8 @@ namespace EasyNetQ.Tests
         {
             Console.WriteLine("Subscriber {0} got: {1} {2}", name, message.Text, message.Id);
             Thread.Sleep(1000);
-            while (!bus.IsConnected) Thread.Sleep(100);
-            bus.Publish(new T { Text = "Hello From " + name, Id = ++message.Id });
+            while (!bus.Advanced.IsConnected) Thread.Sleep(100);
+            bus.PubSub.Publish(new T { Text = "Hello From " + name, Id = ++message.Id });
         }
 
         /// <summary>
@@ -56,12 +57,12 @@ namespace EasyNetQ.Tests
                 Console.WriteLine("About to subscribe");
 
                 // ping pong between busA and busB
-                busB.Subscribe<FromA>("restarted", message => Reply<FromB>(message, busB, "B"));
-                busA.Subscribe<FromB>("restarted_1", message => Reply<FromA>(message, busA, "A"));
+                busB.PubSub.Subscribe<FromA>("restarted", message => Reply<FromB>(message, busB, "B"));
+                busA.PubSub.Subscribe<FromB>("restarted_1", message => Reply<FromA>(message, busA, "A"));
 
                 Console.WriteLine("Subscribed");
 
-                busA.Publish(new FromA { Text = "Initial From A ", Id = 0 });
+                busA.PubSub.Publish(new FromA { Text = "Initial From A ", Id = 0 });
 
                 while (true)
                 {
@@ -78,7 +79,7 @@ namespace EasyNetQ.Tests
             using (var publishBus = RabbitHutch.CreateBus("host=localhost;timeout=60"))
             using (var subscribeBus = RabbitHutch.CreateBus("host=localhost"))
             {
-                subscribeBus.Subscribe<MyMessage>("longRunner", message =>
+                subscribeBus.PubSub.Subscribe<MyMessage>("longRunner", message =>
                     {
                         Console.Out.WriteLine("Got message: {0}", message.Text);
                         Thread.Sleep(2000);
@@ -89,7 +90,7 @@ namespace EasyNetQ.Tests
                 while (true)
                 {
                     Thread.Sleep(1000);
-                    publishBus.Publish(new MyMessage
+                    publishBus.PubSub.Publish(new MyMessage
                         {
                             Text = string.Format("Hello <{0}>", counter)
                         });

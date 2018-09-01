@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -8,7 +9,7 @@ namespace EasyNetQ.Consumer
     public class TransientConsumer : IConsumer
     {
         private readonly IQueue queue;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
         private readonly IInternalConsumerFactory internalConsumerFactory;
@@ -18,7 +19,7 @@ namespace EasyNetQ.Consumer
 
         public TransientConsumer(
             IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
             IPersistentConnection connection, 
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory, 

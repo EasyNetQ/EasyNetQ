@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -13,8 +14,8 @@ namespace EasyNetQ.Tests.Integration
 
             AutoRegisterSubscribers(bus, GetType().GetTypeInfo().Assembly);
 
-            bus.Publish(new MyAutoSubscribedMessage { Text = "Hello Message!" });
-            bus.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
+            bus.PubSub.Publish(new MyAutoSubscribedMessage { Text = "Hello Message!" });
+            bus.PubSub.Publish(new MyOtherAutoSubscribeMessage { Text = "Other hello message!" });
         }
 
         private void AutoRegisterSubscribers(IBus bus, Assembly assembly)

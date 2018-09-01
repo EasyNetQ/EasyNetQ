@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using Xunit;
 
@@ -29,7 +30,7 @@ namespace EasyNetQ.Tests.Integration
 
             message.Text = "Some Text";
 
-            bus.Publish(message);
+            bus.PubSub.Publish(message);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
@@ -11,7 +12,7 @@ namespace EasyNetQ.Consumer
 {
     public interface IHandlerRunner : IDisposable
     {
-        Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context);
+        Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
     }
 
     public class HandlerRunner : IHandlerRunner
@@ -26,7 +27,7 @@ namespace EasyNetQ.Consumer
             this.consumerErrorStrategy = consumerErrorStrategy;
         }
 
-        public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context)
+        public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(context, "context");
 
@@ -35,7 +36,7 @@ namespace EasyNetQ.Consumer
                 logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.Info);
             }
 
-            var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context).ConfigureAwait(false);
+            var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context, cancellationToken).ConfigureAwait(false);
             
             return (model, tag) =>
             {
@@ -72,13 +73,13 @@ namespace EasyNetQ.Consumer
             };
         }
 
-        private async Task<AckStrategy> InvokeUserMessageHandlerInternalAsync(ConsumerExecutionContext context)
+        private async Task<AckStrategy> InvokeUserMessageHandlerInternalAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
         {
             try
             {
                 try
                 {
-                    await context.UserHandler(context.Body, context.Properties, context.Info).ConfigureAwait(false);
+                    await context.UserHandler(context.Body, context.Properties, context.Info, cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

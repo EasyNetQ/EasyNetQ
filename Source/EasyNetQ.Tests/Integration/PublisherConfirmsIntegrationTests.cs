@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -24,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact]
         public void Subscribe()
         {
-            bus.Subscribe<MyMessage>("publish_confirms", message => {});
+            bus.PubSub.Subscribe<MyMessage>("publish_confirms", message => {});
         }
 
         [Fact]
@@ -35,7 +36,7 @@ namespace EasyNetQ.Tests.Integration
 
             while (true)
             {
-                bus.Publish(new MyMessage
+                bus.PubSub.Publish(new MyMessage
                     {
                         Text = "Hello World!"
                     });
@@ -48,7 +49,7 @@ namespace EasyNetQ.Tests.Integration
             var count = 0;
             while ((count++) < 10000)
             {
-                bus.PublishAsync(new MyMessage
+                bus.PubSub.PublishAsync(new MyMessage
                     {
                         Text = string.Format("Message {0}", count)
                     }).ContinueWith(task =>

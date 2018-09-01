@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using EasyNetQ.Producer;
 using Xunit;
 
 using EasyNetQ.SystemMessages;
@@ -45,7 +46,7 @@ namespace EasyNetQ.Tests
         [Fact][Explicit("Needs a RabbitMQ instance on localhost to run")]
         public void Should_log_exceptions_thrown_by_subscribers()
         {
-            bus.Subscribe<MyErrorTestMessage>("exceptionTest", message =>
+            bus.PubSub.Subscribe<MyErrorTestMessage>("exceptionTest", message =>
             {
                 throw new Exception("Hello Error Handler!");
             });    
@@ -53,7 +54,7 @@ namespace EasyNetQ.Tests
             // give the subscription a chance to complete
             Thread.Sleep(500);
 
-            bus.Publish(new MyErrorTestMessage { Id = 444, Name = "I cause an error. Naughty me!" });
+            bus.PubSub.Publish(new MyErrorTestMessage { Id = 444, Name = "I cause an error. Naughty me!" });
 
             // give the publish a chance to get to rabbit and back
             Thread.Sleep(1000);
@@ -72,7 +73,7 @@ namespace EasyNetQ.Tests
             var typeName = typeNameSerializer.Serialize(typeof(MyErrorTestMessage));
             var exchange = this.bus.Advanced.ExchangeDeclare(typeName, ExchangeType.Topic);
 
-            bus.Subscribe<MyErrorTestMessage>("exceptionTest", _ =>
+            bus.PubSub.Subscribe<MyErrorTestMessage>("exceptionTest", _ =>
             {
                 throw new Exception("Hello Error Handler!");
             });
@@ -101,7 +102,7 @@ namespace EasyNetQ.Tests
             // also allow the DefaultConsumerErrorStrategy time to spin up its connection
             Thread.Sleep(1000);
 
-            var errorMessage = this.bus.Advanced.Get<Error>(errorQueue);
+            var errorMessage = this.bus.Advanced.GetMessage<Error>(errorQueue);
             errorMessage.MessageAvailable.Should().BeTrue();
 
             var error = errorMessage.Message.Body;

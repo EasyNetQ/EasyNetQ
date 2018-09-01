@@ -216,7 +216,6 @@ namespace EasyNetQ.Tests
                 false, 
                 false, 
                 true, 
-                true, 
                 "my.alternate.exchange");
         }
 
@@ -414,7 +413,7 @@ namespace EasyNetQ.Tests
             var exchange = new Exchange("my_exchange");
             var queue = new Topology.Queue("my_queue", false);
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
-            advancedBus.BindingDelete(binding);
+            advancedBus.Unbind(binding);
         }
 
         public void Dispose()

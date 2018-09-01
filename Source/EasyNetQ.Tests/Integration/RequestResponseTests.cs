@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using EasyNetQ.Producer;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.Integration
@@ -29,7 +30,7 @@ namespace EasyNetQ.Tests.Integration
             bus = RabbitHutch.CreateBus("host=localhost");
             bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => customRpcRequestConventionDictionary.ContainsKey(type) ? customRpcRequestConventionDictionary[type] : defaultRpcExchange;
             bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => customRpcResponseConventionDictionary.ContainsKey(type) ? customRpcResponseConventionDictionary[type] : defaultRpcExchange;
-            bus.Respond<TestRequestMessage, TestResponseMessage>(req => new TestResponseMessage { Text = req.Text });
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(req => new TestResponseMessage { Text = req.Text });
         }
 
         public void Dispose()
@@ -46,7 +47,7 @@ namespace EasyNetQ.Tests.Integration
             var countdownEvent = new CountdownEvent(numberOfCalls);
             for (int i = 0; i < numberOfCalls; i++)
             {
-                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
                     new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)})
                     .ContinueWith(
                         response =>
@@ -70,7 +71,7 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestRequestMessage {Text = "Hello from the client! "};
 
             Console.WriteLine("Making request");
-            var response = bus.Request<TestRequestMessage, TestResponseMessage>(request);
+            var response = bus.Rpc.Request<TestRequestMessage, TestResponseMessage>(request);
 
             Console.WriteLine("Got response: '{0}'", response.Text);
         }
@@ -89,7 +90,7 @@ namespace EasyNetQ.Tests.Integration
             for (int i = 0; i < numberOfCalls; i++)
             {
                 var request = new TestRequestMessage { Text = "Hello from the client! " + i.ToString() };
-                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
+                bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
                 {
                     Console.WriteLine("Got response: '{0}'", response.Result.Text);
                     count++;
@@ -111,7 +112,7 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestAsyncRequestMessage {Text = "Hello async from the client!"};
 
             Console.Out.WriteLine("Making request");
-            bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
+            bus.Rpc.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
             {
                 Console.Out.WriteLine("response = {0}", response.Result.Text);
                 autoResetEvent.Set();
@@ -129,7 +130,7 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestModifiedRequestExhangeRequestMessage { Text = "Hello from the client to funky exchange!" };
 
             Console.Out.WriteLine("Making request");
-            var response = bus.RequestAsync<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(request);
+            var response = bus.Rpc.RequestAsync<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(request);
 
             Console.Out.WriteLine("response = {0}", response.Result.Text);
 
@@ -144,7 +145,7 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestModifiedResponseExhangeRequestMessage { Text = "Hello from the client! I Wanna receive response via funky exchange!" };
 
             Console.Out.WriteLine("Making request");
-            var response = bus.RequestAsync<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(request);
+            var response = bus.Rpc.RequestAsync<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(request);
 
             Console.Out.WriteLine("response = {0}", response.Result.Text);
 
@@ -164,7 +165,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 var request = new TestAsyncRequestMessage { Text = "Hello async from the client! " + i };
 
-                bus.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
+                bus.Rpc.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
                 {
                     Console.Out.WriteLine("response = {0}", response.Result.Text);
                     Interlocked.Increment(ref count);
@@ -236,7 +237,7 @@ namespace EasyNetQ.Tests.Integration
             };
 
             Console.WriteLine("Making request");
-            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
+            bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
                 Console.WriteLine("Got response: '{0}'", response.Result.Text));
 
             Thread.Sleep(500);
@@ -261,7 +262,7 @@ namespace EasyNetQ.Tests.Integration
                 Console.WriteLine("Making request");
                 try
                 {
-                    bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).Wait(1000);
+                    bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request).Wait(1000);
                 }
                 catch (AggregateException e)
                 {
@@ -281,7 +282,7 @@ namespace EasyNetQ.Tests.Integration
             var request = new TestRequestMessage { Text = "Hello from the client! " };
 
             Console.WriteLine("Making request");
-            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
+            bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
             {
                 Console.WriteLine("Got response: '{0}'", response.Result.Text);
                 autoResetEvent.Set();
@@ -306,7 +307,7 @@ namespace EasyNetQ.Tests.Integration
             };
 
             Console.WriteLine("Making request");
-            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
+            bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
             {
                 Console.WriteLine("Got response: '{0}'", response.Result.Text);
                 autoResetEvent.Set();

@@ -3,6 +3,7 @@ using System.Transactions;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 using System.Collections.Concurrent;
+using EasyNetQ.Producer;
 using log4net;
 
 namespace EasyNetQ.Scheduler
@@ -11,14 +12,13 @@ namespace EasyNetQ.Scheduler
     {
         void Start();
         void Stop();
-
     }
 
     public class SchedulerService : ISchedulerService
     {
         private readonly ILog log = LogManager.GetLogger(typeof(ScheduleRepository));
 
-        private const string schedulerSubscriptionId = "schedulerSubscriptionId";
+        private const string SchedulerSubscriptionId = "schedulerSubscriptionId";
 
         private readonly IBus bus;
         private readonly IScheduleRepository scheduleRepository;
@@ -40,8 +40,9 @@ namespace EasyNetQ.Scheduler
         public void Start()
         {
             log.DebugFormat("Starting SchedulerService");
-            bus.Subscribe<ScheduleMe>(schedulerSubscriptionId, OnMessage);
-            bus.Subscribe<UnscheduleMe>(schedulerSubscriptionId, OnMessage);
+            
+            bus.PubSub.Subscribe<ScheduleMe>(SchedulerSubscriptionId, OnMessage);
+            bus.PubSub.Subscribe<UnscheduleMe>(SchedulerSubscriptionId, OnMessage);
 
             publishTimer = new System.Threading.Timer(OnPublishTimerTick, null, 0, configuration.PublishIntervalSeconds * 1000);
             purgeTimer = new System.Threading.Timer(OnPurgeTimerTick, null, 0, configuration.PurgeIntervalSeconds * 1000);
@@ -50,27 +51,19 @@ namespace EasyNetQ.Scheduler
         public void Stop()
         {
             log.DebugFormat("Stopping SchedulerService");
-            if (publishTimer != null)
-            {
-                publishTimer.Dispose();
-            }
-            if (purgeTimer != null)
-            {
-                purgeTimer.Dispose();
-            }
-            if (bus != null)
-            {
-                bus.Dispose();
-            }
+
+            publishTimer?.Dispose();
+            purgeTimer?.Dispose();
+            bus?.Dispose();
         }
 
-        public void OnMessage(ScheduleMe scheduleMe)
+        private void OnMessage(ScheduleMe scheduleMe)
         {
             log.DebugFormat("Got Schedule Message");
             scheduleRepository.Store(scheduleMe);
         }
 
-        public void OnMessage(UnscheduleMe unscheduleMe)
+        private void OnMessage(UnscheduleMe unscheduleMe)
         {
             log.DebugFormat("Got Unschedule Message");
             scheduleRepository.Cancel(unscheduleMe);
@@ -80,7 +73,7 @@ namespace EasyNetQ.Scheduler
         {
             try
             {
-                if (!bus.IsConnected)
+                if (!bus.Advanced.IsConnected)
                 {
                     log.Info("Not connected");
                     return;
@@ -120,7 +113,8 @@ namespace EasyNetQ.Scheduler
                             routingKey,
                             false,
                             messageProperties,
-                            scheduledMessage.InnerMessage);
+                            scheduledMessage.InnerMessage
+                        );
                     }
 
                     scope.Complete();
@@ -128,7 +122,7 @@ namespace EasyNetQ.Scheduler
             }
             catch (Exception exception)
             {
-                log.ErrorFormat("Error in schedule poll\r\n{0}", exception);
+                log.Error("Error in schedule poll", exception);
             }
         }
 
@@ -140,7 +134,7 @@ namespace EasyNetQ.Scheduler
             }
             catch (Exception exception)
             {
-                log.ErrorFormat("Error in schedule purge\r\n{0}", exception);
+                log.Error("Error in schedule purge", exception);
             }
         }
     }

@@ -1,6 +1,6 @@
 using System;
 
-namespace EasyNetQ.Tests.SimpleRequester
+namespace EasyNetQ.Tests.Tasks.SimpleRequester
 {
     public interface ILatencyRecorder : IDisposable
     {

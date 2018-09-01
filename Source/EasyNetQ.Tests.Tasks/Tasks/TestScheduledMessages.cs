@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduling;
 using Net.CommandLine;
 using Serilog;
@@ -21,8 +22,8 @@ namespace EasyNetQ.Tests.Tasks
         {
             bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.Subscribe<ScheduleTestMessage>("scheduled-message", OnMessage, configuration => configuration.WithAutoDelete());
-            bus.FuturePublish(TimeSpan.FromSeconds(delay), new ScheduleTestMessage());
+            bus.PubSub.Subscribe<ScheduleTestMessage>("scheduled-message", OnMessage, configuration => configuration.WithAutoDelete(), cancellationToken);
+            bus.Scheduler.FuturePublish(new ScheduleTestMessage(), TimeSpan.FromSeconds(delay), cancellationToken: cancellationToken);
 
             Console.WriteLine("Waiting for message to return, press enter to stop");
             Console.ReadLine();

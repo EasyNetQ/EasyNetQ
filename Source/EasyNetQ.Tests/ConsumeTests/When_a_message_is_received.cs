@@ -3,6 +3,7 @@ using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -22,7 +23,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             //mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
             mockBuilder = new MockBuilder();
 
-            mockBuilder.Bus.Receive("the_queue", x => x
+            mockBuilder.SendReceive.Receive("the_queue", x => x
                 .Add<MyMessage>(message => deliveredMyMessage = message)
                 .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 

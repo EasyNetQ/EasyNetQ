@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Description>EasyNetQ.Tests</Description>
     <TargetFrameworks>netcoreapp2.0;net452</TargetFrameworks>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />

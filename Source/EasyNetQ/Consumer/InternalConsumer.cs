@@ -16,13 +16,13 @@ namespace EasyNetQ.Consumer
         StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IConsumerConfiguration configuration
         );
 
         StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs,
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
             IConsumerConfiguration configuration
         );
 
@@ -37,7 +37,15 @@ namespace EasyNetQ.Consumer
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
         
-        public BasicConsumer(Action<BasicConsumer> cancelled, IConsumerDispatcher consumerDispatcher, IQueue queue, IEventBus eventBus, IHandlerRunner handlerRunner, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, IModel model)
+        public BasicConsumer(
+            Action<BasicConsumer> cancelled, 
+            IConsumerDispatcher consumerDispatcher, 
+            IQueue queue, 
+            IEventBus eventBus,
+            IHandlerRunner handlerRunner,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            IModel model
+        )
         {
             Preconditions.CheckNotNull(onMessage, "onMessage");
             
@@ -50,7 +58,7 @@ namespace EasyNetQ.Consumer
             Model = model;
         }
 
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> OnMessage { get; }
+        public Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> OnMessage { get; }
         public IQueue Queue { get; }
         public string ConsumerTag { get; private set; }
 
@@ -167,7 +175,8 @@ namespace EasyNetQ.Consumer
             IHandlerRunner handlerRunner,
             IConsumerDispatcher consumerDispatcher,
             IConventions conventions,
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
             Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
@@ -180,7 +189,11 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
-        public StartConsumingStatus StartConsuming(IPersistentConnection connection, ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, IConsumerConfiguration configuration)
+        public StartConsumingStatus StartConsuming(
+            IPersistentConnection connection,
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IConsumerConfiguration configuration
+        )
         {
             Preconditions.CheckNotNull(connection, nameof(connection));
             Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
@@ -255,9 +268,9 @@ namespace EasyNetQ.Consumer
         public StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IConsumerConfiguration configuration
-            )
+        )
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(queue, "queue");
@@ -286,7 +299,8 @@ namespace EasyNetQ.Consumer
                     true,
                     configuration.IsExclusive,
                     arguments,          // arguments
-                    basicConsumer);     // consumer
+                    basicConsumer       // consumer
+                );     
 
                 logger.InfoFormat(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",

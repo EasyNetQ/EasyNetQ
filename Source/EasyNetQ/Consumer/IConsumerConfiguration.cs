@@ -8,7 +8,7 @@
 
         IConsumerConfiguration WithPriority(int priority);
         IConsumerConfiguration WithPrefetchCount(ushort prefetchCount);
-        IConsumerConfiguration AsExclusive();
+        IConsumerConfiguration WithExclusive(bool isExclusive);
     }
 
     public class ConsumerConfiguration : IConsumerConfiguration
@@ -36,9 +36,9 @@
             return this;
         }
 
-        public IConsumerConfiguration AsExclusive()
+        public IConsumerConfiguration WithExclusive(bool isExclusive)
         {
-            IsExclusive = true;
+            IsExclusive = isExclusive;
             return this;
         }
 

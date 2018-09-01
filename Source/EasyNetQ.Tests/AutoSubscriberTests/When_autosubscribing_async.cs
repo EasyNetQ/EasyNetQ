@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
@@ -28,8 +29,8 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             //mockBuilder = new MockBuilder();
             mockBuilder = new MockBuilder();
 
-            var autoSubscriber = new AutoSubscriber(bus: mockBuilder.Bus, subscriptionIdPrefix: "my_app");
-            autoSubscriber.SubscribeAsync(typeof(MyAsyncConsumer));
+            var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
+            autoSubscriber.Subscribe(new[] {typeof(MyAsyncConsumer)});
         }
 
         public void Dispose()
@@ -82,40 +83,36 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         }
 
         //Discovered by reflection over test assembly, do not remove.
-        class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
+        private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
         {
-            public Task ConsumeAsync(MessageA message)
+            public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
 
             [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public Task ConsumeAsync(MessageB message)
+            public Task ConsumeAsync(MessageB message, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
 
             [ForTopic("Important")]
-            public Task ConsumeAsync(MessageC message)
+            public Task ConsumeAsync(MessageC message, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
         }
 
-        class MessageA
+        private class MessageA
         {
-            public string Text { get; set; }
         }
 
-        class MessageB
+        private class MessageB
         {
-            public string Text { get; set; }
         }
 
-        class MessageC
+        private class MessageC
         {
-            public string Text { get; set; }
         }
-
     }
 }

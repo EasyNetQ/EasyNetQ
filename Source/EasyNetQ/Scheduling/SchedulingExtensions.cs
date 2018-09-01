@@ -8,7 +8,7 @@ namespace EasyNetQ.Scheduling
         {
             return serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
         }
-
+        
         public static IServiceRegister EnableDeadLetterExchangeAndMessageTtlScheduler(this IServiceRegister serviceRegister)
         {
             return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();

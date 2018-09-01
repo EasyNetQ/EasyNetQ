@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Tests.Tasks;
-using EasyNetQ.Tests.Tasks.Tasks;
+using EasyNetQ.Producer;
 using Net.CommandLine;
-using Serilog;
 
-namespace EasyNetQ.Tests.Performance.Producer
+namespace EasyNetQ.Tests.Tasks
 {
     public class TestPerformanceParameters
     {
@@ -55,7 +53,7 @@ namespace EasyNetQ.Tests.Performance.Producer
 
                     try
                     {
-                        bus.PublishAsync(message).ContinueWith(task =>
+                        bus.PubSub.PublishAsync(message).ContinueWith(task =>
                         {
                             if (task.IsCompleted)
                             {

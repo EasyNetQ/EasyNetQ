@@ -1,9 +1,9 @@
 ﻿using System;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ
 {
-    public class SubscriptionResult : ISubscriptionResult
+    public sealed class SubscriptionResult : ISubscriptionResult
     {
         public IExchange Exchange { get; }
         public IQueue Queue { get; }
@@ -22,7 +22,7 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
-            ConsumerCancellation?.Dispose();
+            ConsumerCancellation.Dispose();
         }
     }
 }

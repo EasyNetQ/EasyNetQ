@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using Net.CommandLine;
 
-namespace EasyNetQ.Tests.Performance.Consumer
+namespace EasyNetQ.Tests.Tasks
 {
     public class TestPerformanceConsumer : ICommandLineTask, IDisposable
     {
@@ -21,7 +22,7 @@ namespace EasyNetQ.Tests.Performance.Consumer
                 Interlocked.Exchange(ref messageCount, 0);
             }, null, 1000, 1000);
 
-            bus.Subscribe<TestPerformanceMessage>("consumer", message => Interlocked.Increment(ref messageCount));
+            bus.PubSub.Subscribe<TestPerformanceMessage>("consumer", message => Interlocked.Increment(ref messageCount));
 
             Console.WriteLine("press enter to exit");
             Console.ReadLine();

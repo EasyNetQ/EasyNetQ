@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
@@ -22,40 +23,22 @@ namespace EasyNetQ.Producer
             this.advancedBus = advancedBus;
         }
 
-        public IExchange DeclareExchange(string exchangeName, string exchangeType)
+        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
             if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (asyncLock.Acquire())
+            using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = advancedBus.ExchangeDeclare(exchangeName, exchangeType);
+                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType, cancellationToken: cancellationToken).ConfigureAwait(false);
                 exchanges[exchangeName] = exchange;
                 return exchange;
             }
         }
 
-        public IExchange DeclareExchange(Type messageType, string exchangeType)
+        public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         {
             var exchangeName = conventions.ExchangeNamingConvention(messageType);
-            return DeclareExchange(exchangeName, exchangeType);
-        }
-
-        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType)
-        {
-            if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (await asyncLock.AcquireAsync().ConfigureAwait(false))
-            {
-                if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType).ConfigureAwait(false);
-                exchanges[exchangeName] = exchange;
-                return exchange;
-            }
-        }
-
-        public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType)
-        {
-            var exchangeName = conventions.ExchangeNamingConvention(messageType);
-            return DeclareExchangeAsync(exchangeName, exchangeType);
+            return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);
         }
     }
 }

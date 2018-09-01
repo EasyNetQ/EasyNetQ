@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -9,9 +10,7 @@ namespace EasyNetQ.Producer
     /// </summary>
     public interface IClientCommandDispatcher : IDisposable
     {
-        T Invoke<T>(Func<IModel, T> channelAction);
-        void Invoke(Action<IModel> channelAction);
-        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction);
-        Task InvokeAsync(Action<IModel> channelAction);
+        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken = default);
+        Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken = default);
     }
 }

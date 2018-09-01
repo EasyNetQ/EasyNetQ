@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client.Framing;
 using Xunit;
@@ -26,15 +28,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
             serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
-            mockBuilder.Bus.RespondAsync<RpcRequest, RpcResponse>(m =>
-            {
-                var taskSource = new TaskCompletionSource<RpcResponse>();
-                taskSource.SetCanceled();
-                return taskSource.Task;
-            });
-
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => publishedMessage = x);
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => ackEvent = x);
+            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m => TaskHelpers.FromCancelled<RpcResponse>());
 
             DeliverMessage(new RpcRequest { Value = 42 });
         }
@@ -64,8 +58,16 @@ namespace EasyNetQ.Tests.ConsumeTests
             var body = serializer.MessageToBytes(request);
 
             var waiter = new CountdownEvent(2);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x =>
+            {
+                publishedMessage = x;
+                waiter.Signal();
+            });
+            mockBuilder.EventBus.Subscribe<AckEvent>(x =>
+            {
+                ackEvent = x;
+                waiter.Signal();
+            });
 
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",
