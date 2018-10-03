@@ -89,7 +89,7 @@ namespace EasyNetQ.Producer
             var configuration = new RequestConfiguration();
             configure(configuration);
 
-            var tcs = new TaskCompletionSource<TResponse>();
+            var tcs = TaskHelpers.CreateTcs<TResponse>();
 
             var timeout = timeoutStrategy.GetTimeoutSeconds(requestType);
             Timer timer = null;
@@ -97,8 +97,8 @@ namespace EasyNetQ.Producer
             {
                 timer = new Timer(state =>
                 {
-                    tcs.TrySetException(new TimeoutException($"Request timed out. CorrelationId: {correlationId.ToString()}"));
-                    responseActions.TryRemove(correlationId.ToString(), out ResponseAction responseAction);
+                    tcs.TrySetExceptionAsynchronously(new TimeoutException($"Request timed out. CorrelationId: {correlationId.ToString()}"));
+                    responseActions.TryRemove(correlationId.ToString(), out _);
                 }, null, TimeSpan.FromSeconds(timeout), disablePeriodicSignaling);
             }
 
@@ -137,17 +137,17 @@ namespace EasyNetQ.Producer
 
                     if(isFaulted)
                     {
-                        tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
+                        tcs.TrySetExceptionAsynchronously(new EasyNetQResponderException(exceptionMessage));
                     }
                     else
                     {
-                        tcs.TrySetResult(msg.Body);
+                        tcs.TrySetResultAsynchronously(msg.Body);
                     }
                 },
                 OnFailure = () =>
                 {
                     timer?.Dispose();
-                    tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
+                    tcs.TrySetExceptionAsynchronously(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()));
                 }
             });
         }
@@ -255,7 +255,7 @@ namespace EasyNetQ.Producer
 
         protected Task ExecuteResponder<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, IMessage<TRequest> requestMessage)
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = TaskHelpers.CreateTcs<object>();
 
             try
             {
@@ -269,19 +269,19 @@ namespace EasyNetQ.Producer
 
 
                         OnResponderFailure<TRequest, TResponse>(requestMessage, exception.Message, exception);
-                        tcs.SetException(exception);
+                        tcs.TrySetExceptionAsynchronously(exception);
                     }
                     else
                     {
                         OnResponderSuccess(requestMessage, task.Result);
-                        tcs.SetResult(null);
+                        tcs.TrySetResultAsynchronously(null);
                     }
                 });
             }
             catch (Exception e)
             {
                 OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e);
-                tcs.SetException(e);
+                tcs.TrySetExceptionAsynchronously(e);
             }
 
             return tcs.Task;
