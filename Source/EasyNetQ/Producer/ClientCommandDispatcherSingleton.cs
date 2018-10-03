@@ -32,11 +32,7 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-#if NETFX
-            var tcs = new TaskCompletionSource<T>();
-#else
-            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
+            var tcs = TaskHelpers.CreateTcs<T>();
 
             try
             {
@@ -44,39 +40,25 @@ namespace EasyNetQ.Producer
                 {
                     if (cancellation.IsCancellationRequested)
                     {
-#if NETFX                               
-                        tcs.TrySetCanceledAsynchronously();   
-#else
-                        tcs.TrySetCanceled();
-#endif
-
+                        tcs.TrySetCanceledAsynchronously();
                         return;
                     }
+
                     try
                     {
-                        persistentChannel.InvokeChannelAction(channel =>
-                        {
-#if NETFX                               
-                            tcs.TrySetResultAsynchronously(channelAction(channel));   
-#else
-                            tcs.TrySetResult(channelAction(channel));
-#endif                      
-                        });
+                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResultAsynchronously(channelAction(channel)));
                     }
                     catch (Exception e)
                     {
-#if NETFX                               
-                        tcs.TrySetExceptionAsynchronously(e);   
-#else
-                        tcs.TrySetException(e);
-#endif
+                        tcs.TrySetExceptionAsynchronously(e);
                     }
                 }, cancellation.Token);
             }
             catch (OperationCanceledException)
             {
-                tcs.TrySetCanceled();
+                tcs.TrySetCanceledAsynchronously();
             }
+
             return tcs.Task;
         }
 
@@ -102,7 +84,6 @@ namespace EasyNetQ.Producer
             var thread = new Thread(() =>
             {
                 while (!cancellation.IsCancellationRequested)
-                {
                     try
                     {
                         var channelAction = queue.Take(cancellation.Token);
@@ -112,7 +93,6 @@ namespace EasyNetQ.Producer
                     {
                         break;
                     }
-                }
             }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }
