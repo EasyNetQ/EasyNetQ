@@ -22,14 +22,10 @@ namespace EasyNetQ.Producer
         public IPublishConfirmationWaiter GetWaiter(IModel model)
         {
             var deliveryTag = model.NextPublishSeqNo;
-            var requests = unconfirmedChannelRequests.GetOrAdd(model, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
-#if NETFX
-            var comfirmation = new TaskCompletionSource<object>();
-#else
-            var comfirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
-            requests.Add(deliveryTag, comfirmation);
-            return new PublishConfirmationWaiter(deliveryTag, comfirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
+            var requests = unconfirmedChannelRequests.GetOrAdd(model, _ => new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
+            var confirmation = TaskHelpers.CreateTcs<object>();
+            requests.Add(deliveryTag, confirmation);
+            return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
 
         public void Dispose()
@@ -39,11 +35,7 @@ namespace EasyNetQ.Producer
 
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
         {
-            ConcurrentDictionary<ulong, TaskCompletionSource<object>> requests;
-            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel, out requests))
-            {
-                return;
-            }
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel, out var requests)) return;
 
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
@@ -51,21 +43,12 @@ namespace EasyNetQ.Producer
             if (multiple)
             {
                 foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
-                {
-                    TaskCompletionSource<object> confirmation;
-                    if (requests.TryGetValue(sequenceNumber, out confirmation))
-                    {
+                    if (requests.TryGetValue(sequenceNumber, out var confirmation))
                         Confirm(confirmation, sequenceNumber, isNack);
-                    }
-                }
             }
             else
             {
-                TaskCompletionSource<object> confirmation;
-                if (requests.TryGetValue(deliveryTag, out confirmation))
-                {
-                    Confirm(confirmation, deliveryTag, isNack);
-                }
+                if (requests.TryGetValue(deliveryTag, out var confirmation)) Confirm(confirmation, deliveryTag, isNack);
             }
         }
 
@@ -73,47 +56,24 @@ namespace EasyNetQ.Producer
         {
             foreach (var channel in unconfirmedChannelRequests.Keys)
             {
-                ConcurrentDictionary<ulong, TaskCompletionSource<object>> confirmations;
-                if (!unconfirmedChannelRequests.TryRemove(channel, out confirmations))
-                {
-                    continue;
-                }
+                if (!unconfirmedChannelRequests.TryRemove(channel, out var confirmations)) continue;
                 foreach (var deliveryTag in confirmations.Keys)
                 {
-                    TaskCompletionSource<object> confirmation;
-                    if (!confirmations.TryRemove(deliveryTag, out confirmation))
-                    {
-                        continue;
-                    }
+                    if (!confirmations.TryRemove(deliveryTag, out var confirmation)) continue;
 
-#if NETFX                               
-                    confirmation.TrySetExceptionAsynchronously(new PublishInterruptedException());     
-#else
-                    confirmation.TrySetException(new PublishInterruptedException());
-#endif
+                    confirmation.TrySetExceptionAsynchronously(new PublishInterruptedException());
                 }
             }
+
             unconfirmedChannelRequests.Add(@event.Channel, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
         }
 
         private static void Confirm(TaskCompletionSource<object> tcs, ulong deliveryTag, bool isNack)
         {
             if (isNack)
-            {
-#if NETFX                               
-                tcs.TrySetExceptionAsynchronously(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));     
-#else
-                tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
-#endif
-            }
+                tcs.TrySetExceptionAsynchronously(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
             else
-            {
-#if NETFX                               
-                tcs.TrySetResultAsynchronously(null);     
-#else
-                tcs.TrySetResult(null);
-#endif
-            }
+                tcs.TrySetResultAsynchronously(null);
         }
     }
 }
