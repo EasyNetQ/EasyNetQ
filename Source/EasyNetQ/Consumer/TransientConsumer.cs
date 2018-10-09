@@ -16,6 +16,8 @@ namespace EasyNetQ.Consumer
 
         private IInternalConsumer internalConsumer;
 
+        private ConsumerCancellation consumerCancellation;
+
         public TransientConsumer(
             IQueue queue, 
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
@@ -58,7 +60,8 @@ namespace EasyNetQ.Consumer
             else
                 eventBus.Publish(new StartConsumingFailedEvent(this, queue));
 
-            return new ConsumerCancellation(Dispose);
+            consumerCancellation = new ConsumerCancellation(Dispose);
+            return consumerCancellation;
         }
 
         private bool disposed;
@@ -67,6 +70,8 @@ namespace EasyNetQ.Consumer
         {
             if (disposed) return;
             disposed = true;
+
+            consumerCancellation.OnCancel(queue);
 
             eventBus.Publish(new StoppedConsumingEvent(this));
             

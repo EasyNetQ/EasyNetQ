@@ -27,6 +27,8 @@ namespace EasyNetQ.Consumer
 
         private readonly IList<IDisposable> disposables = new List<IDisposable>();
 
+        private ConsumerCancellation consumerCancellation;
+
         public ExclusiveConsumer(
             IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
@@ -58,8 +60,9 @@ namespace EasyNetQ.Consumer
             disposables.Add(Timers.Start(s => StartConsumingInternal(), RestartConsumingPeriod, RestartConsumingPeriod));
             
             StartConsumingInternal();
-            
-            return new ConsumerCancellation(Dispose);   
+
+            consumerCancellation = new ConsumerCancellation(Dispose);
+            return consumerCancellation;
         }
 
         private void StartConsumingInternal()
@@ -115,7 +118,9 @@ namespace EasyNetQ.Consumer
                 return;
             
             disposed = true;
-            
+
+            consumerCancellation.OnCancel(queue);
+
             eventBus.Publish(new StoppedConsumingEvent(this));
             
             foreach (var disposal in disposables)
