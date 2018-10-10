@@ -331,7 +331,6 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
             disposed = true;
 
-
             var model = Model;
             if (model != null)
             {
@@ -339,9 +338,9 @@ namespace EasyNetQ.Consumer
                 var disposedEvent = new AutoResetEvent(false);
                 consumerDispatcher.QueueAction(() =>
                     {
-                        Model.Dispose();
                         foreach (var c in basicConsumers)
                             c.Dispose();
+                        model.Dispose();
                         disposedEvent.Set();
                     });
                 disposedEvent.WaitOne();
