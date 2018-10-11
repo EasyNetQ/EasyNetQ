@@ -5,10 +5,10 @@ namespace EasyNetQ.AmqpExceptions
 {
     public class AmqpException
     {
-        public AmapExceptionPreface Preface { get; }
+        public AmqpExceptionPreface Preface { get; }
         public IList<IAmqpExceptionElement> Elements { get; }
 
-        public AmqpException(AmapExceptionPreface preface, IList<IAmqpExceptionElement> elements)
+        public AmqpException(AmqpExceptionPreface preface, IList<IAmqpExceptionElement> elements)
         {
             Preface = preface;
             Elements = elements;
@@ -26,11 +26,11 @@ namespace EasyNetQ.AmqpExceptions
         public static ushort ConnectionClosed = 320;
     }
 
-    public class AmapExceptionPreface
+    public class AmqpExceptionPreface
     {
         public string Text { get; }
 
-        public AmapExceptionPreface(string text)
+        public AmqpExceptionPreface(string text)
         {
             Text = text;
         }
