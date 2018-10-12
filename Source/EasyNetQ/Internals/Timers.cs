@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Threading;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Internals
 {
     //https://stackoverflow.com/questions/4962172/why-does-a-system-timers-timer-survive-gc-but-not-system-threading-timer
     public static class Timers
     {
+        private static readonly ILog logger = LogProvider.GetLogger(typeof(Timers));
+        
         public static IDisposable Start(TimerCallback callback, TimeSpan dueTime, TimeSpan period)
         {
             var callbackLock = new object();
@@ -15,6 +18,10 @@ namespace EasyNetQ.Internals
                 try
                 {
                     callback.Invoke(state);
+                }
+                catch (Exception exception)
+                {
+                    logger.Error(exception, string.Empty);
                 }
                 finally
                 {
@@ -30,7 +37,14 @@ namespace EasyNetQ.Internals
             var timer = new Timer(state =>
             {
                 ((Timer) state).Dispose();
-                callback(state);
+                try
+                {
+                    callback(state);
+                }
+                catch (Exception exception)
+                {
+                    logger.Error(exception, string.Empty);
+                }
             });
             timer.Change(dueTime, Timeout.InfiniteTimeSpan);
         }
