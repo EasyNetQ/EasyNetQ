@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using EasyNetQ.Logging;
+﻿using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Text;
 
 namespace EasyNetQ.Consumer
 {
@@ -34,7 +33,7 @@ namespace EasyNetQ.Consumer
 
         private readonly object syncLock = new object();
 
-        private IConnection connection;
+        protected IConnection Connection { get; private set; }
         private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new ConcurrentDictionary<string, object>();
 
         public DefaultConsumerErrorStrategy(
@@ -58,13 +57,13 @@ namespace EasyNetQ.Consumer
 
         protected void Connect()
         {
-            if (connection == null || !connection.IsOpen)
+            if (Connection == null || !Connection.IsOpen)
             {
                 lock (syncLock)
                 {
-                    if ((connection == null || !connection.IsOpen) && !(disposing || disposed))
+                    if ((Connection == null || !Connection.IsOpen) && !(disposing || disposed))
                     {
-                        if (connection != null)
+                        if (Connection != null)
                         {
                             try
                             {
@@ -73,13 +72,13 @@ namespace EasyNetQ.Consumer
                                 // throw an exception, but before the IConnection.Abort()
                                 // is invoked
                                 // https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/ea913903602ba03841f2515c23f843304211cd9e/projects/client/RabbitMQ.Client/src/client/impl/Connection.cs#L1070
-                                connection.Dispose();
+                                Connection.Dispose();
                             }
                             catch
                             {
-                                if (connection.CloseReason != null)
+                                if (Connection.CloseReason != null)
                                 {
-                                    logger.InfoFormat("Connection {connection} has shutdown with reason={reason}", connection.ToString(), connection.CloseReason.Cause);
+                                    logger.InfoFormat("Connection {connection} has shutdown with reason={reason}", Connection.ToString(), Connection.CloseReason.Cause);
                                 }
                                 else
                                 {
@@ -89,11 +88,11 @@ namespace EasyNetQ.Consumer
 
                         }
 
-                        connection = connectionFactory.CreateConnection();
+                        Connection = connectionFactory.CreateConnection();
                         // A possible race condition exists during EasyNetQ IBus disposal where this instance's Dispose() method runs on another thread, while this thread is mid-executing connectionFactory.CreateConnection() (or a few lines earlier), and has not assigned the result to the connection variable before Dispose() accesses it.  This could result in the creation of a RabbitMQ.Client.IConnection instance which never gets disposed; that IConnection instance holds a thread open which can prevent application shutdown.  It was not desirable to lock (syncLock) within the Dispose() method to fix this; therefore, an additional check must be made here to dispose any such extra IConnection.
                         if (disposing || disposed)
                         {
-                            connection.Dispose();
+                            Connection.Dispose();
                         }
                     }
                 }
@@ -149,7 +148,7 @@ namespace EasyNetQ.Consumer
             {
                 Connect();
 
-                using (var model = connection.CreateModel())
+                using (var model = Connection.CreateModel())
                 {
                     var errorExchange = DeclareErrorExchangeWithQueue(model, context);
 
@@ -238,7 +237,7 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
             disposing = true;
 
-            if (connection != null) { connection.Dispose(); }
+            if (Connection != null) { Connection.Dispose(); }
 
             disposed = true;
         }
