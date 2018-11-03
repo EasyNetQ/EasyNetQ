@@ -9,10 +9,11 @@ namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private const int queueSize = 1;
+        private const int QueueSizePerCoreMultiplier = 64;
+        
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
+        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(Environment.ProcessorCount * QueueSizePerCoreMultiplier);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
