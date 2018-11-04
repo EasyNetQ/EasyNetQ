@@ -8,6 +8,7 @@ using EasyNetQ.Events;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
+using Newtonsoft.Json;
 
 namespace EasyNetQ.Producer
 {
