@@ -81,9 +81,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             );
 
             if (!waiter.Wait(5000))
-            {
                 throw new TimeoutException();
-            }
         }
         
         private class RpcRequest

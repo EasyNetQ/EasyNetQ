@@ -82,7 +82,7 @@ namespace EasyNetQ.Producer
                 var timeoutSeconds = timeoutStrategy.GetTimeoutSeconds(requestType);
                 if (timeoutSeconds > 0) cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
 
-                using (cts.Token.Register(() => UnregisterResponseActions(correlationId)))
+                using (cts.Token.Register(() => DeRegisterResponseActions(correlationId)))
                 {
                     var tcs = TaskHelpers.CreateTcs<TResponse>();
 
@@ -132,7 +132,7 @@ namespace EasyNetQ.Producer
             foreach (var responseSubscription in responseSubscriptionsValues) responseSubscription.Unsubscribe();
         }
 
-        protected void UnregisterResponseActions(Guid correlationId)
+        protected void DeRegisterResponseActions(Guid correlationId)
         {
             responseActions.TryRemove(correlationId, out _);
         }
@@ -157,7 +157,7 @@ namespace EasyNetQ.Producer
                     else
                         tcs.TrySetResultAsynchronously(msg.Body);
                 },
-                () => tcs.TrySetExceptionAsynchronously(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId.ToString()))
+                () => tcs.TrySetExceptionAsynchronously(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId))
             );
 
             responseActions.TryAdd(correlationId, responseAction);
@@ -242,7 +242,11 @@ namespace EasyNetQ.Producer
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
-            var exchange = await advancedBus.ExchangeDeclareAsync(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(
+                conventions.RpcRequestExchangeNamingConvention(requestType),
+                ExchangeType.Direct,
+                cancellationToken: cancellationToken
+            ).ConfigureAwait(false);
             var queue = await advancedBus.QueueDeclareAsync(routingKey, cancellationToken: cancellationToken).ConfigureAwait(false);
             await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
@@ -256,7 +260,11 @@ namespace EasyNetQ.Producer
         private async Task RespondToMessageAsync<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, IMessage<TRequest> requestMessage, CancellationToken cancellationToken)
         {
             //TODO Cache declaration of exchange
-            var exchange = await advancedBus.ExchangeDeclareAsync(conventions.RpcResponseExchangeNamingConvention(typeof(TResponse)), ExchangeType.Direct, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(
+                conventions.RpcResponseExchangeNamingConvention(typeof(TResponse)),
+                ExchangeType.Direct,
+                cancellationToken: cancellationToken
+            ).ConfigureAwait(false);
 
             try
             {
