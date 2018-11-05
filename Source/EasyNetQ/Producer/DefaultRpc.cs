@@ -82,11 +82,11 @@ namespace EasyNetQ.Producer
                 var timeoutSeconds = timeoutStrategy.GetTimeoutSeconds(requestType);
                 if (timeoutSeconds > 0) cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
 
+                var tcs = TaskHelpers.CreateTcs<TResponse>();
+                RegisterResponseActions(correlationId, tcs);
+
                 using (cts.Token.Register(() => DeRegisterResponseActions(correlationId)))
                 {
-                    var tcs = TaskHelpers.CreateTcs<TResponse>();
-
-                    RegisterResponseActions(correlationId, tcs);
                     var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cancellationToken).ConfigureAwait(false);
                     var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
                     await RequestPublishAsync(request, routingKey, queueName, correlationId, cancellationToken).ConfigureAwait(false);
