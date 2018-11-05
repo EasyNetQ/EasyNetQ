@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace EasyNetQ
         public bool UseBackgroundThreads { get; set; }
         public IList<AuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get;  set; }
+        public int DispatcherQueueSize { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -51,6 +53,7 @@ namespace EasyNetQ
             PersistentMessages = true;
             UseBackgroundThreads = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
+            DispatcherQueueSize = 1024;
                          
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.

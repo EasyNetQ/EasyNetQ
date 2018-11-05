@@ -12,13 +12,14 @@ namespace EasyNetQ.ConnectionString
     public static class ConnectionStringGrammar
     {
         public static Parser<string> Text = Parse.CharExcept(';').Many().Text();
-        public static Parser<ushort> Number = Parse.Number.Select(ushort.Parse);
+        public static Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
+        public static Parser<int> IntNumber = Parse.Number.Select(int.Parse);
 
         public static Parser<bool> Bool = (Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false"))).Text().Select(x => x.ToLower() == "true");
 
         public static Parser<HostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
-            from port in Parse.Char(':').Then(_ => Number).Or(Parse.Return((ushort)0))
+            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
             select new HostConfiguration { Host = host, Port = port };
 
         public static Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
@@ -31,18 +32,19 @@ namespace EasyNetQ.ConnectionString
             // add new connection string parts here
             BuildKeyValueParser("amqp", AMQP, c => c.AMQPConnectionString),
             BuildKeyValueParser("host", Hosts, c => c.Hosts),
-            BuildKeyValueParser("port", Number, c => c.Port),
+            BuildKeyValueParser("port", UShortNumber, c => c.Port),
             BuildKeyValueParser("virtualHost", Text, c => c.VirtualHost),
-            BuildKeyValueParser("requestedHeartbeat", Number, c => c.RequestedHeartbeat),
+            BuildKeyValueParser("requestedHeartbeat", UShortNumber, c => c.RequestedHeartbeat),
             BuildKeyValueParser("username", Text, c => c.UserName),
             BuildKeyValueParser("password", Text, c => c.Password),
-            BuildKeyValueParser("prefetchcount", Number, c => c.PrefetchCount),
-            BuildKeyValueParser("timeout", Number, c => c.Timeout),
+            BuildKeyValueParser("prefetchCount", UShortNumber, c => c.PrefetchCount),
+            BuildKeyValueParser("timeout", UShortNumber, c => c.Timeout),
             BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
             BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform),
             BuildKeyValueParser("useBackgroundThreads", Bool, c => c.UseBackgroundThreads),
+            BuildKeyValueParser("dispatcherQueueSize", IntNumber, c => c.DispatcherQueueSize),
             BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));
 
