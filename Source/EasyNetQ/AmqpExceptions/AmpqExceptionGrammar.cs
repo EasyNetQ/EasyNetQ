@@ -39,10 +39,10 @@ namespace EasyNetQ.AmqpExceptions
 
         static readonly Parser<IEnumerable<IAmqpExceptionElement>> elements = element.ListDelimitedBy(',');
 
-        static readonly Parser<AmapExceptionPreface> preface =
+        static readonly Parser<AmqpExceptionPreface> preface =
             from text in Parse.CharExcept(':').Many().Text()
             from colon in Parse.Char(':')
-            select new AmapExceptionPreface(text);
+            select new AmqpExceptionPreface(text);
 
         static readonly Parser<AmqpException> exception =
             from p in preface
