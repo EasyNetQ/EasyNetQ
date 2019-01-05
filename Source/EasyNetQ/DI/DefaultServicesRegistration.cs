@@ -20,7 +20,7 @@ namespace EasyNetQ.DI
             // default service registration
             container
                 .Register<IConnectionStringParser, ConnectionStringParser>()
-                .Register<ISerializer, JsonSerializer>()
+                .Register<ISerializer>(_ => new JsonSerializer())
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
                 .Register<ITypeNameSerializer, DefaultTypeNameSerializer>()
