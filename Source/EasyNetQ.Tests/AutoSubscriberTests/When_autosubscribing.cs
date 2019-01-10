@@ -2,12 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 using NSubstitute;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
             parameters = new Dictionary<string, object>();
-            autoSubscriber.Subscribe(typeof(MyAsyncConsumer), typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>));
+            autoSubscriber.Subscribe(new[] {typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)});
         }
 
         public void Dispose()
@@ -85,47 +85,27 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {
-            public void Consume(MessageA message)
+            public void Consume(MessageA message, CancellationToken cancellationToken)
             {
             }
 
             [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public void Consume(MessageB message)
+            public void Consume(MessageB message, CancellationToken cancellationToken)
             {
             }
 
             [ForTopic("Important")]
-            public void Consume(MessageC message)
+            public void Consume(MessageC message, CancellationToken cancellationToken)
             {
             }
           
         }
 
         //Discovered by reflection over test assembly, do not remove.
-        private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
-        {
-            public Task ConsumeAsync(MessageA message)
-            {
-                throw new NotImplementedException();
-            }
-
-            [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public Task ConsumeAsync(MessageB message)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task ConsumeAsync(MessageC message)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        //Discovered by reflection over test assembly, do not remove.
         private abstract class MyGenericAbstractConsumer<TMessage> : IConsume<TMessage>
           where TMessage : class
         {
-            public virtual void Consume(TMessage message)
+            public virtual void Consume(TMessage message, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
@@ -133,17 +113,14 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         private class MessageA
         {
-            public string Text { get; set; }
         }
 
         private class MessageB
         {
-            public string Text { get; set; }
         }
 
         private class MessageC
         {
-            public string Text { get; set; }
         }
 
     }

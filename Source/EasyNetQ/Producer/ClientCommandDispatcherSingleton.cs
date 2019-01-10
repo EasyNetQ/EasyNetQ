@@ -9,10 +9,10 @@ namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private const int queueSize = 1;
+        private const int QueueSize = 1;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(queueSize);
+        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(QueueSize);
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -28,25 +28,11 @@ namespace EasyNetQ.Producer
             StartDispatcherThread(configuration);
         }
 
-        public T Invoke<T>(Func<IModel, T> channelAction)
-        {
-            return InvokeAsync(channelAction).GetAwaiter().GetResult();
-        }
-
-        public void Invoke(Action<IModel> channelAction)
-        {
-            InvokeAsync(channelAction).GetAwaiter().GetResult();
-        }
-
-        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction)
+        public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-#if NETFX
-            var tcs = new TaskCompletionSource<T>();
-#else
-            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
+            var tcs = TaskHelpers.CreateTcs<T>();
 
             try
             {
@@ -54,43 +40,29 @@ namespace EasyNetQ.Producer
                 {
                     if (cancellation.IsCancellationRequested)
                     {
-#if NETFX                               
-                        tcs.TrySetCanceledAsynchronously();   
-#else
-                        tcs.TrySetCanceled();
-#endif
-
+                        tcs.TrySetCanceledAsynchronously();
                         return;
                     }
+
                     try
                     {
-                        persistentChannel.InvokeChannelAction(channel =>
-                        {
-#if NETFX                               
-                            tcs.TrySetResultAsynchronously(channelAction(channel));   
-#else
-                            tcs.TrySetResult(channelAction(channel));
-#endif                      
-                        });
+                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResultAsynchronously(channelAction(channel)));
                     }
                     catch (Exception e)
                     {
-#if NETFX                               
-                        tcs.TrySetExceptionAsynchronously(e);   
-#else
-                        tcs.TrySetException(e);
-#endif
+                        tcs.TrySetExceptionAsynchronously(e);
                     }
                 }, cancellation.Token);
             }
             catch (OperationCanceledException)
             {
-                tcs.TrySetCanceled();
+                tcs.TrySetCanceledAsynchronously();
             }
+
             return tcs.Task;
         }
 
-        public Task InvokeAsync(Action<IModel> channelAction)
+        public Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -98,7 +70,7 @@ namespace EasyNetQ.Producer
             {
                 channelAction(x);
                 return new NoContentStruct();
-            });
+            }, cancellationToken);
         }
 
         public void Dispose()
@@ -112,7 +84,6 @@ namespace EasyNetQ.Producer
             var thread = new Thread(() =>
             {
                 while (!cancellation.IsCancellationRequested)
-                {
                     try
                     {
                         var channelAction = queue.Take(cancellation.Token);
@@ -122,7 +93,6 @@ namespace EasyNetQ.Producer
                     {
                         break;
                     }
-                }
             }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }

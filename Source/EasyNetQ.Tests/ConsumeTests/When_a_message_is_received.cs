@@ -3,6 +3,7 @@ using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -22,7 +23,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             //mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
             mockBuilder = new MockBuilder();
 
-            mockBuilder.Bus.Receive("the_queue", x => x
+            mockBuilder.SendReceive.Receive("the_queue", x => x
                 .Add<MyMessage>(message => deliveredMyMessage = message)
                 .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
@@ -59,6 +60,8 @@ namespace EasyNetQ.Tests.ConsumeTests
             };
             var body = Encoding.UTF8.GetBytes(message);
 
+            var autoResetEvent = new AutoResetEvent(false);
+            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",
                 0,
@@ -68,17 +71,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                 properties,
                 body
                 );
-
-            WaitForMessageDispatchToComplete();
-        }
-
-        private void WaitForMessageDispatchToComplete()
-        {
-            // wait for the subscription thread to handle the message ...
-            var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
-            autoResetEvent.WaitOne(1000);
-        }        
+            
+            if (!autoResetEvent.WaitOne(5000))
+            {
+                throw new TimeoutException();
+            }
+        }       
     }
 }
 

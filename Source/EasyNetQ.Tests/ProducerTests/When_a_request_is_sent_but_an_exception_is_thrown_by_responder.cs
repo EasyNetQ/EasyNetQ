@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 try
                 {
-                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+                    var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
                     DeliverMessage(_correlationId, null);
                     task.Wait(1000);
                 }
@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 try
                 {
-                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+                    var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
                     DeliverMessage(_correlationId, "Why you are so bad with me?");
                     task.Wait(1000);
                 }

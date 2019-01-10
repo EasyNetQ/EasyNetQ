@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 try
                 {
-                    var task = mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+                    var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => { });
                     mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(new ShutdownInitiator(), 0, null));
                     task.Wait();
                 }

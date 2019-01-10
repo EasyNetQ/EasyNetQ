@@ -4,6 +4,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -34,7 +35,7 @@ namespace EasyNetQ.Tests.Integration
             var countdownEvent = new CountdownEvent(10);
             // DownloadStringTask comes from http://blogs.msdn.com/b/pfxteam/archive/2010/05/04/10007557.aspx
 
-            bus.SubscribeAsync<MyMessage>("subscribe_async_test", message => 
+            bus.PubSub.SubscribeAsync<MyMessage>("subscribe_async_test", message => 
                 new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=500"))
                     .ContinueWith(task =>
                     {
@@ -57,25 +58,27 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_handle_multiple_async_IO_operations_in_a_handler()
         {
-            bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
+            bus.PubSub.Subscribe<MyMessage>("subscribe_async_test_2", async message =>
             {
-                var downloadTasks = new[]
+                using (var httpClient = new HttpClient())
                 {
-                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=500")),
-                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=501")),
-                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=502")),
-                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=503")),
-                    new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=504")),
-                };
-
-                return Task.Factory.ContinueWhenAll(downloadTasks, tasks =>
-                {
-                    Console.WriteLine("Finished processing: {0}", message.Text);
-                    foreach (var task in tasks)
+                    var downloadTasks = new[]
                     {
-                        Console.WriteLine("\tDownloaded: {0}", task.Result);
+                        httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=500")),
+                        httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=501")),
+                        httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=502")),
+                        httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=503")),
+                        httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=504")),
+                    };
+
+                    await Task.WhenAll(downloadTasks).ConfigureAwait(false);
+
+                    Console.WriteLine("Finished processing: {0}", message.Text);
+                    foreach (var downloadTask in downloadTasks)
+                    {
+                        Console.WriteLine("\tDownloaded: {0}", await downloadTask.ConfigureAwait(false));
                     }
-                });
+                }
             });
 
             // give the test a chance to receive process the message
@@ -85,20 +88,16 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_handle_async_tasks_in_sequence()
         {
-            bus.SubscribeAsync<MyMessage>("subscribe_async_test_2", message =>
+            bus.PubSub.Subscribe<MyMessage>("subscribe_async_test_2", async message =>
             {
-                Console.WriteLine("Got message: {0}", message.Text);
-                var firstRequestTask = new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=100"));
-
-                return firstRequestTask.ContinueWith(task1 =>
+                using (var httpClient = new HttpClient())
                 {
-                    Console.WriteLine("First Response for: {0}, => {1}", message.Text, task1.Result);
-                    var secondRequestTask = new HttpClient()
-                        .GetStringAsync(new Uri("http://localhost:1338/?timeout=501"));
-
-                    return secondRequestTask.ContinueWith(task2 => 
-                        Console.WriteLine("Second Response for: {0}, => {1}", message.Text, task2.Result));
-                });
+                    Console.WriteLine("Got message: {0}", message.Text);
+                    var firstRequest = await httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=100")).ConfigureAwait(false);
+                    Console.WriteLine("First Response for: {0}, => {1}", message.Text, firstRequest);
+                    var secondRequest = await httpClient.GetStringAsync(new Uri("http://localhost:1338/?timeout=501")).ConfigureAwait(false);
+                    Console.WriteLine("Second Response for: {0}, => {1}", message.Text, secondRequest);
+                }
             });
 
             // give the test a chance to receive process the message
@@ -111,7 +110,7 @@ namespace EasyNetQ.Tests.Integration
         {
             for (var i = 0; i < 10; i++)
             {
-                bus.Publish(new MyMessage { Text = "Hi from the publisher " + i });
+                bus.PubSub.Publish(new MyMessage { Text = "Hi from the publisher " + i });
             }
         }
 

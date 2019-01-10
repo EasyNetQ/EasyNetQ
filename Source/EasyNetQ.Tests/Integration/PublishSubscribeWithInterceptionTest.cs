@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using EasyNetQ.Interception;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Integration.Scheduling;
 using Xunit;
 
@@ -27,7 +28,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var autoResetEvent = new AutoResetEvent(false);
 
-            bus.Subscribe<PartyInvitation>("Should_be_able_to_get_a_message", message =>
+            bus.PubSub.Subscribe<PartyInvitation>("Should_be_able_to_get_a_message", message =>
                 {
                     Console.WriteLine("Got message: {0}", message.Text);
                     autoResetEvent.Set();
@@ -39,7 +40,7 @@ namespace EasyNetQ.Tests.Integration
                     Date = new DateTime(2011, 5, 24)
                 };
 
-            bus.Publish(invitation);
+            bus.PubSub.Publish(invitation);
 
             if (! autoResetEvent.WaitOne(100000))
                 Assert.True(false);

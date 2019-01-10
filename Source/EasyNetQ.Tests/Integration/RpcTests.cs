@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using Xunit;
 
@@ -42,9 +45,9 @@ namespace EasyNetQ.Tests.Integration
         [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_publish_and_receive_response()
         {
-            bus.Respond<RpcRequest, RpcResponse>(req => new RpcResponse { Value = req.Value });
+            bus.Rpc.Respond<RpcRequest, RpcResponse>(req => new RpcResponse { Value = req.Value });
             var request = new RpcRequest { Value = 5 };
-            var response = bus.Request<RpcRequest, RpcResponse>(request);
+            var response = bus.Rpc.Request<RpcRequest, RpcResponse>(request);
 
             Assert.NotNull(response);
             Assert.True(request.Value == response.Value);
@@ -55,10 +58,10 @@ namespace EasyNetQ.Tests.Integration
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                bus.Respond<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
+                bus.Rpc.Respond<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
                 req => new RpcRequest());
 
-                bus.Request<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
+                bus.Rpc.Request<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
                     new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes());
 
                 Thread.Sleep(2000);
@@ -70,10 +73,10 @@ namespace EasyNetQ.Tests.Integration
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                bus.Respond<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
+                bus.Rpc.Respond<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
                 req => new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes());
 
-                bus.Request<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
+                bus.Rpc.Request<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
                     new RpcRequest());
 
                 Thread.Sleep(2000);
@@ -85,13 +88,10 @@ namespace EasyNetQ.Tests.Integration
         {
             var ex = Assert.ThrowsAny<Exception>(() =>
             {
-                bus.Respond<RpcRequest, RpcResponse>(req =>
-                {
-                    throw new Exception("Simulated Exception!");
-                });
+                bus.Rpc.Respond<RpcRequest, RpcResponse>(req => TaskHelpers.FromException<RpcResponse>(new Exception("Simulated Exception!")));
                 var request = new RpcRequest { Value = 5 };
 
-                var response = bus.Request<RpcRequest, RpcResponse>(request);
+                var response = bus.Rpc.Request<RpcRequest, RpcResponse>(request);
 
                 Thread.Sleep(2000);
             });
@@ -105,13 +105,10 @@ namespace EasyNetQ.Tests.Integration
         {
             var ex = Assert.ThrowsAny<Exception>(() =>
             {
-                bus.Respond<string, string>(req =>
-                {
-                    throw new Exception("Simulated Exception!");
-                });
+                bus.Rpc.Respond<string, string>(req => TaskHelpers.FromException<string>(new Exception("Simulated Exception!")));
                 var request = "Hello";
 
-                var response = bus.Request<string, string>(request);
+                var response = bus.Rpc.Request<string, string>(request);
 
                 Thread.Sleep(2000);
             });
@@ -125,13 +122,10 @@ namespace EasyNetQ.Tests.Integration
         {
             var ex = Assert.ThrowsAny<Exception>(() =>
             {
-                bus.Respond<RpcRequest, RpcResponseWithoutParameterlessConstructor>(req =>
-                {
-                    throw new Exception("Simulated Exception!");
-                });
+                bus.Rpc.Respond<RpcRequest, RpcResponseWithoutParameterlessConstructor>(req => TaskHelpers.FromException<RpcResponseWithoutParameterlessConstructor>(new Exception("Simulated Exception!")));
                 var request = new RpcRequest { Value = 5 };
 
-                var response = bus.Request<RpcRequest, RpcResponseWithoutParameterlessConstructor>(request);
+                var response = bus.Rpc.Request<RpcRequest, RpcResponseWithoutParameterlessConstructor>(request);
 
                 Thread.Sleep(2000);
             });

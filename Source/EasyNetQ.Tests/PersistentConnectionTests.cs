@@ -24,22 +24,22 @@ namespace EasyNetQ.Tests
             var mockPersistentConnection = Substitute.For<PersistentConnection>(connectionFactory, eventBus);
 
             // This test is constructed using small delays, such that the IConnectionFactory will return a connection just _after the IPersistentConnection has been disposed.
-            var shimDelay = TimeSpan.FromSeconds(0.5);
+            var shimDelayMs = 500;
             connectionFactory.CreateConnection().Returns(a =>
             {
-                Thread.Sleep(shimDelay.Double());
+                Thread.Sleep(shimDelayMs * 2);
                 return mockConnection;
             });
 
             Task.Factory.StartNew(() => { mockPersistentConnection.Initialize(); }); // Start the persistent connection attempting to connect.
 
-            Thread.Sleep(shimDelay); // Allow some time for the persistent connection code to try to create a connection.
+            Thread.Sleep(shimDelayMs); // Allow some time for the persistent connection code to try to create a connection.
 
             // First call to dispose.  Because CreateConnection() is stubbed to delay for shimDelay.Double(), it will not yet have returned a connection.  So when the PersistentConnection is disposed, no underlying IConnection should yet be disposed.
             mockPersistentConnection.Dispose();
             mockConnection.DidNotReceive().Dispose();
 
-            Thread.Sleep(shimDelay.Double()); // Allow time for persistent connection code to _return its connection ...
+            Thread.Sleep(shimDelayMs * 2); // Allow time for persistent connection code to _return its connection ...
 
             // Assert that the connection returned from connectionFactory.CreateConnection() (_after the PersistentConnection was disposed), still gets disposed.
             mockConnection.Received().Dispose();

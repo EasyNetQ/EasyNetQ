@@ -16,15 +16,15 @@ namespace EasyNetQ.Consumer
         StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IConsumerConfiguration configuration
-            );
+        );
 
         StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs,
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
             IConsumerConfiguration configuration
-            );
+        );
 
         event Action<IInternalConsumer> Cancelled;
     }
@@ -37,7 +37,15 @@ namespace EasyNetQ.Consumer
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
         
-        public BasicConsumer(Action<BasicConsumer> cancelled, IConsumerDispatcher consumerDispatcher, IQueue queue, IEventBus eventBus, IHandlerRunner handlerRunner, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, IModel model)
+        public BasicConsumer(
+            Action<BasicConsumer> cancelled, 
+            IConsumerDispatcher consumerDispatcher, 
+            IQueue queue, 
+            IEventBus eventBus,
+            IHandlerRunner handlerRunner,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            IModel model
+        )
         {
             Preconditions.CheckNotNull(onMessage, "onMessage");
             
@@ -50,7 +58,7 @@ namespace EasyNetQ.Consumer
             Model = model;
         }
 
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> OnMessage { get; }
+        public Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> OnMessage { get; }
         public IQueue Queue { get; }
         public string ConsumerTag { get; private set; }
 
@@ -100,7 +108,10 @@ namespace EasyNetQ.Consumer
         
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
         {
-            logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
+            }
 
             if (disposed)
             {
@@ -116,16 +127,22 @@ namespace EasyNetQ.Consumer
 
             var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, Queue.Name);
             var messsageProperties = new MessageProperties(properties);
-            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messsageProperties, body, this);
+            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messsageProperties, body);
 
-            consumerDispatcher.QueueAction(() =>
-            {
-                eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messsageProperties, body));
-                handlerRunner.InvokeUserMessageHandler(context);
-            });
+            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messsageProperties, body));
+            handlerRunner.InvokeUserMessageHandlerAsync(context)
+                         .ContinueWith(async x =>
+                            {
+                                var ackStrategy = await x.ConfigureAwait(false);
+                                consumerDispatcher.QueueAction(() =>
+                                {
+                                    var ackResult = ackStrategy(Model, deliveryTag);
+                                    eventBus.Publish(new AckEvent(messageReceivedInfo, messsageProperties, body, ackResult));
+                                });
+                            },
+                            TaskContinuationOptions.ExecuteSynchronously
+                         );
         }
-
-        
 
         public IModel Model { get; }
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
@@ -148,12 +165,9 @@ namespace EasyNetQ.Consumer
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
         private readonly IEventBus eventBus;
-
         private ICollection<BasicConsumer> basicConsumers;
 
         public IModel Model { get; private set; }
-        public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
-
 
         public event Action<IInternalConsumer> Cancelled;
 
@@ -161,7 +175,8 @@ namespace EasyNetQ.Consumer
             IHandlerRunner handlerRunner,
             IConsumerDispatcher consumerDispatcher,
             IConventions conventions,
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
             Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
@@ -174,7 +189,11 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
-        public StartConsumingStatus StartConsuming(IPersistentConnection connection, ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, IConsumerConfiguration configuration)
+        public StartConsumingStatus StartConsuming(
+            IPersistentConnection connection,
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IConsumerConfiguration configuration
+        )
         {
             Preconditions.CheckNotNull(connection, nameof(connection));
             Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
@@ -249,9 +268,9 @@ namespace EasyNetQ.Consumer
         public StartConsumingStatus StartConsuming(
             IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IConsumerConfiguration configuration
-            )
+        )
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(queue, "queue");
@@ -280,15 +299,15 @@ namespace EasyNetQ.Consumer
                     true,
                     configuration.IsExclusive,
                     arguments,          // arguments
-                    basicConsumer);     // consumer
+                    basicConsumer       // consumer
+                );     
 
                 logger.InfoFormat(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
                     consumerTag,
                     queue.Name,
                     configuration
-                );
-                
+                );                
                 
                 return StartConsumingStatus.Succeed;
             }
@@ -326,7 +345,6 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
             disposed = true;
 
-
             var model = Model;
             if (model != null)
             {
@@ -334,9 +352,9 @@ namespace EasyNetQ.Consumer
                 var disposedEvent = new AutoResetEvent(false);
                 consumerDispatcher.QueueAction(() =>
                     {
-                        Model.Dispose();
                         foreach (var c in basicConsumers)
                             c.Dispose();
+                        model.Dispose();
                         disposedEvent.Set();
                     });
                 disposedEvent.WaitOne();

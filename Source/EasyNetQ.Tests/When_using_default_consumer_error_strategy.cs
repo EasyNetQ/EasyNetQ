@@ -1,7 +1,9 @@
 // ReSharper disable InconsistentNaming;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -20,7 +22,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
-                ErrorQueueNamingConvention = () => "CustomEasyNetQErrorQueueName",
+                ErrorQueueNamingConvention = info => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 
@@ -31,21 +33,21 @@ namespace EasyNetQ.Tests
                 new JsonSerializer(), 
                 customConventions,
                 new DefaultTypeNameSerializer(),
-                new DefaultErrorMessageSerializer());
+                new DefaultErrorMessageSerializer()
+            );
 
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
+                (bytes, properties, info, cancellation) => TaskHelpers.Completed, 
                 new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {
                     CorrelationId = string.Empty,
                     AppId = string.Empty
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
+                originalMessageBody
             );
 
             try

@@ -6,7 +6,7 @@ namespace EasyNetQ
     /// The result of the AdvancedBus Get method
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IBasicGetResult<T> where T : class
+    public interface IBasicGetResult<T>
     {
         /// <summary>
         /// True if a message is available, false if not.
@@ -22,7 +22,7 @@ namespace EasyNetQ
         IMessage<T> Message { get; }
     }
 
-    public class BasicGetResult<T> : IBasicGetResult<T> where T : class
+    public class BasicGetResult<T> : IBasicGetResult<T>
     {
         private readonly IMessage<T> message;
         public bool MessageAvailable { get; }

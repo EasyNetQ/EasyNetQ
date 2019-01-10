@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -15,7 +16,7 @@ namespace EasyNetQ.Tests.Integration
             var autoResetEvent = new AutoResetEvent(false);
             var bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.Subscribe<EndMessage>("runSaga_spike", endMessage =>
+            bus.PubSub.Subscribe<EndMessage>("runSaga_spike", endMessage =>
             {
                 Console.WriteLine("Got EndMessage: {0}", endMessage.Text);
                 autoResetEvent.Set();
@@ -26,7 +27,7 @@ namespace EasyNetQ.Tests.Integration
                 Text = "Hello Saga! "
             };
 
-            bus.Publish(startMessage);
+            bus.PubSub.Publish(startMessage);
 
             // give the message time to run through the process
             autoResetEvent.WaitOne(1000);
@@ -38,24 +39,24 @@ namespace EasyNetQ.Tests.Integration
 
             // setup the Saga
             Console.WriteLine("Setting up the Saga");
-            bus.Subscribe<StartMessage>("simpleSaga", startMessage =>
+            bus.PubSub.Subscribe<StartMessage>("simpleSaga", startMessage =>
             {
                 Console.WriteLine("Saga got StartMessage: {0}", startMessage.Text);
                 var firstProcessedMessage = startMessage.Text + " - initial process ";
                 var request = new TestRequestMessage { Text = firstProcessedMessage };
 
-                bus.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
+                bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request).ContinueWith(response =>
                 {
                     Console.WriteLine("Saga got Response: {0}", response.Result.Text);
                     var secondProcessedMessage = response.Result.Text + " - final process ";
                     var endMessage = new EndMessage { Text = secondProcessedMessage };
-                    bus.Publish(endMessage);
+                    bus.PubSub.Publish(endMessage);
                 });
             });
             
             // setup the RPC endpoint
             Console.WriteLine("Setting up the RPC endpoint");
-            bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(request =>
             {
                 Console.WriteLine("RPC got Request: {0}", request.Text);
                 return new TestResponseMessage {Text = request.Text + " Responded! "};
@@ -64,7 +65,7 @@ namespace EasyNetQ.Tests.Integration
             // setup the final subscription
             Console.WriteLine("Setting up the final subscription");
             var autoResetEvent = new AutoResetEvent(false);
-            bus.Subscribe<EndMessage>("inline_saga_spike", endMessage =>
+            bus.PubSub.Subscribe<EndMessage>("inline_saga_spike", endMessage =>
             {
                 Console.WriteLine("Test got EndMessage: {0}", endMessage.Text);
                 autoResetEvent.Set();
@@ -72,7 +73,7 @@ namespace EasyNetQ.Tests.Integration
 
             // now kick it off
             Console.WriteLine("Test is publishing StartMessage");
-            bus.Publish(new StartMessage { Text = "Hello Saga!! " });
+            bus.PubSub.Publish(new StartMessage { Text = "Hello Saga!! " });
 
             // give the message time to run through the process
             autoResetEvent.WaitOne(1000);

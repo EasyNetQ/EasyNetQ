@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -35,7 +36,7 @@ namespace EasyNetQ.Tests.ProducerTests
                    publishedMessage = (byte[])x[4];
                });
 
-            mockBuilder.Bus.Publish<IMyMessageInterface>(message);
+            mockBuilder.PubSub.Publish<IMyMessageInterface>(message, c => {});
         }
 
         public void Dispose()

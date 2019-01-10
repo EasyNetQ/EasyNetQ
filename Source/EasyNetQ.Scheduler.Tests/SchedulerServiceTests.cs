@@ -5,7 +5,6 @@ using EasyNetQ.Topology;
 using NSubstitute;
 using Xunit;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EasyNetQ.Scheduler.Tests
 {
@@ -21,7 +20,7 @@ namespace EasyNetQ.Scheduler.Tests
             bus = Substitute.For<IBus>();
             advancedBus = Substitute.For<IAdvancedBus>();
 
-            bus.IsConnected.Returns(true);
+            advancedBus.IsConnected.Returns(true);
             bus.Advanced.Returns(advancedBus);
 
             scheduleRepository = Substitute.For<IScheduleRepository>();
@@ -33,7 +32,8 @@ namespace EasyNetQ.Scheduler.Tests
                 {
                     PublishIntervalSeconds = 1,
                     PurgeIntervalSeconds = 1
-                });
+                }
+            );
         }
 
         [Fact]
@@ -49,19 +49,21 @@ namespace EasyNetQ.Scheduler.Tests
 
             schedulerService.OnPublishTimerTick(null);
 
-            advancedBus.Received().Publish(
+            advancedBus.Received().PublishAsync(
                 Arg.Any<IExchange>(),
-                Arg.Is<string>("msg1"),
+                Arg.Is("msg1"),
                 Arg.Any<bool>(),
                 Arg.Any<MessageProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<byte[]>()
+            );
 
-            advancedBus.Received().Publish(
+            advancedBus.Received().PublishAsync(
                 Arg.Any<IExchange>(),
-                Arg.Is<string>("msg2"),
+                Arg.Is("msg2"),
                 Arg.Any<bool>(),
                 Arg.Any<MessageProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<byte[]>()
+            );
         }
     }
 }

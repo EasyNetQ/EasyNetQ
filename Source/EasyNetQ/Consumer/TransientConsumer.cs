@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -8,7 +9,7 @@ namespace EasyNetQ.Consumer
     public class TransientConsumer : IConsumer
     {
         private readonly IQueue queue;
-        private readonly Func<Byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
         private readonly IInternalConsumerFactory internalConsumerFactory;
@@ -16,13 +17,16 @@ namespace EasyNetQ.Consumer
 
         private IInternalConsumer internalConsumer;
 
+        private ConsumerCancellation consumerCancellation;
+
         public TransientConsumer(
             IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
             IPersistentConnection connection, 
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory, 
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -49,14 +53,16 @@ namespace EasyNetQ.Consumer
                 connection,
                 queue,
                 onMessage,
-                configuration);
+                configuration
+            );
 
             if (status == StartConsumingStatus.Succeed)
                 eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
             else
                 eventBus.Publish(new StartConsumingFailedEvent(this, queue));
 
-            return new ConsumerCancellation(Dispose);
+            consumerCancellation = new ConsumerCancellation(Dispose);
+            return consumerCancellation;
         }
 
         private bool disposed;
@@ -66,11 +72,11 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
             disposed = true;
 
+            consumerCancellation.OnCancel(queue);
+
             eventBus.Publish(new StoppedConsumingEvent(this));
-            if (internalConsumer != null)
-            {
-                internalConsumer.Dispose();
-            }
+            
+            internalConsumer?.Dispose();
         }
     }
 }

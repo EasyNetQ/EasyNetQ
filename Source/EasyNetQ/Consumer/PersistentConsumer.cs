@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
@@ -10,7 +11,7 @@ namespace EasyNetQ.Consumer
     public class PersistentConsumer : IConsumer
     {
         private readonly IQueue queue;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
         private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
 
@@ -20,15 +21,18 @@ namespace EasyNetQ.Consumer
         private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = 
             new ConcurrentDictionary<IInternalConsumer, object>();
 
-        private readonly IList<CancelSubscription> eventCancellations = new List<CancelSubscription>();
+        private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
+
+        private ConsumerCancellation consumerCancellation;
 
         public PersistentConsumer(
             IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
             IPersistentConnection connection, 
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -47,12 +51,13 @@ namespace EasyNetQ.Consumer
 
         public IDisposable StartConsuming()
         {
-            eventCancellations.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
-            eventCancellations.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
+            subscriptions.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
+            subscriptions.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
 
             StartConsumingInternal();
 
-            return new ConsumerCancellation(Dispose);
+            consumerCancellation = new ConsumerCancellation(Dispose);
+            return consumerCancellation;
         }
 
         private void StartConsumingInternal()
@@ -61,8 +66,6 @@ namespace EasyNetQ.Consumer
 
             if(!connection.IsConnected)
             {
-                // connection is not connected, so just ignore this call. A consumer will
-                // be created and start consuming when the connection reconnects.
                 return;
             }
 
@@ -75,7 +78,8 @@ namespace EasyNetQ.Consumer
                 connection,
                 queue,
                 onMessage,
-                configuration);
+                configuration
+            );
 
             if (status == StartConsumingStatus.Succeed)
                 eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
@@ -102,11 +106,13 @@ namespace EasyNetQ.Consumer
 
             disposed = true;
 
-            eventBus.Publish(new StoppedConsumingEvent(this));
+            consumerCancellation.OnCancel(queue);
 
-            foreach (var cancelSubscription in eventCancellations)
+            eventBus.Publish(new StoppedConsumingEvent(this));
+            
+            foreach (var subscription in subscriptions)
             {
-                cancelSubscription();
+                subscription.Dispose();
             }
 
             foreach (var internalConsumer in internalConsumers.Keys)

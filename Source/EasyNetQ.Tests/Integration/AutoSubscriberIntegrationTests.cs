@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using EasyNetQ.AutoSubscribe;
+using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -11,14 +12,14 @@ namespace EasyNetQ.Tests.Integration
     [Explicit("Requires a RabbitMQ broker on localhost.")]
     public class AutoSubscriberIntegrationTests : IDisposable
     {
-        private IBus bus;
+        private readonly IBus bus;
 
         public AutoSubscriberIntegrationTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
             var subscriber = new AutoSubscriber(bus, "autosub.integration");
 
-            subscriber.Subscribe(GetType().GetTypeInfo().Assembly);
+            subscriber.Subscribe(new[] {GetType().GetTypeInfo().Assembly});
         }
 
         public void Dispose()
@@ -32,14 +33,14 @@ namespace EasyNetQ.Tests.Integration
         [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithTopic()
         {
-            bus.Publish(new AutoSubMessage{ Text = "With topic" }, "mytopic");
+            bus.PubSub.Publish(new AutoSubMessage{ Text = "With topic" }, "mytopic");
         }
 
         [Fact]
         [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithoutTopic()
         {
-            bus.Publish(new AutoSubMessage{ Text = "Without topic" });
+            bus.PubSub.Publish(new AutoSubMessage{ Text = "Without topic" });
         }
     }
 
@@ -51,7 +52,7 @@ namespace EasyNetQ.Tests.Integration
     public class MyConsumer : IConsume<AutoSubMessage>
     {
         [ForTopic("mytopic")]
-        public void Consume(AutoSubMessage message)
+        public void Consume(AutoSubMessage message, CancellationToken cancellationToken)
         {
             Console.Out.WriteLine("Autosubscriber got message: {0}", message.Text);
         }

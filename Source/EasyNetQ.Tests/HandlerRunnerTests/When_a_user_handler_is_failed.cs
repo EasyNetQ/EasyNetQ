@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using FluentAssertions;
 using Xunit;
 using RabbitMQ.Client;
@@ -23,35 +24,50 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
         private readonly ConsumerExecutionContext context;
+        private readonly IModel channel;
 
         public When_a_user_handler_is_failed()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            var eventBus = new EventBus();
+            consumerErrorStrategy.HandleConsumerError(null, null).ReturnsForAnyArgs(AckStrategies.Ack);
 
-            var handlerRunner = new HandlerRunner(consumerErrorStrategy, eventBus);
-
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler = (body, properties, info) => 
-                Task.Run(() => throw new Exception());
+            var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
             var consumer = Substitute.For<IBasicConsumer>();
-            var channel = Substitute.For<IModel>();
+            channel = Substitute.For<IModel>();
             consumer.Model.Returns(channel);
 
-            context = new ConsumerExecutionContext(userHandler, messageInfo, messageProperties, messageBody, consumer);
+            context = new ConsumerExecutionContext(
+                (body, properties, info, cancellation) => TaskHelpers.FromException(new Exception()),
+                messageInfo,
+                messageProperties,
+                messageBody
+            );
 
-            var autoResetEvent = new AutoResetEvent(false);
-            eventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
+            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
+                .ContinueWith(async x =>
+                {
+                    var ackStrategy = await x.ConfigureAwait(false);
+                    return ackStrategy(channel, 42);
+                }, TaskContinuationOptions.ExecuteSynchronously)
+                .Unwrap();
 
-            handlerRunner.InvokeUserMessageHandler(context);
-
-            autoResetEvent.WaitOne(1000);
+            if (!handlerTask.Wait(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         [Fact]
         public void Should_handle_consumer_error()
         {
             consumerErrorStrategy.Received().HandleConsumerError(context, Arg.Any<Exception>());
+        }
+
+        [Fact]
+        public void Should_ACK()
+        {
+            channel.Received().BasicAck(42, false);
         }
     }
 }

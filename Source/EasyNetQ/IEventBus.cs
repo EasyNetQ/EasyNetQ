@@ -10,7 +10,7 @@ namespace EasyNetQ
     public interface IEventBus
     {
         void Publish<TEvent>(TEvent @event);
-        CancelSubscription Subscribe<TEvent>(Action<TEvent> eventHandler);
+        IDisposable Subscribe<TEvent>(Action<TEvent> eventHandler);
     }
 
     public class EventBus : IEventBus
@@ -53,14 +53,13 @@ namespace EasyNetQ
 
         public void Publish<TEvent>(TEvent @event)
         {
-            Handlers handlers;
-            if (!subscriptions.TryGetValue(typeof (TEvent), out handlers))
+            if (!subscriptions.TryGetValue(typeof (TEvent), out var handlers))
                 return;
             foreach (var handler in handlers.AsEnumerable())
                 ((Action<TEvent>) handler)(@event);
         }
 
-        public CancelSubscription Subscribe<TEvent>(Action<TEvent> eventHandler)
+        public IDisposable Subscribe<TEvent>(Action<TEvent> eventHandler)
         {
             AddSubscription(eventHandler);
             return GetCancelSubscriptionDelegate(eventHandler);
@@ -68,11 +67,10 @@ namespace EasyNetQ
 
         private void AddSubscription<TEvent>(Action<TEvent> handler)
         {
-            var type = typeof (TEvent);
-
-            subscriptions.AddOrUpdate(type, 
-                addValue: new Handlers(handler),
-                updateValueFactory: (key, existingHandlers) => 
+            subscriptions.AddOrUpdate(
+                typeof (TEvent), 
+                new Handlers(handler),
+                (key, existingHandlers) => 
                 {
                     existingHandlers.Add(handler);
                     return existingHandlers;
@@ -80,17 +78,25 @@ namespace EasyNetQ
             );
         }
 
-        private CancelSubscription GetCancelSubscriptionDelegate<TEvent>(Action<TEvent> eventHandler)
+        private IDisposable GetCancelSubscriptionDelegate<TEvent>(Action<TEvent> eventHandler)
         {
-            return () =>
+            return new Subscription(
+                () =>
                 {
-                    Handlers handlers;
-                    if (!subscriptions.TryGetValue(typeof (TEvent), out handlers))
+                    if (!subscriptions.TryGetValue(typeof (TEvent), out var handlers))
                         return;
                     handlers.Remove(eventHandler);
-                };
+                }
+            );
+        }
+
+        private sealed class Subscription : IDisposable
+        {
+            private readonly Action unsubscribe;
+
+            public Subscription(Action unsubscribe) => this.unsubscribe = unsubscribe;
+
+            public void Dispose() => unsubscribe();
         }
     }
-
-    public delegate void CancelSubscription();
 }

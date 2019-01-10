@@ -1,6 +1,5 @@
 ﻿using System;
 using EasyNetQ.Scheduler.Mongo.Core;
-using log4net;
 
 namespace EasyNetQ.Scheduler.Mongo
 {
@@ -8,8 +7,7 @@ namespace EasyNetQ.Scheduler.Mongo
     {
         public static ISchedulerService CreateScheduler()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
-
+            var bus = RabbitHutch.CreateBus();
             return new SchedulerService(
                 bus,
                 new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow),

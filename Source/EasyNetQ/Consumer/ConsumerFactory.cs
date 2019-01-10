@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using System.Linq;
+using System.Threading;
 
 namespace EasyNetQ.Consumer
 {
@@ -25,19 +26,16 @@ namespace EasyNetQ.Consumer
             
             eventBus.Subscribe<StoppedConsumingEvent>(stoppedConsumingEvent =>
                 {
-                    object value;
-                    consumers.TryRemove(stoppedConsumingEvent.Consumer, out value);
+                    consumers.TryRemove(stoppedConsumingEvent.Consumer, out _);
                 });
         }
-
        
-
         public IConsumer CreateConsumer(
             IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
             IPersistentConnection connection, 
             IConsumerConfiguration configuration
-            )
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -58,9 +56,10 @@ namespace EasyNetQ.Consumer
         /// <returns></returns>
         private IConsumer CreateConsumerInstance(
             IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
             IPersistentConnection connection,
-            IConsumerConfiguration configuration)
+            IConsumerConfiguration configuration
+        )
         {
             if (queue.IsExclusive)
             {
@@ -72,15 +71,15 @@ namespace EasyNetQ.Consumer
         }
 
         public IConsumer CreateConsumer(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, 
+            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs, 
             IPersistentConnection connection, 
-            IConsumerConfiguration configuration)
+            IConsumerConfiguration configuration
+        )
         {
             if (configuration.IsExclusive || queueConsumerPairs.Any(x => x.Item1.IsExclusive))
                 throw new NotSupportedException("Exclusive multiple consuming is not supported.");
 
             return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
-
         }
 
 

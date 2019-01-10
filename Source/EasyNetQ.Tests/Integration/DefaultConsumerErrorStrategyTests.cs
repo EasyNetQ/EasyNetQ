@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.SystemMessages;
 using FluentAssertions;
 using NSubstitute;
@@ -44,8 +46,8 @@ namespace EasyNetQ.Tests.Integration
                 serializer, 
                 conventions,
                 typeNameSerializer,
-                errorMessageSerializer);
-         
+                errorMessageSerializer
+            );
         }
 
         /// <summary>
@@ -60,16 +62,15 @@ namespace EasyNetQ.Tests.Integration
             var exception = new Exception("I just threw!");
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
+                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {
                     CorrelationId = "123",
                     AppId = "456"
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
-                );
+                originalMessageBody
+            );
 
             consumerErrorStrategy.HandleConsumerError(context, exception);
 
@@ -79,7 +80,7 @@ namespace EasyNetQ.Tests.Integration
             using(var connection = connectionFactory.CreateConnection())
             using(var model = connection.CreateModel())
             {
-                var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(), true);
+                var getArgs = model.BasicGet(conventions.ErrorQueueNamingConvention(new MessageReceivedInfo()), true);
                 if (getArgs == null)
                 {
                     Assert.True(false, "Nothing on the error queue");
@@ -108,16 +109,15 @@ namespace EasyNetQ.Tests.Integration
             var exception = new Exception("I just threw!");
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
+                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {
                     CorrelationId = "123",
                     AppId = "456"
                 },
-                originalMessageBody,
-                Substitute.For<IBasicConsumer>()
-                );
+                originalMessageBody
+            );
 
             connectionFactory = Substitute.For<IConnectionFactory>();
 

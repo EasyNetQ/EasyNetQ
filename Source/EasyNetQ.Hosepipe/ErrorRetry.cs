@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client.Exceptions;

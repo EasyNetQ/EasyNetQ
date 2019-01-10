@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -22,12 +24,12 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var advancedBus = Substitute.For<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
 
-            advancedBus.ExchangeDeclare(exchangeName, "topic").Returns(
-                x => throw (new Exception()),
+            advancedBus.ExchangeDeclareAsync(exchangeName, "topic").Returns(
+                x => TaskHelpers.FromException(new Exception()),
                 x =>
                 {
                     exchangeDeclareCount++;
-                    return exchange;
+                    return Task.FromResult(exchange);
                 });
 
             var conventions = Substitute.For<IConventions>();
@@ -43,7 +45,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             }
 
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
-            advancedBus.Received(2).ExchangeDeclare(exchangeName, "topic");
+            advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, "topic");
             declaredExchange.Should().BeSameAs(exchange);
             exchangeDeclareCount.Should().Be(1);
         }
@@ -57,21 +59,21 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchanges = new List<ExchangeStub>();
             IAdvancedBus ret;
             var advancedBus = Substitute.For<IAdvancedBus>();
-            advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
+            advancedBus.ExchangeDeclareAsync(null, null, false, true, false, null)
                 .ReturnsForAnyArgs(mi =>
                 {
                     var exchange = new ExchangeStub { Name = (string)mi[0] };
                     exchanges.Add(exchange);
-                    return exchange;
+                    return Task.FromResult<IExchange>(exchange);
                 });
 
-            advancedBus.Bind(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
                 .Returns(mi =>
                 {
                     var source = (ExchangeStub)mi[0];
                     var destination = (ExchangeStub)mi[1];
                     source.BoundTo = destination;
-                    return Substitute.For<IBinding>();
+                    return Task.FromResult(Substitute.For<IBinding>());
                 });
 
             var conventions = Substitute.For<IConventions>();
@@ -92,21 +94,21 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchanges = new List<ExchangeStub>();
             
             var advancedBus = Substitute.For<IAdvancedBus>();
-            advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
+            advancedBus.ExchangeDeclareAsync(null, null, false, true, false, null)
                 .ReturnsForAnyArgs(mi =>
                 {
                     var exchange = new ExchangeStub { Name = (string)mi[0] };
                     exchanges.Add(exchange);
-                    return exchange;
+                    return Task.FromResult<IExchange>(exchange);
                 });
 
-            advancedBus.Bind(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
                 .Returns(mi =>
                 {
                     var source = (ExchangeStub)mi[0];
                     var destination = (ExchangeStub)mi[1];
                     source.BoundTo = destination;
-                    return Substitute.For<IBinding>();
+                    return Task.FromResult(Substitute.For<IBinding>());
                 });
 
             var conventions = Substitute.For<IConventions>();

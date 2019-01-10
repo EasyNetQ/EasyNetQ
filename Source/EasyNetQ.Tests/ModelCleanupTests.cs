@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using Xunit;
@@ -23,7 +25,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_not_cleanup_publish_model()
         {
-            bus.Publish(new TestMessage());
+            bus.PubSub.Publish(new TestMessage());
             bus.Dispose();
 
             mockBuilder.Channels[0].DidNotReceive().Dispose();
@@ -32,7 +34,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_subscribe_model()
         {
-            bus.Subscribe<TestMessage>("abc", mgs => {});
+            bus.PubSub.Subscribe<TestMessage>("abc", mgs => {});
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -46,7 +48,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_subscribe_async_model()
         {
-            bus.SubscribeAsync<TestMessage>("abc", msg => null);
+            bus.PubSub.Subscribe<TestMessage>("abc", msg => {});
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -60,7 +62,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_request_response_model()
         {
-            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -74,7 +76,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_respond_model()
         {
-            bus.Respond<TestRequestMessage, TestResponseMessage>(x => null);
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage)null);
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();

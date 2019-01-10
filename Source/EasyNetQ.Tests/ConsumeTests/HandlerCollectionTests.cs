@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var handler = handlerCollection.GetHandler<MyMessage>();
 
-            handler(new Message<MyMessage>(new MyMessage()), null);
+            handler(new Message<MyMessage>(new MyMessage()), null, default);
             myMessageHandlerExecuted.Should().BeTrue();
         }
 
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var handler = handlerCollection.GetHandler<Dog>();
 
-            handler(new Message<Dog>(new Dog()), null);
+            handler(new Message<Dog>(new Dog()), null, default);
             animalHandlerExecuted.Should().BeTrue();
         }
 
@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
-            handler(new Message<MyMessage>(new MyMessage()), null);
+            handler(new Message<MyMessage>(new MyMessage()), null, default);
             myMessageHandlerExecuted.Should().BeTrue();
         }
 
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var handler = handlerCollection.GetHandler(typeof(Dog));
 
-            handler(new Message<Dog>(new Dog()), null);
+            handler(new Message<Dog>(new Dog()), null, default);
             animalHandlerExecuted.Should().BeTrue();
         }
 
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             handlerCollection.ThrowOnNoMatchingHandler = false;
             var handler = handlerCollection.GetHandler<MyOtherMessage>();
 
-            handler(new Message<MyOtherMessage>(new MyOtherMessage()), null);
+            handler(new Message<MyOtherMessage>(new MyOtherMessage()), null, default);
             myMessageHandlerExecuted.Should().BeFalse();
             animalHandlerExecuted.Should().BeFalse();
         }

@@ -45,7 +45,10 @@ namespace EasyNetQ.Tests.ConsumeTests
                 body
                 );
 
-            are.WaitOne(1000);
+            if (!are.WaitOne(5000))
+            {
+                throw new TimeoutException();
+            }
         }
 
         public void Dispose()

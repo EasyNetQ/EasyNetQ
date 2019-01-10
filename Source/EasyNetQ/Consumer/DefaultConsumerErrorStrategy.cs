@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
-using EasyNetQ.Logging;
+﻿using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Text;
 
 namespace EasyNetQ.Consumer
 {
@@ -33,14 +33,13 @@ namespace EasyNetQ.Consumer
 
         private readonly object syncLock = new object();
 
-        private IConnection connection;
-        private bool errorQueueDeclared;
-        private readonly ConcurrentDictionary<string, string> errorExchanges = new ConcurrentDictionary<string, string>();
+        protected IConnection Connection { get; private set; }
+        private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new ConcurrentDictionary<string, object>();
 
         public DefaultConsumerErrorStrategy(
-            IConnectionFactory connectionFactory, 
+            IConnectionFactory connectionFactory,
             ISerializer serializer,
-            IConventions conventions, 
+            IConventions conventions,
             ITypeNameSerializer typeNameSerializer,
             IErrorMessageSerializer errorMessageSerializer)
         {
@@ -58,13 +57,13 @@ namespace EasyNetQ.Consumer
 
         protected void Connect()
         {
-            if (connection == null || !connection.IsOpen)
+            if (Connection == null || !Connection.IsOpen)
             {
                 lock (syncLock)
                 {
-                    if ((connection == null || !connection.IsOpen) && !(disposing || disposed))
+                    if ((Connection == null || !Connection.IsOpen) && !(disposing || disposed))
                     {
-                        if (connection != null)
+                        if (Connection != null)
                         {
                             try
                             {
@@ -73,13 +72,13 @@ namespace EasyNetQ.Consumer
                                 // throw an exception, but before the IConnection.Abort()
                                 // is invoked
                                 // https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/ea913903602ba03841f2515c23f843304211cd9e/projects/client/RabbitMQ.Client/src/client/impl/Connection.cs#L1070
-                                connection.Dispose();
+                                Connection.Dispose();
                             }
                             catch
                             {
-                                if (connection.CloseReason != null)
+                                if (Connection.CloseReason != null)
                                 {
-                                    logger.InfoFormat("Connection {connection} has shutdown with reason={reason}", connection.ToString(), connection.CloseReason.Cause);
+                                    logger.InfoFormat("Connection {connection} has shutdown with reason={reason}", Connection.ToString(), Connection.CloseReason.Cause);
                                 }
                                 else
                                 {
@@ -89,48 +88,45 @@ namespace EasyNetQ.Consumer
 
                         }
 
-                        connection = connectionFactory.CreateConnection();
+                        Connection = connectionFactory.CreateConnection();
                         // A possible race condition exists during EasyNetQ IBus disposal where this instance's Dispose() method runs on another thread, while this thread is mid-executing connectionFactory.CreateConnection() (or a few lines earlier), and has not assigned the result to the connection variable before Dispose() accesses it.  This could result in the creation of a RabbitMQ.Client.IConnection instance which never gets disposed; that IConnection instance holds a thread open which can prevent application shutdown.  It was not desirable to lock (syncLock) within the Dispose() method to fix this; therefore, an additional check must be made here to dispose any such extra IConnection.
                         if (disposing || disposed)
                         {
-                            connection.Dispose();
+                            Connection.Dispose();
                         }
                     }
                 }
             }
         }
 
-        private void DeclareDefaultErrorQueue(IModel model)
+        private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string routingKey)
         {
-            if (!errorQueueDeclared)
-            {
-                model.QueueDeclare(
-                    queue: conventions.ErrorQueueNamingConvention(),
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-                errorQueueDeclared = true;
-            }
+            model.QueueDeclare(
+                queue: queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null);
+
+            model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
+            model.QueueBind(queueName, exchangeName, routingKey);
         }
 
-        private string DeclareErrorExchangeAndBindToDefaultErrorQueue(IModel model, ConsumerExecutionContext context)
+        private string DeclareErrorExchangeWithQueue(IModel model, ConsumerExecutionContext context)
         {
-            var originalRoutingKey = context.Info.RoutingKey;
+            var errorExchangeName = conventions.ErrorExchangeNamingConvention(context.Info);
+            var errorQueueName = conventions.ErrorQueueNamingConvention(context.Info);
+            var routingKey = context.Info.RoutingKey;
 
-            return errorExchanges.GetOrAdd(originalRoutingKey, _ =>
+            var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
+
+            existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
             {
-                var exchangeName = conventions.ErrorExchangeNamingConvention(context.Info);
-                model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
-                model.QueueBind(conventions.ErrorQueueNamingConvention(), exchangeName, originalRoutingKey);
-                return exchangeName;
+                DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, routingKey);
+                return null;
             });
-        }
 
-        private string DeclareErrorExchangeQueueStructure(IModel model, ConsumerExecutionContext context)
-        {
-            DeclareDefaultErrorQueue(model);
-            return DeclareErrorExchangeAndBindToDefaultErrorQueue(model, context);
+            return errorExchangeName;
         }
 
         public virtual AckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception)
@@ -144,7 +140,7 @@ namespace EasyNetQ.Consumer
                     "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeued",
                     context.Info
                 );
-                
+
                 return AckStrategies.NackWithRequeue;
             }
 
@@ -152,17 +148,17 @@ namespace EasyNetQ.Consumer
             {
                 Connect();
 
-                using (var model = connection.CreateModel())
+                using (var model = Connection.CreateModel())
                 {
-                    var errorExchange = DeclareErrorExchangeQueueStructure(model, context);
+                    var errorExchange = DeclareErrorExchangeWithQueue(model, context);
 
                     var messageBody = CreateErrorMessage(context, exception);
                     var properties = model.CreateBasicProperties();
                     properties.Persistent = true;
-                    properties.Type = typeNameSerializer.Serialize(typeof (Error));
+                    properties.Type = typeNameSerializer.Serialize(typeof(Error));
 
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
-                    
+
                     return AckStrategies.Ack;
                 }
             }
@@ -183,11 +179,11 @@ namespace EasyNetQ.Consumer
                 );
             }
             catch (Exception unexpectedException)
-            {                
+            {
                 // Something else unexpected has gone wrong :(
                 logger.Error(unexpectedException, "Failed to publish error message");
             }
-            
+
             return AckStrategies.NackWithRequeue;
         }
 
@@ -214,7 +210,7 @@ namespace EasyNetQ.Consumer
                 error.BasicProperties = context.Properties;
             }
             else
-            {   
+            {
                 // we'll need to clone context.Properties as we are mutating the headers dictionary
                 error.BasicProperties = (MessageProperties)context.Properties.Clone();
 
@@ -240,8 +236,8 @@ namespace EasyNetQ.Consumer
         {
             if (disposed) return;
             disposing = true;
-            
-            if (connection != null) { connection.Dispose(); }
+
+            if (Connection != null) { Connection.Dispose(); }
 
             disposed = true;
         }
