@@ -6,6 +6,7 @@ using System;
 using System.Text;
 using Xunit;
 using RabbitMQ.Client;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Tests
 {

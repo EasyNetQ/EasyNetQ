@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
+using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.SystemMessages;
 using FluentAssertions;
 using NSubstitute;

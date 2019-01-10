@@ -7,6 +7,7 @@ using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using EasyNetQ.Tests;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Hosepipe.Tests
 {

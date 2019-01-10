@@ -6,6 +6,7 @@ using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
+using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;

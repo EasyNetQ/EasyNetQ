@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 
 using EasyNetQ.Consumer;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Hosepipe
 {
