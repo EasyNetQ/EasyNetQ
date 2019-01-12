@@ -2,8 +2,11 @@
 using System.Text;
 using Newtonsoft.Json;
 
-namespace EasyNetQ
+namespace EasyNetQ.Serialization.NewtonsoftJson
 {
+    /// <summary>
+    /// Implements <see cref="ISerializer"/> via Newtonsoft.Json
+    /// </summary>
     public class JsonSerializer : ISerializer
     {
         private readonly JsonSerializerSettings serializerSettings;

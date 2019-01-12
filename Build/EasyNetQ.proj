@@ -85,7 +85,8 @@
         <ItemGroup>
             <ClientLibraries Include="$(Source)\EasyNetQ\EasyNetQ.csproj" />
             <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\EasyNetQ.DI.*.csproj" Exclude="$(Source)\*Tests*\*.csproj" />
-       
+            <ClientLibraries Include="$(Source)\EasyNetQ.Serialization.*\EasyNetQ.Serialization.*.csproj" Exclude="$(Source)\*Tests*\*.csproj" />
+          
             <FilesToDelete Include="$(NuGetPackageDirectory)\*.nupkg" />
         </ItemGroup>
 

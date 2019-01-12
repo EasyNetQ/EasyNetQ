@@ -5,6 +5,7 @@ using EasyNetQ.Tests;
 using Xunit;
 using System;
 using System.Text;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Scheduler.Tests
 {

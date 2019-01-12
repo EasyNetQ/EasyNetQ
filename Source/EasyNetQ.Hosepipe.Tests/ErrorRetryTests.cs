@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
+using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Tests;
 using Xunit;

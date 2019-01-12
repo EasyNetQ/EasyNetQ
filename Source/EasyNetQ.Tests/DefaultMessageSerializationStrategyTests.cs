@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using Xunit;
 using NSubstitute;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Tests
 {

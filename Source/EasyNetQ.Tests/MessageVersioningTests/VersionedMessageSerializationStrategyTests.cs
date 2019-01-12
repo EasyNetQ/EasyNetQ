@@ -6,6 +6,7 @@ using System.Text;
 using EasyNetQ.MessageVersioning;
 using Xunit;
 using NSubstitute;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {

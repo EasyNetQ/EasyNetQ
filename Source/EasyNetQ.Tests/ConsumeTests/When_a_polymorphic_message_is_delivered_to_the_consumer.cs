@@ -7,6 +7,7 @@ using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Framing;
 using Xunit;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
