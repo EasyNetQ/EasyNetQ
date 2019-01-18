@@ -170,11 +170,10 @@ namespace EasyNetQ.Producer
                             exclusive: true,
                             autoDelete: true);
 
-                var exchange = DeclareRpcExchange(conventions.RpcResponseExchangeNamingConvention(responseType));
-                if (exchange != Exchange.GetDefault())
-                {
-                    advancedBus.Bind(exchange, queue, queue.Name);
-                }
+                var exchange = DeclareAndBindRpcExchange(
+                    conventions.RpcResponseExchangeNamingConvention(responseType),
+                    queue,
+                    queue.Name);
 
                 advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                     {
@@ -205,7 +204,8 @@ namespace EasyNetQ.Producer
             where TRequest : class
         {
             var requestType = typeof(TRequest);
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
+
+            var exchange = DeclareRpcExchange(conventions.RpcRequestExchangeNamingConvention(requestType));
 
             var requestMessage = new Message<TRequest>(request)
             {
@@ -243,9 +243,12 @@ namespace EasyNetQ.Producer
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
-            var exchange = advancedBus.ExchangeDeclare(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
             var queue = advancedBus.QueueDeclare(routingKey);
-            advancedBus.Bind(exchange, queue, routingKey);
+
+            var exchange = DeclareAndBindRpcExchange(
+                    conventions.RpcRequestExchangeNamingConvention(requestType),
+                    queue,
+                    routingKey);
 
             return advancedBus.Consume<TRequest>(queue, (requestMessage, messageReceivedInfo) => ExecuteResponder(responder, requestMessage),
                 c => c.WithPrefetchCount(configuration.PrefetchCount));
@@ -336,6 +339,16 @@ namespace EasyNetQ.Producer
             {
                 return Exchange.GetDefault();
             }
+        }
+
+        private IExchange DeclareAndBindRpcExchange(string exchangeName, IQueue queue, string routingKey)
+        {
+            var exchange = DeclareRpcExchange(exchangeName);
+            if (exchange != Exchange.GetDefault())
+            {
+                advancedBus.Bind(exchange, queue, routingKey);
+            }
+            return exchange;
         }
     }
 }

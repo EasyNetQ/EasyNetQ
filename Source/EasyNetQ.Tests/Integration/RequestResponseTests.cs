@@ -151,16 +151,16 @@ namespace EasyNetQ.Tests.Integration
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
-        // Run this test. You should see 1000 response messages on the SimpleService
-        // and then 1000 messages appear back here.
+        // Run this test. You should see 200 response messages on the SimpleService
+        // and then 200 messages appear back here.
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_make_many_async_requests()
         {
-            const int numberOfCalls = 500;
+            const int numberOfCalls = 200;
             var countdownEvent = new CountdownEvent(numberOfCalls);
             var count = 0;
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < numberOfCalls; i++)
             {
                 var request = new TestAsyncRequestMessage { Text = "Hello async from the client! " + i };
 
