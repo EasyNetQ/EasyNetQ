@@ -60,8 +60,6 @@ namespace EasyNetQ.Tests.Integration
 
                 bus.Request<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
                     new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes());
-
-                Thread.Sleep(2000);
             });
         }
 
@@ -75,8 +73,6 @@ namespace EasyNetQ.Tests.Integration
 
                 bus.Request<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
                     new RpcRequest());
-
-                Thread.Sleep(2000);
             });
         }
 
@@ -92,12 +88,9 @@ namespace EasyNetQ.Tests.Integration
                 var request = new RpcRequest { Value = 5 };
 
                 var response = bus.Request<RpcRequest, RpcResponse>(request);
-
-                Thread.Sleep(2000);
             });
-            Assert.IsType<AggregateException>(ex);
-            Assert.NotNull(ex.InnerException);
-            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+            Assert.IsType<EasyNetQResponderException>(ex);
+            Assert.Equal("Simulated Exception!", ex.Message);
         }
 
         [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
@@ -112,12 +105,9 @@ namespace EasyNetQ.Tests.Integration
                 var request = "Hello";
 
                 var response = bus.Request<string, string>(request);
-
-                Thread.Sleep(2000);
             });
-            Assert.IsType<AggregateException>(ex);
-            Assert.NotNull(ex.InnerException);
-            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+            Assert.IsType<EasyNetQResponderException>(ex);
+            Assert.Equal("Simulated Exception!", ex.Message);
         }
 
         [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
@@ -132,12 +122,9 @@ namespace EasyNetQ.Tests.Integration
                 var request = new RpcRequest { Value = 5 };
 
                 var response = bus.Request<RpcRequest, RpcResponseWithoutParameterlessConstructor>(request);
-
-                Thread.Sleep(2000);
             });
-            Assert.IsType<AggregateException>(ex);
-            Assert.NotNull(ex.InnerException);
-            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+            Assert.IsType<EasyNetQResponderException>(ex);
+            Assert.Equal("Simulated Exception!", ex.Message);
         }
     }
 }
