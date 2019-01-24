@@ -304,7 +304,10 @@ namespace EasyNetQ.Producer
 
         protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
         {
-            var body = typeof(TResponse) == typeof(string) ? (TResponse)(object)"''" : Activator.CreateInstance<TResponse>();
+            // it tries to preserve the default serialization behavior, 
+            // being able to also deserialize POCO objects that has constructors with parameters, value types and arrays
+            // this avoids to introduce a custom class wrapper that will change the message payload
+            var body = ReflectionHelpers.CreateObject<TResponse>();
 
             var responseMessage = new Message<TResponse>(body);
             responseMessage.Properties.Headers.Add(isFaultedKey, true);
