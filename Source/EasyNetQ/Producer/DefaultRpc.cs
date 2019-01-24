@@ -86,12 +86,20 @@ namespace EasyNetQ.Producer
                 RegisterResponseActions(correlationId, tcs);
 
                 using (cts.Token.Register(() => DeRegisterResponseActions(correlationId)))
+                using (cts.Token.Register(() => tcs.TrySetCanceled()))
                 {
-                    var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cancellationToken).ConfigureAwait(false);
-                    var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
-                    await RequestPublishAsync(request, routingKey, queueName, correlationId, cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
+                        var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
+                        await RequestPublishAsync(request, routingKey, queueName, correlationId, cts.Token).ConfigureAwait(false);
 
-                    return await tcs.Task.ConfigureAwait(false);
+                        return await tcs.Task.ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                    {
+                        throw new TimeoutException();
+                    }
                 }
             }
         }

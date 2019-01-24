@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 
@@ -21,19 +22,9 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Fact]
-        public void Should_throw_a_timeout_exception()
+        public Task Should_throw_a_timeout_exception()
         {
-            Assert.Throws<TimeoutException>(() =>
-            {
-                try
-                {
-                    mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => {}).Wait();
-                }
-                catch (AggregateException aggregateException)
-                {
-                    throw aggregateException.InnerException;
-                }
-            });
+            return Assert.ThrowsAsync<TimeoutException>(() => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => {}));
         }         
     }
 }
