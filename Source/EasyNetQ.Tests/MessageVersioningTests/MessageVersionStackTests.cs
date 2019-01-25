@@ -26,6 +26,16 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
+        public void Versioned_message_stack_works_for_more_than_two_versions_and_types_are_ordered_oldest_first()
+        {
+            var stack = new MessageVersionStack( typeof( MyMessageV3 ));
+
+            Assert.Equal(typeof(MyMessage), stack.ElementAt( 0 ));
+            Assert.Equal(typeof(MyMessageV2), stack.ElementAt( 1 ));
+            Assert.Equal(typeof(MyMessageV3), stack.ElementAt( 2 ));
+        }
+
+        [Fact]
         public void Pop_returns_the_top_of_the_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
