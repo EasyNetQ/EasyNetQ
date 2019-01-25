@@ -60,7 +60,8 @@ namespace EasyNetQ.MessageVersioning
                 .GetInterfaces()
                 .Where( t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof( ISupersede<> ) )
                 .SelectMany( t => t.GetGenericArguments() )
-                .LastOrDefault();
+                .Where( t => type.BaseType == t)
+                .FirstOrDefault();
         }
 
         private static void EnsureVersioningValid( Type messageType, Type supersededType )
