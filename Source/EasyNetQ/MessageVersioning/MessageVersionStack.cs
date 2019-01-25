@@ -60,6 +60,7 @@ namespace EasyNetQ.MessageVersioning
                 .GetInterfaces()
                 .Where( t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof( ISupersede<> ) )
                 .SelectMany( t => t.GetGenericArguments() )
+                .OrderBy( t => t.Name )
                 .LastOrDefault();
         }
 
