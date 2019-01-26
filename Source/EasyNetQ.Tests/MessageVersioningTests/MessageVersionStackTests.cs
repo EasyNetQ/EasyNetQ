@@ -36,6 +36,16 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
+        public void Versioned_message_stack_works_with_arbitrary_type_names()
+        {
+            var stack = new MessageVersionStack( typeof( ComplexMessage ));
+
+            Assert.Equal(typeof(SimpleMessage), stack.ElementAt( 0 ));
+            Assert.Equal(typeof(AdvancedMessage), stack.ElementAt( 1 ));
+            Assert.Equal(typeof(ComplexMessage), stack.ElementAt( 2 ));
+        }
+
+        [Fact]
         public void Pop_returns_the_top_of_the_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
@@ -73,4 +83,19 @@ namespace EasyNetQ.Tests.MessageVersioningTests
     {
         public int AnotherNumber { get; set; }
     }
+
+    public class SimpleMessage
+    {
+        public string Message { get; set; }
+    }
+
+    public class AdvancedMessage : SimpleMessage, ISupersede<SimpleMessage>
+    {
+        public string VeryAdvanced { get; set; }
+    }
+
+    public class ComplexMessage : AdvancedMessage, ISupersede<AdvancedMessage>
+    {
+        public string SoComplex { get; set; }
+    }    
 }
