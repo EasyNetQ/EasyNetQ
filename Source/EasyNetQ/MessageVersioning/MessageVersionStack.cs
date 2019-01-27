@@ -56,10 +56,13 @@ namespace EasyNetQ.MessageVersioning
 
         private static Type GetSupersededType( Type type )
         {
+            if( type.BaseType == null )
+                return null;
+
             var types = FindSupersedes(type);
             var parentTypes = FindSupersedes(type.BaseType);
 
-            return types.FirstOrDefault(t => !parentTypes.Contains(t));
+            return types.Except(parentTypes).FirstOrDefault();
         }
 
         private static IEnumerable<Type> FindSupersedes( Type type )

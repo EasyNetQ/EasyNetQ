@@ -46,6 +46,14 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
+        public void If_given_just_an_object_the_stack_can_handle_it_without_exceptions()
+        {
+            var stack = new MessageVersionStack( typeof( object ));
+        
+            Assert.Equal(typeof(object), stack.ElementAt( 0 ));
+        }
+
+        [Fact]
         public void Pop_returns_the_top_of_the_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
