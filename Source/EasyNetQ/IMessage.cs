@@ -43,14 +43,11 @@ namespace EasyNetQ
             MessageType = body.GetType();
         }
         
-        public Message(Type messageType, T body)
+        public Message()
         {
-            Preconditions.CheckNotNull(body, "body");
-            Preconditions.CheckNotNull(messageType, "messageType");
-            
-            Body = body;
+            Body = default;
             Properties = new MessageProperties();
-            MessageType = messageType;
+            MessageType = typeof(T);
         }
 
         public Message(T body, MessageProperties properties)

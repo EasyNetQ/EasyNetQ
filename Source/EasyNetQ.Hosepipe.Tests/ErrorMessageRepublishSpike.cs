@@ -7,17 +7,24 @@ using Xunit;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using EasyNetQ.Tests;
+using Xunit.Abstractions;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
     public class ErrorMessageRepublishSpike
     {
+        private readonly ITestOutputHelper testOutputHelper;
         readonly ISerializer serializer = new JsonSerializer();
+
+        public ErrorMessageRepublishSpike(ITestOutputHelper testOutputHelper)
+        {
+            this.testOutputHelper = testOutputHelper;
+        }
 
         [Fact]
         public void Should_deserialise_error_message_correctly()
         {
-            var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));
+            var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
 
             error.RoutingKey.ShouldEqual("originalRoutingKey");
             error.Message.ShouldEqual("{ Text:\"Hello World\"}");
@@ -27,14 +34,14 @@ namespace EasyNetQ.Hosepipe.Tests
         public void Should_fail_to_deseralize_some_other_random_message()
         {
             const string randomMessage = "{\"Text\":\"Hello World\"}";
-            var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(randomMessage));
+            var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(randomMessage));
             error.Message.ShouldBeNull();
         }
 
         [Fact][Explicit("Requires a localhost instance of RabbitMQ to run")]
         public void Should_be_able_to_republish_message()
         {
-            var error = serializer.BytesToMessage<Error>(Encoding.UTF8.GetBytes(errorMessage));
+            var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
 
             var connectionFactory = new ConnectionFactory
             {
@@ -59,8 +66,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 }
                 catch (OperationInterruptedException)
                 {
-                    Console.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'",
-                        error.Exchange, connectionFactory.HostName, connectionFactory.VirtualHost);
+                    testOutputHelper.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'", error.Exchange, connectionFactory.HostName, connectionFactory.VirtualHost);
                 }
             }
         }

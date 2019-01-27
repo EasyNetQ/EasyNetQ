@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 else
                 {
-                    var message = serializer.BytesToMessage<Error>(getArgs.Body);
+                    var message = (Error)serializer.BytesToMessage(typeof(Error), getArgs.Body);
 
                     message.RoutingKey.Should().Be(context.Info.RoutingKey);
                     message.Exchange.Should().Be(context.Info.Exchange);

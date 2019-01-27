@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
-        public void When_serializing_a_message_with_a_correlationid_it_is_not_overwritten()
+        public void When_serializing_a_message_with_a_correlation_id_it_is_not_overwritten()
         {
             const string messageType = "MyMessageTypeName";
             var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
@@ -115,7 +115,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
-        public void When_serializing_a_versioned_message_with_a_correlationid_it_is_not_overwritten()
+        public void When_serializing_a_versioned_message_with_a_correlation_id_it_is_not_overwritten()
         {
             const string messageType = "MyMessageV2TypeName";
             const string supersededMessageType = "MyMessageTypeName";
@@ -220,13 +220,13 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.Equal(((Message<MyMessageV2>)deserializedMessage).Body.Number, message.Body.Number);
         }
 
-        private void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, Action<MessageProperties> assertMessagePropertiesCorrect)
+        private static void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, Action<MessageProperties> assertMessagePropertiesCorrect)
         {
             Assert.Equal(message.Body, expectedBody); //, "Serialized message body does not match expected value");
             assertMessagePropertiesCorrect(message.Properties); //;
         }
 
-        private void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType, Action<MessageProperties> assertMessagePropertiesCorrect)
+        private static void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType, Action<MessageProperties> assertMessagePropertiesCorrect)
         {
             Assert.Equal(message.Body.Text, expectedBodyText); //, "Deserialized message body text does not match expected value");
             Assert.Equal(message.MessageType, expectedMessageType); //, "Deserialized message type does not match expected value");
@@ -234,19 +234,19 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             assertMessagePropertiesCorrect(message.Properties);
         }
 
-        private void AssertDefaultMessagePropertiesCorrect(MessageProperties properties, string expectedType, string expectedCorrelationId)
+        private static void AssertDefaultMessagePropertiesCorrect(MessageProperties properties, string expectedType, string expectedCorrelationId)
         {
             Assert.Equal(properties.Type, expectedType); //, "Message type does not match expected value");
             Assert.Equal(properties.CorrelationId, expectedCorrelationId); //, "Message correlation id does not match expected value");
         }
 
-        private void AssertVersionedMessagePropertiesCorrect(MessageProperties properties, string expectedType, string expectedCorrelationId, string alternativeTypes)
+        private static void AssertVersionedMessagePropertiesCorrect(MessageProperties properties, string expectedType, string expectedCorrelationId, string alternativeTypes)
         {
             AssertDefaultMessagePropertiesCorrect(properties, expectedType, expectedCorrelationId);
             Assert.Equal(properties.Headers[AlternativeMessageTypesHeaderKey], alternativeTypes); //, "Alternative message types do not match expected value");
         }
 
-        private VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(IMessage<T> message, IEnumerable<KeyValuePair<string, Type>> messageTypes, byte[] messageBody, string correlationId) where T : class
+        private static VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(IMessage<T> message, IEnumerable<KeyValuePair<string, Type>> messageTypes, byte[] messageBody, string correlationId) where T : class
         {
             var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             foreach (var messageType in messageTypes)
@@ -256,12 +256,12 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             }
 
             var serializer = Substitute.For<ISerializer>();
-            serializer.MessageToBytes(message.GetBody()).Returns(messageBody);
+            serializer.MessageToBytes(typeof(T), message.GetBody()).Returns(messageBody);
 
             return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
-        private VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, Type expectedMessageType, byte[] messageBody) where T : class
+        private static VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, Type expectedMessageType, byte[] messageBody) where T : class
         {
             var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             foreach (var messageType in messageTypes)

@@ -21,23 +21,17 @@ namespace EasyNetQ
             this.serializerSettings = serializerSettings;
         }
 
-        public byte[] MessageToBytes<T>(T message) where T : class
+        public byte[] MessageToBytes(Type messageType, object message) 
         {
-            Preconditions.CheckNotNull(message, "message");
-            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, serializerSettings));
+            Preconditions.CheckNotNull(messageType, "messageType");
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, messageType, serializerSettings));
         }
 
-        public T BytesToMessage<T>(byte[] bytes)
+        public object BytesToMessage(Type messageType, byte[] bytes)
         {
+            Preconditions.CheckNotNull(messageType, "messageType");
             Preconditions.CheckNotNull(bytes, "bytes");
-            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(bytes), serializerSettings);
-        }
-
-        public object BytesToMessage(Type type, byte[] bytes)
-        {
-            Preconditions.CheckNotNull(type, "type");
-            Preconditions.CheckNotNull(bytes, "bytes");
-            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type, serializerSettings);
+            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), messageType, serializerSettings);
         }
     }
 }

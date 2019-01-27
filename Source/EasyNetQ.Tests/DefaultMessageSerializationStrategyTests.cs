@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void When_serializing_a_message_with_a_correlationid_it_is_not_overwritten()
+        public void When_serializing_a_message_with_a_correlation_id_it_is_not_overwritten()
         {
             const string messageType = "MyMessageTypeName";
             var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
@@ -98,18 +98,18 @@ namespace EasyNetQ.Tests
             Assert.Equal(message.Properties.ToString(), expectedMessageProperties); //, "Deserialized message properties do not match expected value");
         }
 
-        private DefaultMessageSerializationStrategy CreateSerializationStrategy(IMessage<MyMessage> message, string messageType, byte[] messageBody, string correlationId)
+        private static DefaultMessageSerializationStrategy CreateSerializationStrategy(IMessage<MyMessage> message, string messageType, byte[] messageBody, string correlationId)
         {
             var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             typeNameSerializer.Serialize(message.MessageType).Returns(messageType);
 
             var serializer = Substitute.For<ISerializer>();
-            serializer.MessageToBytes(message.GetBody()).Returns(messageBody);
+            serializer.MessageToBytes(message.MessageType, message.GetBody()).Returns(messageBody);
 
             return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }
 
-        private DefaultMessageSerializationStrategy CreateDeserializationStrategy(IMessage<MyMessage> message, byte[] messageBody, string correlationId)
+        private static DefaultMessageSerializationStrategy CreateDeserializationStrategy(IMessage<MyMessage> message, byte[] messageBody, string correlationId)
         {
             var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
             typeNameSerializer.DeSerialize(message.Properties.Type).Returns(message.Body.GetType());

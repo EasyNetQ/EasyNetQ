@@ -16,7 +16,7 @@ namespace EasyNetQ.MessageVersioning
 
         public SerializedMessage SerializeMessage(IMessage message)
         {
-            var messageBody = serializer.MessageToBytes(message.GetBody());
+            var messageBody = serializer.MessageToBytes(message.MessageType, message.GetBody());
             var messageTypeProperties = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
             var messageProperties = message.Properties;
             messageTypeProperties.AppendTo(messageProperties);
@@ -26,7 +26,6 @@ namespace EasyNetQ.MessageVersioning
             }
             return new SerializedMessage(messageProperties, messageBody);
         }
-
 
         public IMessage DeserializeMessage(MessageProperties properties, byte[] body)
         {

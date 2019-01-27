@@ -247,7 +247,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer().MessageToBytes(originalMessage);
+            var body = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -334,7 +334,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            var body = new JsonSerializer().MessageToBytes(originalMessage);
+            var body = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(

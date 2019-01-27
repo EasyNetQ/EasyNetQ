@@ -306,7 +306,7 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class
         {
-            var responseMessage = new Message<TResponse>(typeof(TResponse), default);
+            var responseMessage = new Message<TResponse>();
             responseMessage.Properties.Headers.Add(isFaultedKey, true);
             responseMessage.Properties.Headers.Add(exceptionMessageKey, exceptionMessage);
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
