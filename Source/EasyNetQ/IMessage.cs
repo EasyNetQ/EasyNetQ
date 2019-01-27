@@ -42,6 +42,16 @@ namespace EasyNetQ
             Properties = new MessageProperties();
             MessageType = body.GetType();
         }
+        
+        public Message(Type messageType, T body)
+        {
+            Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckNotNull(messageType, "messageType");
+            
+            Body = body;
+            Properties = new MessageProperties();
+            MessageType = messageType;
+        }
 
         public Message(T body, MessageProperties properties)
         {
@@ -50,12 +60,6 @@ namespace EasyNetQ
             Body = body;
             Properties = properties;
             MessageType = body.GetType();
-        }
-
-        public void SetProperties(MessageProperties properties)
-        {
-            Preconditions.CheckNotNull(properties, "properties");
-            Properties = properties;
         }
     }
 }
