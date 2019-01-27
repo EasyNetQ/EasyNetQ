@@ -56,11 +56,21 @@ namespace EasyNetQ.MessageVersioning
 
         private static Type GetSupersededType( Type type )
         {
-             return type
+            if( type.BaseType == null )
+                return null;
+
+            var types = FindSupersedes(type);
+            var parentTypes = FindSupersedes(type.BaseType);
+
+            return types.Except(parentTypes).FirstOrDefault();
+        }
+
+        private static IEnumerable<Type> FindSupersedes( Type type )
+        {
+            return type
                 .GetInterfaces()
                 .Where( t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof( ISupersede<> ) )
-                .SelectMany( t => t.GetGenericArguments() )
-                .LastOrDefault();
+                .SelectMany( t => t.GetGenericArguments() );                
         }
 
         private static void EnsureVersioningValid( Type messageType, Type supersededType )
