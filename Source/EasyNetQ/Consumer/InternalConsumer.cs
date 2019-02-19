@@ -118,10 +118,10 @@ namespace EasyNetQ.Consumer
             }
 
             var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, Queue.Name);
-            var messsageProperties = new MessageProperties(properties);
-            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messsageProperties, body);
+            var messageProperties = new MessageProperties(properties);
+            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messageProperties, body);
 
-            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messsageProperties, body));
+            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, body));
             handlerRunner.InvokeUserMessageHandlerAsync(context)
                          .ContinueWith(async x =>
                             {
@@ -129,7 +129,7 @@ namespace EasyNetQ.Consumer
                                 consumerDispatcher.QueueAction(() =>
                                 {
                                     var ackResult = ackStrategy(Model, deliveryTag);
-                                    eventBus.Publish(new AckEvent(messageReceivedInfo, messsageProperties, body, ackResult));
+                                    eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, body, ackResult));
                                 });
                             },
                             TaskContinuationOptions.ExecuteSynchronously

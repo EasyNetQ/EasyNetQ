@@ -1,4 +1,5 @@
-﻿using System;
+﻿// ReSharper disable InconsistentNaming
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
@@ -61,7 +62,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 ReplyTo = conventions.RpcReturnQueueNamingConvention()
             };
 
-            var body = serializer.MessageToBytes(request);
+            var body = serializer.MessageToBytes(typeof(RpcRequest), request);
 
             var waiter = new CountdownEvent(2);
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
