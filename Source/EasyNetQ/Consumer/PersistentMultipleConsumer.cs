@@ -24,8 +24,6 @@ namespace EasyNetQ.Consumer
 
         private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
 
-        private ConsumerCancellation consumerCancellation;
-
         public PersistentMultipleConsumer(
             ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
             IPersistentConnection connection,
@@ -53,8 +51,7 @@ namespace EasyNetQ.Consumer
 
             StartConsumingInternal();
 
-            consumerCancellation = new ConsumerCancellation(Dispose);
-            return consumerCancellation;
+            return new ConsumerCancellation(Dispose);
         }
 
         private void StartConsumingInternal()
@@ -96,9 +93,7 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
 
             disposed = true;
-
-            consumerCancellation.OnCancel(queueConsumerPairs);
-
+            
             eventBus.Publish(new StoppedConsumingEvent(this));
             
             foreach (var subscription in subscriptions)
