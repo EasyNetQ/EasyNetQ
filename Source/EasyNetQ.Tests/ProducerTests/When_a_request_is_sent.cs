@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -33,7 +35,14 @@ namespace EasyNetQ.Tests.ProducerTests
                         correlationId = properties.CorrelationId;
                     });
 
+            var waiter = new CountdownEvent(2);
+
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+
             var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
+            if (!waiter.Wait(5000))
+                throw new TimeoutException();
 
             DeliverMessage(correlationId);
 

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -58,16 +60,18 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             Assert.Throws<EasyNetQResponderException>(() =>
             {
-                try
-                {
-                    var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
-                    DeliverMessage(_correlationId, "Why you are so bad with me?");
-                    task.Wait(1000);
-                }
-                catch (AggregateException aggregateException)
-                {
-                    throw aggregateException.InnerException;
-                }
+                var waiter = new CountdownEvent(2);
+
+                mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
+                mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+
+                var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
+                if (!waiter.Wait(5000))
+                    throw new TimeoutException();
+                    
+                DeliverMessage(_correlationId, "Why you are so bad with me?");
+                    
+                task.GetAwaiter().GetResult();
             }); // ,"Why you are so bad with me?"
         }
 

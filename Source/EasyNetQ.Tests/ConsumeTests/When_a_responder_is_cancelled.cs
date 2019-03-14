@@ -43,8 +43,8 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_ACK_with_faulted_response()
         {
             Assert.True((bool)publishedMessage.Properties.Headers["IsFaulted"]);
-            Assert.Equal("The responder task was cancelled.", publishedMessage.Properties.Headers["ExceptionMessage"]);
-            Assert.Equal(AckResult.Ack, ackEvent.AckResult);
+            Assert.Equal("A task was canceled.", publishedMessage.Properties.Headers["ExceptionMessage"]);
+            Assert.Equal(AckResult.Nack, ackEvent.AckResult);
         }
 
         private void DeliverMessage(RpcRequest request)
@@ -78,12 +78,10 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "the_routing_key",
                 properties,
                 body
-                );
+            );
 
             if (!waiter.Wait(5000))
-            {
                 throw new TimeoutException();
-            }
         }
         
         private class RpcRequest

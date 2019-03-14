@@ -10,7 +10,7 @@ namespace EasyNetQ.Producer
     ///     An RPC style request-response pattern
     /// </summary>
     //TODO Need support of non-generic overloads
-    public interface IRpc
+    public interface IRpc : IDisposable
     {
         /// <summary>
         ///     Make a request to an RPC service
