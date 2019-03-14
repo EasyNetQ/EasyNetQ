@@ -1,10 +1,10 @@
-﻿using EasyNetQ.Logging;
+﻿using System;
+using EasyNetQ.Logging;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
-using System;
-using System.Threading;
 using Xunit;
 
-namespace EasyNetQ.Tests.Integration.LegacyConventionsTests
+namespace EasyNetQ.Tests.Integration
 {
     public class RpcWithLegacyConventionsTests : IDisposable
     {
@@ -35,9 +35,9 @@ namespace EasyNetQ.Tests.Integration.LegacyConventionsTests
         [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
         public void Should_be_able_to_publish_and_receive_response()
         {
-            bus.Respond<RpcRequest, RpcResponse>(req => new RpcResponse { Value = req.Value });
+            bus.Rpc.Respond<RpcRequest, RpcResponse>(req => new RpcResponse { Value = req.Value });
             var request = new RpcRequest { Value = 5 };
-            var response = bus.Request<RpcRequest, RpcResponse>(request);
+            var response = bus.Rpc.Request<RpcRequest, RpcResponse>(request);
 
             Assert.NotNull(response);
             Assert.True(request.Value == response.Value);
@@ -48,10 +48,10 @@ namespace EasyNetQ.Tests.Integration.LegacyConventionsTests
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                bus.Respond<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
+                bus.Rpc.Respond<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
                     req => new RpcRequest());
 
-                bus.Request<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
+                bus.Rpc.Request<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
                    new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes());
             });
         }
@@ -61,10 +61,10 @@ namespace EasyNetQ.Tests.Integration.LegacyConventionsTests
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                bus.Respond<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
+                bus.Rpc.Respond<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
                     req => new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes());
 
-                bus.Request<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
+                bus.Rpc.Request<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
                    new RpcRequest());
             });
         }
