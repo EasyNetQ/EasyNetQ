@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Description>EasyNetQ.Scheduler.Mongo.Tests</Description>
     <TargetFramework>net452</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
