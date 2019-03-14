@@ -22,7 +22,7 @@ namespace EasyNetQ.Hosepipe
         {
             foreach (var rawErrorMessage in rawErrorMessages)
             {
-                var error = serializer.BytesToMessage<Error>(errorMessageSerializer.Deserialize(rawErrorMessage.Body));
+                var error = (Error)serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
                 RepublishError(error, parameters);
             }
         }

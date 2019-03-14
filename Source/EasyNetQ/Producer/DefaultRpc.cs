@@ -7,7 +7,6 @@ using EasyNetQ.Events;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
-using Newtonsoft.Json;
 
 namespace EasyNetQ.Producer
 {
@@ -123,19 +122,19 @@ namespace EasyNetQ.Producer
 
                     bool isFaulted = false;
                     string exceptionMessage = "The exception message has not been specified.";
-                    if(msg.Properties.HeadersPresent)
+                    if (msg.Properties.HeadersPresent)
                     {
-                        if(msg.Properties.Headers.ContainsKey(isFaultedKey))
+                        if (msg.Properties.Headers.ContainsKey(isFaultedKey))
                         {
                             isFaulted = Convert.ToBoolean(msg.Properties.Headers[isFaultedKey]);
                         }
-                        if(msg.Properties.Headers.ContainsKey(exceptionMessageKey))
+                        if (msg.Properties.Headers.ContainsKey(exceptionMessageKey))
                         {
                             exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[exceptionMessageKey]);
                         }
                     }
 
-                    if(isFaulted)
+                    if (isFaulted)
                     {
                         tcs.TrySetExceptionAsynchronously(new EasyNetQResponderException(exceptionMessage));
                     }
@@ -171,9 +170,10 @@ namespace EasyNetQ.Producer
                             exclusive: true,
                             autoDelete: true);
 
-                var exchange = DeclareRpcExchange(conventions.RpcResponseExchangeNamingConvention(responseType));
-
-                advancedBus.Bind(exchange, queue, queue.Name);
+                var exchange = DeclareAndBindRpcExchange(
+                    conventions.RpcResponseExchangeNamingConvention(responseType),
+                    queue,
+                    queue.Name);
 
                 advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                     {
@@ -202,8 +202,9 @@ namespace EasyNetQ.Producer
         protected virtual void RequestPublish<TRequest>(TRequest request, string routingKey, string returnQueueName, Guid correlationId)
         {
             var requestType = typeof(TRequest);
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct);
-                        
+
+            var exchange = DeclareRpcExchange(conventions.RpcRequestExchangeNamingConvention(requestType));
+
             var requestMessage = new Message<TRequest>(request)
             {
                 Properties =
@@ -242,9 +243,12 @@ namespace EasyNetQ.Producer
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
-            var exchange = await advancedBus.ExchangeDeclareAsync(conventions.RpcRequestExchangeNamingConvention(requestType), ExchangeType.Direct, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(routingKey, cancellationToken: cancellationToken).ConfigureAwait(false);
-            await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
+            var queue = advancedBus.QueueDeclare(routingKey);
+
+            var exchange = DeclareAndBindRpcExchange(
+                    conventions.RpcRequestExchangeNamingConvention(requestType),
+                    queue,
+                    routingKey);
 
             return advancedBus.Consume<TRequest>(
                 queue,
@@ -263,7 +267,7 @@ namespace EasyNetQ.Producer
                 {
                     if (task.IsFaulted || task.IsCanceled)
                     {
-                        var exception = task.IsCanceled 
+                        var exception = task.IsCanceled
                             ? new EasyNetQResponderException("The responder task was cancelled.")
                             : task.Exception?.InnerException ?? new EasyNetQResponderException("The responder faulted while dispatching the message.");
 
@@ -305,13 +309,7 @@ namespace EasyNetQ.Producer
 
         protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
         {
-            // HACK: I think we can live with this, because it will run only on exception, 
-            // it tries to preserve the default serialization behavior, 
-            // being able to also deserialize POCO objects that has constructors with parameters
-            // this avoids to introduce a custom class wrapper that will change the message payload
-            var body = JsonConvert.DeserializeObject<TResponse>(typeof(TResponse) == typeof(string) ? "''" : "{}");
-
-            var responseMessage = new Message<TResponse>(body);
+            var responseMessage = new Message<TResponse>();
             responseMessage.Properties.Headers.Add(isFaultedKey, true);
             responseMessage.Properties.Headers.Add(exceptionMessageKey, exceptionMessage);
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
@@ -324,7 +322,24 @@ namespace EasyNetQ.Producer
 
         private IExchange DeclareRpcExchange(string exchangeName)
         {
-            return publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
+            if (exchangeName != Exchange.GetDefault().Name)
+            {
+                return publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
+            }
+            else
+            {
+                return Exchange.GetDefault();
+            }
+        }
+
+        private IExchange DeclareAndBindRpcExchange(string exchangeName, IQueue queue, string routingKey)
+        {
+            var exchange = DeclareRpcExchange(exchangeName);
+            if (exchange != Exchange.GetDefault())
+            {
+                advancedBus.Bind(exchange, queue, routingKey);
+            }
+            return exchange;
         }
     }
 }
