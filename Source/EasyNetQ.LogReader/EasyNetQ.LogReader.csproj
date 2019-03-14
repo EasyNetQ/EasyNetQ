@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Description>EasyNetQ.LogReader</Description>
     <TargetFramework>net451</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />

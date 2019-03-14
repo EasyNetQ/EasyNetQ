@@ -5,10 +5,8 @@
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
     <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
