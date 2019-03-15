@@ -50,7 +50,6 @@ namespace EasyNetQ.Scheduling
                 {
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof (T))
                 }
-                
             };
             await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
