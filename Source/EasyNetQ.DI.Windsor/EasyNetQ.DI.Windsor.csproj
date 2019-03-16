@@ -7,9 +7,6 @@
     <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>

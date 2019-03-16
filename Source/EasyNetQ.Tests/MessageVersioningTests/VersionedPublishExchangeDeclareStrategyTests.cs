@@ -55,7 +55,6 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         public void When_declaring_exchanges_for_unversioned_message_one_exchange_created()
         {
             var exchanges = new List<ExchangeStub>();
-            IAdvancedBus ret;
             var advancedBus = Substitute.For<IAdvancedBus>();
             advancedBus.ExchangeDeclare(null, null, false, true, false, false, null)
                 .ReturnsForAnyArgs(mi =>
@@ -81,7 +80,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
 
-            Assert.Equal(1, exchanges.Count); //, "Single exchange should have been created" );
+            Assert.True(exchanges.Count == 1); //, "Single exchange should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name);//, "Exchange should have used naming convection to name the exchange" );
             Assert.Null(exchanges[0].BoundTo); // "Unversioned message should not create any exchange to exchange bindings" );
         }

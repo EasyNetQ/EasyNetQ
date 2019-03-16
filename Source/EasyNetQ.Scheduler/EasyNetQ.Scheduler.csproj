@@ -3,37 +3,18 @@
   <PropertyGroup>
     <Description>EasyNetQ.Scheduler</Description>
     <TargetFramework>net451</TargetFramework>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
     <None Update="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="App.config" />
-    <Reference Include="EasyNetQ.Management.Client, Version=0.51.2.115, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyNetQ.Management.Client.0.51.2.115\lib\net40\EasyNetQ.Management.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.6.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\RabbitMQ.Client.3.6.0\lib\net45\RabbitMQ.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <None Include="app.config" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Data" />
-    <Reference Include="Topshelf, Version=3.1.135.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Topshelf.3.1.4\lib\net40-full\Topshelf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />

@@ -2,6 +2,7 @@
 
 using System.Linq;
 using EasyNetQ.MessageVersioning;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
@@ -65,9 +66,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         public void IsEmpty_returns_false_for_non_empty_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
-
-            Assert.True( stack.Count() > 0 );
-            Assert.False(stack.IsEmpty());
+            stack.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -76,8 +75,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var stack = new MessageVersionStack( typeof( MyMessage ) );
             stack.Pop();
 
-            Assert.Equal(0, stack.Count());
-            Assert.True( stack.IsEmpty());
+            stack.Should().BeEmpty();
         }
 
         [Fact]

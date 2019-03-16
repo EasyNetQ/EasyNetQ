@@ -3,21 +3,9 @@
   <PropertyGroup>
     <Description>EasyNetQ.LogReader</Description>
     <TargetFramework>net451</TargetFramework>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <Reference Include="EasyNetQ.Management.Client, Version=0.51.2.115, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyNetQ.Management.Client.0.51.2.115\lib\net40\EasyNetQ.Management.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.6.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\RabbitMQ.Client.3.6.0\lib\net45\RabbitMQ.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
@@ -26,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
