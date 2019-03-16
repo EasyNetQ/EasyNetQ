@@ -5,9 +5,6 @@
     <TargetFramework>net452</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     <ProjectReference Include="..\EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj" />
     <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />

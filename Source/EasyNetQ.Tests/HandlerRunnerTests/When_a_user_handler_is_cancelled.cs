@@ -35,7 +35,12 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                async (body, properties, info) => throw new OperationCanceledException(),
+                (body, properties, info) =>
+                {
+                    var tcs = new TaskCompletionSource<object>();
+                    tcs.SetCanceled();
+                    return tcs.Task;
+                },
                 messageInfo,
                 messageProperties,
                 messageBody

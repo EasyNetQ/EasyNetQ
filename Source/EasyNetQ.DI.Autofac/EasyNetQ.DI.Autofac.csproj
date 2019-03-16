@@ -7,9 +7,6 @@
     <PackageTags>Autofac;RabbitMQ;Messaging;AMQP;C#</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>

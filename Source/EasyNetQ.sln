@@ -58,8 +58,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Tests", "EasyNe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe", "EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj", "{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.SetupActions", "EasyNetQ.Hosepipe.SetupActions\EasyNetQ.Hosepipe.SetupActions.csproj", "{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.Tests", "EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj", "{DA597678-7873-4156-8112-8C70B164381A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj", "{03B93AAD-6CAB-4726-826E-B05684AEC1B9}"
@@ -128,10 +126,6 @@ Global
 		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}.Release|Any CPU.Build.0 = Release|Any CPU
-		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{93F795C9-FCA3-4B9F-B7EC-19759B8E44CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Release|Any CPU.ActiveCfg = Release|Any CPU
