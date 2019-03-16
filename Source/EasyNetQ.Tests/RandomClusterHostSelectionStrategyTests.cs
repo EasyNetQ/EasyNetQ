@@ -32,10 +32,7 @@ namespace EasyNetQ.Tests
                 hosts.Add(item);
             } while (clusterHostSelectionStrategy.Next());
 
-            Assert.True(hosts.Contains("0"));
-            Assert.True(hosts.Contains("1"));
-            Assert.True(hosts.Contains("2"));
-            Assert.True(hosts.Contains("3"));
+            hosts.Should().Contain(new[] {"0", "1", "2", "3"});
             clusterHostSelectionStrategy.Succeeded.Should().BeFalse();
         }
 
