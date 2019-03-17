@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,21 +11,23 @@ namespace EasyNetQ.Consumer
     public class ExclusiveConsumer : IConsumer
     {
         private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(10);
-        
-        private readonly object syncLock = new object();
-        private volatile bool isStarted;
-
-        private readonly IQueue queue;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
-        private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
-
-        private readonly IInternalConsumerFactory internalConsumerFactory;
-        private readonly IEventBus eventBus;
-  
-        private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = new ConcurrentDictionary<IInternalConsumer, object>();
+        private readonly IPersistentConnection connection;
 
         private readonly IList<IDisposable> disposables = new List<IDisposable>();
+        private readonly IEventBus eventBus;
+
+        private readonly IInternalConsumerFactory internalConsumerFactory;
+
+        private readonly ConcurrentSet<IInternalConsumer> internalConsumers = new ConcurrentSet<IInternalConsumer>();
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+
+        private readonly IQueue queue;
+
+        private readonly object syncLock = new object();
+
+        private bool disposed;
+        private volatile bool isStarted;
 
         public ExclusiveConsumer(
             IQueue queue,
@@ -43,7 +44,7 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(configuration, "configuration");
-       
+
             this.queue = queue;
             this.onMessage = onMessage;
             this.connection = connection;
@@ -57,10 +58,24 @@ namespace EasyNetQ.Consumer
             disposables.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
             disposables.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
             disposables.Add(Timers.Start(s => StartConsumingInternal(), RestartConsumingPeriod, RestartConsumingPeriod));
-            
+
             StartConsumingInternal();
-            
-            return new ConsumerCancellation(Dispose);   
+
+            return new ConsumerCancellation(Dispose);
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+
+            disposed = true;
+
+            eventBus.Publish(new StoppedConsumingEvent(this));
+
+            foreach (var disposal in disposables) disposal.Dispose();
+
+            foreach (var internalConsumer in internalConsumers) internalConsumer.Dispose();
         }
 
         private void StartConsumingInternal()
@@ -74,9 +89,9 @@ namespace EasyNetQ.Consumer
             {
                 if (isStarted)
                     return;
-                
+
                 var internalConsumer = internalConsumerFactory.CreateConsumer();
-                internalConsumers.TryAdd(internalConsumer, null);
+                internalConsumers.Add(internalConsumer);
                 internalConsumer.Cancelled += consumer => Dispose();
                 var status = internalConsumer.StartConsuming(connection, queue, onMessage, configuration);
                 if (status == StartConsumingStatus.Succeed)
@@ -87,7 +102,7 @@ namespace EasyNetQ.Consumer
                 else
                 {
                     internalConsumer.Dispose();
-                    internalConsumers.TryRemove(internalConsumer, out _);
+                    internalConsumers.Remove(internalConsumer);
                     eventBus.Publish(new StartConsumingFailedEvent(this, queue));
                 }
             }
@@ -106,28 +121,6 @@ namespace EasyNetQ.Consumer
         private void ConnectionOnConnected()
         {
             StartConsumingInternal();
-        }
-
-        private bool disposed;
-
-        public void Dispose()
-        {
-            if (disposed)
-                return;
-            
-            disposed = true;
-            
-            eventBus.Publish(new StoppedConsumingEvent(this));
-            
-            foreach (var disposal in disposables)
-            {
-                disposal.Dispose();
-            }
-            
-            foreach (var internalConsumer in internalConsumers.Keys)
-            {
-                internalConsumer.Dispose();
-            }
         }
     }
 }
