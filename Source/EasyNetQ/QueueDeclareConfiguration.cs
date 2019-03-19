@@ -137,13 +137,6 @@ namespace EasyNetQ
         IQueueDeclareConfiguration WithQueueMode(string queueMode = QueueMode.Default);
     }
 
-    public static class QueueMode
-    {
-        public const string Default = "default";
-
-        public const string Lazy = "lazy";
-    }
-
     public class QueueDeclareConfiguration : IQueueDeclareConfiguration
     {
         public bool Durable { get; private set; } = true;
@@ -172,31 +165,31 @@ namespace EasyNetQ
 
         public IQueueDeclareConfiguration WithMaxPriority(int maxPriority)
         {
-            Arguments["x-max-priority"] = maxPriority.ToString();
+            Arguments["x-max-priority"] = maxPriority;
             return this;
         }
 
         public IQueueDeclareConfiguration WithMaxLength(int maxLength)
         {
-            Arguments["x-max-length"] = maxLength.ToString();
+            Arguments["x-max-length"] = maxLength;
             return this;
         }
 
         public IQueueDeclareConfiguration WithMaxLengthBytes(int maxLengthBytes)
         {
-            Arguments["x-max-length-bytes"] = maxLengthBytes.ToString();
+            Arguments["x-max-length-bytes"] = maxLengthBytes;
             return this;
         }
 
         public IQueueDeclareConfiguration WithExpires(TimeSpan expires)
         {
-            Arguments["x-expires"] = ((long) expires.TotalSeconds).ToString();
+            Arguments["x-expires"] = (int) expires.TotalMilliseconds;
             return this;
         }
 
         public IQueueDeclareConfiguration WithMessageTtl(TimeSpan messageTtl)
         {
-            Arguments["x-message-ttl"] = ((long) messageTtl.TotalSeconds).ToString();
+            Arguments["x-message-ttl"] = (int) messageTtl.TotalMilliseconds;
             return this;
         }
 

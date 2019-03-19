@@ -320,8 +320,11 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
+            Preconditions.CheckNotNull(name, "name");
+            Preconditions.CheckNotNull(configure, "configure");
+
             var queueDeclareConfiguration = new QueueDeclareConfiguration();
-            configure?.Invoke(queueDeclareConfiguration);
+            configure.Invoke(queueDeclareConfiguration);
             var durable = queueDeclareConfiguration.Durable;
             var exclusive = queueDeclareConfiguration.Exclusive;
             var autoDelete = queueDeclareConfiguration.AutoDelete;
