@@ -106,7 +106,7 @@ namespace EasyNetQ
 
             return bus.Consume(queue, onMessage, c => { });
         }
-  
+
         /// <summary>
         /// Consume raw bytes from the queue.
         /// </summary>
@@ -121,8 +121,8 @@ namespace EasyNetQ
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
-            this IAdvancedBus bus, 
-            IQueue queue, 
+            this IAdvancedBus bus,
+            IQueue queue,
             Action<byte[], MessageProperties, MessageReceivedInfo> onMessage,
             Action<IConsumerConfiguration> configure
         )
@@ -146,7 +146,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue, 
+            IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage
         )
         {
@@ -154,7 +154,7 @@ namespace EasyNetQ
 
             return bus.Consume(queue, onMessage, c => { });
         }
-        
+
         /// <summary>
         /// Consume raw bytes from the queue.
         /// </summary>
@@ -210,8 +210,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body, cancellationToken)
-               .GetAwaiter()
-               .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -243,8 +243,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             bus.PublishAsync(exchange, routingKey, mandatory, message, cancellationToken)
-               .GetAwaiter()
-               .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -258,10 +258,10 @@ namespace EasyNetQ
         public static IBasicGetResult<T> GetMessage<T>(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.GetMessageAsync<T>(queue, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -274,10 +274,10 @@ namespace EasyNetQ
         public static IBasicGetResult GetMessage(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.GetMessageAsync(queue, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -290,10 +290,10 @@ namespace EasyNetQ
         public static uint GetMessagesCount(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.GetMessagesCountAsync(queue, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -307,10 +307,10 @@ namespace EasyNetQ
         public static IQueue QueueDeclare(this IAdvancedBus bus, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.QueueDeclareAsync(cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -318,17 +318,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="bus">The bus instance</param>
         /// <param name="name">The name of the queue</param>
-        /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
-        /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
-        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
-        /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
-        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
-        /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
-        /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="configuration">The configuration of the queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
         /// The queue
@@ -336,25 +326,118 @@ namespace EasyNetQ
         public static IQueue QueueDeclare(
             this IAdvancedBus bus,
             string name,
-            bool passive = false,
-            bool durable = true,
-            bool exclusive = false,
-            bool autoDelete = false,
-            int? perQueueMessageTtl = null,
-            int? expires = null,
-            int? maxPriority = null,
-            string deadLetterExchange = null,
-            string deadLetterRoutingKey = null,
-            int? maxLength = null,
-            int? maxLengthBytes = null,
+            Action<IQueueDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
-            return bus.QueueDeclareAsync(name, passive, durable, exclusive, autoDelete, perQueueMessageTtl, expires, maxPriority, deadLetterExchange, deadLetterRoutingKey, maxLength, maxLengthBytes, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+
+            return bus.QueueDeclareAsync(name, configure, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+
+        /// <summary>
+        /// Declare a queue. If the queue already exists this method does nothing
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The name of the queue</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>
+        /// The queue
+        /// </returns>
+        public static Task<IQueue> QueueDeclareAsync(
+            this IAdvancedBus bus,
+            string name,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.QueueDeclareAsync(name, c => { }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Declare a queue. If the queue already exists this method does nothing
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The name of the queue</param>
+        /// <param name="durable">Durable queues remain active when a server restarts.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
+        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>
+        /// The queue
+        /// </returns>
+        public static Task<IQueue> QueueDeclareAsync(
+            this IAdvancedBus bus,
+            string name,
+            bool durable,
+            bool exclusive,
+            bool autoDelete,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.QueueDeclareAsync(
+                name,
+                c => c.AsDurable(durable)
+                    .AsExclusive(exclusive)
+                    .AsAutoDelete(autoDelete),
+                cancellationToken
+            );
+        }
+
+        /// <summary>
+        /// Declare a queue. If the queue already exists this method does nothing
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The name of the queue</param>
+        /// <param name="durable">Durable queues remain active when a server restarts.</param>
+        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
+        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>
+        /// The queue
+        /// </returns>
+        public static IQueue QueueDeclare(
+            this IAdvancedBus bus,
+            string name,
+            bool durable,
+            bool exclusive,
+            bool autoDelete,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.QueueDeclareAsync(name, durable, exclusive, autoDelete, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Declare a queue. If the queue already exists this method does nothing
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The name of the queue</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>
+        /// The queue
+        /// </returns>
+        public static IQueue QueueDeclare(
+            this IAdvancedBus bus,
+            string name,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.QueueDeclareAsync(name, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -371,8 +454,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             return bus.BindAsync(source, destination, routingKey, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -395,10 +478,10 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.BindAsync(source, destination, routingKey, headers, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -415,8 +498,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             return bus.BindAsync(exchange, queue, routingKey, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -431,7 +514,7 @@ namespace EasyNetQ
         /// <returns>A binding</returns>
         public static IBinding Bind(
             this IAdvancedBus bus,
-            IExchange exchange, 
+            IExchange exchange,
             IQueue queue,
             string routingKey,
             IDictionary<string, object> headers,
@@ -439,7 +522,7 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.BindAsync(exchange, queue, routingKey, headers, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
@@ -472,10 +555,10 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
-            
+
             return bus.ExchangeDeclareAsync(name, type, passive, durable, autoDelete, alternateExchange, delayed, cancellationToken)
-                      .GetAwaiter()
-                      .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -489,8 +572,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             bus.UnbindAsync(binding, cancellationToken)
-               .GetAwaiter()
-               .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -506,8 +589,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             bus.QueueDeleteAsync(queue, ifUnused, ifEmpty, cancellationToken)
-               .GetAwaiter()
-               .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -521,8 +604,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             bus.QueuePurgeAsync(queue, cancellationToken)
-               .GetAwaiter()
-               .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -537,8 +620,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             bus.ExchangeDeleteAsync(exchange, ifUnused, cancellationToken)
-               .GetAwaiter()
-               .GetResult();
+                .GetAwaiter()
+                .GetResult();
         }
     }
 }
