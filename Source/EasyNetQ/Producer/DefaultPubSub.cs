@@ -95,7 +95,7 @@ namespace EasyNetQ.Producer
                 {
                     c.AsDurable(configuration.Durable);
                     c.AsAutoDelete(configuration.AutoDelete);
-                    if (configuration.Expires.HasValue) c.WithExpires(TimeSpan.FromSeconds(configuration.Expires.Value));
+                    if (configuration.Expires.HasValue) c.WithExpires(TimeSpan.FromMilliseconds(configuration.Expires.Value));
                     if (configuration.MaxPriority.HasValue) c.WithMaxPriority(configuration.MaxPriority.Value);
                     if (configuration.MaxLength.HasValue) c.WithMaxLength(configuration.MaxLength.Value);
                     if (configuration.MaxLengthBytes.HasValue) c.WithMaxLengthBytes(configuration.MaxLengthBytes.Value);
