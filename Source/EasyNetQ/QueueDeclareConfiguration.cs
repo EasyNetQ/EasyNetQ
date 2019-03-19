@@ -40,8 +40,8 @@ namespace EasyNetQ
                 c.AsDurable(durable);
                 c.AsExclusive(exclusive);
                 c.AsAutoDelete(autoDelete);
-                if (perQueueMessageTtl.HasValue) c.WithMessageTtl(TimeSpan.FromSeconds(perQueueMessageTtl.Value));
-                if (expires.HasValue) c.WithExpires(TimeSpan.FromSeconds(expires.Value));
+                if (perQueueMessageTtl.HasValue) c.WithMessageTtl(TimeSpan.FromMilliseconds(perQueueMessageTtl.Value));
+                if (expires.HasValue) c.WithExpires(TimeSpan.FromMilliseconds(expires.Value));
                 if (maxPriority.HasValue) c.WithMaxPriority(maxPriority.Value);
                 if (deadLetterExchange != null) c.WithDeadLetterExchange(new Exchange(deadLetterExchange));
                 if (deadLetterRoutingKey != null) c.WithDeadLetterRoutingKey(deadLetterRoutingKey);
