@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,33 +11,6 @@ namespace EasyNetQ
     {
         private const int DefaultPort = 5672;
         private const int DefaultAmqpsPort = 5671;
-        public ushort Port { get; set; }
-        public string VirtualHost { get; set; }
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        /// <summary>
-        /// Heartbeat interval seconds. (default is 10)
-        /// </summary>
-        public ushort RequestedHeartbeat { get; set; }
-        public ushort PrefetchCount { get; set; }
-        public Uri AMQPConnectionString { get; set; }
-        public IDictionary<string, object> ClientProperties { get; } 
-
-        public IEnumerable<HostConfiguration> Hosts { get; set; }
-        public SslOption Ssl { get; }
-        /// <summary>
-        /// Operation timeout seconds. (default is 10)
-        /// </summary>
-        public ushort Timeout { get; set; }
-        public bool PublisherConfirms { get; set; }
-        public bool PersistentMessages { get; set; }
-        public string Product { get; set; }
-        public string Platform { get; set; }
-        public string Name { get; set; }
-        public bool UseBackgroundThreads { get; set; }
-        public IList<AuthMechanismFactory> AuthMechanisms { get; set; }
-        public TimeSpan ConnectIntervalAttempt { get;  set; }
-        public int DispatcherQueueSize { get; set; }
 
         public ConnectionConfiguration()
         {
@@ -54,19 +26,51 @@ namespace EasyNetQ
             UseBackgroundThreads = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
             DispatcherQueueSize = 1024;
-                         
+
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
             // set to 50 based on this blog post:
             // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
             PrefetchCount = 50;
             AuthMechanisms = new AuthMechanismFactory[] {new PlainMechanismFactory()};
-            
+
             Hosts = new List<HostConfiguration>();
 
             Ssl = new SslOption();
             ClientProperties = new Dictionary<string, object>();
         }
+
+        public ushort Port { get; set; }
+        public string VirtualHost { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+
+        /// <summary>
+        /// Heartbeat interval seconds. (default is 10)
+        /// </summary>
+        public ushort RequestedHeartbeat { get; set; }
+
+        public ushort PrefetchCount { get; set; }
+        public Uri AMQPConnectionString { get; set; }
+        public IDictionary<string, object> ClientProperties { get; }
+
+        public IEnumerable<HostConfiguration> Hosts { get; set; }
+        public SslOption Ssl { get; }
+
+        /// <summary>
+        /// Operation timeout seconds. (default is 10)
+        /// </summary>
+        public ushort Timeout { get; set; }
+
+        public bool PublisherConfirms { get; set; }
+        public bool PersistentMessages { get; set; }
+        public string Product { get; set; }
+        public string Platform { get; set; }
+        public string Name { get; set; }
+        public bool UseBackgroundThreads { get; set; }
+        public IList<AuthMechanismFactory> AuthMechanisms { get; set; }
+        public TimeSpan ConnectIntervalAttempt { get; set; }
+        public int DispatcherQueueSize { get; set; }
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
@@ -92,8 +96,12 @@ namespace EasyNetQ
                     applicationName = Path.GetFileName(applicationNameAndPath);
                     applicationPath = Path.GetDirectoryName(applicationNameAndPath);
                 }
-                catch (ArgumentException) { }
-                catch (PathTooLongException) { }
+                catch (ArgumentException)
+                {
+                }
+                catch (PathTooLongException)
+                {
+                }
             }
 
             var hostname = Environment.MachineName;
@@ -132,20 +140,24 @@ namespace EasyNetQ
                 if (Port == DefaultPort)
                 {
                     if (AMQPConnectionString.Port > 0)
-                        Port = (ushort)AMQPConnectionString.Port;
-                    else if(AMQPConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase))
+                        Port = (ushort) AMQPConnectionString.Port;
+                    else if (AMQPConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase))
                         Port = DefaultAmqpsPort;
                 }
+
                 if (AMQPConnectionString.Segments.Length > 1)
                 {
                     VirtualHost = AMQPConnectionString.Segments.Last();
                 }
+
                 Hosts = Hosts.Concat(new[] {new HostConfiguration {Host = AMQPConnectionString.Host}});
             }
+
             if (!Hosts.Any())
             {
                 throw new EasyNetQException("Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\"");
             }
+
             foreach (var hostConfiguration in Hosts)
             {
                 if (hostConfiguration.Port == 0)

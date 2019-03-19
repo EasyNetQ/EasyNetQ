@@ -17,6 +17,21 @@ namespace EasyNetQ
     public interface IAdvancedBus : IDisposable
     {
         /// <summary>
+        /// True if the bus is connected, False if it is not.
+        /// </summary>
+        bool IsConnected { get; }
+
+        /// <summary>
+        /// The IoC container that EasyNetQ uses to resolve its services.
+        /// </summary>
+        IServiceResolver Container { get; }
+
+        /// <summary>
+        /// The conventions used by EasyNetQ to name its routing topology elements.
+        /// </summary>
+        IConventions Conventions { get; }
+
+        /// <summary>
         /// Consume a stream of messages
         /// </summary>
         /// <param name="queueConsumerPairs">Multiple queue - consumer pairs</param>
@@ -154,20 +169,9 @@ namespace EasyNetQ
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(
             string name,
-            bool passive = false,
-            bool durable = true,
-            bool exclusive = false,
-            bool autoDelete = false,
-            int? perQueueMessageTtl  = null,
-            int? expires = null,
-            int? maxPriority = null,
-            string deadLetterExchange = null,
-            string deadLetterRoutingKey = null,
-            int? maxLength = null,
-            int? maxLengthBytes = null,
+            Action<IQueueDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
         );
-
 
         /// <summary>
         /// Declare a transient server named queue. Note, this queue will only last for duration of the
@@ -177,7 +181,10 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken = default);
-        
+
+
+        Task QueueDeclarePassiveAsync(string name, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Delete a queue
         /// </summary>
@@ -282,7 +289,7 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>An IBasicGetResult.</returns>
         Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue, CancellationToken cancellationToken = default);
- 
+
         /// <summary>
         /// Get the raw message from the given queue.
         /// </summary>
@@ -298,11 +305,6 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The number of counted messages</returns>
         Task<uint> GetMessagesCountAsync(IQueue queue, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// True if the bus is connected, False if it is not.
-        /// </summary>
-        bool IsConnected { get; }
 
         /// <summary>
         /// Event fires when the bus has connected to a RabbitMQ broker.
@@ -328,15 +330,5 @@ namespace EasyNetQ
         /// Event fires when a mandatory or immediate message is returned as un-routable
         /// </summary>
         event EventHandler<MessageReturnedEventArgs> MessageReturned;
-
-        /// <summary>
-        /// The IoC container that EasyNetQ uses to resolve its services.
-        /// </summary>
-        IServiceResolver Container { get; }
-
-        /// <summary>
-        /// The conventions used by EasyNetQ to name its routing topology elements.
-        /// </summary>
-        IConventions Conventions { get; }
     }
 }

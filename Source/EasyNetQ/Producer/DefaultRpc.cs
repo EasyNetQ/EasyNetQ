@@ -8,7 +8,6 @@ using EasyNetQ.Events;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
-using Newtonsoft.Json;
 
 namespace EasyNetQ.Producer
 {
@@ -156,8 +155,10 @@ namespace EasyNetQ.Producer
                     var exceptionMessage = "The exception message has not been specified.";
                     if (msg.Properties.HeadersPresent)
                     {
-                        if (msg.Properties.Headers.ContainsKey(IsFaultedKey)) isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
-                        if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey)) exceptionMessage = Encoding.UTF8.GetString((byte[]) msg.Properties.Headers[ExceptionMessageKey]);
+                        if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
+                            isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
+                        if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
+                            exceptionMessage = Encoding.UTF8.GetString((byte[]) msg.Properties.Headers[ExceptionMessageKey]);
                     }
 
                     if (isFaulted)
@@ -186,11 +187,10 @@ namespace EasyNetQ.Producer
 
                 var queue = await advancedBus.QueueDeclareAsync(
                     conventions.RpcReturnQueueNamingConvention(),
-                    false,
-                    false,
-                    true,
-                    true,
-                    cancellationToken: cancellationToken
+                    c => c.AsDurable(false)
+                        .AsExclusive()
+                        .AsAutoDelete(),
+                    cancellationToken
                 ).ConfigureAwait(false);
 
                 var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(
@@ -241,7 +241,8 @@ namespace EasyNetQ.Producer
             await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, Action<IResponderConfiguration> configure, CancellationToken cancellationToken)
+        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder,
+            Action<IResponderConfiguration> configure, CancellationToken cancellationToken)
         {
             var requestType = typeof(TRequest);
 
@@ -255,7 +256,7 @@ namespace EasyNetQ.Producer
                 ExchangeType.Direct,
                 cancellationToken: cancellationToken
             ).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(routingKey, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var queue = await advancedBus.QueueDeclareAsync(routingKey, cancellationToken).ConfigureAwait(false);
             await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
             return advancedBus.Consume<TRequest>(
@@ -265,7 +266,8 @@ namespace EasyNetQ.Producer
             );
         }
 
-        private async Task RespondToMessageAsync<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, IMessage<TRequest> requestMessage, CancellationToken cancellationToken)
+        private async Task RespondToMessageAsync<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, IMessage<TRequest> requestMessage,
+            CancellationToken cancellationToken)
         {
             //TODO Cache declaration of exchange
             var exchange = await advancedBus.ExchangeDeclareAsync(
