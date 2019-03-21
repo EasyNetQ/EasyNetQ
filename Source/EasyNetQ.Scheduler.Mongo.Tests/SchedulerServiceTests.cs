@@ -26,7 +26,8 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
                         HandleTimeoutInterval = TimeSpan.FromSeconds(1),
                         PublishInterval = TimeSpan.FromSeconds(1),
                         SubscriptionId = "Scheduler",
-                        PublishMaxSchedules = 2
+                        PublishMaxSchedules = 2,
+                        EnableLegacyConventions = false
                     });
         }
 
