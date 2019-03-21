@@ -441,6 +441,26 @@ namespace EasyNetQ
         }
 
         /// <summary>
+        /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The queue to declare</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        public static void QueueDeclarePassive(
+            this IAdvancedBus bus,
+            string name,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            bus.QueueDeclarePassiveAsync(name, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+
+        /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
         /// </summary>
         /// <param name="bus">The bus instance</param>

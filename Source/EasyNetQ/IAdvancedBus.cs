@@ -183,6 +183,11 @@ namespace EasyNetQ
         Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken = default);
 
 
+        /// <summary>
+        /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
+        /// </summary>
+        /// <param name="name">The queue to declare</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         Task QueueDeclarePassiveAsync(string name, CancellationToken cancellationToken = default);
 
         /// <summary>
