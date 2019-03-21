@@ -32,7 +32,8 @@ namespace EasyNetQ.Scheduler.Tests
                 new SchedulerServiceConfiguration
                 {
                     PublishIntervalSeconds = 1,
-                    PurgeIntervalSeconds = 1
+                    PurgeIntervalSeconds = 1,
+                    EnableLegacyConventions = false
                 });
         }
 

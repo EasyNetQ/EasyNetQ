@@ -28,5 +28,17 @@ namespace EasyNetQ.Scheduler.Mongo
             }
             return value;
         }
+
+        protected static bool GetBoolAppSetting(string settingKey)
+        {
+            var appSetting = ConfigurationManager.AppSettings[settingKey];
+            bool value;
+            if (!bool.TryParse(appSetting, out value))
+            {
+                throw new ApplicationException(String.Format("AppSetting '{0}' value '{1}' is not a valid boolean",
+                                                             settingKey, appSetting));
+            }
+            return value;
+        }
     }
 }

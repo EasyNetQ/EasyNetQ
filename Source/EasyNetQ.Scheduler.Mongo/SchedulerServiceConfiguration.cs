@@ -10,6 +10,7 @@ namespace EasyNetQ.Scheduler.Mongo
         public TimeSpan PublishInterval { get; set; }
         public TimeSpan HandleTimeoutInterval { get; set; }
         public int PublishMaxSchedules { get; set; }
+        public bool EnableLegacyConventions { get; set; }
 
         public static SchedulerServiceConfiguration FromConfigFile()
         {
@@ -19,6 +20,7 @@ namespace EasyNetQ.Scheduler.Mongo
                     PublishInterval = GetTimeSpanAppSettings("publishInterval"),
                     PublishMaxSchedules = GetIntAppSetting("publishMaxSchedules"),
                     HandleTimeoutInterval = GetTimeSpanAppSettings("handleTimeoutInterval"),
+                    EnableLegacyConventions = GetBoolAppSetting("enableLegacyConventions")
                 };
         }
     }
