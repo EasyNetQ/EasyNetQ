@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var advancedBus = Substitute.For<IAdvancedBus>();
             IExchange exchange = new Exchange(exchangeName);
 
-            advancedBus.ExchangeDeclareAsync(exchangeName, "topic").Returns(
+            advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(
                 x => TaskHelpers.FromException(new Exception()),
                 x =>
                 {
@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             }
 
             var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
-            advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, "topic");
+            advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
             declaredExchange.Should().BeSameAs(exchange);
             exchangeDeclareCount.Should().Be(1);
         }
