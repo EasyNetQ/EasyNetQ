@@ -135,6 +135,14 @@ namespace EasyNetQ
         /// <param name="queueMode">The queueMode to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
         IQueueDeclareConfiguration WithQueueMode(string queueMode = QueueMode.Default);
+
+        /// <summary>
+        /// Sets a raw argument for query declaration
+        /// </summary>
+        /// <param name="name">The argument name to set</param>
+        /// <param name="value">The argument value to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
+        IQueueDeclareConfiguration WithArgument(string name, object value);
     }
 
     public class QueueDeclareConfiguration : IQueueDeclareConfiguration
@@ -165,49 +173,47 @@ namespace EasyNetQ
 
         public IQueueDeclareConfiguration WithMaxPriority(int maxPriority)
         {
-            Arguments["x-max-priority"] = maxPriority;
-            return this;
+            return WithArgument("x-max-priority", maxPriority);
         }
 
         public IQueueDeclareConfiguration WithMaxLength(int maxLength)
         {
-            Arguments["x-max-length"] = maxLength;
-            return this;
+            return WithArgument("x-max-length", maxLength);
         }
 
         public IQueueDeclareConfiguration WithMaxLengthBytes(int maxLengthBytes)
         {
-            Arguments["x-max-length-bytes"] = maxLengthBytes;
-            return this;
+            return WithArgument("x-max-length-bytes", maxLengthBytes);
         }
 
         public IQueueDeclareConfiguration WithExpires(TimeSpan expires)
         {
-            Arguments["x-expires"] = (int) expires.TotalMilliseconds;
-            return this;
+            return WithArgument("x-expires", (int) expires.TotalMilliseconds);
         }
 
         public IQueueDeclareConfiguration WithMessageTtl(TimeSpan messageTtl)
         {
-            Arguments["x-message-ttl"] = (int) messageTtl.TotalMilliseconds;
-            return this;
+            return WithArgument("x-message-ttl", (int) messageTtl.TotalMilliseconds);
         }
 
         public IQueueDeclareConfiguration WithDeadLetterExchange(IExchange deadLetterExchange)
         {
-            Arguments["x-dead-letter-exchange"] = deadLetterExchange.Name;
-            return this;
+            return WithArgument("x-dead-letter-exchange", deadLetterExchange.Name);
         }
 
         public IQueueDeclareConfiguration WithDeadLetterRoutingKey(string deadLetterRoutingKey)
         {
-            Arguments["x-dead-letter-routing-key"] = deadLetterRoutingKey;
-            return this;
+            return WithArgument("x-dead-letter-routing-key", deadLetterRoutingKey);
         }
 
         public IQueueDeclareConfiguration WithQueueMode(string queueMode = QueueMode.Default)
         {
-            Arguments["x-queue-mode"] = queueMode;
+            return WithArgument("x-queue-mode", queueMode);
+        }
+
+        public IQueueDeclareConfiguration WithArgument(string name, object value)
+        {
+            Arguments[name] = value;
             return this;
         }
     }

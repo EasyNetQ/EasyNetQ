@@ -5,14 +5,40 @@ namespace EasyNetQ
 {
     public interface IExchangeDeclareConfiguration
     {
+        /// <summary>
+        /// Sets as durable or not. Durable queues remain active when a server restarts.
+        /// </summary>
+        /// <param name="durable">The durable flag to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
         IExchangeDeclareConfiguration AsDurable(bool durable = true);
 
+        /// <summary>
+        /// Sets as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
+        /// </summary>
+        /// <param name="autoDelete">The autoDelete flag to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
         IExchangeDeclareConfiguration AsAutoDelete(bool autoDelete = true);
 
+        /// <summary>
+        /// Sets alternate exchange of the exchange.
+        /// </summary>
+        /// <param name="alternateExchange">The alternate exchange to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
         IExchangeDeclareConfiguration WithAlternateExchange(IExchange alternateExchange);
 
+        /// <summary>
+        /// Sets type of the exchange.
+        /// </summary>
+        /// <param name="exchangeType">The type to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
         IExchangeDeclareConfiguration WithType(string exchangeType = ExchangeType.Fanout);
 
+        /// <summary>
+        /// Sets a raw argument for exchange declaration
+        /// </summary>
+        /// <param name="name">The argument name to set</param>
+        /// <param name="value">The argument value to set</param>
+        /// <returns>IExchangeDeclareConfiguration</returns>
         IExchangeDeclareConfiguration WithArgument(string name, object value);
     }
 
