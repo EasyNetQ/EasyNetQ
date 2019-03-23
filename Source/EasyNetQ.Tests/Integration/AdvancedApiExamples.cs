@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests.Integration
         {
             const string bindingKey = "the-binding-key";
 
-            var delayedExchange = advancedBus.ExchangeDeclare("delayed", ExchangeType.Direct, delayed: true);
+            var delayedExchange = advancedBus.ExchangeDeclare("delayed", c => c.AsDelayedExchange(ExchangeType.Direct));
             var queue = advancedBus.QueueDeclare("my_queue");
             advancedBus.Bind(delayedExchange, queue, bindingKey);
 
@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.Integration
             const string bindingKey = "the-binding-key";
 
             var alternateExchange = advancedBus.ExchangeDeclare(alternate, ExchangeType.Direct);
-            var originalExchange = advancedBus.ExchangeDeclare("original", ExchangeType.Direct, alternateExchange: alternate);
+            var originalExchange = advancedBus.ExchangeDeclare("original", c => c.WithType(ExchangeType.Direct).WithAlternateExchange(new Exchange(alternate)));
             var queue = advancedBus.QueueDeclare("my_queue");
 
             advancedBus.Bind(alternateExchange, queue, bindingKey);
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests.Integration
             var queue = advancedBus.QueueDeclare("my_queue");
             var exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct);
             advancedBus.Bind(exchange, queue, "routing_key");
-            advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
+            advancedBus.ExchangeDeclarePassive("my_exchange");
         }
 
         [Fact]
