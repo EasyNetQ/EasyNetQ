@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
@@ -11,9 +10,8 @@ namespace EasyNetQ.MultipleExchange
     public class MultipleExchangePublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
     {
         private readonly IAdvancedBus advancedBus;
-        private readonly AsyncLock asyncLock = new AsyncLock();
         private readonly IConventions conventions;
-        private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
+        private readonly AsyncCache<ExchangeKey, IExchange> declaredExchanges;
 
         public MultipleExchangePublishExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
         {
@@ -22,6 +20,8 @@ namespace EasyNetQ.MultipleExchange
 
             this.conventions = conventions;
             this.advancedBus = advancedBus;
+
+            declaredExchanges = new AsyncCache<ExchangeKey, IExchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
         }
 
         public async Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
@@ -42,16 +42,22 @@ namespace EasyNetQ.MultipleExchange
             return sourceExchange;
         }
 
-        public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
+        public Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
-            if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;
-            using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
+            return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
+        }
+
+        private struct ExchangeKey
+        {
+            public ExchangeKey(string name, string type)
             {
-                if (exchanges.TryGetValue(exchangeName, out exchange)) return exchange;
-                exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, exchangeType, cancellationToken: cancellationToken).ConfigureAwait(false);
-                exchanges[exchangeName] = exchange;
-                return exchange;
+                Name = name;
+                Type = type;
             }
+
+            public string Name { get; }
+
+            public string Type { get; }
         }
     }
 }
