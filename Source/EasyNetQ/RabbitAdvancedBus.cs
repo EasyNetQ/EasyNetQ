@@ -372,37 +372,33 @@ namespace EasyNetQ
             }
         }
 
+        public async Task ExchangeDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
+        {
+            Preconditions.CheckShortString(name, "name");
+
+            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclarePassive(name), cancellationToken).ConfigureAwait(false);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat("Passive declared exchange {exchange}", name);
+            }
+        }
+
         public async Task<IExchange> ExchangeDeclareAsync(
             string name,
-            string type,
-            bool passive = false,
-            bool durable = true,
-            bool autoDelete = false,
-            string alternateExchange = null,
-            bool delayed = false,
+            Action<IExchangeDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckShortString(name, "name");
-            Preconditions.CheckShortString(type, "type");
 
-            if (passive)
-            {
-                await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclarePassive(name), cancellationToken).ConfigureAwait(false);
-                return new Exchange(name);
-            }
+            var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
+            configure(exchangeDeclareConfiguration);
 
-            IDictionary<string, object> arguments = new Dictionary<string, object>();
-            if (alternateExchange != null)
-            {
-                arguments.Add("alternate-exchange", alternateExchange);
-            }
-
-            if (delayed)
-            {
-                arguments.Add("x-delayed-type", type);
-                type = "x-delayed-message";
-            }
+            var type = exchangeDeclareConfiguration.Type;
+            var durable = exchangeDeclareConfiguration.Durable;
+            var autoDelete = exchangeDeclareConfiguration.AutoDelete;
+            var arguments = exchangeDeclareConfiguration.Arguments;
 
             await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments), cancellationToken).ConfigureAwait(false);
 

@@ -209,11 +209,11 @@ namespace EasyNetQ.Tests
 
             exchange = advancedBus.ExchangeDeclare(
                 "my_exchange",
-                ExchangeType.Direct,
-                false,
-                false,
-                true,
-                "my.alternate.exchange");
+                c => c.WithType(ExchangeType.Direct)
+                    .AsDurable(false)
+                    .AsAutoDelete()
+                    .WithAlternateExchange(new Exchange("my.alternate.exchange"))
+            );
         }
 
         public void Dispose()
@@ -259,7 +259,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            exchange = advancedBus.ExchangeDeclare("my_exchange", ExchangeType.Direct, passive: true);
+            advancedBus.ExchangeDeclarePassive("my_exchange");
         }
 
         public void Dispose()
@@ -269,20 +269,12 @@ namespace EasyNetQ.Tests
 
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private IExchange exchange;
 
         [Fact]
         public void Should_passively_declare_exchange()
         {
             mockBuilder.Channels.Count.Should().Be(1);
             mockBuilder.Channels[0].Received().ExchangeDeclarePassive(Arg.Is("my_exchange"));
-        }
-
-        [Fact]
-        public void Should_return_an_exchange_instance()
-        {
-            exchange.Should().NotBeNull();
-            exchange.Name.Should().Be("my_exchange");
         }
     }
 

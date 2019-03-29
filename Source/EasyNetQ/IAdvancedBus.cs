@@ -207,6 +207,13 @@ namespace EasyNetQ
         Task QueuePurgeAsync(IQueue queue, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
+        /// </summary>
+        /// <param name="name">The exchange to declare</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        Task ExchangeDeclarePassiveAsync(string name, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Declare an exchange
         /// </summary>
         /// <param name="name">The exchange name</param>
@@ -220,12 +227,7 @@ namespace EasyNetQ
         /// <returns>The exchange</returns>
         Task<IExchange> ExchangeDeclareAsync(
             string name,
-            string type,
-            bool passive = false,
-            bool durable = true,
-            bool autoDelete = false,
-            string alternateExchange = null,
-            bool delayed = false,
+            Action<IExchangeDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
         );
 

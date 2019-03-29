@@ -11,10 +11,10 @@ namespace EasyNetQ.Scheduling
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
-        private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private readonly ITypeNameSerializer typeNameSerializer;
 
         public ExternalScheduler(
             IAdvancedBus advancedBus,
@@ -40,26 +40,11 @@ namespace EasyNetQ.Scheduling
             this.messageSerializationStrategy = messageSerializationStrategy;
         }
 
-        public async Task CancelFuturePublishAsync(string cancellationKey, CancellationToken cancellationToken = default)
-        {
-            var uncheduleMeType = typeof(UnscheduleMe);
-            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
-            var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
-            var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(uncheduleMeType)
-                }
-            };
-            await advancedBus.PublishAsync(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
-        }
-
         //TODO Cache exchange
         public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default)
-        {            
+        {
             Preconditions.CheckNotNull(message, "message");
-            
+
             var scheduleMeType = typeof(ScheduleMe);
             var scheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
             var baseMessageType = typeof(T);
@@ -89,7 +74,21 @@ namespace EasyNetQ.Scheduling
                 }
             };
             await advancedBus.PublishAsync(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
+        }
 
+        public async Task CancelFuturePublishAsync(string cancellationKey, CancellationToken cancellationToken = default)
+        {
+            var uncheduleMeType = typeof(UnscheduleMe);
+            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
+            var unscheduleMe = new UnscheduleMe {CancellationKey = cancellationKey};
+            var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
+            {
+                Properties =
+                {
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(uncheduleMeType)
+                }
+            };
+            await advancedBus.PublishAsync(unscheduleMeExchange, conventions.TopicNamingConvention(uncheduleMeType), false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
     }
 }

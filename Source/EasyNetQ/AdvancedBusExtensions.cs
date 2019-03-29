@@ -555,31 +555,91 @@ namespace EasyNetQ
         /// <param name="bus">The bus instance</param>
         /// <param name="name">The exchange name</param>
         /// <param name="type">The type of exchange</param>
-        /// <param name="passive">Throw an exception rather than create the exchange if it doens't exist</param>
         /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declars x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The exchange</returns>
+        public static Task<IExchange> ExchangeDeclareAsync(
+            this IAdvancedBus bus,
+            string name,
+            string type,
+            bool durable = true,
+            bool autoDelete = false,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.ExchangeDeclareAsync(name, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
+        }
+
+        /// <summary>
+        /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The exchange to declare</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        public static void ExchangeDeclarePassive(
+            this IAdvancedBus bus,
+            string name,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            bus.ExchangeDeclarePassiveAsync(name, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Declare an exchange
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The exchange name</param>
+        /// <param name="type">The type of exchange</param>
+        /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
+        /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The exchange</returns>
         public static IExchange ExchangeDeclare(
             this IAdvancedBus bus,
             string name,
             string type,
-            bool passive = false,
             bool durable = true,
             bool autoDelete = false,
-            string alternateExchange = null,
-            bool delayed = false,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
-            return bus.ExchangeDeclareAsync(name, type, passive, durable, autoDelete, alternateExchange, delayed, cancellationToken)
+            return bus.ExchangeDeclareAsync(name, type, durable, autoDelete, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }
+
+        /// <summary>
+        /// Declare an exchange
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="name">The exchange name</param>
+        /// <param name="configure">The configuration of exchange</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The exchange</returns>
+        public static IExchange ExchangeDeclare(
+            this IAdvancedBus bus,
+            string name,
+            Action<IExchangeDeclareConfiguration> configure,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.ExchangeDeclareAsync(name, configure, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }
+
 
         /// <summary>
         /// Delete a binding
