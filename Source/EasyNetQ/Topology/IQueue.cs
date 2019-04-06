@@ -1,18 +1,16 @@
-﻿namespace EasyNetQ.Topology
+﻿using System.Collections.Generic;
+
+namespace EasyNetQ.Topology
 {
     /// <summary>
     /// Represents an AMQP queue
     /// </summary>
     public interface IQueue : IBindable
     {
-        /// <summary>
-        /// The name of the queue
-        /// </summary>
         string Name { get; }
-
-        /// <summary>
-        /// Is this queue transient?
-        /// </summary>
+        bool IsDurable { get; }
         bool IsExclusive { get; }
+        bool IsAutoDelete { get; }
+        IDictionary<string, object> Arguments { get; }
     }
 }

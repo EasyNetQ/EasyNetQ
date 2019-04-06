@@ -10,14 +10,14 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="durable">The durable flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration AsDurable(bool durable = true);
+        IExchangeDeclareConfiguration AsDurable(bool durable);
 
         /// <summary>
         /// Sets as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
         /// </summary>
         /// <param name="autoDelete">The autoDelete flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration AsAutoDelete(bool autoDelete = true);
+        IExchangeDeclareConfiguration AsAutoDelete(bool autoDelete);
 
         /// <summary>
         /// Sets alternate exchange of the exchange.
@@ -31,7 +31,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="exchangeType">The type to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration WithType(string exchangeType = ExchangeType.Fanout);
+        IExchangeDeclareConfiguration WithType(string exchangeType);
 
         /// <summary>
         /// Sets a raw argument for exchange declaration
@@ -44,9 +44,9 @@ namespace EasyNetQ
 
     public sealed class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
     {
-        public bool Durable { get; private set; } = true;
+        public bool IsDurable { get; private set; } = true;
 
-        public bool AutoDelete { get; private set; }
+        public bool IsAutoDelete { get; private set; }
 
         public string Type { get; private set; }
 
@@ -54,13 +54,13 @@ namespace EasyNetQ
 
         public IExchangeDeclareConfiguration AsDurable(bool durable = true)
         {
-            Durable = durable;
+            IsDurable = durable;
             return this;
         }
 
         public IExchangeDeclareConfiguration AsAutoDelete(bool autoDelete = true)
         {
-            AutoDelete = autoDelete;
+            IsAutoDelete = autoDelete;
             return this;
         }
 
@@ -69,7 +69,7 @@ namespace EasyNetQ
             return WithArgument("alternate-exchange", alternateExchange.Name);
         }
 
-        public IExchangeDeclareConfiguration WithType(string type = ExchangeType.Fanout)
+        public IExchangeDeclareConfiguration WithType(string type)
         {
             Type = type;
             return this;

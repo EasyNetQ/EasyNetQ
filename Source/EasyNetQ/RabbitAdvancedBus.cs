@@ -295,9 +295,7 @@ namespace EasyNetQ
         {
             return QueueDeclareAsync(
                 string.Empty,
-                c => c.AsDurable()
-                    .AsExclusive()
-                    .AsAutoDelete(),
+                c => c.AsDurable(true).AsExclusive(true).AsAutoDelete(true),
                 cancellationToken
             );
         }
@@ -323,14 +321,14 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(name, "name");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var queueDeclareConfiguration = new QueueDeclareConfiguration();
-            configure.Invoke(queueDeclareConfiguration);
-            var durable = queueDeclareConfiguration.Durable;
-            var exclusive = queueDeclareConfiguration.Exclusive;
-            var autoDelete = queueDeclareConfiguration.AutoDelete;
-            var arguments = queueDeclareConfiguration.Arguments;
+            var configuration = new QueueDeclareConfiguration();
+            configure.Invoke(configuration);
+            var isDurable = configuration.IsDurable;
+            var isExclusive = configuration.IsExclusive;
+            var isAutoDelete = configuration.IsAutoDelete;
+            var arguments = configuration.Arguments;
 
-            var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments), cancellationToken)
+            var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments), cancellationToken)
                 .ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -338,14 +336,14 @@ namespace EasyNetQ
                 logger.DebugFormat(
                     "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
                     queueDeclareOk.QueueName,
-                    durable,
-                    exclusive,
-                    autoDelete,
+                    isDurable,
+                    isExclusive,
+                    isAutoDelete,
                     arguments.Stringify()
                 );
             }
 
-            return new Queue(queueDeclareOk.QueueName, exclusive);
+            return new Queue(queueDeclareOk.QueueName, isDurable, isExclusive, isAutoDelete, arguments);
         }
 
         public virtual async Task QueueDeleteAsync(IQueue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
@@ -392,15 +390,14 @@ namespace EasyNetQ
         {
             Preconditions.CheckShortString(name, "name");
 
-            var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
-            configure(exchangeDeclareConfiguration);
+            var configuration = new ExchangeDeclareConfiguration();
+            configure(configuration);
+            var type = configuration.Type;
+            var isDurable = configuration.IsDurable;
+            var isAutoDelete = configuration.IsAutoDelete;
+            var arguments = configuration.Arguments;
 
-            var type = exchangeDeclareConfiguration.Type;
-            var durable = exchangeDeclareConfiguration.Durable;
-            var autoDelete = exchangeDeclareConfiguration.AutoDelete;
-            var arguments = exchangeDeclareConfiguration.Arguments;
-
-            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclare(name, type, durable, autoDelete, arguments), cancellationToken).ConfigureAwait(false);
+            await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments), cancellationToken).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
             {
@@ -408,13 +405,13 @@ namespace EasyNetQ
                     "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
                     name,
                     type,
-                    durable,
-                    autoDelete,
+                    isDurable,
+                    isAutoDelete,
                     arguments.Stringify()
                 );
             }
 
-            return new Exchange(name);
+            return new Exchange(name, type, isDurable, isAutoDelete, arguments);
         }
 
         public virtual async Task ExchangeDeleteAsync(IExchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default)
@@ -431,16 +428,16 @@ namespace EasyNetQ
 
         public Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, CancellationToken cancellationToken)
         {
-            return BindAsync(exchange, queue, routingKey, null, cancellationToken);
+            return BindAsync(exchange, queue, routingKey, new Dictionary<string, object>(), cancellationToken);
         }
 
-        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken)
+        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
+            Preconditions.CheckNotNull(arguments, "arguments");
 
-            var arguments = headers ?? new Dictionary<string, object>();
             await clientCommandDispatcher.InvokeAsync(x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments), cancellationToken).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -459,16 +456,16 @@ namespace EasyNetQ
 
         public Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, CancellationToken cancellationToken)
         {
-            return BindAsync(source, destination, routingKey, null, cancellationToken);
+            return BindAsync(source, destination, routingKey, new Dictionary<string, object>(), cancellationToken);
         }
 
-        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken)
+        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
+            Preconditions.CheckNotNull(arguments, "arguments");
 
-            var arguments = headers ?? new Dictionary<string, object>();
             await clientCommandDispatcher.InvokeAsync(x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments), cancellationToken).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -506,7 +503,7 @@ namespace EasyNetQ
             else if (binding.Bindable is IExchange destination)
             {
                 await clientCommandDispatcher
-                    .InvokeAsync(x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, new Dictionary<string, object>()), cancellationToken)
+                    .InvokeAsync(x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, null), cancellationToken)
                     .ConfigureAwait(false);
 
                 if (logger.IsDebugEnabled())

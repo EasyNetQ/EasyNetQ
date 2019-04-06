@@ -1,13 +1,12 @@
-﻿namespace EasyNetQ.Topology
-{
-    using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace EasyNetQ.Topology
+{
     public interface IBinding
     {
         IBindable Bindable { get; }
         IExchange Exchange { get; }
         string RoutingKey { get; }
-
-        IDictionary<string, object> Headers { get; }
+        IDictionary<string, object> Arguments { get; }
     }
 }
