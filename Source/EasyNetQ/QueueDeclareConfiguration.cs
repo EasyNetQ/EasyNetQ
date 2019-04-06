@@ -4,53 +4,6 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
-    public static class QueueDeclareConfigurationActions
-    {
-        /// <summary>
-        /// Create the action to configure queue
-        /// </summary>
-        /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
-        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
-        /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
-        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
-        /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
-        /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
-        /// <returns>
-        /// The configuration action
-        /// </returns>
-        public static Action<IQueueDeclareConfiguration> From(
-            bool durable = true,
-            bool exclusive = false,
-            bool autoDelete = false,
-            int? perQueueMessageTtl = null,
-            int? expires = null,
-            int? maxPriority = null,
-            string deadLetterExchange = null,
-            string deadLetterRoutingKey = null,
-            int? maxLength = null,
-            int? maxLengthBytes = null
-        )
-        {
-            return c =>
-            {
-                c.AsDurable(durable);
-                c.AsExclusive(exclusive);
-                c.AsAutoDelete(autoDelete);
-                if (perQueueMessageTtl.HasValue) c.WithMessageTtl(TimeSpan.FromMilliseconds(perQueueMessageTtl.Value));
-                if (expires.HasValue) c.WithExpires(TimeSpan.FromMilliseconds(expires.Value));
-                if (maxPriority.HasValue) c.WithMaxPriority(maxPriority.Value);
-                if (deadLetterExchange != null) c.WithDeadLetterExchange(new Exchange(deadLetterExchange));
-                if (deadLetterRoutingKey != null) c.WithDeadLetterRoutingKey(deadLetterRoutingKey);
-                if (maxLength.HasValue) c.WithMaxLength(maxLength.Value);
-                if (maxLengthBytes.HasValue) c.WithMaxLengthBytes(maxLengthBytes.Value);
-            };
-        }
-    }
-
     /// <summary>
     /// Allows queue declaration configuration to be fluently extended without adding overloads to IBus
     /// 
@@ -64,21 +17,21 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="durable">The durable flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration AsDurable(bool durable = true);
+        IQueueDeclareConfiguration AsDurable(bool durable);
 
         /// <summary>
         /// Sets as exclusive or not. Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.
         /// </summary>
         /// <param name="exclusive">The exclusive flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration AsExclusive(bool exclusive = true);
+        IQueueDeclareConfiguration AsExclusive(bool exclusive);
 
         /// <summary>
         /// Sets as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
         /// </summary>
         /// <param name="autoDelete">The autoDelete flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration AsAutoDelete(bool autoDelete = true);
+        IQueueDeclareConfiguration AsAutoDelete(bool autoDelete);
 
         /// <summary>
         /// Sets queue as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
@@ -134,7 +87,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="queueMode">The queueMode to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration WithQueueMode(string queueMode = QueueMode.Default);
+        IQueueDeclareConfiguration WithQueueMode(string queueMode);
 
         /// <summary>
         /// Sets a raw argument for query declaration
@@ -147,27 +100,27 @@ namespace EasyNetQ
 
     public class QueueDeclareConfiguration : IQueueDeclareConfiguration
     {
-        public bool Durable { get; private set; } = true;
-        public bool Exclusive { get; private set; }
-        public bool AutoDelete { get; private set; }
+        public bool IsDurable { get; private set; } = true;
+        public bool IsExclusive { get; private set; }
+        public bool IsAutoDelete { get; private set; }
 
         public IDictionary<string, object> Arguments { get; } = new Dictionary<string, object>();
 
-        public IQueueDeclareConfiguration AsDurable(bool durable = true)
+        public IQueueDeclareConfiguration AsDurable(bool durable)
         {
-            Durable = durable;
+            IsDurable = durable;
             return this;
         }
 
-        public IQueueDeclareConfiguration AsExclusive(bool exclusive = true)
+        public IQueueDeclareConfiguration AsExclusive(bool exclusive)
         {
-            Exclusive = exclusive;
+            IsExclusive = exclusive;
             return this;
         }
 
-        public IQueueDeclareConfiguration AsAutoDelete(bool autoDelete = true)
+        public IQueueDeclareConfiguration AsAutoDelete(bool autoDelete)
         {
-            AutoDelete = autoDelete;
+            IsAutoDelete = autoDelete;
             return this;
         }
 

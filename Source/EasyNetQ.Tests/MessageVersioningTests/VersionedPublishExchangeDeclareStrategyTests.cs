@@ -19,6 +19,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         {
             public ExchangeStub BoundTo { get; set; }
             public string Name { get; set; }
+            public string Type { get; }
+            public bool IsDurable { get; }
+            public bool IsAutoDelete { get; }
+            public IDictionary<string, object> Arguments { get; }
         }
 
         [Fact]

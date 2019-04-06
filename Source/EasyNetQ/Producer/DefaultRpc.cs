@@ -187,9 +187,7 @@ namespace EasyNetQ.Producer
 
                 var queue = await advancedBus.QueueDeclareAsync(
                     conventions.RpcReturnQueueNamingConvention(),
-                    c => c.AsDurable(false)
-                        .AsExclusive()
-                        .AsAutoDelete(),
+                    c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
                     cancellationToken
                 ).ConfigureAwait(false);
 
