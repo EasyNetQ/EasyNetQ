@@ -129,6 +129,7 @@ namespace EasyNetQ.Tests
                     .AsAutoDelete(true)
                     .WithMessageTtl(TimeSpan.FromSeconds(1))
                     .WithExpires(TimeSpan.FromSeconds(2))
+                    .WithMaxPriority(10)
                     .WithDeadLetterExchange(Exchange.GetDefault())
                     .WithDeadLetterRoutingKey("my_queue2")
             );
