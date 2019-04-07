@@ -36,7 +36,7 @@ namespace EasyNetQ
         /// <summary>
         /// Sets queue as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
         /// </summary>
-        /// <param name="maxPriority">The autoDelete flag to set</param>
+        /// <param name="maxPriority">The maxPriority to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
         IQueueDeclareConfiguration WithMaxPriority(int maxPriority);
 
@@ -57,7 +57,7 @@ namespace EasyNetQ
         /// <summary>
         /// Sets expires of the queue. Determines how long a queue can remain unused before it is automatically deleted by the server.
         /// </summary>
-        /// <param name="expires">The autoDelete flag to set</param>
+        /// <param name="expires">The expires to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
         IQueueDeclareConfiguration WithExpires(TimeSpan expires);
 
@@ -98,7 +98,7 @@ namespace EasyNetQ
         IQueueDeclareConfiguration WithArgument(string name, object value);
     }
 
-    public class QueueDeclareConfiguration : IQueueDeclareConfiguration
+    public sealed class QueueDeclareConfiguration : IQueueDeclareConfiguration
     {
         public bool IsDurable { get; private set; } = true;
         public bool IsExclusive { get; private set; }
