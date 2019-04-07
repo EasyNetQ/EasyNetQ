@@ -12,7 +12,7 @@ namespace EasyNetQ.Topology
             Type = type;
             IsDurable = durable;
             IsAutoDelete = autoDelete;
-            Arguments = arguments;
+            Arguments = arguments ?? new Dictionary<string, object>();
         }
 
         public string Name { get; }
