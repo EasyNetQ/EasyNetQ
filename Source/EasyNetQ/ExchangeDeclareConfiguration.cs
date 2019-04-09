@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
@@ -18,13 +17,6 @@ namespace EasyNetQ
         /// <param name="isAutoDelete">The autoDelete flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
         IExchangeDeclareConfiguration AsAutoDelete(bool isAutoDelete);
-
-        /// <summary>
-        /// Sets alternate exchange of the exchange.
-        /// </summary>
-        /// <param name="alternateExchange">The alternate exchange to set</param>
-        /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration WithAlternateExchange(IExchange alternateExchange);
 
         /// <summary>
         /// Sets type of the exchange.
@@ -62,11 +54,6 @@ namespace EasyNetQ
         {
             IsAutoDelete = isAutoDelete;
             return this;
-        }
-
-        public IExchangeDeclareConfiguration WithAlternateExchange(IExchange alternateExchange)
-        {
-            return WithArgument("alternate-exchange", alternateExchange.Name);
         }
 
         public IExchangeDeclareConfiguration WithType(string type)
