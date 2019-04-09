@@ -15,23 +15,23 @@ namespace EasyNetQ
         /// <summary>
         /// Sets as durable or not. Durable queues remain active when a server restarts.
         /// </summary>
-        /// <param name="durable">The durable flag to set</param>
+        /// <param name="isDurable">The durable flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration AsDurable(bool durable);
+        IQueueDeclareConfiguration AsDurable(bool isDurable);
 
         /// <summary>
         /// Sets as exclusive or not. Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.
         /// </summary>
-        /// <param name="exclusive">The exclusive flag to set</param>
+        /// <param name="isExclusive">The exclusive flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration AsExclusive(bool exclusive);
+        IQueueDeclareConfiguration AsExclusive(bool isExclusive);
 
         /// <summary>
         /// Sets as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
         /// </summary>
-        /// <param name="autoDelete">The autoDelete flag to set</param>
+        /// <param name="isAutoDelete">The autoDelete flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IQueueDeclareConfiguration AsAutoDelete(bool autoDelete);
+        IQueueDeclareConfiguration AsAutoDelete(bool isAutoDelete);
 
         /// <summary>
         /// Sets queue as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
@@ -106,21 +106,21 @@ namespace EasyNetQ
 
         public IDictionary<string, object> Arguments { get; } = new Dictionary<string, object>();
 
-        public IQueueDeclareConfiguration AsDurable(bool durable)
+        public IQueueDeclareConfiguration AsDurable(bool isDurable)
         {
-            IsDurable = durable;
+            IsDurable = isDurable;
             return this;
         }
 
-        public IQueueDeclareConfiguration AsExclusive(bool exclusive)
+        public IQueueDeclareConfiguration AsExclusive(bool isExclusive)
         {
-            IsExclusive = exclusive;
+            IsExclusive = isExclusive;
             return this;
         }
 
-        public IQueueDeclareConfiguration AsAutoDelete(bool autoDelete)
+        public IQueueDeclareConfiguration AsAutoDelete(bool isAutoDelete)
         {
-            IsAutoDelete = autoDelete;
+            IsAutoDelete = isAutoDelete;
             return this;
         }
 

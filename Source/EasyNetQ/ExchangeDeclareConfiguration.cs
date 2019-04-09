@@ -8,16 +8,16 @@ namespace EasyNetQ
         /// <summary>
         /// Sets as durable or not. Durable exchanges remain active when a server restarts.
         /// </summary>
-        /// <param name="durable">The durable flag to set</param>
+        /// <param name="isDurable">The durable flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration AsDurable(bool durable);
+        IExchangeDeclareConfiguration AsDurable(bool isDurable);
 
         /// <summary>
         /// Sets as autoDelete or not. If set, the exchange is deleted when all queues have finished using it.
         /// </summary>
-        /// <param name="autoDelete">The autoDelete flag to set</param>
+        /// <param name="isAutoDelete">The autoDelete flag to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration AsAutoDelete(bool autoDelete);
+        IExchangeDeclareConfiguration AsAutoDelete(bool isAutoDelete);
 
         /// <summary>
         /// Sets alternate exchange of the exchange.
@@ -29,9 +29,9 @@ namespace EasyNetQ
         /// <summary>
         /// Sets type of the exchange.
         /// </summary>
-        /// <param name="exchangeType">The type to set</param>
+        /// <param name="type">The type to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        IExchangeDeclareConfiguration WithType(string exchangeType);
+        IExchangeDeclareConfiguration WithType(string type);
 
         /// <summary>
         /// Sets an argument for exchange declaration
@@ -52,15 +52,15 @@ namespace EasyNetQ
 
         public IDictionary<string, object> Arguments { get; } = new Dictionary<string, object>();
 
-        public IExchangeDeclareConfiguration AsDurable(bool durable = true)
+        public IExchangeDeclareConfiguration AsDurable(bool isDurable)
         {
-            IsDurable = durable;
+            IsDurable = isDurable;
             return this;
         }
 
-        public IExchangeDeclareConfiguration AsAutoDelete(bool autoDelete = true)
+        public IExchangeDeclareConfiguration AsAutoDelete(bool isAutoDelete)
         {
-            IsAutoDelete = autoDelete;
+            IsAutoDelete = isAutoDelete;
             return this;
         }
 
