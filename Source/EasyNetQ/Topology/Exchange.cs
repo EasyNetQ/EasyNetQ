@@ -1,20 +1,29 @@
-﻿namespace EasyNetQ.Topology
+﻿using System.Collections.Generic;
+
+namespace EasyNetQ.Topology
 {
-    public class Exchange : IExchange
+    public sealed class Exchange : IExchange
     {
-        private static readonly Exchange defaultExchange = new Exchange("");
+        public Exchange(string name, string type = ExchangeType.Direct, bool durable = true, bool autoDelete = false, IDictionary<string, object> arguments = null)
+        {
+            Preconditions.CheckNotNull(name, "name");
+
+            Name = name;
+            Type = type;
+            IsDurable = durable;
+            IsAutoDelete = autoDelete;
+            Arguments = arguments ?? new Dictionary<string, object>();
+        }
 
         public string Name { get; }
+        public string Type { get; }
+        public bool IsDurable { get; }
+        public bool IsAutoDelete { get; }
+        public IDictionary<string, object> Arguments { get; }
 
         public static IExchange GetDefault()
         {
-            return defaultExchange;
-        }
-
-        public Exchange(string name)
-        {
-            Preconditions.CheckNotNull(name, "name");
-            Name = name;
+            return new Exchange("");
         }
     }
 }

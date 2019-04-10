@@ -9,6 +9,7 @@ using EasyNetQ.Topology;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using Queue = EasyNetQ.Topology.Queue;
 
 namespace EasyNetQ.Tests
 {
@@ -22,8 +23,8 @@ namespace EasyNetQ.Tests
             queue = advancedBus.QueueDeclare(
                 "my_queue",
                 c => c.AsDurable(false)
-                    .AsExclusive()
-                    .AsAutoDelete()
+                    .AsExclusive(true)
+                    .AsAutoDelete(true)
                     .WithMessageTtl(TimeSpan.FromSeconds(1))
                     .WithExpires(TimeSpan.FromSeconds(2))
                     .WithMaxPriority(10)
@@ -70,16 +71,14 @@ namespace EasyNetQ.Tests
             advancedBus = mockBuilder.Bus.Advanced;
             queue = advancedBus.QueueDeclare(
                 "my_queue",
-                QueueDeclareConfigurationActions.From(
-                    durable: false,
-                    exclusive: true,
-                    autoDelete: true,
-                    perQueueMessageTtl: 1000,
-                    expires: 2000,
-                    maxPriority: 10,
-                    deadLetterExchange: "my_exchange",
-                    deadLetterRoutingKey: "my_routing_key"
-                )
+                c => c.AsDurable(false)
+                    .AsExclusive(true)
+                    .AsAutoDelete(true)
+                    .WithMessageTtl(TimeSpan.FromSeconds(1))
+                    .WithExpires(TimeSpan.FromSeconds(2))
+                    .WithMaxPriority(10)
+                    .WithDeadLetterExchange(new Exchange("my_exchange"))
+                    .WithDeadLetterRoutingKey("my_routing_key")
             );
         }
 
@@ -125,16 +124,14 @@ namespace EasyNetQ.Tests
             advancedBus = mockBuilder.Bus.Advanced;
             queue = advancedBus.QueueDeclare(
                 "my_queue",
-                QueueDeclareConfigurationActions.From(
-                    durable: false,
-                    exclusive: true,
-                    autoDelete: true,
-                    perQueueMessageTtl: 1000,
-                    expires: 2000,
-                    maxPriority: 10,
-                    deadLetterExchange: "",
-                    deadLetterRoutingKey: "my_queue2"
-                )
+                c => c.AsDurable(false)
+                    .AsExclusive(true)
+                    .AsAutoDelete(true)
+                    .WithMessageTtl(TimeSpan.FromSeconds(1))
+                    .WithExpires(TimeSpan.FromSeconds(2))
+                    .WithMaxPriority(10)
+                    .WithDeadLetterExchange(Exchange.GetDefault())
+                    .WithDeadLetterRoutingKey("my_queue2")
             );
         }
 
@@ -178,7 +175,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
             advancedBus = mockBuilder.Bus.Advanced;
 
-            var queue = new Topology.Queue("my_queue", false);
+            var queue = new Queue("my_queue", false);
             advancedBus.QueueDelete(queue);
         }
 
@@ -211,7 +208,7 @@ namespace EasyNetQ.Tests
                 "my_exchange",
                 c => c.WithType(ExchangeType.Direct)
                     .AsDurable(false)
-                    .AsAutoDelete()
+                    .AsAutoDelete(true)
                     .WithAlternateExchange(new Exchange("my.alternate.exchange"))
             );
         }
@@ -375,7 +372,7 @@ namespace EasyNetQ.Tests
             binding.Should().NotBeNull();
             binding.RoutingKey.Should().Be("my_routing_key");
             binding.Exchange.Name.Should().Be("my_exchange");
-            binding.Headers["header1"].Should().Be("value1");
+            binding.Arguments["header1"].Should().Be("value1");
             binding.Bindable.Should().BeAssignableTo<IQueue>();
             ((IQueue) binding.Bindable).Name.Should().Be("my_queue");
         }
@@ -401,7 +398,7 @@ namespace EasyNetQ.Tests
             advancedBus = mockBuilder.Bus.Advanced;
 
             var exchange = new Exchange("my_exchange");
-            var queue = new Topology.Queue("my_queue", false);
+            var queue = new Queue("my_queue", false);
             binding = advancedBus.Bind(exchange, queue, "my_routing_key");
             advancedBus.Unbind(binding);
         }
