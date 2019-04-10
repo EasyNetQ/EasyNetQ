@@ -7,7 +7,15 @@ namespace EasyNetQ.Scheduler.Mongo
     {
         public static ISchedulerService CreateScheduler()
         {
-            var bus = RabbitHutch.CreateBus();
+            var serviceConfig = SchedulerServiceConfiguration.FromConfigFile();
+            var bus = RabbitHutch.CreateBus(sr =>
+            {
+                if (serviceConfig.EnableLegacyConventions)
+                {
+                    sr.EnableLegacyConventions();
+                }
+            });
+
             return new SchedulerService(
                 bus,
                 new ScheduleRepository(ScheduleRepositoryConfiguration.FromConfigFile(), () => DateTime.UtcNow),

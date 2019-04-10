@@ -1,8 +1,8 @@
-﻿using EasyNetQ.Scheduler.Mongo.Core;
+﻿using System;
+using EasyNetQ.Scheduler.Mongo.Core;
 using EasyNetQ.Topology;
 using NSubstitute;
 using Xunit;
-using System;
 
 namespace EasyNetQ.Scheduler.Mongo.Tests
 {
@@ -22,13 +22,13 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
                 bus,
                 scheduleRepository,
                 new SchedulerServiceConfiguration
-                    {
-                        HandleTimeoutInterval = TimeSpan.FromSeconds(1),
-                        PublishInterval = TimeSpan.FromSeconds(1),
-                        SubscriptionId = "Scheduler",
-                        PublishMaxSchedules = 2
-                    }
-            );
+                {
+                    HandleTimeoutInterval = TimeSpan.FromSeconds(1),
+                    PublishInterval = TimeSpan.FromSeconds(1),
+                    SubscriptionId = "Scheduler",
+                    PublishMaxSchedules = 2,
+                    EnableLegacyConventions = false
+                });
         }
 
         private SchedulerService schedulerService;
@@ -41,10 +41,10 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
         {
             var id = Guid.NewGuid();
             scheduleRepository.GetPending().Returns(new Schedule
-                {
-                    Id = id,
-                    BindingKey = "msg1"
-                });
+            {
+                Id = id,
+                BindingKey = "msg1"
+            });
 
             schedulerService.OnPublishTimerTick(null);
 

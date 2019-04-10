@@ -1,20 +1,15 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Collections.Generic;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 using NSubstitute;
 using Xunit;
-using System.Collections.Generic;
 
 namespace EasyNetQ.Scheduler.Tests
 {
     public class SchedulerServiceTests
     {
-        private SchedulerService schedulerService;
-        private IBus bus;
-        private IAdvancedBus advancedBus;
-        private IScheduleRepository scheduleRepository;
-
         public SchedulerServiceTests()
         {
             bus = Substitute.For<IBus>();
@@ -26,23 +21,28 @@ namespace EasyNetQ.Scheduler.Tests
             scheduleRepository = Substitute.For<IScheduleRepository>();
 
             schedulerService = new SchedulerService(
-                bus, 
+                bus,
                 scheduleRepository,
                 new SchedulerServiceConfiguration
                 {
                     PublishIntervalSeconds = 1,
-                    PurgeIntervalSeconds = 1
-                }
-            );
+                    PurgeIntervalSeconds = 1,
+                    EnableLegacyConventions = false
+                });
         }
+
+        private SchedulerService schedulerService;
+        private IBus bus;
+        private IAdvancedBus advancedBus;
+        private IScheduleRepository scheduleRepository;
 
         [Fact]
         public void Should_get_pending_scheduled_messages_and_update_them()
         {
             var pendingSchedule = new List<ScheduleMe>
             {
-                new ScheduleMe { RoutingKey = "msg1"},
-                new ScheduleMe { RoutingKey = "msg2"},
+                new ScheduleMe {RoutingKey = "msg1"},
+                new ScheduleMe {RoutingKey = "msg2"},
             };
 
             scheduleRepository.GetPending().Returns(pendingSchedule);
