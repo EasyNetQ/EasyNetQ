@@ -1,15 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EasyNetQ;
 
-namespace Sprache
+namespace EasyNetQ.Sprache
 {
     /// <summary>
     /// Parsers and combinators.
     /// </summary>
-    public static class Parse
+    internal static class Parse
     {
+        public static readonly Parser<char> AnyChar = Char(c => true, "any character");
+        public static readonly Parser<char> WhiteSpace = Char(char.IsWhiteSpace, "whitespace");
+        public static readonly Parser<char> Digit = Char(char.IsDigit, "digit");
+        public static readonly Parser<char> Letter = Char(char.IsLetter, "letter");
+        public static readonly Parser<char> LetterOrDigit = Char(char.IsLetterOrDigit, "letter or digit");
+        public static readonly Parser<char> Lower = Char(char.IsLower, "lowercase letter");
+        public static readonly Parser<char> Upper = Char(char.IsUpper, "upper");
+        public static readonly Parser<char> Numeric = Char(char.IsNumber, "numeric character");
+
+        public static readonly Parser<string> Number = Numeric.AtLeastOnce().Text();
+
+        public static readonly Parser<string> Decimal =
+            from integral in Number
+            from fraction in Char('.').Then(point => Number.Select(n => "." + n)).XOr(Return(""))
+            select integral + fraction;
+
         /// <summary>
         /// TryParse a single character matching 'predicate'
         /// </summary>
@@ -30,12 +45,12 @@ namespace Sprache
 
                     return new Failure<char>(i,
                         () => string.Format("unexpected '{0}'", i.Current),
-                        () => new[] { description });
+                        () => new[] {description});
                 }
 
                 return new Failure<char>(i,
                     () => "Unexpected end of input reached",
-                    () => new[] { description });
+                    () => new[] {description});
             };
         }
 
@@ -79,17 +94,6 @@ namespace Sprache
         {
             return CharExcept(ch => c == ch, c.ToString());
         }
-
-
-
-        public static readonly Parser<char> AnyChar = Char(c => true, "any character");
-        public static readonly Parser<char> WhiteSpace = Char(char.IsWhiteSpace, "whitespace");
-        public static readonly Parser<char> Digit = Char(char.IsDigit, "digit");
-        public static readonly Parser<char> Letter = Char(char.IsLetter, "letter");
-        public static readonly Parser<char> LetterOrDigit = Char(char.IsLetterOrDigit, "letter or digit");
-        public static readonly Parser<char> Lower = Char(char.IsLower, "lowercase letter");
-        public static readonly Parser<char> Upper = Char(char.IsUpper, "upper");
-        public static readonly Parser<char> Numeric = Char(char.IsNumber, "numeric character");
 
         /// <summary>
         /// Parse a string of characters.
@@ -208,12 +212,12 @@ namespace Sprache
             Preconditions.CheckNotNull(parser, "parser");
 
             return i => parser(i).IfSuccess(s =>
-                s.Remainder.AtEnd ?
-                    (IResult<T>)s :
-                    new Failure<T>(
+                s.Remainder.AtEnd
+                    ? (IResult<T>) s
+                    : new Failure<T>(
                         s.Remainder,
                         () => string.Format("unexpected '{0}'", s.Remainder.Current),
-                        () => new[] { "end of input" }));
+                        () => new[] {"end of input"}));
         }
 
         /// <summary>
@@ -243,9 +247,9 @@ namespace Sprache
             Preconditions.CheckNotNull(parser, "parser");
 
             return from leading in WhiteSpace.Many()
-                   from item in parser
-                   from trailing in WhiteSpace.Many()
-                   select item;
+                from item in parser
+                from trailing in WhiteSpace.Many()
+                select item;
         }
 
         /// <summary>
@@ -261,20 +265,20 @@ namespace Sprache
             Parser<T> p = null;
 
             return i =>
-                       {
-                           if (p == null)
-                               p = reference();
+            {
+                if (p == null)
+                    p = reference();
 
-                           if (i.Memos.ContainsKey(p))
-                               throw new ParseException(i.Memos[p].ToString());
+                if (i.Memos.ContainsKey(p))
+                    throw new ParseException(i.Memos[p].ToString());
 
-                           i.Memos[p] = new Failure<T>(i,
-                               () => "Left recursion in the grammar.",
-                               () => new string[0]);
-                           var result = p(i);
-                           i.Memos[p] = result;
-                           return result;
-                       };
+                i.Memos[p] = new Failure<T>(i,
+                    () => "Left recursion in the grammar.",
+                    () => new string[0]);
+                var result = p(i);
+                i.Memos[p] = result;
+                return result;
+            };
         }
 
         /// <summary>
@@ -309,7 +313,7 @@ namespace Sprache
                         () => ff.Message,
                         () => ff.Expectations.Union(sf.Expectations)));
 
-                var fs = (ISuccess<T>)fr;
+                var fs = (ISuccess<T>) fr;
                 if (fs.Remainder == i)
                     return second(i).IfFailure(sf => fs);
 
@@ -329,9 +333,7 @@ namespace Sprache
             Preconditions.CheckNotNull(parser, "parser");
             Preconditions.CheckNotNull(name, "name");
 
-            return i => parser(i).IfFailure(f => f.FailedInput == i ?
-                new Failure<T>(f.FailedInput, () => f.Message, () => new[] { name }) :
-                f);
+            return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] {name}) : f);
         }
 
         /// <summary>
@@ -347,7 +349,8 @@ namespace Sprache
             Preconditions.CheckNotNull(first, "first");
             Preconditions.CheckNotNull(second, "second");
 
-            return i => {
+            return i =>
+            {
                 var fr = first(i);
                 var ff = fr as IFailure<T>;
                 if (ff != null)
@@ -361,7 +364,7 @@ namespace Sprache
                         () => ff.Expectations.Union(sf.Expectations)));
                 }
 
-                var fs = (ISuccess<T>)fr;
+                var fs = (ISuccess<T>) fr;
                 if (fs.Remainder == i)
                     return second(i).IfFailure(sf => fs);
 
@@ -379,7 +382,7 @@ namespace Sprache
         {
             Preconditions.CheckNotNull(parser, "parser");
 
-            return parser.Select(r => (IEnumerable<T>)new[] { r });
+            return parser.Select(r => (IEnumerable<T>) new[] {r});
         }
 
         /// <summary>
@@ -437,12 +440,12 @@ namespace Sprache
 
             // Could be more like: except.Then(s => s.Fail("..")).XOr(parser)
             return i =>
-                {
-                    var r = except(i);
-                    if (r is ISuccess<U>)
-                        return new Failure<T>(i, () => "Excepted parser succeeded.", () => new[] { "other than the excepted input" });
-                    return parser(i);
-                };
+            {
+                var r = except(i);
+                if (r is ISuccess<U>)
+                    return new Failure<T>(i, () => "Excepted parser succeeded.", () => new[] {"other than the excepted input"});
+                return parser(i);
+            };
         }
 
         /// <summary>
@@ -472,9 +475,11 @@ namespace Sprache
             Preconditions.CheckNotNull(predicate, "predicate");
 
             return i => parser(i).IfSuccess(s =>
-                predicate(s.Result) ? (IResult<T>)s : new Failure<T>(i,
-                    () => string.Format("Unexpected {0}.", s.Result),
-                    () => new string[0]));
+                predicate(s.Result)
+                    ? (IResult<T>) s
+                    : new Failure<T>(i,
+                        () => string.Format("Unexpected {0}.", s.Result),
+                        () => new string[0]));
         }
 
         /// <summary>
@@ -566,15 +571,8 @@ namespace Sprache
             return op.Then(opvalue =>
                     operand.Then(operandValue =>
                         ChainRightOperatorRest(operandValue, op, operand, apply)).Then(r =>
-                            Return(apply(opvalue, lastOperand, r))))
+                        Return(apply(opvalue, lastOperand, r))))
                 .Or(Return(lastOperand));
         }
-
-        public static readonly Parser<string> Number = Numeric.AtLeastOnce().Text();
-
-        public static readonly Parser<string> Decimal =
-            from integral in Number
-            from fraction in Char('.').Then(point => Number.Select(n => "." + n)).XOr(Return(""))
-            select integral + fraction;
     }
 }
