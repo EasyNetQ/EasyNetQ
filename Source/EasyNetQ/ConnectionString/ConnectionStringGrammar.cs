@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Sprache;
+using EasyNetQ.Sprache;
 
 namespace EasyNetQ.ConnectionString
 {
@@ -11,23 +11,22 @@ namespace EasyNetQ.ConnectionString
 
     public static class ConnectionStringGrammar
     {
-        public static Parser<string> Text = Parse.CharExcept(';').Many().Text();
-        public static Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
-        public static Parser<int> IntNumber = Parse.Number.Select(int.Parse);
+        internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
+        internal static readonly Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
+        internal static readonly Parser<int> IntNumber = Parse.Number.Select(int.Parse);
 
-        public static Parser<bool> Bool = (Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false"))).Text().Select(x => x.ToLower() == "true");
+        internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text().Select(x => x.ToLower() == "true");
 
-        public static Parser<HostConfiguration> Host =
+        internal static readonly Parser<HostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
-            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
-            select new HostConfiguration { Host = host, Port = port };
+            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort) 0))
+            select new HostConfiguration {Host = host, Port = port};
 
-        public static Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
+        internal static readonly Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
-        private static Uri _result;
-        public static Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _result)).Select(_ => new Uri(_));
+        internal static readonly Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
 
-        public static Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
+        internal static readonly Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
             // add new connection string parts here
             BuildKeyValueParser("amqp", AMQP, c => c.AMQPConnectionString),
@@ -48,33 +47,38 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));
 
-        public static Parser<UpdateConfiguration> AMQPAlone =
-            AMQP.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>)(configuration
-                                                                                       =>
-                {
-                    configuration.AMQPConnectionString = _;
-                    return configuration;
-                }));
+        internal static readonly Parser<UpdateConfiguration> AMQPAlone =
+            AMQP.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>) (configuration
+                =>
+            {
+                configuration.AMQPConnectionString = _;
+                return configuration;
+            }));
 
-        public static Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.Once());
+        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.Once());
 
-        public static Parser<UpdateConfiguration> BuildKeyValueParser<T>(
+        public static IEnumerable<UpdateConfiguration> ParseConnectionString(string connectionString)
+        {
+            return ConnectionStringBuilder.Parse(connectionString);
+        }
+
+        private static Parser<UpdateConfiguration> BuildKeyValueParser<T>(
             string keyName,
             Parser<T> valueParser,
-            Expression<Func<ConnectionConfiguration, T>> getter)
+            Expression<Func<ConnectionConfiguration, T>> getter
+        )
         {
-            return
-                from key in Parse.CaseInsensitiveString(keyName).Token()
+            return from key in Parse.CaseInsensitiveString(keyName).Token()
                 from separator in Parse.Char('=')
                 from value in valueParser
-                select (Func<ConnectionConfiguration, ConnectionConfiguration>)(c =>
+                select (Func<ConnectionConfiguration, ConnectionConfiguration>) (c =>
                 {
                     CreateSetter(getter)(c, value);
                     return c;
                 });
         }
 
-        public static Action<ConnectionConfiguration, T> CreateSetter<T>(Expression<Func<ConnectionConfiguration, T>> getter)
+        private static Action<ConnectionConfiguration, T> CreateSetter<T>(Expression<Func<ConnectionConfiguration, T>> getter)
         {
             return CreateSetter<ConnectionConfiguration, T>(getter);
         }
@@ -87,7 +91,7 @@ namespace EasyNetQ.ConnectionString
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="getter"></param>
         /// <returns></returns>
-        public static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
+        private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
         {
             Preconditions.CheckNotNull(getter, "getter");
 
@@ -101,24 +105,23 @@ namespace EasyNetQ.ConnectionString
             Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
 #if !NETFX
-            return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
-            
+            return (Action<TContaining, TProperty>) property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+
 #else
             return (Action<TContaining, TProperty>)
                 Delegate.CreateDelegate(typeof(Action<TContaining, TProperty>),
                     property.GetSetMethod());
 #endif
-
         }
 
-        public static IEnumerable<T> Cons<T>(this T head, IEnumerable<T> rest)
+        private static IEnumerable<T> Cons<T>(this T head, IEnumerable<T> rest)
         {
             yield return head;
             foreach (var item in rest)
                 yield return item;
         }
 
-        public static Parser<IEnumerable<T>> ListDelimitedBy<T>(this Parser<T> parser, char delimiter)
+        internal static Parser<IEnumerable<T>> ListDelimitedBy<T>(this Parser<T> parser, char delimiter)
         {
             return
                 from head in parser

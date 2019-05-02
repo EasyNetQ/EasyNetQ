@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Sprache
+namespace EasyNetQ.Sprache
 {
-    static class ResultHelper
+    internal static class ResultHelper
     {
         public static IResult<U> IfSuccess<T, U>(this IResult<T> result, Func<ISuccess<T>, IResult<U>> next)
         {
@@ -10,7 +10,7 @@ namespace Sprache
             if (s != null)
                 return next(s);
 
-            var f = (IFailure<T>)result;
+            var f = (IFailure<T>) result;
             return new Failure<U>(f.FailedInput, () => f.Message, () => f.Expectations);
         }
 
@@ -19,7 +19,7 @@ namespace Sprache
             var s = result as ISuccess<T>;
             if (s != null)
                 return s;
-            var f = (IFailure<T>)result;
+            var f = (IFailure<T>) result;
             return next(f);
         }
     }
