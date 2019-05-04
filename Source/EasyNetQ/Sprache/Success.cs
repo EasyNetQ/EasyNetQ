@@ -1,6 +1,6 @@
-﻿namespace Sprache
+﻿namespace EasyNetQ.Sprache
 {
-    sealed class Success<T> : ISuccess<T>
+    internal sealed class Success<T> : ISuccess<T>
     {
         readonly Input _remainder;
         readonly T _result;

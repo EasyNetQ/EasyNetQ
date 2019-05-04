@@ -1,6 +1,6 @@
-﻿namespace Sprache
+﻿namespace EasyNetQ.Sprache
 {
-    public interface IResult<out T>
+    internal interface IResult<out T>
     {
     }
 }

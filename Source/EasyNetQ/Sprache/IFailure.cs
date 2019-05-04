@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Sprache
+namespace EasyNetQ.Sprache
 {
-    public interface IFailure<out T> : IResult<T>
+    internal interface IFailure<out T> : IResult<T>
     {
         string Message { get; }
         IEnumerable<string> Expectations { get; }

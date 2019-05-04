@@ -1,10 +1,8 @@
-﻿using EasyNetQ;
-
-namespace Sprache
+﻿namespace EasyNetQ.Sprache
 {
-    public delegate IResult<T> Parser<out T>(Input input);
+    internal delegate IResult<T> Parser<out T>(Input input);
 
-    public static class ParserExtensions
+    internal static class ParserExtensions
     {
         public static IResult<T> TryParse<T>(this Parser<T> parser, string input)
         {
@@ -20,7 +18,7 @@ namespace Sprache
             Preconditions.CheckNotNull(input, "input");
 
             var result = parser.TryParse(input);
-            
+
             var success = result as ISuccess<T>;
 
             if (success != null)
@@ -30,7 +28,7 @@ namespace Sprache
                     throw new ParseException(string.Format("Parsing failure: Couldn't parse the whole input; unparsable remainder is: \"{0}\".", success.Remainder.Source.Substring(success.Remainder.Position)));
                 }
 
-              return success.Result;
+                return success.Result;
             }
 
             throw new ParseException(result.ToString());
