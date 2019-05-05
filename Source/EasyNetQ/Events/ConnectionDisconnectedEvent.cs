@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Events
 {
-    public class ConnectionDisconnectedEvent
+    public struct ConnectionDisconnectedEvent
     {
     }
 }

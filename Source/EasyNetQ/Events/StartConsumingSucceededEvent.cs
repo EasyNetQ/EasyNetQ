@@ -6,7 +6,7 @@ namespace EasyNetQ.Events
     /// <summary>
     /// This event is fired when the consumer starts consuming successfully.
     /// </summary>
-    public class StartConsumingSucceededEvent
+    public struct StartConsumingSucceededEvent
     {
         public IConsumer Consumer { get; }
 

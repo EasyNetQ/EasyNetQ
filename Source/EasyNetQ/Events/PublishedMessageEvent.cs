@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Events
 {
-    public class PublishedMessageEvent
+    public struct PublishedMessageEvent
     {
         public string ExchangeName { get; }
         public string RoutingKey { get; }

@@ -1,6 +1,6 @@
 namespace EasyNetQ.Events
 {
-    public class ConnectionBlockedEvent
+    public struct ConnectionBlockedEvent
     {
         public string Reason { get; }
 

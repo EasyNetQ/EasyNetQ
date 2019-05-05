@@ -1,6 +1,6 @@
 ﻿namespace EasyNetQ.Events
 {
-    public class ConsumerModelDisposedEvent
+    public struct ConsumerModelDisposedEvent
     {
         public string ConsumerTag { get; }
 

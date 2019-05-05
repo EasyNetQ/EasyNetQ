@@ -2,7 +2,7 @@
 
 namespace EasyNetQ.Events
 {
-    public class PublishChannelCreatedEvent
+    public struct PublishChannelCreatedEvent
     {
         public IModel Channel { get; }
 
@@ -11,4 +11,4 @@ namespace EasyNetQ.Events
             Channel = channel;
         }
     }
-}   
+}

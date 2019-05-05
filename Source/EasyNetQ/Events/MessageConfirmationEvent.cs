@@ -2,7 +2,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Events
 {
-    public class MessageConfirmationEvent
+    public struct MessageConfirmationEvent
     {
         public IModel Channel { get; private set; }
         public ulong DeliveryTag { get; private set; }
