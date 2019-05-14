@@ -36,25 +36,5 @@ namespace EasyNetQ
             }
             return default(TAttribute);
         }
-
-        public static T CreateObject<T>()
-        {
-            var type = typeof(T);
-
-            if (type == typeof(string))
-                return (T)(object)string.Empty;
-
-            if (type.IsValueType)
-                return Activator.CreateInstance<T>();
-
-            if (type.IsArray)
-                return (T)(object)Array.CreateInstance(type.GetElementType(), 0);
-
-            var ctor = typeof(T).GetConstructors().OrderByDescending(c => c.GetParameters().Count()).First();
-            object[] values = ctor.GetParameters().Select(p => GetDefaultValue(p.ParameterType)).ToArray();
-            return (T)Activator.CreateInstance(type, values);
-        }
-
-        private static object GetDefaultValue(Type type) => type.IsValueType ? Activator.CreateInstance(type) : null;
     }
 }
