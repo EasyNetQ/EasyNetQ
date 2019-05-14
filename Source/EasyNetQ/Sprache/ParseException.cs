@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Sprache
+namespace EasyNetQ.Sprache
 {
-    public class ParseException : Exception
+    internal class ParseException : Exception
     {
         public ParseException(string message)
             : base(message)

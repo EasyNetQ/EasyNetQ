@@ -36,19 +36,14 @@ To solve this issue:
             _jsonBackwardCompatibilitySerializer = (ISerializer)Activator.CreateInstance(_jsonBackwardCompatibilitySerializerType);
         }
 
-        public byte[] MessageToBytes<T>(T message)
+        public byte[] MessageToBytes(Type messageType, object message)
         {
-            return _jsonBackwardCompatibilitySerializer.MessageToBytes<T>(message);
+            return _jsonBackwardCompatibilitySerializer.MessageToBytes(messageType, message);
         }
 
-        public T BytesToMessage<T>(byte[] bytes)
+        public object BytesToMessage(Type messageType, byte[] bytes)
         {
-            return _jsonBackwardCompatibilitySerializer.BytesToMessage<T>(bytes);
-        }
-
-        public object BytesToMessage(Type type, byte[] bytes)
-        {
-            return _jsonBackwardCompatibilitySerializer.BytesToMessage(type, bytes);
+            return _jsonBackwardCompatibilitySerializer.BytesToMessage(messageType, bytes);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace EasyNetQ
         public SerializedMessage SerializeMessage(IMessage message)
         {
             var typeName = typeNameSerializer.Serialize(message.MessageType);
-            var messageBody = serializer.MessageToBytes(message.GetBody());
+            var messageBody = serializer.MessageToBytes(message.MessageType, message.GetBody());
             var messageProperties = message.Properties;
 
             messageProperties.Type = typeName;

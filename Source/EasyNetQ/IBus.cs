@@ -23,8 +23,7 @@ namespace EasyNetQ
         /// Provides a simple Send/Receive API
         /// </summary>
         ISendReceive SendReceive { get; }
-
-        
+    
         /// <summary>
         /// Provides a simple Delayed Publish API
         /// </summary>

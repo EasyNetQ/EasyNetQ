@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Sprache;
+using EasyNetQ.Sprache;
 
 namespace EasyNetQ.ConnectionString
 {
@@ -14,7 +14,7 @@ namespace EasyNetQ.ConnectionString
         {
             try
             {
-                var updater = ConnectionStringGrammar.ConnectionStringBuilder.Parse(connectionString);
+                var updater = ConnectionStringGrammar.ParseConnectionString(connectionString);
                 var connectionConfiguration = updater.Aggregate(new ConnectionConfiguration(), (current, updateFunction) => updateFunction(current));
                 connectionConfiguration.Validate();
                 return connectionConfiguration;

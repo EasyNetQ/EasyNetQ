@@ -6,6 +6,7 @@ namespace EasyNetQ.Scheduler.Mongo
 {
     public class SchedulerServiceConfiguration : ConfigurationBase, ISchedulerServiceConfiguration
     {
+        public bool EnableLegacyConventions { get; set; }
         public string SubscriptionId { get; set; }
         public TimeSpan PublishInterval { get; set; }
         public TimeSpan HandleTimeoutInterval { get; set; }
@@ -14,12 +15,13 @@ namespace EasyNetQ.Scheduler.Mongo
         public static SchedulerServiceConfiguration FromConfigFile()
         {
             return new SchedulerServiceConfiguration
-                {
-                    SubscriptionId = ConfigurationManager.AppSettings["subscriptionId"],
-                    PublishInterval = GetTimeSpanAppSettings("publishInterval"),
-                    PublishMaxSchedules = GetIntAppSetting("publishMaxSchedules"),
-                    HandleTimeoutInterval = GetTimeSpanAppSettings("handleTimeoutInterval"),
-                };
+            {
+                SubscriptionId = ConfigurationManager.AppSettings["subscriptionId"],
+                PublishInterval = GetTimeSpanAppSettings("publishInterval"),
+                PublishMaxSchedules = GetIntAppSetting("publishMaxSchedules"),
+                HandleTimeoutInterval = GetTimeSpanAppSettings("handleTimeoutInterval"),
+                EnableLegacyConventions = GetBoolAppSetting("enableLegacyConventions")
+            };
         }
     }
 }

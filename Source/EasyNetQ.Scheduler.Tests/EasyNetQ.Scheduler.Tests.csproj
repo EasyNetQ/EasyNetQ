@@ -3,10 +3,8 @@
   <PropertyGroup>
     <Description>EasyNetQ.Scheduler.Tests</Description>
     <TargetFramework>net452</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />

@@ -9,10 +9,9 @@ namespace EasyNetQ.Producer
 {
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
-        private const int QueueSize = 1;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly IPersistentChannel persistentChannel;
-        private readonly BlockingCollection<Action> queue = new BlockingCollection<Action>(QueueSize);
+        private readonly BlockingCollection<Action> queue;
 
         public ClientCommandDispatcherSingleton(
             ConnectionConfiguration configuration,
@@ -23,6 +22,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
+            queue = new BlockingCollection<Action>(configuration.DispatcherQueueSize);
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
 
             StartDispatcherThread(configuration);

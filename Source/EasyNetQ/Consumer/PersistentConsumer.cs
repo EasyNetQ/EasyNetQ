@@ -1,34 +1,33 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Consumer
 {
     public class PersistentConsumer : IConsumer
     {
-        private readonly IQueue queue;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
-        private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
-
-        private readonly IInternalConsumerFactory internalConsumerFactory;
+        private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
 
-        private readonly ConcurrentDictionary<IInternalConsumer, object> internalConsumers = 
-            new ConcurrentDictionary<IInternalConsumer, object>();
+        private readonly IInternalConsumerFactory internalConsumerFactory;
+
+        private readonly ConcurrentSet<IInternalConsumer> internalConsumers = new ConcurrentSet<IInternalConsumer>();
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        private readonly IQueue queue;
 
         private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
 
-        private ConsumerCancellation consumerCancellation;
+        private bool disposed;
 
         public PersistentConsumer(
-            IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
-            IPersistentConnection connection, 
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            IPersistentConnection connection,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
@@ -56,21 +55,30 @@ namespace EasyNetQ.Consumer
 
             StartConsumingInternal();
 
-            consumerCancellation = new ConsumerCancellation(Dispose);
-            return consumerCancellation;
+            return new ConsumerCancellation(Dispose);
+        }
+
+        public void Dispose()
+        {
+            if (disposed) return;
+
+            disposed = true;
+
+            eventBus.Publish(new StoppedConsumingEvent(this));
+
+            foreach (var subscription in subscriptions) subscription.Dispose();
+
+            foreach (var internalConsumer in internalConsumers) internalConsumer.Dispose();
         }
 
         private void StartConsumingInternal()
         {
             if (disposed) return;
 
-            if(!connection.IsConnected)
-            {
-                return;
-            }
+            if (!connection.IsConnected) return;
 
             var internalConsumer = internalConsumerFactory.CreateConsumer();
-            internalConsumers.TryAdd(internalConsumer, null);
+            internalConsumers.Add(internalConsumer);
 
             internalConsumer.Cancelled += consumer => Dispose();
 
@@ -96,29 +104,6 @@ namespace EasyNetQ.Consumer
         private void ConnectionOnConnected()
         {
             StartConsumingInternal();
-        }
-
-        private bool disposed;
-
-        public void Dispose()
-        {
-            if (disposed) return;
-
-            disposed = true;
-
-            consumerCancellation.OnCancel(queue);
-
-            eventBus.Publish(new StoppedConsumingEvent(this));
-            
-            foreach (var subscription in subscriptions)
-            {
-                subscription.Dispose();
-            }
-
-            foreach (var internalConsumer in internalConsumers.Keys)
-            {
-                internalConsumer.Dispose();
-            }
         }
     }
 }

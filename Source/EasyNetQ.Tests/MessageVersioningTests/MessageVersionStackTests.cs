@@ -2,6 +2,7 @@
 
 using System.Linq;
 using EasyNetQ.MessageVersioning;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
@@ -26,6 +27,34 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
+        public void Versioned_message_stack_works_for_more_than_two_versions_and_types_are_ordered_oldest_first()
+        {
+            var stack = new MessageVersionStack( typeof( MyMessageV3 ));
+
+            Assert.Equal(typeof(MyMessage), stack.ElementAt( 0 ));
+            Assert.Equal(typeof(MyMessageV2), stack.ElementAt( 1 ));
+            Assert.Equal(typeof(MyMessageV3), stack.ElementAt( 2 ));
+        }
+
+        [Fact]
+        public void Versioned_message_stack_works_with_arbitrary_type_names()
+        {
+            var stack = new MessageVersionStack( typeof( ComplexMessage ));
+
+            Assert.Equal(typeof(SimpleMessage), stack.ElementAt( 0 ));
+            Assert.Equal(typeof(AdvancedMessage), stack.ElementAt( 1 ));
+            Assert.Equal(typeof(ComplexMessage), stack.ElementAt( 2 ));
+        }
+
+        [Fact]
+        public void If_given_just_an_object_the_stack_can_handle_it_without_exceptions()
+        {
+            var stack = new MessageVersionStack( typeof( object ));
+        
+            Assert.Equal(typeof(object), stack.ElementAt( 0 ));
+        }
+
+        [Fact]
         public void Pop_returns_the_top_of_the_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessageV2 ) );
@@ -37,9 +66,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         public void IsEmpty_returns_false_for_non_empty_stack()
         {
             var stack = new MessageVersionStack( typeof( MyMessage ) );
-
-            Assert.True( stack.Count() > 0 );
-            Assert.False(stack.IsEmpty());
+            stack.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -48,8 +75,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var stack = new MessageVersionStack( typeof( MyMessage ) );
             stack.Pop();
 
-            Assert.Equal(0, stack.Count());
-            Assert.True( stack.IsEmpty());
+            stack.Should().BeEmpty();
         }
 
         [Fact]
@@ -63,4 +89,19 @@ namespace EasyNetQ.Tests.MessageVersioningTests
     {
         public int AnotherNumber { get; set; }
     }
+
+    public class SimpleMessage
+    {
+        public string Message { get; set; }
+    }
+
+    public class AdvancedMessage : SimpleMessage, ISupersede<SimpleMessage>
+    {
+        public string VeryAdvanced { get; set; }
+    }
+
+    public class ComplexMessage : AdvancedMessage, ISupersede<AdvancedMessage>
+    {
+        public string SoComplex { get; set; }
+    }    
 }

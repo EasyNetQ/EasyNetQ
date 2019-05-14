@@ -62,7 +62,15 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_request_response_model()
         {
+            var waiter = new CountdownEvent(2);
+
+            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
+            mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+
             bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            if(!waiter.Wait(5000))
+                throw new TimeoutException();
+
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();

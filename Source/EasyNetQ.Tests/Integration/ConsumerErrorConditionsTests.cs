@@ -96,7 +96,7 @@ namespace EasyNetQ.Tests
                 CorrelationId = correlationId
             };
 
-             bus.Advanced.Publish(exchange, typeNameSerializer.Serialize(typeof(MyErrorTestMessage)), true, props, serializer.MessageToBytes(message));
+             bus.Advanced.Publish(exchange, typeNameSerializer.Serialize(typeof(MyErrorTestMessage)), true, props, serializer.MessageToBytes(typeof(MyErrorTestMessage), message));
 
             // give the publish a chance to get to rabbit and back
             // also allow the DefaultConsumerErrorStrategy time to spin up its connection

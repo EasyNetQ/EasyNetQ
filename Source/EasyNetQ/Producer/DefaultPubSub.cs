@@ -10,11 +10,11 @@ namespace EasyNetQ.Producer
 {
     public class DefaultPubSub : IPubSub
     {
+        private readonly IAdvancedBus advancedBus;
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IConventions conventions;
-        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        private readonly IAdvancedBus advancedBus;
+        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
 
         public DefaultPubSub(
             ConnectionConfiguration connectionConfiguration,
@@ -29,7 +29,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            
+
             this.connectionConfiguration = connectionConfiguration;
             this.conventions = conventions;
             this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
@@ -78,7 +78,7 @@ namespace EasyNetQ.Producer
 
         private async Task<ISubscriptionResult> SubscribeAsyncInternal<T>(
             string subscriptionId,
-            Func<T, CancellationToken, Task> onMessage, 
+            Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken
         )
@@ -90,16 +90,19 @@ namespace EasyNetQ.Producer
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
             var queue = await advancedBus.QueueDeclareAsync(
-                queueName, 
-                autoDelete: configuration.AutoDelete, 
-                durable: configuration.Durable, 
-                expires: configuration.Expires, 
-                maxPriority: configuration.MaxPriority,
-                maxLength: configuration.MaxLength,
-                maxLengthBytes: configuration.MaxLengthBytes,
-                cancellationToken: cancellationToken
+                queueName,
+                c =>
+                {
+                    c.AsDurable(configuration.Durable);
+                    c.AsAutoDelete(configuration.AutoDelete);
+                    if (configuration.Expires.HasValue) c.WithExpires(TimeSpan.FromMilliseconds(configuration.Expires.Value));
+                    if (configuration.MaxPriority.HasValue) c.WithMaxPriority(configuration.MaxPriority.Value);
+                    if (configuration.MaxLength.HasValue) c.WithMaxLength(configuration.MaxLength.Value);
+                    if (configuration.MaxLengthBytes.HasValue) c.WithMaxLengthBytes(configuration.MaxLengthBytes.Value);
+                },
+                cancellationToken
             ).ConfigureAwait(false);
-            
+
             var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
@@ -111,10 +114,10 @@ namespace EasyNetQ.Producer
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body, default),
                 x => x.WithPriority(configuration.Priority)
-                      .WithPrefetchCount(configuration.PrefetchCount)
-                      .WithExclusive(configuration.IsExclusive)
+                    .WithPrefetchCount(configuration.PrefetchCount)
+                    .WithExclusive(configuration.IsExclusive)
             );
-            
+
             return new SubscriptionResult(exchange, queue, consumerCancellation);
         }
     }

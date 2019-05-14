@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
+using EasyNetQ.Scheduling;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ
 {
     public static class SchedulerExtensions
     {

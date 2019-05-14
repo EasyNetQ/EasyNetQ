@@ -1,8 +1,10 @@
 // ReSharper disable InconsistentNaming
-using EasyNetQ.MultipleExchange;
-using EasyNetQ.Topology;
+
+using System;
 using System.Threading.Tasks;
+using EasyNetQ.MultipleExchange;
 using EasyNetQ.Producer;
+using EasyNetQ.Topology;
 using NSubstitute;
 using Xunit;
 
@@ -16,13 +18,8 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
             var advancedBus = Substitute.For<IAdvancedBus>();
 
             advancedBus.ExchangeDeclareAsync(
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<bool>(),
-                Arg.Any<bool>(),
-                Arg.Any<bool>(),
-                Arg.Any<string>(),
-                Arg.Any<bool>()
+                    Arg.Any<string>(),
+                    Arg.Any<Action<IExchangeDeclareConfiguration>>()
                 )
                 .Returns(Task.FromResult(Substitute.For<IExchange>()));
 

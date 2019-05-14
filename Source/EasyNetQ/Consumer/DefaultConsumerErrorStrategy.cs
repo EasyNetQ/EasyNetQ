@@ -226,7 +226,7 @@ namespace EasyNetQ.Consumer
                     kvp => kvp.Value is byte[] ? Encoding.UTF8.GetString((byte[])kvp.Value) : kvp.Value);
             }
 
-            return serializer.MessageToBytes(error);
+            return serializer.MessageToBytes(typeof(Error), error);
         }
 
         private bool disposed;

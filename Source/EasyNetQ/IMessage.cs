@@ -42,6 +42,13 @@ namespace EasyNetQ
             Properties = new MessageProperties();
             MessageType = body.GetType();
         }
+        
+        public Message()
+        {
+            Body = default;
+            Properties = new MessageProperties();
+            MessageType = typeof(T);
+        }
 
         public Message(T body, MessageProperties properties)
         {

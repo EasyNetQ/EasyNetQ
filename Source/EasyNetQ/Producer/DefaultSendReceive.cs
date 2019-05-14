@@ -10,10 +10,11 @@ namespace EasyNetQ.Producer
 {
     public class DefaultSendReceive : ISendReceive
     {
+        private readonly AsyncLock asyncLock = new AsyncLock();
+        private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>();
+
         private readonly IAdvancedBus advancedBus;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        
-        private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>(); 
 
         public DefaultSendReceive(
             IAdvancedBus advancedBus,
@@ -27,12 +28,12 @@ namespace EasyNetQ.Producer
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken)
+        public async Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(message, "message");
 
-            DeclareQueue(queue);
+            await DeclareQueueAsync(queue, cancellationToken).ConfigureAwait(false);
 
             var wrappedMessage = new Message<T>(message)
             {
@@ -42,11 +43,11 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            return advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage, cancellationToken);
+            await advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage, cancellationToken).ConfigureAwait(false);
         }
 
         public AwaitableDisposable<IDisposable> ReceiveAsync<T>(
-            string queue, 
+            string queue,
             Func<T, CancellationToken, Task> onMessage,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken
@@ -57,17 +58,6 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(configure, "configure");
 
             return ReceiveInternalAsync(queue, onMessage, configure, cancellationToken).ToAwaitableDisposable();
-        }
-
-        private async Task<IDisposable> ReceiveInternalAsync<T>(
-            string queue, 
-            Func<T, CancellationToken, Task> onMessage,
-            Action<IConsumerConfiguration> configure,
-            CancellationToken cancellationToken
-        )
-        {
-            var declaredQueue = DeclareQueue(queue);
-            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body, default), configure);
         }
 
         public AwaitableDisposable<IDisposable> ReceiveAsync(
@@ -84,26 +74,40 @@ namespace EasyNetQ.Producer
             return ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken).ToAwaitableDisposable();
         }
 
+        private async Task<IDisposable> ReceiveInternalAsync<T>(
+            string queue,
+            Func<T, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure,
+            CancellationToken cancellationToken
+        )
+        {
+            var declaredQueue = await DeclareQueueAsync(queue, cancellationToken).ConfigureAwait(false);
+            return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body, default), configure);
+        }
+
         private async Task<IDisposable> ReceiveInternalAsync(
-            string queue, 
+            string queue,
             Action<IReceiveRegistration> addHandlers,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken
         )
         {
-            var declaredQueue = DeclareQueue(queue);
+            var declaredQueue = await DeclareQueueAsync(queue, cancellationToken).ConfigureAwait(false);
             return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)), configure);
         }
-        
-        private IQueue DeclareQueue(string queueName)
-        {
-            IQueue queue = null;
-            declaredQueues.AddOrUpdate(
-                queueName, 
-                key => queue = advancedBus.QueueDeclare(queueName), 
-                (key, value) => queue = value);
 
-            return queue;
+        private async Task<IQueue> DeclareQueueAsync(string queueName, CancellationToken cancellationToken)
+        {
+            if (declaredQueues.TryGetValue(queueName, out var queue)) return queue;
+
+            using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
+            {
+                if (declaredQueues.TryGetValue(queueName, out queue)) return queue;
+
+                queue = await advancedBus.QueueDeclareAsync(queueName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                declaredQueues[queueName] = queue;
+                return queue;
+            }
         }
 
         private sealed class HandlerAdder : IReceiveRegistration

@@ -63,8 +63,6 @@ namespace EasyNetQ.Tests.Integration
 
                 bus.Rpc.Request<MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes, RpcRequest>(
                     new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes());
-
-                Thread.Sleep(2000);
             });
         }
 
@@ -78,8 +76,6 @@ namespace EasyNetQ.Tests.Integration
 
                 bus.Rpc.Request<RpcRequest, MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes>(
                     new RpcRequest());
-
-                Thread.Sleep(2000);
             });
         }
 
@@ -95,9 +91,8 @@ namespace EasyNetQ.Tests.Integration
 
                 Thread.Sleep(2000);
             });
-            Assert.IsType<AggregateException>(ex);
-            Assert.NotNull(ex.InnerException);
-            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+            Assert.IsType<EasyNetQResponderException>(ex);
+            Assert.Equal("Simulated Exception!", ex.Message);
         }
 
         [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
@@ -112,9 +107,8 @@ namespace EasyNetQ.Tests.Integration
 
                 Thread.Sleep(2000);
             });
-            Assert.IsType<AggregateException>(ex);
-            Assert.NotNull(ex.InnerException);
-            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+            Assert.IsType<EasyNetQResponderException>(ex);
+            Assert.Equal("Simulated Exception!", ex.Message);
         }
 
         [Fact, Explicit("Requires a RabbitMQ instance on localhost")]
@@ -129,9 +123,8 @@ namespace EasyNetQ.Tests.Integration
 
                 Thread.Sleep(2000);
             });
-            Assert.IsType<AggregateException>(ex);
-            Assert.NotNull(ex.InnerException);
-            Assert.Equal("Simulated Exception!", ex.InnerException.Message);
+            Assert.IsType<EasyNetQResponderException>(ex);
+            Assert.Equal("Simulated Exception!", ex.Message);
         }
     }
 }

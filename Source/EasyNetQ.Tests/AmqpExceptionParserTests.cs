@@ -1,13 +1,24 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using Xunit;
 using EasyNetQ.AmqpExceptions;
 using FluentAssertions;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
     public class AmqpExceptionParserTests
     {
+        [Fact]
+        public void Should_fail_on_badly_formatted_exception()
+        {
+            Assert.Throws<Sprache.ParseException>(() =>
+            {
+                const string originalException = "Do be do od be do do = something else, that I don't know=hello";
+
+                AmqpExceptionGrammar.ParseExceptionString(originalException);
+            });
+        }
+
         [Fact]
         public void Should_parse_first_Amqp_exception_example()
         {
@@ -37,16 +48,6 @@ namespace EasyNetQ.Tests
             amqpException.Code.Should().Be(406);
             amqpException.MethodId.Should().Be(10);
             amqpException.ClassId.Should().Be(40);
-        }
-
-        [Fact]
-        public void Should_fail_on_badly_formatted_exception()
-        {
-            Assert.Throws<Sprache.ParseException>(() => { 
-            const string originalException = "Do be do od be do do = something else, that I don't know=hello";
-
-            AmqpExceptionGrammar.ParseExceptionString(originalException);
-            });
         }
     }
 }
