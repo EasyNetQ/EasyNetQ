@@ -5,6 +5,7 @@ VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6301F5B7-5B36-4EDA-8E37-6C970155F8B4}"
 	ProjectSection(SolutionItems) = preProject
+		..\.editorconfig = ..\.editorconfig
 		..\appveyor.yml = ..\appveyor.yml
 		..\build.bat = ..\build.bat
 		..\Build\EasyNetQ.proj = ..\Build\EasyNetQ.proj
@@ -80,7 +81,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests.Common", "Ea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Microsoft", "EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj", "{132E7958-BC4E-42D3-86F2-6BF98E4FB6B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serialization.NewtonsoftJson", "EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj", "{0A3E2411-B851-4F49-9C3A-8E24E8697201}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Serialization.NewtonsoftJson", "EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj", "{0A3E2411-B851-4F49-9C3A-8E24E8697201}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
