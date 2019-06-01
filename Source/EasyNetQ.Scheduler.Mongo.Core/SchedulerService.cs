@@ -71,7 +71,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core
                         return;
                     var exchangeName = schedule.Exchange ?? schedule.BindingKey;
                     var routingKey = schedule.RoutingKey ?? schedule.BindingKey;
-                    var properties = schedule.BasicProperties ?? new MessageProperties {Type = schedule.BindingKey};
+                    var properties = schedule.BasicProperties ?? new MessageProperties { Type = schedule.BindingKey };
                     logger.DebugFormat("Publishing Scheduled Message with to exchange '{0}'", exchangeName);
                     var exchange = bus.Advanced.ExchangeDeclare(exchangeName, schedule.ExchangeType ?? ExchangeType.Topic);
                     bus.Advanced.Publish(

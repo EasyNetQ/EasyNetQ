@@ -80,7 +80,7 @@ namespace EasyNetQ.Scheduling
         {
             var uncheduleMeType = typeof(UnscheduleMe);
             var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
-            var unscheduleMe = new UnscheduleMe {CancellationKey = cancellationKey};
+            var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
             var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
             {
                 Properties =

@@ -20,7 +20,7 @@ namespace EasyNetQ.ConnectionString
         internal static readonly Parser<HostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
             from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort) 0))
-            select new HostConfiguration {Host = host, Port = port};
+            select new HostConfiguration { Host = host, Port = port };
 
         internal static readonly Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 

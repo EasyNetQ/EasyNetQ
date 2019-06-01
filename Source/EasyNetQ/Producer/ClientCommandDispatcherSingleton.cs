@@ -93,7 +93,7 @@ namespace EasyNetQ.Producer
                     {
                         break;
                     }
-            }) {Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads};
+            }) { Name = "Client Command Dispatcher Thread", IsBackground = configuration.UseBackgroundThreads };
             thread.Start();
         }
 

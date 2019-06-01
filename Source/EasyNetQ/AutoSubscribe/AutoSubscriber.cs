@@ -79,7 +79,7 @@ namespace EasyNetQ.AutoSubscribe
             {
                 var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeAsyncConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                    .Invoke(this, new object[] {subscriberConsumerInfo, cancellationToken});
+                    .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
                 subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
             }
@@ -88,7 +88,7 @@ namespace EasyNetQ.AutoSubscribe
             {
                 var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                    .Invoke(this, new object[] {subscriberConsumerInfo, cancellationToken});
+                    .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
                 subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
             }

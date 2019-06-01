@@ -40,8 +40,8 @@ namespace EasyNetQ.Tests.Tasks
         {
             var assembliesToScan = new[]
             {
-                typeof (Program).Assembly,
-                typeof (DisplayCommandLineTasks).Assembly
+                typeof(Program).Assembly,
+                typeof(DisplayCommandLineTasks).Assembly
             };
 
             var builder = new ContainerBuilder();

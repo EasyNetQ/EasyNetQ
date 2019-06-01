@@ -53,7 +53,7 @@ namespace EasyNetQ
 
         public void Publish<TEvent>(TEvent @event)
         {
-            if (!subscriptions.TryGetValue(typeof (TEvent), out var handlers))
+            if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
             foreach (var handler in handlers.AsEnumerable())
                 ((Action<TEvent>) handler)(@event);
@@ -68,7 +68,7 @@ namespace EasyNetQ
         private void AddSubscription<TEvent>(Action<TEvent> handler)
         {
             subscriptions.AddOrUpdate(
-                typeof (TEvent), 
+                typeof(TEvent), 
                 new Handlers(handler),
                 (key, existingHandlers) => 
                 {
@@ -83,7 +83,7 @@ namespace EasyNetQ
             return new Subscription(
                 () =>
                 {
-                    if (!subscriptions.TryGetValue(typeof (TEvent), out var handlers))
+                    if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                         return;
                     handlers.Remove(eventHandler);
                 }

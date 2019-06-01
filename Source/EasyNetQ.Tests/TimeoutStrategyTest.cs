@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void TestWhenMessagetWithAttribute()
         {
-            var timeoutStrategy = new TimeoutStrategy(new ConnectionConfiguration {Timeout = 10});
+            var timeoutStrategy = new TimeoutStrategy(new ConnectionConfiguration { Timeout = 10 });
             Assert.Equal((ulong)90, timeoutStrategy.GetTimeoutSeconds(typeof(MessageWithTimeoutAttribute)));
         }
 

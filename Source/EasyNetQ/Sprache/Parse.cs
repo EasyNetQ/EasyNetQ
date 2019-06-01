@@ -45,12 +45,12 @@ namespace EasyNetQ.Sprache
 
                     return new Failure<char>(i,
                         () => string.Format("unexpected '{0}'", i.Current),
-                        () => new[] {description});
+                        () => new[] { description });
                 }
 
                 return new Failure<char>(i,
                     () => "Unexpected end of input reached",
-                    () => new[] {description});
+                    () => new[] { description });
             };
         }
 
@@ -333,7 +333,7 @@ namespace EasyNetQ.Sprache
             Preconditions.CheckNotNull(parser, "parser");
             Preconditions.CheckNotNull(name, "name");
 
-            return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] {name}) : f);
+            return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] { name }) : f);
         }
 
         /// <summary>
@@ -382,7 +382,7 @@ namespace EasyNetQ.Sprache
         {
             Preconditions.CheckNotNull(parser, "parser");
 
-            return parser.Select(r => (IEnumerable<T>) new[] {r});
+            return parser.Select(r => (IEnumerable<T>) new[] { r });
         }
 
         /// <summary>

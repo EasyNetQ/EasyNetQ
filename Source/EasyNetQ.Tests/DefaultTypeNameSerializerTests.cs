@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests
         public void Should_deserialize_string_type_name()
         {
             var type = typeNameSerializer.DeSerialize("System.String, mscorlib");
-            type.Should().Be(typeof (string));
+            type.Should().Be(typeof(string));
         }
 
 #if NET_CORE

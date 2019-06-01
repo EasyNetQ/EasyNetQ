@@ -39,7 +39,7 @@ namespace EasyNetQ.Hosepipe.Tests
 
             for (int i = 0; i < 10; i++)
             {
-                bus.PubSub.Publish(new TestMessage{ Text = string.Format("\n>>>>>> Message {0}\n", i)});
+                bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i)});
             }
 
             bus.Dispose();

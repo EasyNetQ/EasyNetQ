@@ -37,7 +37,7 @@ namespace EasyNetQ.MessageVersioning
 
             if (!string.IsNullOrWhiteSpace(alternativeTypesHeader))
                 alternativeTypes = alternativeTypesHeader
-                    .Split(new[] {AlternativeMessageTypeSeparator}, StringSplitOptions.RemoveEmptyEntries)
+                    .Split(new[] { AlternativeMessageTypeSeparator }, StringSplitOptions.RemoveEmptyEntries)
                     .ToList();
         }
 

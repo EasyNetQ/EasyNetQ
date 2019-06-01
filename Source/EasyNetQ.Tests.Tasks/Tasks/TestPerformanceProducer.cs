@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests.Tasks
                 while (!cancelled)
                 {
                     var text = new string('#', messageSize);
-                    var message = new TestPerformanceMessage {Text = text};
+                    var message = new TestPerformanceMessage { Text = text };
 
                     try
                     {
