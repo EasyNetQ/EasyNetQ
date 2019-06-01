@@ -367,15 +367,14 @@ namespace EasyNetQ
         {
             if (value == null) return "NULL";
 
-            var dictionary = value as IDictionary<string, object>;
-            if (dictionary == null) return value.ToString();
-
-            return dictionary
-                .Select(x => string.Format("{0}={1}", x.Key, x.Value))
-                .Intersperse(", ")
-                .SurroundWith("[", "]")
-                .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
-                .ToString();
+            return value is IDictionary<string, object> dictionary
+                ? dictionary
+                    .Select(x => string.Format("{0}={1}", x.Key, x.Value))
+                    .Intersperse(", ")
+                    .SurroundWith("[", "]")
+                    .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
+                    .ToString()
+                : value.ToString();
         }
 
         private static string CheckShortString(string input, string name)

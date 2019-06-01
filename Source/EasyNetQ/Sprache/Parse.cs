@@ -306,8 +306,7 @@ namespace EasyNetQ.Sprache
             return i =>
             {
                 var fr = first(i);
-                var ff = fr as IFailure<T>;
-                if (ff != null)
+                if (fr is IFailure<T> ff)
                     return second(i).IfFailure(sf => new Failure<T>(
                         ff.FailedInput,
                         () => ff.Message,
@@ -352,8 +351,7 @@ namespace EasyNetQ.Sprache
             return i =>
             {
                 var fr = first(i);
-                var ff = fr as IFailure<T>;
-                if (ff != null)
+                if (fr is IFailure<T> ff)
                 {
                     if (ff.FailedInput != i)
                         return ff;

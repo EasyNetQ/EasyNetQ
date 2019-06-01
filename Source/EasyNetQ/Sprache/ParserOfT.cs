@@ -19,9 +19,7 @@
 
             var result = parser.TryParse(input);
 
-            var success = result as ISuccess<T>;
-
-            if (success != null)
+            if (result is ISuccess<T> success)
             {
                 if (!success.Remainder.AtEnd)
                 {
