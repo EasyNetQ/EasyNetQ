@@ -57,22 +57,9 @@ namespace EasyNetQ.Producer
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.timeoutStrategy = timeoutStrategy;
             this.typeNameSerializer = typeNameSerializer;
-
-            eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
         }
 
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
-        {
-            var copyOfResponseActions = responseActions.Values;
-            responseActions.Clear();
-            responseQueues.Clear();
-
-            // retry in-flight requests.
-            foreach (var responseAction in copyOfResponseActions)
-            {
-                responseAction.OnFailure();
-            }
-        }
+        // Removed the clearing of the created queues and actions, as they should survive a node-switch
 
         public virtual Task<TResponse> Request<TRequest, TResponse>(TRequest request, Action<IRequestConfiguration> configure)
             where TRequest : class
@@ -163,11 +150,11 @@ namespace EasyNetQ.Producer
                     return queueName;
 
                 var queue = advancedBus.QueueDeclare(
-                            conventions.RpcReturnQueueNamingConvention(),
-                            passive: false,
-                            durable: false,
-                            exclusive: true,
-                            autoDelete: true);
+                        conventions.RpcReturnQueueNamingConvention(),
+                        passive: false,
+                        durable: true,
+                        exclusive: false,
+                        autoDelete: false);
 
                 var exchange = DeclareAndBindRpcExchange(
                     conventions.RpcResponseExchangeNamingConvention(responseType),
