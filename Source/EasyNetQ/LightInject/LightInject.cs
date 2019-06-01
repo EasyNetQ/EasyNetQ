@@ -1386,7 +1386,7 @@ namespace EasyNetQ.LightInject
                 }
             }
 
-            return default(TValue);
+            return default;
         }
 
         // Excluded from coverage since it is equal to the generic version.
@@ -1420,7 +1420,7 @@ namespace EasyNetQ.LightInject
                 }
             }
 
-            return default(GetInstanceDelegate);
+            return default;
         }
 
         /// <summary>
@@ -1477,7 +1477,7 @@ namespace EasyNetQ.LightInject
                 }
             }
 
-            return default(TValue);
+            return default;
         }
 
         /// <summary>
