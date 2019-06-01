@@ -1,6 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/easynetq/easynetq.svg?label=Ready&title=Ready)](http://waffle.io/easynetq/easynetq)
-[![Stories in Progress](https://badge.waffle.io/easynetq/easynetq.svg?label=In%20Progress&title=In%20Progress)](http://waffle.io/easynetq/easynetq)
-
 [![Build status](https://ci.appveyor.com/api/projects/status/3k82vjb7ugg3okwt?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
 
 [![NuGet status](https://img.shields.io/nuget/v/EasyNetQ.png?maxAge=3600)](https://www.nuget.org/packages/EasyNetQ)
@@ -62,7 +59,7 @@ http://mikehadlow.blogspot.co.uk/search/label/EasyNetQ
 
 ## Getting started
 
-Just open EasyNetQ.sln in VisualStudio 2017 and build.
+Just open EasyNetQ.sln in VisualStudio and build.
 
 All the required dependencies for the solution file to build the software are included. To run the explicit tests that send messages you will have to be running the EasyNetQ.Tests.SimpleService application and have a working local RabbitMQ server (see http://www.rabbitmq.com/ for more details).
 
