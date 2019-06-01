@@ -150,11 +150,11 @@ namespace EasyNetQ.Producer
                     return queueName;
 
                 var queue = advancedBus.QueueDeclare(
-                        conventions.RpcReturnQueueNamingConvention(),
-                        passive: false,
-                        durable: true,
-                        exclusive: false,
-                        autoDelete: false);
+                            conventions.RpcReturnQueueNamingConvention(),
+                            passive: false,
+                            durable: true,
+                            exclusive: false,
+                            autoDelete: false);
 
                 var exchange = DeclareAndBindRpcExchange(
                     conventions.RpcResponseExchangeNamingConvention(responseType),
