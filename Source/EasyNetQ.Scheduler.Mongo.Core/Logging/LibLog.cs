@@ -2442,7 +2442,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core.LibLog.LogProviders
 
         public void Dispose()
         {
-            if(_onDispose != null)
+            if (_onDispose != null)
             {
                 _onDispose();
             }

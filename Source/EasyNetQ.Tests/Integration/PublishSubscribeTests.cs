@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests.Integration
 
         public void Dispose()
         {
-            if(bus != null) bus.Dispose();
+            if (bus != null) bus.Dispose();
         }
 
         // 1. Run this first, should see no messages consumed

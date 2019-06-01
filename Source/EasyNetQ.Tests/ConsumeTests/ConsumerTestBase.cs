@@ -92,7 +92,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 OriginalBody
             );
             
-            if(!waiter.Wait(5000))
+            if (!waiter.Wait(5000))
             {
                 throw new TimeoutException();
             }

@@ -10,9 +10,9 @@ namespace EasyNetQ.Hosepipe
 
         public HosepipeMessage(string body, MessageProperties properties, MessageReceivedInfo info)
         {
-            if(body == null) throw new ArgumentNullException("body");
-            if(properties == null) throw new ArgumentNullException("properties");
-            if(info == null) throw new ArgumentNullException("info");
+            if (body == null) throw new ArgumentNullException("body");
+            if (properties == null) throw new ArgumentNullException("properties");
+            if (info == null) throw new ArgumentNullException("info");
 
             Body = body;
             Properties = properties;

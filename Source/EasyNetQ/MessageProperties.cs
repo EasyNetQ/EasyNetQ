@@ -54,19 +54,19 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
 
-            if(contentTypePresent)      basicProperties.ContentType      =  ContentType; 
-            if(contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding; 
-            if(deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode; 
-            if(priorityPresent)         basicProperties.Priority         =  Priority; 
-            if(correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId; 
-            if(replyToPresent)          basicProperties.ReplyTo          =  ReplyTo; 
-            if(expirationPresent)       basicProperties.Expiration       =  Expiration; 
-            if(messageIdPresent)        basicProperties.MessageId        =  MessageId; 
-            if(timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp); 
-            if(typePresent)             basicProperties.Type             =  Type; 
-            if(userIdPresent)           basicProperties.UserId           =  UserId; 
-            if(appIdPresent)            basicProperties.AppId            =  AppId; 
-            if(clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
+            if (contentTypePresent)      basicProperties.ContentType      =  ContentType; 
+            if (contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding; 
+            if (deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode; 
+            if (priorityPresent)         basicProperties.Priority         =  Priority; 
+            if (correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId; 
+            if (replyToPresent)          basicProperties.ReplyTo          =  ReplyTo; 
+            if (expirationPresent)       basicProperties.Expiration       =  Expiration; 
+            if (messageIdPresent)        basicProperties.MessageId        =  MessageId; 
+            if (timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp); 
+            if (typePresent)             basicProperties.Type             =  Type; 
+            if (userIdPresent)           basicProperties.UserId           =  UserId; 
+            if (appIdPresent)            basicProperties.AppId            =  AppId; 
+            if (clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
 
             if (headersPresent)
             {

@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests
             mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
             bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
-            if(!waiter.Wait(5000))
+            if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
             var are = WaitForConsumerModelDisposedMessage();

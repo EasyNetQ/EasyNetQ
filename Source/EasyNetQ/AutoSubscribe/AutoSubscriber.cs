@@ -207,7 +207,7 @@ namespace EasyNetQ.AutoSubscribe
         private static Action<ISubscriptionConfiguration> AutoSubscriberConsumerInfo(AutoSubscriberConsumerInfo subscriptionInfo)
         {
             var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
-            if(configSettings == null)
+            if (configSettings == null)
             {
                 return subscriptionConfiguration => {};
             }
