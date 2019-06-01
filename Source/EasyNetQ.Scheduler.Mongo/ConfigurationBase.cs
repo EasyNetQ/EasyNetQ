@@ -8,10 +8,9 @@ namespace EasyNetQ.Scheduler.Mongo
         protected static int GetIntAppSetting(string settingKey)
         {
             var appSetting = ConfigurationManager.AppSettings[settingKey];
-            int value;
-            if (!Int32.TryParse(appSetting, out value))
+            if (!int.TryParse(appSetting, out int value))
             {
-                throw new ApplicationException(String.Format("AppSetting '{0}' value '{1}' is not a valid integer",
+                throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid integer",
                     settingKey, appSetting));
             }
 
@@ -21,8 +20,7 @@ namespace EasyNetQ.Scheduler.Mongo
         protected static TimeSpan GetTimeSpanAppSettings(string settingKey)
         {
             var appSetting = ConfigurationManager.AppSettings[settingKey];
-            TimeSpan value;
-            if (!TimeSpan.TryParse(appSetting, out value))
+            if (!TimeSpan.TryParse(appSetting, out TimeSpan value))
             {
                 throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid timespan",
                     settingKey, appSetting));
@@ -34,8 +32,7 @@ namespace EasyNetQ.Scheduler.Mongo
         protected static bool GetBoolAppSetting(string settingKey)
         {
             var appSetting = ConfigurationManager.AppSettings[settingKey];
-            bool value;
-            if (!bool.TryParse(appSetting, out value))
+            if (!bool.TryParse(appSetting, out bool value))
             {
                 throw new ApplicationException(String.Format("AppSetting '{0}' value '{1}' is not a valid boolean",
                     settingKey, appSetting));

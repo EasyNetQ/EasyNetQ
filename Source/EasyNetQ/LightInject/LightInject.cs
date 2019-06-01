@@ -3171,15 +3171,13 @@ namespace EasyNetQ.LightInject
 
         private Delegate GetConstructorDependencyDelegate(Type type, string serviceName)
         {
-            Delegate dependencyDelegate;
-            GetConstructorDependencyFactories(type).TryGetValue(serviceName, out dependencyDelegate);
+            GetConstructorDependencyFactories(type).TryGetValue(serviceName, out var dependencyDelegate);
             return dependencyDelegate;
         }
 
         private Delegate GetPropertyDependencyExpression(Type type, string serviceName)
         {
-            Delegate dependencyDelegate;
-            GetPropertyDependencyFactories(type).TryGetValue(serviceName, out dependencyDelegate);
+            GetPropertyDependencyFactories(type).TryGetValue(serviceName, out var dependencyDelegate);
             return dependencyDelegate;
         }
 
@@ -3281,9 +3279,8 @@ namespace EasyNetQ.LightInject
 
         private Action<IEmitter> GetRegisteredEmitMethod(Type serviceType, string serviceName)
         {
-            Action<IEmitter> emitMethod;
             var registrations = GetEmitMethods(serviceType);
-            registrations.TryGetValue(serviceName, out emitMethod);
+            registrations.TryGetValue(serviceName, out var emitMethod);
             return emitMethod ?? CreateEmitMethodForUnknownService(serviceType, serviceName);
         }
 
@@ -3852,8 +3849,7 @@ namespace EasyNetQ.LightInject
                 return null;
             }
 
-            ServiceRegistration openGenericServiceRegistration;
-            services.TryGetValue(serviceName, out openGenericServiceRegistration);
+            services.TryGetValue(serviceName, out var openGenericServiceRegistration);
             if (openGenericServiceRegistration == null && string.IsNullOrEmpty(serviceName) && services.Count == 1)
             {
                 return services.First().Value;
@@ -5648,8 +5644,7 @@ namespace EasyNetQ.LightInject
         {
             var scope = (Scope)sender;
             scope.Completed -= OnScopeCompleted;
-            object removedInstance;
-            instances.TryRemove(scope, out removedInstance);
+            instances.TryRemove(scope, out var _);
         }
     }
 
