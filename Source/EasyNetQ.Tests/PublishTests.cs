@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests
                  });
 
             var message = new MyMessage { Text = "Hiya!" };
-            mockBuilder.PubSub.PublishAsync(message, c => {})
+            mockBuilder.PubSub.PublishAsync(message, c => { })
                 .GetAwaiter()
                 .GetResult();
             WaitForMessageToPublish();

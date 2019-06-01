@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_subscribe_model()
         {
-            bus.PubSub.Subscribe<TestMessage>("abc", mgs => {});
+            bus.PubSub.Subscribe<TestMessage>("abc", mgs => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_subscribe_async_model()
         {
-            bus.PubSub.Subscribe<TestMessage>("abc", msg => {});
+            bus.PubSub.Subscribe<TestMessage>("abc", msg => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();

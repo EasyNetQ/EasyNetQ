@@ -327,9 +327,9 @@ namespace EasyNetQ.Tests.Integration
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public SomeRandomException() {}
-        public SomeRandomException(string message) : base(message) {}
-        public SomeRandomException(string message, Exception inner) : base(message, inner) {}
+        public SomeRandomException() { }
+        public SomeRandomException(string message) : base(message) { }
+        public SomeRandomException(string message, Exception inner) : base(message, inner) { }
     }
 }
 

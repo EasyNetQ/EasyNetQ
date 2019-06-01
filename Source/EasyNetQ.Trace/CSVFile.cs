@@ -41,7 +41,7 @@ namespace EasyNetQ.Trace
         {
             // Verify required argument
             if (columns == null)
-                throw new ArgumentNullException("columns");
+                throw new ArgumentNullException(nameof(columns));
 
             // Ensure we're using current quote character
             if (OneQuote == null || OneQuote[0] != Quote)

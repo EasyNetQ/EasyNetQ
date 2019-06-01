@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests
         }
 
         class A { }
-        class B : A {}
+        class B : A { }
         class PolyMessage
         {
             public A AorB { get; set; }
