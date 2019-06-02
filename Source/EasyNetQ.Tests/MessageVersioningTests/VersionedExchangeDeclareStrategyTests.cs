@@ -60,7 +60,6 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             exchangeDeclareCount.Should().Be(1);
         }
 
-
         // Unversioned message - exchange declared
         // Versioned message - superseded exchange declared, then superseding, then bind
         [Fact]

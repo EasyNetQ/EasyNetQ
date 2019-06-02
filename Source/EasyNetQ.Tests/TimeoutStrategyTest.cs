@@ -7,7 +7,6 @@ namespace EasyNetQ.Tests
     {
     }
 
-
     public class MessageWithoutTimeoutAttribute
     {
     }

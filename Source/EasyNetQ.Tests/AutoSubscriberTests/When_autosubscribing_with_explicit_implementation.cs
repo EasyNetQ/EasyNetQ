@@ -81,7 +81,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).Should().BeTrue();
         }
 
-
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
         {

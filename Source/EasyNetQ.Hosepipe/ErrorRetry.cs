@@ -27,7 +27,6 @@ namespace EasyNetQ.Hosepipe
             }
         }
 
-
         public void RepublishError(Error error, QueueParameters parameters)
         {
             using (var connection = HosepipeConnection.FromParameters(parameters))

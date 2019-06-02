@@ -4,7 +4,6 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
 using EasyNetQ.DI.LightInject;
 
-
 // ReSharper disable once CheckNamespace
 namespace LightInject
 {

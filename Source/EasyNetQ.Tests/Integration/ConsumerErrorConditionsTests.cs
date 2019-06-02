@@ -108,7 +108,6 @@ namespace EasyNetQ.Tests
             var error = errorMessage.Message.Body;
             Console.WriteLine(error.ToString());
 
-
             error.BasicProperties.Type.Should().Be(typeNameSerializer.Serialize(typeof(MyErrorTestMessage)));
             error.BasicProperties.CorrelationId.Should().Be(correlationId);
             error.BasicProperties.Headers.Should().BeEquivalentTo(headers);

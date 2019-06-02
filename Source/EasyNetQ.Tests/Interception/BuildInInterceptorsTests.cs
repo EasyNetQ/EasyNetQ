@@ -17,7 +17,6 @@ namespace EasyNetQ.Tests.Interception
             Assert.Equal(body, gZipInterceptor.OnConsume(gZipInterceptor.OnProduce(rawMessage)).Body);
         }
 
-
         [Fact]
         public void ShouldEncryptAndDecrypt()
         {
@@ -51,8 +50,7 @@ namespace EasyNetQ.Tests.Interception
             var sourceMessage = new RawMessage(new MessageProperties(), new byte[0]);
             var firstMessage = new RawMessage(new MessageProperties(), new byte[0]);
             var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            
-            
+
             var first = Substitute.For<IProduceConsumeInterceptor>();      
             var second = Substitute.For<IProduceConsumeInterceptor>();
             first.OnConsume(secondMessage).Returns(firstMessage);

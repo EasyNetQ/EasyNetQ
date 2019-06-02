@@ -52,7 +52,6 @@ namespace EasyNetQ.Tests.Integration
                     are.Set();
                 }));
 
-
             bus.SendReceive.Send(queue, new MyMessage { Text = "Hello Widgets!" });
 
             var signalReceived = are.WaitOne(waitTime);

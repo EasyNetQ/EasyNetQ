@@ -25,7 +25,6 @@ namespace EasyNetQ.Tests.Interception
             interceptorRegistrator.Received().Add(Arg.Any<GZipInterceptor>());
         }
 
-
         [Fact]
         public void When_using_EnableTripleDESEncryption_extension_method_required_interceptor_is_added()
         {

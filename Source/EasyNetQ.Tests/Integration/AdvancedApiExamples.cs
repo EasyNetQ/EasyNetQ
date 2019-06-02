@@ -24,7 +24,6 @@ namespace EasyNetQ.Tests.Integration
 
         private IAdvancedBus advancedBus;
 
-
         [Fact]
         [Explicit]
         public void ConsumeFromAQueue()

@@ -58,7 +58,6 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             );
         }
 
-
         [Fact]
         public void Should_hadle_publish_timeout()
         {

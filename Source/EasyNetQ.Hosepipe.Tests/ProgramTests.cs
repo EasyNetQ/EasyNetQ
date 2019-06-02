@@ -90,7 +90,6 @@ namespace EasyNetQ.Hosepipe.Tests
         private readonly string expectedRetryOutput =
             "2 Error messages from directory '" + Directory.GetCurrentDirectory() + "' republished\r\n";
 
-
         [Fact]
         public void Should_retry_errors_with_retry()
         {

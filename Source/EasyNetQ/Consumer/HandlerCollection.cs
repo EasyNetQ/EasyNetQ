@@ -15,7 +15,6 @@ namespace EasyNetQ.Consumer
         private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, CancellationToken, Task>> handlers =
             new Dictionary<Type, Func<IMessage, MessageReceivedInfo, CancellationToken, Task>>();
 
-
         public HandlerCollection()
         {
             ThrowOnNoMatchingHandler = true;
@@ -33,7 +32,6 @@ namespace EasyNetQ.Consumer
             handlers.Add(typeof(T), (m, i, c) => handler((IMessage<T>)m, i, c));
             return this;
         }
-
 
         public Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> GetHandler<T>()
         {

@@ -82,8 +82,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
         }
     }
-    
-    
+
     public class When_autosubscribing_async_explicit_implementation_with_subscription_configuration_attribute : IDisposable
     {
         private readonly IBus bus;

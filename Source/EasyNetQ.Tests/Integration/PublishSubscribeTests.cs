@@ -42,7 +42,6 @@ namespace EasyNetQ.Tests.Integration
             Console.WriteLine("Stopped consuming");
         }
 
-
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe_as_exlusive()
         {
@@ -92,7 +91,6 @@ namespace EasyNetQ.Tests.Integration
 
             Console.WriteLine("Stopped consuming");
         }
-
 
         // 2. Run this a few times, should publish some messages
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]

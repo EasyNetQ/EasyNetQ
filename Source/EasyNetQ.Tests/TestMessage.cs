@@ -15,7 +15,6 @@
     {
     }
 
-
     [Queue("MyQueue")]
     public class QueueNameOnlyAnnotatedTestMessage
     {
@@ -35,7 +34,6 @@
     public interface IEmptyQueueNameAnnotatedTestMessage
     {
     }
-
 
     public class MyMessage
     {

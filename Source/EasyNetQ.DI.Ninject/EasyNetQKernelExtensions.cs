@@ -19,8 +19,7 @@ namespace Ninject
             var serviceRegister = new NinjectAdapter(kernel);
             RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return kernel;
-        }
-        
+        }        
                 
         public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
         {

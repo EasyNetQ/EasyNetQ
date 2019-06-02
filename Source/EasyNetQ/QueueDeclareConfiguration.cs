@@ -66,7 +66,6 @@ namespace EasyNetQ
             return this;
         }
 
-
         public IQueueDeclareConfiguration WithArgument(string name, object value)
         {
             Arguments[name] = value;

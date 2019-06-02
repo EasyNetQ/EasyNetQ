@@ -337,7 +337,6 @@ namespace EasyNetQ
                 .GetResult();
         }
 
-
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
         /// </summary>
@@ -459,7 +458,6 @@ namespace EasyNetQ
                 .GetResult();
         }
 
-
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
         /// </summary>
@@ -547,7 +545,6 @@ namespace EasyNetQ
                 .GetAwaiter()
                 .GetResult();
         }
-
 
         /// <summary>
         /// Declare an exchange
@@ -639,7 +636,6 @@ namespace EasyNetQ
                 .GetAwaiter()
                 .GetResult();
         }
-
 
         /// <summary>
         /// Delete a binding

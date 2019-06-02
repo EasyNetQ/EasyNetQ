@@ -270,7 +270,6 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 typeNameSerializer.DeSerialize(localMessageType.Key).Returns(localMessageType.Value);
             }
 
-
             var serializer = Substitute.For<ISerializer>();
             serializer.BytesToMessage(expectedMessageType, messageBody).Returns(message);
 

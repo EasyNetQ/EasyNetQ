@@ -284,9 +284,7 @@ namespace EasyNetQ
             }
         }
 
-
         // ---------------------------------- Exchange / Queue / Binding -----------------------------------
-
 
         public Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken)
         {

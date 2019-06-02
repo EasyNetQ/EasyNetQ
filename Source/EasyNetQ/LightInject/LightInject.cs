@@ -6612,7 +6612,6 @@ namespace EasyNetQ.LightInject
     }
 #endif
 
-
     /// <summary>
     /// Defines an immutable representation of a key and a value.
     /// </summary>

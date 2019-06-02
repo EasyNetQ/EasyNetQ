@@ -59,7 +59,6 @@ namespace EasyNetQ.Consumer
             return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
         }
 
-
         public void Dispose()
         {
             foreach (var consumer in consumers) consumer.Dispose();

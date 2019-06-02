@@ -93,7 +93,6 @@ namespace EasyNetQ
             pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
         }
 
-
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
         /// </summary>
