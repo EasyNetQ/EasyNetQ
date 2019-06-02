@@ -145,7 +145,7 @@ namespace EasyNetQ.Scheduler
         private static string SerializeToString(MessageProperties properties)
         {
             if (properties == null)
-                throw new ArgumentNullException("properties");
+                throw new ArgumentNullException(nameof(properties));
             return JsonConvert.SerializeObject(properties);
         }
 

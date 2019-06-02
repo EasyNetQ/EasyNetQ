@@ -23,7 +23,7 @@ namespace EasyNetQ
             // https://referencesource.microsoft.com/#mscorlib/system/string.cs,1226
             if (s == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(s));
             }
             if (start < 0)
             {
