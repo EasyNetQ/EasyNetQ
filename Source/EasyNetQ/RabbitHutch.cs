@@ -202,9 +202,6 @@ namespace EasyNetQ
         /// Override default services. For example, to override the default <see cref="ISerializer"/>:
         /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
         /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
         public static void RegisterBus(IServiceRegister serviceRegister,
                                        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
                                        Action<IServiceRegister> registerServices)
