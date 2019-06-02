@@ -5,5 +5,18 @@
         <PackageProduct>EasyNetQ</PackageProduct>
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
+        <!-- Enable periodically if necessary -->
+        <UseAnalyzers Condition="'$(UseAnalyzers)' == ''">true</UseAnalyzers>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(UseAnalyzers)' == 'true'">
+        <NoWarn>$(NoWarn);</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseAnalyzers)' == 'true'">
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 </Project>
