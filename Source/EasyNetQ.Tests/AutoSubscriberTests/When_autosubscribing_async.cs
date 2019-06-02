@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_bound_to_queues()
         {
             // ReSharper disable once CollectionNeverUpdated.Local
-            var parameters = new Dictionary<string, object>(){ };
+            var parameters = new Dictionary<string, object> { };
 
             void ConsumerStarted(int channelIndex, string queueName, string topicName) => 
                 mockBuilder.Channels[0].Received().QueueBind(

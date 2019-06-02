@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                Arg.Is(ConsumerTag),
                Arg.Is(true),
                Arg.Is(false),
-               Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(new Dictionary <string, object>
+               Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>
                    {
                         { "x-priority", 0 }
                    })),

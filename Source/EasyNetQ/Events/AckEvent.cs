@@ -7,7 +7,7 @@
         public byte[] Body { get; }
         public AckResult AckResult { get; }
 
-        public AckEvent(MessageReceivedInfo info, MessageProperties properties, byte[] body , AckResult ackResult)
+        public AckEvent(MessageReceivedInfo info, MessageProperties properties, byte[] body, AckResult ackResult)
         {
             ReceivedInfo = info;
             Properties = properties;
