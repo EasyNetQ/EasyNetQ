@@ -217,7 +217,7 @@ namespace EasyNetQ.Sprache
                     : new Failure<T>(
                         s.Remainder,
                         () => string.Format("unexpected '{0}'", s.Remainder.Current),
-                        () => new[] {"end of input"}));
+                        () => new[] { "end of input" }));
         }
 
         /// <summary>
@@ -441,7 +441,7 @@ namespace EasyNetQ.Sprache
             {
                 var r = except(i);
                 if (r is ISuccess<U>)
-                    return new Failure<T>(i, () => "Excepted parser succeeded.", () => new[] {"other than the excepted input"});
+                    return new Failure<T>(i, () => "Excepted parser succeeded.", () => new[] { "other than the excepted input" });
                 return parser(i);
             };
         }

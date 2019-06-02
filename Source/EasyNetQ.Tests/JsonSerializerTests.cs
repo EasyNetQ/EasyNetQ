@@ -56,8 +56,8 @@ namespace EasyNetQ.Tests
                 UserId = "user id",
                 Headers = new Dictionary<string, object>
                 {
-                    {"one", "header one"},
-                    {"two", "header two"}
+                    { "one", "header one" },
+                    { "two", "header two" }
                 }
             };
 

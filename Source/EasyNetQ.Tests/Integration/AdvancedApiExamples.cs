@@ -126,7 +126,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine("Got message {0}", message.Body.Text)));
 
             // publish the message to retry queue which should end up in the main queue after expiration
-            advancedBus.Publish(exchange, "routing_key", false, new Message<MyMessage>(new MyMessage { Text = "My Message" }, new MessageProperties {Expiration = "50"}));
+            advancedBus.Publish(exchange, "routing_key", false, new Message<MyMessage>(new MyMessage { Text = "My Message" }, new MessageProperties { Expiration = "50" }));
 
             Thread.Sleep(1000);
         }
@@ -150,7 +150,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine("Got message {0}", message.Body.Text)));
 
             // publish message to the retry queue which should dead letter to main queue after expiration
-            advancedBus.Publish(exchange, "retry_routing_key", false, new Message<MyMessage>(new MyMessage { Text = "My Message" }, new MessageProperties {Expiration = "50"}));
+            advancedBus.Publish(exchange, "retry_routing_key", false, new Message<MyMessage>(new MyMessage { Text = "My Message" }, new MessageProperties { Expiration = "50" }));
 
             Thread.Sleep(1000);
         }

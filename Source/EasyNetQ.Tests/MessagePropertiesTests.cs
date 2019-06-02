@@ -74,8 +74,8 @@ namespace EasyNetQ.Tests
             var stringBuilder = new StringBuilder();
             var headers = new Dictionary<string, object>
                 {
-                    {"key1", "value1"},
-                    {"key2", "value2"}
+                    { "key1", "value1" },
+                    { "key2", "value2" }
                 };
 
             var properties = new MessageProperties

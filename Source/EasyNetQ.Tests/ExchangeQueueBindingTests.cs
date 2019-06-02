@@ -354,7 +354,7 @@ namespace EasyNetQ.Tests
             var exchange = new Exchange("my_exchange");
             var queue = new Topology.Queue("my_queue", false);
 
-            binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> {["header1"] = "value1"});
+            binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
         }
 
         public void Dispose()
@@ -380,7 +380,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_declare_a_binding()
         {
-            var expectedHeaders = new Dictionary<string, object> {["header1"] = "value1"};
+            var expectedHeaders = new Dictionary<string, object> { ["header1"] = "value1" };
 
             mockBuilder.Channels[0].Received().QueueBind(
                 Arg.Is("my_queue"),

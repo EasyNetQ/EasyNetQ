@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.Integration
                 throw new Exception("Something bad happened!");
             });
 
-            bus.PubSub.Publish(new MyMessage{ Text = "this will inevitably fail"});
+            bus.PubSub.Publish(new MyMessage { Text = "this will inevitably fail" });
 
             // allow time for the subscription exception to throw and the 
             // error message to get written.

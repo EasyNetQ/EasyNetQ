@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                Arg.Is(false),
                Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(new Dictionary <string, object>
                    {
-                        {"x-priority", 0}
+                        { "x-priority", 0 }
                    })),
                Arg.Is(MockBuilder.Consumers[0]));
         }
