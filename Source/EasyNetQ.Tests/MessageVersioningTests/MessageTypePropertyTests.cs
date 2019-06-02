@@ -54,16 +54,16 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             property.AppendTo( properties );
 
             Assert.Equal( properties.Type,  typeNameSerialiser.Serialize( typeof( MyMessageV2 ) ) );
-            Assert.Equal( properties.Headers[ AlternativeMessageTypesHeaderKey ],  typeNameSerialiser.Serialize( typeof( MyMessage ) ) );
+            Assert.Equal( properties.Headers[AlternativeMessageTypesHeaderKey], typeNameSerialiser.Serialize( typeof( MyMessage ) ) );
         }
 
         [Fact]
         public void MessageTypeProperty_is_created_correctly_from_message_properties_for_unversioned_message()
         {
             var typeNameSerialiser = new DefaultTypeNameSerializer();
-            var properties = new MessageProperties {Type = typeNameSerialiser.Serialize( typeof( MyMessage ) )};
+            var properties = new MessageProperties { Type = typeNameSerialiser.Serialize(typeof(MyMessage)) };
 
-            var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
+            var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerialiser);
             var messageType = property.GetMessageType();
 
             Assert.Equal(typeof(MyMessage), messageType);
@@ -73,7 +73,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         public void MessageTypeProperty_is_created_correctly_from_message_properties_for_versioned_message()
         {
             var typeNameSerialiser = new DefaultTypeNameSerializer();
-            var properties = new MessageProperties {Type = typeNameSerialiser.Serialize( typeof( MyMessageV2 ) )};
+            var properties = new MessageProperties { Type = typeNameSerialiser.Serialize(typeof(MyMessageV2)) };
             var encodedAlternativeMessageTypes = Encoding.UTF8.GetBytes( typeNameSerialiser.Serialize( typeof( MyMessage ) ) );
             properties.Headers.Add( AlternativeMessageTypesHeaderKey, encodedAlternativeMessageTypes );
 
@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var alternativeTypes = string.Concat( v2, ";", v1 );
             var encodedAlternativeTypes = Encoding.UTF8.GetBytes( alternativeTypes );
 
-            var properties = new MessageProperties {Type = vUnknown };
+            var properties = new MessageProperties { Type = vUnknown };
             properties.Headers.Add( AlternativeMessageTypesHeaderKey, encodedAlternativeTypes );
 
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
@@ -113,7 +113,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var alternativeTypes = string.Concat( vUnknown1, ";", v2, ";", v1 );
             var encodedAlternativeTypes = Encoding.UTF8.GetBytes( alternativeTypes );
 
-            var properties = new MessageProperties {Type = vUnknown2 };
+            var properties = new MessageProperties { Type = vUnknown2 };
             properties.Headers.Add( AlternativeMessageTypesHeaderKey, encodedAlternativeTypes );
 
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );
@@ -133,7 +133,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var alternativeTypes = string.Concat( vUnknown2, ";", vUnknown1 );
             var encodedAlternativeTypes = Encoding.UTF8.GetBytes( alternativeTypes );
 
-            var properties = new MessageProperties {Type = vUnknown3 };
+            var properties = new MessageProperties { Type = vUnknown3 };
             properties.Headers.Add( AlternativeMessageTypesHeaderKey, encodedAlternativeTypes );
 
             var property = MessageTypeProperty.ExtractFromProperties( properties, typeNameSerialiser );

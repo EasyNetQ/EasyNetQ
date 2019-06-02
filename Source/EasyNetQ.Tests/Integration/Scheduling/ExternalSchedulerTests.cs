@@ -44,7 +44,7 @@ namespace EasyNetQ.Tests.Integration.Scheduling
 
             bus.Scheduler.FuturePublish(invitation, TimeSpan.FromSeconds(3));
 
-            if(! autoResetEvent.WaitOne(100000))
+            if (!autoResetEvent.WaitOne(100000))
                 Assert.True(false);
         }
 

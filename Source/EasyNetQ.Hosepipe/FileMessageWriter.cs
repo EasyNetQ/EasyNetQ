@@ -26,7 +26,7 @@ namespace EasyNetQ.Hosepipe
                 var propertiesPath = Path.Combine(parameters.MessagesOutputDirectory, uniqueFileName + ".properties.txt");
                 var infoPath = Path.Combine(parameters.MessagesOutputDirectory, uniqueFileName + ".info.txt");
                 
-                if(File.Exists(bodyPath))
+                if (File.Exists(bodyPath))
                 {
                     Console.WriteLine("Overwriting existing message file: {0}", bodyPath);
                 }

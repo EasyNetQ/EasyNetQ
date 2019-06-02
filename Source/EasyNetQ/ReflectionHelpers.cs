@@ -29,12 +29,11 @@ namespace EasyNetQ
 
         public static TAttribute GetAttribute<TAttribute>(this Type type) where TAttribute : Attribute
         {
-            Attribute[] attributes;
-            if (GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out attributes) && attributes.Length > 0)
+            if (GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out var attributes) && attributes.Length > 0)
             {
                 return (TAttribute)attributes[0];
             }
-            return default(TAttribute);
+            return default;
         }
     }
 }

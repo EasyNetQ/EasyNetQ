@@ -49,7 +49,7 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus()
         {
-            return CreateBus(c => {});
+            return CreateBus(c => { });
         }
 #endif
         /// <summary>

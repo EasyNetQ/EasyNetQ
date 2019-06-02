@@ -23,7 +23,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
-            return pubSub.PublishAsync(message, c => {}, cancellationToken);
+            return pubSub.PublishAsync(message, c => { }, cancellationToken);
         }
         
         /// <summary>

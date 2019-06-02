@@ -32,7 +32,7 @@ namespace EasyNetQ
             // set to 50 based on this blog post:
             // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
             PrefetchCount = 50;
-            AuthMechanisms = new AuthMechanismFactory[] {new PlainMechanismFactory()};
+            AuthMechanisms = new AuthMechanismFactory[] { new PlainMechanismFactory() };
 
             Hosts = new List<HostConfiguration>();
 
@@ -150,7 +150,7 @@ namespace EasyNetQ
                     VirtualHost = AMQPConnectionString.Segments.Last();
                 }
 
-                Hosts = Hosts.Concat(new[] {new HostConfiguration {Host = AMQPConnectionString.Host}});
+                Hosts = Hosts.Concat(new[] { new HostConfiguration { Host = AMQPConnectionString.Host } });
             }
 
             if (!Hosts.Any())

@@ -25,10 +25,10 @@ namespace EasyNetQ.Tests.Integration
         [Explicit("Requires a broker on localhost to run")]
         public void Should_not_throw_when_over_long_message_is_published()
         {
-            var message =
-                new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes();
-
-            message.Text = "Some Text";
+            var message = new MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes
+            {
+                Text = "Some Text"
+            };
 
             bus.PubSub.Publish(message);
         }

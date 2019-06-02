@@ -37,7 +37,7 @@ namespace EasyNetQ.Producer
 
         public void Dispose()
         {
-            if(dispatcher.IsValueCreated) dispatcher.Value.Dispose();
+            if (dispatcher.IsValueCreated) dispatcher.Value.Dispose();
         }
     }
 }

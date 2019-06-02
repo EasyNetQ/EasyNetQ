@@ -17,12 +17,12 @@ namespace EasyNetQ.Tests.Integration
 
         private readonly Dictionary<Type, string> customRpcRequestConventionDictionary = new Dictionary<Type, string>()
         {
-            {typeof (TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange"}
+            { typeof(TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange" }
         };
 
         private readonly Dictionary<Type, string> customRpcResponseConventionDictionary = new Dictionary<Type, string>()
         {
-            {typeof (TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange"}
+            { typeof(TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange" }
         };
 
         public RequestResponseTests()
@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests.Integration
             for (int i = 0; i < numberOfCalls; i++)
             {
                 bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
-                    new TestRequestMessage {Text = string.Format("Hello from client number: {0}! ", i)})
+                    new TestRequestMessage { Text = string.Format("Hello from client number: {0}! ", i) })
                     .ContinueWith(
                         response =>
                             {
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_do_simple_request_response()
         {
-            var request = new TestRequestMessage {Text = "Hello from the client! "};
+            var request = new TestRequestMessage { Text = "Hello from the client! " };
 
             Console.WriteLine("Making request");
             var response = bus.Rpc.Request<TestRequestMessage, TestResponseMessage>(request);
@@ -109,7 +109,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_make_a_request_that_runs_async_on_the_server()
         {
             var autoResetEvent = new AutoResetEvent(false);
-            var request = new TestAsyncRequestMessage {Text = "Hello async from the client!"};
+            var request = new TestAsyncRequestMessage { Text = "Hello async from the client!" };
 
             Console.Out.WriteLine("Making request");
             bus.Rpc.RequestAsync<TestAsyncRequestMessage, TestAsyncResponseMessage>(request).ContinueWith(response =>
@@ -327,9 +327,9 @@ namespace EasyNetQ.Tests.Integration
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public SomeRandomException() {}
-        public SomeRandomException(string message) : base(message) {}
-        public SomeRandomException(string message, Exception inner) : base(message, inner) {}
+        public SomeRandomException() { }
+        public SomeRandomException(string message) : base(message) { }
+        public SomeRandomException(string message, Exception inner) : base(message, inner) { }
     }
 }
 

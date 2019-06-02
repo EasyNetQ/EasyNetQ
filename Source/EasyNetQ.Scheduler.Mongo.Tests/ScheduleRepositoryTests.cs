@@ -53,7 +53,7 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             while (true)
             {
                 var schedule = scheduleRepository.GetPending();
-                if(schedule == null)
+                if (schedule == null)
                     break;
                 Console.WriteLine("{0}, {1}, {2}",
                                   schedule.BindingKey,

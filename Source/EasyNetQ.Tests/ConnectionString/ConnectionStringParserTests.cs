@@ -41,10 +41,10 @@ namespace EasyNetQ.Tests.ConnectionString
         public static IEnumerable<object[]> AppendixAExamples()
 // ReSharper restore UnusedMethodReturnValue.Local
         {
-            yield return new[] {new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000, "vhost")};
-            yield return new[] {new AmqpSpecification(new Uri("amqp://"), "", 5672, "/")};
-            yield return new[] {new AmqpSpecification(new Uri("amqp://host"), "host", 5672, "/")};
-            yield return new[] {new AmqpSpecification(new Uri("amqps://host"), "host", 5671, "/")};
+            yield return new[] { new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000, "vhost") };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://"), "", 5672, "/") };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://host"), "host", 5672, "/") };
+            yield return new[] { new AmqpSpecification(new Uri("amqps://host"), "host", 5671, "/") };
         }
 
         public class AmqpSpecification

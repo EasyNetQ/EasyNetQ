@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
             parameters = new Dictionary<string, object>();
-            autoSubscriber.Subscribe(new [] {typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)});
+            autoSubscriber.Subscribe(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) });
         }
 
         public void Dispose()

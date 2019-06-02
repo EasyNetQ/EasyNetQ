@@ -102,8 +102,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             const string correlationId = "CorrelationId";
             var messageTypes = new Dictionary<string, Type>
                 {
-                    {messageType, typeof( MyMessageV2 )},
-                    {supersededMessageType, typeof( MyMessage )}
+                    { messageType, typeof(MyMessageV2) },
+                    { supersededMessageType, typeof(MyMessage) }
                 };
 
             var message = new Message<MyMessageV2>(new MyMessageV2());
@@ -123,8 +123,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             const string correlationId = "CorrelationId";
             var messageTypes = new Dictionary<string, Type>
                 {
-                    {messageType, typeof( MyMessageV2 )},
-                    {supersededMessageType, typeof( MyMessage )}
+                    { messageType, typeof(MyMessageV2) },
+                    { supersededMessageType, typeof(MyMessage) }
                 };
 
             var message = new Message<MyMessageV2>(new MyMessageV2())
@@ -148,8 +148,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             const string correlationId = "CorrelationId";
             var messageTypes = new Dictionary<string, Type>
                 {
-                    {messageType, typeof( MyMessageV2 )},
-                    {supersededMessageType, typeof( MyMessage )}
+                    { messageType, typeof(MyMessageV2) },
+                    { supersededMessageType, typeof(MyMessage) }
                 };
 
             var message = new Message<MyMessageV2>(new MyMessageV2 { Text = messageContent })

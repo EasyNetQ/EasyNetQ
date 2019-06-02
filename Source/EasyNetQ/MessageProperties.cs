@@ -54,19 +54,19 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
 
-            if(contentTypePresent)      basicProperties.ContentType      =  ContentType; 
-            if(contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding; 
-            if(deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode; 
-            if(priorityPresent)         basicProperties.Priority         =  Priority; 
-            if(correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId; 
-            if(replyToPresent)          basicProperties.ReplyTo          =  ReplyTo; 
-            if(expirationPresent)       basicProperties.Expiration       =  Expiration; 
-            if(messageIdPresent)        basicProperties.MessageId        =  MessageId; 
-            if(timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp); 
-            if(typePresent)             basicProperties.Type             =  Type; 
-            if(userIdPresent)           basicProperties.UserId           =  UserId; 
-            if(appIdPresent)            basicProperties.AppId            =  AppId; 
-            if(clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
+            if (contentTypePresent)      basicProperties.ContentType      =  ContentType; 
+            if (contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding; 
+            if (deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode; 
+            if (priorityPresent)         basicProperties.Priority         =  Priority; 
+            if (correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId; 
+            if (replyToPresent)          basicProperties.ReplyTo          =  ReplyTo; 
+            if (expirationPresent)       basicProperties.Expiration       =  Expiration; 
+            if (messageIdPresent)        basicProperties.MessageId        =  MessageId; 
+            if (timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp); 
+            if (typePresent)             basicProperties.Type             =  Type; 
+            if (userIdPresent)           basicProperties.UserId           =  UserId; 
+            if (appIdPresent)            basicProperties.AppId            =  AppId; 
+            if (clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
 
             if (headersPresent)
             {
@@ -367,15 +367,14 @@ namespace EasyNetQ
         {
             if (value == null) return "NULL";
 
-            var dictionary = value as IDictionary<string, object>;
-            if (dictionary == null) return value.ToString();
-
-            return dictionary
-                .Select(x => string.Format("{0}={1}", x.Key, x.Value))
-                .Intersperse(", ")
-                .SurroundWith("[", "]")
-                .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
-                .ToString();
+            return value is IDictionary<string, object> dictionary
+                ? dictionary
+                    .Select(x => string.Format("{0}={1}", x.Key, x.Value))
+                    .Intersperse(", ")
+                    .SurroundWith("[", "]")
+                    .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
+                    .ToString()
+                : value.ToString();
         }
 
         private static string CheckShortString(string input, string name)

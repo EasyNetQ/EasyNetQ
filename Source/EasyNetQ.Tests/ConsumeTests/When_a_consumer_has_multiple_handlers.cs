@@ -40,8 +40,8 @@ namespace EasyNetQ.Tests.ConsumeTests
                     })
             );
 
-            Deliver(new MyMessage {Text = "Hello Polymorphs!"});
-            Deliver(new MyOtherMessage {Text = "Hello Isomorphs!"});
+            Deliver(new MyMessage { Text = "Hello Polymorphs!" });
+            Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
             Deliver(new Dog());
 
             if (!countdownEvent.Wait(5000)) throw new TimeoutException();

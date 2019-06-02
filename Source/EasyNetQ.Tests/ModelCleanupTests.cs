@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_subscribe_model()
         {
-            bus.PubSub.Subscribe<TestMessage>("abc", mgs => {});
+            bus.PubSub.Subscribe<TestMessage>("abc", mgs => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -48,7 +48,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_subscribe_async_model()
         {
-            bus.PubSub.Subscribe<TestMessage>("abc", msg => {});
+            bus.PubSub.Subscribe<TestMessage>("abc", msg => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests
             mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
             bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
-            if(!waiter.Wait(5000))
+            if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
             var are = WaitForConsumerModelDisposedMessage();

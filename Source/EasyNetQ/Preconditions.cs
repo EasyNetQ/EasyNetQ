@@ -85,12 +85,12 @@ namespace EasyNetQ
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException("name must not be blank", "name");
+                throw new ArgumentException("name must not be blank", nameof(name));
             }
 
             if (string.IsNullOrWhiteSpace(message))
             {
-                throw new ArgumentException("message must not be blank", "message");
+                throw new ArgumentException("message must not be blank", nameof(message));
             }
 
             if (string.IsNullOrWhiteSpace(value))

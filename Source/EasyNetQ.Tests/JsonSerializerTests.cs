@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_be_able_to_serialize_and_deserialize_a_message()
         {
-            var message = new MyMessage {Text = "Hello World"};
+            var message = new MyMessage { Text = "Hello World" };
 
             var binaryMessage = serializer.MessageToBytes(typeof(MyMessage), message);
             var deserializedMessage = (MyMessage)serializer.BytesToMessage(typeof(MyMessage), binaryMessage);
@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests
         }
 
         class A { }
-        class B : A {}
+        class B : A { }
         class PolyMessage
         {
             public A AorB { get; set; }

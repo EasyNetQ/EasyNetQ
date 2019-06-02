@@ -41,8 +41,8 @@ namespace EasyNetQ.Scheduler.Tests
         {
             var pendingSchedule = new List<ScheduleMe>
             {
-                new ScheduleMe {RoutingKey = "msg1"},
-                new ScheduleMe {RoutingKey = "msg2"},
+                new ScheduleMe { RoutingKey = "msg1" },
+                new ScheduleMe { RoutingKey = "msg2" },
             };
 
             scheduleRepository.GetPending().Returns(pendingSchedule);

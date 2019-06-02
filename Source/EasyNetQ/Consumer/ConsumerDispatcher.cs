@@ -30,7 +30,7 @@ namespace EasyNetQ.Consumer
                         logger.ErrorException(string.Empty, exception);
                     }
                 }
-            }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
+            }) { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
             thread.Start();
         }
 

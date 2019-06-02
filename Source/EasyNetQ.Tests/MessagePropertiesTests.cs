@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests
             const string replyTo = "reply to";
 
             var properties = new MessageProperties();
-            var originalProperties = new BasicProperties {ReplyTo = replyTo};
+            var originalProperties = new BasicProperties { ReplyTo = replyTo };
 
             properties.CopyFrom(originalProperties);
 
@@ -105,7 +105,7 @@ namespace EasyNetQ.Tests
             var longInput = new String('*', 256);
 
             var properties = new MessageProperties();
-            var stringFields = properties.GetType().GetProperties().Where(x => x.PropertyType == typeof (String));
+            var stringFields = properties.GetType().GetProperties().Where(x => x.PropertyType == typeof(string));
             foreach (var propertyInfo in stringFields)
             {
                 var threw = false;

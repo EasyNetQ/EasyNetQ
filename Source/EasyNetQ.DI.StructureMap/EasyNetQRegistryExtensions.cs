@@ -28,7 +28,7 @@ namespace StructureMap
                 throw new ArgumentNullException(nameof(registry));
             }
             
-            return registry.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return registry.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IRegistry RegisterEasyNetQ(this IRegistry registry, string connectionString, Action<IServiceRegister> registerServices)

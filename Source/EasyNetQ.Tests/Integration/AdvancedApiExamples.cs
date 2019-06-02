@@ -127,7 +127,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine("Got message {0}", message.Body.Text)));
 
             // publish the message to retry queue which should end up in the main queue after expiration
-            advancedBus.Publish(exchange, "routing_key", false, new Message<MyMessage>(new MyMessage() {Text = "My Message"}, new MessageProperties {Expiration = "50"}));
+            advancedBus.Publish(exchange, "routing_key", false, new Message<MyMessage>(new MyMessage { Text = "My Message" }, new MessageProperties {Expiration = "50"}));
 
             Thread.Sleep(1000);
         }
@@ -151,7 +151,7 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine("Got message {0}", message.Body.Text)));
 
             // publish message to the retry queue which should dead letter to main queue after expiration
-            advancedBus.Publish(exchange, "retry_routing_key", false, new Message<MyMessage>(new MyMessage() {Text = "My Message"}, new MessageProperties {Expiration = "50"}));
+            advancedBus.Publish(exchange, "retry_routing_key", false, new Message<MyMessage>(new MyMessage { Text = "My Message" }, new MessageProperties {Expiration = "50"}));
 
             Thread.Sleep(1000);
         }
@@ -176,7 +176,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_get_a_message()
         {
             var queue = advancedBus.QueueDeclare("get_test");
-            advancedBus.Publish(Exchange.GetDefault(), "get_test", false, new Message<MyMessage>(new MyMessage {Text = "Oh! Hello!"}));
+            advancedBus.Publish(Exchange.GetDefault(), "get_test", false, new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
 
             var getResult = advancedBus.GetMessage<MyMessage>(queue);
 
@@ -195,7 +195,7 @@ namespace EasyNetQ.Tests.Integration
         public void Should_be_able_to_get_queue_length()
         {
             var queue = advancedBus.QueueDeclare("count_test");
-            advancedBus.Publish(Exchange.GetDefault(), "count_test", false, new Message<MyMessage>(new MyMessage {Text = "Oh! Hello!"}));
+            advancedBus.Publish(Exchange.GetDefault(), "count_test", false, new Message<MyMessage>(new MyMessage { Text = "Oh! Hello!" }));
             var messageCount = advancedBus.GetMessagesCount(queue);
             Console.WriteLine("{0} messages in queue", messageCount);
         }
@@ -209,7 +209,7 @@ namespace EasyNetQ.Tests.Integration
                 Task.Factory.StartNew(() =>
                     Console.WriteLine("Got message {0}", message.Body.Text)));
 
-            advancedBus.Publish(Exchange.GetDefault(), "consume_test", false, new Message<MyMessage>(new MyMessage {Text = "Wotcha!"}));
+            advancedBus.Publish(Exchange.GetDefault(), "consume_test", false, new Message<MyMessage>(new MyMessage { Text = "Wotcha!" }));
 
             Thread.Sleep(1000);
         }

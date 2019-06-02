@@ -110,7 +110,7 @@ namespace EasyNetQ.Hosepipe
                 arguments.At(0, "?", PrintUsage);
 
                 // print usage if there are no arguments
-                arguments.At(0, a => {}).FailWith(PrintUsage);
+                arguments.At(0, a => { }).FailWith(PrintUsage);
             }
             catch (EasyNetQHosepipeException easyNetQHosepipeException)
             {
@@ -118,7 +118,7 @@ namespace EasyNetQ.Hosepipe
                 Console.WriteLine(easyNetQHosepipeException.Message);
             }
 
-            if(!succeeded)
+            if (!succeeded)
             {
                 Console.WriteLine("Operation failed");
                 Console.Write(results.ToString());
@@ -148,7 +148,7 @@ namespace EasyNetQ.Hosepipe
 
         private void ErrorDump(QueueParameters parameters)
         {
-            if(parameters.QueueName == null)
+            if (parameters.QueueName == null)
                 parameters.QueueName = conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
             Dump(parameters);
         }
@@ -181,7 +181,7 @@ namespace EasyNetQ.Hosepipe
         {
             using (var manifest = typeof(Program).GetTypeInfo().Assembly.GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt"))
             {
-                if(manifest == null)
+                if (manifest == null)
                 {
                     throw new Exception("Could not load usage");
                 }

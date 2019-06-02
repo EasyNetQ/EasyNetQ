@@ -11,8 +11,8 @@ namespace EasyNetQ.Hosepipe
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public EasyNetQHosepipeException() {}
-        public EasyNetQHosepipeException(string message) : base(message) {}
-        public EasyNetQHosepipeException(string message, Exception inner) : base(message, inner) {}
+        public EasyNetQHosepipeException() { }
+        public EasyNetQHosepipeException(string message) : base(message) { }
+        public EasyNetQHosepipeException(string message, Exception inner) : base(message, inner) { }
     }
 }
