@@ -41,12 +41,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_declared_the_queues()
         {
-            void VerifyQueueDeclared(string queueName) => 
+            void VerifyQueueDeclared(string queueName) =>
                 mockBuilder.Channels[0].Received().QueueDeclare(
-                    queue: Arg.Is(value: queueName), 
-                    durable: Arg.Is(true), 
-                    exclusive: Arg.Is(false), 
-                    autoDelete: Arg.Is(false), 
+                    queue: Arg.Is(value: queueName),
+                    durable: Arg.Is(true),
+                    exclusive: Arg.Is(false),
+                    autoDelete: Arg.Is(false),
                     arguments: Arg.Any<IDictionary<string, object>>()
                 );
 
@@ -61,11 +61,11 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             // ReSharper disable once CollectionNeverUpdated.Local
             var parameters = new Dictionary<string, object> { };
 
-            void ConsumerStarted(int channelIndex, string queueName, string topicName) => 
+            void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
                 mockBuilder.Channels[0].Received().QueueBind(
-                    queue: Arg.Is(value: queueName), 
-                    exchange: Arg.Any<string>(), 
-                    routingKey: Arg.Is(value: topicName), 
+                    queue: Arg.Is(value: queueName),
+                    exchange: Arg.Any<string>(),
+                    routingKey: Arg.Is(value: topicName),
                     arguments: Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(parameters))
                 );
 

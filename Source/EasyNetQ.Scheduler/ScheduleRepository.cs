@@ -20,7 +20,7 @@ namespace EasyNetQ.Scheduler
     public class ScheduleRepository : IScheduleRepository
     {
         private readonly ILog logger = LogManager.GetLogger(typeof(ScheduleRepository));
-        
+
         private readonly ScheduleRepositoryConfiguration configuration;
         private readonly Func<DateTime> now;
         private readonly ISqlDialect dialect;

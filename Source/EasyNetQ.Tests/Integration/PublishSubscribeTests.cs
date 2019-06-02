@@ -162,7 +162,7 @@ namespace EasyNetQ.Tests.Integration
 
         // 6. Run publish first using '2' above.
         // 7. Run this test, while it's running, restart the RabbitMQ service.
-        // 
+        //
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Long_running_subscriber_should_survive_a_rabbit_restart()
         {
@@ -211,9 +211,9 @@ namespace EasyNetQ.Tests.Integration
             var subscribeBus2 = RabbitHutch.CreateBus(connectionString);
 
             // first set up the subscribers
-            subscribeBus1.PubSub.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus1.PubSub.Subscribe<MyMessage>("roundRobinTest", message =>
                 Console.WriteLine("Subscriber 1: {0}", message.Text));
-            subscribeBus2.PubSub.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus2.PubSub.Subscribe<MyMessage>("roundRobinTest", message =>
                 Console.WriteLine("Subscriber 2: {0}", message.Text));
 
             // now publish some messages

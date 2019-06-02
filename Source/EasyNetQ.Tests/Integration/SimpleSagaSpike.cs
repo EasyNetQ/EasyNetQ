@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests.Integration
                     bus.PubSub.Publish(endMessage);
                 });
             });
-            
+
             // setup the RPC endpoint
             Console.WriteLine("Setting up the RPC endpoint");
             bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(request =>

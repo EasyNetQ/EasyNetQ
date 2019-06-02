@@ -103,5 +103,5 @@ namespace EasyNetQ.Tests.MessageVersioningTests
     public class ComplexMessage : AdvancedMessage, ISupersede<AdvancedMessage>
     {
         public string SoComplex { get; set; }
-    }    
+    }
 }

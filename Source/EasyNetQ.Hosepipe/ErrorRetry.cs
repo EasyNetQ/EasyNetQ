@@ -51,7 +51,7 @@ namespace EasyNetQ.Hosepipe
                     Console.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'",
                         error.Exchange, parameters.HostName, parameters.VHost);
                 }
-            }            
+            }
         }
     }
 }

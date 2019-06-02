@@ -71,12 +71,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                 properties,
                 body
                 );
-            
+
             if (!autoResetEvent.WaitOne(5000))
             {
                 throw new TimeoutException();
             }
-        }       
+        }
     }
 }
 

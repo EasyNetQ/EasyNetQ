@@ -39,7 +39,7 @@ namespace EasyNetQ.Scheduler
         public void Start()
         {
             log.DebugFormat("Starting SchedulerService");
-            
+
             bus.PubSub.Subscribe<ScheduleMe>(SchedulerSubscriptionId, OnMessage);
             bus.PubSub.Subscribe<UnscheduleMe>(SchedulerSubscriptionId, OnMessage);
 

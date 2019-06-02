@@ -7,6 +7,6 @@ namespace EasyNetQ
         public string GetCorrelationId()
         {
             return Guid.NewGuid().ToString();
-        } 
+        }
     }
 }

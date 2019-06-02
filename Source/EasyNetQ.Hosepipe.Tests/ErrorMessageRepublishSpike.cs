@@ -70,7 +70,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        private const string errorMessage = 
+        private const string errorMessage =
 @"{
     ""RoutingKey"":""originalRoutingKey"",
     ""Exchange"":""orginalExchange"",

@@ -14,7 +14,7 @@ namespace EasyNetQ
         bool MessageAvailable { get; }
 
         /// <summary>
-        /// The message retrieved from the queue. 
+        /// The message retrieved from the queue.
         /// This property will throw a MessageNotAvailableException if no message
         /// was available. You should check the MessageAvailable property before
         /// attempting to access it.
@@ -82,7 +82,7 @@ namespace EasyNetQ
         //
 
         public MessageNotAvailableException() : base(
-            "No message currently on queue. Check the MessageAvailable property on " + 
+            "No message currently on queue. Check the MessageAvailable property on " +
             "IBasicGetResult before attempting to access the Message property.")
         {
         }

@@ -29,7 +29,7 @@ namespace EasyNetQ.Producer
         /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
         AwaitableDisposable<IDisposable> ReceiveAsync<T>(
             string queue,
-            Func<T, CancellationToken, Task> onMessage, 
+            Func<T, CancellationToken, Task> onMessage,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
         );
@@ -43,8 +43,8 @@ namespace EasyNetQ.Producer
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
         AwaitableDisposable<IDisposable> ReceiveAsync(
-            string queue, 
-            Action<IReceiveRegistration> addHandlers, 
+            string queue,
+            Action<IReceiveRegistration> addHandlers,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
         );

@@ -29,9 +29,9 @@ namespace EasyNetQ.Tests.Integration
             foreach (var subscriberInfo in subscriberInfos)
             {
                 var subscribeMethod = genericSubscribeMethod.MakeGenericMethod(new[] { subscriberInfo.MessageType });
-                
+
                 var subscriberInstance = Activator.CreateInstance(subscriberInfo.SubscriberType);
-                
+
                 var subscriberId = subscriberInfo
                     .SubscriberType
                     .GetProperty("SubscriberId")

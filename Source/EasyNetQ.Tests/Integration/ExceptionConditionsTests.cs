@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests
                     Console.Out.WriteLine("Deleting Exchange: {0}", exchange.Name);
                     client.DeleteExchange(exchange);
                 }
-            }            
+            }
         }
 
         public void OccasionallyKillConnections()

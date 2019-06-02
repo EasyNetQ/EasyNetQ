@@ -8,12 +8,12 @@ namespace EasyNetQ.Topology
     public interface IExchange : IBindable
     {
         /// <summary>
-        /// The exchange name. 
+        /// The exchange name.
         /// </summary>
         string Name { get; }
 
         /// <summary>
-        /// The exchange type. 
+        /// The exchange type.
         /// </summary>
         string Type { get; }
 

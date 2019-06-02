@@ -13,7 +13,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, nameof(queue));
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
-            
+
             return new QueueConsumerPair(queue, null, h => h.Add(onMessage));
         }
 

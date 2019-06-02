@@ -66,10 +66,10 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_be_able_to_write_debug_properties()
         {
-            const string expectedDebugProperties = 
-                "ContentType=content_type, ContentEncoding=content_encoding, " + 
-                "Headers=[key1=value1, key2=value2], DeliveryMode=10, Priority=3, CorrelationId=NULL, " + 
-                "ReplyTo=reply_to, Expiration=expiration, MessageId=message_id, Timestamp=123456, Type=type, " + 
+            const string expectedDebugProperties =
+                "ContentType=content_type, ContentEncoding=content_encoding, " +
+                "Headers=[key1=value1, key2=value2], DeliveryMode=10, Priority=3, CorrelationId=NULL, " +
+                "ReplyTo=reply_to, Expiration=expiration, MessageId=message_id, Timestamp=123456, Type=type, " +
                 "UserId=userid, AppId=app_id, ClusterId=cluster_id";
 
             var stringBuilder = new StringBuilder();

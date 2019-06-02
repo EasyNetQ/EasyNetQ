@@ -11,7 +11,7 @@ namespace EasyNetQ.Consumer
     public class HandlerCollection : IHandlerCollection
     {
         private readonly ILog logger = LogProvider.For<HandlerCollection>();
-        
+
         private readonly IDictionary<Type, Func<IMessage, MessageReceivedInfo, CancellationToken, Task>> handlers =
             new Dictionary<Type, Func<IMessage, MessageReceivedInfo, CancellationToken, Task>>();
 

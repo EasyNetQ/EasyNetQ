@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 Thread.Sleep(10000);
                 Console.Out.WriteLine("-- end of test --");
-            }            
+            }
         }
 
         public void Spike()

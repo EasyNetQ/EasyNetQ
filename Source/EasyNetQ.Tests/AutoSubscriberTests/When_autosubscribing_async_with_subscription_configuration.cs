@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
             pubSub.SubscribeAsync(
-                    Arg.Is("MyAttrTest"), 
+                    Arg.Is("MyAttrTest"),
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                 )
@@ -93,11 +93,11 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
             bus.PubSub.Returns(pubSub);
-            
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
             pubSub.SubscribeAsync(
-                    Arg.Is("MyAttrTest"), 
+                    Arg.Is("MyAttrTest"),
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                    )

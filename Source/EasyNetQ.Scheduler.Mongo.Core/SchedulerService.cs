@@ -11,7 +11,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core
     public class SchedulerService : ISchedulerService
     {
         private readonly ILog logger = LogProvider.For<SchedulerService>();
-        
+
         private readonly IBus bus;
         private readonly ISchedulerServiceConfiguration configuration;
         private readonly IScheduleRepository scheduleRepository;
@@ -41,7 +41,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core
         public void Stop()
         {
             logger.Debug("Stopping SchedulerService");
-            
+
             publishTimer?.Dispose();
             handleTimeoutTimer?.Dispose();
             foreach (var subscription in subscriptions)

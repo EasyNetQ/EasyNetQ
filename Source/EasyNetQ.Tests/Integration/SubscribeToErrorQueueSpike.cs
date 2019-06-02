@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.Integration
 
             bus.PubSub.Publish(new MyMessage { Text = "this will inevitably fail" });
 
-            // allow time for the subscription exception to throw and the 
+            // allow time for the subscription exception to throw and the
             // error message to get written.
             Thread.Sleep(1000);
         }

@@ -68,9 +68,9 @@ namespace EasyNetQ.Tests.ProducerTests
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
                 if (!waiter.Wait(5000))
                     throw new TimeoutException();
-                    
+
                 DeliverMessage(_correlationId, "Why you are so bad with me?");
-                    
+
                 task.GetAwaiter().GetResult();
             }); // ,"Why you are so bad with me?"
         }

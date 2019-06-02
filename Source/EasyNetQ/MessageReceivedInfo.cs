@@ -12,10 +12,10 @@
         public MessageReceivedInfo() { }
 
         public MessageReceivedInfo(
-            string consumerTag, 
-            ulong deliverTag, 
-            bool redelivered, 
-            string exchange, 
+            string consumerTag,
+            ulong deliverTag,
+            bool redelivered,
+            string exchange,
             string routingKey,
             string queue)
         {

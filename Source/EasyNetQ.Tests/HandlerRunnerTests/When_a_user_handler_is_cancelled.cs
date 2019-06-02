@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                 throw new TimeoutException();
             }
         }
-    
+
         [Fact]
         public void Should_handle_consumer_cancelled()
         {

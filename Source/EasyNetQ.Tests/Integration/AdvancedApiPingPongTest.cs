@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests.Integration
 
                     if (IsDuplicateMessage(nextMessage.CorrelationId))
                     {
-                        Console.Out.WriteLine("\n>>>>>>>> DUPLICATE MESSAGE DETECTED: {0} <<<<<<<<<<\n", 
+                        Console.Out.WriteLine("\n>>>>>>>> DUPLICATE MESSAGE DETECTED: {0} <<<<<<<<<<\n",
                             nextMessage.CorrelationId);
                         return;
                     }
@@ -146,7 +146,7 @@ namespace EasyNetQ.Tests.Integration
                     var client = new ManagementClient("http://localhost", "guest", "guest", 15672);
                     while (true)
                     {
-                        Thread.Sleep(TimeSpan.FromSeconds(secondsBetweenDisconnection)); 
+                        Thread.Sleep(TimeSpan.FromSeconds(secondsBetweenDisconnection));
                         var connections = client.GetConnections();
                         foreach (var connection in connections)
                         {

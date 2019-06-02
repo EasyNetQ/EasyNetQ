@@ -5,9 +5,9 @@ using System.Threading;
 namespace EasyNetQ
 {
     public sealed class TimeBudget
-    {   
+    {
         private static readonly TimeSpan Precision = TimeSpan.FromMilliseconds(1);
-        
+
         private readonly TimeSpan budget;
         private readonly Stopwatch watch;
 

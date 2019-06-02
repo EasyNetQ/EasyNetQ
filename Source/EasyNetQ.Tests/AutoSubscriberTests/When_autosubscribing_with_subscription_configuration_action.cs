@@ -32,9 +32,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                     .WithPrefetchCount(10)
                                     .WithPriority(10)
                 };
-            
+
             pubSub.SubscribeAsync(
-                    Arg.Is("MyActionTest"), 
+                    Arg.Is("MyActionTest"),
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                 )
@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe_with_action_capable_of_configuring_subscription()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.Should().BeTrue();

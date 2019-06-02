@@ -10,11 +10,11 @@ namespace EasyNetQ
     {
         private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();
         private readonly ConcurrentDictionary<string, Type> deSerializedTypes = new ConcurrentDictionary<string, Type>();
-        
+
         public string Serialize(Type type)
         {
             Preconditions.CheckNotNull(type, "type");
-            
+
             return serializedTypes.GetOrAdd(type, t =>
             {
                 var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
@@ -36,7 +36,7 @@ namespace EasyNetQ
                 return GetTypeFromTypeNameKey(typeNameKey);
             });
         }
-        
+
         private static string RemoveAssemblyDetails(string fullyQualifiedTypeName)
         {
             var builder = new StringBuilder(fullyQualifiedTypeName.Length);
@@ -80,7 +80,7 @@ namespace EasyNetQ
 
             return builder.ToString();
         }
-        
+
         private static TypeNameKey SplitFullyQualifiedTypeName(string fullyQualifiedTypeName)
         {
             var assemblyDelimiterIndex = GetAssemblyDelimiterIndex(fullyQualifiedTypeName);
@@ -119,7 +119,7 @@ namespace EasyNetQ
                 var assembly = Assembly.Load(new AssemblyName(assemblyName));
 #endif
 
-#if NETFX 
+#if NETFX
                 if (assembly == null)
                 {
                     // will find assemblies loaded with Assembly.LoadFile outside of the main directory
@@ -213,7 +213,7 @@ namespace EasyNetQ
 
             return type;
         }
-        
+
         private static int? GetAssemblyDelimiterIndex(string fullyQualifiedTypeName)
         {
             // we need to get the first comma following all surrounded in brackets because of generic types

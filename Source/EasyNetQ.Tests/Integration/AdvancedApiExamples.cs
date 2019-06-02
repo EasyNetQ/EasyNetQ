@@ -135,7 +135,7 @@ namespace EasyNetQ.Tests.Integration
         [Explicit]
         public void Should_be_able_to_dead_letter_to_given_exchange()
         {
-            // create a main queue and a retry queue both binding to the same topic exchange with 
+            // create a main queue and a retry queue both binding to the same topic exchange with
             // different routing keys. Retry queue is dead lettering to the exchange with routing key
             // of main queue binding.
             var queue = advancedBus.QueueDeclare("main_queue");

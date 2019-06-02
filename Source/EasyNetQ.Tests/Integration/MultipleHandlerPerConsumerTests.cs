@@ -31,8 +31,8 @@ namespace EasyNetQ.Tests.Integration
             var queue = bus.Advanced.QueueDeclare("multiple_types");
 
             bus.Advanced.Consume(queue, x => x
-                    .Add<MyMessage>((message, info) => 
-                        { 
+                    .Add<MyMessage>((message, info) =>
+                        {
                             Console.WriteLine("Got MyMessage {0}", message.Body.Text);
                             countdownEvent.Signal();
                         })

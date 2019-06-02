@@ -18,14 +18,14 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         public static void FuturePublish<T>(
             this IScheduler scheduler,
-            T message, 
+            T message,
             TimeSpan delay,
-            string topic = null, 
+            string topic = null,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(scheduler, "scheduler");
-            
+
             scheduler.FuturePublishAsync(message, delay, topic, cancellationToken)
                 .GetAwaiter()
                 .GetResult();

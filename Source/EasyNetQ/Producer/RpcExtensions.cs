@@ -132,7 +132,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(rpc, "rpc");
 
             var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, c) => responder(m));
-            
+
             return rpc.Respond(asyncResponder, c => { }, cancellationToken);
         }
 
@@ -156,7 +156,7 @@ namespace EasyNetQ
 
             return rpc.Respond<TRequest, TResponse>((r, c) => responder(r), configure, cancellationToken);
         }
-        
+
         /// <summary>
         ///     Set up a responder for an RPC service.
         /// </summary>

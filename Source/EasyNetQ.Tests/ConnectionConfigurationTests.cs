@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests
         public void The_validate_method_should_apply_AMQPconnection_idempotently()
         {
             var connectionConfiguration = new ConnectionStringParser().Parse("amqp://amqphost:1234/");
-            connectionConfiguration.Validate(); // Simulates additional call to .Validate(); made by some RabbitHutch.CreateBus(...) overloads, in addition to call within ConnectionStringParser.Parse().  
+            connectionConfiguration.Validate(); // Simulates additional call to .Validate(); made by some RabbitHutch.CreateBus(...) overloads, in addition to call within ConnectionStringParser.Parse().
 
             connectionConfiguration.Hosts.Count().Should().Be(1);
             connectionConfiguration.Hosts.Single().Host.Should().Be("amqphost");

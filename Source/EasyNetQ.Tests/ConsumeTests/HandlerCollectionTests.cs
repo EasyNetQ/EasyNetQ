@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             handlerCollection = new HandlerCollection();
 
-            handlerCollection.Add<MyMessage>((message, info) => 
+            handlerCollection.Add<MyMessage>((message, info) =>
                 {
                     myMessageHandlerExecuted = true;
                 });

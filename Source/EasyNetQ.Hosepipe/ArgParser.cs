@@ -32,7 +32,7 @@ namespace EasyNetQ.Hosepipe
     public class Arguments
     {
         private readonly IList<Argument> arguments = new List<Argument>();
-        private readonly IDictionary<string, Argument> keys = new Dictionary<string, Argument>();  
+        private readonly IDictionary<string, Argument> keys = new Dictionary<string, Argument>();
 
         public void Add(Argument argument)
         {
@@ -63,10 +63,10 @@ namespace EasyNetQ.Hosepipe
         {
             if (!keys.ContainsKey(key)) return TryResult.Pass();
 
-            try 
+            try
             {
                 Convert.ChangeType(keys[key].Value, typeof(T));
-            } 
+            }
             catch (InvalidCastException)
             {
                 return TryResult.Fail();

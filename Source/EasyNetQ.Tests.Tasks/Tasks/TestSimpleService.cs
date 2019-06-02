@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.Tasks
             bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => CustomRpcResponseConventionDictionary.ContainsKey(type) ? CustomRpcResponseConventionDictionary[type] : DefaultRpcExchange;
 
             bus.Rpc.Respond<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(
-                x => HandleModifiedRequestExchangeRequestAsync(x)    
+                x => HandleModifiedRequestExchangeRequestAsync(x)
             );
             bus.Rpc.Respond<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(
                 x => HandleModifiedResponseExchangeRequestAsync(x)

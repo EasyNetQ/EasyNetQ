@@ -16,10 +16,10 @@ namespace EasyNetQ.AutoSubscribe
 
         public DefaultAutoSubscriberMessageDispatcher()
             : this(new ActivatorBasedResolver())
-        {   
+        {
         }
 
-        public void Dispatch<TMessage, TConsumer>(TMessage message, CancellationToken cancellationToken = default) 
+        public void Dispatch<TMessage, TConsumer>(TMessage message, CancellationToken cancellationToken = default)
             where TMessage : class
             where TConsumer : class, IConsume<TMessage>
         {

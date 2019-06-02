@@ -22,11 +22,11 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
             bus.PubSub.Returns(pubSub);
-            
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
             pubSub.SubscribeAsync(
-                    Arg.Is("MyAttrTest"), 
+                    Arg.Is("MyAttrTest"),
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                 )
@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe()
         {
             pubSub.Received().SubscribeAsync(
-                Arg.Any<string>(), 
+                Arg.Any<string>(),
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
             );
@@ -55,7 +55,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe_with_no_expires()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.Should().BeTrue();

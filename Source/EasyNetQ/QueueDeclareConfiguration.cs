@@ -4,7 +4,7 @@ namespace EasyNetQ
 {
     /// <summary>
     /// Allows queue declaration configuration to be fluently extended without adding overloads to IBus
-    /// 
+    ///
     /// e.g.
     /// x => x.WithMaxPriority(42)
     /// </summary>

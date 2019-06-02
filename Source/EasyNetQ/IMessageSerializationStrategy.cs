@@ -16,5 +16,5 @@ namespace EasyNetQ
 
         public MessageProperties Properties { get; }
         public byte[] Body { get; }
-    }     
+    }
 }

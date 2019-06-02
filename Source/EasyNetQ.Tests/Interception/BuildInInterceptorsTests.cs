@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.Interception
             var sourceMessage = new RawMessage(new MessageProperties(), new byte[0]);
             var firstMessage = new RawMessage(new MessageProperties(), new byte[0]);
             var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            
+
             var first = Substitute.For<IProduceConsumeInterceptor>();
             var second = Substitute.For<IProduceConsumeInterceptor>();
             first.OnProduce(sourceMessage).Returns(firstMessage);
@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests.Interception
             var firstMessage = new RawMessage(new MessageProperties(), new byte[0]);
             var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
 
-            var first = Substitute.For<IProduceConsumeInterceptor>();      
+            var first = Substitute.For<IProduceConsumeInterceptor>();
             var second = Substitute.For<IProduceConsumeInterceptor>();
             first.OnConsume(secondMessage).Returns(firstMessage);
             second.OnConsume(sourceMessage).Returns(secondMessage);

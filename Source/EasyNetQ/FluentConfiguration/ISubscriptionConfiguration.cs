@@ -47,12 +47,12 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
         /// <summary>
-        /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy. 
-        /// This controls for how long a queue can be unused before it is automatically deleted. 
-        /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period. 
+        /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy.
+        /// This controls for how long a queue can be unused before it is automatically deleted.
+        /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period.
         /// This can be used, for example, for RPC-style reply queues, where many queues can be created which may never be drained.
-        /// The server guarantees that the queue will be deleted, if unused for at least the expiration period. 
-        /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed. 
+        /// The server guarantees that the queue will be deleted, if unused for at least the expiration period.
+        /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed.
         /// Leases of durable queues restart when the server restarts.
         /// </summary>
         /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
@@ -81,7 +81,7 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithQueueName(string queueName);
 
         /// <summary>
-        /// Sets the maximum number of ready messages that may exist on the queue. 
+        /// Sets the maximum number of ready messages that may exist on the queue.
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached.
         /// </summary>
         /// <param name="maxLength">the maximum number of ready messages that may exist on the queue.</param>

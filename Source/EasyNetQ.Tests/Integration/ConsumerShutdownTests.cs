@@ -11,10 +11,10 @@ namespace EasyNetQ.Tests.Integration
 {
     // Expect to see:
     // ==============
-    // INFO: Basic ack failed because channel was closed with message 
-    // 'The AMQP operation was interrupted: AMQP close-reason, initiated by Application, 
-    // code=200, text="Goodbye", classId=0, methodId=0, cause='. 
-    // Message remains on RabbitMQ and will be retried. 
+    // INFO: Basic ack failed because channel was closed with message
+    // 'The AMQP operation was interrupted: AMQP close-reason, initiated by Application,
+    // code=200, text="Goodbye", classId=0, methodId=0, cause='.
+    // Message remains on RabbitMQ and will be retried.
     // ConsumerTag: 36c2b0c5-11c9-4f4e-b3f8-9943d113e646, DeliveryTag: 1
     [Explicit("Requires a RabbitMQ broker on localhost")]
     public class ConsumerShutdownTests

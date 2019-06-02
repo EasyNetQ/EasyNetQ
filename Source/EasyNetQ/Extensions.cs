@@ -14,9 +14,9 @@ namespace EasyNetQ
 
         public static void Add<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key, TValue value)
         {
-            ((IDictionary<TKey, TValue>)source).Add(key, value);        
+            ((IDictionary<TKey, TValue>)source).Add(key, value);
         }
-        
+
         public static string Trim(this string s, int start, int length)
         {
             // References: https://referencesource.microsoft.com/#mscorlib/system/string.cs,2691
@@ -33,7 +33,7 @@ namespace EasyNetQ
             {
                 throw new ArgumentOutOfRangeException(nameof(length));
             }
-            
+
             var end = start + length - 1;
             if (end >= s.Length)
             {

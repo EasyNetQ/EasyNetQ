@@ -35,7 +35,7 @@ namespace EasyNetQ.Consumer
             }
 
             var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context, cancellationToken).ConfigureAwait(false);
-            
+
             return (model, tag) =>
             {
                 try
@@ -61,12 +61,12 @@ namespace EasyNetQ.Consumer
                 catch (Exception exception)
                 {
                     logger.Error(
-                        exception, 
+                        exception,
                         "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
                         context.Info
                     );
                 }
-                
+
                 return AckResult.Exception;
             };
         }
