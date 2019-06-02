@@ -2,7 +2,6 @@
 {
     public class TestMessage
     {
-         
     }
 
     [Queue("MyQueue", ExchangeName = "MyExchange")]
@@ -44,5 +43,4 @@
     {
         public string Text { get; set; }
     }
-
 }

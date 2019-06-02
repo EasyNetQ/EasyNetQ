@@ -35,7 +35,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                 .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
             autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
-
         }
 
         public void Dispose()

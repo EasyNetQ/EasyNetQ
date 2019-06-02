@@ -97,7 +97,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             public void Consume(MessageC message, CancellationToken cancellationToken)
             {
             }
-          
         }
 
         //Discovered by reflection over test assembly, do not remove.
@@ -121,7 +120,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private class MessageC
         {
         }
-
     }
 }
 

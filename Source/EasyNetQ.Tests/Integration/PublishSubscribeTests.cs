@@ -175,7 +175,6 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine(message.Text);
                     autoResetEvent.Set();
                 }, null, 5000, Timeout.Infinite);
-                
             });
 
             // allow time for messages to be consumed

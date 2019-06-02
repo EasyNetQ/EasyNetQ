@@ -78,7 +78,6 @@ namespace EasyNetQ.Tests
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-
                 new ConnectionStringParser().Parse(
                 "virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3");
             });

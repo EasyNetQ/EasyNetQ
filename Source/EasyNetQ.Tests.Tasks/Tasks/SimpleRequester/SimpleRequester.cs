@@ -17,7 +17,6 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
 
         public Task Run(CancellationToken cancellationToken)
         {
-
             timer = new Timer(OnTimer, null, publishIntervalMilliseconds, publishIntervalMilliseconds);
 
             Console.Out.WriteLine("Timer running, ctrl-C to end");

@@ -85,6 +85,5 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             public string Text { get; set; }
         }
-
     }
 }

@@ -19,12 +19,11 @@ namespace EasyNetQ.Tests.Tasks
 
         private static readonly Dictionary<Type, string> CustomRpcResponseConventionDictionary = new Dictionary<Type, string>
         {
-            {typeof(TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange" }
+            { typeof(TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange" }
         };
 
         public Task Run(CancellationToken cancellationToken)
         {
-
             bus = RabbitHutch.CreateBus("host=localhost");
 
             bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => CustomRpcRequestConventionDictionary.ContainsKey(type) ? CustomRpcRequestConventionDictionary[type] : DefaultRpcExchange;
@@ -103,7 +102,6 @@ namespace EasyNetQ.Tests.Tasks
         {
             bus.Dispose();
             Console.WriteLine("Shut down complete");
-
         }
     }
 

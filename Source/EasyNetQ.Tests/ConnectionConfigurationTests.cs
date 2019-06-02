@@ -10,7 +10,6 @@ namespace EasyNetQ.Tests
 {
     public class ConnectionConfigurationTests
     {
-        
         [Fact]
         public void The_validate_method_should_apply_AMQPconnection_idempotently()
         {
