@@ -10,8 +10,10 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(UseAnalyzers)' == 'true'">
-        <RulesToConsider>SA1116;SA1117;SA1122;SA1128;SA1134;SA1214;SA1413;SA1501;SA1513;SA1519;SA1629</RulesToConsider>
-        <NoWarn>$(NoWarn);$(RulesToConsider);SA1005;SA1009;SA1101;SA1111;SA1200;SA1201;SA1202;SA1204;SA1208;SA1311;SA1503;SA1512;SA1600;SA1623;SA1633;</NoWarn>
+        <RulesToConsider>SA1116;SA1117;SA1122;SA1128;SA1134;SA1214;SA1306;SA1307;SA1413;SA1501;SA1502;SA1513;SA1516;SA1519;</RulesToConsider>
+        <RulesForMissingDocumentation>SA1614;SA1615;SA1616;SA1629</RulesForMissingDocumentation>
+        <RulesToIgnore>SA1005;SA1009;SA1101;SA1111;SA1200;SA1201;SA1202;SA1204;SA1208;SA1309;SA1311;SA1402;SA1503;SA1512;SA1515;SA1600;SA1623;SA1633;</RulesToIgnore>
+        <NoWarn>$(NoWarn);$(RulesToConsider);$(RulesForMissingDocumentation);$(RulesToIgnore)</NoWarn>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(UseAnalyzers)' == 'true'">

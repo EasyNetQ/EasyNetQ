@@ -4,7 +4,7 @@ namespace EasyNetQ.FluentConfiguration
 {
     /// <summary>
     /// Allows configuration to be fluently extended without adding overloads to IBus
-    /// 
+    ///
     /// e.g.
     /// x => x.WithTopic("*.brighton")
     /// </summary>
@@ -15,35 +15,35 @@ namespace EasyNetQ.FluentConfiguration
         /// Add a topic for the queue binding
         /// </summary>
         /// <param name="topic">The topic to add</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithTopic(string topic);
 
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
         /// <param name="autoDelete">Queue's durability flag</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
 
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
         /// <param name="durable">Queue's durability flag</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithDurable(bool durable = true);
 
         /// <summary>
         /// Configures the consumer's priority
         /// </summary>
         /// <param name="priority">Consumer's priority value</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithPriority(int priority);
 
         /// <summary>
         /// Configures the consumer's prefetch count
         /// </summary>
         /// <param name="prefetchCount">Consumer's prefetch count value</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
         /// <summary>
@@ -56,28 +56,28 @@ namespace EasyNetQ.FluentConfiguration
         /// Leases of durable queues restart when the server restarts.
         /// </summary>
         /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithExpires(int expires);
 
         /// <summary>
         /// Configures the consumer's to be exclusive
         /// </summary>
         /// <param name="isExclusive">Consumer's exclusive flag</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration AsExclusive(bool isExclusive = true);
 
         /// <summary>
         /// Configures the queue's maxPriority
         /// </summary>
         /// <param name="priority">Queue's maxPriority value</param>
-        /// <returns></returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithMaxPriority(byte priority);
 
         /// <summary>
         /// Sets the queue name
         /// </summary>
-        /// <param name="queueName"></param>
-        /// <returns></returns>
+        /// <param name="queueName">The queue name</param>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithQueueName(string queueName);
 
         /// <summary>
@@ -85,6 +85,7 @@ namespace EasyNetQ.FluentConfiguration
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached.
         /// </summary>
         /// <param name="maxLength">the maximum number of ready messages that may exist on the queue.</param>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithMaxLength(int maxLength);
 
         /// <summary>
@@ -92,6 +93,7 @@ namespace EasyNetQ.FluentConfiguration
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached
         /// </summary>
         /// <param name="maxLengthBytes">The maximum size of the queue in bytes.</param>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
 
         /// <summary>

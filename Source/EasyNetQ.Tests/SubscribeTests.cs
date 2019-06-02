@@ -218,7 +218,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-        public class When_a_message_is_delivered : IDisposable
+    public class When_a_message_is_delivered : IDisposable
     {
         private MockBuilder mockBuilder;
 
