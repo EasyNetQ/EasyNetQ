@@ -18,7 +18,7 @@ Commands
 			The basic properties for the message:
 			<queue_name>.n.properties.txt
 
-			The infomation needed to republish the message, including the exchange name
+			The information needed to republish the message, including the exchange name
 			and routing key:
 			<queue_name>.n.info.txt
 

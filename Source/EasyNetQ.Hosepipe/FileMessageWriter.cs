@@ -28,7 +28,7 @@ namespace EasyNetQ.Hosepipe
                 
                 if(File.Exists(bodyPath))
                 {
-                    Console.WriteLine("Overwriting existing messsage file: {0}", bodyPath);
+                    Console.WriteLine("Overwriting existing message file: {0}", bodyPath);
                 }
                 
                 File.WriteAllText(bodyPath, message.Body);
