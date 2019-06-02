@@ -188,7 +188,7 @@ namespace EasyNetQ.Consumer
             return AckStrategies.NackWithRequeue;
         }
 
-        public AckStrategy HandleConsumerCancelled(ConsumerExecutionContext context)
+        public virtual AckStrategy HandleConsumerCancelled(ConsumerExecutionContext context)
         {
             return AckStrategies.NackWithRequeue;
         }
