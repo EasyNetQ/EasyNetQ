@@ -5,7 +5,7 @@ namespace EasyNetQ.Scheduler
 {
     public class Program
     {
-        static void Main()
+        private static void Main()
         {
             XmlConfigurator.Configure();
 

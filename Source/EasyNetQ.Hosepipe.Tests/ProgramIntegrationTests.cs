@@ -8,8 +8,8 @@ namespace EasyNetQ.Hosepipe.Tests
     [Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]
     public class ProgramIntegrationTests
     {
-        const string outputPath = @"C:\Temp\MessageOutput";
-        const string queue = "EasyNetQ_Hosepipe_Tests_ProgramIntegrationTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
+        private const string outputPath = @"C:\Temp\MessageOutput";
+        private const string queue = "EasyNetQ_Hosepipe_Tests_ProgramIntegrationTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
         public void DumpMessages()
         {

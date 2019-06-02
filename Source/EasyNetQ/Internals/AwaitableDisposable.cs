@@ -17,7 +17,7 @@ namespace EasyNetQ.Internals
         private readonly Task<T> task;
 
         /// <summary>
-        /// Initializes a new awaitable wrapper around the specified task.
+        /// Initializes a new instance of the <see cref="AwaitableDisposable{T}"/> struct - awaitable wrapper around the specified task.
         /// </summary>
         /// <param name="task">The underlying task to wrap. This may not be <c>null</c>.</param>
         public AwaitableDisposable(Task<T> task)
