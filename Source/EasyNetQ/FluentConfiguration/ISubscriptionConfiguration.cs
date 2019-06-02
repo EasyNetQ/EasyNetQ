@@ -21,24 +21,28 @@ namespace EasyNetQ.FluentConfiguration
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
+        /// <param name="autoDelete">Queue's durability flag</param>
         /// <returns></returns>
         ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
 
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
+        /// <param name="durable">Queue's durability flag</param>
         /// <returns></returns>
         ISubscriptionConfiguration WithDurable(bool durable = true);
 
         /// <summary>
         /// Configures the consumer's priority
         /// </summary>
+        /// <param name="priority">Consumer's priority value</param>
         /// <returns></returns>
         ISubscriptionConfiguration WithPriority(int priority);
 
         /// <summary>
         /// Configures the consumer's prefetch count
         /// </summary>
+        /// <param name="prefetchCount">Consumer's prefetch count value</param>
         /// <returns></returns>
         ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
@@ -58,12 +62,14 @@ namespace EasyNetQ.FluentConfiguration
         /// <summary>
         /// Configures the consumer's to be exclusive
         /// </summary>
+        /// <param name="isExclusive">Consumer's exclusive flag</param>
         /// <returns></returns>
         ISubscriptionConfiguration AsExclusive(bool isExclusive = true);
 
         /// <summary>
         /// Configures the queue's maxPriority
         /// </summary>
+        /// <param name="priority">Queue's maxPriority value</param>
         /// <returns></returns>
         ISubscriptionConfiguration WithMaxPriority(byte priority);
 
@@ -75,15 +81,17 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithQueueName(string queueName);
 
         /// <summary>
-        /// The maximum number of ready messages that may exist on the queue. 
+        /// Sets the maximum number of ready messages that may exist on the queue. 
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached.
         /// </summary>
+        /// <param name="maxLength">the maximum number of ready messages that may exist on the queue.</param>
         ISubscriptionConfiguration WithMaxLength(int maxLength);
 
         /// <summary>
-        /// The maximum size of the queue in bytes.
+        /// Sets the maximum size of the queue in bytes.
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached
         /// </summary>
+        /// <param name="maxLengthBytes">The maximum size of the queue in bytes.</param>
         ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
 
         /// <summary>
