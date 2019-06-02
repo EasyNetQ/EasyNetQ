@@ -58,7 +58,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             AdditionalSetup();
         }
 
-        public abstract void AdditionalSetup();
+        protected abstract void AdditionalSetup();
     }
 }
 
