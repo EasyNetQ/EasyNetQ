@@ -6,7 +6,7 @@
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
         <!-- Enable periodically if necessary -->
-        <UseAnalyzers Condition="'$(UseAnalyzers)' == ''">true</UseAnalyzers>
+        <UseAnalyzers Condition="'$(UseAnalyzers)' == ''">false</UseAnalyzers>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(UseAnalyzers)' == 'true'">
