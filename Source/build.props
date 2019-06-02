@@ -10,7 +10,8 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(UseAnalyzers)' == 'true'">
-        <NoWarn>$(NoWarn);</NoWarn>
+        <RulesToConsider></RulesToConsider>
+        <NoWarn>$(NoWarn);$(RulesToConsider);SA1101;SA1111;SA1200;SA1503;SA1600;SA1633;</NoWarn>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(UseAnalyzers)' == 'true'">

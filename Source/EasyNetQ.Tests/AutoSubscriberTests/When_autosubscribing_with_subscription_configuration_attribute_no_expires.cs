@@ -1,14 +1,13 @@
-using System;
 using EasyNetQ.AutoSubscribe;
-using Xunit;
-using NSubstitute;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using FluentAssertions;
+using NSubstitute;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {

@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ.Events;
-using EasyNetQ.Internals;
+﻿using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {

@@ -1,12 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Text;
-using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Topology;
+using System;
+using System.Collections.Concurrent;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration

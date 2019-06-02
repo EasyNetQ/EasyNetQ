@@ -1,10 +1,10 @@
 // ReSharper disable InconsistentNaming
 using EasyNetQ.SystemMessages;
-using EasyNetQ.Topology;
 using EasyNetQ.Tests;
-using Xunit;
+using EasyNetQ.Topology;
 using System;
 using System.Text;
+using Xunit;
 
 namespace EasyNetQ.Scheduler.Tests
 {

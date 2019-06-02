@@ -1,9 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
+using EasyNetQ.Topology;
 using System;
 using System.Threading;
-using EasyNetQ.Topology;
-using EasyNetQ.Consumer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration

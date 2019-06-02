@@ -1,10 +1,9 @@
 // ReSharper disable InconsistentNaming
 
-using System;
 using EasyNetQ.DI;
-using Xunit;
 using EasyNetQ.Interception;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.Interception
 {

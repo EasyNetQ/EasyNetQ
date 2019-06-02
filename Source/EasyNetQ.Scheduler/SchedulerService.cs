@@ -1,10 +1,9 @@
-using System;
-using System.Transactions;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
-using System.Collections.Concurrent;
-using EasyNetQ.Producer;
 using log4net;
+using System;
+using System.Collections.Concurrent;
+using System.Transactions;
 
 namespace EasyNetQ.Scheduler
 {

@@ -1,14 +1,14 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
+using FluentAssertions;
 using NSubstitute;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using FluentAssertions;
+using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {

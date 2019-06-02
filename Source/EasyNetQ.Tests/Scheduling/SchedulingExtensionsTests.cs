@@ -2,8 +2,8 @@
 
 using EasyNetQ.DI;
 using EasyNetQ.Scheduling;
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.Scheduling
 {

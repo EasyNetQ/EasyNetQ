@@ -1,11 +1,10 @@
-﻿using System;
+﻿using EasyNetQ.Internals;
+using EasyNetQ.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using EasyNetQ.Internals;
-using System.Reflection;
 using System.Threading;
-using EasyNetQ.Logging;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {

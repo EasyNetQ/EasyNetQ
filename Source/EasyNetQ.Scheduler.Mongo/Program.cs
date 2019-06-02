@@ -1,6 +1,6 @@
 ﻿using EasyNetQ.Scheduler.Mongo.Core;
-using Topshelf;
 using log4net.Config;
+using Topshelf;
 
 namespace EasyNetQ.Scheduler.Mongo
 {
