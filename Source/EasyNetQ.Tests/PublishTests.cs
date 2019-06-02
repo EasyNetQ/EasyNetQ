@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests
                 x.Register<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
 
             mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
-                .Do( x =>
+                .Do(x =>
                 {
                     body = (ReadOnlyMemory<byte>)x[4];
                     properties = (IBasicProperties)x[3];
@@ -99,7 +99,7 @@ namespace EasyNetQ.Tests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is<Dictionary<string, object>>( x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
     }
 

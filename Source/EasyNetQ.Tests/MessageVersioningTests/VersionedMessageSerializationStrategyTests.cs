@@ -162,7 +162,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 },
             };
             message.Properties.Headers.Add("Alternative-Message-Types", Encoding.UTF8.GetBytes(supersededMessageType));
-            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof( MyMessageV2 ), serializedMessageBody);
+            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof(MyMessageV2), serializedMessageBody);
 
             var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 

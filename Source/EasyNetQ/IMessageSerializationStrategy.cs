@@ -1,4 +1,3 @@
-
 namespace EasyNetQ
 {
     public interface IMessageSerializationStrategy

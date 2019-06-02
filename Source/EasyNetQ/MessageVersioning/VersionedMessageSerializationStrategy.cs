@@ -1,4 +1,3 @@
-
 namespace EasyNetQ.MessageVersioning
 { 
     public class VersionedMessageSerializationStrategy : IMessageSerializationStrategy

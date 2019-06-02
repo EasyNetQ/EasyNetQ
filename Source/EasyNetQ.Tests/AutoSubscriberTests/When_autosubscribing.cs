@@ -66,7 +66,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                                 Arg.Is(queueName),
                                                 Arg.Any<string>(),
                                                 Arg.Is(topicName),
-                                                Arg.Is<IDictionary<string, object>>( x => x.SequenceEqual(parameters)));            
+                                                Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(parameters)));
           
             assertConsumerStarted(1, expectedQueueName1, "#");
             assertConsumerStarted(2, expectedQueueName2, "#");
