@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests.Tasks
 
         public static Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequestAsync(TestModifiedRequestExhangeRequestMessage request)
         {
-            Console.Out.WriteLine("Responding to RPC request from exchange : "+ CustomRpcRequestConventionDictionary[typeof(TestModifiedRequestExhangeRequestMessage)]);
+            Console.Out.WriteLine("Responding to RPC request from exchange : " + CustomRpcRequestConventionDictionary[typeof(TestModifiedRequestExhangeRequestMessage)]);
             return Task.FromResult(new TestModifiedRequestExhangeResponseMessage
             {
                 Text = request.Text + " response!"

@@ -9,7 +9,7 @@ namespace EasyNetQ
     {
         public static void Remove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key)
         {
-            ((IDictionary<TKey, TValue>) source).Remove(key);
+            ((IDictionary<TKey, TValue>)source).Remove(key);
         }
 
         public static void Add<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key, TValue value)

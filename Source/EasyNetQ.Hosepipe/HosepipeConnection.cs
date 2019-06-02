@@ -26,7 +26,7 @@ namespace EasyNetQ.Hosepipe
                     "by incorrect credentials.",
                     parameters.HostName,
                     parameters.VHost,
-                    parameters.HostPort == -1 ? string.Empty: ":" + parameters.HostPort));
+                    parameters.HostPort == -1 ? string.Empty : ":" + parameters.HostPort));
             }
         } 
     }

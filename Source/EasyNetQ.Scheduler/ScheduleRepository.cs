@@ -87,7 +87,7 @@ namespace EasyNetQ.Scheduler
                     {
                         scheduledMessages.Add(new ScheduleMe
                         {
-                            WakeTime = (DateTime) reader["WakeTime"],
+                            WakeTime = (DateTime)reader["WakeTime"],
                             BindingKey = reader["BindingKey"].ToString(),
                             InnerMessage = (byte[])reader["InnerMessage"],
                             CancellationKey = reader["CancellationKey"].ToString(),

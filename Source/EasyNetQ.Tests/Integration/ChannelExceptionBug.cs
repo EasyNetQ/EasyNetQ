@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.Integration
             // Run conditions: test-exchange must not be declared
             using (var bus = EasyNetQ.RabbitHutch.CreateBus("host=localhost").Advanced)
             {
-                for (int i = 0; i < 10; i++ )
+                for (int i = 0; i < 10; i++)
                 {
                     var c = i;
 

@@ -213,7 +213,7 @@ namespace EasyNetQ.Sprache
 
             return i => parser(i).IfSuccess(s =>
                 s.Remainder.AtEnd
-                    ? (IResult<T>) s
+                    ? (IResult<T>)s
                     : new Failure<T>(
                         s.Remainder,
                         () => string.Format("unexpected '{0}'", s.Remainder.Current),
@@ -312,7 +312,7 @@ namespace EasyNetQ.Sprache
                         () => ff.Message,
                         () => ff.Expectations.Union(sf.Expectations)));
 
-                var fs = (ISuccess<T>) fr;
+                var fs = (ISuccess<T>)fr;
                 if (fs.Remainder == i)
                     return second(i).IfFailure(sf => fs);
 
@@ -362,7 +362,7 @@ namespace EasyNetQ.Sprache
                         () => ff.Expectations.Union(sf.Expectations)));
                 }
 
-                var fs = (ISuccess<T>) fr;
+                var fs = (ISuccess<T>)fr;
                 if (fs.Remainder == i)
                     return second(i).IfFailure(sf => fs);
 
@@ -380,7 +380,7 @@ namespace EasyNetQ.Sprache
         {
             Preconditions.CheckNotNull(parser, "parser");
 
-            return parser.Select(r => (IEnumerable<T>) new[] { r });
+            return parser.Select(r => (IEnumerable<T>)new[] { r });
         }
 
         /// <summary>
@@ -474,7 +474,7 @@ namespace EasyNetQ.Sprache
 
             return i => parser(i).IfSuccess(s =>
                 predicate(s.Result)
-                    ? (IResult<T>) s
+                    ? (IResult<T>)s
                     : new Failure<T>(i,
                         () => string.Format("Unexpected {0}.", s.Result),
                         () => new string[0]));

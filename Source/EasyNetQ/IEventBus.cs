@@ -56,7 +56,7 @@ namespace EasyNetQ
             if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
             foreach (var handler in handlers.AsEnumerable())
-                ((Action<TEvent>) handler)(@event);
+                ((Action<TEvent>)handler)(@event);
         }
 
         public IDisposable Subscribe<TEvent>(Action<TEvent> eventHandler)

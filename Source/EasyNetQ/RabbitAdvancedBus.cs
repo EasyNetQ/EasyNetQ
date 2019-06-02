@@ -527,7 +527,7 @@ namespace EasyNetQ
             var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))
             {
-                return new BasicGetResult<T>(new Message<T>((T) message.GetBody(), message.Properties));
+                return new BasicGetResult<T>(new Message<T>((T)message.GetBody(), message.Properties));
             }
 
             throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);

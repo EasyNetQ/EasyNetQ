@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests.Mocking
                 channel.QueueDeclare(null, true, false, false, null)
                     .ReturnsForAnyArgs(queueDeclareInvocation =>
                     {
-                        var queueName = (string) queueDeclareInvocation[0];
+                        var queueName = (string)queueDeclareInvocation[0];
 
                         return new QueueDeclareOk(queueName, 0, 0);
                     });

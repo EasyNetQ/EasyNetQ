@@ -59,7 +59,7 @@ namespace EasyNetQ.Hosepipe
             return TryResult.Pass();
         }
 
-        public TryResult WithTypedKeyOptional<T>(string key, Action<Argument> argumentAction) where T:IConvertible
+        public TryResult WithTypedKeyOptional<T>(string key, Action<Argument> argumentAction) where T : IConvertible
         {
             if (!keys.ContainsKey(key)) return TryResult.Pass();
 

@@ -49,9 +49,9 @@ namespace EasyNetQ.Tests
                 Arg.Is(true),
                 Arg.Is(true),
                 Arg.Is<IDictionary<string, object>>(args =>
-                    ((int) args["x-message-ttl"] == 1000) &&
-                    ((int) args["x-expires"] == 2000) &&
-                    ((int) args["x-max-priority"] == 10)));
+                    ((int)args["x-message-ttl"] == 1000) &&
+                    ((int)args["x-expires"] == 2000) &&
+                    ((int)args["x-max-priority"] == 10)));
         }
 
         [Fact]
@@ -100,11 +100,11 @@ namespace EasyNetQ.Tests
                 Arg.Is(true),
                 Arg.Is(true),
                 Arg.Is<IDictionary<string, object>>(args =>
-                    ((int) args["x-message-ttl"] == 1000) &&
-                    ((int) args["x-expires"] == 2000) &&
-                    ((int) args["x-max-priority"] == 10) &&
-                    ((string) args["x-dead-letter-exchange"] == "my_exchange") &&
-                    ((string) args["x-dead-letter-routing-key"] == "my_routing_key")));
+                    ((int)args["x-message-ttl"] == 1000) &&
+                    ((int)args["x-expires"] == 2000) &&
+                    ((int)args["x-max-priority"] == 10) &&
+                    ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
+                    ((string)args["x-dead-letter-routing-key"] == "my_routing_key")));
         }
 
         [Fact]
@@ -153,11 +153,11 @@ namespace EasyNetQ.Tests
                 Arg.Is(true),
                 Arg.Is(true),
                 Arg.Is<IDictionary<string, object>>(args =>
-                    ((int) args["x-message-ttl"] == 1000) &&
-                    ((int) args["x-expires"] == 2000) &&
-                    ((int) args["x-max-priority"] == 10) &&
-                    ((string) args["x-dead-letter-exchange"] == "") &&
-                    ((string) args["x-dead-letter-routing-key"] == "my_queue2")));
+                    ((int)args["x-message-ttl"] == 1000) &&
+                    ((int)args["x-expires"] == 2000) &&
+                    ((int)args["x-max-priority"] == 10) &&
+                    ((string)args["x-dead-letter-exchange"] == "") &&
+                    ((string)args["x-dead-letter-routing-key"] == "my_queue2")));
         }
 
         [Fact]
@@ -330,7 +330,7 @@ namespace EasyNetQ.Tests
             binding.RoutingKey.Should().Be("my_routing_key");
             binding.Exchange.Name.Should().Be("my_exchange");
             binding.Bindable.Should().BeAssignableTo<IQueue>();
-            ((IQueue) binding.Bindable).Name.Should().Be("my_queue");
+            ((IQueue)binding.Bindable).Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -374,7 +374,7 @@ namespace EasyNetQ.Tests
             binding.Exchange.Name.Should().Be("my_exchange");
             binding.Arguments["header1"].Should().Be("value1");
             binding.Bindable.Should().BeAssignableTo<IQueue>();
-            ((IQueue) binding.Bindable).Name.Should().Be("my_queue");
+            ((IQueue)binding.Bindable).Name.Should().Be("my_queue");
         }
 
         [Fact]
