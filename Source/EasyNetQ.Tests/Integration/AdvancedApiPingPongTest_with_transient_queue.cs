@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        void Consume(int from, int to)
+        private void Consume(int from, int to)
         {
             buses[from].Advanced.Consume(queues[from], (body, properties, info) => Task.Factory.StartNew(() =>
                 {

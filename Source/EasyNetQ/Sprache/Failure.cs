@@ -6,13 +6,12 @@ namespace EasyNetQ.Sprache
 {
     internal sealed class Failure<T> : IFailure<T>
     {
-        readonly Func<IEnumerable<string>> _expectations;
-        readonly Input _input;
-        readonly Func<string> _message;
+        private readonly Func<IEnumerable<string>> _expectations;
+        private readonly Func<string> _message;
 
         public Failure(Input input, Func<string> message, Func<IEnumerable<string>> expectations)
         {
-            _input = input;
+            FailedInput = input;
             _message = message;
             _expectations = expectations;
         }
@@ -21,7 +20,7 @@ namespace EasyNetQ.Sprache
 
         public IEnumerable<string> Expectations => _expectations();
 
-        public Input FailedInput => _input;
+        public Input FailedInput { get; private set; }
 
         public override string ToString()
         {

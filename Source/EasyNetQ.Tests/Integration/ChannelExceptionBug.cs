@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.Integration
             connection.Dispose();
         }
 
-        void model_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
+        private void model_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             foreach (var value in e.Detail)
             {

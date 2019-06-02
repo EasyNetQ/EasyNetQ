@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposable
     {
         private MockBuilder mockBuilder;
-        ITestMessageInterface receivedMessage;
+        private ITestMessageInterface receivedMessage;
 
         public When_a_polymorphic_message_is_delivered_to_the_consumer()
         {

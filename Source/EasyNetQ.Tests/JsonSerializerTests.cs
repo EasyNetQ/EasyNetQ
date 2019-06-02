@@ -78,9 +78,9 @@ namespace EasyNetQ.Tests
             getPropertiesString(originalProperties).Should().Be(getPropertiesString(newProperties));
         }
 
-        class A { }
-        class B : A { }
-        class PolyMessage
+        private class A { }
+        private class B : A { }
+        private class PolyMessage
         {
             public A AorB { get; set; }
         }

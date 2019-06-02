@@ -13,15 +13,15 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 {
     public class When_autosubscribing_async : IDisposable
     {
-        readonly MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
-        const string expectedQueueName1 =
+        private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageA, EasyNetQ.Tests_my_app:9a0467719db423b16b7e5c35d25b877c";
 
-        const string expectedQueueName2 =
+        private const string expectedQueueName2 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageB, EasyNetQ.Tests_MyExplicitId";
 
-        const string expectedQueueName3 =
+        private const string expectedQueueName3 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageC, EasyNetQ.Tests_my_app:63691066ce7a3fb38d685ce30873d12e";
 
         public When_autosubscribing_async()

@@ -522,7 +522,7 @@ namespace EasyNetQ.Sprache
             return operand.Then(first => ChainOperatorRest(first, op, operand, apply));
         }
 
-        static Parser<T> ChainOperatorRest<T, TOp>(
+        private static Parser<T> ChainOperatorRest<T, TOp>(
             T firstOperand,
             Parser<TOp> op,
             Parser<T> operand,
@@ -557,7 +557,7 @@ namespace EasyNetQ.Sprache
             return operand.Then(first => ChainRightOperatorRest(first, op, operand, apply));
         }
 
-        static Parser<T> ChainRightOperatorRest<T, TOp>(
+        private static Parser<T> ChainRightOperatorRest<T, TOp>(
             T lastOperand,
             Parser<TOp> op,
             Parser<T> operand,
