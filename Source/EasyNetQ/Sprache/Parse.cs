@@ -82,7 +82,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<char> CharCaseInsensitive(char c)
         {
-            return Char(ch => System.Char.ToLower(c) == System.Char.ToLower(ch), c.ToString());
+            return Char(ch => char.ToLower(c) == char.ToLower(ch), c.ToString());
         }
 
         /// <summary>

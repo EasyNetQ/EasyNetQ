@@ -274,7 +274,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var serializer = Substitute.For<ISerializer>();
             serializer.BytesToMessage(expectedMessageType, messageBody).Returns(message);
 
-            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(String.Empty));
+            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(string.Empty));
         }
     }
 }

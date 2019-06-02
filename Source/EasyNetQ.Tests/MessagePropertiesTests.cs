@@ -102,7 +102,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_throw_if_any_string_property_exceeds_255_chars()
         {
-            var longInput = new String('*', 256);
+            var longInput = new string('*', 256);
 
             var properties = new MessageProperties();
             var stringFields = properties.GetType().GetProperties().Where(x => x.PropertyType == typeof(string));
