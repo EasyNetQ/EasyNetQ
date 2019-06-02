@@ -6470,6 +6470,7 @@ namespace EasyNetQ.LightInject
             return implementingTypeName;
         }
     }
+
     /// <summary>
     /// Selects the properties that represents a dependency to the target <see cref="Type"/>.
     /// </summary>

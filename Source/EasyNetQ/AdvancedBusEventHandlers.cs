@@ -14,18 +14,22 @@ namespace EasyNetQ
         /// An event handler for <see cref="IAdvancedBus.Connected"/>.
         /// </summary>
         public EventHandler Connected { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Disconnected"/>.
         /// </summary>
         public EventHandler Disconnected { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Blocked"/>.
         /// </summary>
         public EventHandler<ConnectionBlockedEventArgs> Blocked { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Unblocked"/>.
         /// </summary>
         public EventHandler Unblocked { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.MessageReturned"/>.
         /// </summary>

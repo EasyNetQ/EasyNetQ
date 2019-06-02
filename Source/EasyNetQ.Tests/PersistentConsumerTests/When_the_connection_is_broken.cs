@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public class When_the_connection_is_broken : Given_a_PersistentConsumer
     {
-        public override void AdditionalSetup()
+        protected override void AdditionalSetup()
         {
             consumer.StartConsuming();
             eventBus.Publish(new ConnectionCreatedEvent());
