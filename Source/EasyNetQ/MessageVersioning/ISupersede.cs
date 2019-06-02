@@ -28,4 +28,4 @@ namespace EasyNetQ.MessageVersioning
     /// </code>
     /// </example>
     public interface ISupersede<T> where T : class { }
-}	
+}

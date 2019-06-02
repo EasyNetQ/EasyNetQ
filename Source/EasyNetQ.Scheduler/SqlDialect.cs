@@ -119,8 +119,8 @@ namespace EasyNetQ.Scheduler
         public bool IsDialectFor(string providerName)
         {
             return
-				providerName == "Npgsql" ||
-				providerName == "Devart.Data.PostgreSql";
+                providerName == "Npgsql" ||
+                providerName == "Devart.Data.PostgreSql";
         }
 
         public string InsertProcedureName { get; private set; }
