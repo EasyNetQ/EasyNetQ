@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.ProducerTests
     public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IDisposable
     {
         private MockBuilder mockBuilder;
-        private TestRequestMessage requestMessage;
+        private readonly TestRequestMessage requestMessage;
         private string _correlationId;
 
         public When_a_request_is_sent_but_an_exception_is_thrown_by_responder()

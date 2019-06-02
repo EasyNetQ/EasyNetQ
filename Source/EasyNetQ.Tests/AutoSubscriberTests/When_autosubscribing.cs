@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     public class When_autosubscribing : IDisposable
     {
         private MockBuilder mockBuilder;
-        private Dictionary<string, object> parameters;
+        private readonly Dictionary<string, object> parameters;
 
         private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";

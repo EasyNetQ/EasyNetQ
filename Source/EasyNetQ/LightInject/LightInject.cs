@@ -7423,7 +7423,7 @@ namespace EasyNetQ.LightInject
             get
             {
                 var logicalThreadValue = (LogicalThreadValue)CallContext.LogicalGetData(key);
-                return logicalThreadValue != null ? logicalThreadValue.Value : default(T);
+                return logicalThreadValue != null ? logicalThreadValue.Value : default;
             }
             set
             {

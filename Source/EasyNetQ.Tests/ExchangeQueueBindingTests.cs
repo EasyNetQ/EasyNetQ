@@ -410,7 +410,7 @@ namespace EasyNetQ.Tests
 
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private IBinding binding;
+        private readonly IBinding binding;
 
         [Fact]
         public void Should_unbind_the_exchange()

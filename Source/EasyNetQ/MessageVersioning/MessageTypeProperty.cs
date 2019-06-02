@@ -75,7 +75,7 @@ namespace EasyNetQ.MessageVersioning
             if (!messageProperties.HeadersPresent || !messageProperties.Headers.ContainsKey(AlternativeMessageTypesHeaderKey))
                 return new MessageTypeProperty(typeNameSerializer, messageType, null);
 
-            var rawHeader = messageProperties.Headers[AlternativeMessageTypesHeaderKey] as byte[];
+            byte[] rawHeader = messageProperties.Headers[AlternativeMessageTypesHeaderKey] as byte[];
             if (rawHeader == null)
                 throw new EasyNetQException(
                     "{0} header was present but contained no data or was not encoded as a byte[].",

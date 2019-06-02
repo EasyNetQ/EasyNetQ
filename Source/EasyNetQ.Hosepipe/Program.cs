@@ -20,7 +20,7 @@ namespace EasyNetQ.Hosepipe
 
         private static StringBuilder results = new StringBuilder();
         private static bool succeeded = true;
-        private static Func<string, Action> messsage = m => () =>
+        private static readonly Func<string, Action> messsage = m => () =>
         {
             results.AppendLine(m);
             succeeded = false;
