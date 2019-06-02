@@ -45,14 +45,15 @@ namespace EasyNetQ.Tests
         {
             const string replyTo = "reply to";
 
-            var properties = new MessageProperties {
+            var properties = new MessageProperties
+            {
                 ReplyTo = replyTo,
-                Headers = new Dictionary<string, object>()
-                          {
-                              { "AString", "ThisIsAString" },
-                              { "AnInt", 123 }
-                          }
-                };
+                Headers = new Dictionary<string, object>
+                {
+                    { "AString", "ThisIsAString" },
+                    { "AnInt", 123 }
+                }
+            };
 
             var destinationProperties = (MessageProperties)properties.Clone();
 
