@@ -318,7 +318,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="bus">The bus instance</param>
         /// <param name="name">The name of the queue</param>
-        /// <param name="configuration">The configuration of the queue</param>
+        /// <param name="configure">Delegate to configure the queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
         /// The queue

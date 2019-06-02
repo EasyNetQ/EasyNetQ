@@ -12,8 +12,8 @@ namespace EasyNetQ
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="scheduler">The scheduler instance</param>
-        /// <param name="delay">The delay for message to publish in future</param>
         /// <param name="message">The message to response with</param>
+        /// <param name="delay">The delay for message to publish in future</param>
         /// <param name="topic">The topic string</param>
         /// <param name="cancellationToken">The cancellation token</param>
         public static void FuturePublish<T>(

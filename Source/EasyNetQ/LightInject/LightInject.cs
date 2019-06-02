@@ -388,7 +388,7 @@ namespace EasyNetQ.LightInject
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
-        /// <param name="lifetimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
+        /// <param name="lifeTimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
         /// <param name="serviceNameFormatter">The function used to format the service name based on current registration index.</param>
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         IServiceRegistry RegisterOrdered(Type serviceType, Type[] implementingTypes,
@@ -4118,7 +4118,7 @@ namespace EasyNetQ.LightInject
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
-        /// <param name="lifetimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
+        /// <param name="lifeTimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         public IServiceRegistry RegisterOrdered(Type serviceType, Type[] implementingTypes, Func<Type, ILifetime> lifeTimeFactory)
         {
@@ -4131,7 +4131,7 @@ namespace EasyNetQ.LightInject
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
-        /// <param name="lifetimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
+        /// <param name="lifeTimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
         /// <param name="serviceNameFormatter">The function used to format the service name based on current registration index.</param>
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         public IServiceRegistry RegisterOrdered(Type serviceType, Type[] implementingTypes,
