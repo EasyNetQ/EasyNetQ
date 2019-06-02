@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.Integration
 
         public void Dispose()
         {
-            if(bus != null) bus.Dispose();
+            if (bus != null) bus.Dispose();
         }
 
         private MyMessage CreateMessage()

@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.Integration
 
             foreach (var subscriberInfo in subscriberInfos)
             {
-                var subscribeMethod = genericSubscribeMethod.MakeGenericMethod(new[] {subscriberInfo.MessageType});
+                var subscribeMethod = genericSubscribeMethod.MakeGenericMethod(new[] { subscriberInfo.MessageType });
                 
                 var subscriberInstance = Activator.CreateInstance(subscriberInfo.SubscriberType);
                 
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.Integration
 
                 var handleMethod = subscriberInfo.SubscriberType.GetMethod("Handle");
 
-                var delegateType = typeof (Action<>).MakeGenericType(subscriberInfo.MessageType);
+                var delegateType = typeof(Action<>).MakeGenericType(subscriberInfo.MessageType);
                 var handleDelegate = handleMethod.CreateDelegate(delegateType, subscriberInstance);
 
                 subscribeMethod.Invoke(bus, new[] { subscriberId, handleDelegate });
@@ -52,7 +52,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 var subscriberOfInterface = type
                     .GetInterfaces()
-                    .SingleOrDefault(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof (ISubscriberOf<>));
+                    .SingleOrDefault(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(ISubscriberOf<>));
 
                 if (subscriberOfInterface == null) continue;
 

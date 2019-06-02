@@ -60,7 +60,7 @@ namespace EasyNetQ.AutoSubscribe
             SubscriptionIdPrefix = subscriptionIdPrefix;
             AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
-            ConfigureSubscriptionConfiguration = subscriptionConfiguration => {};
+            ConfigureSubscriptionConfiguration = subscriptionConfiguration => { };
         }
  
         /// <summary>
@@ -79,7 +79,7 @@ namespace EasyNetQ.AutoSubscribe
             {
                 var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeAsyncConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                    .Invoke(this, new object[] {subscriberConsumerInfo, cancellationToken});
+                    .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
                 subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
             }
@@ -88,7 +88,7 @@ namespace EasyNetQ.AutoSubscribe
             {
                 var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                    .Invoke(this, new object[] {subscriberConsumerInfo, cancellationToken});
+                    .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
                 subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
             }
@@ -207,9 +207,9 @@ namespace EasyNetQ.AutoSubscribe
         private static Action<ISubscriptionConfiguration> AutoSubscriberConsumerInfo(AutoSubscriberConsumerInfo subscriptionInfo)
         {
             var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
-            if(configSettings == null)
+            if (configSettings == null)
             {
-                return subscriptionConfiguration => {};
+                return subscriptionConfiguration => { };
             }
             return configuration =>
                 {

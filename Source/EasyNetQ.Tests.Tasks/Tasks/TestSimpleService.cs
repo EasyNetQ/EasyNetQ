@@ -14,12 +14,12 @@ namespace EasyNetQ.Tests.Tasks
 
         private static readonly Dictionary<Type, string> CustomRpcRequestConventionDictionary = new Dictionary<Type, string>
         {
-            {typeof (TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange"}
+            { typeof(TestModifiedRequestExhangeRequestMessage), "ChangedRpcRequestExchange" }
         };
 
         private static readonly Dictionary<Type, string> CustomRpcResponseConventionDictionary = new Dictionary<Type, string>
         {
-            {typeof (TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange"}
+            {typeof(TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange" }
         };
 
         public Task Run(CancellationToken cancellationToken)
@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests.Tasks
 
         private static Task<TestAsyncResponseMessage> HandleAsyncRequest(TestAsyncRequestMessage request)
         {
-            Console.Out.WriteLine("Got aysnc request '{0}'", request.Text);
+            Console.Out.WriteLine("Got async request '{0}'", request.Text);
 
             return RunDelayed(1000, () =>
             {
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests.Tasks
 
         public static Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequestAsync(TestModifiedRequestExhangeRequestMessage request)
         {
-            Console.Out.WriteLine("Responding to RPC request from exchange : "+ CustomRpcRequestConventionDictionary[typeof (TestModifiedRequestExhangeRequestMessage)]);
+            Console.Out.WriteLine("Responding to RPC request from exchange : "+ CustomRpcRequestConventionDictionary[typeof(TestModifiedRequestExhangeRequestMessage)]);
             return Task.FromResult(new TestModifiedRequestExhangeResponseMessage
             {
                 Text = request.Text + " response!"

@@ -26,14 +26,14 @@ namespace EasyNetQ.Tests
 		[Fact]
 		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
 		{
-			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
+			var result = conventions.ExchangeNamingConvention(typeof(TestMessage));
 		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
 		}
 
 		[Fact]
 		public void The_default_topic_naming_convention_should_return_an_empty_string()
 		{
-			var result = conventions.TopicNamingConvention(typeof (TestMessage));
+			var result = conventions.TopicNamingConvention(typeof(TestMessage));
 		    result.Should().Be("");
 		}
 
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests
 		public void The_default_queue_naming_convention_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id()
 		{
 			const string subscriptionId = "test";
-			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
+			var result = conventions.QueueNamingConvention(typeof(TestMessage), subscriptionId);
 		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
 		}
 
@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void The_default_rpc_request_exchange_name_should_be()
         {
-            var result = conventions.RpcRequestExchangeNamingConvention(typeof (object));
+            var result = conventions.RpcRequestExchangeNamingConvention(typeof(object));
             result.Should().Be("easy_net_q_rpc");
         }
 

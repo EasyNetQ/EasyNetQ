@@ -8,8 +8,7 @@ namespace EasyNetQ.Scheduler
         public static short GetShortAppSetting(string settingKey)
         {
             var appSetting = ConfigurationManager.AppSettings[settingKey];
-            short value;
-            if (!short.TryParse(appSetting, out value))
+            if (!short.TryParse(appSetting, out short value))
             {
                 throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid short",
                     settingKey, appSetting));
@@ -21,8 +20,7 @@ namespace EasyNetQ.Scheduler
         public static int GetIntAppSetting(string settingKey)
         {
             var appSetting = ConfigurationManager.AppSettings[settingKey];
-            int value;
-            if (!int.TryParse(appSetting, out value))
+            if (!int.TryParse(appSetting, out int value))
             {
                 throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid integer",
                     settingKey, appSetting));
@@ -34,8 +32,7 @@ namespace EasyNetQ.Scheduler
         public static bool GetBoolAppSetting(string settingKey)
         {
             var appSetting = ConfigurationManager.AppSettings[settingKey];
-            bool value;
-            if (!bool.TryParse(appSetting, out value))
+            if (!bool.TryParse(appSetting, out bool value))
             {
                 throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid boolean",
                     settingKey, appSetting));

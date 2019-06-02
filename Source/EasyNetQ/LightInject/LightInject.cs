@@ -1083,13 +1083,7 @@ namespace EasyNetQ.LightInject
         /// <returns>An array containing the runtime arguments supplied when resolving the service.</returns>
         public static object[] Load(object[] constants)
         {
-            object[] arguments = constants[constants.Length - 1] as object[];
-            if (arguments == null)
-            {
-                return new object[] { };
-            }
-
-            return arguments;
+            return constants[constants.Length - 1] is object[] arguments ? arguments : new object[] { };
         }
     }
 
@@ -1392,7 +1386,7 @@ namespace EasyNetQ.LightInject
                 }
             }
 
-            return default(TValue);
+            return default;
         }
 
         // Excluded from coverage since it is equal to the generic version.
@@ -1426,7 +1420,7 @@ namespace EasyNetQ.LightInject
                 }
             }
 
-            return default(GetInstanceDelegate);
+            return default;
         }
 
         /// <summary>
@@ -1483,7 +1477,7 @@ namespace EasyNetQ.LightInject
                 }
             }
 
-            return default(TValue);
+            return default;
         }
 
         /// <summary>
@@ -3171,15 +3165,13 @@ namespace EasyNetQ.LightInject
 
         private Delegate GetConstructorDependencyDelegate(Type type, string serviceName)
         {
-            Delegate dependencyDelegate;
-            GetConstructorDependencyFactories(type).TryGetValue(serviceName, out dependencyDelegate);
+            GetConstructorDependencyFactories(type).TryGetValue(serviceName, out var dependencyDelegate);
             return dependencyDelegate;
         }
 
         private Delegate GetPropertyDependencyExpression(Type type, string serviceName)
         {
-            Delegate dependencyDelegate;
-            GetPropertyDependencyFactories(type).TryGetValue(serviceName, out dependencyDelegate);
+            GetPropertyDependencyFactories(type).TryGetValue(serviceName, out var dependencyDelegate);
             return dependencyDelegate;
         }
 
@@ -3281,9 +3273,8 @@ namespace EasyNetQ.LightInject
 
         private Action<IEmitter> GetRegisteredEmitMethod(Type serviceType, string serviceName)
         {
-            Action<IEmitter> emitMethod;
             var registrations = GetEmitMethods(serviceType);
-            registrations.TryGetValue(serviceName, out emitMethod);
+            registrations.TryGetValue(serviceName, out var emitMethod);
             return emitMethod ?? CreateEmitMethodForUnknownService(serviceType, serviceName);
         }
 
@@ -3852,8 +3843,7 @@ namespace EasyNetQ.LightInject
                 return null;
             }
 
-            ServiceRegistration openGenericServiceRegistration;
-            services.TryGetValue(serviceName, out openGenericServiceRegistration);
+            services.TryGetValue(serviceName, out var openGenericServiceRegistration);
             if (openGenericServiceRegistration == null && string.IsNullOrEmpty(serviceName) && services.Count == 1)
             {
                 return services.First().Value;
@@ -5285,14 +5275,9 @@ namespace EasyNetQ.LightInject
         /// <param name="obj">The <see cref="T:System.Object"/> to compare with the current <see cref="T:System.Object"/>. </param><filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
-            var other = obj as ServiceRegistration;
-            if (other == null)
-            {
-                return false;
-            }
-
-            var result = ServiceName == other.ServiceName && ServiceType == other.ServiceType;
-            return result;
+            return obj is ServiceRegistration other
+                ? ServiceName == other.ServiceName && ServiceType == other.ServiceType
+                : false;
         }
 
         /// <summary>
@@ -5556,8 +5541,7 @@ namespace EasyNetQ.LightInject
         /// </summary>
         public void Dispose()
         {
-            var disposable = singleton as IDisposable;
-            if (disposable != null)
+            if (singleton is IDisposable disposable)
             {
                 disposable.Dispose();
             }
@@ -5578,8 +5562,7 @@ namespace EasyNetQ.LightInject
         public object GetInstance(Func<object> createInstance, Scope scope)
         {
             var instance = createInstance();
-            var disposable = instance as IDisposable;
-            if (disposable != null)
+            if (instance is IDisposable disposable)
             {
                 TrackInstance(scope, disposable);
             }
@@ -5628,8 +5611,7 @@ namespace EasyNetQ.LightInject
 
         private static void RegisterForDisposal(Scope scope, object instance)
         {
-            var disposable = instance as IDisposable;
-            if (disposable != null)
+            if (instance is IDisposable disposable)
             {
                 scope.TrackInstance(disposable);
             }
@@ -5648,8 +5630,7 @@ namespace EasyNetQ.LightInject
         {
             var scope = (Scope)sender;
             scope.Completed -= OnScopeCompleted;
-            object removedInstance;
-            instances.TryRemove(scope, out removedInstance);
+            instances.TryRemove(scope, out var _);
         }
     }
 

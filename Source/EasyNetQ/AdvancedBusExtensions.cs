@@ -252,7 +252,7 @@ namespace EasyNetQ
         /// </summary>
         /// <typeparam name="T">The message type to get</typeparam>
         /// <param name="bus">The bus instance</param>
-        /// <param name="queue">The queue from which to retreive the message</param>
+        /// <param name="queue">The queue from which to retrieve the message</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>An IBasicGetResult.</returns>
         public static IBasicGetResult<T> GetMessage<T>(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
@@ -268,7 +268,7 @@ namespace EasyNetQ
         /// Get the raw message from the given queue.
         /// </summary>
         /// <param name="bus">The bus instance</param>
-        /// <param name="queue">The queue from which to retreive the message</param>
+        /// <param name="queue">The queue from which to retrieve the message</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>An IBasicGetResult</returns>
         public static IBasicGetResult GetMessage(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)

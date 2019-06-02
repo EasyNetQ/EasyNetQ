@@ -51,11 +51,11 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
             var ticksTenSecondsAgo = DateTime.Now.AddSeconds(-10).Ticks;
             var lateResponses = requests.Where(x => (!x.Value.HasResponded) && (x.Value.Ticks < ticksTenSecondsAgo));
 
-            var reponded = requests.Count(x => x.Value.HasResponded);
+            var responded = requests.Count(x => x.Value.HasResponded);
 
-            Console.WriteLine("Total: {0}, reponded: {1} over 10 seconds late: [{2}]", 
+            Console.WriteLine("Total: {0}, responded: {1} over 10 seconds late: [{2}]", 
                 requests.Count,
-                reponded,
+                responded,
                 string.Join(",", lateResponses.Select(x => x.Value.Id.ToString())));
         }
     }

@@ -18,8 +18,8 @@ namespace EasyNetQ.Tests
 
         public ConsumerErrorConditionsTests()
         {
-            var connectionConfiguration = new ConnectionConfiguration {Hosts = new[] {new HostConfiguration { Host = "localhost"} }};
-            bus = RabbitHutch.CreateBus(connectionConfiguration, c => {});
+            var connectionConfiguration = new ConnectionConfiguration { Hosts = new[] {new HostConfiguration { Host = "localhost"} } };
+            bus = RabbitHutch.CreateBus(connectionConfiguration, c => { });
         }
 
         public void Dispose()

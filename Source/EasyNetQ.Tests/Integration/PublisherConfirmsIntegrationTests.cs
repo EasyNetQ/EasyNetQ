@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact]
         public void Subscribe()
         {
-            bus.PubSub.Subscribe<MyMessage>("publish_confirms", message => {});
+            bus.PubSub.Subscribe<MyMessage>("publish_confirms", message => { });
         }
 
         [Fact]

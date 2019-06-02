@@ -46,9 +46,9 @@ namespace EasyNetQ.Producer
                     if (requests.TryGetValue(sequenceNumber, out var confirmation))
                         Confirm(confirmation, sequenceNumber, isNack);
             }
-            else
+            else if (requests.TryGetValue(deliveryTag, out var confirmation))
             {
-                if (requests.TryGetValue(deliveryTag, out var confirmation)) Confirm(confirmation, deliveryTag, isNack);
+                Confirm(confirmation, deliveryTag, isNack);
             }
         }
 

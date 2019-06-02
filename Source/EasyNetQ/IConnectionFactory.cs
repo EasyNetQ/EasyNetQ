@@ -43,13 +43,13 @@ namespace EasyNetQ
 
                 connectionFactory.HostName = hostConfiguration.Host;
                 
-                if(connectionFactory.VirtualHost == "/")
+                if (connectionFactory.VirtualHost == "/")
                     connectionFactory.VirtualHost = Configuration.VirtualHost;
                 
-                if(connectionFactory.UserName == "guest")
+                if (connectionFactory.UserName == "guest")
                     connectionFactory.UserName = Configuration.UserName;
 
-                if(connectionFactory.Password == "guest")
+                if (connectionFactory.Password == "guest")
                     connectionFactory.Password = Configuration.Password;
 
                 if (connectionFactory.Port == -1)

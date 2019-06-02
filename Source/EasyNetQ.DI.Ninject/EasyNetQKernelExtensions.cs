@@ -29,7 +29,7 @@ namespace Ninject
                 throw new ArgumentNullException(nameof(kernel));
             }
             
-            return kernel.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return kernel.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IKernel RegisterEasyNetQ(this IKernel kernel, string connectionString, Action<IServiceRegister> registerServices)

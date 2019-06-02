@@ -146,7 +146,7 @@ namespace EasyNetQ.Tests
             public int Id { get; set; }
         }
 
-        public class FromA : ErrorTestBaseMessage {}
+        public class FromA : ErrorTestBaseMessage { }
         public class FromB : ErrorTestBaseMessage { }
     }
 }

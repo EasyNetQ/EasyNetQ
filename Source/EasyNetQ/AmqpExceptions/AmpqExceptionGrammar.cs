@@ -45,7 +45,7 @@ namespace EasyNetQ.AmqpExceptions
             return from k in Parse.CaseInsensitiveString(key).Token()
                 from eq in Parse.Char('=')
                 from value in Number
-                select new T {Value = value};
+                select new T { Value = value };
         }
 
         public static AmqpException ParseExceptionString(string exceptionMessage)

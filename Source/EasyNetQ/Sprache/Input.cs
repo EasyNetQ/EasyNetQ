@@ -54,8 +54,7 @@ namespace EasyNetQ.Sprache
 
         public override bool Equals(object obj)
         {
-            var i = obj as Input;
-            return i != null && i._source == _source && i._position == _position;
+            return obj is Input i && i._source == _source && i._position == _position;
         }
 
         public override int GetHashCode()

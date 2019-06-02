@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ProducerTests
                    publishedMessage = (byte[])x[4];
                });
 
-            mockBuilder.PubSub.Publish<IMyMessageInterface>(message, c => {});
+            mockBuilder.PubSub.Publish<IMyMessageInterface>(message, c => { });
         }
 
         public void Dispose()

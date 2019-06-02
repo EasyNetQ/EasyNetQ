@@ -28,7 +28,7 @@ namespace Castle.Windsor
                 throw new ArgumentNullException(nameof(container));
             }
             
-            return container.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return container.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString, Action<IServiceRegister> registerServices)

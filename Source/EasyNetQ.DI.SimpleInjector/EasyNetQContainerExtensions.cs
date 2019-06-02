@@ -28,7 +28,7 @@ namespace SimpleInjector
                 throw new ArgumentNullException(nameof(container));
             }
             
-            return container.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return container.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static Container RegisterEasyNetQ(this Container container, string connectionString, Action<IServiceRegister> registerServices)

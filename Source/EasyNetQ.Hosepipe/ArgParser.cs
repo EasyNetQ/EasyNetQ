@@ -118,7 +118,7 @@ namespace EasyNetQ.Hosepipe
 
         public static TryResult Fail()
         {
-            return new TryResult {pass = false};
+            return new TryResult { pass = false };
         }
 
         public void FailWith(Action action)

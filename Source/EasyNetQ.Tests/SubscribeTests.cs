@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests
                 .Register<IConventions>(conventions)
                 );
 
-            subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => {});
+            subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
         public void Dispose()

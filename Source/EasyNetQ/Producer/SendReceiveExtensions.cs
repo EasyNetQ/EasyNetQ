@@ -112,7 +112,6 @@ namespace EasyNetQ
                 cancellationToken
             );
         }
-        
                 
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers
@@ -243,7 +242,6 @@ namespace EasyNetQ
                 cancellationToken
             ).GetAwaiter().GetResult();
         }
-
 
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers

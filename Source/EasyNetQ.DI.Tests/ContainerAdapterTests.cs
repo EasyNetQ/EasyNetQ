@@ -134,7 +134,7 @@ namespace EasyNetQ.DI.Tests
             {
                 (ResolverFactory) (c =>
                 {
-                    var container = new SimpleInjectorContainer {Options = {AllowOverridingRegistrations = true}};
+                    var container = new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } };
                     c(new SimpleInjectorAdapter(container));
                     return container.GetInstance<IServiceResolver>();
                 })

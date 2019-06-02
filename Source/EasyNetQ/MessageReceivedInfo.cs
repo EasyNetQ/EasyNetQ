@@ -9,7 +9,7 @@
         public string RoutingKey { get; set; }
         public string Queue { get; set; }
 
-        public MessageReceivedInfo() {}
+        public MessageReceivedInfo() { }
 
         public MessageReceivedInfo(
             string consumerTag, 
