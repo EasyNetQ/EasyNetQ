@@ -260,7 +260,7 @@ namespace EasyNetQ.Producer
             return advancedBus.Consume<TRequest>(
                 queue,
                 (m, i, c) => RespondToMessageAsync(responder, m, c),
-                c => c.WithPrefetchCount(configuration.PrefetchCount)
+                c => c.WithPrefetchCount(configuration.PrefetchCount).WithPriority(configuration.Priority)
             );
         }
 
