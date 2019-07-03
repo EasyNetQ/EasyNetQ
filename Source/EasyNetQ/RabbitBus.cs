@@ -153,7 +153,6 @@ namespace EasyNetQ
             configure(configuration);
 
             var queueName = configuration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
-            var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
             var queue = advancedBus.QueueDeclare(
                 queueName, 
@@ -163,7 +162,7 @@ namespace EasyNetQ
                 maxPriority: configuration.MaxPriority,
                 maxLength: configuration.MaxLength,
                 maxLengthBytes: configuration.MaxLengthBytes);
-            var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
+            var exchange = publishExchangeDeclareStrategy.DeclareExchange(typeof(T), ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
             {
