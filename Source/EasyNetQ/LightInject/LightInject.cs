@@ -7421,7 +7421,7 @@ namespace EasyNetQ.LightInject
             return localBuilder;
         }
     }
-#if NET452
+#if NET452 && !NET46
 
     /// <summary>
     /// Provides storage per logical thread of execution.
