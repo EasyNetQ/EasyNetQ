@@ -74,7 +74,7 @@ namespace EasyNetQ.Producer
             {
                 queueWithCancellation.Cancellation.Dispose();
             }
-            
+
             // finish in-flight requests
             foreach (var responseAction in copyOfResponseActions)
             {
@@ -93,7 +93,11 @@ namespace EasyNetQ.Producer
             var configuration = new RequestConfiguration();
             configure(configuration);
 
+#if NETFX && !NET46
             var tcs = new TaskCompletionSource<TResponse>();
+#else
+            var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
 
             var timeout = timeoutStrategy.GetTimeoutSeconds(requestType);
             Timer timer = null;
@@ -270,7 +274,11 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class
         {
+#if NETFX && !NET46
             var tcs = new TaskCompletionSource<object>();
+#else
+            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
 
             try
             {
