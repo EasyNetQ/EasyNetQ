@@ -33,16 +33,16 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
 
-            var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy(conventions, advancedBus);
+            var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
             try
             {
-                publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+                exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             }
             catch (Exception)
             {
             }
 
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+            var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             advancedBus.Received(2).ExchangeDeclare(exchangeName, "topic");
             declaredExchange.Should().BeSameAs(exchange);
             exchangeDeclareCount.Should().Be(1);
@@ -76,7 +76,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
 
-            var publishExchangeStrategy = new VersionedPublishExchangeDeclareStrategy(conventions, advancedBus);
+            var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
             publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
 
@@ -111,7 +111,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
             
-            var publishExchangeStrategy = new VersionedPublishExchangeDeclareStrategy(conventions, advancedBus);
+            var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
             publishExchangeStrategy.DeclareExchange(typeof(MyMessageV2), ExchangeType.Topic);
 

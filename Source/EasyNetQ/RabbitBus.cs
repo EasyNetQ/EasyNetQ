@@ -13,7 +13,7 @@ namespace EasyNetQ
     {
         private readonly IConventions conventions;
         private readonly IAdvancedBus advancedBus;
-        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly IRpc rpc;
         private readonly ISendReceive sendReceive;
@@ -22,7 +22,7 @@ namespace EasyNetQ
         public RabbitBus(
             IConventions conventions,
             IAdvancedBus advancedBus,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IRpc rpc,
             ISendReceive sendReceive,
@@ -30,14 +30,14 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(rpc, "rpc");
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
 
             this.conventions = conventions;
             this.advancedBus = advancedBus;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.rpc = rpc;
             this.sendReceive = sendReceive;
@@ -80,7 +80,7 @@ namespace EasyNetQ
             if (configuration.Expires != null)
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(messageType, ExchangeType.Topic);
+            var exchange = exchangeDeclareStrategy.DeclareExchange(messageType, ExchangeType.Topic);
             advancedBus.Publish(exchange, configuration.Topic, false, easyNetQMessage);
         }
 
@@ -120,7 +120,7 @@ namespace EasyNetQ
             if (configuration.Expires != null)
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
-            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic).ConfigureAwait(false);
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic).ConfigureAwait(false);
             await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage).ConfigureAwait(false);
         }
 
@@ -162,7 +162,7 @@ namespace EasyNetQ
                 maxPriority: configuration.MaxPriority,
                 maxLength: configuration.MaxLength,
                 maxLengthBytes: configuration.MaxLengthBytes);
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(typeof(T), ExchangeType.Topic);
+            var exchange = exchangeDeclareStrategy.DeclareExchange(typeof(T), ExchangeType.Topic);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
             {

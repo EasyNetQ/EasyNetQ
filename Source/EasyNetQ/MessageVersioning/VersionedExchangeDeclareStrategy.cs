@@ -7,14 +7,14 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.MessageVersioning
 {
-    public class VersionedPublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
+    public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy
     {
         private readonly IAdvancedBus advancedBus;
         private readonly AsyncLock asyncLock = new AsyncLock();
         private readonly IConventions conventions;
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
 
-        public VersionedPublishExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
+        public VersionedExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
         {
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");

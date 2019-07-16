@@ -17,7 +17,7 @@ namespace EasyNetQ.Producer
         private readonly ConnectionConfiguration connectionConfiguration;
         protected readonly IAdvancedBus advancedBus;
         protected readonly IConventions conventions;
-        protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly ITimeoutStrategy timeoutStrategy;
         private readonly ITypeNameSerializer typeNameSerializer;
@@ -36,7 +36,7 @@ namespace EasyNetQ.Producer
             IAdvancedBus advancedBus,
             IEventBus eventBus,
             IConventions conventions,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             ITimeoutStrategy timeoutStrategy,
             ITypeNameSerializer typeNameSerializer)
@@ -45,7 +45,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
@@ -53,7 +53,7 @@ namespace EasyNetQ.Producer
             this.connectionConfiguration = connectionConfiguration;
             this.advancedBus = advancedBus;
             this.conventions = conventions;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.timeoutStrategy = timeoutStrategy;
             this.typeNameSerializer = typeNameSerializer;
@@ -326,7 +326,7 @@ namespace EasyNetQ.Producer
         {
             if (exchangeName != Exchange.GetDefault().Name)
             {
-                return publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
+                return exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
             }
             else
             {

@@ -7,14 +7,14 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.MultipleExchange
 {
-    public class MultipleExchangePublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
+    public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy
     {
         private readonly IAdvancedBus advancedBus;
         private readonly AsyncLock asyncLock = new AsyncLock();
         private readonly IConventions conventions;
         private readonly ConcurrentDictionary<string, IExchange> exchanges = new ConcurrentDictionary<string, IExchange>();
 
-        public MultipleExchangePublishExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
+        public MultipleExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
         {
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
