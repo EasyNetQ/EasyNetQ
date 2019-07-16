@@ -23,12 +23,12 @@ namespace EasyNetQ.Scheduling
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IMessageSerializationStrategy messageSerializationStrategy)
         {
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
+            Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
 
             this.advancedBus = advancedBus;
             this.conventions = conventions;

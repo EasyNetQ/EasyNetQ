@@ -11,7 +11,7 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
-    public class VersionedPublishExchangeDeclareStrategyTests
+    public class VersionedExchangeDeclareStrategyTests
     {
         [Fact]
         public void Should_declare_exchange_again_if_first_attempt_failed()

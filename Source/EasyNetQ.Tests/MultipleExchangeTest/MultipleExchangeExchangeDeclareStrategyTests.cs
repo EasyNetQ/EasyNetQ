@@ -7,7 +7,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.MultipleExchangeTest
 {
-    public class AdvancedPolymorphismPublishExchangeDeclareStrategyTests
+    public class AdvancedPolymorphismExchangeDeclareStrategyTests
     {
         [Fact(Skip = "Needs to be updated to XUnit")]
         public void When_declaring_exchanges_for_message_type_that_has_no_interface_one_exchange_created()

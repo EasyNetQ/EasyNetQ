@@ -41,14 +41,14 @@ namespace EasyNetQ.Producer
             ITimeoutStrategy timeoutStrategy,
             ITypeNameSerializer typeNameSerializer)
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "configuration");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
+            Preconditions.CheckNotNull(timeoutStrategy, nameof(timeoutStrategy));
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
 
             this.connectionConfiguration = connectionConfiguration;
             this.advancedBus = advancedBus;

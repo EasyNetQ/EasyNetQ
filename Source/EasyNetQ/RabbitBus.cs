@@ -28,12 +28,12 @@ namespace EasyNetQ
             ISendReceive sendReceive,
             ConnectionConfiguration connectionConfiguration)
         {
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(rpc, "rpc");
-            Preconditions.CheckNotNull(sendReceive, "sendReceive");
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
+            Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+            Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
 
             this.conventions = conventions;
             this.advancedBus = advancedBus;
