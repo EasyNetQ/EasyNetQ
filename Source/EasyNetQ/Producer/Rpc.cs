@@ -17,7 +17,7 @@ namespace EasyNetQ.Producer
         private readonly ConnectionConfiguration connectionConfiguration;
         protected readonly IAdvancedBus advancedBus;
         protected readonly IConventions conventions;
-        protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly ITimeoutStrategy timeoutStrategy;
         private readonly ITypeNameSerializer typeNameSerializer;
@@ -36,24 +36,24 @@ namespace EasyNetQ.Producer
             IAdvancedBus advancedBus,
             IEventBus eventBus,
             IConventions conventions,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             ITimeoutStrategy timeoutStrategy,
             ITypeNameSerializer typeNameSerializer)
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "configuration");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
+            Preconditions.CheckNotNull(timeoutStrategy, nameof(timeoutStrategy));
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
 
             this.connectionConfiguration = connectionConfiguration;
             this.advancedBus = advancedBus;
             this.conventions = conventions;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.timeoutStrategy = timeoutStrategy;
             this.typeNameSerializer = typeNameSerializer;
@@ -347,7 +347,7 @@ namespace EasyNetQ.Producer
         {
             if (exchangeName != Exchange.GetDefault().Name)
             {
-                return publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
+                return exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Direct);
             }
             else
             {

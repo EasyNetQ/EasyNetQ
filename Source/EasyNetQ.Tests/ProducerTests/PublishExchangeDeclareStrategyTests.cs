@@ -10,7 +10,7 @@ using NSubstitute;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
-    public class PublishExchangeDeclareStrategyTests
+    public class ExchangeDeclareStrategyTests
     {
         private const string exchangeName = "the_exchange";
 
@@ -27,9 +27,9 @@ namespace EasyNetQ.Tests.ProducerTests
                     return exchange;
                 });
 
-            var publishExchangeDeclareStrategy = new PublishExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
+            var exchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
            
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+            var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
             advancedBus.Received().ExchangeDeclare(exchangeName, "topic");
             declaredExchange.Should().BeSameAs(exchange);
@@ -48,10 +48,10 @@ namespace EasyNetQ.Tests.ProducerTests
                 return exchange;
             });
 
-            var publishExchangeDeclareStrategy = new PublishExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
+            var exchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
   
-            var _ = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+            var _ = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+            var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
             advancedBus.Received().ExchangeDeclare(exchangeName, "topic");
             declaredExchange.Should().BeSameAs(exchange);
@@ -74,15 +74,15 @@ namespace EasyNetQ.Tests.ProducerTests
                     return exchange;
                 });
 
-            var publishExchangeDeclareStrategy = new VersionedPublishExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
+            var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
             try
             {
-                publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+                exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             }
             catch (Exception)
             {
             }
-            var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+            var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             advancedBus.Received(2).ExchangeDeclare(exchangeName, "topic");
             declaredExchange.Should().BeSameAs(exchange);
             exchangeDeclareCount.Should().Be(1);

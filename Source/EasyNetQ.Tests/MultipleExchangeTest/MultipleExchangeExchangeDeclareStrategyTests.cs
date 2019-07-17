@@ -7,7 +7,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.MultipleExchangeTest
 {
-    public class AdvancedPolymorphismPublishExchangeDeclareStrategyTests
+    public class AdvancedPolymorphismExchangeDeclareStrategyTests
     {
         [Fact(Skip = "Needs to be updated to XUnit")]
         public void When_declaring_exchanges_for_message_type_that_has_no_interface_one_exchange_created()
@@ -32,9 +32,9 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
 
-            var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy(conventions, advancedBus);
+            var exchangeStrategy = new MultipleExchangeDeclareStrategy(conventions, advancedBus);
 
-            publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic).Wait();
+            exchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic).Wait();
 
 /*
             //ensure that only one exchange is declared

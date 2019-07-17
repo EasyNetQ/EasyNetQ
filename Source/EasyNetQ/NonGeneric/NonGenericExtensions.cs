@@ -89,10 +89,10 @@ namespace EasyNetQ.NonGeneric
             Preconditions.CheckTypeMatches(messageType, message, "message", "message must be of type " + messageType);
             
             var advancedBus = bus.Advanced.Container.Resolve<IAdvancedBus>();
-            var publishExchangeDeclareStrategy = bus.Advanced.Container.Resolve<IPublishExchangeDeclareStrategy>();
+            var exchangeDeclareStrategy = bus.Advanced.Container.Resolve<IExchangeDeclareStrategy>();
             var messageDeliveryModeStrategy = bus.Advanced.Container.Resolve<IMessageDeliveryModeStrategy>();
             
-            var exchange = publishExchangeDeclareStrategy.DeclareExchange(messageType, ExchangeType.Topic);
+            var exchange = exchangeDeclareStrategy.DeclareExchange(messageType, ExchangeType.Topic);
             var easyNetQMessage = MessageFactory.CreateInstance(messageType, message);
             easyNetQMessage.Properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType);
 

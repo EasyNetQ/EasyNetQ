@@ -4,7 +4,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
 {
-    public interface IPublishExchangeDeclareStrategy
+    public interface IExchangeDeclareStrategy
     {
         IExchange DeclareExchange(string exchangeName, string exchangeType);
         IExchange DeclareExchange(Type messageType, string exchangeType);        

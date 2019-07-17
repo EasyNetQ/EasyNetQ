@@ -12,28 +12,28 @@ namespace EasyNetQ.Scheduling
         private readonly IConventions conventions;
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
         public ExternalScheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
             ITypeNameSerializer typeNameSerializer,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IMessageSerializationStrategy messageSerializationStrategy)
         {
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
+            Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
 
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.typeNameSerializer = typeNameSerializer;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.messageSerializationStrategy = messageSerializationStrategy;
         }
@@ -46,7 +46,7 @@ namespace EasyNetQ.Scheduling
         {
             Preconditions.CheckNotNull(message, "message");
             var scheduleMeType = typeof(ScheduleMe);
-            var scheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
+            var scheduleMeExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
             var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
@@ -86,7 +86,7 @@ namespace EasyNetQ.Scheduling
         {
             Preconditions.CheckNotNull(message, "message");
             var scheduleMeType = typeof(ScheduleMe);
-            var scheduleMeExchange = publishExchangeDeclareStrategy.DeclareExchange(scheduleMeType, ExchangeType.Topic);
+            var scheduleMeExchange = exchangeDeclareStrategy.DeclareExchange(scheduleMeType, ExchangeType.Topic);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
             var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
@@ -139,7 +139,7 @@ namespace EasyNetQ.Scheduling
         public async Task CancelFuturePublishAsync(string cancellationKey)
         {
             var uncheduleMeType = typeof(UnscheduleMe);
-            var unscheduleMeExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
+            var unscheduleMeExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(uncheduleMeType, ExchangeType.Topic).ConfigureAwait(false);
             var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
             var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
             {
@@ -154,7 +154,7 @@ namespace EasyNetQ.Scheduling
         public void CancelFuturePublish(string cancellationKey)
         {
             var uncheduleMeType = typeof(UnscheduleMe);
-            var unscheduleMeExchange = publishExchangeDeclareStrategy.DeclareExchange(uncheduleMeType, ExchangeType.Topic);
+            var unscheduleMeExchange = exchangeDeclareStrategy.DeclareExchange(uncheduleMeType, ExchangeType.Topic);
             var unscheduleMe = new UnscheduleMe { CancellationKey = cancellationKey };
             var easyNetQMessage = new Message<UnscheduleMe>(unscheduleMe)
             {
