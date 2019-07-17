@@ -23,7 +23,7 @@ namespace EasyNetQ.Producer
         private readonly ITypeNameSerializer typeNameSerializer;
 
         private readonly object responseQueuesAddLock = new object();
-        private readonly ConcurrentDictionary<RpcKey, string> responseQueues = new ConcurrentDictionary<RpcKey, string>();
+        private readonly ConcurrentDictionary<RpcKey, ResponseQueueWithCancellation> responseQueues = new ConcurrentDictionary<RpcKey, ResponseQueueWithCancellation>();
         private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
 
         protected readonly TimeSpan disablePeriodicSignaling = TimeSpan.FromMilliseconds(-1);
@@ -63,11 +63,19 @@ namespace EasyNetQ.Producer
 
         private void OnConnectionCreated(ConnectionCreatedEvent @event)
         {
-            var copyOfResponseActions = responseActions.Values;
-            responseActions.Clear();
+            var copyOfResponseQueues = responseQueues.Values;
             responseQueues.Clear();
 
-            // retry in-flight requests.
+            var copyOfResponseActions = responseActions.Values;
+            responseActions.Clear();
+
+            // call consumer cancellations
+            foreach (var queueWithCancellation in copyOfResponseQueues)
+            {
+                queueWithCancellation.Cancellation.Dispose();
+            }
+
+            // finish in-flight requests
             foreach (var responseAction in copyOfResponseActions)
             {
                 responseAction.OnFailure();
@@ -85,7 +93,11 @@ namespace EasyNetQ.Producer
             var configuration = new RequestConfiguration();
             configure(configuration);
 
+#if NETFX && !NET46
             var tcs = new TaskCompletionSource<TResponse>();
+#else
+            var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
 
             var timeout = timeoutStrategy.GetTimeoutSeconds(requestType);
             Timer timer = null;
@@ -154,13 +166,12 @@ namespace EasyNetQ.Producer
         {
             var responseType = typeof(TResponse);
             var rpcKey = new RpcKey { Request = typeof(TRequest), Response = responseType };
-            string queueName;
-            if (responseQueues.TryGetValue(rpcKey, out queueName))
-                return queueName;
+            if (responseQueues.TryGetValue(rpcKey, out ResponseQueueWithCancellation queueWithCancellation))
+                return queueWithCancellation.QueueName;
             lock (responseQueuesAddLock)
             {
-                if (responseQueues.TryGetValue(rpcKey, out queueName))
-                    return queueName;
+                if (responseQueues.TryGetValue(rpcKey, out queueWithCancellation))
+                    return queueWithCancellation.QueueName;
 
                 var queue = advancedBus.QueueDeclare(
                             conventions.RpcReturnQueueNamingConvention(),
@@ -174,7 +185,7 @@ namespace EasyNetQ.Producer
                     queue,
                     queue.Name);
 
-                advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
+                var cancellation = advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) => Task.Factory.StartNew(() =>
                     {
                         ResponseAction responseAction;
                         if (responseActions.TryRemove(message.Properties.CorrelationId, out responseAction))
@@ -182,7 +193,7 @@ namespace EasyNetQ.Producer
                             responseAction.OnSuccess(message);
                         }
                     }));
-                responseQueues.TryAdd(rpcKey, queue.Name);
+                responseQueues.TryAdd(rpcKey, new ResponseQueueWithCancellation { QueueName = queue.Name, Cancellation = cancellation });
                 return queue.Name;
             }
         }
@@ -191,6 +202,12 @@ namespace EasyNetQ.Producer
         {
             public Type Request;
             public Type Response;
+        }
+
+        protected struct ResponseQueueWithCancellation
+        {
+            public string QueueName;
+            public IDisposable Cancellation;
         }
 
         protected class ResponseAction
@@ -257,7 +274,11 @@ namespace EasyNetQ.Producer
             where TRequest : class
             where TResponse : class
         {
+#if NETFX && !NET46
             var tcs = new TaskCompletionSource<object>();
+#else
+            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
 
             try
             {
