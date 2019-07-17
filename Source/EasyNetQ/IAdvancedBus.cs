@@ -254,6 +254,7 @@ namespace EasyNetQ
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
         /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="arguments">If set, directly provides supplied arguments to queue declaration.</param>
         /// <returns>
         /// The queue
         /// </returns>
@@ -269,7 +270,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null);
+            int? maxLengthBytes = null,
+            IDictionary<string, object> arguments = null);
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -286,6 +288,7 @@ namespace EasyNetQ
         /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
         /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
         /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="arguments">If set, directly provides supplied arguments to queue declaration.</param>
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(
             string name,
@@ -299,7 +302,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null);
+            int? maxLengthBytes = null,
+            IDictionary<string, object> arguments = null);
 
         /// <summary>
         /// Delete a queue
@@ -326,6 +330,7 @@ namespace EasyNetQ
         /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <param name="delayed">If set, declares x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="arguments">If set, directly provides supplied arguments to exchange declaration.</param>
         /// <returns>The exchange</returns>
         IExchange ExchangeDeclare(
             string name,
@@ -335,7 +340,8 @@ namespace EasyNetQ
             bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false);
+            bool delayed = false,
+            IDictionary<string, object> arguments = null);
 
         /// <summary>
         /// Declare an exchange
@@ -348,6 +354,7 @@ namespace EasyNetQ
         /// <param name="internal">If set, the exchange may not be used directly by publishers, but only when bound to other exchanges.</param>
         /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
         /// <param name="delayed">If set, declares x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="arguments">If set, directly provides supplied arguments to exchange declaration.</param>
         /// <returns>The exchange</returns>
         Task<IExchange> ExchangeDeclareAsync(
             string name,
@@ -357,7 +364,8 @@ namespace EasyNetQ
             bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false);
+            bool delayed = false,
+            IDictionary<string, object> arguments = null);
 
         /// <summary>
         /// Delete an exchange

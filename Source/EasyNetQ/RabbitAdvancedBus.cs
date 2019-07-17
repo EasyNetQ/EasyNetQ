@@ -417,7 +417,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null)
+            int? maxLengthBytes = null,
+            IDictionary<string, object> arguments = null)
 	        {
             Preconditions.CheckNotNull(name, "name");
 
@@ -427,18 +428,20 @@ namespace EasyNetQ
                 return new Queue(name, exclusive);
             }
 
-            var arguments = new Dictionary<string, object>();
+            if (arguments == null)
+                arguments = new Dictionary<string, object>();
+
             if (perQueueMessageTtl.HasValue)
             {
-                arguments.Add("x-message-ttl", perQueueMessageTtl.Value);
+                arguments["x-message-ttl"] = perQueueMessageTtl.Value;
             }
             if (expires.HasValue)
             {
-                arguments.Add("x-expires", expires);
+                arguments["x-expires"] = expires;
             }
             if (maxPriority.HasValue)
             {
-                arguments.Add("x-max-priority", maxPriority.Value);
+                arguments["x-max-priority"] = maxPriority.Value;
             }
             // Allow empty dead-letter-exchange as it represents the default rabbitmq exchange
             // and thus is a valid value. To dead-letter a message directly to a queue, you
@@ -446,19 +449,19 @@ namespace EasyNetQ
             // queue since every queue has a direct binding with default exchange.
             if (deadLetterExchange != null)
             {
-                arguments.Add("x-dead-letter-exchange", deadLetterExchange);
+                arguments["x-dead-letter-exchange"] = deadLetterExchange;
             }
             if (!string.IsNullOrEmpty(deadLetterRoutingKey))
             {
-                arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
+                arguments["x-dead-letter-routing-key"] = deadLetterRoutingKey;
             }
             if (maxLength.HasValue)
             {
-                arguments.Add("x-max-length", maxLength.Value);
+                arguments["x-max-length"] = maxLength.Value;
             }
             if (maxLengthBytes.HasValue)
             {
-                arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
+                arguments["x-max-length-bytes"] = maxLengthBytes.Value;
             }
 
             var queueDeclareOk = clientCommandDispatcher.Invoke(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments));
@@ -490,7 +493,8 @@ namespace EasyNetQ
             string deadLetterExchange = null,
             string deadLetterRoutingKey = null,
             int? maxLength = null,
-            int? maxLengthBytes = null)
+            int? maxLengthBytes = null,
+            IDictionary<string, object> arguments = null)
         {
             Preconditions.CheckNotNull(name, "name");
 
@@ -500,18 +504,20 @@ namespace EasyNetQ
                 return new Queue(name, exclusive);
             }
 
-            var arguments = new Dictionary<string, object>();
+            if (arguments == null)
+                arguments = new Dictionary<string, object>();
+
             if (perQueueMessageTtl.HasValue)
             {
-                arguments.Add("x-message-ttl", perQueueMessageTtl.Value);
+                arguments["x-message-ttl"] = perQueueMessageTtl.Value;
             }
             if (expires.HasValue)
             {
-                arguments.Add("x-expires", expires);
+                arguments["x-expires"] = expires;
             }
             if (maxPriority.HasValue)
             {
-                arguments.Add("x-max-priority", maxPriority.Value);
+                arguments["x-max-priority"] = maxPriority.Value;
             }
             // Allow empty dead-letter-exchange as it represents the default rabbitmq exchange
             // and thus is a valid value. To dead-letter a message directly to a queue, you
@@ -519,19 +525,19 @@ namespace EasyNetQ
             // queue since every queue has a direct binding with default exchange.
             if (deadLetterExchange != null)
             {
-                arguments.Add("x-dead-letter-exchange", deadLetterExchange);
+                arguments["x-dead-letter-exchange"] = deadLetterExchange;
             }
             if (!string.IsNullOrEmpty(deadLetterRoutingKey))
             {
-                arguments.Add("x-dead-letter-routing-key", deadLetterRoutingKey);
+                arguments["x-dead-letter-routing-key"] = deadLetterRoutingKey;
             }
             if (maxLength.HasValue)
             {
-                arguments.Add("x-max-length", maxLength.Value);
+                arguments["x-max-length"] = maxLength.Value;
             }
             if (maxLengthBytes.HasValue)
             {
-                arguments.Add("x-max-length-bytes", maxLengthBytes.Value);
+                arguments["x-max-length-bytes"] = maxLengthBytes.Value;
             }
 
             var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclare(name, durable, exclusive, autoDelete, arguments)).ConfigureAwait(false);
@@ -583,7 +589,8 @@ namespace EasyNetQ
             bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false)
+            bool delayed = false,
+            IDictionary<string, object> arguments = null)
         {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
@@ -594,15 +601,17 @@ namespace EasyNetQ
                 return new Exchange(name);
             }
 
-            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            if (arguments == null)
+                arguments = new Dictionary<string, object>();
+
             if (alternateExchange != null)
             {
-                arguments.Add("alternate-exchange", alternateExchange);
+                arguments["alternate-exchange"] = alternateExchange;
             }
-            
+
             if (delayed)
             {
-                arguments.Add("x-delayed-type", type);
+                arguments["x-delayed-type"] = type;
                 type = "x-delayed-message";
             }
             
@@ -631,7 +640,8 @@ namespace EasyNetQ
             bool autoDelete = false,
             bool @internal = false,
             string alternateExchange = null,
-            bool delayed = false)
+            bool delayed = false,
+            IDictionary<string, object> arguments = null)
         {
             Preconditions.CheckShortString(name, "name");
             Preconditions.CheckShortString(type, "type");
@@ -642,14 +652,17 @@ namespace EasyNetQ
                 return new Exchange(name);
             }
             
-            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            if (arguments == null)
+                arguments = new Dictionary<string, object>();
+
             if (alternateExchange != null)
             {
-                arguments.Add("alternate-exchange", alternateExchange);
+                arguments["alternate-exchange"] = alternateExchange;
             }
+
             if (delayed)
             {
-                arguments.Add("x-delayed-type", type);
+                arguments["x-delayed-type"] = type;
                 type = "x-delayed-message";
             }
             
