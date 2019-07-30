@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -9,7 +9,6 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     {
         public override void AdditionalSetup()
         {
-            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
             consumer.Dispose();
         }

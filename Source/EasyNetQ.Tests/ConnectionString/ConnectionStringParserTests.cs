@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.ConnectionString
             var connectionConfiguration = connectionStringParser.Parse(spec.amqpUri.ToString());
 
             connectionConfiguration.Port.Should().Be((ushort) spec.port);
-            connectionConfiguration.AMQPConnectionString.Should().Be(spec.amqpUri);
+            connectionConfiguration.AmqpConnectionString.Should().Be(spec.amqpUri);
             connectionConfiguration.Hosts.First().Host.Should().Be(spec.host);
             connectionConfiguration.Hosts.First().Port.Should().Be((ushort) spec.port);
             connectionConfiguration.VirtualHost.Should().Be(spec.vhost);

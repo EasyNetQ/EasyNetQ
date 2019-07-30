@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.ConnectionString
         [Fact]
         public void Should_parse_amqp()
         {
-            var hosts = ConnectionStringGrammar.AMQP.Parse("amqp://localhost/");
+            var hosts = ConnectionStringGrammar.Amqp.Parse("amqp://localhost/");
 
             hosts.Port.Should().Be(-1);
             hosts.Host.Should().Be("localhost");
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests.ConnectionString
         public void Should_try_to_parse_amqp()
         {
             var message = "asd";
-            var exception = Assert.Throws<ParseException>(() => ConnectionStringGrammar.AMQP.Parse(message));
+            var exception = Assert.Throws<ParseException>(() => ConnectionStringGrammar.Amqp.Parse(message));
 
             Assert.Contains(message, exception.Message);
         }

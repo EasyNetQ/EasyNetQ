@@ -24,12 +24,12 @@ namespace EasyNetQ.ConnectionString
 
         internal static readonly Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
 
-        internal static readonly Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
+        internal static readonly Parser<Uri> Amqp = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
 
         internal static readonly Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
             // add new connection string parts here
-            BuildKeyValueParser("amqp", AMQP, c => c.AMQPConnectionString),
+            BuildKeyValueParser("amqp", Amqp, c => c.AmqpConnectionString),
             BuildKeyValueParser("host", Hosts, c => c.Hosts),
             BuildKeyValueParser("port", UShortNumber, c => c.Port),
             BuildKeyValueParser("virtualHost", Text, c => c.VirtualHost),
@@ -47,15 +47,15 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));
 
-        internal static readonly Parser<UpdateConfiguration> AMQPAlone =
-            AMQP.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>) (configuration
+        internal static readonly Parser<UpdateConfiguration> AmqpAlone =
+            Amqp.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>) (configuration
                 =>
             {
-                configuration.AMQPConnectionString = _;
+                configuration.AmqpConnectionString = _;
                 return configuration;
             }));
 
-        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.Once());
+        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AmqpAlone.Once());
 
         public static IEnumerable<UpdateConfiguration> ParseConnectionString(string connectionString)
         {

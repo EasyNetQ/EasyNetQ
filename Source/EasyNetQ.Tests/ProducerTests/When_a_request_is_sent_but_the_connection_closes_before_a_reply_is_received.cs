@@ -1,17 +1,16 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
 using NSubstitute;
 using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
     {
-        private MockBuilder mockBuilder;
-
         public When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received()
         {
             mockBuilder = new MockBuilder();
@@ -22,23 +21,19 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
+        private MockBuilder mockBuilder;
+
         [Fact]
         public void Should_throw_an_EasyNetQException()
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                try
-                {
-                    var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => { });
-                    mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(new ShutdownInitiator(), 0, null));
-                    task.Wait();
-                }
-                catch (AggregateException aggregateException)
-                {
-                    throw aggregateException.InnerException;
-                }
+                var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+                mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(new ShutdownInitiator(), 0, null));
+                (mockBuilder.Connection as IRecoverable).Recovery += Raise.EventWith(null, new EventArgs());
+                task.GetAwaiter().GetResult();
             });
-        }         
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,10 +16,6 @@ namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_request_is_sent : IDisposable
     {
-        private MockBuilder mockBuilder;
-        private TestRequestMessage requestMessage;
-        private TestResponseMessage responseMessage;
-
         public When_a_request_is_sent()
         {
             mockBuilder = new MockBuilder();
@@ -30,10 +27,10 @@ namespace EasyNetQ.Tests.ProducerTests
 
             mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
                 .Do(invocation =>
-                    {
-                        var properties = (IBasicProperties)invocation[3];
-                        correlationId = properties.CorrelationId;
-                    });
+                {
+                    var properties = (IBasicProperties) invocation[3];
+                    correlationId = properties.CorrelationId;
+                });
 
             var waiter = new CountdownEvent(2);
 
@@ -54,44 +51,9 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Fact]
-        public void Should_return_the_response()
-        {
-            responseMessage.Text.Should().Be("Hello World");
-        }
-
-        [Fact]
-        public void Should_publish_request_message()
-        {
-            mockBuilder.Channels[0].Received().BasicPublish(
-                Arg.Is("easy_net_q_rpc"),
-                Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests.Common"),
-                Arg.Is(false),
-                Arg.Any<IBasicProperties>(),
-                Arg.Any<byte[]>());
-        }
-
-        [Fact]
-        public void Should_declare_the_publish_exchange()
-        {
-            mockBuilder.Channels[0].Received().ExchangeDeclare(
-                Arg.Is("easy_net_q_rpc"),
-                Arg.Is("direct"),
-                Arg.Is(true),
-                Arg.Is(false),
-                Arg.Any<IDictionary<string, object>>());
-        }
-
-        [Fact]
-        public void Should_declare_the_response_queue()
-        {
-            mockBuilder.Channels[0].Received().QueueDeclare(
-                Arg.Is<string>(arg => arg.StartsWith("easynetq.response.")),
-                Arg.Is(false),
-                Arg.Is(true),
-                Arg.Is(true),
-                Arg.Any<IDictionary<string, object>>());
-        }
+        private MockBuilder mockBuilder;
+        private TestRequestMessage requestMessage;
+        private TestResponseMessage responseMessage;
 
         protected void DeliverMessage(string correlationId)
         {
@@ -110,7 +72,49 @@ namespace EasyNetQ.Tests.ProducerTests
                 "the_routing_key",
                 properties,
                 body
-                );
+            );
+        }
+
+        [Fact]
+        public void Should_declare_the_publish_exchange()
+        {
+            mockBuilder.Channels[0].Received().ExchangeDeclare(
+                Arg.Is("easy_net_q_rpc"),
+                Arg.Is("direct"),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Any<IDictionary<string, object>>()
+            );
+        }
+
+        [Fact]
+        public void Should_declare_the_response_queue()
+        {
+            mockBuilder.Channels[0].Received().QueueDeclare(
+                Arg.Is<string>(arg => arg.StartsWith("easynetq.response.")),
+                Arg.Is(false),
+                Arg.Is(true),
+                Arg.Is(true),
+                Arg.Any<IDictionary<string, object>>()
+            );
+        }
+
+        [Fact]
+        public void Should_publish_request_message()
+        {
+            mockBuilder.Channels[0].Received().BasicPublish(
+                Arg.Is("easy_net_q_rpc"),
+                Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests.Common"),
+                Arg.Is(false),
+                Arg.Any<IBasicProperties>(),
+                Arg.Any<byte[]>()
+            );
+        }
+
+        [Fact]
+        public void Should_return_the_response()
+        {
+            responseMessage.Text.Should().Be("Hello World");
         }
     }
 }

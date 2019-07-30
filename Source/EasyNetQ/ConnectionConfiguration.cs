@@ -46,19 +46,19 @@ namespace EasyNetQ
         public string Password { get; set; }
 
         /// <summary>
-        /// Heartbeat interval seconds. (default is 10)
+        ///     Heartbeat interval seconds. (default is 10)
         /// </summary>
         public ushort RequestedHeartbeat { get; set; }
 
         public ushort PrefetchCount { get; set; }
-        public Uri AMQPConnectionString { get; set; }
+        public Uri AmqpConnectionString { get; set; }
         public IDictionary<string, object> ClientProperties { get; }
 
         public IEnumerable<HostConfiguration> Hosts { get; set; }
         public SslOption Ssl { get; }
 
         /// <summary>
-        /// Operation timeout seconds. (default is 10)
+        ///     Operation timeout seconds. (default is 10)
         /// </summary>
         public ushort Timeout { get; set; }
 
@@ -76,7 +76,7 @@ namespace EasyNetQ
         {
             string applicationNameAndPath = null;
 #if !NETFX
-            var version = this.GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
+            var version = GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
@@ -85,10 +85,6 @@ namespace EasyNetQ
             var applicationName = "unknown";
             var applicationPath = "unknown";
             if (!string.IsNullOrWhiteSpace(applicationNameAndPath))
-            {
-                // Note: When running the application in an Integration Services Package (SSIS) the
-                // Environment.GetCommandLineArgs()[0] can return null, and therefor it is not possible to get
-                // the filename or directory name.
                 try
                 {
                     // Will only throw an exception if the applicationName contains invalid characters, is empty, or too long
@@ -102,7 +98,6 @@ namespace EasyNetQ
                 catch (PathTooLongException)
                 {
                 }
-            }
 
             var hostname = Environment.MachineName;
 
@@ -135,36 +130,27 @@ namespace EasyNetQ
 
         public void Validate()
         {
-            if (AMQPConnectionString != null && !Hosts.Any(h => h.Host == AMQPConnectionString.Host))
+            if (AmqpConnectionString != null && Hosts.All(h => h.Host != AmqpConnectionString.Host))
             {
                 if (Port == DefaultPort)
                 {
-                    if (AMQPConnectionString.Port > 0)
-                        Port = (ushort) AMQPConnectionString.Port;
-                    else if (AMQPConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase))
+                    if (AmqpConnectionString.Port > 0)
+                        Port = (ushort) AmqpConnectionString.Port;
+                    else if (AmqpConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase))
                         Port = DefaultAmqpsPort;
                 }
 
-                if (AMQPConnectionString.Segments.Length > 1)
-                {
-                    VirtualHost = AMQPConnectionString.Segments.Last();
-                }
+                if (AmqpConnectionString.Segments.Length > 1) VirtualHost = AmqpConnectionString.Segments.Last();
 
-                Hosts = Hosts.Concat(new[] { new HostConfiguration { Host = AMQPConnectionString.Host } });
+                Hosts = Hosts.Concat(new[] {new HostConfiguration {Host = AmqpConnectionString.Host}});
             }
 
             if (!Hosts.Any())
-            {
                 throw new EasyNetQException("Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\"");
-            }
 
             foreach (var hostConfiguration in Hosts)
-            {
                 if (hostConfiguration.Port == 0)
-                {
                     hostConfiguration.Port = Port;
-                }
-            }
 
             SetDefaultClientProperties(ClientProperties);
         }
