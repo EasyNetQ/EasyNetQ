@@ -30,9 +30,9 @@ namespace EasyNetQ
         private bool disposed;
 
         public RabbitAdvancedBus(
-            IConnectionFactory connectionFactory,
+            IPersistentConnection connection,
             IConsumerFactory consumerFactory,
-            IClientCommandDispatcherFactory clientCommandDispatcherFactory,
+            IClientCommandDispatcher clientCommandDispatcher,
             IPublishConfirmationListener confirmationListener,
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
@@ -41,11 +41,10 @@ namespace EasyNetQ
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
-            AdvancedBusEventHandlers advancedBusEventHandlers,
-            IPersistentConnectionFactory persistentConnectionFactory
+            AdvancedBusEventHandlers advancedBusEventHandlers
         )
         {
-            Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
+            Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
@@ -55,8 +54,8 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
-            Preconditions.CheckNotNull(persistentConnectionFactory, "persistentConnectionFactory");
 
+            this.connection = connection;
             this.consumerFactory = consumerFactory;
             this.confirmationListener = confirmationListener;
             this.eventBus = eventBus;
@@ -97,9 +96,7 @@ namespace EasyNetQ
                 MessageReturned += advancedBusEventHandlers.MessageReturned;
             }
 
-            connection = persistentConnectionFactory.CreateConnection();
-            clientCommandDispatcher = clientCommandDispatcherFactory.GetClientCommandDispatcher(connection);
-            connection.Initialize();
+            this.clientCommandDispatcher = clientCommandDispatcher;
         }
 
         // ---------------------------------- consume --------------------------------------
@@ -132,7 +129,7 @@ namespace EasyNetQ
 
             var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
             configure(consumerConfiguration);
-            var consumer = consumerFactory.CreateConsumer(queueOnMessages, connection, consumerConfiguration);
+            var consumer = consumerFactory.CreateConsumer(queueOnMessages, consumerConfiguration);
 
             return consumer.StartConsuming();
         }
@@ -178,7 +175,7 @@ namespace EasyNetQ
             {
                 var rawMessage = produceConsumeInterceptor.OnConsume(new RawMessage(properties, body));
                 return onMessage(rawMessage.Body, rawMessage.Properties, receivedInfo, cancellationToken);
-            }, connection, consumerConfiguration);
+            }, consumerConfiguration);
             return consumer.StartConsuming();
         }
 

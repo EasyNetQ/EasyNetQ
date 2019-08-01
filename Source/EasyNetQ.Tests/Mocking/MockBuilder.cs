@@ -1,57 +1,51 @@
-﻿using NSubstitute;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
 using EasyNetQ.Producer;
 using EasyNetQ.Scheduling;
 using FluentAssertions;
+using NSubstitute;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 
 namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
-        private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
-        private readonly IConnection connection = Substitute.For<IConnection>();
-        private readonly List<IModel> channels = new List<IModel>();
-        private readonly Stack<IModel> channelPool = new Stack<IModel>();
-        private readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
-        private readonly IBasicProperties basicProperties = new BasicProperties();
-        private readonly List<string> consumerQueueNames = new List<string>();
-        private readonly IBus bus;
-
         public const string Host = "my_host";
         public const string VirtualHost = "my_virtual_host";
         public const int PortNumber = 1234;
+        private readonly IBasicProperties basicProperties = new BasicProperties();
+        private readonly IBus bus;
+        private readonly Stack<IModel> channelPool = new Stack<IModel>();
+        private readonly List<IModel> channels = new List<IModel>();
+        private readonly IConnection connection = Substitute.For<IConnection, IRecoverable>();
+        private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
+        private readonly List<string> consumerQueueNames = new List<string>();
+        private readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
 
-        public MockBuilder() : this(register => { }) { }
+        public MockBuilder() : this(register => { })
+        {
+        }
 
-        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices) { }
+        public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices)
+        {
+        }
 
-        public MockBuilder(string connectionString) : this(connectionString, register => { }) { }
+        public MockBuilder(string connectionString) : this(connectionString, register => { })
+        {
+        }
 
         public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
             for (var i = 0; i < 10; i++)
             {
-                channelPool.Push(Substitute.For<IModel>());
+                channelPool.Push(Substitute.For<IModel, IRecoverable>());
             }
 
-            connectionFactory.CreateConnection().Returns(connection);
-            connectionFactory.Next().Returns(false);
-            connectionFactory.Succeeded.Returns(true);
-            connectionFactory.CurrentHost.Returns(new HostConfiguration
-            {
-                Host = Host,
-                Port = PortNumber
-            });
-            connectionFactory.Configuration.Returns(new ConnectionConfiguration
-            {
-                VirtualHost = VirtualHost,
-            });
-
+            connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
             connection.IsOpen.Returns(true);
+            connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
 
             connection.CreateModel().Returns(i =>
             {
@@ -60,11 +54,11 @@ namespace EasyNetQ.Tests.Mocking
                 channel.CreateBasicProperties().Returns(basicProperties);
                 channel.IsOpen.Returns(true);
                 channel.BasicConsume(null, false, null, true, false, null, null)
-                    .ReturnsForAnyArgs(consumeInvokation =>
+                    .ReturnsForAnyArgs(consumeInvocation =>
                     {
-                        var queueName = (string)consumeInvokation[0];
-                        var consumerTag = (string)consumeInvokation[2];
-                        var consumer = (IBasicConsumer)consumeInvokation[6];
+                        var queueName = (string) consumeInvocation[0];
+                        var consumerTag = (string) consumeInvocation[2];
+                        var consumer = (IBasicConsumer) consumeInvocation[6];
 
                         ConsumerQueueNames.Add(queueName);
                         consumer.HandleBasicConsumeOk(consumerTag);
@@ -83,10 +77,10 @@ namespace EasyNetQ.Tests.Mocking
             });
 
             bus = RabbitHutch.CreateBus(connectionString, x =>
-                {
-                    registerServices(x);
-                    x.Register(connectionFactory);
-                });
+            {
+                registerServices(x);
+                x.Register(connectionFactory);
+            });
 
             bus.Should().NotBeNull();
             bus.Advanced.Should().NotBeNull();
@@ -96,11 +90,11 @@ namespace EasyNetQ.Tests.Mocking
         public IPubSub PubSub => bus.PubSub;
 
         public IRpc Rpc => bus.Rpc;
-        
+
         public ISendReceive SendReceive => bus.SendReceive;
-        
+
         public IScheduler Scheduler => bus.Scheduler;
-        
+
         public IConnectionFactory ConnectionFactory => connectionFactory;
 
         public IConnection Connection => connection;

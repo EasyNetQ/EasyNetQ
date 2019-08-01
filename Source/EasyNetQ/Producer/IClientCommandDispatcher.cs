@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 namespace EasyNetQ.Producer
 {
     /// <summary>
-    /// Responsible for invoking client commands.
+    ///     Responsible for invoking client commands.
     /// </summary>
     public interface IClientCommandDispatcher : IDisposable
     {
