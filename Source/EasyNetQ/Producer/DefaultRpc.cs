@@ -24,7 +24,7 @@ namespace EasyNetQ.Producer
         private readonly List<IDisposable> eventBusSubscriptions = new List<IDisposable>();
 
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        protected readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         private readonly ConcurrentDictionary<Guid, ResponseAction> responseActions = new ConcurrentDictionary<Guid, ResponseAction>();
         private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions = new ConcurrentDictionary<RpcKey, ResponseSubscription>();
 
@@ -37,7 +37,7 @@ namespace EasyNetQ.Producer
             IAdvancedBus advancedBus,
             IEventBus eventBus,
             IConventions conventions,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             ITimeoutStrategy timeoutStrategy,
             ITypeNameSerializer typeNameSerializer
@@ -47,7 +47,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
@@ -55,7 +55,7 @@ namespace EasyNetQ.Producer
             this.connectionConfiguration = connectionConfiguration;
             this.advancedBus = advancedBus;
             this.conventions = conventions;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.timeoutStrategy = timeoutStrategy;
             this.typeNameSerializer = typeNameSerializer;
@@ -191,7 +191,7 @@ namespace EasyNetQ.Producer
                     cancellationToken
                 ).ConfigureAwait(false);
 
-                var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(
+                var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
                     conventions.RpcResponseExchangeNamingConvention(responseType),
                     ExchangeType.Direct,
                     cancellationToken
@@ -219,7 +219,7 @@ namespace EasyNetQ.Producer
         )
         {
             var requestType = typeof(TRequest);
-            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
                 conventions.RpcRequestExchangeNamingConvention(requestType),
                 ExchangeType.Direct,
                 cancellationToken

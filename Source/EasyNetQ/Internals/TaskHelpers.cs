@@ -11,7 +11,7 @@ namespace EasyNetQ.Internals
 {
     public static class TaskHelpers
     {
-#if NETFX
+#if NETFX && !NET46
         /// <summary>
         ///     We want to prevent callers hijacking the reader thread; this is a bit nasty, but works;
         ///     see http://stackoverflow.com/a/22588431/23354 for more information; a huge
@@ -204,7 +204,7 @@ namespace EasyNetQ.Internals
 
         public static TaskCompletionSource<T> CreateTcs<T>()
         {
-#if NETFX
+#if NETFX && !NET46
             return new TaskCompletionSource<T>();
 #else
             return new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -213,7 +213,7 @@ namespace EasyNetQ.Internals
 
         public static void TrySetResultAsynchronously<T>(this TaskCompletionSource<T> source, T result)
         {
-#if NETFX
+#if NETFX && !NET46
             if (IsSyncSafe(source.Task))
 #else
             if ((source.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
@@ -229,7 +229,7 @@ namespace EasyNetQ.Internals
 
         public static void TrySetCanceledAsynchronously<T>(this TaskCompletionSource<T> source)
         {
-#if NETFX
+#if NETFX && !NET46
             if (IsSyncSafe(source.Task))
 #else
             if ((source.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
@@ -245,7 +245,7 @@ namespace EasyNetQ.Internals
 
         public static void TrySetExceptionAsynchronously<T>(this TaskCompletionSource<T> source, Exception exception)
         {
-#if NETFX
+#if NETFX && !NET46
             if (IsSyncSafe(source.Task))
 #else
             if ((source.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)

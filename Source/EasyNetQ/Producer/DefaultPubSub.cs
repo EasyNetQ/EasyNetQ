@@ -14,25 +14,25 @@ namespace EasyNetQ.Producer
         private readonly ConnectionConfiguration connectionConfiguration;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        private readonly IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy;
+        private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
 
         public DefaultPubSub(
             ConnectionConfiguration connectionConfiguration,
             IConventions conventions,
-            IPublishExchangeDeclareStrategy publishExchangeDeclareStrategy,
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IAdvancedBus advancedBus
         )
         {
             Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(publishExchangeDeclareStrategy, "publishExchangeDeclareStrategy");
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
 
             this.connectionConfiguration = connectionConfiguration;
             this.conventions = conventions;
-            this.publishExchangeDeclareStrategy = publishExchangeDeclareStrategy;
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.advancedBus = advancedBus;
         }
@@ -58,7 +58,7 @@ namespace EasyNetQ.Producer
             if (configuration.Expires != null)
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
-            var exchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
             await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
         }
 

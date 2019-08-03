@@ -31,7 +31,7 @@ namespace EasyNetQ.DI
                 .Register(AdvancedBusEventHandlers.Default)
                 .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
-                .Register<IPublishExchangeDeclareStrategy, PublishExchangeDeclareStrategy>()
+                .Register<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
                 .Register<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
                 .Register<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
                 .Register<IHandlerRunner, HandlerRunner>()

@@ -7,13 +7,13 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.MessageVersioning
 {
-    public class VersionedPublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
+    public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy
     {
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly AsyncCache<ExchangeKey, IExchange> declaredExchanges;
 
-        public VersionedPublishExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
+        public VersionedExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
         {
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
