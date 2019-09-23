@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>EasyNetQ.Scheduler</Description>
-    <TargetFramework>net451</TargetFramework>
+    <TargetFramework>net452</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
@@ -20,10 +20,10 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
-    <PackageReference Include="Topshelf" Version="3.1.4" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.1" />
+    <PackageReference Include="Topshelf" Version="4.2.1" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

@@ -25,23 +25,23 @@ namespace EasyNetQ.DI.Tests
     public class ContainerAdapterTests
     {
         public delegate IServiceResolver ResolverFactory(Action<IServiceRegister> configure);
-        
+
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_last_registration_win(ResolverFactory resolverFactory)
         {
             var first = new Service();
             var last = new Service();
-            
+
             var resolver = resolverFactory(c =>
             {
                 c.Register<IService>(first);
                 c.Register<IService>(last);
             });
-            
+
             Assert.Equal(last, resolver.Resolve<IService>());
         }
-         
+
         [Theory]
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_singleton_created_once(ResolverFactory resolverFactory)
@@ -50,7 +50,7 @@ namespace EasyNetQ.DI.Tests
 
             var first = resolver.Resolve<IService>();
             var second = resolver.Resolve<IService>();
-            
+
             Assert.Same(first, second);
         }
 
@@ -112,7 +112,7 @@ namespace EasyNetQ.DI.Tests
             {
                 var container = new LightInjectContainer();
                 c(new LightInjectAdapter(container));
-                return container.GetInstance<IServiceResolver>();
+                return (IServiceResolver) container.GetInstance(typeof(IServiceResolver));
             })};
 
             yield return new object[] {(ResolverFactory) (c =>
@@ -135,14 +135,14 @@ namespace EasyNetQ.DI.Tests
                 var container = containerBuilder.Build();
                 return container.Resolve<IServiceResolver>();
             })};
-            
+
             yield return new object[] {(ResolverFactory) (c =>
             {
                 var container = new WindsorContainer();
                 c(new WindsorAdapter(container));
                 return container.Resolve<IServiceResolver>();
             })};
-            
+
             yield return new object[] {(ResolverFactory) (c =>
             {
                 var container = new NinjectContainer();
@@ -170,7 +170,7 @@ namespace EasyNetQ.DI.Tests
             private static volatile int sequenceNumber = 0;
 
             private readonly int number;
-            
+
             public Service()
             {
                 number = Interlocked.Increment(ref sequenceNumber);
