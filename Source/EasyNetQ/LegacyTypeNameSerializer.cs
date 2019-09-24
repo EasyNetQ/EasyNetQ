@@ -20,7 +20,7 @@ namespace EasyNetQ
                     throw new EasyNetQException("type name {0}, is not a valid EasyNetQ type name. Expected Type:Assembly", t);
                 }
                 var type = Type.GetType(nameParts[0] + ", " + nameParts[1]);
-                if (type == null && typeof(string).FullName == nameParts[0])
+                if (type == null)
                 {
                     type = Type.GetType(nameParts[0]);
                 }
