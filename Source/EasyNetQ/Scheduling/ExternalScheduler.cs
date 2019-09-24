@@ -41,7 +41,7 @@ namespace EasyNetQ.Scheduling
         }
 
         //TODO Cache exchange
-        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default)
+        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default, byte? priority = default)
         {
             Preconditions.CheckNotNull(message, "message");
 
@@ -53,7 +53,9 @@ namespace EasyNetQ.Scheduling
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType)
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType),
+                    PriorityPresent = priority.HasValue,
+                    Priority = priority ?? 0
                 }
             });
             var scheduleMe = new ScheduleMe

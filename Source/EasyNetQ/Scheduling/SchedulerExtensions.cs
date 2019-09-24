@@ -16,17 +16,19 @@ namespace EasyNetQ
         /// <param name="message">The message to response with</param>
         /// <param name="topic">The topic string</param>
         /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="priority">The message priority</param>
         public static void FuturePublish<T>(
             this IScheduler scheduler,
-            T message, 
+            T message,
             TimeSpan delay,
-            string topic = null, 
-            CancellationToken cancellationToken = default
+            string topic = null,
+            CancellationToken cancellationToken = default,
+            byte? priority = default
         )
         {
             Preconditions.CheckNotNull(scheduler, "scheduler");
-            
-            scheduler.FuturePublishAsync(message, delay, topic, cancellationToken)
+
+            scheduler.FuturePublishAsync(message, delay, topic, cancellationToken, priority)
                 .GetAwaiter()
                 .GetResult();
         }

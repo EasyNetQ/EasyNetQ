@@ -19,11 +19,13 @@ namespace EasyNetQ.Scheduling
         /// <param name="message">The message to response with</param>
         /// <param name="topic">The topic string</param>
         /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="priority">The message priority</param>
         Task FuturePublishAsync<T>(
             T message,
             TimeSpan delay,
             string topic = null,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default,
+            byte? priority = default
         );
     }
 }

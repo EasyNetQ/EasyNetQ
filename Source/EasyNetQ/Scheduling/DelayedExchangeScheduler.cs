@@ -26,7 +26,7 @@ namespace EasyNetQ.Scheduling
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default)
+        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default, byte? priority = default)
         {
             Preconditions.CheckNotNull(message, "message");
 
@@ -50,7 +50,9 @@ namespace EasyNetQ.Scheduling
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
+                    PriorityPresent = priority.HasValue,
+                    Priority = priority ?? 0
                 }
             };
             await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage.WithDelay(delay), cancellationToken).ConfigureAwait(false);
