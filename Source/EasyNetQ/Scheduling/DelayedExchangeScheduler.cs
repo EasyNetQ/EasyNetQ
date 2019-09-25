@@ -50,11 +50,11 @@ namespace EasyNetQ.Scheduling
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
-                    PriorityPresent = priority.HasValue,
-                    Priority = priority ?? 0
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
                 }
             };
+            if (priority.HasValue)
+                easyNetQMessage.Properties.Priority = priority.Value;
             await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage.WithDelay(delay), cancellationToken).ConfigureAwait(false);
         }
     }

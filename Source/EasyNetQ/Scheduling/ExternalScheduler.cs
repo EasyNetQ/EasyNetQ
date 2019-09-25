@@ -54,10 +54,12 @@ namespace EasyNetQ.Scheduling
                 Properties =
                 {
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType),
-                    PriorityPresent = priority.HasValue,
-                    Priority = priority ?? 0
                 }
             });
+
+            if (priority.HasValue)
+                serializedMessage.Properties.Priority = priority.Value;
+
             var scheduleMe = new ScheduleMe
             {
                 WakeTime = DateTime.UtcNow.Add(delay),
