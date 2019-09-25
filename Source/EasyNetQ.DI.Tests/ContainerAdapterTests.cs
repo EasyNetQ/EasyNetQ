@@ -9,6 +9,7 @@ using EasyNetQ.DI.Ninject;
 using EasyNetQ.DI.SimpleInjector;
 using EasyNetQ.DI.StructureMap;
 using EasyNetQ.DI.Windsor;
+using LightInject;
 using Ninject;
 using Xunit;
 using LightInjectContainer = LightInject.ServiceContainer;
