@@ -11,7 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
+    <PackageReference Include="GitVersionTask" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>

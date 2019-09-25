@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.4.0" />
     <PackageReference Include="Castle.Windsor" Version="5.0.0" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
+    <PackageReference Include="GitVersionTask" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
