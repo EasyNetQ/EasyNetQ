@@ -53,7 +53,7 @@ namespace EasyNetQ.Scheduling
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType),
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType)
                 }
             });
 
