@@ -55,21 +55,21 @@ namespace EasyNetQ.Tests
             typeName.Should().Be("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
         }
 
-#if NET_CORE
+
         [Fact]
         public void Should_deserialize_net45_string_type_name()
         {
             var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
             type.Should().Be(typeof(string));
         }
-#else
+
         [Fact]
         public void Should_deserialize_netcore_string_type_name()
         {
             var type = typeNameSerializer.DeSerialize("System.String:System.Private.CoreLib");
             type.Should().Be(typeof(string));
         }
-#endif
+
 
 #if NET_CORE
         [Fact]
