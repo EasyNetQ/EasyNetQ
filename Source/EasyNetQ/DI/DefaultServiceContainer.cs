@@ -30,6 +30,12 @@ namespace EasyNetQ.DI
             return this;
         }
 
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            container.Register(serviceType, implementingType, ToLifetime(lifetime));
+            return this;
+        }
+
         public TService Resolve<TService>()
         {
             return (TService)container.GetInstance(typeof(TService));

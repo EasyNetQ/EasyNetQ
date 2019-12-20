@@ -6,6 +6,7 @@ using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client.Events;
 using Xunit;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Tests
 {
@@ -42,7 +43,8 @@ namespace EasyNetQ.Tests
                 Substitute.For<IProduceConsumeInterceptor>(),
                 Substitute.For<IMessageSerializationStrategy>(),
                 Substitute.For<IConventions>(),
-                advancedBusEventHandlers);
+                advancedBusEventHandlers,
+                Substitute.For<ILogger<RabbitAdvancedBus>>());
         }
 
         private AdvancedBusEventHandlers advancedBusEventHandlers;

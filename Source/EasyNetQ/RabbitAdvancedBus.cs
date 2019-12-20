@@ -23,7 +23,7 @@ namespace EasyNetQ
         private readonly IConsumerFactory consumerFactory;
         private readonly IEventBus eventBus;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
-        private readonly ILog logger = LogProvider.For<RabbitAdvancedBus>();
+        private readonly ILogger<RabbitAdvancedBus> logger;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
@@ -41,7 +41,8 @@ namespace EasyNetQ
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
-            AdvancedBusEventHandlers advancedBusEventHandlers
+            AdvancedBusEventHandlers advancedBusEventHandlers,
+            ILogger<RabbitAdvancedBus> logger
         )
         {
             Preconditions.CheckNotNull(connection, "connection");
@@ -54,6 +55,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
+            Preconditions.CheckNotNull(logger, "logger");
 
             this.connection = connection;
             this.consumerFactory = consumerFactory;
@@ -65,6 +67,7 @@ namespace EasyNetQ
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
+            this.logger = logger;
 
             this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             if (advancedBusEventHandlers.Connected != null)
@@ -527,7 +530,7 @@ namespace EasyNetQ
             var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))
             {
-                return new BasicGetResult<T>(new Message<T>((T) message.GetBody(), message.Properties));
+                return new BasicGetResult<T>(new Message<T>((T)message.GetBody(), message.Properties));
             }
 
             throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);

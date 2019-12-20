@@ -59,7 +59,12 @@ namespace EasyNetQ.DI.Autofac
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
-        
+
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            throw new NotImplementedException();
+        }
+
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;

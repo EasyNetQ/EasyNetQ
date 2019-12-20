@@ -1,6 +1,7 @@
 ﻿using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
+using EasyNetQ.Logging;
 using EasyNetQ.Producer;
 using EasyNetQ.Scheduling;
 using RabbitMQ.Client;
@@ -19,6 +20,8 @@ namespace EasyNetQ.DI
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
             // default service registration
             container
+                .Register<ILogger, DefaultLogger>()
+                .Register(typeof(ILogger<>), typeof(DefaultLogger<>))
                 .Register<IConnectionStringParser, ConnectionStringParser>()
                 .Register<ISerializer>(_ => new JsonSerializer())
                 .Register<IConventions, Conventions>()

@@ -47,6 +47,11 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             {
                 throw new NotImplementedException();
             }
+
+            public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

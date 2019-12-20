@@ -51,6 +51,11 @@ namespace EasyNetQ.DI.StructureMap
             }
         }
 
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            throw new NotImplementedException();
+        }
+
         private class StructureMapResolver : IServiceResolver
         {
             protected readonly IContainer Container;

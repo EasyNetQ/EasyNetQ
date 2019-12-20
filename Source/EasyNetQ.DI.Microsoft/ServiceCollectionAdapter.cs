@@ -54,6 +54,11 @@ namespace EasyNetQ.DI.Microsoft
             return this;
         }
 
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            throw new NotImplementedException();
+        }
+
         private class ServiceProviderAdapter : IServiceResolver
         {
             private readonly IServiceProvider serviceProvider;
