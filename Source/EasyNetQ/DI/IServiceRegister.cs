@@ -47,6 +47,6 @@ namespace EasyNetQ.DI
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingType">The implementing type.</param>
         /// <returns>itself for nice fluent composition</returns>
-        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton);
+        IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton);
     }
 }
