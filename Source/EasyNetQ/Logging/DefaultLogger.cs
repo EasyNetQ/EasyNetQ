@@ -14,7 +14,7 @@ namespace EasyNetQ.Logging
 
     public class DefaultLogger<TCategoryName> : ILogger<TCategoryName>
     {
-        private readonly ILog logger = LogProvider.GetLogger(typeof(TCategoryName));
+        private readonly ILog logger = LogProvider.For<TCategoryName>();
 
         public bool Log(LogLevel logLevel, Func<string> messageFunc, Exception exception = null, params object[] formatParameters)
         {
