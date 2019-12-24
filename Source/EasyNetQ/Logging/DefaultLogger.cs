@@ -4,7 +4,7 @@ namespace EasyNetQ.Logging
 {
     public class DefaultLogger : ILogger
     {
-        private readonly ILog logger = LogProvider.GetLogger(null);
+        private readonly ILog logger = LogProvider.For<DefaultLogger>();
 
         public bool Log(LogLevel logLevel, Func<string> messageFunc, Exception exception = null, params object[] formatParameters)
         {
