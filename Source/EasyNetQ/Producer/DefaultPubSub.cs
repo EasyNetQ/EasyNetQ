@@ -99,6 +99,7 @@ namespace EasyNetQ.Producer
                     if (configuration.MaxPriority.HasValue) c.WithMaxPriority(configuration.MaxPriority.Value);
                     if (configuration.MaxLength.HasValue) c.WithMaxLength(configuration.MaxLength.Value);
                     if (configuration.MaxLengthBytes.HasValue) c.WithMaxLengthBytes(configuration.MaxLengthBytes.Value);
+                    if (!string.IsNullOrEmpty(configuration.QueueMode)) c.WithQueueMode(configuration.QueueMode);
                 },
                 cancellationToken
             ).ConfigureAwait(false);
