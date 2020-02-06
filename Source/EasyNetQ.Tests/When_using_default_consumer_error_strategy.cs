@@ -23,7 +23,8 @@ namespace EasyNetQ.Tests
 
             mockBuilder = new MockBuilder();
 
-            var connection = new PersistentConnection(new ConnectionConfiguration(), mockBuilder.ConnectionFactory, new EventBus());
+            var connectionConfiguration = new ConnectionConfiguration();
+            var connection = new PersistentConnection(connectionConfiguration, mockBuilder.ConnectionFactory, new EventBus());
             connection.Initialize();
 
             errorStrategy = new DefaultConsumerErrorStrategy(
@@ -31,7 +32,8 @@ namespace EasyNetQ.Tests
                 new JsonSerializer(),
                 customConventions,
                 new DefaultTypeNameSerializer(),
-                new DefaultErrorMessageSerializer()
+                new DefaultErrorMessageSerializer(),
+                connectionConfiguration
             );
 
             const string originalMessage = "";
