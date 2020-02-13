@@ -13,7 +13,6 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.8.1" />
     <PackageReference Include="mongocsharpdriver" Version="2.8.1" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012">
     <PackageReference Include="GitVersionTask" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
