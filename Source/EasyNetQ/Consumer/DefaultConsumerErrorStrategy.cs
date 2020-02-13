@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Text;
 using EasyNetQ.Logging;
@@ -11,14 +12,14 @@ namespace EasyNetQ.Consumer
 {
     /// <summary>
     /// A strategy for dealing with failed messages. When a message consumer throws, HandleConsumerError is invoked.
-    /// 
-    /// The general principle is to put all failed messages in a dedicated error queue so that they can be 
+    ///
+    /// The general principle is to put all failed messages in a dedicated error queue so that they can be
     /// examined and retried (or ignored).
-    /// 
+    ///
     /// Each failed message is wrapped in a special system message, 'Error' and routed by a special exchange
     /// named after the original message's routing key. This is so that ad-hoc queues can be attached for
     /// errors on specific message types.
-    /// 
+    ///
     /// Each exchange is bound to the central EasyNetQ error queue.
     /// </summary>
     public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
@@ -30,6 +31,7 @@ namespace EasyNetQ.Consumer
         private readonly ILog logger = LogProvider.For<DefaultConsumerErrorStrategy>();
         private readonly ISerializer serializer;
         private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly ConnectionConfiguration configuration;
 
         private bool disposed;
         private bool disposing;
@@ -39,7 +41,8 @@ namespace EasyNetQ.Consumer
             ISerializer serializer,
             IConventions conventions,
             ITypeNameSerializer typeNameSerializer,
-            IErrorMessageSerializer errorMessageSerializer)
+            IErrorMessageSerializer errorMessageSerializer,
+            ConnectionConfiguration connectionConfiguration)
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(serializer, "serializer");
@@ -51,6 +54,7 @@ namespace EasyNetQ.Consumer
             this.conventions = conventions;
             this.typeNameSerializer = typeNameSerializer;
             this.errorMessageSerializer = errorMessageSerializer;
+            this.configuration = connectionConfiguration;
         }
 
         public virtual AckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception)
@@ -81,7 +85,9 @@ namespace EasyNetQ.Consumer
 
                     model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
 
-                    return AckStrategies.Ack;
+                    if (!configuration.PublisherConfirms) return AckStrategies.Ack;
+
+                    return model.WaitForConfirms(new TimeSpan(0, 0, configuration.Timeout)) ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
                 }
             }
             catch (BrokerUnreachableException unreachableException)
