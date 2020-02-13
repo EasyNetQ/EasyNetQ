@@ -291,7 +291,7 @@ namespace EasyNetQ.Producer
                             : task.Exception?.InnerException ?? new EasyNetQResponderException("The responder faulted while dispatching the message.");
 
 
-                        OnResponderFailure<TRequest, TResponse>(requestMessage, exception.Message, exception);
+                        OnResponderFailure<TRequest, TResponse>(requestMessage, exception.Message, exception, typeof(TResponse));
                         tcs.SetException(exception);
                     }
                     else
@@ -303,7 +303,7 @@ namespace EasyNetQ.Producer
             }
             catch (Exception e)
             {
-                OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e);
+                OnResponderFailure<TRequest, TResponse>(requestMessage, e.Message, e, typeof(TResponse));
                 tcs.SetException(e);
             }
 
@@ -328,11 +328,11 @@ namespace EasyNetQ.Producer
             advancedBus.Publish(exchange, requestMessage.Properties.ReplyTo, false, responseMessage);
         }
 
-        protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception)
+        protected virtual void OnResponderFailure<TRequest, TResponse>(IMessage<TRequest> requestMessage, string exceptionMessage, Exception exception, Type responseType)
             where TRequest : class
             where TResponse : class
         {
-            var responseMessage = new Message<TResponse>();
+            var responseMessage = new Message<TResponse>((TResponse)Activator.CreateInstance(responseType));
             responseMessage.Properties.Headers.Add(isFaultedKey, true);
             responseMessage.Properties.Headers.Add(exceptionMessageKey, exceptionMessage);
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
