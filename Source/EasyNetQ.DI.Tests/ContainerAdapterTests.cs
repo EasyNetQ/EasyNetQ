@@ -127,7 +127,7 @@ namespace EasyNetQ.DI.Tests
                 {
                     var container = new LightInjectContainer();
                     c(new LightInjectAdapter(container));
-                    return container.GetInstance<IServiceResolver>();
+                    return (IServiceResolver) container.GetInstance<IServiceResolver>();
                 })
             };
 
