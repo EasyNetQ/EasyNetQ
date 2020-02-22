@@ -74,11 +74,11 @@ namespace EasyNetQ.Consumer
 
         public void HandleBasicCancel(string consumerTag)
         {
-            Cancel();
             logger.InfoFormat(
                 "Consumer with consumerTag {consumerTag} has cancelled",
                 consumerTag
             );
+            Cancel();
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
@@ -89,6 +89,7 @@ namespace EasyNetQ.Consumer
                 Queue.Name,
                 reason
             );
+            Cancel();
         }
 
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
@@ -251,6 +252,7 @@ namespace EasyNetQ.Consumer
                             queue.Name,
                             consumerTag
                         );
+                        DisposeModelAndConsumers();
                         return StartConsumingStatus.Failed;
                     }
                 }
@@ -264,6 +266,7 @@ namespace EasyNetQ.Consumer
                     "Consume on queue {queue} failed",
                     string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name))
                 );
+                DisposeModelAndConsumers();
                 return StartConsumingStatus.Failed;
             }
         }
@@ -318,6 +321,7 @@ namespace EasyNetQ.Consumer
                     consumerTag,
                     queue.Name
                 );
+                DisposeModelAndConsumers();
                 return StartConsumingStatus.Failed;
             }
         }
@@ -325,21 +329,24 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             if (disposed) return;
+
+            DisposeModelAndConsumers();
+        }
+
+        private void DisposeModelAndConsumers()
+        {
             disposed = true;
 
             var model = Model;
             if (model != null)
             {
                 // Queued because we may be on the RabbitMQ.Client dispatch thread.
-                var disposedEvent = new AutoResetEvent(false);
                 consumerDispatcher.QueueAction(() =>
                 {
                     foreach (var c in basicConsumers)
                         c.Dispose();
                     model.Dispose();
-                    disposedEvent.Set();
-                });
-                disposedEvent.WaitOne();
+                }, Priority.Medium);
             }
         }
 

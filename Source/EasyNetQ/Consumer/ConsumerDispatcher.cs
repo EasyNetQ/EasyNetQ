@@ -8,22 +8,26 @@ namespace EasyNetQ.Consumer
     public class ConsumerDispatcher : IConsumerDispatcher
     {
         private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
-        private readonly BlockingCollection<Action> queue;
+        private readonly ConcurrentQueue<Action> highPriority = new ConcurrentQueue<Action>();
+        private readonly ConcurrentQueue<Action> mediumPriority = new ConcurrentQueue<Action>();
+        private readonly ConcurrentQueue<Action> lowPriority = new ConcurrentQueue<Action>();
         private bool disposed;
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            queue = new BlockingCollection<Action>();
-
             var thread = new Thread(_ =>
             {
-                while (!disposed && queue.TryTake(out var action, -1))
+
+                while (!disposed)
                 {
                     try
                     {
-                        action();
+                        if (highPriority.TryDequeue(out var action) || mediumPriority.TryDequeue(out action) || lowPriority.TryDequeue(out action))
+                        {
+                            action();
+                        }
                     }
                     catch (Exception exception)
                     {
@@ -34,24 +38,40 @@ namespace EasyNetQ.Consumer
             thread.Start();
         }
 
-        public void QueueAction(Action action)
+        public void QueueAction(Action action, Priority priority = Priority.Low)
         {
             Preconditions.CheckNotNull(action, "action");
-            queue.Add(action);
+
+            switch (priority)
+            {
+                case Priority.Low:
+                    lowPriority.Enqueue(action);
+                    break;
+                case Priority.Medium:
+                    mediumPriority.Enqueue(action);
+                    break;
+                case Priority.High:
+                    highPriority.Enqueue(action);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(priority), priority, null);
+            }
         }
 
         public void OnDisconnected()
         {
-            // throw away any queued actions. RabbitMQ will redeliver any in-flight
-            // messages that have not been acked when the connection is lost.
-            while (queue.TryTake(out _))
+            QueueAction(() =>
             {
-            }
+                // throw away any queued actions. RabbitMQ will redeliver any in-flight
+                // messages that have not been acked when the connection is lost.
+                while (lowPriority.TryDequeue(out _))
+                {
+                }
+            }, Priority.High);
         }
 
         public void Dispose()
         {
-            queue.CompleteAdding();
             disposed = true;
         }
 
