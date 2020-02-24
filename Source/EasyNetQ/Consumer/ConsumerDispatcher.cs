@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
@@ -17,7 +18,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            var thread = new Thread(_ =>
+            var thread = new Thread(async _ =>
             {
 
                 while (!disposed)
@@ -27,6 +28,10 @@ namespace EasyNetQ.Consumer
                         if (highPriority.TryDequeue(out var action) || mediumPriority.TryDequeue(out action) || lowPriority.TryDequeue(out action))
                         {
                             action();
+                        }
+                        else
+                        {
+                            await Task.Delay(50);
                         }
                     }
                     catch (Exception exception)
