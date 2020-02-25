@@ -12,6 +12,7 @@ namespace EasyNetQ.Consumer
         private readonly ConcurrentQueue<Action> highPriority = new ConcurrentQueue<Action>();
         private readonly ConcurrentQueue<Action> mediumPriority = new ConcurrentQueue<Action>();
         private readonly ConcurrentQueue<Action> lowPriority = new ConcurrentQueue<Action>();
+        private readonly ManualResetEvent manualResetEvent = new ManualResetEvent(false);
         private bool disposed;
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
@@ -31,7 +32,7 @@ namespace EasyNetQ.Consumer
                         }
                         else
                         {
-                            await Task.Delay(50);
+                            manualResetEvent.WaitOne();
                         }
                     }
                     catch (Exception exception)
@@ -61,6 +62,8 @@ namespace EasyNetQ.Consumer
                 default:
                     throw new ArgumentOutOfRangeException(nameof(priority), priority, null);
             }
+
+            manualResetEvent.Set();
         }
 
         public void OnDisconnected()

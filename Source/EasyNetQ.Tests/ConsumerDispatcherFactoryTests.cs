@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
             var autoResetEvent = new AutoResetEvent(false);
-            var threadName = Thread.CurrentThread.Name;
+            var threadName = "";
 
             dispatcher.QueueAction(() =>
                 {
@@ -71,7 +71,7 @@ namespace EasyNetQ.Tests
             // queue first action, we're going to block on this one
             dispatcher.QueueAction(() => autoResetEvent1.WaitOne(100));
 
-            // queue second action, this should be cleared when 
+            // queue second action, this should be cleared when
             // the dispatcher factory's OnDisconnected method is called
             // and never run.
             dispatcher.QueueAction(() =>
