@@ -19,7 +19,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            var thread = new Thread(async _ =>
+            var thread = new Thread(_ =>
             {
 
                 while (!disposed)
@@ -32,6 +32,8 @@ namespace EasyNetQ.Consumer
                         }
                         else
                         {
+                            if (disposed)
+                                return;
                             manualResetEvent.WaitOne();
                         }
                     }
@@ -81,6 +83,7 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             disposed = true;
+            manualResetEvent.Set();
         }
 
         public bool IsDisposed => disposed;

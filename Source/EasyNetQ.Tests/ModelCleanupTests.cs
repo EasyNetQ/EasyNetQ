@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
             bus = mockBuilder.Bus;
-            waitTime = TimeSpan.FromMinutes(2);
+            waitTime = TimeSpan.FromSeconds(10);
         }
 
         private readonly IBus bus;
