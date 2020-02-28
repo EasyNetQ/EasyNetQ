@@ -12,7 +12,7 @@ namespace EasyNetQ.Consumer
         private readonly ConcurrentQueue<Action> highPriority = new ConcurrentQueue<Action>();
         private readonly ConcurrentQueue<Action> mediumPriority = new ConcurrentQueue<Action>();
         private readonly ConcurrentQueue<Action> lowPriority = new ConcurrentQueue<Action>();
-        private readonly ManualResetEvent manualResetEvent = new ManualResetEvent(false);
+        private readonly AutoResetEvent autoResetEvent = new AutoResetEvent(false);
         private bool disposed;
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
@@ -31,7 +31,7 @@ namespace EasyNetQ.Consumer
                         }
                         else
                         {
-                            manualResetEvent.WaitOne();
+                            autoResetEvent.WaitOne();
                         }
                     }
                     catch (Exception exception)
@@ -43,7 +43,7 @@ namespace EasyNetQ.Consumer
             thread.Start();
         }
 
-        public bool IsDone()
+        private bool IsDone()
         {
             return disposed && highPriority.IsEmpty && mediumPriority.IsEmpty && lowPriority.IsEmpty;
         }
@@ -67,7 +67,7 @@ namespace EasyNetQ.Consumer
                     throw new ArgumentOutOfRangeException(nameof(priority), priority, null);
             }
 
-            manualResetEvent.Set();
+            autoResetEvent.Set();
         }
 
         public void OnDisconnected()
@@ -85,7 +85,7 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             disposed = true;
-            manualResetEvent.Set();
+            autoResetEvent.Set();
         }
 
         public bool IsDisposed => disposed;
