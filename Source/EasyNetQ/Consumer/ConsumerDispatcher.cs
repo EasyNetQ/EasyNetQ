@@ -21,8 +21,7 @@ namespace EasyNetQ.Consumer
 
             var thread = new Thread(_ =>
             {
-
-                while (!disposed)
+                while(!IsDone())
                 {
                     try
                     {
@@ -32,8 +31,6 @@ namespace EasyNetQ.Consumer
                         }
                         else
                         {
-                            if (disposed)
-                                return;
                             manualResetEvent.WaitOne();
                         }
                     }
@@ -44,6 +41,11 @@ namespace EasyNetQ.Consumer
                 }
             }) { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
             thread.Start();
+        }
+
+        public bool IsDone()
+        {
+            return disposed && highPriority.IsEmpty && mediumPriority.IsEmpty && lowPriority.IsEmpty;
         }
 
         public void QueueAction(Action action, Priority priority = Priority.Low)
