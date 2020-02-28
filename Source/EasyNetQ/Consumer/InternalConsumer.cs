@@ -9,22 +9,6 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Consumer
 {
-    public interface IInternalConsumer : IDisposable
-    {
-        StartConsumingStatus StartConsuming(
-            IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
-            IConsumerConfiguration configuration
-        );
-
-        StartConsumingStatus StartConsuming(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
-            IConsumerConfiguration configuration
-        );
-
-        event Action<IInternalConsumer> Cancelled;
-    }
-
     public class InternalConsumer : IInternalConsumer
     {
         private readonly IPersistentConnection connection;
@@ -120,7 +104,6 @@ namespace EasyNetQ.Consumer
                             queue.Name,
                             consumerTag
                         );
-                        DisposeModelAndConsumers();
                         return StartConsumingStatus.Failed;
                     }
                 }
@@ -134,7 +117,6 @@ namespace EasyNetQ.Consumer
                     "Consume on queue {queue} failed",
                     string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name))
                 );
-                DisposeModelAndConsumers();
                 return StartConsumingStatus.Failed;
             }
         }
@@ -189,7 +171,6 @@ namespace EasyNetQ.Consumer
                     consumerTag,
                     queue.Name
                 );
-                DisposeModelAndConsumers();
                 return StartConsumingStatus.Failed;
             }
         }
@@ -198,11 +179,6 @@ namespace EasyNetQ.Consumer
         {
             if (disposed) return;
 
-            DisposeModelAndConsumers();
-        }
-
-        private void DisposeModelAndConsumers()
-        {
             disposed = true;
 
             var model = Model;
