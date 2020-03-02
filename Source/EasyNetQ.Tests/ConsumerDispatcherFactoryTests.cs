@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests
             var autoResetEvent = new AutoResetEvent(false);
             var threadName = "";
 
-            dispatcher.QueueAction(() =>
+            dispatcher.QueueTransientAction(() =>
                 {
                     threadName = Thread.CurrentThread.Name;
                     autoResetEvent.Set();
@@ -61,7 +61,7 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_clear_queue_on_disconnect()
+        public void Should_clear_transient_queue_on_disconnect()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();
             var autoResetEvent1 = new AutoResetEvent(false);
@@ -69,12 +69,12 @@ namespace EasyNetQ.Tests
             var actionExecuted = false;
 
             // queue first action, we're going to block on this one
-            dispatcher.QueueAction(() => autoResetEvent1.WaitOne(100));
+            dispatcher.QueueTransientAction(() => autoResetEvent1.WaitOne(100));
 
             // queue second action, this should be cleared when
             // the dispatcher factory's OnDisconnected method is called
             // and never run.
-            dispatcher.QueueAction(() =>
+            dispatcher.QueueTransientAction(() =>
                 {
                     actionExecuted = true;
                 });
@@ -86,11 +86,45 @@ namespace EasyNetQ.Tests
             autoResetEvent1.Set();
 
             // now queue up a new action and wait for it to complete
-            dispatcher.QueueAction(() => autoResetEvent2.Set());
+            dispatcher.QueueTransientAction(() => autoResetEvent2.Set());
             autoResetEvent2.WaitOne(100);
 
             // check that the second action was never run
             actionExecuted.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Should_not_clear_durable_queue_on_disconnect()
+        {
+            var dispatcher = dispatcherFactory.GetConsumerDispatcher();
+            var blockingEvent = new AutoResetEvent(false);
+            var blockingEvent2 = new AutoResetEvent(false);
+
+            var actionExecuted = false;
+
+            // queue first action, we're going to block on this one
+            dispatcher.QueueDurableAction(() => blockingEvent.WaitOne(100));
+
+            // queue second action, this should not be cleared when
+            // the dispatcher factory's OnDisconnected method is called
+            // and it should run.
+            dispatcher.QueueDurableAction(() =>
+            {
+                actionExecuted = true;
+            });
+
+            // disconnect
+            dispatcherFactory.OnDisconnected();
+
+            // release the block on the first event
+            blockingEvent.Set();
+
+            // now queue up a new action and wait for it to complete
+            dispatcher.QueueTransientAction(() => blockingEvent2.Set());
+            blockingEvent2.WaitOne(100);
+
+            // check that the second action was never run
+            actionExecuted.Should().BeTrue();
         }
     }
 }

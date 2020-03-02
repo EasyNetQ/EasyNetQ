@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
@@ -9,11 +8,9 @@ namespace EasyNetQ.Consumer
     public class ConsumerDispatcher : IConsumerDispatcher
     {
         private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
-        private readonly ConcurrentQueue<Action> highPriority = new ConcurrentQueue<Action>();
-        private readonly ConcurrentQueue<Action> mediumPriority = new ConcurrentQueue<Action>();
-        private readonly ConcurrentQueue<Action> lowPriority = new ConcurrentQueue<Action>();
         private readonly AutoResetEvent autoResetEvent = new AutoResetEvent(false);
-        private bool disposed;
+        private readonly ConcurrentQueue<Action> durableActions = new ConcurrentQueue<Action>();
+        private readonly ConcurrentQueue<Action> transientActions = new ConcurrentQueue<Action>();
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
@@ -22,72 +19,61 @@ namespace EasyNetQ.Consumer
             var thread = new Thread(_ =>
             {
                 while(!IsDone())
-                {
                     try
                     {
-                        if (highPriority.TryDequeue(out var action) || mediumPriority.TryDequeue(out action) || lowPriority.TryDequeue(out action))
-                        {
+                        if (durableActions.TryDequeue(out var action) || transientActions.TryDequeue(out action))
                             action();
-                        }
                         else
-                        {
                             autoResetEvent.WaitOne();
-                        }
                     }
                     catch (Exception exception)
                     {
                         logger.ErrorException(string.Empty, exception);
                     }
-                }
-            }) { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
+            }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }
 
-        private bool IsDone()
-        {
-            return disposed && highPriority.IsEmpty && mediumPriority.IsEmpty && lowPriority.IsEmpty;
-        }
+        public bool IsDisposed { get; private set; }
 
-        public void QueueAction(Action action, Priority priority = Priority.Low)
+        public void QueueTransientAction(Action action)
         {
             Preconditions.CheckNotNull(action, "action");
+            if (IsDisposed)
+                throw new ObjectDisposedException(nameof(ConsumerDispatcher));
 
-            switch (priority)
-            {
-                case Priority.Low:
-                    lowPriority.Enqueue(action);
-                    break;
-                case Priority.Medium:
-                    mediumPriority.Enqueue(action);
-                    break;
-                case Priority.High:
-                    highPriority.Enqueue(action);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(priority), priority, null);
-            }
+            transientActions.Enqueue(action);
+            autoResetEvent.Set();
+        }
 
+        public void QueueDurableAction(Action action)
+        {
+            Preconditions.CheckNotNull(action, "action");
+            if (IsDisposed)
+                throw new ObjectDisposedException(nameof(ConsumerDispatcher));
+
+            durableActions.Enqueue(action);
             autoResetEvent.Set();
         }
 
         public void OnDisconnected()
         {
-            QueueAction(() =>
+            // throw away any queued actions. RabbitMQ will redeliver any in-flight
+            // messages that have not been acked when the connection is lost.
+            while (transientActions.TryDequeue(out _))
             {
-                // throw away any queued actions. RabbitMQ will redeliver any in-flight
-                // messages that have not been acked when the connection is lost.
-                while (lowPriority.TryDequeue(out _))
-                {
-                }
-            }, Priority.High);
+            }
         }
 
         public void Dispose()
         {
-            disposed = true;
+            IsDisposed = true;
             autoResetEvent.Set();
         }
 
-        public bool IsDisposed => disposed;
+        private bool IsDone()
+        {
+            return IsDisposed && durableActions.IsEmpty && transientActions.IsEmpty;
+        }
     }
 }

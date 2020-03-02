@@ -185,12 +185,12 @@ namespace EasyNetQ.Consumer
             if (model != null)
             {
                 // Queued because we may be on the RabbitMQ.Client dispatch thread.
-                consumerDispatcher.QueueAction(() =>
+                consumerDispatcher.QueueTransientAction(() =>
                 {
                     foreach (var c in basicConsumers)
                         c.Dispose();
                     model.Dispose();
-                }, Priority.Medium);
+                });
             }
         }
 
