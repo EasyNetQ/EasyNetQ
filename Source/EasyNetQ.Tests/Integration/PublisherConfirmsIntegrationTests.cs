@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.Producer;
 using Xunit;
@@ -14,7 +15,12 @@ namespace EasyNetQ.Tests.Integration
 
         public PublisherConfirmsIntegrationTests()
         {
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10");
+            bus = RabbitHutch.CreateBus(new ConnectionConfiguration()
+            {
+                Hosts = new List<HostConfiguration>(){new HostConfiguration(){Host = "localhost", Port = 5672}},
+                PublisherConfirms = true
+            }, register => { });
+
         }
 
         public void Dispose()
@@ -28,10 +34,10 @@ namespace EasyNetQ.Tests.Integration
             bus.PubSub.Subscribe<MyMessage>("publish_confirms", message => { });
         }
 
-        [Fact]
+        [Fact(Skip = "Needs to be verified manually")]
         public void Should_be_able_to_interrupt_publishing()
         {
-            // while we publish with publisher confirms on, we should be able to kill the 
+            // while we publish with publisher confirms on, we should be able to kill the
             // RabbitMQ connection and see the publish successfully continue.
 
             while (true)
@@ -70,6 +76,22 @@ namespace EasyNetQ.Tests.Integration
 
             Thread.Sleep(10000);
         }
+
+        [Fact]
+        public async void PublisherConfirmShouldNotTimeOut()
+        {
+            var resetEvent = new AutoResetEvent(false);
+
+            await bus.PubSub.SubscribeAsync<MyMessage>("my_subscription_id", msg =>
+            {
+                resetEvent.Set();
+            });
+            await bus.PubSub.PublishAsync(new MyMessage(){Text = "WUHU"});
+            var signalReceived = resetEvent.WaitOne(TimeSpan.FromSeconds(15));
+
+            Assert.True(signalReceived);
+        }
+
     }
 }
 
