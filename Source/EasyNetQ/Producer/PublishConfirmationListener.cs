@@ -54,9 +54,9 @@ namespace EasyNetQ.Producer
 
         private void OnPublishChannelCreated(PublishChannelCreatedEvent @event)
         {
-            foreach (var channel in unconfirmedChannelRequests.Keys)
+            foreach (var channelNumber in unconfirmedChannelRequests.Keys)
             {
-                if (!unconfirmedChannelRequests.TryRemove(channel, out var confirmations)) continue;
+                if (!unconfirmedChannelRequests.TryRemove(channelNumber, out var confirmations)) continue;
                 foreach (var deliveryTag in confirmations.Keys)
                 {
                     if (!confirmations.TryRemove(deliveryTag, out var confirmation)) continue;

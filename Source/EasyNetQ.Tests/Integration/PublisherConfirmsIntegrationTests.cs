@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using EasyNetQ.Producer;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
