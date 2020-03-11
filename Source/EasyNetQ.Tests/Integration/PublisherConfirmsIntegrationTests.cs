@@ -10,16 +10,13 @@ namespace EasyNetQ.Tests.Integration
     [Explicit("Integration test, requires a RabbitMQ instance on localhost")]
     public class PublisherConfirmsIntegrationTests : IDisposable
     {
-        private IBus bus;
-
         public PublisherConfirmsIntegrationTests()
         {
-            bus = RabbitHutch.CreateBus(new ConnectionConfiguration()
+            bus = RabbitHutch.CreateBus(new ConnectionConfiguration
             {
-                Hosts = new List<HostConfiguration>(){new HostConfiguration(){Host = "localhost", Port = 5672}},
+                Hosts = new List<HostConfiguration> {new HostConfiguration {Host = "localhost", Port = 5672}},
                 PublisherConfirms = true
             }, register => { });
-
         }
 
         public void Dispose()
@@ -27,10 +24,18 @@ namespace EasyNetQ.Tests.Integration
             bus.Dispose();
         }
 
+        private readonly IBus bus;
+
         [Fact]
-        public void Subscribe()
+        public async void PublisherConfirmShouldNotTimeOut()
         {
-            bus.PubSub.Subscribe<MyMessage>("publish_confirms", message => { });
+            var resetEvent = new AutoResetEvent(false);
+
+            await bus.PubSub.SubscribeAsync<MyMessage>("my_subscription_id", msg => { resetEvent.Set(); });
+            await bus.PubSub.PublishAsync(new MyMessage {Text = "WUHU"});
+            var signalReceived = resetEvent.WaitOne(TimeSpan.FromSeconds(15));
+
+            Assert.True(signalReceived);
         }
 
         [Fact(Skip = "Needs to be verified manually")]
@@ -40,57 +45,44 @@ namespace EasyNetQ.Tests.Integration
             // RabbitMQ connection and see the publish successfully continue.
 
             while (true)
-            {
                 bus.PubSub.Publish(new MyMessage
-                    {
-                        Text = "Hello World!"
-                    });
-            }
+                {
+                    Text = "Hello World!"
+                });
         }
 
         [Fact]
         public void Should_be_able_to_publish_asynchronously()
         {
             var count = 0;
-            while ((count++) < 10000)
-            {
+            while (count++ < 10000)
                 bus.PubSub.PublishAsync(new MyMessage
+                {
+                    Text = string.Format("Message {0}", count)
+                }).ContinueWith(task =>
+                {
+                    if (task.IsCompleted)
                     {
-                        Text = string.Format("Message {0}", count)
-                    }).ContinueWith(task =>
-                        {
-                            if (task.IsCompleted)
-                            {
-                                //Console.Out.WriteLine("{0} Completed", count);
-                            }
-                            if (task.IsFaulted)
-                            {
-                                Console.Out.WriteLine("\n\n");
-                                Console.Out.WriteLine(task.Exception);
-                                Console.Out.WriteLine("\n\n");
-                            }
-                        });
-                //Thread.Sleep(1);
-            }
+                        //Console.Out.WriteLine("{0} Completed", count);
+                    }
+
+                    if (task.IsFaulted)
+                    {
+                        Console.Out.WriteLine("\n\n");
+                        Console.Out.WriteLine(task.Exception);
+                        Console.Out.WriteLine("\n\n");
+                    }
+                });
+            //Thread.Sleep(1);
 
             Thread.Sleep(10000);
         }
 
         [Fact]
-        public async void PublisherConfirmShouldNotTimeOut()
+        public void Subscribe()
         {
-            var resetEvent = new AutoResetEvent(false);
-
-            await bus.PubSub.SubscribeAsync<MyMessage>("my_subscription_id", msg =>
-            {
-                resetEvent.Set();
-            });
-            await bus.PubSub.PublishAsync(new MyMessage(){Text = "WUHU"});
-            var signalReceived = resetEvent.WaitOne(TimeSpan.FromSeconds(15));
-
-            Assert.True(signalReceived);
+            bus.PubSub.Subscribe<MyMessage>("publish_confirms", message => { });
         }
-
     }
 }
 
