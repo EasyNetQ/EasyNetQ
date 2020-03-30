@@ -102,7 +102,7 @@ namespace EasyNetQ.Consumer
                 .ContinueWith(async x =>
                     {
                         var ackStrategy = await x.ConfigureAwait(false);
-                        consumerDispatcher.QueueTransientAction(() =>
+                        consumerDispatcher.QueueAction(() =>
                         {
                             var ackResult = ackStrategy(Model, deliveryTag);
                             eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, body, ackResult));

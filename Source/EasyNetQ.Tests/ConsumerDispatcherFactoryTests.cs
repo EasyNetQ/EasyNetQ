@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests
             var autoResetEvent = new AutoResetEvent(false);
             var threadName = "";
 
-            dispatcher.QueueTransientAction(() =>
+            dispatcher.QueueAction(() =>
                 {
                     threadName = Thread.CurrentThread.Name;
                     autoResetEvent.Set();
@@ -69,12 +69,12 @@ namespace EasyNetQ.Tests
             var actionExecuted = false;
 
             // queue first action, we're going to block on this one
-            dispatcher.QueueTransientAction(() => autoResetEvent1.WaitOne(100));
+            dispatcher.QueueAction(() => autoResetEvent1.WaitOne(100));
 
             // queue second action, this should be cleared when
             // the dispatcher factory's OnDisconnected method is called
             // and never run.
-            dispatcher.QueueTransientAction(() =>
+            dispatcher.QueueAction(() =>
                 {
                     actionExecuted = true;
                 });
@@ -86,7 +86,7 @@ namespace EasyNetQ.Tests
             autoResetEvent1.Set();
 
             // now queue up a new action and wait for it to complete
-            dispatcher.QueueTransientAction(() => autoResetEvent2.Set());
+            dispatcher.QueueAction(() => autoResetEvent2.Set());
             autoResetEvent2.WaitOne(100);
 
             // check that the second action was never run
@@ -103,15 +103,15 @@ namespace EasyNetQ.Tests
             var actionExecuted = false;
 
             // queue first action, we're going to block on this one
-            dispatcher.QueueDurableAction(() => blockingEvent.WaitOne(100));
+            dispatcher.QueueAction(() => blockingEvent.WaitOne(100), true);
 
             // queue second action, this should not be cleared when
             // the dispatcher factory's OnDisconnected method is called
             // and it should run.
-            dispatcher.QueueDurableAction(() =>
+            dispatcher.QueueAction(() =>
             {
                 actionExecuted = true;
-            });
+            }, true);
 
             // disconnect
             dispatcherFactory.OnDisconnected();
@@ -120,7 +120,7 @@ namespace EasyNetQ.Tests
             blockingEvent.Set();
 
             // now queue up a new action and wait for it to complete
-            dispatcher.QueueTransientAction(() => blockingEvent2.Set());
+            dispatcher.QueueAction(() => blockingEvent2.Set(), true);
             blockingEvent2.WaitOne(100);
 
             // check that the second action was never run
