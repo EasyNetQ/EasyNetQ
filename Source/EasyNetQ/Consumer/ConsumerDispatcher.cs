@@ -35,6 +35,16 @@ namespace EasyNetQ.Consumer
         }
 
         public bool IsDisposed { get; private set; }
+        public void QueueAction(Action action)
+        {
+            Preconditions.CheckNotNull(action, "action");
+            if (IsDisposed)
+                throw new ObjectDisposedException(nameof(ConsumerDispatcher));
+
+            transientActions.Enqueue(action);
+            autoResetEvent.Set();
+        }
+
         public void QueueAction(Action action, bool surviveDisconnect = false)
         {
             Preconditions.CheckNotNull(action, "action");
