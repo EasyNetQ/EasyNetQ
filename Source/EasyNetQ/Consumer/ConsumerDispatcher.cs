@@ -45,7 +45,7 @@ namespace EasyNetQ.Consumer
             autoResetEvent.Set();
         }
 
-        public void QueueAction(Action action, bool surviveDisconnect = false)
+        public void QueueAction(Action action, bool surviveDisconnect)
         {
             Preconditions.CheckNotNull(action, "action");
             if (IsDisposed)
