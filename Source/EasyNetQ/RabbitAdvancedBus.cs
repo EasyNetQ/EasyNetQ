@@ -66,13 +66,13 @@ namespace EasyNetQ
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
 
-            this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
+            this.eventBus.Subscribe<ConnectionCreatedEvent>(OnConnected);
             if (advancedBusEventHandlers.Connected != null)
             {
                 Connected += advancedBusEventHandlers.Connected;
             }
 
-            this.eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
+            this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnDisconnected);
             if (advancedBusEventHandlers.Disconnected != null)
             {
                 Disconnected += advancedBusEventHandlers.Disconnected;
@@ -579,9 +579,9 @@ namespace EasyNetQ
         }
 
         //------------------------------------------------------------------------------------------
-        public virtual event EventHandler Connected;
+        public virtual event EventHandler<ConnectedEventArgs> Connected;
 
-        public virtual event EventHandler Disconnected;
+        public virtual event EventHandler<DisconnectedEventArgs> Disconnected;
 
         public virtual event EventHandler<ConnectionBlockedEventArgs> Blocked;
 
@@ -607,9 +607,9 @@ namespace EasyNetQ
             disposed = true;
         }
 
-        protected void OnConnected() => Connected?.Invoke(this, EventArgs.Empty);
+        protected void OnConnected(ConnectionCreatedEvent args) => Connected?.Invoke(this, new ConnectedEventArgs(args.Hostname, args.Port));
 
-        protected void OnDisconnected() => Disconnected?.Invoke(this, EventArgs.Empty);
+        protected void OnDisconnected(ConnectionDisconnectedEvent args) => Disconnected?.Invoke(this, new DisconnectedEventArgs(args.Hostname, args.Port, args.Reason));
 
         protected void OnBlocked(ConnectionBlockedEvent args) => Blocked?.Invoke(this, new ConnectionBlockedEventArgs(args.Reason));
 

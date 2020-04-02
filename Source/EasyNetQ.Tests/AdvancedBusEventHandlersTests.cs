@@ -14,8 +14,16 @@ namespace EasyNetQ.Tests
         public AdvancedBusEventHandlersTests()
         {
             advancedBusEventHandlers = new AdvancedBusEventHandlers(
-                connected: (s, e) => connectedCalled = true,
-                disconnected: (s, e) => disconnectedCalled = true,
+                connected: (s, e) =>
+                {
+                    connectedCalled = true;
+                    connectedEventArgs = e;
+                },
+                disconnected: (s, e) =>
+                {
+                    disconnectedCalled = true;
+                    disconnectedEventArgs = e;
+                },
                 blocked: (s, e) =>
                 {
                     blockedCalled = true;
@@ -54,6 +62,8 @@ namespace EasyNetQ.Tests
         private bool unBlockedCalled = false;
         private bool messageReturnedCalled = false;
         private MessageReturnedEventArgs messageReturnedEventArgs;
+        private DisconnectedEventArgs disconnectedEventArgs;
+        private ConnectedEventArgs connectedEventArgs;
 
         [Fact]
         public void AdvancedBusEventHandlers_Blocked_handler_is_called()
@@ -70,8 +80,11 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Connected_handler_is_called()
         {
-            eventBus.Publish(new ConnectionCreatedEvent());
+            var connectedEvent = new ConnectionCreatedEvent("hostname", 5672);
+            eventBus.Publish(connectedEvent);
             Assert.True(connectedCalled, "The AdvancedBusEventHandlers Connected event handler wasn't called after a ConnectionCreatedEvent publish.");
+            Assert.Equal(connectedEventArgs.Hostname, connectedEvent.Hostname);
+            Assert.Equal(connectedEventArgs.Port, connectedEvent.Port);
         }
 
         [Fact(Skip =
@@ -84,8 +97,12 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Disconnected_handler_is_called()
         {
-            eventBus.Publish(new ConnectionDisconnectedEvent());
+            var disconnectEvent = new ConnectionDisconnectedEvent("hostname", 5672, "Reason for disconnect");
+            eventBus.Publish(disconnectEvent);
             Assert.True(disconnectedCalled, "The AdvancedBusEventHandlers Disconnected event handler wasn't called after a ConnectionDisconnectedEvent publish.");
+            Assert.Equal(disconnectEvent.Hostname, disconnectedEventArgs.Hostname);
+            Assert.Equal(disconnectEvent.Port, disconnectedEventArgs.Port);
+            Assert.Equal(disconnectEvent.Reason, disconnectedEventArgs.Reason);
         }
 
         [Fact]

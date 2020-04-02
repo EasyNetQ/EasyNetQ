@@ -233,6 +233,12 @@ namespace EasyNetQ
                 return;
             throw new ArgumentOutOfRangeException(name, string.Format("Arguments {0} must be less than maxValue", name));
         }
+        public static void CheckGreater(int value, int minValue, string name)
+        {
+            if (value > minValue)
+                return;
+            throw new ArgumentOutOfRangeException(name, string.Format("Arguments {0} must be greater than minValue", name));
+        }
 
         public static void CheckNull<T>(T value, string name)
         {

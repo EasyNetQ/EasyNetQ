@@ -135,7 +135,7 @@ namespace EasyNetQ
                 connection.Endpoint.Port.ToString()
             );
 
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint.HostName, connection.Endpoint.Port));
         }
 
         private void OnConnectionRestored(object sender, EventArgs e)
@@ -146,13 +146,13 @@ namespace EasyNetQ
                 connection.Endpoint.HostName,
                 connection.Endpoint.Port
             );
-
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint.HostName, connection.Endpoint.Port));
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            eventBus.Publish(new ConnectionDisconnectedEvent());
+            var connection = (IConnection)sender;
+            eventBus.Publish(new ConnectionDisconnectedEvent(connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText));
             logger.InfoFormat("Disconnected from broker");
         }
 

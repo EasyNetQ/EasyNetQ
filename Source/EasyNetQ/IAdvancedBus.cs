@@ -316,12 +316,12 @@ namespace EasyNetQ
         /// <summary>
         /// Event fires when the bus has connected to a RabbitMQ broker.
         /// </summary>
-        event EventHandler Connected;
+        event EventHandler<ConnectedEventArgs> Connected;
 
         /// <summary>
         /// Event fires when the bus has disconnected from a RabbitMQ broker.
         /// </summary>
-        event EventHandler Disconnected;
+        event EventHandler<DisconnectedEventArgs> Disconnected;
 
         /// <summary>
         /// Event fires when the bus gets blocked due to the broker running low on resources.

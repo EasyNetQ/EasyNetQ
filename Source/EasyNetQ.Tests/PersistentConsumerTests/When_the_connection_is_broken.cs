@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         public override void AdditionalSetup()
         {
             consumer.StartConsuming();
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent("hostname", 5672));
         }
 
         [Fact]

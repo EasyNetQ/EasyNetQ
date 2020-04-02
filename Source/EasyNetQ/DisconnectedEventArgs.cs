@@ -1,11 +1,13 @@
-﻿namespace EasyNetQ.Events
+﻿using System;
+
+namespace EasyNetQ
 {
     /// <summary>
-    /// <see cref="IEventBus"/> event for when disconnected from the broker.
+    /// Event arguments for <see cref="IAdvancedBus.Disconnected"/> event.
     /// </summary>
-    public class ConnectionDisconnectedEvent
+    public class DisconnectedEventArgs : EventArgs
     {
-        public ConnectionDisconnectedEvent(string hostname, int port, string reason)
+        public DisconnectedEventArgs(string hostname, int port, string reason)
         {
             Hostname = hostname;
             Port = port;
