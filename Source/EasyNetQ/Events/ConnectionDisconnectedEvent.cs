@@ -10,6 +10,6 @@
         }
         public string Hostname { get; }
         public int Port { get; }
-        public string ReasonText { get; }
+        public string Reason { get; }
     }
 }
