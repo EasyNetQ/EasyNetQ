@@ -26,6 +26,6 @@ namespace EasyNetQ
         /// <summary>
         /// The reason for the disconnected event.
         /// </summary>
-        public string ReasonText { get; }
+        public string Reason { get; }
     }
 }
