@@ -9,11 +9,11 @@ namespace EasyNetQ
     /// </summary>
     public class DisconnectedEventArgs : EventArgs
     {
-        public DisconnectedEventArgs(string hostname, int port, string reasonText)
+        public DisconnectedEventArgs(string hostname, int port, string reason)
         {
             Hostname = hostname;
             Port = port;
-            ReasonText = reasonText;
+            Reason = reason;
         }
         /// <summary>
         /// Hostname for the disconnected connection 

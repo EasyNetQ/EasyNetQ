@@ -100,7 +100,7 @@ namespace EasyNetQ.Tests
             Assert.True(disconnectedCalled, "The AdvancedBusEventHandlers Disconnected event handler wasn't called after a ConnectionDisconnectedEvent publish.");
             Assert.Equal("localhost", disconnectedEventArgs.Hostname);
             Assert.Equal(5672, disconnectedEventArgs.Port);
-            Assert.Equal("reason for disconnect", disconnectedEventArgs.ReasonText);
+            Assert.Equal("reason for disconnect", disconnectedEventArgs.Reason);
         }
 
         [Fact]
