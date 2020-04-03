@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         {
             persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent("hostname", 5672));
         }
 
         [Fact]

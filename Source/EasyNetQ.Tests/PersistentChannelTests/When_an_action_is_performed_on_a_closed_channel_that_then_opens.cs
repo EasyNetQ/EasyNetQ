@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 
             persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
 
-            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent()), null, 10, Timeout.Infinite);
+            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent("localhost", 5672)), null, 10, Timeout.Infinite);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }

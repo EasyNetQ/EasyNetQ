@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         [Fact(Skip = "It seems to be not actual now, discuss it later. Looks like odd optimization")]
         public void Should_not_open_a_channel_when_not_connected()
         {
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent("localhost", 5672));
             persistentConnection.DidNotReceive().CreateModel();
         }
 
@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         public void Should_open_a_channel_when_connected()
         {
             persistentConnection.IsConnected.Returns(true);
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent("localhost", 5672));
             persistentConnection.Received().CreateModel();
         }
     }

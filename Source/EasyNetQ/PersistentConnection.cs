@@ -93,7 +93,7 @@ namespace EasyNetQ
 
                     try
                     {
-                        OnConnected();
+                        OnConnected(new ConnectionCreatedEvent(connection.Endpoint.HostName, connection.Endpoint.Port));
                     }
                     catch
                     {
@@ -141,7 +141,7 @@ namespace EasyNetQ
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
             if (disposed) return;
-            OnDisconnected();
+            OnDisconnected(new ConnectionDisconnectedEvent(connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText));
 
             // try to reconnect and re-subscribe
             logger.InfoFormat("Disconnected from broker");
@@ -163,15 +163,15 @@ namespace EasyNetQ
             eventBus.Publish(new ConnectionUnblockedEvent());
         }
 
-        private void OnConnected()
+        private void OnConnected(ConnectionCreatedEvent evt)
         {
             logger.Debug("OnConnected event fired");
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(evt);
         }
 
-        private void OnDisconnected()
+        private void OnDisconnected(ConnectionDisconnectedEvent evt)
         {
-            eventBus.Publish(new ConnectionDisconnectedEvent());
+            eventBus.Publish(evt);
         }
 
         private bool disposed;

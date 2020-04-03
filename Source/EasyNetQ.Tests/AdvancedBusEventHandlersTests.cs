@@ -21,12 +21,22 @@ namespace EasyNetQ.Tests
         private bool unBlockedCalled = false;
         private bool messageReturnedCalled = false;
         private MessageReturnedEventArgs messageReturnedEventArgs;
+        private ConnectedEventArgs connectedEventArgs;
+        private DisconnectedEventArgs disconnectedEventArgs;
 
         public AdvancedBusEventHandlersTests()
         {
             advancedBusEventHandlers = new AdvancedBusEventHandlers(
-                connected: (s, e) => connectedCalled = true,
-                disconnected: (s, e) => disconnectedCalled = true,
+                connected: (s, e) =>
+                {
+                    connectedCalled = true;
+                    connectedEventArgs = e;
+                },
+                disconnected: (s, e) =>
+                {
+                    disconnectedCalled = true;
+                    disconnectedEventArgs = e;
+                },
                 blocked: (s, e) =>
                 {
                     blockedCalled = true;
@@ -74,15 +84,20 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Connected_handler_is_called()
         {
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent("localhost", 5672));
             Assert.True(connectedCalled, "The AdvancedBusEventHandlers Connected event handler wasn't called after a ConnectionCreatedEvent publish.");
+            Assert.Equal("localhost", connectedEventArgs.Hostname);
+            Assert.Equal(5672, connectedEventArgs.Port);
         }
 
         [Fact]
         public void AdvancedBusEventHandlers_Disconnected_handler_is_called()
         {
-            eventBus.Publish(new ConnectionDisconnectedEvent());
+            eventBus.Publish(new ConnectionDisconnectedEvent("localhost", 5672, "reason for disconnect"));
             Assert.True(disconnectedCalled, "The AdvancedBusEventHandlers Disconnected event handler wasn't called after a ConnectionDisconnectedEvent publish.");
+            Assert.Equal("localhost", disconnectedEventArgs.Hostname);
+            Assert.Equal(5672, disconnectedEventArgs.Port);
+            Assert.Equal("reason for disconnect", disconnectedEventArgs.ReasonText);
         }
 
         [Fact]
