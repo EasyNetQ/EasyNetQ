@@ -2,11 +2,11 @@
 {
     public class ConnectionDisconnectedEvent
     {
-        public ConnectionDisconnectedEvent(string hostname, int port, string reasonText)
+        public ConnectionDisconnectedEvent(string hostname, int port, string reason)
         {
             Hostname = hostname;
             Port = port;
-            ReasonText = reasonText;
+            Reason = reason;
         }
         public string Hostname { get; }
         public int Port { get; }

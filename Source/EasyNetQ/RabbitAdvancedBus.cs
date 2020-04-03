@@ -902,7 +902,7 @@ namespace EasyNetQ
 
         public virtual event EventHandler<DisconnectedEventArgs> Disconnected;
 
-        protected void OnDisconnected(ConnectionDisconnectedEvent args) => Disconnected?.Invoke(this, new DisconnectedEventArgs(args.Hostname, args.Port, args.ReasonText));
+        protected void OnDisconnected(ConnectionDisconnectedEvent args) => Disconnected?.Invoke(this, new DisconnectedEventArgs(args.Hostname, args.Port, args.Reason));
 
         public virtual event EventHandler<ConnectionBlockedEventArgs> Blocked;
 
