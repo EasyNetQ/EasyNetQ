@@ -50,6 +50,13 @@ namespace EasyNetQ.Tests.Mocking
             });
 
             connection.IsOpen.Returns(true);
+            connection.Endpoint.Returns(new AmqpTcpEndpoint
+            {
+                AddressFamily = System.Net.Sockets.AddressFamily.InterNetwork,
+                HostName = Host,
+                Port = PortNumber,
+                Ssl = new SslOption(Host)
+            });
 
             connection.CreateModel().Returns(i =>
             {

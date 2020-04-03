@@ -51,9 +51,12 @@ namespace EasyNetQ.Tests
 
             var connectionFactory = Substitute.For<IConnectionFactory>();
             connectionFactory.Succeeded.Returns(true);
-            connectionFactory.CreateConnection().Returns(Substitute.For<IConnection>());
+            var connection = Substitute.For<IConnection>();
+            connection.Endpoint.Returns(new AmqpTcpEndpoint());
+            connectionFactory.CreateConnection().Returns(connection);
             connectionFactory.CurrentHost.Returns(new HostConfiguration());
             connectionFactory.Configuration.Returns(new ConnectionConfiguration());
+            
 
             eventBus = new EventBus();
 
