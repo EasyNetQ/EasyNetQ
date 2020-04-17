@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -12,11 +13,7 @@ namespace EasyNetQ.Tests.Integration
     {
         public PublisherConfirmsIntegrationTests()
         {
-            bus = RabbitHutch.CreateBus(new ConnectionConfiguration
-            {
-                Hosts = new List<HostConfiguration> {new HostConfiguration {Host = "localhost", Port = 5672}},
-                PublisherConfirms = true
-            }, register => { });
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10");
         }
 
         public void Dispose()
@@ -27,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
         private readonly IBus bus;
 
         [Fact]
-        public async void PublisherConfirmShouldNotTimeOut()
+        public async Task PublisherConfirmShouldNotTimeOut()
         {
             var resetEvent = new AutoResetEvent(false);
 
