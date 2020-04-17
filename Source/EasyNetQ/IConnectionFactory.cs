@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using RabbitMQ.Client;
 
 namespace EasyNetQ
 {
@@ -42,10 +43,10 @@ namespace EasyNetQ
                 }
 
                 connectionFactory.HostName = hostConfiguration.Host;
-                
+
                 if(connectionFactory.VirtualHost == "/")
                     connectionFactory.VirtualHost = Configuration.VirtualHost;
-                
+
                 if(connectionFactory.UserName == "guest")
                     connectionFactory.UserName = Configuration.UserName;
 
@@ -62,7 +63,7 @@ namespace EasyNetQ
                 else if (Configuration.Ssl.Enabled)
                     connectionFactory.Ssl = Configuration.Ssl;
 
-                connectionFactory.RequestedHeartbeat = Configuration.RequestedHeartbeat;
+                connectionFactory.RequestedHeartbeat = TimeSpan.FromSeconds(Configuration.RequestedHeartbeat);
                 connectionFactory.ClientProperties = Configuration.ClientProperties;
                 connectionFactory.AuthMechanisms = Configuration.AuthMechanisms;
                 clusterHostSelectionStrategy.Add(new ConnectionFactoryInfo(connectionFactory, hostConfiguration));

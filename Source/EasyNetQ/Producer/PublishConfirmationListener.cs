@@ -23,13 +23,9 @@ namespace EasyNetQ.Producer
         {
             var deliveryTag = model.NextPublishSeqNo;
             var requests = unconfirmedChannelRequests.GetOrAdd(model, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
-#if NETFX
-            var comfirmation = new TaskCompletionSource<object>();
-#else
-            var comfirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
-            requests.Add(deliveryTag, comfirmation);
-            return new PublishConfirmationWaiter(deliveryTag, comfirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
+            var confirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            requests.Add(deliveryTag, confirmation);
+            return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
 
         public void Dispose()
@@ -86,11 +82,7 @@ namespace EasyNetQ.Producer
                         continue;
                     }
 
-#if NETFX                               
-                    confirmation.TrySetExceptionAsynchronously(new PublishInterruptedException());     
-#else
                     confirmation.TrySetException(new PublishInterruptedException());
-#endif
                 }
             }
             unconfirmedChannelRequests.Add(@event.Channel, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
@@ -100,19 +92,11 @@ namespace EasyNetQ.Producer
         {
             if (isNack)
             {
-#if NETFX                               
-                tcs.TrySetExceptionAsynchronously(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));     
-#else
                 tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
-#endif
             }
             else
             {
-#if NETFX                               
-                tcs.TrySetResultAsynchronously(null);     
-#else
                 tcs.TrySetResult(null);
-#endif
             }
         }
     }
