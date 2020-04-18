@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests
         }
 #else
         [Fact]
-        public void Should_not_deserialize_hashset_of_string_type()
+        public void Should_deserialize_hashset_of_string_type()
         {
             Assert.Throws<EasyNetQException>(() => {
                 typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:System.Core");

@@ -176,7 +176,7 @@ namespace EasyNetQ.Tests
                 Arg.Any<string>(),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<ReadOnlyMemory<byte>>());
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace EasyNetQ.Tests
                 Arg.Is("CustomTopicNamingConvention"),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<ReadOnlyMemory<byte>>());
         }
     }
 

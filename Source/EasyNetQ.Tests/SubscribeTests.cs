@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests
         private const string queueName = typeName + "_" + subscriptionId;
         private const string consumerTag = "the_consumer_tag";
 
-        private ISubscriptionResult subscriptionResult; 
+        private ISubscriptionResult subscriptionResult;
 
         public When_subscribe_is_called()
         {
@@ -79,8 +79,8 @@ namespace EasyNetQ.Tests
         public void Should_bind_the_queue_and_exchange()
         {
             mockBuilder.Channels[0].Received().QueueBind(
-                Arg.Is(queueName), 
-                Arg.Is(typeName), 
+                Arg.Is(queueName),
+                Arg.Is(typeName),
                 Arg.Is("#"),
                 Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
         }
@@ -148,9 +148,9 @@ namespace EasyNetQ.Tests
                 // Configure subscription
                 mockBuilder.PubSub.Subscribe<MyMessage>(
                     "x",
-                    m => { }, 
+                    m => { },
                     c =>
-                    {                        
+                    {
                         c.WithAutoDelete(autoDelete)
                             .WithPriority(priority)
                             .WithPrefetchCount(prefetchCount)
@@ -189,7 +189,7 @@ namespace EasyNetQ.Tests
                     Arg.Is(false), // IsExclusive is set on the Consume call
                     Arg.Is(autoDelete),
                     Arg.Is<IDictionary<string, object>>(
-                        x => 
+                        x =>
                         (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
                         (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
                         (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&

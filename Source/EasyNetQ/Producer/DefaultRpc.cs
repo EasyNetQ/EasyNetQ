@@ -81,7 +81,7 @@ namespace EasyNetQ.Producer
                 var timeoutSeconds = timeoutStrategy.GetTimeoutSeconds(requestType);
                 if (timeoutSeconds > 0) cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
 
-                var tcs = TaskHelpers.CreateTcs<TResponse>();
+                var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
                 RegisterResponseActions(correlationId, tcs);
 
                 using (cts.Token.Register(() => DeRegisterResponseActions(correlationId)))
@@ -162,11 +162,11 @@ namespace EasyNetQ.Producer
                     }
 
                     if (isFaulted)
-                        tcs.TrySetExceptionAsynchronously(new EasyNetQResponderException(exceptionMessage));
+                        tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
                     else
-                        tcs.TrySetResultAsynchronously(msg.Body);
+                        tcs.TrySetResult(msg.Body);
                 },
-                () => tcs.TrySetExceptionAsynchronously(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId))
+                () => tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId))
             );
 
             responseActions.TryAdd(correlationId, responseAction);

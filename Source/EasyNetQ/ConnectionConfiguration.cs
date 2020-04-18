@@ -32,7 +32,7 @@ namespace EasyNetQ
             // set to 50 based on this blog post:
             // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
             PrefetchCount = 50;
-            AuthMechanisms = new AuthMechanismFactory[] { new PlainMechanismFactory() };
+            AuthMechanisms = new IAuthMechanismFactory[] { new PlainMechanismFactory() };
 
             Hosts = new List<HostConfiguration>();
 
@@ -68,7 +68,7 @@ namespace EasyNetQ
         public string Platform { get; set; }
         public string Name { get; set; }
         public bool UseBackgroundThreads { get; set; }
-        public IList<AuthMechanismFactory> AuthMechanisms { get; set; }
+        public IList<IAuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get; set; }
         public int DispatcherQueueSize { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.DI
 {
@@ -30,7 +31,7 @@ namespace EasyNetQ.DI
             if (connectionFactory.Port == -1)
                 connectionFactory.Port = connectionConfiguration.Port;
 
-            connectionFactory.RequestedHeartbeat = connectionConfiguration.RequestedHeartbeat;
+            connectionFactory.RequestedHeartbeat = TimeSpan.FromSeconds(connectionConfiguration.RequestedHeartbeat);
             connectionFactory.ClientProperties = connectionConfiguration.ClientProperties;
             connectionFactory.AuthMechanisms = connectionConfiguration.AuthMechanisms;
 

@@ -23,7 +23,7 @@ namespace EasyNetQ.Producer
         {
             var deliveryTag = model.NextPublishSeqNo;
             var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
-            var confirmation = TaskHelpers.CreateTcs<object>();
+            var confirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
             requests.Add(deliveryTag, confirmation);
             return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
         }
@@ -61,7 +61,7 @@ namespace EasyNetQ.Producer
                 {
                     if (!confirmations.TryRemove(deliveryTag, out var confirmation)) continue;
 
-                    confirmation.TrySetExceptionAsynchronously(new PublishInterruptedException());
+                    confirmation.TrySetException(new PublishInterruptedException());
                 }
             }
 
@@ -71,9 +71,9 @@ namespace EasyNetQ.Producer
         private static void Confirm(TaskCompletionSource<object> tcs, ulong deliveryTag, bool isNack)
         {
             if (isNack)
-                tcs.TrySetExceptionAsynchronously(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
+                tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
             else
-                tcs.TrySetResultAsynchronously(null);
+                tcs.TrySetResult(null);
         }
     }
 }

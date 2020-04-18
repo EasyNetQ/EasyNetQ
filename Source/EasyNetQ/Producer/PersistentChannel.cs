@@ -108,7 +108,7 @@ namespace EasyNetQ.Producer
         private void OnReturn(object sender, BasicReturnEventArgs args)
         {
             var returnedMessageEvent = new ReturnedMessageEvent(
-                args.Body,
+                args.Body.ToArray(),
                 new MessageProperties(args.BasicProperties),
                 new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)
             );
