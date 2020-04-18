@@ -29,9 +29,9 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
 
-            var publishExchangeStrategy = new MultipleExchangePublishExchangeDeclareStrategy(conventions, advancedBus);
+            var exchangeStrategy = new MultipleExchangeDeclareStrategy(conventions, advancedBus);
 
-            publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
+            exchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
 
 /*
             //ensure that only one exchange is declared

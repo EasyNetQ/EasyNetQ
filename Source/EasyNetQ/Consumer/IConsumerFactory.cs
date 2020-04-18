@@ -10,14 +10,12 @@ namespace EasyNetQ.Consumer
     {
         IConsumer CreateConsumer(
             ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
-            IPersistentConnection connection,
             IConsumerConfiguration configuration
         );
 
         IConsumer CreateConsumer(
-            IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
-            IPersistentConnection connection,
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IConsumerConfiguration configuration
         );
     }

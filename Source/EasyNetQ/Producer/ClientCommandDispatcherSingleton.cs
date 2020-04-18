@@ -32,7 +32,7 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            var tcs = TaskHelpers.CreateTcs<T>();
+            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             try
             {
@@ -40,23 +40,23 @@ namespace EasyNetQ.Producer
                 {
                     if (cancellation.IsCancellationRequested)
                     {
-                        tcs.TrySetCanceledAsynchronously();
+                        tcs.TrySetCanceled();
                         return;
                     }
 
                     try
                     {
-                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResultAsynchronously(channelAction(channel)));
+                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResult(channelAction(channel)));
                     }
                     catch (Exception e)
                     {
-                        tcs.TrySetExceptionAsynchronously(e);
+                        tcs.TrySetException(e);
                     }
                 }, cancellation.Token);
             }
             catch (OperationCanceledException)
             {
-                tcs.TrySetCanceledAsynchronously();
+                tcs.TrySetCanceled();
             }
 
             return tcs.Task;

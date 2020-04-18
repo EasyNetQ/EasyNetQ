@@ -7,7 +7,7 @@ namespace EasyNetQ.Producer
     public static class PublishExchangeDeclareStrategyExtensions
     {
         public static IExchange DeclareExchange(
-            this IPublishExchangeDeclareStrategy strategy, 
+            this IExchangeDeclareStrategy strategy, 
             string exchangeName,
             string exchangeType,
             CancellationToken cancellationToken = default
@@ -21,7 +21,7 @@ namespace EasyNetQ.Producer
         }
         
         public static IExchange DeclareExchange(
-            this IPublishExchangeDeclareStrategy strategy, 
+            this IExchangeDeclareStrategy strategy, 
             Type messageType,
             string exchangeType,
             CancellationToken cancellationToken = default     

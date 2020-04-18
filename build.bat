@@ -2,14 +2,14 @@
 setlocal EnableDelayedExpansion
 
 set ScriptRoot=%~dp0
-set VisualStudioInstallation=%ProgramFiles(x86)%\Microsoft Visual Studio\2017
+set VisualStudioInstallation=%ProgramFiles(x86)%\Microsoft Visual Studio\2019
 
 echo Searching for Visual Studio in: "%VisualStudioInstallation%"
 
 if defined DevEnvDir (
-    echo Visual Studio 2017 development environment has already been set.
+    echo Visual Studio 2019 development environment has already been set.
 ) else (
-    echo Setting Visual Studio 2017 environment...
+    echo Setting Visual Studio 2019 environment...
 
     for /F %%G in ('dir /b "%VisualStudioInstallation%"') do (
 
@@ -28,8 +28,8 @@ if defined DevEnvDir (
 :RunBuild
 
 if not defined DevEnvDir (
-    echo Visual Studio 2017 environment should have been set.
-    exit /b 1
+    echo Visual Studio 2019 environment should have been set.
+    exit /b 
 )
 
 msbuild %ScriptRoot%\Build\EasyNetQ.proj

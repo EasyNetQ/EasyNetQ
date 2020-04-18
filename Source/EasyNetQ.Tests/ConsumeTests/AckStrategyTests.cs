@@ -1,23 +1,23 @@
 ﻿using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
     public class Ack_strategy
     {
+        public Ack_strategy()
+        {
+            model = Substitute.For<IModel, IRecoverable>();
+
+            result = AckStrategies.Ack(model, deliveryTag);
+        }
+
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
-
-        public Ack_strategy()
-        {
-            model = Substitute.For<IModel>();
-
-            result = AckStrategies.Ack(model, deliveryTag);          
-        }
 
         [Fact]
         public void Should_ack_message()
@@ -29,21 +29,21 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_return_Ack()
         {
             Assert.Equal(AckResult.Ack, result);
-        } 
+        }
     }
 
     public class NackWithoutRequeue_strategy
     {
-        private IModel model;
-        private AckResult result;
-        private const ulong deliveryTag = 1234;
-
         public NackWithoutRequeue_strategy()
         {
-            model = Substitute.For<IModel>();
+            model = Substitute.For<IModel, IRecoverable>();
 
             result = AckStrategies.NackWithoutRequeue(model, deliveryTag);
         }
+
+        private IModel model;
+        private AckResult result;
+        private const ulong deliveryTag = 1234;
 
 
         [Fact]
@@ -61,16 +61,16 @@ namespace EasyNetQ.Tests.ConsumeTests
 
     public class NackWithRequeue_strategy
     {
-        private IModel model;
-        private AckResult result;
-        private const ulong deliveryTag = 1234;
-
         public NackWithRequeue_strategy()
         {
-            model = Substitute.For<IModel>();
+            model = Substitute.For<IModel, IRecoverable>();
 
             result = AckStrategies.NackWithRequeue(model, deliveryTag);
         }
+
+        private IModel model;
+        private AckResult result;
+        private const ulong deliveryTag = 1234;
 
 
         [Fact]

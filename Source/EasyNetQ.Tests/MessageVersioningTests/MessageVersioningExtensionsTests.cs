@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             serviceRegister.EnableMessageVersioning();
 
-            serviceRegister.AssertServiceRegistered<IPublishExchangeDeclareStrategy, VersionedPublishExchangeDeclareStrategy>();
+            serviceRegister.AssertServiceRegistered<IExchangeDeclareStrategy, VersionedExchangeDeclareStrategy>();
             serviceRegister.AssertServiceRegistered<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
         }
 

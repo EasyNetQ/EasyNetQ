@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace EasyNetQ
@@ -17,6 +16,7 @@ namespace EasyNetQ
                 {
                     yield return separator;
                 }
+
                 yield return item;
             }
         }
@@ -28,29 +28,13 @@ namespace EasyNetQ
             {
                 yield return item;
             }
-            yield return last;
-        }
 
-        public static void Shuffle<T>(this IList<T> list)
-        {
-            var n = list.Count;
-            while (n > 1)
-            {
-                n--;
-                var k = Random.Next(n + 1);
-                var value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
+            yield return last;
         }
 
         internal static string Stringify(this IDictionary<string, object> source)
         {
             return string.Join(", ", source.Select(kvp => $"{kvp.Key}={kvp.Value}"));
         }
-
-        [ThreadStatic] private static Random random;
-
-        private static Random Random => random ?? (random = new Random(Environment.TickCount));
     }
 }

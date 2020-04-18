@@ -85,6 +85,12 @@ namespace EasyNetQ.FluentConfiguration
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached
         /// </summary>
         ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
+
+        /// <summary>
+        /// Sets the queue mode. Valid modes are "default" and "lazy". Works with RabbitMQ version 3.6+.
+        /// </summary>
+        /// <returns></returns>
+        ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default);
     }
 
     public class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -101,6 +107,7 @@ namespace EasyNetQ.FluentConfiguration
         public string QueueName { get; private set; }
         public int? MaxLength { get; private set; }
         public int? MaxLengthBytes { get; private set; }
+        public string QueueMode { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -175,6 +182,12 @@ namespace EasyNetQ.FluentConfiguration
         public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
         {
             MaxLengthBytes = maxLengthBytes;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithQueueMode(string queueMode)
+        {
+            QueueMode = queueMode;
             return this;
         }
     }

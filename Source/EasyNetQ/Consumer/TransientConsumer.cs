@@ -8,34 +8,32 @@ namespace EasyNetQ.Consumer
 {
     public class TransientConsumer : IConsumer
     {
-        private readonly IQueue queue;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
-        private readonly IPersistentConnection connection;
         private readonly IConsumerConfiguration configuration;
-        private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IEventBus eventBus;
+        private readonly IInternalConsumerFactory internalConsumerFactory;
+        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        private readonly IQueue queue;
+
+        private bool disposed;
 
         private IInternalConsumer internalConsumer;
 
         public TransientConsumer(
-            IQueue queue, 
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, 
-            IPersistentConnection connection, 
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
             IConsumerConfiguration configuration,
-            IInternalConsumerFactory internalConsumerFactory, 
+            IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(configuration, "configuration");
 
             this.queue = queue;
             this.onMessage = onMessage;
-            this.connection = connection;
             this.configuration = configuration;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
@@ -48,7 +46,6 @@ namespace EasyNetQ.Consumer
             internalConsumer.Cancelled += consumer => Dispose();
 
             var status = internalConsumer.StartConsuming(
-                connection,
                 queue,
                 onMessage,
                 configuration
@@ -62,15 +59,13 @@ namespace EasyNetQ.Consumer
             return new ConsumerCancellation(Dispose);
         }
 
-        private bool disposed;
-
         public void Dispose()
         {
             if (disposed) return;
             disposed = true;
 
             eventBus.Publish(new StoppedConsumingEvent(this));
-            
+
             internalConsumer?.Dispose();
         }
     }

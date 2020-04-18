@@ -4,27 +4,14 @@ using System;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using FluentAssertions;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
 {
     public class When_a_user_handler_is_executed
     {
-        private byte[] deliveredBody;
-        private MessageProperties deliveredProperties;
-        private MessageReceivedInfo deliveredInfo;
-
-        private readonly MessageProperties messageProperties = new MessageProperties
-            {
-                CorrelationId = "correlation_id"
-            };
-        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 42, false, "exchange", "routingKey", "queue");
-        private readonly byte[] messageBody = new byte[0];
-
-        private readonly IModel channel;
-
         public When_a_user_handler_is_executed()
         {
             var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
@@ -32,16 +19,16 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
             var consumer = Substitute.For<IBasicConsumer>();
-            channel = Substitute.For<IModel>();
+            channel = Substitute.For<IModel, IRecoverable>();
             consumer.Model.Returns(channel);
 
             var context = new ConsumerExecutionContext(
                 (body, properties, info, cancellation) => Task.Run(() =>
-                    {
-                        deliveredBody = body;
-                        deliveredProperties = properties;
-                        deliveredInfo = info;
-                    }),
+                {
+                    deliveredBody = body;
+                    deliveredProperties = properties;
+                    deliveredInfo = info;
+                }),
                 messageInfo,
                 messageProperties,
                 messageBody
@@ -61,16 +48,30 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             }
         }
 
+        private byte[] deliveredBody;
+        private MessageProperties deliveredProperties;
+        private MessageReceivedInfo deliveredInfo;
+
+        private readonly MessageProperties messageProperties = new MessageProperties
+        {
+            CorrelationId = "correlation_id"
+        };
+
+        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 42, false, "exchange", "routingKey", "queue");
+        private readonly byte[] messageBody = new byte[0];
+
+        private readonly IModel channel;
+
+        [Fact]
+        public void Should_ACK()
+        {
+            channel.Received().BasicAck(42, false);
+        }
+
         [Fact]
         public void Should_deliver_body()
         {
             deliveredBody.Should().BeSameAs(messageBody);
-        }
-
-        [Fact]
-        public void Should_deliver_properties()
-        {
-            deliveredProperties.Should().BeSameAs(messageProperties);
         }
 
         [Fact]
@@ -80,9 +81,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         }
 
         [Fact]
-        public void Should_ACK()
+        public void Should_deliver_properties()
         {
-            channel.Received().BasicAck(42, false);
+            deliveredProperties.Should().BeSameAs(messageProperties);
         }
     }
 }

@@ -6,12 +6,12 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
 {
-    public class PublishExchangeDeclareStrategy : IPublishExchangeDeclareStrategy
+    public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
     {
         private readonly IConventions conventions;
         private readonly AsyncCache<ExchangeKey, IExchange> declaredExchanges;
 
-        public PublishExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
+        public DefaultExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
         {
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");

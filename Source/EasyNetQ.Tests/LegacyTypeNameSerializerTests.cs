@@ -55,12 +55,21 @@ namespace EasyNetQ.Tests
             typeName.Should().Be("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
         }
 
+
         [Fact]
-        public void Should_deserialize_string_type_name()
+        public void Should_deserialize_net45_string_type_name()
         {
             var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
             type.Should().Be(typeof(string));
         }
+
+        [Fact]
+        public void Should_deserialize_netcore_string_type_name()
+        {
+            var type = typeNameSerializer.DeSerialize("System.String:System.Private.CoreLib");
+            type.Should().Be(typeof(string));
+        }
+
 
 #if NET_CORE
         [Fact]
@@ -71,7 +80,7 @@ namespace EasyNetQ.Tests
         }
 #else
         [Fact]
-        public void Should_not_deserialize_hashset_of_string_type()
+        public void Should_deserialize_hashset_of_string_type()
         {
             Assert.Throws<EasyNetQException>(() => {
                 typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]:System.Core");

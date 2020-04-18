@@ -2,8 +2,8 @@
 
 using EasyNetQ.Events;
 using FluentAssertions;
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -11,7 +11,6 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     {
         public override void AdditionalSetup()
         {
-            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
             eventBus.Publish(new ConnectionCreatedEvent());
         }
@@ -20,8 +19,9 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         public void Should_re_create_internal_consumer()
         {
             internalConsumerFactory.Received().CreateConsumer();
-            createConsumerCalled.Should().Be(2);
-            internalConsumers.Count.Should().Be(2);
+            createConsumerCalled.Should().Be(1);
+            internalConsumers.Count.Should().Be(1);
+            internalConsumers[0].Received(2).StartConsuming(queue, onMessage, configuration);
         }
     }
 }

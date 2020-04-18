@@ -6,7 +6,7 @@ namespace EasyNetQ.MessageVersioning
     /// Marker interface to indicate that a message supersedes a previous version.
     /// </summary>
     /// <remarks>
-    /// Requires that <see cref="VersionedMessageSerializationStrategy"/> and <see cref="VersionedPublishExchangeDeclareStrategy"/> are
+    /// Requires that <see cref="VersionedMessageSerializationStrategy"/> and <see cref="VersionedExchangeDeclareStrategy"/> are
     /// registered in the <see cref="IServiceRegister"/> to take advantage of message version support.
     /// </remarks>
     /// <typeparam name="T">The type of the message being superseded.</typeparam>

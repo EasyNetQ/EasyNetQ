@@ -8,7 +8,7 @@ namespace EasyNetQ.MultipleExchange
         public static IServiceRegister EnableAdvancedMessagePolymorphism(this IServiceRegister serviceRegister)
         {
             return serviceRegister
-                .Register<IPublishExchangeDeclareStrategy, MultipleExchangePublishExchangeDeclareStrategy>();
+                .Register<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
         }
     }
 }

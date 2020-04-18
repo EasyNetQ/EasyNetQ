@@ -8,16 +8,16 @@ namespace EasyNetQ.Internals
     public static class Timers
     {
         private static readonly ILog logger = LogProvider.GetLogger(typeof(Timers));
-        
-        public static IDisposable Start(TimerCallback callback, TimeSpan dueTime, TimeSpan period)
+
+        public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period)
         {
             var callbackLock = new object();
-            var timer = new Timer(state =>
+            var timer = new Timer(_ =>
             {
                 if (!Monitor.TryEnter(callbackLock)) return;
                 try
                 {
-                    callback.Invoke(state);
+                    callback.Invoke();
                 }
                 catch (Exception exception)
                 {
@@ -30,23 +30,6 @@ namespace EasyNetQ.Internals
             });
             timer.Change(dueTime, period);
             return timer;
-        }
-
-        public static void RunOnce(TimerCallback callback, TimeSpan dueTime)
-        {
-            var timer = new Timer(state =>
-            {
-                ((Timer) state).Dispose();
-                try
-                {
-                    callback(state);
-                }
-                catch (Exception exception)
-                {
-                    logger.Error(exception, string.Empty);
-                }
-            });
-            timer.Change(dueTime, Timeout.InfiniteTimeSpan);
         }
     }
 }

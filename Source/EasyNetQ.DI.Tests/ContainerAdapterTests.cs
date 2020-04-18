@@ -9,6 +9,7 @@ using EasyNetQ.DI.Ninject;
 using EasyNetQ.DI.SimpleInjector;
 using EasyNetQ.DI.StructureMap;
 using EasyNetQ.DI.Windsor;
+using LightInject;
 using Ninject;
 using Xunit;
 using LightInjectContainer = LightInject.ServiceContainer;
@@ -126,7 +127,7 @@ namespace EasyNetQ.DI.Tests
                 {
                     var container = new LightInjectContainer();
                     c(new LightInjectAdapter(container));
-                    return container.GetInstance<IServiceResolver>();
+                    return (IServiceResolver) container.GetInstance<IServiceResolver>();
                 })
             };
 
