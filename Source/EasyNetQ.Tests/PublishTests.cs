@@ -16,20 +16,20 @@ namespace EasyNetQ.Tests
     public class When_publish_is_called : IDisposable
     {
         private const string correlationId = "abc123";
-        
+
         private MockBuilder mockBuilder;
-        byte[] body;
+        ReadOnlyMemory<byte> body;
         private IBasicProperties properties;
 
         public When_publish_is_called()
         {
-            mockBuilder = new MockBuilder(x => 
+            mockBuilder = new MockBuilder(x =>
                 x.Register<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
 
             mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
                 .Do( x =>
                 {
-                    body = (byte[])x[4];
+                    body = (ReadOnlyMemory<byte>)x[4];
                     properties = (IBasicProperties)x[3];
                  });
 
@@ -64,10 +64,10 @@ namespace EasyNetQ.Tests
                     Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                     Arg.Is(""),
                     Arg.Is(false),
-                    Arg.Is(mockBuilder.BasicProperties), 
-                    Arg.Any<byte[]>());
+                    Arg.Is(mockBuilder.BasicProperties),
+                    Arg.Any<ReadOnlyMemory<byte>>());
 
-            var json = Encoding.UTF8.GetString(body);
+            var json = Encoding.UTF8.GetString(body.ToArray());
             json.Should().Be("{\"Text\":\"Hiya!\"}");
         }
 
@@ -134,7 +134,7 @@ namespace EasyNetQ.Tests
                     Arg.Is("X.A"),
                     Arg.Is(false),
                     Arg.Is(mockBuilder.BasicProperties),
-                    Arg.Any<byte[]>());
+                    Arg.Any<ReadOnlyMemory<byte>>());
         }
     }
 }

@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests
         {
             var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
             result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
-        }        
+        }
 	}
 
     public class When_using_QueueAttribute
@@ -171,7 +171,7 @@ namespace EasyNetQ.Tests
 		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
 		{
             mockBuilder.Channels[0].Received().ExchangeDeclare(
-                Arg.Is("CustomExchangeNamingConvention"), 
+                Arg.Is("CustomExchangeNamingConvention"),
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
@@ -182,11 +182,11 @@ namespace EasyNetQ.Tests
 		public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
 		{
             mockBuilder.Channels[0].Received().BasicPublish(
-                    Arg.Is("CustomExchangeNamingConvention"), 
-                    Arg.Any<string>(), 
+                    Arg.Is("CustomExchangeNamingConvention"),
+                    Arg.Any<string>(),
                     Arg.Is(false),
                     Arg.Any<IBasicProperties>(),
-                    Arg.Any<byte[]>());
+                    Arg.Any<ReadOnlyMemory<byte>>());
 		}
 
 		[Fact]
@@ -197,7 +197,7 @@ namespace EasyNetQ.Tests
                     Arg.Is("CustomTopicNamingConvention"),
                     Arg.Is(false),
                     Arg.Any<IBasicProperties>(),
-                    Arg.Any<byte[]>());
+                    Arg.Any<ReadOnlyMemory<byte>>());
         }
 	}
 
