@@ -50,9 +50,9 @@ namespace EasyNetQ.Hosepipe
                         basicGetResult.RoutingKey,
                         parameters.QueueName);
 
-                    yield return new HosepipeMessage(errorMessageSerializer.Serialize(basicGetResult.Body), properties, info);
+                    yield return new HosepipeMessage(errorMessageSerializer.Serialize(basicGetResult.Body.ToArray()), properties, info);
                 }
-            }            
-        } 
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.ProducerTests
         private MockBuilder mockBuilder;
         private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
         private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
-        private byte[] publishedMessage;
+        private ReadOnlyMemory<byte> publishedMessage;
         private IBasicProperties properties;
 
         public When_a_polymorphic_message_is_sent()
@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.ProducerTests
                .Do(x =>
                {
                    properties = (IBasicProperties)x[3];
-                   publishedMessage = (byte[])x[4];
+                   publishedMessage = (ReadOnlyMemory<byte>)x[4];
                });
 
             mockBuilder.Bus.Publish<IMyMessageInterface>(message);
@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Is(interfaceTypeName),
                 Arg.Is("topic"),
                 Arg.Is(true),
-                Arg.Is(false), 
+                Arg.Is(false),
                 Arg.Any<IDictionary<string, object>>());
         }
 
@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_correctly_serialize_implementation()
         {
-            var json = Encoding.UTF8.GetString(publishedMessage);
+            var json = Encoding.UTF8.GetString(publishedMessage.ToArray());
             json.Should().Be("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}");
         }
 
@@ -73,9 +73,9 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Channels[0].Received().BasicPublish(
                     Arg.Is(interfaceTypeName),
                     Arg.Is(""),
-                    Arg.Is(false), 
-                    Arg.Any<IBasicProperties>(), 
-                    Arg.Any<byte[]>() 
+                    Arg.Is(false),
+                    Arg.Any<IBasicProperties>(),
+                    Arg.Any<ReadOnlyMemory<byte>>()
                 );
         }
     }

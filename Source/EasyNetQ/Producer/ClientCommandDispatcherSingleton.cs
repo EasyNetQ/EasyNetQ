@@ -42,11 +42,7 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-#if NETFX && !NET46
-            var tcs = new TaskCompletionSource<T>();
-#else
             var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-#endif
 
             try
             {
@@ -54,32 +50,19 @@ namespace EasyNetQ.Producer
                 {
                     if (cancellation.IsCancellationRequested)
                     {
-#if NETFX && !NET46
-                        tcs.TrySetCanceledAsynchronously();   
-#else
                         tcs.TrySetCanceled();
-#endif
-
                         return;
                     }
                     try
                     {
                         persistentChannel.InvokeChannelAction(channel =>
                         {
-#if NETFX && !NET46
-                            tcs.TrySetResultAsynchronously(channelAction(channel));   
-#else
                             tcs.TrySetResult(channelAction(channel));
-#endif                      
                         });
                     }
                     catch (Exception e)
                     {
-#if NETFX && !NET46
-                        tcs.TrySetExceptionAsynchronously(e);   
-#else
                         tcs.TrySetException(e);
-#endif
                     }
                 }, cancellation.Token);
             }

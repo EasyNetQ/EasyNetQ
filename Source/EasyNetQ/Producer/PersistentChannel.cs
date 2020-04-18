@@ -146,7 +146,7 @@ namespace EasyNetQ.Producer
 
         private void OnReturn(object sender, BasicReturnEventArgs args)
         {
-            eventBus.Publish(new ReturnedMessageEvent(args.Body,
+            eventBus.Publish(new ReturnedMessageEvent(args.Body.ToArray(),
                 new MessageProperties(args.BasicProperties),
                 new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)));
         }

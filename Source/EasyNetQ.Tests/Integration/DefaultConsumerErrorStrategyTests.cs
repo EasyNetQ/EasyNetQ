@@ -40,8 +40,8 @@ namespace EasyNetQ.Tests.Integration
             serializer = new JsonSerializer();
             conventions = new Conventions(typeNameSerializer);
             consumerErrorStrategy = new DefaultConsumerErrorStrategy(
-                connectionFactory, 
-                serializer, 
+                connectionFactory,
+                serializer,
                 conventions,
                 typeNameSerializer,
                 errorMessageSerializer
@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 else
                 {
-                    var message = (Error)serializer.BytesToMessage(typeof(Error), getArgs.Body);
+                    var message = (Error)serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
 
                     message.RoutingKey.Should().Be(context.Info.RoutingKey);
                     message.Exchange.Should().Be(context.Info.Exchange);

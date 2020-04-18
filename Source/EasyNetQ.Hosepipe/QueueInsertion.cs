@@ -24,12 +24,12 @@ namespace EasyNetQ.Hosepipe
                 {
                     var body = errorMessageSerializer.Deserialize(message.Body);
 
-                    var properties = new BasicProperties();
+                    var properties = channel.CreateBasicProperties();
                     message.Properties.CopyTo(properties);
 
                     channel.BasicPublish(message.Info.Exchange, message.Info.RoutingKey, true, properties, body);
                 }
-            }                        
+            }
         }
     }
 }
