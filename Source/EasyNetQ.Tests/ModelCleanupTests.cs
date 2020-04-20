@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests
             bus.Publish(new TestMessage());
             bus.Dispose();
 
-            mockBuilder.Channels[0].Received().Dispose();
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
         }
 
         [Fact]
