@@ -101,7 +101,7 @@ namespace EasyNetQ
 
             var hostname = Environment.MachineName;
 
-            var netVersion = Environment.Version.ToString()
+            var netVersion = Environment.Version.ToString();
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
             var name = Name ?? applicationName;
