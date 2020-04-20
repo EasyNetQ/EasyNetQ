@@ -101,6 +101,7 @@ namespace EasyNetQ
 
             var hostname = Environment.MachineName;
 
+            var netVersion = Environment.Version.ToString();
             var product = Product ?? applicationName;
             var platform = Platform ?? hostname;
             var name = Name ?? applicationName;
@@ -108,6 +109,7 @@ namespace EasyNetQ
             AddValueIfNotExists(clientProperties, "client_api", "EasyNetQ");
             AddValueIfNotExists(clientProperties, "product", product);
             AddValueIfNotExists(clientProperties, "platform", platform);
+            AddValueIfNotExists(clientProperties, "net_version", netVersion);
             AddValueIfNotExists(clientProperties, "version", version);
             AddValueIfNotExists(clientProperties, "connection_name", name);
             AddValueIfNotExists(clientProperties, "easynetq_version", version);
