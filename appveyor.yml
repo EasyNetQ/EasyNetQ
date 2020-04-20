@@ -27,7 +27,7 @@ deploy:
     server:
     api_key:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
-    skip_symbols: true
+    skip_symbols: false
     on:
       branch: master
   - provider: NuGet
@@ -35,7 +35,7 @@ deploy:
     server:
     api_key:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
-    skip_symbols: true
+    skip_symbols: false
     on:
       branch: develop
   - provider: NuGet
@@ -43,7 +43,7 @@ deploy:
     server:
     api_key:
       secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
-    skip_symbols: true
+    skip_symbols: false
     on:
       branch: /release\/.+/
   - provider: NuGet
@@ -51,7 +51,7 @@ deploy:
     server: https://www.myget.org/F/easynetq-unstable/api/v2/package
     api_key:
        secure: +0aKxcCHqWvvdJxA4dh1ToRqwA6x8yqhfrYDIeOjQu6Skpg/UrwxAPBik8z6be99
-    skip_symbols: true
+    skip_symbols: false
     on:
       branch: /feature\/.+/
 
