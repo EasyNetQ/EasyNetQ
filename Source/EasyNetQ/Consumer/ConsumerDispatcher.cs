@@ -18,7 +18,7 @@ namespace EasyNetQ.Consumer
 
             var thread = new Thread(_ =>
             {
-                while(!IsDone())
+                while (!IsDone())
                     try
                     {
                         if (durableActions.TryDequeue(out var action) || transientActions.TryDequeue(out action))

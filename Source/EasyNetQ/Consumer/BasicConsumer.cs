@@ -41,7 +41,6 @@ namespace EasyNetQ.Consumer
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
-
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
