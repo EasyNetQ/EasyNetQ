@@ -84,6 +84,24 @@ namespace EasyNetQ.Tests
             Assert.Equal(((Message<MyMessage>)deserializedMessage).Body.Text, message.Body.Text);
         }
 
+        [Fact]
+        public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped_when_null()
+        {
+            var typeNameSerializer = new DefaultTypeNameSerializer();
+            var serializer = new JsonSerializer();
+            const string correlationId = "CorrelationId";
+
+            var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+
+            var message = new Message<MyMessage>();
+            var serializedMessage = serializationStrategy.SerializeMessage(message);
+            var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
+
+            Assert.Equal(deserializedMessage.MessageType, message.MessageType);
+            Assert.Null(((Message<MyMessage>)deserializedMessage).Body);
+        }
+
+
         private void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType, string expectedCorrelationId)
         {
             Assert.Equal(message.Body, expectedBody); //, "Serialized message body does not match expected value");
