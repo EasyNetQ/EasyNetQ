@@ -82,12 +82,9 @@ namespace EasyNetQ.Scheduling
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_delayed";
-            var queueName = conventions.QueueNamingConvention(typeof (T), null);
             var futureExchange = await advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Direct, delayed: true).ConfigureAwait(false);
             var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic).ConfigureAwait(false);
             await advancedBus.BindAsync(futureExchange, exchange, topic).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(queueName).ConfigureAwait(false);
-            await advancedBus.BindAsync(exchange, queue, topic).ConfigureAwait(false);
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
@@ -107,12 +104,9 @@ namespace EasyNetQ.Scheduling
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
             var futureExchangeName = exchangeName + "_delayed";
-            var queueName = conventions.QueueNamingConvention(typeof(T), null);
             var futureExchange = advancedBus.ExchangeDeclare(futureExchangeName, ExchangeType.Direct, delayed: true);
             var exchange = advancedBus.ExchangeDeclare(exchangeName, ExchangeType.Topic);
             advancedBus.Bind(futureExchange, exchange, topic);
-            var queue = advancedBus.QueueDeclare(queueName);
-            advancedBus.Bind(exchange, queue, topic);
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
