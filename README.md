@@ -1,10 +1,17 @@
 [![Stories in Ready](https://badge.waffle.io/easynetq/easynetq.svg?label=Ready&title=Ready)](http://waffle.io/easynetq/easynetq)
 [![Stories in Progress](https://badge.waffle.io/easynetq/easynetq.svg?label=In%20Progress&title=In%20Progress)](http://waffle.io/easynetq/easynetq)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/3k82vjb7ugg3okwt?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/EasyNetQ/easynetq?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
 
-[![NuGet status](https://img.shields.io/nuget/v/EasyNetQ.png?maxAge=3600)](https://www.nuget.org/packages/EasyNetQ)
+[![NuGet Status](https://img.shields.io/nuget/v/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
+[![Nuget Status](https://img.shields.io/nuget/vpre/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
+[![Nuget Status](https://img.shields.io/nuget/dt/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
 
+![Activity](https://img.shields.io/github/commit-activity/w/EasyNetQ/easynetq)
+![Activity](https://img.shields.io/github/commit-activity/m/EasyNetQ/easynetq)
+![Activity](https://img.shields.io/github/commit-activity/y/EasyNetQ/easynetq)
+
+![Size](https://img.shields.io/github/repo-size/graphql-dotnet/graphql-dotnet)
 --
 
 ![EasyNetQ Logo](https://github.com/EasyNetQ/EasyNetQ/wiki/images/logo_design_150.png)
