@@ -153,6 +153,11 @@ namespace EasyNetQ
                 }
             }
 
+            if (Timeout == 0)
+            {
+                throw new EasyNetQException("Invalid connection string. 'timeout' value must be positive value");
+            }
+
             SetDefaultClientProperties(ClientProperties);
         }
     }
