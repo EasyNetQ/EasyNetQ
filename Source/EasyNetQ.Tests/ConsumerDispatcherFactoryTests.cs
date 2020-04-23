@@ -35,14 +35,6 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_dispose_dispatcher_when_factory_is_disposed()
-        {
-            var dispatcher = dispatcherFactory.GetConsumerDispatcher();
-            dispatcherFactory.Dispose();
-            ((ConsumerDispatcher)dispatcher).IsDisposed.Should().BeTrue();
-        }
-
-        [Fact]
         public void Should_run_actions_on_the_consumer_thread()
         {
             var dispatcher = dispatcherFactory.GetConsumerDispatcher();

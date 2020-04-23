@@ -8,9 +8,11 @@ namespace EasyNetQ.Consumer
     public class ConsumerDispatcher : IConsumerDispatcher
     {
         private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
-        private readonly AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+        private readonly AutoResetEvent actionAvailable = new AutoResetEvent(false);
         private readonly ConcurrentQueue<Action> durableActions = new ConcurrentQueue<Action>();
         private readonly ConcurrentQueue<Action> transientActions = new ConcurrentQueue<Action>();
+        private volatile bool isDisposed;
+
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
@@ -24,7 +26,10 @@ namespace EasyNetQ.Consumer
                         if (durableActions.TryDequeue(out var action) || transientActions.TryDequeue(out action))
                             action();
                         else
-                            autoResetEvent.WaitOne();
+                        {
+                            if (!isDisposed)
+                                actionAvailable.WaitOne(10000);
+                        }
                     }
                     catch (Exception exception)
                     {
@@ -34,7 +39,6 @@ namespace EasyNetQ.Consumer
             thread.Start();
         }
 
-        public bool IsDisposed { get; private set; }
         public void QueueAction(Action action)
         {
             QueueAction(action, false);
@@ -43,7 +47,7 @@ namespace EasyNetQ.Consumer
         public void QueueAction(Action action, bool surviveDisconnect)
         {
             Preconditions.CheckNotNull(action, "action");
-            if (IsDisposed)
+            if (isDisposed)
                 throw new ObjectDisposedException(nameof(ConsumerDispatcher));
 
             if (surviveDisconnect)
@@ -54,7 +58,7 @@ namespace EasyNetQ.Consumer
             {
                 transientActions.Enqueue(action);
             }
-            autoResetEvent.Set();
+            actionAvailable.Set();
         }
 
         public void OnDisconnected()
@@ -68,13 +72,13 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
-            IsDisposed = true;
-            autoResetEvent.Set();
+            isDisposed = true;
+            actionAvailable.Set();
         }
 
         private bool IsDone()
         {
-            return IsDisposed && durableActions.IsEmpty && transientActions.IsEmpty;
+            return isDisposed && durableActions.IsEmpty && transientActions.IsEmpty;
         }
     }
 }
