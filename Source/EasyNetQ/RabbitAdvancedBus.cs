@@ -229,8 +229,13 @@ namespace EasyNetQ
             if (connectionConfiguration.PublisherConfirms)
             {
                 var timeout = TimeBudget.Start(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
-                while (!timeout.IsExpired())
+                while (true)
                 {
+                    if (timeout.IsExpired())
+                    {
+                        throw new TimeoutException($"Publish timed out after {connectionConfiguration.Timeout} seconds");
+                    }
+
                     var confirmsWaiter = clientCommandDispatcher.Invoke(model =>
                     {
                         var properties = model.CreateBasicProperties();
@@ -339,8 +344,13 @@ namespace EasyNetQ
             if (connectionConfiguration.PublisherConfirms)
             {
                 var timeout = TimeBudget.Start(TimeSpan.FromSeconds(connectionConfiguration.Timeout));
-                while (!timeout.IsExpired())
+                while (true)
                 {
+                    if (timeout.IsExpired())
+                    {
+                        throw new TimeoutException($"Publish timed out after {connectionConfiguration.Timeout} seconds");
+                    }
+
                     var confirmsWaiter = await clientCommandDispatcher.InvokeAsync(model =>
                     {
                         var properties = model.CreateBasicProperties();
