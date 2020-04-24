@@ -64,5 +64,6 @@ skip_commits:
   - hall_of_fame.md
   - licence.txt
   - DatabaseScripts/*
+  - CODEOWNERS
 
 skip_tags: true
