@@ -21,6 +21,7 @@ namespace EasyNetQ.Consumer
             var thread = new Thread(_ =>
             {
                 while (!IsDone())
+                {
                     try
                     {
                         if (durableActions.TryDequeue(out var action) || transientActions.TryDequeue(out action))
@@ -35,6 +36,7 @@ namespace EasyNetQ.Consumer
                     {
                         logger.ErrorException(string.Empty, exception);
                     }
+                }
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }

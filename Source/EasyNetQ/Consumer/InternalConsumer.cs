@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
@@ -336,16 +337,28 @@ namespace EasyNetQ.Consumer
             disposed = true;
 
             var model = Model;
-            if (model != null)
+            if (model == null) return;
+            // Queued because we may be on the RabbitMQ.Client dispatch thread.
+            var disposedEvent = new AutoResetEvent(false);
+            consumerDispatcher.QueueAction(() =>
             {
-                // Queued because we may be on the RabbitMQ.Client dispatch thread.
-                consumerDispatcher.QueueAction(() =>
+                try
                 {
                     foreach (var c in basicConsumers)
                         c.Dispose();
                     model.Dispose();
-                }, true);
-            }
+                }
+                catch(Exception exception)
+                {
+                    logger.ErrorException(string.Empty, exception);
+                }
+                finally
+                {
+                    disposedEvent.Set();
+                }
+            }, surviveDisconnect: true);
+
+            disposedEvent.WaitOne();
         }
     }
 }
