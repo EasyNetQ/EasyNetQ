@@ -227,11 +227,18 @@ namespace EasyNetQ
             }
         }
 
-        public static void CheckLess(TimeSpan value, TimeSpan maxValue, string name)
+        public static void CheckLess<T>(T value, T maxValue, string name) where T: IComparable<T>
         {
-            if (value < maxValue)
+            if (value.CompareTo(maxValue) < 0)
                 return;
-            throw new ArgumentOutOfRangeException(name, string.Format("Arguments {0} must be less than maxValue", name));
+            throw new ArgumentOutOfRangeException(name, value, string.Format("{0} must be less than {1}", name, maxValue));
+        }
+
+        public static void CheckGreater<T>(T value, T minValue, string name) where T: IComparable<T>
+        {
+            if (value.CompareTo(minValue) > 0)
+                return;
+            throw new ArgumentOutOfRangeException(name, value, string.Format("{0} must be greated than {1}", name, minValue));
         }
 
         public static void CheckNull<T>(T value, string name)

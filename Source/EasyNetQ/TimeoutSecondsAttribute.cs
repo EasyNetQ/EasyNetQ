@@ -9,6 +9,7 @@ namespace EasyNetQ
 
         public TimeoutSecondsAttribute(ushort timeout)
         {
+            Preconditions.CheckGreater(timeout, 0, "timeout");
             Timeout = timeout;
         }
     }
