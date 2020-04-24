@@ -37,12 +37,11 @@ namespace EasyNetQ
 
         public Message(T body)
         {
-            Preconditions.CheckNotNull(body, "body");
             Body = body;
             Properties = new MessageProperties();
-            MessageType = body.GetType();
+            MessageType = body != null ? body.GetType() : typeof(T);
         }
-        
+
         public Message()
         {
             Body = default;
@@ -52,11 +51,9 @@ namespace EasyNetQ
 
         public Message(T body, MessageProperties properties)
         {
-            Preconditions.CheckNotNull(body, "body");
-            Preconditions.CheckNotNull(properties, "properties");
             Body = body;
             Properties = properties;
-            MessageType = body.GetType();
+            MessageType = body != null ? body.GetType() : typeof(T);
         }
     }
 }
