@@ -348,10 +348,6 @@ namespace EasyNetQ.Consumer
                         c.Dispose();
                     model.Dispose();
                 }
-                catch(Exception exception)
-                {
-                    logger.ErrorException(string.Empty, exception);
-                }
                 finally
                 {
                     disposedEvent.Set();

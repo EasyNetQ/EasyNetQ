@@ -7,12 +7,11 @@ namespace EasyNetQ.Consumer
 {
     public class ConsumerDispatcher : IConsumerDispatcher
     {
-        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly AutoResetEvent actionAvailable = new AutoResetEvent(false);
         private readonly ConcurrentQueue<Action> durableActions = new ConcurrentQueue<Action>();
+        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly ConcurrentQueue<Action> transientActions = new ConcurrentQueue<Action>();
         private volatile bool isDisposed;
-
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
@@ -21,11 +20,12 @@ namespace EasyNetQ.Consumer
             var thread = new Thread(_ =>
             {
                 while (!IsDone())
-                {
                     try
                     {
                         if (durableActions.TryDequeue(out var action) || transientActions.TryDequeue(out action))
+                        {
                             action();
+                        }
                         else
                         {
                             if (!isDisposed)
@@ -36,7 +36,6 @@ namespace EasyNetQ.Consumer
                     {
                         logger.ErrorException(string.Empty, exception);
                     }
-                }
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
             thread.Start();
         }
@@ -53,13 +52,9 @@ namespace EasyNetQ.Consumer
                 throw new ObjectDisposedException(nameof(ConsumerDispatcher));
 
             if (surviveDisconnect)
-            {
                 durableActions.Enqueue(action);
-            }
             else
-            {
                 transientActions.Enqueue(action);
-            }
             actionAvailable.Set();
         }
 
