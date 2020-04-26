@@ -9,7 +9,7 @@
     <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EasyNetQ.Management.Client" Version="2.0.0-netcore0001" />
+    <PackageReference Include="EasyNetQ.Management.Client" Version="1.3.0" />
     <PackageReference Include="FluentAssertions" Version="5.8.0" />
     <PackageReference Include="GitVersionTask" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
