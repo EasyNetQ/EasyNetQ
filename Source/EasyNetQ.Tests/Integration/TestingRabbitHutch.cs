@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using EasyNetQ.Topology;
+﻿using EasyNetQ.Topology;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -12,7 +10,7 @@ namespace EasyNetQ.Tests.Integration
         public void CreateBus()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
-            bus.Advanced.ExchangeDeclare("cippa", ExchangeType.Topic);
+            bus.Advanced.ExchangeDeclare("cippa", ExchangeType.Topic).Name.Should().Be("cippa");
         }
     }
 }
