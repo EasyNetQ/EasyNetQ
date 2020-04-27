@@ -5,7 +5,7 @@ namespace EasyNetQ
 {
     /// <summary>
     /// Creates a generic <see cref="IMessage{T}"/> and returns it casted as <see cref="IMessage"/>
-    /// so it can be used in scenarios where we only have a runtime <see cref="Type"/> available. 
+    /// so it can be used in scenarios where we only have a runtime <see cref="Type"/> available.
     /// </summary>
     public static class MessageFactory
     {
@@ -23,7 +23,6 @@ namespace EasyNetQ
         public static IMessage CreateInstance(Type messageType, object body, MessageProperties properties)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
-            Preconditions.CheckNotNull(body, "body");
             Preconditions.CheckNotNull(properties, "properties");
 
             var genericType = genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(t));

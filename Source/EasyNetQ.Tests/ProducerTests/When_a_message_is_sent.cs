@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.ProducerTests
         public void Dispose()
         {
             mockBuilder.Bus.Dispose();
-        } 
+        }
 
         [Fact]
         public void Should_publish_the_message()
@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Is(queueName),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<byte[]>());
+                Arg.Any<ReadOnlyMemory<byte>>());
         }
 
         [Fact]

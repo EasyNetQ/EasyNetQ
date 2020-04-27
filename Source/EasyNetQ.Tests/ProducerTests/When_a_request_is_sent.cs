@@ -107,7 +107,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests.Common"),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<byte[]>()
+                Arg.Any<ReadOnlyMemory<byte>>()
             );
         }
 

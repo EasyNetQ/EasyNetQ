@@ -547,7 +547,7 @@ namespace EasyNetQ
             }
 
             var getResult = new BasicGetResult(
-                result.Body,
+                result.Body.ToArray(),
                 new MessageProperties(result.BasicProperties),
                 new MessageReceivedInfo(
                     "",

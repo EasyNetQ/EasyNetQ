@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Consumer;
@@ -88,7 +89,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 else
                 {
-                    var message = (Error) serializer.BytesToMessage(typeof(Error), getArgs.Body);
+                    var message = (Error) serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
 
                     message.RoutingKey.Should().Be(context.Info.RoutingKey);
                     message.Exchange.Should().Be(context.Info.Exchange);
@@ -138,7 +139,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 else
                 {
-                    var message = (Error) serializer.BytesToMessage(typeof(Error), getArgs.Body);
+                    var message = (Error) serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
 
                     message.RoutingKey.Should().Be(context.Info.RoutingKey);
                     message.Exchange.Should().Be(context.Info.Exchange);

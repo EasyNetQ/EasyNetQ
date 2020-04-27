@@ -91,7 +91,7 @@ namespace EasyNetQ.Consumer
             );
         }
 
-        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
+        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
             if (logger.IsDebugEnabled())
             {
@@ -110,11 +110,12 @@ namespace EasyNetQ.Consumer
                 return;
             }
 
+            var bodyBytes = body.ToArray();
             var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, Queue.Name);
             var messageProperties = new MessageProperties(properties);
-            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messageProperties, body);
+            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messageProperties, bodyBytes);
 
-            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, body));
+            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, bodyBytes));
             handlerRunner.InvokeUserMessageHandlerAsync(context)
                 .ContinueWith(async x =>
                     {
@@ -122,7 +123,7 @@ namespace EasyNetQ.Consumer
                         consumerDispatcher.QueueAction(() =>
                         {
                             var ackResult = ackStrategy(Model, deliveryTag);
-                            eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, body, ackResult));
+                            eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, bodyBytes, ackResult));
                         });
                     },
                     TaskContinuationOptions.ExecuteSynchronously
@@ -152,7 +153,7 @@ namespace EasyNetQ.Consumer
             localCancelled?.Invoke(this);
 
             var consumerCancelled = ConsumerCancelled;
-            consumerCancelled?.Invoke(this, new ConsumerEventArgs(ConsumerTag));
+            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
         }
     }
 

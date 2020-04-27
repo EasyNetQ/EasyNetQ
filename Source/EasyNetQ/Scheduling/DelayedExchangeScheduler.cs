@@ -32,7 +32,6 @@ namespace EasyNetQ.Scheduling
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
             var futureExchangeName = exchangeName + "_delayed";
-            var queueName = conventions.QueueNamingConvention(typeof(T), null);
             var futureExchange = await advancedBus.ExchangeDeclareAsync(
                 futureExchangeName,
                 c => c.AsDelayedExchange(ExchangeType.Direct),
@@ -44,13 +43,11 @@ namespace EasyNetQ.Scheduling
                 cancellationToken
             ).ConfigureAwait(false);
             await advancedBus.BindAsync(futureExchange, exchange, topic, cancellationToken).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(queueName, cancellationToken).ConfigureAwait(false);
-            await advancedBus.BindAsync(exchange, queue, topic, cancellationToken).ConfigureAwait(false);
             var easyNetQMessage = new Message<T>(message)
             {
                 Properties =
                 {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
                 }
             };
             await advancedBus.PublishAsync(futureExchange, topic, false, easyNetQMessage.WithDelay(delay), cancellationToken).ConfigureAwait(false);

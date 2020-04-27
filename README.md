@@ -1,7 +1,14 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/3k82vjb7ugg3okwt?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/EasyNetQ/easynetq?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
 
-[![NuGet status](https://img.shields.io/nuget/v/EasyNetQ.png?maxAge=3600)](https://www.nuget.org/packages/EasyNetQ)
+[![NuGet Status](https://img.shields.io/nuget/v/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
+[![Nuget Status](https://img.shields.io/nuget/vpre/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
+[![Nuget Status](https://img.shields.io/nuget/dt/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
 
+![Activity](https://img.shields.io/github/commit-activity/w/EasyNetQ/easynetq)
+![Activity](https://img.shields.io/github/commit-activity/m/EasyNetQ/easynetq)
+![Activity](https://img.shields.io/github/commit-activity/y/EasyNetQ/easynetq)
+
+![Size](https://img.shields.io/github/repo-size/graphql-dotnet/graphql-dotnet)
 --
 
 ![EasyNetQ Logo](https://github.com/EasyNetQ/EasyNetQ/wiki/images/logo_design_150.png)
@@ -34,20 +41,20 @@ To subscribe to a message...
 Remote procedure call...
 
     var request = new TestRequestMessage {Text = "Hello from the client! "};
-    bus.Request<TestRequestMessage, TestResponseMessage>(request, response => 
+    bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
         Console.WriteLine("Got response: '{0}'", response.Text));
 
 RPC server...
 
-    bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
+    bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
 		new TestResponseMessage{ Text = request.Text + " all done!" });
-	
+
 
 ## Management API
 
 EasyNetQ also has a client-side library for the RabbitMQ Management HTTP API. This lets you control all aspects for your
-RabbitMQ broker from .NET code, including creating virtual hosts and users; setting permissions; monitoring queues, 
-connections and channels; and setting up exchanges, queues and bindings. 
+RabbitMQ broker from .NET code, including creating virtual hosts and users; setting permissions; monitoring queues,
+connections and channels; and setting up exchanges, queues and bindings.
 
 See the **[documentation](https://github.com/EasyNetQ/EasyNetQ/wiki/Management-API-Introduction)**.
 

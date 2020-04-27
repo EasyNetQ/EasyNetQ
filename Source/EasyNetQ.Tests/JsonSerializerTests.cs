@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
-using RabbitMQ.Client.Framing;
 // ReSharper disable InconsistentNaming
 using System;
 using System.Text;
@@ -17,7 +16,7 @@ namespace EasyNetQ.Tests
         {
             serializer = new JsonSerializer();
         }
-        
+
         [Fact]
         public void Should_be_able_to_serialize_and_deserialize_a_default_message()
         {
