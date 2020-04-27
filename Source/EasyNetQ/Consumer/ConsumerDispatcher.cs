@@ -7,11 +7,11 @@ namespace EasyNetQ.Consumer
 {
     public class ConsumerDispatcher : IConsumerDispatcher
     {
-        private readonly AutoResetEvent actionAvailable = new AutoResetEvent(false);
-        private readonly ConcurrentQueue<Action> durableActions = new ConcurrentQueue<Action>();
         private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
+        private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+        private readonly SemaphoreSlim actionsAvailable = new SemaphoreSlim(0);
+        private readonly ConcurrentQueue<Action> durableActions = new ConcurrentQueue<Action>();
         private readonly ConcurrentQueue<Action> transientActions = new ConcurrentQueue<Action>();
-        private volatile bool isDisposed;
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
@@ -19,18 +19,16 @@ namespace EasyNetQ.Consumer
 
             var thread = new Thread(_ =>
             {
-                while (!IsDone())
+                while (!cancellation.IsCancellationRequested || !durableActions.IsEmpty || !transientActions.IsEmpty)
                     try
                     {
                         if (durableActions.TryDequeue(out var action) || transientActions.TryDequeue(out action))
-                        {
                             action();
-                        }
                         else
-                        {
-                            if (!isDisposed)
-                                actionAvailable.WaitOne(10000);
-                        }
+                            actionsAvailable.Wait(cancellation.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
                     }
                     catch (Exception exception)
                     {
@@ -48,14 +46,16 @@ namespace EasyNetQ.Consumer
         public void QueueAction(Action action, bool surviveDisconnect)
         {
             Preconditions.CheckNotNull(action, "action");
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(ConsumerDispatcher));
+
+            if(cancellation.IsCancellationRequested)
+                throw new InvalidOperationException("Consumer dispatcher is stopping or already stopped");
 
             if (surviveDisconnect)
                 durableActions.Enqueue(action);
             else
                 transientActions.Enqueue(action);
-            actionAvailable.Set();
+
+            actionsAvailable.Release();
         }
 
         public void OnDisconnected()
@@ -69,13 +69,7 @@ namespace EasyNetQ.Consumer
 
         public void Dispose()
         {
-            isDisposed = true;
-            actionAvailable.Set();
-        }
-
-        private bool IsDone()
-        {
-            return isDisposed && durableActions.IsEmpty && transientActions.IsEmpty;
+            cancellation.Cancel();
         }
     }
 }
