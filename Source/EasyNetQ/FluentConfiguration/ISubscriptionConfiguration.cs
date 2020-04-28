@@ -9,38 +9,37 @@ namespace EasyNetQ.FluentConfiguration
     /// e.g.
     /// x => x.WithTopic("*.brighton")
     /// </summary>
-    /// <typeparam name="T">The message type to be published</typeparam>
     public interface ISubscriptionConfiguration
     {
         /// <summary>
         /// Add a topic for the queue binding
         /// </summary>
         /// <param name="topic">The topic to add</param>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithTopic(string topic);
 
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
 
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithDurable(bool durable = true);
 
         /// <summary>
         /// Configures the consumer's priority
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithPriority(int priority);
 
         /// <summary>
         /// Configures the consumer's prefetch count
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
         /// <summary>
@@ -53,38 +52,40 @@ namespace EasyNetQ.FluentConfiguration
         /// Leases of durable queues restart when the server restarts.
         /// </summary>
         /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithExpires(int expires);
 
         /// <summary>
         /// Configures the consumer's to be exclusive
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration AsExclusive(bool isExclusive = true);
 
         /// <summary>
         /// Configures the queue's maxPriority
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithMaxPriority(byte priority);
 
         /// <summary>
         /// Sets the queue name
         /// </summary>
         /// <param name="queueName"></param>
-        /// <returns></returns>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithQueueName(string queueName);
 
         /// <summary>
         /// The maximum number of ready messages that may exist on the queue. 
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached.
         /// </summary>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithMaxLength(int maxLength);
 
         /// <summary>
         /// The maximum size of the queue in bytes.
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached
         /// </summary>
+        /// <returns>Reference to the same <see cref="ISubscriptionConfiguration"/> to allow methods chaining.</returns>
         ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
     }
 

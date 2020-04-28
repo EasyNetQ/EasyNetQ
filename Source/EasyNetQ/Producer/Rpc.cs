@@ -255,7 +255,10 @@ namespace EasyNetQ.Producer
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
-            var queue = advancedBus.QueueDeclare(routingKey);
+            var queue = advancedBus.QueueDeclare(
+                routingKey,
+                durable: configuration.Durable,
+                expires: configuration.Expires);
 
             var exchange = DeclareAndBindRpcExchange(
                     conventions.RpcRequestExchangeNamingConvention(requestType),

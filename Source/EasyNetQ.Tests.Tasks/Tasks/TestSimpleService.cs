@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.Tasks.Tasks
 
         private static Task<TestAsyncResponseMessage> HandleAsyncRequest(TestAsyncRequestMessage request)
         {
-            Console.Out.WriteLine("Got aysnc request '{0}'", request.Text);
+            Console.Out.WriteLine("Got async request '{0}'", request.Text);
 
             return RunDelayed(1000, () =>
             {
