@@ -8,7 +8,7 @@
 
         IResponderConfiguration WithDurable(bool durable = true);
 
-        IResponderConfiguration WithExpires(int? expires);
+        IResponderConfiguration WithExpires(int expires);
     }
 
     public class ResponderConfiguration : IResponderConfiguration
@@ -50,7 +50,7 @@
             return this;
         }
 
-        public IResponderConfiguration WithExpires(int? expires)
+        public IResponderConfiguration WithExpires(int expires)
         {
             Expires = expires;
             return this;
