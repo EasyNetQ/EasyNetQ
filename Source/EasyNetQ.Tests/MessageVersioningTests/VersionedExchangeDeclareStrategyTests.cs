@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
 
         // Unversioned message - exchange declared
-        // Versioned message - superceded exchange declared, then superceding, then bind
+        // Versioned message - superseded exchange declared, then superseding, then bind
         [Fact]
         public void When_declaring_exchanges_for_unversioned_message_one_exchange_created()
         {
