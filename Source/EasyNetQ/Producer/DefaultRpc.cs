@@ -191,13 +191,16 @@ namespace EasyNetQ.Producer
                     cancellationToken
                 ).ConfigureAwait(false);
 
-                var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
-                    conventions.RpcResponseExchangeNamingConvention(responseType),
-                    ExchangeType.Direct,
-                    cancellationToken
-                ).ConfigureAwait(false);
-
-                await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
+                var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
+                if (exchangeName != Exchange.GetDefault().Name)
+                {
+                    var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
+                        exchangeName,
+                        ExchangeType.Direct,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
+                }
 
                 var subscription = advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) =>
                 {
@@ -268,11 +271,14 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken)
         {
             //TODO Cache declaration of exchange
-            var exchange = await advancedBus.ExchangeDeclareAsync(
-                conventions.RpcResponseExchangeNamingConvention(typeof(TResponse)),
-                ExchangeType.Direct,
-                cancellationToken: cancellationToken
-            ).ConfigureAwait(false);
+            var exchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
+            var exchange = exchangeName == Exchange.GetDefault().Name
+                ? Exchange.GetDefault()
+                : await advancedBus.ExchangeDeclareAsync(
+                    exchangeName,
+                    ExchangeType.Direct,
+                    cancellationToken: cancellationToken
+                ).ConfigureAwait(false);
 
             try
             {
