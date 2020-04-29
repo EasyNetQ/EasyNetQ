@@ -16,7 +16,6 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-
             var thread = new Thread(_ =>
             {
                 var blockingCollections = new[] {durableActions, transientActions};
@@ -28,7 +27,7 @@ namespace EasyNetQ.Consumer
                         );
                         action();
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
                     {
                         break;
                     }
@@ -52,12 +51,7 @@ namespace EasyNetQ.Consumer
             thread.Start();
         }
 
-        public void QueueAction(Action action)
-        {
-            QueueAction(action, false);
-        }
-
-        public void QueueAction(Action action, bool surviveDisconnect)
+        public void QueueAction(Action action, bool surviveDisconnect = false)
         {
             Preconditions.CheckNotNull(action, "action");
 
