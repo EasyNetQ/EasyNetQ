@@ -52,12 +52,7 @@ namespace EasyNetQ.Consumer
             thread.Start();
         }
 
-        public void QueueAction(Action action)
-        {
-            QueueAction(action, false);
-        }
-
-        public void QueueAction(Action action, bool surviveDisconnect)
+        public void QueueAction(Action action, bool surviveDisconnect = false)
         {
             Preconditions.CheckNotNull(action, "action");
 
