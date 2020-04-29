@@ -124,8 +124,8 @@ namespace EasyNetQ
             connection.ConnectionBlocked += OnConnectionBlocked;
             connection.ConnectionUnblocked += OnConnectionUnblocked;
 
-            if (connection is IRecoverable recoverable)
-                recoverable.Recovery += OnConnectionRestored;
+            if (connection is IAutorecoveringConnection recoverable)
+                recoverable.RecoverySucceeded += OnConnectionRestored;
             else
                 throw new NotSupportedException("Non-recoverable connection is not supported");
 
