@@ -11,13 +11,18 @@ namespace EasyNetQ.Consumer
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly BlockingCollection<Action> durableActions = new BlockingCollection<Action>();
         private readonly BlockingCollection<Action> transientActions = new BlockingCollection<Action>();
+        private readonly Thread dispatcherThread;
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
+            using (ExecutionContext.SuppressFlow())
+            {
             var thread = new Thread(_ =>
             {
+                try
+                {
                 var blockingCollections = new[] {durableActions, transientActions};
                 while (!cancellation.IsCancellationRequested)
                     try
@@ -47,8 +52,20 @@ namespace EasyNetQ.Consumer
                         logger.ErrorException(string.Empty, exception);
                     }
                 }
+                logger.Info("EasyNetQ consumer dispatch thread finished");
+                }
+                catch (Exception ex)
+                {
+                    logger.Fatal(ex, "EasyNetQ consumer dispatch thread fatal termination");
+                }
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
+
+            if (configuration.UseWaitJoin)
+                dispatcherThread = thread;
+
             thread.Start();
+            logger.Info("EasyNetQ consumer dispatch thread started");
+            }
         }
 
         public void QueueAction(Action action, bool surviveDisconnect = false)
@@ -66,11 +83,17 @@ namespace EasyNetQ.Consumer
 
         public void OnDisconnected()
         {
+            int count = 0;
+
             // throw away any queued actions. RabbitMQ will redeliver any in-flight
             // messages that have not been acked when the connection is lost.
             while (transientActions.TryTake(out _))
             {
+                ++count;
             }
+
+            if (count > 0)
+                logger.Info("Throwed away {Count} queued transient actions. RabbitMQ will redeliver any in-flight messages that have not been acked when the connection is lost.", count);
         }
 
         public void Dispose()
@@ -78,6 +101,8 @@ namespace EasyNetQ.Consumer
             durableActions.CompleteAdding();
             transientActions.CompleteAdding();
             cancellation.Cancel();
+            if (dispatcherThread != null)
+                dispatcherThread.Join();
         }
     }
 }

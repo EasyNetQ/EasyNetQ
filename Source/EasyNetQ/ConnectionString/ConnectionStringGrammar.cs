@@ -43,6 +43,7 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform),
             BuildKeyValueParser("useBackgroundThreads", Bool, c => c.UseBackgroundThreads),
+            BuildKeyValueParser("useWaitJoin", Bool, c => c.UseWaitJoin),
             BuildKeyValueParser("dispatcherQueueSize", IntNumber, c => c.DispatcherQueueSize),
             BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));

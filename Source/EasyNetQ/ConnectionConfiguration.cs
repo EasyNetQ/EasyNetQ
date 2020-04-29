@@ -35,6 +35,7 @@ namespace EasyNetQ
         public string Platform { get; set; }
         public string Name { get; set; }
         public bool UseBackgroundThreads { get; set; }
+        public bool UseWaitJoin { get; set; }
         public IList<IAuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get;  set; }
         public int DispatcherQueueSize { get; set; }
@@ -51,6 +52,7 @@ namespace EasyNetQ
             PublisherConfirms = false;
             PersistentMessages = true;
             UseBackgroundThreads = false;
+            UseWaitJoin = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
             DispatcherQueueSize = 1024;
 
