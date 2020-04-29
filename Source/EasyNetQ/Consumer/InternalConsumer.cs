@@ -107,12 +107,8 @@ namespace EasyNetQ.Consumer
         /// </summary>
         private void Cancel()
         {
-            // copy to temp variable to be thread safe.
-            var localCancelled = cancelled;
-            localCancelled?.Invoke(this);
-
-            var consumerCancelled = ConsumerCancelled;
-            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
+            cancelled?.Invoke(this);
+            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
         }
 
         public void HandleBasicCancelOk(string consumerTag)
@@ -131,6 +127,7 @@ namespace EasyNetQ.Consumer
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
+            Cancel();
             logger.InfoFormat(
                 "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
                 ConsumerTag,
@@ -332,22 +329,28 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             if (disposed) return;
+
             disposed = true;
 
             var model = Model;
-            if (model != null)
+            if (model == null) return;
+            // Queued because we may be on the RabbitMQ.Client dispatch thread.
+            var disposedEvent = new AutoResetEvent(false);
+            consumerDispatcher.QueueAction(() =>
             {
-                // Queued because we may be on the RabbitMQ.Client dispatch thread.
-                var disposedEvent = new AutoResetEvent(false);
-                consumerDispatcher.QueueAction(() =>
-                    {
-                        foreach (var c in basicConsumers)
-                            c.Dispose();
-                        model.Dispose();
-                        disposedEvent.Set();
-                    });
-                disposedEvent.WaitOne();
-            }
+                try
+                {
+                    foreach (var c in basicConsumers)
+                        c.Dispose();
+                    model.Dispose();
+                }
+                finally
+                {
+                    disposedEvent.Set();
+                }
+            }, surviveDisconnect: true);
+
+            disposedEvent.WaitOne();
         }
     }
 }
