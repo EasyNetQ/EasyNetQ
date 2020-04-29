@@ -16,7 +16,6 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-
             var thread = new Thread(_ =>
             {
                 var blockingCollections = new[] {durableActions, transientActions};
@@ -30,7 +29,6 @@ namespace EasyNetQ.Consumer
                     }
                     catch (OperationCanceledException)
                     {
-                        break;
                     }
                     catch (Exception exception)
                     {
