@@ -27,8 +27,9 @@ namespace EasyNetQ.Consumer
                         );
                         action();
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
                     {
+                        break;
                     }
                     catch (Exception exception)
                     {
