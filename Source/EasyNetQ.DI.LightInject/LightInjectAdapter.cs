@@ -45,6 +45,11 @@ namespace EasyNetQ.DI.LightInject
             }
         }
 
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            throw new NotImplementedException();
+        }
+
         private class LightInjectResolver : IServiceResolver
         {
             private readonly IServiceFactory serviceFactory;

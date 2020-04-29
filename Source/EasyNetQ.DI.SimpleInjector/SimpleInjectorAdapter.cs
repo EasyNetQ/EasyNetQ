@@ -61,5 +61,10 @@ namespace EasyNetQ.DI.SimpleInjector
         {
             return new ServiceResolverScope(this);
         }
+
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
