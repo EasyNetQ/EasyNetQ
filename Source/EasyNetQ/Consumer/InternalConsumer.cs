@@ -107,12 +107,8 @@ namespace EasyNetQ.Consumer
         /// </summary>
         private void Cancel()
         {
-            // copy to temp variable to be thread safe.
-            var localCancelled = cancelled;
-            localCancelled?.Invoke(this);
-
-            var consumerCancelled = ConsumerCancelled;
-            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
+            cancelled?.Invoke(this);
+            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
         }
 
         public void HandleBasicCancelOk(string consumerTag)
@@ -131,13 +127,13 @@ namespace EasyNetQ.Consumer
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
+            Cancel();
             logger.InfoFormat(
                 "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
                 ConsumerTag,
                 Queue.Name,
                 reason
             );
-            Cancel();
         }
 
         public IModel Model { get; }
