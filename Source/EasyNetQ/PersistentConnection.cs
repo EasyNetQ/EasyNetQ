@@ -127,7 +127,7 @@ namespace EasyNetQ
             if (connection is IRecoverable recoverable)
                 recoverable.Recovery += OnConnectionRestored;
             else
-                throw new NotSupportedException("Non-recoverable connection is not supported");
+            //throw new NotSupportedException("Non-recoverable connection is not supported");
 
             logger.InfoFormat(
                 "Connected to broker {broker}, port {port}",

@@ -56,7 +56,19 @@ namespace EasyNetQ.DI.Microsoft
 
         public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
         {
-            throw new NotImplementedException();
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    serviceCollection.Add(new ServiceDescriptor(serviceType, implementingType, ServiceLifetime.Transient));
+                    break;
+                case Lifetime.Singleton:
+                    serviceCollection.Add(new ServiceDescriptor(serviceType, implementingType, ServiceLifetime.Singleton));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+
+            return this;
         }
 
         private class ServiceProviderAdapter : IServiceResolver

@@ -42,7 +42,8 @@ namespace EasyNetQ
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
             AdvancedBusEventHandlers advancedBusEventHandlers,
-            ILogger<RabbitAdvancedBus> logger
+            ILogger<RabbitAdvancedBus> logger,
+            ILogger l
         )
         {
             Preconditions.CheckNotNull(connection, "connection");
@@ -68,7 +69,7 @@ namespace EasyNetQ
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
             this.logger = logger;
-
+            l.Info("dfxf");
             this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             if (advancedBusEventHandlers.Connected != null)
             {
