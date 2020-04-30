@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests.Mocking
         private readonly IBus bus;
         private readonly Stack<IModel> channelPool = new Stack<IModel>();
         private readonly List<IModel> channels = new List<IModel>();
-        private readonly IConnection connection = Substitute.For<IConnection, IRecoverable>();
+        private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
         private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
         private readonly List<string> consumerQueueNames = new List<string>();
         private readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
