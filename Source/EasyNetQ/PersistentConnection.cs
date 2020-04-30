@@ -132,7 +132,7 @@ namespace EasyNetQ
             logger.InfoFormat(
                 "Connected to broker {broker}, port {port}",
                 connection.Endpoint.HostName,
-                connection.Endpoint.Port
+                connection.Endpoint.Port.ToString()
             );
 
             eventBus.Publish(new ConnectionCreatedEvent());
