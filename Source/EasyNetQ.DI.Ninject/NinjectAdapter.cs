@@ -50,6 +50,11 @@ namespace EasyNetQ.DI.Ninject
             }
         }
 
+        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        {
+            throw new NotImplementedException();
+        }
+
         private class NinjectResolver : IServiceResolver
         {
             private readonly IKernel kernel;
