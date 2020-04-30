@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
                 mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(new ShutdownInitiator(), 0, null));
-                (mockBuilder.Connection as IRecoverable).Recovery += Raise.EventWith(null, new EventArgs());
+                (mockBuilder.Connection as IAutorecoveringConnection).RecoverySucceeded += Raise.EventWith(null, new EventArgs());
                 task.GetAwaiter().GetResult();
             });
         }
