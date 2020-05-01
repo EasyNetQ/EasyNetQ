@@ -20,8 +20,6 @@ namespace EasyNetQ.Consumer
             {
             var thread = new Thread(_ =>
             {
-                try
-                {
                 var blockingCollections = new[] {durableActions, transientActions};
                 while (!cancellation.IsCancellationRequested)
                     try
@@ -52,11 +50,6 @@ namespace EasyNetQ.Consumer
                     }
                 }
                 logger.Info("EasyNetQ consumer dispatch thread finished");
-                }
-                catch (Exception ex)
-                {
-                    logger.Fatal(ex, "EasyNetQ consumer dispatch thread fatal termination");
-                }
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
 
             thread.Start();
