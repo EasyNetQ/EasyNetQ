@@ -49,11 +49,11 @@ namespace EasyNetQ.Consumer
                         logger.ErrorException(string.Empty, exception);
                     }
                 }
-                logger.Info("EasyNetQ consumer dispatch thread finished");
+                logger.Debug("EasyNetQ consumer dispatch thread finished");
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
 
             thread.Start();
-            logger.Info("EasyNetQ consumer dispatch thread started");
+            logger.Debug("EasyNetQ consumer dispatch thread started");
             }
         }
 
@@ -82,7 +82,7 @@ namespace EasyNetQ.Consumer
             }
 
             if (count > 0)
-                logger.Info("Throwed away {Count} queued transient actions. RabbitMQ will redeliver any in-flight messages that have not been acked when the connection is lost.", count);
+                logger.Debug("{count} queued transient actions were thrown", count);
         }
 
         public void Dispose()
