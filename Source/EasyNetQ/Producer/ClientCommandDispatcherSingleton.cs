@@ -1,9 +1,8 @@
-﻿using System;
+﻿using RabbitMQ.Client;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Internals;
-using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
 {
@@ -25,7 +24,8 @@ namespace EasyNetQ.Producer
             queue = new BlockingCollection<Action>(configuration.DispatcherQueueSize);
             persistentChannel = persistentChannelFactory.CreatePersistentChannel(connection);
 
-            StartDispatcherThread(configuration);
+            using (ExecutionContext.SuppressFlow())
+                StartDispatcherThread(configuration);
         }
 
         public T Invoke<T>(Func<IModel, T> channelAction)
@@ -86,6 +86,7 @@ namespace EasyNetQ.Producer
 
         public void Dispose()
         {
+            queue.CompleteAdding();
             cancellation.Cancel();
             persistentChannel.Dispose();
         }
@@ -101,7 +102,7 @@ namespace EasyNetQ.Producer
                         var channelAction = queue.Take(cancellation.Token);
                         channelAction();
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
                     {
                         break;
                     }
