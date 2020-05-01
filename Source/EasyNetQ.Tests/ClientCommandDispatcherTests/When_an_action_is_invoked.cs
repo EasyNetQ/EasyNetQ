@@ -64,7 +64,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         [Fact]
         public void Should_invoke_the_action_on_the_dispatcher_thread()
         {
-            actionThreadName.Should().Be("Client Command Dispatcher Thread");
+            actionThreadName.Should().Be("EasyNetQ client command dispatch thread");
         }
     }
 }
