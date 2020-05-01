@@ -11,7 +11,6 @@ namespace EasyNetQ.Consumer
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly BlockingCollection<Action> durableActions = new BlockingCollection<Action>();
         private readonly BlockingCollection<Action> transientActions = new BlockingCollection<Action>();
-        private readonly Thread dispatcherThread;
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
         {
@@ -60,9 +59,6 @@ namespace EasyNetQ.Consumer
                 }
             }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
 
-            if (configuration.UseWaitJoin)
-                dispatcherThread = thread;
-
             thread.Start();
             logger.Info("EasyNetQ consumer dispatch thread started");
             }
@@ -101,8 +97,6 @@ namespace EasyNetQ.Consumer
             durableActions.CompleteAdding();
             transientActions.CompleteAdding();
             cancellation.Cancel();
-            if (dispatcherThread != null)
-                dispatcherThread.Join();
         }
     }
 }
