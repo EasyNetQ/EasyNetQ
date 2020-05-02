@@ -13,12 +13,16 @@ namespace EasyNetQ.Tests.FluentConfiguration
         }
 
         [Fact]
+        public void Should_throw_if_customer_topic_is_null()
+        {
+            var configuration = new PublishConfiguration("default");
+            Assert.Throws<ArgumentNullException>(() => configuration.WithTopic(null));
+        }
+
+        [Fact]
         public void Should_return_default_topic()
         {
             var configuration = new PublishConfiguration("default");
-
-            configuration.WithTopic(null);
-
             Assert.Equal("default", configuration.Topic);
         }
 
