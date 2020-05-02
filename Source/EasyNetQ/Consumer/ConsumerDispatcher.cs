@@ -16,39 +16,46 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            var thread = new Thread(_ =>
+            using (ExecutionContext.SuppressFlow())
             {
-                var blockingCollections = new[] {durableActions, transientActions};
-                while (!cancellation.IsCancellationRequested)
-                    try
-                    {
-                        BlockingCollection<Action>.TakeFromAny(
-                            blockingCollections, out var action, cancellation.Token
-                        );
-                        action();
-                    }
-                    catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.ErrorException(string.Empty, exception);
-                    }
-
-                while (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action) >= 0)
+                var thread = new Thread(_ =>
                 {
-                    try
+                    var blockingCollections = new[] { durableActions, transientActions };
+                    while (!cancellation.IsCancellationRequested)
+                        try
+                        {
+                            BlockingCollection<Action>.TakeFromAny(
+                                blockingCollections, out var action, cancellation.Token
+                            );
+                            action();
+                        }
+                        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        catch (Exception exception)
+                        {
+                            logger.ErrorException(string.Empty, exception);
+                        }
+
+                    while (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action) >= 0)
                     {
-                        action();
+                        try
+                        {
+                            action();
+                        }
+                        catch (Exception exception)
+                        {
+                            logger.ErrorException(string.Empty, exception);
+                        }
                     }
-                    catch (Exception exception)
-                    {
-                        logger.ErrorException(string.Empty, exception);
-                    }
-                }
-            }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
-            thread.Start();
+                    logger.Debug("EasyNetQ consumer dispatch thread finished");
+                })
+                { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
+
+                thread.Start();
+                logger.Debug("EasyNetQ consumer dispatch thread started");
+            }
         }
 
         public void QueueAction(Action action, bool surviveDisconnect = false)
@@ -66,11 +73,17 @@ namespace EasyNetQ.Consumer
 
         public void OnDisconnected()
         {
+            int count = 0;
+
             // throw away any queued actions. RabbitMQ will redeliver any in-flight
             // messages that have not been acked when the connection is lost.
             while (transientActions.TryTake(out _))
             {
+                ++count;
             }
+
+            if (count > 0)
+                logger.Debug("{count} queued transient actions were thrown", count);
         }
 
         public void Dispose()
