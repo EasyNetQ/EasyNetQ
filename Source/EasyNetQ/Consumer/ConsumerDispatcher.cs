@@ -18,42 +18,43 @@ namespace EasyNetQ.Consumer
 
             using (ExecutionContext.SuppressFlow())
             {
-            var thread = new Thread(_ =>
-            {
-                var blockingCollections = new[] {durableActions, transientActions};
-                while (!cancellation.IsCancellationRequested)
-                    try
-                    {
-                        BlockingCollection<Action>.TakeFromAny(
-                            blockingCollections, out var action, cancellation.Token
-                        );
-                        action();
-                    }
-                    catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.ErrorException(string.Empty, exception);
-                    }
-
-                while (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action) >= 0)
+                var thread = new Thread(_ =>
                 {
-                    try
-                    {
-                        action();
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.ErrorException(string.Empty, exception);
-                    }
-                }
-                logger.Debug("EasyNetQ consumer dispatch thread finished");
-            }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads};
+                    var blockingCollections = new[] { durableActions, transientActions };
+                    while (!cancellation.IsCancellationRequested)
+                        try
+                        {
+                            BlockingCollection<Action>.TakeFromAny(
+                                blockingCollections, out var action, cancellation.Token
+                            );
+                            action();
+                        }
+                        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        catch (Exception exception)
+                        {
+                            logger.ErrorException(string.Empty, exception);
+                        }
 
-            thread.Start();
-            logger.Debug("EasyNetQ consumer dispatch thread started");
+                    while (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action) >= 0)
+                    {
+                        try
+                        {
+                            action();
+                        }
+                        catch (Exception exception)
+                        {
+                            logger.ErrorException(string.Empty, exception);
+                        }
+                    }
+                    logger.Debug("EasyNetQ consumer dispatch thread finished");
+                })
+                { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
+
+                thread.Start();
+                logger.Debug("EasyNetQ consumer dispatch thread started");
             }
         }
 

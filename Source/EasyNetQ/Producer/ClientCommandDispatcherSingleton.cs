@@ -110,7 +110,8 @@ namespace EasyNetQ.Producer
                     }
                 }
                 logger.Debug("EasyNetQ client command dispatch thread finished");
-            }) {Name = "EasyNetQ client command dispatch thread", IsBackground = configuration.UseBackgroundThreads};
+            })
+            { Name = "EasyNetQ client command dispatch thread", IsBackground = configuration.UseBackgroundThreads };
             thread.Start();
             logger.Debug("EasyNetQ client command dispatch thread started");
         }
