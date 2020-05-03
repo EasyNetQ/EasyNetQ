@@ -101,7 +101,6 @@ namespace EasyNetQ.Tests
             Assert.Null(((Message<MyMessage>)deserializedMessage).Body);
         }
 
-
         private void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType, string expectedCorrelationId)
         {
             Assert.Equal(message.Body, expectedBody); //, "Serialized message body does not match expected value");

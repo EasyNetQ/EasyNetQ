@@ -140,7 +140,7 @@ namespace EasyNetQ
 
         private void OnConnectionRestored(object sender, EventArgs e)
         {
-            var connection = (IConnection) sender;
+            var connection = (IConnection)sender;
             logger.InfoFormat(
                 "Reconnected to broker {broker}, port {port}",
                 connection.Endpoint.HostName,

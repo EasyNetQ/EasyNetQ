@@ -84,7 +84,7 @@ namespace EasyNetQ.FluentConfiguration
         /// Sets the maximum number of ready messages that may exist on the queue.
         /// Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached.
         /// </summary>
-        /// <param name="maxLength">the maximum number of ready messages that may exist on the queue.</param>
+        /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.</param>
         /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithMaxLength(int maxLength);
 

@@ -102,7 +102,7 @@ namespace EasyNetQ.Producer
 
         private void OnConnectionRestored(object sender, EventArgs e)
         {
-            eventBus.Publish(new PublishChannelCreatedEvent((IModel) sender));
+            eventBus.Publish(new PublishChannelCreatedEvent((IModel)sender));
         }
 
         private void OnReturn(object sender, BasicReturnEventArgs args)

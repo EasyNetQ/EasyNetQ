@@ -56,9 +56,9 @@ namespace EasyNetQ.Tests.Mocking
                 channel.BasicConsume(null, false, null, true, false, null, null)
                     .ReturnsForAnyArgs(consumeInvocation =>
                     {
-                        var queueName = (string) consumeInvocation[0];
-                        var consumerTag = (string) consumeInvocation[2];
-                        var consumer = (IBasicConsumer) consumeInvocation[6];
+                        var queueName = (string)consumeInvocation[0];
+                        var consumerTag = (string)consumeInvocation[2];
+                        var consumer = (IBasicConsumer)consumeInvocation[6];
 
                         ConsumerQueueNames.Add(queueName);
                         consumer.HandleBasicConsumeOk(consumerTag);

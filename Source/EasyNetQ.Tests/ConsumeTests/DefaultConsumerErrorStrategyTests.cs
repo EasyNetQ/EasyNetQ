@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 Substitute.For<IConventions>(),
                 Substitute.For<ITypeNameSerializer>(),
                 Substitute.For<IErrorMessageSerializer>(),
-                new ConnectionConfiguration {PublisherConfirms = configurePublisherConfirm});
+                new ConnectionConfiguration { PublisherConfirms = configurePublisherConfirm });
             return consumerErrorStrategy;
         }
 

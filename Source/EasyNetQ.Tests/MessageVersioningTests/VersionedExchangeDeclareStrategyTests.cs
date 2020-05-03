@@ -121,7 +121,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
-            
+
             var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
             publishExchangeStrategy.DeclareExchange(typeof(MyMessageV2), ExchangeType.Topic);

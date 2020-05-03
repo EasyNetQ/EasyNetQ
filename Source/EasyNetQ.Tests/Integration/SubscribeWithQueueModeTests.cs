@@ -1,8 +1,8 @@
-﻿using System;
-using Xunit;
-using EasyNetQ.Management.Client;
+﻿using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
 using FluentAssertions;
+using System;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {

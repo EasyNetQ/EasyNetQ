@@ -38,7 +38,6 @@ namespace EasyNetQ.Tests
     private bool _appId_present = false;
     private bool _clusterId_present = false;
 
-
     public string ContentType
     {
       get => _contentType;

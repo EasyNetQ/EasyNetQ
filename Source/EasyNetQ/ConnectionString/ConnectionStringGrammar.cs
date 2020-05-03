@@ -19,7 +19,7 @@ namespace EasyNetQ.ConnectionString
 
         internal static readonly Parser<HostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
-            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort) 0))
+            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
             select new HostConfiguration { Host = host, Port = port };
 
         internal static readonly Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
@@ -48,7 +48,7 @@ namespace EasyNetQ.ConnectionString
         }.Aggregate((a, b) => a.Or(b));
 
         internal static readonly Parser<UpdateConfiguration> AmqpAlone =
-            Amqp.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>) (configuration
+            Amqp.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>)(configuration
                 =>
             {
                 configuration.AmqpConnectionString = _;
@@ -105,7 +105,7 @@ namespace EasyNetQ.ConnectionString
             Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
 #if !NETFX
-            return (Action<TContaining, TProperty>) property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+            return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
 
 #else
             return (Action<TContaining, TProperty>)

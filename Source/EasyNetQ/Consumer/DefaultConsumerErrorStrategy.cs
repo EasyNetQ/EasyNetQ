@@ -180,7 +180,7 @@ namespace EasyNetQ.Consumer
             else
             {
                 // we'll need to clone context.Properties as we are mutating the headers dictionary
-                error.BasicProperties = (MessageProperties) context.Properties.Clone();
+                error.BasicProperties = (MessageProperties)context.Properties.Clone();
 
                 // the RabbitMQClient implicitly converts strings to byte[] on sending, but reads them back as byte[]
                 // we're making the assumption here that any byte[] values in the headers are strings
@@ -191,7 +191,7 @@ namespace EasyNetQ.Consumer
 
                 error.BasicProperties.Headers = context.Properties.Headers.ToDictionary(
                     kvp => kvp.Key,
-                    kvp => kvp.Value is byte[] ? Encoding.UTF8.GetString((byte[]) kvp.Value) : kvp.Value);
+                    kvp => kvp.Value is byte[] ? Encoding.UTF8.GetString((byte[])kvp.Value) : kvp.Value);
             }
 
             return serializer.MessageToBytes(typeof(Error), error);
