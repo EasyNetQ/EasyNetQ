@@ -76,7 +76,7 @@ namespace EasyNetQ
                 logger.Error(
                     exception,
                     "Failed to connect to any of hosts {hosts} and vhost {vhost}",
-                    string.Join(",", connectionConfiguration.Hosts.Select(x => $"{x.Host}:{x.Port}`")),
+                    string.Join(",", connectionConfiguration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
                     connectionConfiguration.VirtualHost
                 );
 
@@ -98,7 +98,7 @@ namespace EasyNetQ
                     logger.Error(
                         exception,
                         "Failed to connect to any of hosts {hosts} and vhost {vhost}",
-                        string.Join(",", connectionConfiguration.Hosts.Select(x => $"{x.Host}:{x.Port}`")),
+                        string.Join(",", connectionConfiguration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
                         connectionConfiguration.VirtualHost
                     );
                 }
