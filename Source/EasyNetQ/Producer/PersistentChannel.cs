@@ -42,9 +42,7 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            var timeout = configuration.Timeout.Equals(0)
-                ? TimeBudget.Infinite()
-                : TimeBudget.Start(TimeSpan.FromSeconds(configuration.Timeout));
+            var timeout = TimeBudget.Start(configuration.GetTimeout());
 
             var retryTimeoutMs = MinRetryTimeoutMs;
             while (!timeout.IsExpired())
