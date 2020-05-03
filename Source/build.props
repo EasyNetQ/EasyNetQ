@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
     <!-- Properties common to all project builds -->
     <PropertyGroup>
-        <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
+        <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
         <PackageProduct>EasyNetQ</PackageProduct>
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
