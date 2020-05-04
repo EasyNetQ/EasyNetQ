@@ -153,7 +153,7 @@ namespace EasyNetQ
         {
             var connection = (IConnection)sender;
             eventBus.Publish(new ConnectionDisconnectedEvent(connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText));
-            logger.InfoFormat("Disconnected from broker");
+            logger.InfoFormat("Disconnected from broker {broker}, port {port}, reason {reason}", connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText);
         }
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
