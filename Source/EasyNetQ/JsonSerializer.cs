@@ -1,37 +1,57 @@
 ﻿using System;
+using System.IO;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace EasyNetQ
 {
     public class JsonSerializer : ISerializer
     {
-        private readonly JsonSerializerSettings serializerSettings;
-
-        public JsonSerializer()
-        {
-            serializerSettings = new JsonSerializerSettings
+        private static readonly Encoding Encoding = new UTF8Encoding(false);
+        private static readonly Newtonsoft.Json.JsonSerializerSettings DefaultSerializerSettings =
+            new Newtonsoft.Json.JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.Auto
+                TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto
             };
-        }
 
-        public JsonSerializer(JsonSerializerSettings serializerSettings)
+        private const int DefaultBufferSize = 1024;
+
+        private readonly Newtonsoft.Json.JsonSerializer jsonSerializer;
+
+        public JsonSerializer() : this(DefaultSerializerSettings)
         {
-            this.serializerSettings = serializerSettings;
         }
 
-        public byte[] MessageToBytes(Type messageType, object message) 
+        public JsonSerializer(Newtonsoft.Json.JsonSerializerSettings serializerSettings)
+        {
+            jsonSerializer = Newtonsoft.Json.JsonSerializer.Create(serializerSettings);
+        }
+
+        public byte[] MessageToBytes(Type messageType, object message)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
-            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, messageType, serializerSettings));
+
+            using (var memoryStream = new MemoryStream(DefaultBufferSize))
+            {
+                using (var streamWriter = new StreamWriter(memoryStream, Encoding, DefaultBufferSize, true))
+                using (var jsonWriter = new Newtonsoft.Json.JsonTextWriter(streamWriter))
+                {
+                    jsonWriter.Formatting = jsonSerializer.Formatting;
+                    jsonSerializer.Serialize(jsonWriter, message, messageType);
+                }
+
+                return memoryStream.ToArray();
+            }
         }
 
         public object BytesToMessage(Type messageType, byte[] bytes)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
             Preconditions.CheckNotNull(bytes, "bytes");
-            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), messageType, serializerSettings);
+
+            using (var memoryStream = new MemoryStream(bytes, false))
+            using (var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true))
+            using (var reader = new Newtonsoft.Json.JsonTextReader(streamReader))
+                return jsonSerializer.Deserialize(reader, messageType);
         }
     }
 }
