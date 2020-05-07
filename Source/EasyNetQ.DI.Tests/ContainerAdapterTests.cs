@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Autofac;
@@ -13,9 +13,9 @@ using LightInject;
 using Ninject;
 using Xunit;
 using LightInjectContainer = LightInject.ServiceContainer;
+using NinjectContainer = Ninject.StandardKernel;
 using SimpleInjectorContainer = SimpleInjector.Container;
 using StructureMapContainer = StructureMap.Container;
-using NinjectContainer = Ninject.StandardKernel;
 #if !NETFX
 using EasyNetQ.DI.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
@@ -127,7 +127,7 @@ namespace EasyNetQ.DI.Tests
                 {
                     var container = new LightInjectContainer();
                     c(new LightInjectAdapter(container));
-                    return (IServiceResolver)container.GetInstance<IServiceResolver>();
+                    return container.GetInstance<IServiceResolver>();
                 })
             };
 

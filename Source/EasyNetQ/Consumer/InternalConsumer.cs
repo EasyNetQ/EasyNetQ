@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -153,7 +153,7 @@ namespace EasyNetQ.Consumer
             localCancelled?.Invoke(this);
 
             var consumerCancelled = ConsumerCancelled;
-            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] { ConsumerTag }));
+            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] { ConsumerTag }));
         }
     }
 

@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests
         private const string correlationId = "abc123";
 
         private MockBuilder mockBuilder;
-        ReadOnlyMemory<byte> body;
+        private ReadOnlyMemory<byte> body;
         private IBasicProperties properties;
 
         public When_publish_is_called()

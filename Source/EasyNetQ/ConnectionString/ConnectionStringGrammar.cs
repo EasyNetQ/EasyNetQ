@@ -71,7 +71,7 @@ namespace EasyNetQ.ConnectionString
             return from key in Parse.CaseInsensitiveString(keyName).Token()
                 from separator in Parse.Char('=')
                 from value in valueParser
-                select (Func<ConnectionConfiguration, ConnectionConfiguration>) (c =>
+                select (Func<ConnectionConfiguration, ConnectionConfiguration>)(c =>
                 {
                     CreateSetter(getter)(c, value);
                     return c;
