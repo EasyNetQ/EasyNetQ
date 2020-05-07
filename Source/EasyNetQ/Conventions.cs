@@ -81,7 +81,7 @@ namespace EasyNetQ
 
         private QueueAttribute GetQueueAttribute(Type messageType)
         {
-            return messageType.GetAttribute<QueueAttribute>() ?? new QueueAttribute(string.Empty);
+            return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
         }
 
 		public ExchangeNameConvention ExchangeNamingConvention { get; set; }
