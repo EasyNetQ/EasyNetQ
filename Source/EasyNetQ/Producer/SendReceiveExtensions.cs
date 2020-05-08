@@ -18,19 +18,19 @@ namespace EasyNetQ
         /// <param name="message">The message</param>
         /// <param name="cancellationToken">The cancellation token</param>
         public static void Send<T>(
-            this ISendReceive sendReceive, 
-            string queue, 
+            this ISendReceive sendReceive,
+            string queue,
             T message,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
-            
+
             sendReceive.SendAsync(queue, message, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }
-        
+
         /// <summary>
         /// Receive a message from the specified queue
         /// </summary>
@@ -42,13 +42,13 @@ namespace EasyNetQ
         /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
         public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
             this ISendReceive sendReceive,
-            string queue, 
-            Action<T> onMessage, 
+            string queue,
+            Action<T> onMessage,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
-            
+
             return sendReceive.ReceiveAsync(
                 queue,
                 onMessage,
@@ -112,7 +112,7 @@ namespace EasyNetQ
                 cancellationToken
             );
         }
-                
+
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers
         /// </summary>
@@ -131,7 +131,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
             return sendReceive.ReceiveAsync(
-                queue, 
+                queue,
                 addHandlers,
                 c => { },
                 cancellationToken
@@ -149,13 +149,13 @@ namespace EasyNetQ
         /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
         public static IDisposable Receive<T>(
             this ISendReceive sendReceive,
-            string queue, 
-            Action<T> onMessage, 
+            string queue,
+            Action<T> onMessage,
             CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
-            
+
             return sendReceive.Receive(queue, onMessage, c => { }, cancellationToken);
         }
 
@@ -183,7 +183,7 @@ namespace EasyNetQ
 
             return sendReceive.Receive(
                 queue,
-                onMessageAsync, 
+                onMessageAsync,
                 configure,
                 cancellationToken
             );
@@ -203,18 +203,18 @@ namespace EasyNetQ
             string queue,
             Func<T, Task> onMessage,
             CancellationToken cancellationToken = default
-        ) 
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
             return sendReceive.Receive<T>(
                 queue,
-                (m, c) => onMessage(m), 
+                (m, c) => onMessage(m),
                 c => { },
                 cancellationToken
             );
         }
-        
+
         /// <summary>
         /// Receive a message from the specified queue
         /// </summary>
@@ -231,7 +231,7 @@ namespace EasyNetQ
             Func<T, CancellationToken, Task> onMessage,
             Action<IConsumerConfiguration> configure,
             CancellationToken cancellationToken = default
-        ) 
+        )
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
@@ -261,13 +261,13 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
             return sendReceive.Receive(
-                queue, 
+                queue,
                 addHandlers,
                 c => { },
                 cancellationToken
             );
         }
-        
+
         /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers
         /// </summary>

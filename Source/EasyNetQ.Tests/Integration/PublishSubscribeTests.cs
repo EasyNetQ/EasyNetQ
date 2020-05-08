@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests.Integration
         public PublishSubscribeTests()
         {
             bus = RabbitHutch.CreateBus("host=localhost");
-            while(!bus.Advanced.IsConnected) Thread.Sleep(10);
+            while (!bus.Advanced.IsConnected) Thread.Sleep(10);
         }
 
         public void Dispose()
@@ -41,7 +41,6 @@ namespace EasyNetQ.Tests.Integration
 
             Console.WriteLine("Stopped consuming");
         }
-
 
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Should_be_able_to_subscribe_as_exlusive()
@@ -92,7 +91,6 @@ namespace EasyNetQ.Tests.Integration
 
             Console.WriteLine("Stopped consuming");
         }
-
 
         // 2. Run this a few times, should publish some messages
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
@@ -164,7 +162,7 @@ namespace EasyNetQ.Tests.Integration
 
         // 6. Run publish first using '2' above.
         // 7. Run this test, while it's running, restart the RabbitMQ service.
-        // 
+        //
         [Fact][Explicit("Needs a Rabbit instance on localhost to work")]
         public void Long_running_subscriber_should_survive_a_rabbit_restart()
         {
@@ -177,7 +175,6 @@ namespace EasyNetQ.Tests.Integration
                     Console.WriteLine(message.Text);
                     autoResetEvent.Set();
                 }, null, 5000, Timeout.Infinite);
-                
             });
 
             // allow time for messages to be consumed
@@ -214,9 +211,9 @@ namespace EasyNetQ.Tests.Integration
             var subscribeBus2 = RabbitHutch.CreateBus(connectionString);
 
             // first set up the subscribers
-            subscribeBus1.PubSub.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus1.PubSub.Subscribe<MyMessage>("roundRobinTest", message =>
                 Console.WriteLine("Subscriber 1: {0}", message.Text));
-            subscribeBus2.PubSub.Subscribe<MyMessage>("roundRobinTest", message => 
+            subscribeBus2.PubSub.Subscribe<MyMessage>("roundRobinTest", message =>
                 Console.WriteLine("Subscriber 2: {0}", message.Text));
 
             // now publish some messages

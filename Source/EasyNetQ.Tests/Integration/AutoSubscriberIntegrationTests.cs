@@ -33,14 +33,14 @@ namespace EasyNetQ.Tests.Integration
         [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithTopic()
         {
-            bus.PubSub.Publish(new AutoSubMessage{ Text = "With topic" }, "mytopic");
+            bus.PubSub.Publish(new AutoSubMessage { Text = "With topic" }, "mytopic");
         }
 
         [Fact]
         [Explicit("Requires a RabbitMQ broker on localhost.")]
         public void PublishWithoutTopic()
         {
-            bus.PubSub.Publish(new AutoSubMessage{ Text = "Without topic" });
+            bus.PubSub.Publish(new AutoSubMessage { Text = "Without topic" });
         }
     }
 

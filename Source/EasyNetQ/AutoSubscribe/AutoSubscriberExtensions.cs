@@ -17,26 +17,26 @@ namespace EasyNetQ.AutoSubscribe
         /// <param name="autoSubscriber">The autoSubscriber instance.</param>
         /// <param name="assemblies">The assemblies to scan for consumers.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        public static Task<IDisposable> SubscribeAsync(this AutoSubscriber autoSubscriber ,Assembly[] assemblies, CancellationToken cancellationToken = default)
+        public static Task<IDisposable> SubscribeAsync(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckAny(assemblies, nameof(assemblies), "No assemblies specified.");
 
             return autoSubscriber.SubscribeAsync(assemblies.SelectMany(a => a.GetTypes()).ToArray(), cancellationToken);
         }
-        
+
         public static IDisposable Subscribe(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(autoSubscriber, "autoSubscriber");
-            
+
             return autoSubscriber.SubscribeAsync(assemblies, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }
-        
+
         public static IDisposable Subscribe(this AutoSubscriber autoSubscriber, Type[] consumerTypes, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(autoSubscriber, "autoSubscriber");
-            
+
             return autoSubscriber.SubscribeAsync(consumerTypes, cancellationToken)
                 .GetAwaiter()
                 .GetResult();

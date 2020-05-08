@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.Integration
             // Run conditions: test-exchange must not be declared
             using (var bus = EasyNetQ.RabbitHutch.CreateBus("host=localhost").Advanced)
             {
-                for (int i = 0; i < 10; i++ )
+                for (int i = 0; i < 10; i++)
                 {
                     var c = i;
 
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 Thread.Sleep(10000);
                 Console.Out.WriteLine("-- end of test --");
-            }            
+            }
         }
 
         public void Spike()
@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.Integration
             connection.Dispose();
         }
 
-        void model_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
+        private void model_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             foreach (var value in e.Detail)
             {

@@ -9,7 +9,7 @@
     {
         private readonly ConnectionConfiguration configuration;
         private readonly IEventBus eventBus;
-        
+
         public PersistentChannelFactory(ConnectionConfiguration configuration, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(configuration, "configuration");

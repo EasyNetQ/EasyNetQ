@@ -13,7 +13,7 @@ namespace EasyNetQ.Consumer
         public ConsumerDispatcherFactory(ConnectionConfiguration configuration)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
-            
+
             dispatcher = new Lazy<IConsumerDispatcher>(() => new ConsumerDispatcher(configuration));
         }
 

@@ -1,12 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Text;
-using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Topology;
+using System;
+using System.Collections.Concurrent;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -69,7 +69,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        public void Consume(int from, int to)
+        private void Consume(int from, int to)
         {
             buses[from].Advanced.Consume(queues[from], (body, properties, info) => Task.Factory.StartNew(() =>
                 {
@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests.Integration
 
                     if (IsDuplicateMessage(nextMessage.CorrelationId))
                     {
-                        Console.Out.WriteLine("\n>>>>>>>> DUPLICATE MESSAGE DETECTED: {0} <<<<<<<<<<\n", 
+                        Console.Out.WriteLine("\n>>>>>>>> DUPLICATE MESSAGE DETECTED: {0} <<<<<<<<<<\n",
                             nextMessage.CorrelationId);
                         return;
                     }
@@ -146,7 +146,7 @@ namespace EasyNetQ.Tests.Integration
                     var client = new ManagementClient("http://localhost", "guest", "guest", 15672);
                     while (true)
                     {
-                        Thread.Sleep(TimeSpan.FromSeconds(secondsBetweenDisconnection)); 
+                        Thread.Sleep(TimeSpan.FromSeconds(secondsBetweenDisconnection));
                         var connections = client.GetConnections();
                         foreach (var connection in connections)
                         {

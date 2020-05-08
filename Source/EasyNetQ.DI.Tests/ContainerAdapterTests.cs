@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Autofac;
@@ -13,9 +13,9 @@ using LightInject;
 using Ninject;
 using Xunit;
 using LightInjectContainer = LightInject.ServiceContainer;
+using NinjectContainer = Ninject.StandardKernel;
 using SimpleInjectorContainer = SimpleInjector.Container;
 using StructureMapContainer = StructureMap.Container;
-using NinjectContainer = Ninject.StandardKernel;
 #if !NETFX
 using EasyNetQ.DI.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
@@ -105,7 +105,7 @@ namespace EasyNetQ.DI.Tests
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_override_dependency_with_factory(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory(c => c.Register<IService, Service>().Register(_ => (IService) new DummyService()));
+            var resolver = resolverFactory(c => c.Register<IService, Service>().Register(_ => (IService)new DummyService()));
             Assert.IsType<DummyService>(resolver.Resolve<IService>());
         }
 
@@ -113,7 +113,7 @@ namespace EasyNetQ.DI.Tests
         {
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var container = new DefaultServiceContainer();
                     c(container);
@@ -123,17 +123,17 @@ namespace EasyNetQ.DI.Tests
 
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var container = new LightInjectContainer();
                     c(new LightInjectAdapter(container));
-                    return (IServiceResolver) container.GetInstance<IServiceResolver>();
+                    return container.GetInstance<IServiceResolver>();
                 })
             };
 
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var container = new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } };
                     c(new SimpleInjectorAdapter(container));
@@ -143,7 +143,7 @@ namespace EasyNetQ.DI.Tests
 
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var container = new StructureMapContainer(r => c(new StructureMapAdapter(r)));
                     return container.GetInstance<IServiceResolver>();
@@ -152,7 +152,7 @@ namespace EasyNetQ.DI.Tests
 
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var containerBuilder = new ContainerBuilder();
                     c(new AutofacAdapter(containerBuilder));
@@ -163,7 +163,7 @@ namespace EasyNetQ.DI.Tests
 
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var container = new WindsorContainer();
                     c(new WindsorAdapter(container));
@@ -173,7 +173,7 @@ namespace EasyNetQ.DI.Tests
 
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var container = new NinjectContainer();
                     c(new NinjectAdapter(container));
@@ -184,7 +184,7 @@ namespace EasyNetQ.DI.Tests
 #if !NETFX
             yield return new object[]
             {
-                (ResolverFactory) (c =>
+                (ResolverFactory)(c =>
                 {
                     var serviceCollection = new ServiceCollection();
                     c(new ServiceCollectionAdapter(serviceCollection));

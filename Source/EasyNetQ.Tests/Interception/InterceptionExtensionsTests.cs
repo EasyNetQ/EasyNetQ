@@ -1,10 +1,9 @@
 // ReSharper disable InconsistentNaming
 
-using System;
 using EasyNetQ.DI;
-using Xunit;
 using EasyNetQ.Interception;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.Interception
 {
@@ -25,7 +24,6 @@ namespace EasyNetQ.Tests.Interception
             interceptorRegistrator.EnableGZipCompression();
             interceptorRegistrator.Received().Add(Arg.Any<GZipInterceptor>());
         }
-
 
         [Fact]
         public void When_using_EnableTripleDESEncryption_extension_method_required_interceptor_is_added()

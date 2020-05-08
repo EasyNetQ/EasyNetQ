@@ -28,7 +28,7 @@ namespace EasyNetQ.Producer
                     using (var compositeCancellation = CancellationTokenSource.CreateLinkedTokenSource(timeoutCancellation.Token, cancellation))
                     {
                         var timeoutTask = Task.Delay(timeout, compositeCancellation.Token);
-                        if (timeoutTask == await Task.WhenAny(confirmation, timeoutTask).ConfigureAwait(false)) throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int) timeout.TotalSeconds, deliveryTag));
+                        if (timeoutTask == await Task.WhenAny(confirmation, timeoutTask).ConfigureAwait(false)) throw new TimeoutException(string.Format("Publisher confirms timed out after {0} seconds waiting for ACK or NACK from sequence number {1}", (int)timeout.TotalSeconds, deliveryTag));
                         timeoutCancellation.Cancel();
                         await confirmation.ConfigureAwait(false);
                     }

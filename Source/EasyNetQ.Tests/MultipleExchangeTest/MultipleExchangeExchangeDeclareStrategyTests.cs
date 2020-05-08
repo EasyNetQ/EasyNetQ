@@ -131,8 +131,8 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
 
             //ensure the IMessageInterfaceOne exchange is bound to the concrete type version
             advancedBus.AssertWasCalled(b => b.BindAsync(
-                Arg<IExchange>.Matches( m => m.Name == "MessageWithTwoInterfaces"),
-                Arg<IExchange>.Matches(m => m.Name == "IMessageInterfaceOne"), 
+                Arg<IExchange>.Matches(m => m.Name == "MessageWithTwoInterfaces"),
+                Arg<IExchange>.Matches(m => m.Name == "IMessageInterfaceOne"),
                 Arg<string>.Is.Anything), opt => opt.Repeat.Times(1));
 
             //ensure the IMessageInterfaceTwo exchange is bound to the concrete type version

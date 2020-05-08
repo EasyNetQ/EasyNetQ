@@ -34,7 +34,7 @@ namespace EasyNetQ.Scheduler.Mongo
             var appSetting = ConfigurationManager.AppSettings[settingKey];
             if (!bool.TryParse(appSetting, out bool value))
             {
-                throw new ApplicationException(String.Format("AppSetting '{0}' value '{1}' is not a valid boolean",
+                throw new ApplicationException(string.Format("AppSetting '{0}' value '{1}' is not a valid boolean",
                     settingKey, appSetting));
             }
 

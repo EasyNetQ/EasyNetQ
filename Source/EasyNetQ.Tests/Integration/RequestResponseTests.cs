@@ -1,12 +1,11 @@
 // ReSharper disable InconsistentNaming
 
-using Xunit;
+using FluentAssertions;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using EasyNetQ.Producer;
-using FluentAssertions;
+using Xunit;
 
 namespace EasyNetQ.Tests.Integration
 {
@@ -133,7 +132,6 @@ namespace EasyNetQ.Tests.Integration
             var response = bus.Rpc.RequestAsync<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(request);
 
             Console.Out.WriteLine("response = {0}", response.Result.Text);
-
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -148,7 +146,6 @@ namespace EasyNetQ.Tests.Integration
             var response = bus.Rpc.RequestAsync<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(request);
 
             Console.Out.WriteLine("response = {0}", response.Result.Text);
-
         }
 
         // First start the EasyNetQ.Tests.SimpleService console app.
@@ -315,7 +312,6 @@ namespace EasyNetQ.Tests.Integration
 
             autoResetEvent.WaitOne(10000);
         }
-
     }
 
     public class SomeRandomException : Exception

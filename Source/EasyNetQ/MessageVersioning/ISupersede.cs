@@ -17,15 +17,15 @@ namespace EasyNetQ.MessageVersioning
     /// <![CDATA[
     /// public class MessageV1
     /// {
-    ///		public string SomeProperty { get; set; }
+    ///     public string SomeProperty { get; set; }
     /// }
-    /// 
+    ///
     /// public class MessageV2 : MessageV1, ISupersede<MessageV1>
     /// {
-    ///		public DateTime SomeOtherProperty { get; set; }
+    ///     public DateTime SomeOtherProperty { get; set; }
     /// }
     /// ]]>
     /// </code>
     /// </example>
     public interface ISupersede<T> where T : class { }
-}	
+}

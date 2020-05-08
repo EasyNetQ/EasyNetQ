@@ -36,17 +36,17 @@ using System.Reflection;
 // 0.60.1.0 Added SimpleInjector DI support
 // 0.60.0.0 Remove [Serializable] attribute from messages and exceptions
 // 0.59.0.0 Support of priority queues to IBus publish methods
-// 0.58.0.0 added IErrorMessageSerializer and 2 implementations (UTF8 and Base64) 
+// 0.58.0.0 added IErrorMessageSerializer and 2 implementations (UTF8 and Base64)
 // 0.57.2.0 Removed from the hosepipe library the useless dependency on easynetq management client
 // 0.57.1.0 Fix hosepipe usage description to describe the option `x`: the get (noack)
 // 0.57.0.0 RPC responses go through the dedicated RPC exchange (easy_net_q_rpc by default) instead of the default exchange
 // 0.56.0.0 Updated to StructreMap 4, Note: this is only a breaking change for users of 'EasyNetQ.DI.StructureMap'
 // 0.55.1.0 Marked Rpc.Respond overload as virtual
 // 0.55.0.0 Bug fix, DefaultConsumerErrorStrategy does not decode header values
-// 0.54.3.0 Allow usage of background threads  
-// 0.54.2.0 Fix bug with infinite dispose  
+// 0.54.3.0 Allow usage of background threads
+// 0.54.2.0 Fix bug with infinite dispose
 // 0.54.1.0 Added LightInject DI support
-// 0.54.0.0 Updated RabbitMQ client to 3.6.0 
+// 0.54.0.0 Updated RabbitMQ client to 3.6.0
 // 0.53.6.0 set CLSCompliant to false
 // 0.53.5.0 Added custom queue-name support to 'err' and 'retry' commands
 // 0.53.4.0 Update RabbitMQ.Client to 3.5.7
@@ -55,11 +55,11 @@ using System.Reflection;
 // 0.53.1.0 Removed separate test applications in favor of a single task runner
 // 0.53.0.0 fix expires default behavior of subscription configuration attribute
 // 0.52.0.0 Added synchronous callback on Consume(byte[]) methods of the advanced api
-// 0.51.0.0 Brand new sync/async implementation, a lot of changes in publish mechanisms. Should be used with care  
-// 0.50.12.0 Added Serilog nuget package 
-// 0.50.11.0 Updated Scheduler for MSSQL to support all properties of the ScheduleMe message 
-// 0.50.10.0 Updated RabbitMQ client to 3.5.6 
-// 0.50.9.0 Updated RabbitMQ client to 3.5.5 
+// 0.51.0.0 Brand new sync/async implementation, a lot of changes in publish mechanisms. Should be used with care
+// 0.50.12.0 Added Serilog nuget package
+// 0.50.11.0 Updated Scheduler for MSSQL to support all properties of the ScheduleMe message
+// 0.50.10.0 Updated RabbitMQ client to 3.5.6
+// 0.50.9.0 Updated RabbitMQ client to 3.5.5
 // 0.50.8.0 Allow SubscriptionConfigurationAttribute on class
 // 0.50.7.0 Fix typo in Extensions
 // 0.50.6.0 Allow specifying the maximum size of the message queue when it is being declared

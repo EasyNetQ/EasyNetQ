@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
 {
     public class LatencyRecorder : ILatencyRecorder
     {
-        private readonly IDictionary<long, RequestRecord> requests = 
+        private readonly IDictionary<long, RequestRecord> requests =
             new ConcurrentDictionary<long, RequestRecord>();
 
         private readonly Timer reportTimer;
@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
 
             var responded = requests.Count(x => x.Value.HasResponded);
 
-            Console.WriteLine("Total: {0}, responded: {1} over 10 seconds late: [{2}]", 
+            Console.WriteLine("Total: {0}, responded: {1} over 10 seconds late: [{2}]",
                 requests.Count,
                 responded,
                 string.Join(",", lateResponses.Select(x => x.Value.Id.ToString())));

@@ -4,7 +4,7 @@ using System.IO;
 
 namespace EasyNetQ.Hosepipe
 {
-    public class MessageReader : IMessageReader 
+    public class MessageReader : IMessageReader
     {
         public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
         {

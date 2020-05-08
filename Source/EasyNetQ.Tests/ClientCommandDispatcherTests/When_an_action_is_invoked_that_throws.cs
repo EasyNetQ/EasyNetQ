@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public void Should_raise_the_exception_on_the_calling_thread()
         {
             var exception = new CrazyTestOnlyException();
-            
+
             var task = dispatcher.InvokeAsync(x =>
             {
                 throw exception;

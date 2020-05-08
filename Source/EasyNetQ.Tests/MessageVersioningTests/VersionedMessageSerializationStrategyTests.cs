@@ -1,11 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.MessageVersioning;
+using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using EasyNetQ.MessageVersioning;
 using Xunit;
-using NSubstitute;
 
 namespace EasyNetQ.Tests.MessageVersioningTests
 {
@@ -162,7 +162,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 },
             };
             message.Properties.Headers.Add("Alternative-Message-Types", Encoding.UTF8.GetBytes(supersededMessageType));
-            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof( MyMessageV2 ), serializedMessageBody);
+            var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof(MyMessageV2), serializedMessageBody);
 
             var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
@@ -270,11 +270,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 typeNameSerializer.DeSerialize(localMessageType.Key).Returns(localMessageType.Value);
             }
 
-
             var serializer = Substitute.For<ISerializer>();
             serializer.BytesToMessage(expectedMessageType, messageBody).Returns(message);
 
-            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(String.Empty));
+            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(string.Empty));
         }
     }
 }

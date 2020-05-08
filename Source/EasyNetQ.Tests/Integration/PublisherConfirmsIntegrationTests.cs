@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.Integration
             var resetEvent = new AutoResetEvent(false);
 
             await bus.PubSub.SubscribeAsync<MyMessage>("my_subscription_id", msg => { resetEvent.Set(); });
-            await bus.PubSub.PublishAsync(new MyMessage {Text = "WUHU"});
+            await bus.PubSub.PublishAsync(new MyMessage { Text = "WUHU" });
             var signalReceived = resetEvent.WaitOne(TimeSpan.FromSeconds(15));
 
             Assert.True(signalReceived);

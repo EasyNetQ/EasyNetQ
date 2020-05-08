@@ -14,8 +14,8 @@ namespace EasyNetQ.Tests
         {
             var consumer = new DefaultAutoSubscriberMessageDispatcher();
             var message = new MyMessage();
-            var consumedMessage = (MyMessage) null;
-            
+            var consumedMessage = (MyMessage)null;
+
             MyMessageConsumer.ConsumedMessageFunc = m => consumedMessage = m;
             consumer.Dispatch<MyMessage, MyMessageConsumer>(message);
 

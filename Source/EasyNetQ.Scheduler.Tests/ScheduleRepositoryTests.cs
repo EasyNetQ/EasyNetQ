@@ -1,10 +1,10 @@
 // ReSharper disable InconsistentNaming
 using EasyNetQ.SystemMessages;
-using EasyNetQ.Topology;
 using EasyNetQ.Tests;
-using Xunit;
+using EasyNetQ.Topology;
 using System;
 using System.Text;
+using Xunit;
 
 namespace EasyNetQ.Scheduler.Tests
 {
@@ -80,8 +80,8 @@ namespace EasyNetQ.Scheduler.Tests
             var schedules = scheduleRepository.GetPending();
             foreach (var scheduleMe in schedules)
             {
-                Console.WriteLine("key: {0}, waketime: {1}, exchange {2}, type: {3}, properties: {4}, routing: {5}, body:{6}", 
-                    scheduleMe.BindingKey, 
+                Console.WriteLine("key: {0}, waketime: {1}, exchange {2}, type: {3}, properties: {4}, routing: {5}, body:{6}",
+                    scheduleMe.BindingKey,
                     scheduleMe.WakeTime,
                     scheduleMe.Exchange,
                     scheduleMe.ExchangeType,

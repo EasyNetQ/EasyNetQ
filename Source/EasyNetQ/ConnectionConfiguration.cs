@@ -137,14 +137,14 @@ namespace EasyNetQ
                 if (Port == DefaultPort)
                 {
                     if (AmqpConnectionString.Port > 0)
-                        Port = (ushort) AmqpConnectionString.Port;
+                        Port = (ushort)AmqpConnectionString.Port;
                     else if (AmqpConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase))
                         Port = DefaultAmqpsPort;
                 }
 
                 if (AmqpConnectionString.Segments.Length > 1) VirtualHost = AmqpConnectionString.Segments.Last();
 
-                Hosts = Hosts.Concat(new[] {new HostConfiguration {Host = AmqpConnectionString.Host}});
+                Hosts = Hosts.Concat(new[] { new HostConfiguration { Host = AmqpConnectionString.Host } });
             }
 
             if (!Hosts.Any())

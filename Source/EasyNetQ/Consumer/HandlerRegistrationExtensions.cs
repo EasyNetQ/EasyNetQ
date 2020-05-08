@@ -1,6 +1,6 @@
-﻿using System;
+﻿using EasyNetQ.Internals;
+using System;
 using System.Threading.Tasks;
-using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer
 {
@@ -23,7 +23,7 @@ namespace EasyNetQ.Consumer
             var asyncHandler = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => handler(m, i));
             return handlerRegistration.Add(asyncHandler);
         }
-        
+
         /// <summary>
         /// Add an asynchronous handler
         /// </summary>

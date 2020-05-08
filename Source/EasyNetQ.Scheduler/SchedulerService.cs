@@ -1,10 +1,9 @@
-using System;
-using System.Transactions;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
-using System.Collections.Concurrent;
-using EasyNetQ.Producer;
 using log4net;
+using System;
+using System.Collections.Concurrent;
+using System.Transactions;
 
 namespace EasyNetQ.Scheduler
 {
@@ -40,7 +39,7 @@ namespace EasyNetQ.Scheduler
         public void Start()
         {
             log.DebugFormat("Starting SchedulerService");
-            
+
             bus.PubSub.Subscribe<ScheduleMe>(SchedulerSubscriptionId, OnMessage);
             bus.PubSub.Subscribe<UnscheduleMe>(SchedulerSubscriptionId, OnMessage);
 

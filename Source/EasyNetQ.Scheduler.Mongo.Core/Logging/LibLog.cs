@@ -421,7 +421,7 @@ namespace EasyNetQ.Scheduler.Mongo.Core.Logging
         {
             if (logger == null)
             {
-                throw new ArgumentNullException("logger");
+                throw new ArgumentNullException(nameof(logger));
             }
         }
 

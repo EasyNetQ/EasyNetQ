@@ -69,7 +69,6 @@ namespace EasyNetQ.Scheduler.Mongo.Tests
             scheduleRepository.HandleTimeout();
         }
 
-
         [Fact]
         [Explicit("Required a database")]
         public void Should_be_able_to_mark_as_published()

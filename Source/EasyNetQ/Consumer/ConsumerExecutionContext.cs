@@ -13,9 +13,9 @@ namespace EasyNetQ.Consumer
         public byte[] Body { get; }
 
         public ConsumerExecutionContext(
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> userHandler, 
-            MessageReceivedInfo info, 
-            MessageProperties properties, 
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> userHandler,
+            MessageReceivedInfo info,
+            MessageProperties properties,
             byte[] body
         )
         {

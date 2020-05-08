@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.Tasks
     public class TestConsumeMultipleMessageTypesFromSingleQueue : ICommandLineTask, IDisposable
     {
         private readonly ILogger logger;
-        
+
         private IBus bus;
 
         public TestConsumeMultipleMessageTypesFromSingleQueue(ILogger logger)
@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.Tasks
             pubSub.Subscribe<MessageA>("multiple", m => Task.Run(() => logger.Information("{0}", m)), cancellationToken);
             pubSub.Subscribe<MessageB>("multiple", m => Task.Run(() => logger.Information("{0}", m)), cancellationToken);
 
-            for (int i = 0; i < 100; i++)    
+            for (int i = 0; i < 100; i++)
             {
                 pubSub.Publish(new MessageA(), cancellationToken);
                 pubSub.Publish(new MessageB(), cancellationToken);

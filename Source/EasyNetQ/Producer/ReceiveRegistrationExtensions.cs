@@ -19,7 +19,7 @@ namespace EasyNetQ.Producer
 
             return receiveRegistration.Add<T>((m, c) => onMessage(m));
         }
-        
+
         /// <summary>
         /// Add an asynchronous message handler to this receiver
         /// </summary>

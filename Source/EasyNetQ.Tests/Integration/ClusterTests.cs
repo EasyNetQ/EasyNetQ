@@ -55,7 +55,7 @@ namespace EasyNetQ.Tests.Integration
 //            var count = 0;
 //            while (true)
 //            {
-//                Thread.Sleep(5 * 1000); // five seconds between each publish    
+//                Thread.Sleep(5 * 1000); // five seconds between each publish
 //                using (var channel = bus.OpenPublishChannel())
 //                {
 //                    channel.Publish(new MyMessage { Text = "Hello " + count.ToString()});
@@ -63,7 +63,7 @@ namespace EasyNetQ.Tests.Integration
 //                count++;
 //            }
 
-            Thread.Sleep(TimeSpan.FromMinutes(5)); // let's give it 5 minutes    
+            Thread.Sleep(TimeSpan.FromMinutes(5)); // let's give it 5 minutes
         }
     }
 }

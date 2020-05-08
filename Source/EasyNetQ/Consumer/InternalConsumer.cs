@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -153,7 +153,7 @@ namespace EasyNetQ.Consumer
             localCancelled?.Invoke(this);
 
             var consumerCancelled = ConsumerCancelled;
-            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
+            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] { ConsumerTag }));
         }
     }
 
@@ -208,7 +208,7 @@ namespace EasyNetQ.Consumer
 
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
-                {"x-priority", configuration.Priority}
+                { "x-priority", configuration.Priority }
             };
             try
             {
@@ -282,7 +282,7 @@ namespace EasyNetQ.Consumer
             var consumerTag = conventions.ConsumerTagConvention();
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
-                {"x-priority", configuration.Priority}
+                { "x-priority", configuration.Priority }
             };
             try
             {
@@ -290,7 +290,7 @@ namespace EasyNetQ.Consumer
 
                 var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
 
-                basicConsumers = new[] {basicConsumer};
+                basicConsumers = new[] { basicConsumer };
 
                 Model.BasicConsume(
                     queue.Name, // queue

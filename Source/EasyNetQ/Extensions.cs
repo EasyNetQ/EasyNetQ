@@ -9,21 +9,21 @@ namespace EasyNetQ
     {
         public static void Remove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key)
         {
-            ((IDictionary<TKey, TValue>) source).Remove(key);
+            ((IDictionary<TKey, TValue>)source).Remove(key);
         }
 
         public static void Add<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key, TValue value)
         {
-            ((IDictionary<TKey, TValue>)source).Add(key, value);        
+            ((IDictionary<TKey, TValue>)source).Add(key, value);
         }
-        
+
         public static string Trim(this string s, int start, int length)
         {
             // References: https://referencesource.microsoft.com/#mscorlib/system/string.cs,2691
             // https://referencesource.microsoft.com/#mscorlib/system/string.cs,1226
             if (s == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(s));
             }
             if (start < 0)
             {
@@ -33,7 +33,7 @@ namespace EasyNetQ
             {
                 throw new ArgumentOutOfRangeException(nameof(length));
             }
-            
+
             var end = start + length - 1;
             if (end >= s.Length)
             {

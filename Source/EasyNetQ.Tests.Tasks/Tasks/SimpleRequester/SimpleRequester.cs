@@ -17,7 +17,6 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
 
         public Task Run(CancellationToken cancellationToken)
         {
-
             timer = new Timer(OnTimer, null, publishIntervalMilliseconds, publishIntervalMilliseconds);
 
             Console.Out.WriteLine("Timer running, ctrl-C to end");
@@ -30,7 +29,7 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
         private static readonly object requestLock = new object();
         private static Timer timer;
 
-        static void OnTimer(object state)
+        private static void OnTimer(object state)
         {
             try
             {
@@ -52,7 +51,7 @@ namespace EasyNetQ.Tests.Tasks.SimpleRequester
             }
         }
 
-        static void ResponseHandler(TestResponseMessage response)
+        private static void ResponseHandler(TestResponseMessage response)
         {
             Console.WriteLine("Response: {0}", response.Text);
             latencyRecorder.RegisterResponse(response.Id);

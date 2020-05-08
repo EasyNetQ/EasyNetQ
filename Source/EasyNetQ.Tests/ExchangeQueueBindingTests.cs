@@ -49,9 +49,9 @@ namespace EasyNetQ.Tests
                 Arg.Is(true),
                 Arg.Is(true),
                 Arg.Is<IDictionary<string, object>>(args =>
-                    ((int) args["x-message-ttl"] == 1000) &&
-                    ((int) args["x-expires"] == 2000) &&
-                    ((int) args["x-max-priority"] == 10)));
+                    ((int)args["x-message-ttl"] == 1000) &&
+                    ((int)args["x-expires"] == 2000) &&
+                    ((int)args["x-max-priority"] == 10)));
         }
 
         [Fact]
@@ -100,11 +100,11 @@ namespace EasyNetQ.Tests
                 Arg.Is(true),
                 Arg.Is(true),
                 Arg.Is<IDictionary<string, object>>(args =>
-                    ((int) args["x-message-ttl"] == 1000) &&
-                    ((int) args["x-expires"] == 2000) &&
-                    ((int) args["x-max-priority"] == 10) &&
-                    ((string) args["x-dead-letter-exchange"] == "my_exchange") &&
-                    ((string) args["x-dead-letter-routing-key"] == "my_routing_key")));
+                    ((int)args["x-message-ttl"] == 1000) &&
+                    ((int)args["x-expires"] == 2000) &&
+                    ((int)args["x-max-priority"] == 10) &&
+                    ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
+                    ((string)args["x-dead-letter-routing-key"] == "my_routing_key")));
         }
 
         [Fact]
@@ -153,11 +153,11 @@ namespace EasyNetQ.Tests
                 Arg.Is(true),
                 Arg.Is(true),
                 Arg.Is<IDictionary<string, object>>(args =>
-                    ((int) args["x-message-ttl"] == 1000) &&
-                    ((int) args["x-expires"] == 2000) &&
-                    ((int) args["x-max-priority"] == 10) &&
-                    ((string) args["x-dead-letter-exchange"] == "") &&
-                    ((string) args["x-dead-letter-routing-key"] == "my_queue2")));
+                    ((int)args["x-message-ttl"] == 1000) &&
+                    ((int)args["x-expires"] == 2000) &&
+                    ((int)args["x-max-priority"] == 10) &&
+                    ((string)args["x-dead-letter-exchange"] == "") &&
+                    ((string)args["x-dead-letter-routing-key"] == "my_queue2")));
         }
 
         [Fact]
@@ -330,7 +330,7 @@ namespace EasyNetQ.Tests
             binding.RoutingKey.Should().Be("my_routing_key");
             binding.Exchange.Name.Should().Be("my_exchange");
             binding.Bindable.Should().BeAssignableTo<IQueue>();
-            ((IQueue) binding.Bindable).Name.Should().Be("my_queue");
+            ((IQueue)binding.Bindable).Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -354,7 +354,7 @@ namespace EasyNetQ.Tests
             var exchange = new Exchange("my_exchange");
             var queue = new Topology.Queue("my_queue", false);
 
-            binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> {["header1"] = "value1"});
+            binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
         }
 
         public void Dispose()
@@ -374,13 +374,13 @@ namespace EasyNetQ.Tests
             binding.Exchange.Name.Should().Be("my_exchange");
             binding.Arguments["header1"].Should().Be("value1");
             binding.Bindable.Should().BeAssignableTo<IQueue>();
-            ((IQueue) binding.Bindable).Name.Should().Be("my_queue");
+            ((IQueue)binding.Bindable).Name.Should().Be("my_queue");
         }
 
         [Fact]
         public void Should_declare_a_binding()
         {
-            var expectedHeaders = new Dictionary<string, object> {["header1"] = "value1"};
+            var expectedHeaders = new Dictionary<string, object> { ["header1"] = "value1" };
 
             mockBuilder.Channels[0].Received().QueueBind(
                 Arg.Is("my_queue"),
@@ -410,7 +410,7 @@ namespace EasyNetQ.Tests
 
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private IBinding binding;
+        private readonly IBinding binding;
 
         [Fact]
         public void Should_unbind_the_exchange()

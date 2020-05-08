@@ -1,21 +1,21 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
+using FluentAssertions;
 using NSubstitute;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using FluentAssertions;
+using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
     public class When_autosubscribing : IDisposable
     {
         private MockBuilder mockBuilder;
-        private Dictionary<string, object> parameters;
+        private readonly Dictionary<string, object> parameters;
 
         private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
@@ -66,8 +66,8 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                                 Arg.Is(queueName),
                                                 Arg.Any<string>(),
                                                 Arg.Is(topicName),
-                                                Arg.Is<IDictionary<string, object>>( x => x.SequenceEqual(parameters)));            
-          
+                                                Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(parameters)));
+
             assertConsumerStarted(1, expectedQueueName1, "#");
             assertConsumerStarted(2, expectedQueueName2, "#");
             assertConsumerStarted(3, expectedQueueName3, "Important");
@@ -80,7 +80,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             mockBuilder.ConsumerQueueNames.Contains(expectedQueueName2).Should().BeTrue();
             mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).Should().BeTrue();
         }
-
 
         // Discovered by reflection over test assembly, do not remove.
         private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
@@ -98,7 +97,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             public void Consume(MessageC message, CancellationToken cancellationToken)
             {
             }
-          
         }
 
         //Discovered by reflection over test assembly, do not remove.
@@ -122,7 +120,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         private class MessageC
         {
         }
-
     }
 }
 

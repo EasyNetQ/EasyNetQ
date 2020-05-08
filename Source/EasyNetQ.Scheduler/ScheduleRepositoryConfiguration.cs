@@ -48,6 +48,5 @@ namespace EasyNetQ.Scheduler
                 InstanceName = ConfigurationManager.AppSettings[instanceNameKey] ?? ""
             };
         }
-
     }
 }

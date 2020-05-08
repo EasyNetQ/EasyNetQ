@@ -21,7 +21,6 @@ namespace EasyNetQ.Tests.Integration
 
         private IBus bus;
 
-
         [Fact]
         [Explicit("Needs an instance of RabbitMQ on localhost to work")]
         public void Should_be_able_to_get_a_message()
@@ -42,7 +41,7 @@ namespace EasyNetQ.Tests.Integration
 
             bus.PubSub.Publish(invitation);
 
-            if (! autoResetEvent.WaitOne(100000))
+            if (!autoResetEvent.WaitOne(100000))
                 Assert.True(false);
         }
     }

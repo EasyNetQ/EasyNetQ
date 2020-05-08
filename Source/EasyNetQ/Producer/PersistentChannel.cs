@@ -102,7 +102,7 @@ namespace EasyNetQ.Producer
 
         private void OnConnectionRestored(object sender, EventArgs e)
         {
-            eventBus.Publish(new PublishChannelCreatedEvent((IModel) sender));
+            eventBus.Publish(new PublishChannelCreatedEvent((IModel)sender));
         }
 
         private void OnReturn(object sender, BasicReturnEventArgs args)
@@ -117,12 +117,12 @@ namespace EasyNetQ.Producer
 
         private void OnAck(object sender, BasicAckEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Ack((IModel) sender, args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Ack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
         private void OnNack(object sender, BasicNackEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Nack((IModel) sender, args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
         private static bool NeedRethrow(OperationInterruptedException exception)

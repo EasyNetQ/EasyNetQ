@@ -1,8 +1,8 @@
 ﻿﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
 
-namespace EasyNetQ
+﻿namespace EasyNetQ
 {
     /// <summary>
     /// An internal pub-sub bus to distribute events within EasyNetQ
@@ -56,7 +56,7 @@ namespace EasyNetQ
             if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
             foreach (var handler in handlers.AsEnumerable())
-                ((Action<TEvent>) handler)(@event);
+                ((Action<TEvent>)handler)(@event);
         }
 
         public IDisposable Subscribe<TEvent>(Action<TEvent> eventHandler)
@@ -68,9 +68,9 @@ namespace EasyNetQ
         private void AddSubscription<TEvent>(Action<TEvent> handler)
         {
             subscriptions.AddOrUpdate(
-                typeof(TEvent), 
+                typeof(TEvent),
                 new Handlers(handler),
-                (key, existingHandlers) => 
+                (key, existingHandlers) =>
                 {
                     existingHandlers.Add(handler);
                     return existingHandlers;

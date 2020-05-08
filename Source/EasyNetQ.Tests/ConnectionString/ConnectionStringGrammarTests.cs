@@ -44,11 +44,11 @@ namespace EasyNetQ.Tests.ConnectionString
 
             hosts.Count().Should().Be(3);
             hosts.ElementAt(0).Host.Should().Be("host.one");
-            hosts.ElementAt(0).Port.Should().Be((ushort) 1001);
+            hosts.ElementAt(0).Port.Should().Be(1001);
             hosts.ElementAt(1).Host.Should().Be("host.two");
-            hosts.ElementAt(1).Port.Should().Be((ushort) 1002);
+            hosts.ElementAt(1).Port.Should().Be(1002);
             hosts.ElementAt(2).Host.Should().Be("host.three");
-            hosts.ElementAt(2).Port.Should().Be((ushort) 1003);
+            hosts.ElementAt(2).Port.Should().Be(1003);
         }
 
         [Fact]

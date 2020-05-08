@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var advancedBusEventHandlers = new AdvancedBusEventHandlers((s, e) =>
             {
-                var advancedBus = (IAdvancedBus) s;
+                var advancedBus = (IAdvancedBus)s;
                 advancedBus.ExchangeDeclare("my_test_exchange", "topic", autoDelete: true);
             });
 
@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var advancedBusEventHandlers = new AdvancedBusEventHandlers((s, e) =>
             {
-                var advancedBus = (IAdvancedBus) s;
+                var advancedBus = (IAdvancedBus)s;
                 advancedBus.QueueDeclare("my_test_queue", c => c.AsAutoDelete(true));
             });
             bus = RabbitHutch.CreateBus("host=localhost", c => c.Register(advancedBusEventHandlers));
@@ -42,7 +42,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var advancedBusEventHandlers = new AdvancedBusEventHandlers((s, e) =>
             {
-                var advancedBus = (IAdvancedBus) s;
+                var advancedBus = (IAdvancedBus)s;
                 var exchange = advancedBus.ExchangeDeclare("my_test_exchange", "topic", autoDelete: true);
                 advancedBus.Publish(exchange, "key", false, new MessageProperties(), Encoding.UTF8.GetBytes("Hello world"));
             });

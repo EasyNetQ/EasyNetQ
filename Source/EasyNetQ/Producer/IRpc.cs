@@ -34,9 +34,9 @@ namespace EasyNetQ.Producer
         /// </summary>
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
-        /// <param name="cancellationToken">The cancellation token</param>
         /// <param name="responder">A function that performs the response</param>
         /// <param name="configure">A function that performs the configuration</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
             Func<TRequest, CancellationToken, Task<TResponse>> responder,
             Action<IResponderConfiguration> configure,

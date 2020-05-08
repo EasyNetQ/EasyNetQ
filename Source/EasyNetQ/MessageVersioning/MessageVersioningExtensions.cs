@@ -5,7 +5,7 @@ namespace EasyNetQ.MessageVersioning
 {
     public static class MessageVersioningExtensions
     {
-         public static IServiceRegister EnableMessageVersioning( this IServiceRegister serviceRegister )
+         public static IServiceRegister EnableMessageVersioning(this IServiceRegister serviceRegister )
          {
              return serviceRegister
                  .Register<IExchangeDeclareStrategy, VersionedExchangeDeclareStrategy>()

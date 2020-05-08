@@ -1,10 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Threading;
-using System.Text;
-using System.Threading.Tasks;
 using EasyNetQ.Topology;
+using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.Integration
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.Integration
                 exchanges[i] = buses[i].Advanced.ExchangeDeclare(name, "direct");
 
                 // declaring a queue without specifying the name creates a transient, server named queue.
-                queues[i] = buses[i].Advanced.QueueDeclare(); 
+                queues[i] = buses[i].Advanced.QueueDeclare();
 
                 buses[i].Advanced.QueuePurge(queues[i]);
                 buses[i].Advanced.Bind(exchanges[i], queues[i], routingKey);
@@ -68,7 +68,7 @@ namespace EasyNetQ.Tests.Integration
             }
         }
 
-        void Consume(int from, int to)
+        private void Consume(int from, int to)
         {
             buses[from].Advanced.Consume(queues[from], (body, properties, info) => Task.Factory.StartNew(() =>
                 {

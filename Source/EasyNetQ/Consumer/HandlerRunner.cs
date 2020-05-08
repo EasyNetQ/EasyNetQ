@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ.Events;
-using EasyNetQ.Internals;
+﻿using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
@@ -37,7 +35,7 @@ namespace EasyNetQ.Consumer
             }
 
             var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context, cancellationToken).ConfigureAwait(false);
-            
+
             return (model, tag) =>
             {
                 try
@@ -63,12 +61,12 @@ namespace EasyNetQ.Consumer
                 catch (Exception exception)
                 {
                     logger.Error(
-                        exception, 
+                        exception,
                         "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
                         context.Info
                     );
                 }
-                
+
                 return AckResult.Exception;
             };
         }

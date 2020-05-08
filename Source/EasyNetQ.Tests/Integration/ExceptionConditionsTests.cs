@@ -14,10 +14,10 @@ namespace EasyNetQ.Tests
     {
         public void Server_goes_away_after_connection_but_before_publish()
         {
-            using(var bus = RabbitHutch.CreateBus("host=localhost"))
+            using (var bus = RabbitHutch.CreateBus("host=localhost"))
             {
                 Console.WriteLine("Now kill the server");
-                while(true)
+                while (true)
                 {
                     Thread.Sleep(2000);
                     try
@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests
                     Console.Out.WriteLine("Deleting Exchange: {0}", exchange.Name);
                     client.DeleteExchange(exchange);
                 }
-            }            
+            }
         }
 
         public void OccasionallyKillConnections()

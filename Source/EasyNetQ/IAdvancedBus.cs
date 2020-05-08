@@ -154,17 +154,7 @@ namespace EasyNetQ
         /// Declare a queue. If the queue already exists this method does nothing
         /// </summary>
         /// <param name="name">The name of the queue</param>
-        /// <param name="passive">Throw an exception rather than create the queue if it doesn't exist</param>
-        /// <param name="durable">Durable queues remain active when a server restarts.</param>
-        /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
-        /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
-        /// <param name="perQueueMessageTtl">Determines how long a message published to a queue can live before it is discarded by the server.</param>
-        /// <param name="expires">Determines how long a queue can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="maxPriority">Determines the maximum message priority that the queue should support.</param>
-        /// <param name="deadLetterExchange">Determines an exchange's name can remain unused before it is automatically deleted by the server.</param>
-        /// <param name="deadLetterRoutingKey">If set, will route message with the routing key specified, if not set, message will be routed with the same routing keys they were originally published with.</param>
-        /// <param name="maxLength">The maximum number of ready messages that may exist on the queue.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
-        /// <param name="maxLengthBytes">The maximum size of the queue in bytes.  Messages will be dropped or dead-lettered from the front of the queue to make room for new messages once the limit is reached</param>
+        /// <param name="configure">Delegate to configure queue declaration</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(
@@ -181,7 +171,6 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The queue</returns>
         Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken = default);
-
 
         /// <summary>
         /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
@@ -217,12 +206,7 @@ namespace EasyNetQ
         /// Declare an exchange
         /// </summary>
         /// <param name="name">The exchange name</param>
-        /// <param name="type">The type of exchange</param>
-        /// <param name="passive">Throw an exception rather than create the exchange if it doesn't exist</param>
-        /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
-        /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-        /// <param name="alternateExchange">Route messages to this exchange if they cannot be routed.</param>
-        /// <param name="delayed">If set, declares x-delayed-type exchange for routing delayed messages.</param>
+        /// <param name="configure">Delegate to configure exchange declaration</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The exchange</returns>
         Task<IExchange> ExchangeDeclareAsync(

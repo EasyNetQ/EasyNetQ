@@ -46,15 +46,12 @@ namespace EasyNetQ.Tests.Integration
         {
             bus.Rpc.Respond<IAnimal, IAnimal>(@interface =>
             {
-                var cat = @interface as Cat;
-                var dog = @interface as Dog;
-
-                if (cat != null)
+                if (@interface is Cat cat)
                 {
                     Console.Out.WriteLine("Name = {0}", cat.Name);
                     Console.Out.WriteLine("Meow = {0}", cat.Meow);
                 }
-                else if (dog != null)
+                else if (@interface is Dog dog)
                 {
                     Console.Out.WriteLine("Name = {0}", dog.Name);
                     Console.Out.WriteLine("Bark = {0}", dog.Bark);

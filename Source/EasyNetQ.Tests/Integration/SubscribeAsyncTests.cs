@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.Integration
             var countdownEvent = new CountdownEvent(10);
             // DownloadStringTask comes from http://blogs.msdn.com/b/pfxteam/archive/2010/05/04/10007557.aspx
 
-            bus.PubSub.SubscribeAsync<MyMessage>("subscribe_async_test", message => 
+            bus.PubSub.SubscribeAsync<MyMessage>("subscribe_async_test", message =>
                 new HttpClient().GetStringAsync(new Uri("http://localhost:1338/?timeout=500"))
                     .ContinueWith(task =>
                     {

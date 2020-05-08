@@ -6,7 +6,7 @@ namespace EasyNetQ.Scheduler.Tests
 {
     public class MockScheduleRepository : IScheduleRepository
     {
-        public Func<IList<ScheduleMe>> GetPendingDelegate { get; set; } 
+        public Func<IList<ScheduleMe>> GetPendingDelegate { get; set; }
 
         public void Store(ScheduleMe scheduleMe)
         {

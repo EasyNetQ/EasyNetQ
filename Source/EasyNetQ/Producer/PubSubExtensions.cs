@@ -25,7 +25,7 @@ namespace EasyNetQ
 
             return pubSub.PublishAsync(message, c => { }, cancellationToken);
         }
-        
+
         /// <summary>
         /// Publishes a message with a topic.
         /// When used with publisher confirms the task completes when the publish is confirmed.
@@ -92,7 +92,6 @@ namespace EasyNetQ
 
             pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
         }
-
 
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
@@ -163,9 +162,9 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
-            
+
             var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
-            
+
             return pubSub.SubscribeAsync(
                 subscriptionId,
                 onMessageAsync,
@@ -203,7 +202,7 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
-            
+
             return pubSub.SubscribeAsync<T>(
                 subscriptionId,
                 (m, c) => onMessage(m),
@@ -283,7 +282,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(pubSub, "pubSub");
 
             var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
-            
+
             return pubSub.Subscribe(
                 subscriptionId,
                 onMessageAsync,
@@ -321,15 +320,15 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
-            
+
             return pubSub.Subscribe<T>(
                 subscriptionId,
-                (m, c) => onMessage(m), 
+                (m, c) => onMessage(m),
                 c => { },
                 cancellationToken
             );
         }
-        
+
         /// <summary>
         /// Subscribes to a stream of messages that match a .NET type.
         /// Allows the subscriber to complete asynchronously.
@@ -363,7 +362,7 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(pubSub, "pubSub");
-            
+
             return pubSub.SubscribeAsync(
                 subscriptionId,
                 onMessage,

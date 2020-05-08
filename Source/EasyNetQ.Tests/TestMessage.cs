@@ -2,7 +2,6 @@
 {
     public class TestMessage
     {
-         
     }
 
     [Queue("MyQueue", ExchangeName = "MyExchange")]
@@ -14,7 +13,6 @@
     public interface IAnnotatedTestMessage
     {
     }
-
 
     [Queue("MyQueue")]
     public class QueueNameOnlyAnnotatedTestMessage
@@ -36,7 +34,6 @@
     {
     }
 
-
     public class MyMessage
     {
         public string Text { get; set; }
@@ -46,5 +43,4 @@
     {
         public string Text { get; set; }
     }
-
 }

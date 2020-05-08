@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.ProducerTests
     public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IDisposable
     {
         private MockBuilder mockBuilder;
-        private TestRequestMessage requestMessage;
+        private readonly TestRequestMessage requestMessage;
         private string _correlationId;
 
         public When_a_request_is_sent_but_an_exception_is_thrown_by_responder()
@@ -68,9 +68,9 @@ namespace EasyNetQ.Tests.ProducerTests
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
                 if (!waiter.Wait(5000))
                     throw new TimeoutException();
-                    
+
                 DeliverMessage(_correlationId, "Why you are so bad with me?");
-                    
+
                 task.GetAwaiter().GetResult();
             }); // ,"Why you are so bad with me?"
         }

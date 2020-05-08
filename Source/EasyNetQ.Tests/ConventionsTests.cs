@@ -114,7 +114,6 @@ namespace EasyNetQ.Tests
             result.Should().Be("MyQueue");
         }
 
-
         [Theory]
         [InlineData(typeof(EmptyQueueNameAnnotatedTestMessage))]
         [InlineData(typeof(IEmptyQueueNameAnnotatedTestMessage))]

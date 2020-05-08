@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
                 .Do(invocation =>
                 {
-                    var properties = (IBasicProperties) invocation[3];
+                    var properties = (IBasicProperties)invocation[3];
                     correlationId = properties.CorrelationId;
                 });
 

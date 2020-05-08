@@ -9,8 +9,8 @@ namespace EasyNetQ.Tests
 {
     public class ConnectionStringTests
     {
-        const string connectionStringValue =
-            "host=192.168.1.1:1001,my.little.host:1002;virtualHost=Copa;username=Copa;" + 
+        private const string connectionStringValue =
+            "host=192.168.1.1:1001,my.little.host:1002;virtualHost=Copa;username=Copa;" +
             "password=abc_xyz;port=12345;requestedHeartbeat=3";
         private ConnectionConfiguration connectionString;
 
@@ -78,7 +78,6 @@ namespace EasyNetQ.Tests
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-
                 new ConnectionStringParser().Parse(
                 "virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3");
             });

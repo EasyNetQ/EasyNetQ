@@ -3,7 +3,7 @@
     public class ServiceResolverScope : IServiceResolverScope
     {
         private readonly IServiceResolver resolver;
-        
+
         public ServiceResolverScope(IServiceResolver resolver)
         {
             this.resolver = resolver;

@@ -8,12 +8,10 @@ namespace EasyNetQ.Tests
     {
     }
 
-
     [DeliveryMode(false)]
     public class NotPersistentMessageWithDeliveryAttribute
     {
     }
-
 
     public class MessageWithoutDeliveryAttribute
     {

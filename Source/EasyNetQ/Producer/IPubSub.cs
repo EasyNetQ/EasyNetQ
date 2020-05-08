@@ -22,8 +22,8 @@ namespace EasyNetQ.Producer
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
         Task PublishAsync<T>(
-            T message, 
-            Action<IPublishConfiguration> configure, 
+            T message,
+            Action<IPublishConfiguration> configure,
             CancellationToken cancellationToken = default
         );
 
@@ -51,7 +51,7 @@ namespace EasyNetQ.Producer
         /// </returns>
         AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
             string subscriptionId,
-            Func<T, CancellationToken, Task> onMessage, 
+            Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,
             CancellationToken cancellationToken = default
         );

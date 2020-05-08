@@ -59,7 +59,7 @@ namespace EasyNetQ.DI.Autofac
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
-        
+
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;

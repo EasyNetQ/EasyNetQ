@@ -69,7 +69,7 @@ namespace EasyNetQ.Producer
             return InvokeAsync(x =>
             {
                 channelAction(x);
-                return new NoContentStruct();
+                return default(NoContentStruct);
             }, cancellationToken);
         }
 

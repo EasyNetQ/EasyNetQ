@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 Hosts = new List<HostConfiguration>
                 {
-                    new HostConfiguration {Host = "localhost", Port = 5672}
+                    new HostConfiguration { Host = "localhost", Port = 5672 }
                 },
                 UserName = "guest",
                 Password = "guest"
@@ -89,7 +89,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 else
                 {
-                    var message = (Error) serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
+                    var message = (Error)serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
 
                     message.RoutingKey.Should().Be(context.Info.RoutingKey);
                     message.Exchange.Should().Be(context.Info.Exchange);
@@ -139,7 +139,7 @@ namespace EasyNetQ.Tests.Integration
                 }
                 else
                 {
-                    var message = (Error) serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
+                    var message = (Error)serializer.BytesToMessage(typeof(Error), getArgs.Body.ToArray());
 
                     message.RoutingKey.Should().Be(context.Info.RoutingKey);
                     message.Exchange.Should().Be(context.Info.Exchange);

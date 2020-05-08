@@ -17,10 +17,12 @@ namespace EasyNetQ
         /// The message properties.
         /// </summary>
         MessageProperties Properties { get; }
+
         /// <summary>
         /// The message body return as an object when we only have runtime types and can't use generics.
         /// </summary>
         object GetBody();
+
         /// <summary>
         /// The message <see cref="Type"/>. This is a shortcut to GetBody().GetType().
         /// </summary>

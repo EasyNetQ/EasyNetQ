@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -6,9 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.FluentConfiguration;
-using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 
 namespace EasyNetQ.AutoSubscribe
 {
@@ -20,7 +19,7 @@ namespace EasyNetQ.AutoSubscribe
     {
         private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
         private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
-            
+
         protected readonly IBus Bus;
 
         /// <summary>
@@ -31,7 +30,7 @@ namespace EasyNetQ.AutoSubscribe
         /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
-        public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; } 
+        public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; }
 
         /// <summary>
         /// Responsible for generating SubscriptionIds, when you use
@@ -44,9 +43,9 @@ namespace EasyNetQ.AutoSubscribe
         public Func<AutoSubscriberConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
 
         /// <summary>
-        /// Responsible for setting subscription configuration for all 
+        /// Responsible for setting subscription configuration for all
         /// auto subscribed consumers <see cref="IConsume{T}"/>.
-        /// the values may be overriden for particular consumer 
+        /// the values may be overriden for particular consumer
         /// methods by using an <see cref="SubscriptionConfigurationAttribute"/>.
         /// </summary>
         public Action<ISubscriptionConfiguration> ConfigureSubscriptionConfiguration { protected get; set; }
@@ -62,7 +61,7 @@ namespace EasyNetQ.AutoSubscribe
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
             ConfigureSubscriptionConfiguration = subscriptionConfiguration => { };
         }
- 
+
         /// <summary>
         /// Registers all async consumers in passed assembly. The actual Subscriber instances is
         /// created using <seealso cref="AutoSubscriberMessageDispatcher"/>. The SubscriptionId per consumer
@@ -77,16 +76,16 @@ namespace EasyNetQ.AutoSubscribe
 
             foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
             {
-                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeAsyncConsumerMethodInfo
+                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                     .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
                 subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
             }
-            
+
             foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
             {
-                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>) AutoSubscribeConsumerMethodInfo
+                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>)AutoSubscribeConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                     .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
@@ -130,14 +129,14 @@ namespace EasyNetQ.AutoSubscribe
             return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
         }
 
-        private AwaitableDisposable<ISubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMesage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken) 
+        private AwaitableDisposable<ISubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMesage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
             where TMesage : class
             where TConsumerAsync : class, IConsumeAsync<TMesage>
         {
             var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
             var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
             var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
-            
+
             return Bus.PubSub.SubscribeAsync<TMesage>(
                 subscriptionId,
                 (m, c) => AutoSubscriberMessageDispatcher.DispatchAsync<TMesage, TConsumerAsync>(m, c),
@@ -145,8 +144,8 @@ namespace EasyNetQ.AutoSubscribe
                 cancellationToken
             );
         }
-        
-        private AwaitableDisposable<ISubscriptionResult> AutoSubscribeConsumerAsync<TMesage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken) 
+
+        private AwaitableDisposable<ISubscriptionResult> AutoSubscribeConsumerAsync<TMesage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
             where TMesage : class
             where TConsumer : class, IConsume<TMesage>
         {
@@ -155,7 +154,7 @@ namespace EasyNetQ.AutoSubscribe
             var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
             var asyncDispatcher = TaskHelpers.FromAction<TMesage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMesage, TConsumer>(m, c));
-            
+
             return Bus.PubSub.SubscribeAsync(
                 subscriptionId,
                 asyncDispatcher,
@@ -163,7 +162,7 @@ namespace EasyNetQ.AutoSubscribe
                 cancellationToken
             );
         }
-        
+
         private Action<ISubscriptionConfiguration> GenerateConfigurationAction(AutoSubscriberConsumerInfo subscriptionInfo)
         {
             return sc =>

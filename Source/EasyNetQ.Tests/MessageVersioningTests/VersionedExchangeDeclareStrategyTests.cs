@@ -60,7 +60,6 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             exchangeDeclareCount.Should().Be(1);
         }
 
-
         // Unversioned message - exchange declared
         // Versioned message - superseded exchange declared, then superseding, then bind
         [Fact]
@@ -79,8 +78,8 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
                 .Returns(mi =>
                 {
-                    var source = (ExchangeStub) mi[0];
-                    var destination = (ExchangeStub) mi[1];
+                    var source = (ExchangeStub)mi[0];
+                    var destination = (ExchangeStub)mi[1];
                     source.BoundTo = destination;
                     return Task.FromResult(Substitute.For<IBinding>());
                 });
@@ -114,15 +113,15 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
                 .Returns(mi =>
                 {
-                    var source = (ExchangeStub) mi[0];
-                    var destination = (ExchangeStub) mi[1];
+                    var source = (ExchangeStub)mi[0];
+                    var destination = (ExchangeStub)mi[1];
                     source.BoundTo = destination;
                     return Task.FromResult(Substitute.For<IBinding>());
                 });
 
             var conventions = Substitute.For<IConventions>();
             conventions.ExchangeNamingConvention = t => t.Name;
-            
+
             var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
             publishExchangeStrategy.DeclareExchange(typeof(MyMessageV2), ExchangeType.Topic);

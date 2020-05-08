@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.ProducerTests
         public Task Should_throw_a_timeout_exception()
         {
             return Assert.ThrowsAsync<TimeoutException>(() => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => { }));
-        }         
+        }
     }
 }
 

@@ -1,6 +1,5 @@
-
 namespace EasyNetQ.MessageVersioning
-{ 
+{
     public class VersionedMessageSerializationStrategy : IMessageSerializationStrategy
     {
         private readonly ITypeNameSerializer typeNameSerializer;

@@ -218,7 +218,7 @@ namespace EasyNetQ.Tests
         }
     }
 
-        public class When_a_message_is_delivered : IDisposable
+    public class When_a_message_is_delivered : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -307,7 +307,7 @@ namespace EasyNetQ.Tests
         private const string consumerTag = "the_consumer_tag";
         private const ulong deliveryTag = 123;
 
-        private MyMessage originalMessage;
+        private readonly MyMessage originalMessage;
         private readonly Exception originalException = new Exception("Some exception message");
         private ConsumerExecutionContext basicDeliverEventArgs;
         private Exception raisedException;

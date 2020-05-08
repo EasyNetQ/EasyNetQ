@@ -19,19 +19,18 @@ namespace EasyNetQ.Tests.Tasks
 
         private static readonly Dictionary<Type, string> CustomRpcResponseConventionDictionary = new Dictionary<Type, string>
         {
-            {typeof(TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange" }
+            { typeof(TestModifiedResponseExhangeResponseMessage), "ChangedRpcResponseExchange" }
         };
 
         public Task Run(CancellationToken cancellationToken)
         {
-
             bus = RabbitHutch.CreateBus("host=localhost");
 
             bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => CustomRpcRequestConventionDictionary.ContainsKey(type) ? CustomRpcRequestConventionDictionary[type] : DefaultRpcExchange;
             bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => CustomRpcResponseConventionDictionary.ContainsKey(type) ? CustomRpcResponseConventionDictionary[type] : DefaultRpcExchange;
 
             bus.Rpc.Respond<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(
-                x => HandleModifiedRequestExchangeRequestAsync(x)    
+                x => HandleModifiedRequestExchangeRequestAsync(x)
             );
             bus.Rpc.Respond<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(
                 x => HandleModifiedResponseExchangeRequestAsync(x)
@@ -45,7 +44,6 @@ namespace EasyNetQ.Tests.Tasks
 
             return Task.FromResult(0);
         }
-
 
         private static Task<TestAsyncResponseMessage> HandleAsyncRequest(TestAsyncRequestMessage request)
         {
@@ -78,7 +76,7 @@ namespace EasyNetQ.Tests.Tasks
 
         public static Task<TestModifiedRequestExhangeResponseMessage> HandleModifiedRequestExchangeRequestAsync(TestModifiedRequestExhangeRequestMessage request)
         {
-            Console.Out.WriteLine("Responding to RPC request from exchange : "+ CustomRpcRequestConventionDictionary[typeof(TestModifiedRequestExhangeRequestMessage)]);
+            Console.Out.WriteLine("Responding to RPC request from exchange : " + CustomRpcRequestConventionDictionary[typeof(TestModifiedRequestExhangeRequestMessage)]);
             return Task.FromResult(new TestModifiedRequestExhangeResponseMessage
             {
                 Text = request.Text + " response!"
@@ -104,7 +102,6 @@ namespace EasyNetQ.Tests.Tasks
         {
             bus.Dispose();
             Console.WriteLine("Shut down complete");
-
         }
     }
 

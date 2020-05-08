@@ -54,7 +54,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            return configuration.WithArgument("x-expires", (int) expires.TotalMilliseconds);
+            return configuration.WithArgument("x-expires", (int)expires.TotalMilliseconds);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            return configuration.WithArgument("x-message-ttl", (int) messageTtl.TotalMilliseconds);
+            return configuration.WithArgument("x-message-ttl", (int)messageTtl.TotalMilliseconds);
         }
 
         /// <summary>

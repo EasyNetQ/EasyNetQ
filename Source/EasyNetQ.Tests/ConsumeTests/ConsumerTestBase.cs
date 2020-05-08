@@ -1,14 +1,14 @@
-using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
-using NSubstitute;
+using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             Cancellation = new CancellationTokenSource();
 
             ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            
+
             IConventions conventions = new Conventions(new DefaultTypeNameSerializer())
                 {
                     ConsumerTagConvention = () => ConsumerTag
@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             MockBuilder.Bus.Dispose();
         }
-        
+
         protected abstract void AdditionalSetUp();
 
         protected void StartConsumer(Action<byte[], MessageProperties, MessageReceivedInfo> handler)
@@ -78,10 +78,10 @@ namespace EasyNetQ.Tests.ConsumeTests
             OriginalBody = Encoding.UTF8.GetBytes("Hello World");
 
             var waiter = new CountdownEvent(2);
-            
+
             MockBuilder.EventBus.Subscribe<DeliveredMessageEvent>(x => waiter.Signal());
             MockBuilder.EventBus.Subscribe<AckEvent>(x => waiter.Signal());
-            
+
             MockBuilder.Consumers[0].HandleBasicDeliver(
                 ConsumerTag,
                 DeliverTag,
@@ -91,7 +91,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 OriginalProperties,
                 OriginalBody
             );
-            
+
             if (!waiter.Wait(5000))
             {
                 throw new TimeoutException();

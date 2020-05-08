@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using EasyNetQ.Consumer;
-
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe
 {
-    public interface IQueueRetreival {
+    public interface IQueueRetreival
+    {
         IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters);
     }
 

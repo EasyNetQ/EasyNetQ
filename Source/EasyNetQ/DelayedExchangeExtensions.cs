@@ -15,7 +15,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(message, "message");
 
-            message.Properties.Headers["x-delay"] = (int) delay.TotalMilliseconds;
+            message.Properties.Headers["x-delay"] = (int)delay.TotalMilliseconds;
             return message;
         }
     }

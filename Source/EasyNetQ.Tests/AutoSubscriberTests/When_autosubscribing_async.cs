@@ -13,15 +13,15 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 {
     public class When_autosubscribing_async : IDisposable
     {
-        readonly MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
-        const string expectedQueueName1 =
+        private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageA, EasyNetQ.Tests_my_app:9a0467719db423b16b7e5c35d25b877c";
 
-        const string expectedQueueName2 =
+        private const string expectedQueueName2 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageB, EasyNetQ.Tests_MyExplicitId";
 
-        const string expectedQueueName3 =
+        private const string expectedQueueName3 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageC, EasyNetQ.Tests_my_app:63691066ce7a3fb38d685ce30873d12e";
 
         public When_autosubscribing_async()
@@ -41,12 +41,12 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_declared_the_queues()
         {
-            void VerifyQueueDeclared(string queueName) => 
+            void VerifyQueueDeclared(string queueName) =>
                 mockBuilder.Channels[0].Received().QueueDeclare(
-                    queue: Arg.Is(value: queueName), 
-                    durable: Arg.Is(true), 
-                    exclusive: Arg.Is(false), 
-                    autoDelete: Arg.Is(false), 
+                    queue: Arg.Is(value: queueName),
+                    durable: Arg.Is(true),
+                    exclusive: Arg.Is(false),
+                    autoDelete: Arg.Is(false),
                     arguments: Arg.Any<IDictionary<string, object>>()
                 );
 
@@ -59,13 +59,13 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_bound_to_queues()
         {
             // ReSharper disable once CollectionNeverUpdated.Local
-            var parameters = new Dictionary<string, object>(){ };
+            var parameters = new Dictionary<string, object> { };
 
-            void ConsumerStarted(int channelIndex, string queueName, string topicName) => 
+            void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
                 mockBuilder.Channels[0].Received().QueueBind(
-                    queue: Arg.Is(value: queueName), 
-                    exchange: Arg.Any<string>(), 
-                    routingKey: Arg.Is(value: topicName), 
+                    queue: Arg.Is(value: queueName),
+                    exchange: Arg.Any<string>(),
+                    routingKey: Arg.Is(value: topicName),
                     arguments: Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(parameters))
                 );
 

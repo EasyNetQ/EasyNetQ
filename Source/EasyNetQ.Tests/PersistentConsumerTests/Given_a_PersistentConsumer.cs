@@ -1,14 +1,14 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -58,7 +58,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             AdditionalSetup();
         }
 
-        public abstract void AdditionalSetup();
+        protected abstract void AdditionalSetup();
     }
 }
 

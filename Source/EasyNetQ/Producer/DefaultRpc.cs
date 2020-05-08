@@ -149,7 +149,7 @@ namespace EasyNetQ.Producer
             var responseAction = new ResponseAction(
                 message =>
                 {
-                    var msg = (IMessage<TResponse>) message;
+                    var msg = (IMessage<TResponse>)message;
 
                     var isFaulted = false;
                     var exceptionMessage = "The exception message has not been specified.";
@@ -158,7 +158,7 @@ namespace EasyNetQ.Producer
                         if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
                             isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
                         if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
-                            exceptionMessage = Encoding.UTF8.GetString((byte[]) msg.Properties.Headers[ExceptionMessageKey]);
+                            exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[ExceptionMessageKey]);
                     }
 
                     if (isFaulted)

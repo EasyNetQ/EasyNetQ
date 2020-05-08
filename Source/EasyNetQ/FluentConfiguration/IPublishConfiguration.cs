@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// Allows publish configuration to be fluently extended without adding overloads to IBus
-    /// 
+    ///
     /// e.g.
     /// x => x.WithTopic("*.brighton").WithPriority(2)
     /// </summary>

@@ -1,9 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using NSubstitute;
 using System;
 using System.Text;
 using Xunit;
-using NSubstitute;
 
 namespace EasyNetQ.Tests
 {
@@ -100,7 +100,6 @@ namespace EasyNetQ.Tests
             Assert.Equal(deserializedMessage.MessageType, message.MessageType);
             Assert.Null(((Message<MyMessage>)deserializedMessage).Body);
         }
-
 
         private void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType, string expectedCorrelationId)
         {

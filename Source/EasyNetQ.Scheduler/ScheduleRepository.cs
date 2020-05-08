@@ -20,7 +20,7 @@ namespace EasyNetQ.Scheduler
     public class ScheduleRepository : IScheduleRepository
     {
         private readonly ILog logger = LogManager.GetLogger(typeof(ScheduleRepository));
-        
+
         private readonly ScheduleRepositoryConfiguration configuration;
         private readonly Func<DateTime> now;
         private readonly ISqlDialect dialect;
@@ -87,7 +87,7 @@ namespace EasyNetQ.Scheduler
                     {
                         scheduledMessages.Add(new ScheduleMe
                         {
-                            WakeTime = (DateTime) reader["WakeTime"],
+                            WakeTime = (DateTime)reader["WakeTime"],
                             BindingKey = reader["BindingKey"].ToString(),
                             InnerMessage = (byte[])reader["InnerMessage"],
                             CancellationKey = reader["CancellationKey"].ToString(),
@@ -145,7 +145,7 @@ namespace EasyNetQ.Scheduler
         private static string SerializeToString(MessageProperties properties)
         {
             if (properties == null)
-                throw new ArgumentNullException("properties");
+                throw new ArgumentNullException(nameof(properties));
             return JsonConvert.SerializeObject(properties);
         }
 

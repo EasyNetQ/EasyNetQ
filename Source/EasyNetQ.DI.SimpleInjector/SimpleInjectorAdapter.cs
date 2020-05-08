@@ -38,7 +38,6 @@ namespace EasyNetQ.DI.SimpleInjector
 
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
-
             switch (lifetime)
             {
                 case Lifetime.Transient:

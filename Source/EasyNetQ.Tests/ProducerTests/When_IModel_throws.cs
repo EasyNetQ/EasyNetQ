@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_try_to_reconnect_until_timeout()
         {
-            Assert.Throws<TimeoutException>(() => mockBuilder.PubSub.Publish(new MyMessage {Text = "Hello World"}));
+            Assert.Throws<TimeoutException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
         }
     }
 }

@@ -45,7 +45,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         private AckResult result;
         private const ulong deliveryTag = 1234;
 
-
         [Fact]
         public void Should_nack_message_and_not_requeue()
         {
@@ -71,7 +70,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         private IModel model;
         private AckResult result;
         private const ulong deliveryTag = 1234;
-
 
         [Fact]
         public void Should_nack_message_and_requeue()

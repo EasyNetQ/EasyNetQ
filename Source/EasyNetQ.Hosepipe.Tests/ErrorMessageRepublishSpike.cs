@@ -1,12 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Text;
 using EasyNetQ.SystemMessages;
-using Xunit;
+using EasyNetQ.Tests;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using EasyNetQ.Tests;
+using System.Text;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -14,7 +13,7 @@ namespace EasyNetQ.Hosepipe.Tests
     public class ErrorMessageRepublishSpike
     {
         private readonly ITestOutputHelper testOutputHelper;
-        readonly ISerializer serializer = new JsonSerializer();
+        private readonly ISerializer serializer = new JsonSerializer();
 
         public ErrorMessageRepublishSpike(ITestOutputHelper testOutputHelper)
         {
@@ -71,7 +70,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        private const string errorMessage = 
+        private const string errorMessage =
 @"{
     ""RoutingKey"":""originalRoutingKey"",
     ""Exchange"":""orginalExchange"",

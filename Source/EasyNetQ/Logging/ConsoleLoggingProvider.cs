@@ -7,7 +7,7 @@ namespace EasyNetQ.Logging
     public class ConsoleLogProvider : ILogProvider
     {
         private static readonly object SyncRoot = new object();
-        
+
         private static readonly Dictionary<LogLevel, ConsoleColor> Colors = new Dictionary<LogLevel, ConsoleColor>
             {
                 { LogLevel.Fatal, ConsoleColor.Red },
@@ -19,7 +19,7 @@ namespace EasyNetQ.Logging
             };
 
         public static ConsoleLogProvider Instance = new ConsoleLogProvider();
-        
+
         private ConsoleLogProvider()
         {
         }

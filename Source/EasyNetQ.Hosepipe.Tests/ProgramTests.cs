@@ -14,12 +14,12 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         private Program program;
         private MockMessageWriter messageWriter;
-        private MockQueueRetrieval queueRetrieval;
+        private readonly MockQueueRetrieval queueRetrieval;
         private MockMessageReader messageReader;
-        private MockQueueInsertion queueInsertion;
-        private MockErrorRetry errorRetry;
-        private Conventions conventions;
-        private IErrorMessageSerializer defaultErrorMessageSerializer;
+        private readonly MockQueueInsertion queueInsertion;
+        private readonly MockErrorRetry errorRetry;
+        private readonly Conventions conventions;
+        private readonly IErrorMessageSerializer defaultErrorMessageSerializer;
 
         public ProgramTests()
         {
@@ -89,7 +89,6 @@ namespace EasyNetQ.Hosepipe.Tests
 
         private readonly string expectedRetryOutput =
             "2 Error messages from directory '" + Directory.GetCurrentDirectory() + "' republished\r\n";
-
 
         [Fact]
         public void Should_retry_errors_with_retry()

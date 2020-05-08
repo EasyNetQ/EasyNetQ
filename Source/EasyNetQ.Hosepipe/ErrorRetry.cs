@@ -27,7 +27,6 @@ namespace EasyNetQ.Hosepipe
             }
         }
 
-
         public void RepublishError(Error error, QueueParameters parameters)
         {
             using (var connection = HosepipeConnection.FromParameters(parameters))
@@ -52,7 +51,7 @@ namespace EasyNetQ.Hosepipe
                     Console.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'",
                         error.Exchange, parameters.HostName, parameters.VHost);
                 }
-            }            
+            }
         }
     }
 }

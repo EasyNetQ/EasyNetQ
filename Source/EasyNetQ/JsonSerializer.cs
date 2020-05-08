@@ -21,7 +21,7 @@ namespace EasyNetQ
             this.serializerSettings = serializerSettings;
         }
 
-        public byte[] MessageToBytes(Type messageType, object message) 
+        public byte[] MessageToBytes(Type messageType, object message)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
             return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, messageType, serializerSettings));

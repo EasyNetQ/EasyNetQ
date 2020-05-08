@@ -1,15 +1,14 @@
 ﻿// ReSharper disable InconsistentNaming
-using System;
 using EasyNetQ.AutoSubscribe;
-using Xunit;
-using NSubstitute;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using FluentAssertions;
+using NSubstitute;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -24,7 +23,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
             bus.PubSub.Returns(pubSub);
-           
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
                 {
                         ConfigureSubscriptionConfiguration =
@@ -33,9 +32,9 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                     .WithPrefetchCount(11)
                                     .WithPriority(11)
                 };
-            
+
             pubSub.SubscribeAsync(
-                    Arg.Is("MyActionAndAttributeTest"), 
+                    Arg.Is("MyActionAndAttributeTest"),
                     Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
                 )
@@ -64,7 +63,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe_with_attribute_values_notaction_values()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.Should().BeTrue();

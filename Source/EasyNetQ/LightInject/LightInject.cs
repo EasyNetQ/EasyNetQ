@@ -374,7 +374,7 @@ namespace EasyNetQ.LightInject
 
         /// <summary>
         /// Registers the <paramref name="serviceType"/> with a set of <paramref name="implementingTypes"/> and
-        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>. 
+        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>.
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
@@ -384,11 +384,11 @@ namespace EasyNetQ.LightInject
 
         /// <summary>
         /// Registers the <paramref name="serviceType"/> with a set of <paramref name="implementingTypes"/> and
-        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>. 
+        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>.
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
-        /// <param name="lifetimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
+        /// <param name="lifeTimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
         /// <param name="serviceNameFormatter">The function used to format the service name based on current registration index.</param>
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         IServiceRegistry RegisterOrdered(Type serviceType, Type[] implementingTypes,
@@ -1065,7 +1065,7 @@ namespace EasyNetQ.LightInject
         /// <summary>
         /// Returns the <see cref="IScopeManager"/> that is responsible for managing scopes.
         /// </summary>
-        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param> 
+        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param>
         /// <returns>The <see cref="IScopeManager"/> that is responsible for managing scopes.</returns>
         IScopeManager GetScopeManager(IServiceFactory serviceFactory);
     }
@@ -1116,8 +1116,8 @@ namespace EasyNetQ.LightInject
         /// <summary>
         /// Gets an instance of the given <typeparamref name="TService"/> type.
         /// </summary>
-        /// <typeparam name="TService">The type of the requested service.</typeparam>   
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <typeparam name="TService">The type of the requested service.</typeparam>
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <returns>The requested service instance.</returns>
         public static TService GetInstance<TService>(this IServiceFactory factory)
         {
@@ -1128,7 +1128,7 @@ namespace EasyNetQ.LightInject
         /// Gets a named instance of the given <typeparamref name="TService"/>.
         /// </summary>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="serviceName">The name of the requested service.</param>
         /// <returns>The requested service instance.</returns>
         public static TService GetInstance<TService>(this IServiceFactory factory, string serviceName)
@@ -1141,7 +1141,7 @@ namespace EasyNetQ.LightInject
         /// </summary>
         /// <typeparam name="T">The type of the argument.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>             
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="value">The argument value.</param>
         /// <returns>The requested service instance.</returns>
         public static TService GetInstance<T, TService>(this IServiceFactory factory, T value)
@@ -1154,7 +1154,7 @@ namespace EasyNetQ.LightInject
         /// </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="value">The argument value.</param>
         /// <param name="serviceName">The name of the requested service.</param>
         /// <returns>The requested service instance.</returns>
@@ -1169,7 +1169,7 @@ namespace EasyNetQ.LightInject
         /// <typeparam name="T1">The type of the first parameter.</typeparam>
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="arg1">The first argument value.</param>
         /// <param name="arg2">The second argument value.</param>
         /// <returns>The requested service instance.</returns>
@@ -1184,7 +1184,7 @@ namespace EasyNetQ.LightInject
         /// <typeparam name="T1">The type of the first parameter.</typeparam>
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="arg1">The first argument value.</param>
         /// <param name="arg2">The second argument value.</param>
         /// <param name="serviceName">The name of the requested service.</param>
@@ -1201,7 +1201,7 @@ namespace EasyNetQ.LightInject
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="arg1">The first argument value.</param>
         /// <param name="arg2">The second argument value.</param>
         /// <param name="arg3">The third argument value.</param>
@@ -1218,7 +1218,7 @@ namespace EasyNetQ.LightInject
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="arg1">The first argument value.</param>
         /// <param name="arg2">The second argument value.</param>
         /// <param name="arg3">The third argument value.</param>
@@ -1237,7 +1237,7 @@ namespace EasyNetQ.LightInject
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="arg1">The first argument value.</param>
         /// <param name="arg2">The second argument value.</param>
         /// <param name="arg3">The third argument value.</param>
@@ -1256,7 +1256,7 @@ namespace EasyNetQ.LightInject
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="arg1">The first argument value.</param>
         /// <param name="arg2">The second argument value.</param>
         /// <param name="arg3">The third argument value.</param>
@@ -1272,7 +1272,7 @@ namespace EasyNetQ.LightInject
         /// Tries to get an instance of the given <typeparamref name="TService"/> type.
         /// </summary>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <returns>The requested service instance if available, otherwise default(T).</returns>
         public static TService TryGetInstance<TService>(this IServiceFactory factory)
         {
@@ -1283,7 +1283,7 @@ namespace EasyNetQ.LightInject
         /// Tries to get an instance of the given <typeparamref name="TService"/> type.
         /// </summary>
         /// <typeparam name="TService">The type of the requested service.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <param name="serviceName">The name of the requested service.</param>
         /// <returns>The requested service instance if available, otherwise default(T).</returns>
         public static TService TryGetInstance<TService>(this IServiceFactory factory, string serviceName)
@@ -1295,7 +1295,7 @@ namespace EasyNetQ.LightInject
         /// Gets all instances of type <typeparamref name="TService"/>.
         /// </summary>
         /// <typeparam name="TService">The type of services to resolve.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <returns>A list that contains all implementations of the <typeparamref name="TService"/> type.</returns>
         public static IEnumerable<TService> GetAllInstances<TService>(this IServiceFactory factory)
         {
@@ -1306,7 +1306,7 @@ namespace EasyNetQ.LightInject
         /// Creates an instance of a concrete class.
         /// </summary>
         /// <typeparam name="TService">The type of class for which to create an instance.</typeparam>
-        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>     
+        /// <param name="factory">The target <see cref="IServiceFactory"/>.</param>
         /// <returns>An instance of <typeparamref name="TService"/>.</returns>
         /// <remarks>The concrete type will be registered if not already registered with the container.</remarks>
         public static TService Create<TService>(this IServiceFactory factory)
@@ -2025,7 +2025,7 @@ namespace EasyNetQ.LightInject
         public ITypeExtractor CompositionRootTypeExtractor { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IServiceNameProvider"/> that is responsible 
+        /// Gets or sets the <see cref="IServiceNameProvider"/> that is responsible
         /// for providing a service name for a given service during assembly scanning.
         /// </summary>
         public IServiceNameProvider ServiceNameProvider { get; set; }
@@ -2089,7 +2089,7 @@ namespace EasyNetQ.LightInject
         {
             if (serviceType.IsFunc() || serviceType.IsFuncWithParameters() || serviceType.IsLazy())
             {
-                var returnType = serviceType.GenericTypeArguments.Last();                
+                var returnType = serviceType.GenericTypeArguments.Last();
                 return GetEmitMethod(returnType, serviceName) != null || availableServices.ContainsKey(serviceType);
             }
             return GetEmitMethod(serviceType, serviceName) != null;
@@ -2215,7 +2215,7 @@ namespace EasyNetQ.LightInject
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         public IServiceRegistry RegisterAssembly(Assembly assembly, Func<Type, Type, bool> shouldRegister)
         {
-            return RegisterAssembly(assembly, () => DefaultLifetime, shouldRegister);                        
+            return RegisterAssembly(assembly, () => DefaultLifetime, shouldRegister);
         }
 
         /// <summary>
@@ -2249,7 +2249,7 @@ namespace EasyNetQ.LightInject
             return RegisterAssembly(assembly, lifetimeFactory, shouldRegister, ServiceNameProvider.GetServiceName);
         }
 
-        public IServiceRegistry RegisterAssembly(Assembly assembly, Func<ILifetime> lifetimeFactory, Func<Type, Type, bool> shouldRegister, Func<Type,Type,string> serviceNameProvider)
+        public IServiceRegistry RegisterAssembly(Assembly assembly, Func<ILifetime> lifetimeFactory, Func<Type, Type, bool> shouldRegister, Func<Type, Type, string> serviceNameProvider)
         {
             AssemblyScanner.Scan(assembly, this, lifetimeFactory, shouldRegister, serviceNameProvider);
             return this;
@@ -2978,7 +2978,7 @@ namespace EasyNetQ.LightInject
         public void Dispose()
         {
             var disposableLifetimeInstances = availableServices.Values.SelectMany(t => t.Values)
-                .Where(sr => sr.Lifetime != null 
+                .Where(sr => sr.Lifetime != null
                     && IsNotServiceFactory(sr.ServiceType))
                 .Select(sr => sr.Lifetime)
                 .Where(lt => lt is IDisposable).Cast<IDisposable>();
@@ -3685,7 +3685,7 @@ namespace EasyNetQ.LightInject
                 if (emitter == null)
                 {
                     emitter = CreateEmitMethodForReadOnlyCollectionServiceRequest(serviceType);
-                }                
+                }
             }
             else if (serviceType.IsListOfT())
             {
@@ -3901,11 +3901,11 @@ namespace EasyNetQ.LightInject
                 emitMethods = emitters
                     .Where(kv => actualServiceType.GetTypeInfo().IsAssignableFrom(kv.Key.GetTypeInfo()))
                     .SelectMany(kv => kv.Value).OrderBy(kv => kv.Key).Select(kv => kv.Value)
-                    .ToList();                
+                    .ToList();
             }
             else
             {
-                emitMethods = GetEmitMethods(actualServiceType).OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();                
+                emitMethods = GetEmitMethods(actualServiceType).OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
             }
 
             if (dependencyStack.Count > 0 && emitMethods.Contains(dependencyStack.Peek()))
@@ -4114,11 +4114,11 @@ namespace EasyNetQ.LightInject
 
         /// <summary>
         /// Registers the <paramref name="serviceType"/> with a set of <paramref name="implementingTypes"/> and
-        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>. 
+        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>.
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
-        /// <param name="lifetimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
+        /// <param name="lifeTimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         public IServiceRegistry RegisterOrdered(Type serviceType, Type[] implementingTypes, Func<Type, ILifetime> lifeTimeFactory)
         {
@@ -4127,11 +4127,11 @@ namespace EasyNetQ.LightInject
 
         /// <summary>
         /// Registers the <paramref name="serviceType"/> with a set of <paramref name="implementingTypes"/> and
-        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>. 
+        /// ensures that service instance ordering matches the ordering of the <paramref name="implementingTypes"/>.
         /// </summary>
         /// <param name="serviceType">The service type to register.</param>
         /// <param name="implementingTypes">The implementing types.</param>
-        /// <param name="lifetimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
+        /// <param name="lifeTimeFactory">The <see cref="ILifetime"/> factory that controls the lifetime of each entry in <paramref name="implementingTypes"/>.</param>
         /// <param name="serviceNameFormatter">The function used to format the service name based on current registration index.</param>
         /// <returns>The <see cref="IServiceRegistry"/>, for chaining calls.</returns>
         public IServiceRegistry RegisterOrdered(Type serviceType, Type[] implementingTypes,
@@ -4140,7 +4140,7 @@ namespace EasyNetQ.LightInject
             var offset = GetAvailableServices(serviceType).Count;
             foreach (var implementingType in implementingTypes)
             {
-                offset++;                
+                offset++;
                 Register(serviceType, implementingType, serviceNameFormatter(offset), lifeTimeFactory(implementingType));
             }
 
@@ -4281,7 +4281,7 @@ namespace EasyNetQ.LightInject
         /// <summary>
         /// Returns the <see cref="IScopeManager"/> that is responsible for managing scopes.
         /// </summary>
-        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param> 
+        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param>
         /// <returns>The <see cref="IScopeManager"/> that is responsible for managing scopes.</returns>
         public IScopeManager GetScopeManager(IServiceFactory serviceFactory)
         {
@@ -4302,7 +4302,7 @@ namespace EasyNetQ.LightInject
         /// <summary>
         /// Creates a new <see cref="IScopeManager"/> instance.
         /// </summary>
-        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with the <see cref="IScopeManager"/>.</param> 
+        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with the <see cref="IScopeManager"/>.</param>
         /// <returns><see cref="IScopeManager"/>.</returns>
         protected abstract IScopeManager CreateScopeManager(IServiceFactory serviceFactory);
     }
@@ -4315,7 +4315,7 @@ namespace EasyNetQ.LightInject
         /// <summary>
         /// Creates a new <see cref="IScopeManager"/> instance.
         /// </summary>
-        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with the <see cref="IScopeManager"/>.</param> 
+        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with the <see cref="IScopeManager"/>.</param>
         /// <returns><see cref="IScopeManager"/>.</returns>
         protected override IScopeManager CreateScopeManager(IServiceFactory serviceFactory)
         {
@@ -4333,12 +4333,12 @@ namespace EasyNetQ.LightInject
         private readonly LogicalThreadStorage<Scope> currentScope = new LogicalThreadStorage<Scope>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PerLogicalCallContextScopeManager"/> class.        
+        /// Initializes a new instance of the <see cref="PerLogicalCallContextScopeManager"/> class.
         /// </summary>
         /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param>
-        public PerLogicalCallContextScopeManager(IServiceFactory serviceFactory) 
+        public PerLogicalCallContextScopeManager(IServiceFactory serviceFactory)
             : base(serviceFactory)
-        {            
+        {
         }
 
         /// <summary>
@@ -4348,7 +4348,7 @@ namespace EasyNetQ.LightInject
         {
             get { return GetThisScopeOrFirstValidAncestor(currentScope.Value); }
             set { currentScope.Value = value; }
-        }               
+        }
     }
 
     /// <summary>
@@ -4360,7 +4360,7 @@ namespace EasyNetQ.LightInject
         /// <summary>
         /// Creates a new <see cref="IScopeManager"/> instance.
         /// </summary>
-        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with the <see cref="IScopeManager"/>.</param> 
+        /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with the <see cref="IScopeManager"/>.</param>
         /// <returns><see cref="IScopeManager"/>.</returns>
         protected override IScopeManager CreateScopeManager(IServiceFactory serviceFactory)
         {
@@ -4395,7 +4395,7 @@ namespace EasyNetQ.LightInject
     }
 
 #if NETSTANDARD1_1 || NETSTANDARD1_3 || NETSTANDARD1_6
-    
+
     /// <summary>
     /// Defines and represents a dynamic method that can be compiled and executed.
     /// </summary>
@@ -5290,7 +5290,7 @@ namespace EasyNetQ.LightInject
             return $"ServiceType: '{ServiceType}', ServiceName: '{ServiceName}', ImplementingType: '{ImplementingType}', Lifetime: '{lifeTime}'";
         }
     }
-    
+
     /// <summary>
     /// Represents the result from mapping generic arguments.
     /// </summary>
@@ -5640,7 +5640,7 @@ namespace EasyNetQ.LightInject
     public abstract class ScopeManager : IScopeManager
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ScopeManager"/> class.        
+        /// Initializes a new instance of the <see cref="ScopeManager"/> class.
         /// </summary>
         /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param>
         protected ScopeManager(IServiceFactory serviceFactory)
@@ -5689,8 +5689,8 @@ namespace EasyNetQ.LightInject
 
             Scope parentScope = scope.ParentScope;
 
-            // Only update the current scope if the scope being 
-            // ended is the current scope.         
+            // Only update the current scope if the scope being
+            // ended is the current scope.
             if (ReferenceEquals(CurrentScope, scope))
             {
                 CurrentScope = parentScope;
@@ -5717,7 +5717,7 @@ namespace EasyNetQ.LightInject
                 scope = scope.ParentScope;
             }
 
-            // Update the current scope so that the previous current 
+            // Update the current scope so that the previous current
             // scope can be garbage collected.
             CurrentScope = scope;
             return scope;
@@ -5732,7 +5732,7 @@ namespace EasyNetQ.LightInject
         private readonly ThreadLocal<Scope> threadLocalScope = new ThreadLocal<Scope>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PerThreadScopeManager"/> class.        
+        /// Initializes a new instance of the <see cref="PerThreadScopeManager"/> class.
         /// </summary>
         /// <param name="serviceFactory">The <see cref="IServiceFactory"/> to be associated with this <see cref="ScopeManager"/>.</param>
         public PerThreadScopeManager(IServiceFactory serviceFactory)
@@ -5766,7 +5766,7 @@ namespace EasyNetQ.LightInject
         /// <param name="scopeManager">The <see cref="scopeManager"/> that manages this <see cref="Scope"/>.</param>
         /// <param name="parentScope">The parent <see cref="Scope"/>.</param>
         public Scope(IScopeManager scopeManager, Scope parentScope)
-        {            
+        {
             this.scopeManager = scopeManager;
             serviceFactory = scopeManager.ServiceFactory;
             ParentScope = parentScope;
@@ -5937,7 +5937,7 @@ namespace EasyNetQ.LightInject
         private class ReferenceEqualityComparer<T> : IEqualityComparer<T>
         {
             public static readonly ReferenceEqualityComparer<T> Default
-                = new ReferenceEqualityComparer<T>(); 
+                = new ReferenceEqualityComparer<T>();
 
             public bool Equals(T x, T y)
             {
@@ -6215,7 +6215,7 @@ namespace EasyNetQ.LightInject
                 openGenericImplementingType.GetTypeInfo().GenericTypeParameters.Select(t => t.Name).ToArray();
 
             var genericArgumentMap = CreateMap(genericServiceType, openGenericImplementingType, genericParameterNames);
-         
+
             return new GenericMappingResult(genericParameterNames, genericArgumentMap, genericServiceType, openGenericImplementingType);
         }
 
@@ -6239,7 +6239,7 @@ namespace EasyNetQ.LightInject
                 genericServiceType);
 
             Type[] baseTypeGenericArguments = GetGenericArgumentsOrParameters(baseTypeImplementingOpenGenericServiceType);
-          
+
             MapGenericArguments(genericArguments, baseTypeGenericArguments, genericArgumentMap);
             return genericArgumentMap;
         }
@@ -6325,7 +6325,7 @@ namespace EasyNetQ.LightInject
         private readonly ITypeExtractor concreteTypeExtractor;
         private readonly ITypeExtractor compositionRootTypeExtractor;
         private readonly ICompositionRootExecutor compositionRootExecutor;
-        private readonly IGenericArgumentMapper genericArgumentMapper;        
+        private readonly IGenericArgumentMapper genericArgumentMapper;
         private Assembly currentAssembly;
 
         /// <summary>
@@ -6346,7 +6346,7 @@ namespace EasyNetQ.LightInject
             this.concreteTypeExtractor = concreteTypeExtractor;
             this.compositionRootTypeExtractor = compositionRootTypeExtractor;
             this.compositionRootExecutor = compositionRootExecutor;
-            this.genericArgumentMapper = genericArgumentMapper;            
+            this.genericArgumentMapper = genericArgumentMapper;
         }
 
         /// <summary>
@@ -6380,7 +6380,7 @@ namespace EasyNetQ.LightInject
                 ExecuteCompositionRoots(compositionRootTypes);
             }
         }
-       
+
         private static IEnumerable<Type> GetBaseTypes(Type concreteType)
         {
             Type baseType = concreteType;
@@ -6470,6 +6470,7 @@ namespace EasyNetQ.LightInject
             return implementingTypeName;
         }
     }
+
     /// <summary>
     /// Selects the properties that represents a dependency to the target <see cref="Type"/>.
     /// </summary>
@@ -6500,7 +6501,7 @@ namespace EasyNetQ.LightInject
             return propertyInfo.SetMethod == null || propertyInfo.SetMethod.IsStatic || propertyInfo.SetMethod.IsPrivate || propertyInfo.GetIndexParameters().Length > 0;
         }
     }
-#if NET452 || NET46 
+#if NET452 || NET46
 
     /// <summary>
     /// Loads all assemblies from the application base directory that matches the given search pattern.
@@ -6611,7 +6612,6 @@ namespace EasyNetQ.LightInject
         }
     }
 #endif
-
 
     /// <summary>
     /// Defines an immutable representation of a key and a value.
@@ -7409,9 +7409,9 @@ namespace EasyNetQ.LightInject
     /// </summary>
     /// <typeparam name="T">The type of the value contained in this <see cref="LogicalThreadStorage{T}"/>.</typeparam>
     public class LogicalThreadStorage<T>
-    {        
+    {
         private readonly string key = Guid.NewGuid().ToString();
-               
+
         /// <summary>
         /// Gets the value for the current logical thread of execution.
         /// </summary>
@@ -7423,7 +7423,7 @@ namespace EasyNetQ.LightInject
             get
             {
                 var logicalThreadValue = (LogicalThreadValue)CallContext.LogicalGetData(key);
-                return logicalThreadValue != null ? logicalThreadValue.Value : default(T);
+                return logicalThreadValue != null ? logicalThreadValue.Value : default;
             }
             set
             {

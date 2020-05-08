@@ -1,11 +1,11 @@
-﻿using System;
+﻿using EasyNetQ.Events;
+using EasyNetQ.Internals;
+using EasyNetQ.Topology;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Events;
-using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ.Consumer
 {
@@ -58,7 +58,6 @@ namespace EasyNetQ.Consumer
 
             return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
         }
-
 
         public void Dispose()
         {

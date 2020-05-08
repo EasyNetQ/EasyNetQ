@@ -1,10 +1,10 @@
-﻿using System;
+﻿using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
+using EasyNetQ.Topology;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
@@ -318,7 +318,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="bus">The bus instance</param>
         /// <param name="name">The name of the queue</param>
-        /// <param name="configuration">The configuration of the queue</param>
+        /// <param name="configure">Delegate to configure the queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
         /// The queue
@@ -336,7 +336,6 @@ namespace EasyNetQ
                 .GetAwaiter()
                 .GetResult();
         }
-
 
         /// <summary>
         /// Declare a queue. If the queue already exists this method does nothing
@@ -459,7 +458,6 @@ namespace EasyNetQ
                 .GetResult();
         }
 
-
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
         /// </summary>
@@ -547,7 +545,6 @@ namespace EasyNetQ
                 .GetAwaiter()
                 .GetResult();
         }
-
 
         /// <summary>
         /// Declare an exchange
@@ -639,7 +636,6 @@ namespace EasyNetQ
                 .GetAwaiter()
                 .GetResult();
         }
-
 
         /// <summary>
         /// Delete a binding

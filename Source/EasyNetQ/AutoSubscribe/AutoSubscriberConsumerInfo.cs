@@ -6,7 +6,7 @@ namespace EasyNetQ.AutoSubscribe
 {
     public class AutoSubscriberConsumerInfo
     {
-        public Type ConcreteType{ get; }
+        public Type ConcreteType { get; }
         public Type MessageType { get; }
         public MethodInfo ConsumeMethod { get; }
 

@@ -1,11 +1,10 @@
 // ReSharper disable InconsistentNaming
 
-using System.Collections.Generic;
-using Xunit;
-using RabbitMQ.Client;
-using NSubstitute;
-using System.Linq;
 using FluentAssertions;
+using NSubstitute;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -37,9 +36,9 @@ namespace EasyNetQ.Tests.ConsumeTests
                Arg.Is(ConsumerTag),
                Arg.Is(true),
                Arg.Is(false),
-               Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(new Dictionary <string, object>
+               Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>
                    {
-                        {"x-priority", 0}
+                        { "x-priority", 0 }
                    })),
                Arg.Is(MockBuilder.Consumers[0]));
         }

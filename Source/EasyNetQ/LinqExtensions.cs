@@ -11,7 +11,10 @@ namespace EasyNetQ
             var first = true;
             foreach (var item in items)
             {
-                if (first) first = false;
+                if (first)
+                {
+                    first = false;
+                }
                 else
                 {
                     yield return separator;
