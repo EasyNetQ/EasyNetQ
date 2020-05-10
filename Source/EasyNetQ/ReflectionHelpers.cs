@@ -2,9 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-
 
 namespace EasyNetQ
 {
@@ -14,7 +11,7 @@ namespace EasyNetQ
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-            return typesAttributes.GetOrAdd(type, t => t.GetTypeInfo().GetCustomAttributes(true)
+            return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));
@@ -36,7 +33,7 @@ namespace EasyNetQ
             {
                 return (TAttribute)attributes[0];
             }
-            return default(TAttribute);
+            return default;
         }
     }
 }
