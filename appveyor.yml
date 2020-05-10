@@ -6,6 +6,16 @@ pull_requests:
 
 test: off
 
+install:
+  - ps: |
+      $dockerPathName = (Get-WmiObject win32_service | ?{$_.Name -eq 'docker'}).PathName
+      Write-Host $dockerPathName
+      $dockerConfigFile = $dockerPathName.split()[-1].trim('"')
+      Get-Content $dockerConfigFile
+      $integTestsConfigFile = '.\Source\EasyNetQ.IntegrationTests\settings.json'
+      $integTestsConfig = Get-Content $integTestsConfigFile
+      $integTestsConfig -replace ("""dockerHttpApiUri"": ""http://127.0.0.1:2375""", """dockerHttpApiUri"": ""npipe://./pipe/docker_engine_windows""") | Set-Content $integTestsConfigFile
+
 build:
   project: Build\EasyNetQ.proj
   verbosity: minimal
