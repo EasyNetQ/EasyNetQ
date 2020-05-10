@@ -1,0 +1,17 @@
+{
+    "dockerHttpApiUri": "http://127.0.0.1:2375",
+    "rabbitMQHostName": "rmq",
+    "rabbitMQClientPort": 5672,
+    "rabbitMQManagementPort": 15672,
+    "rabbitMQVirtualHost": "/",
+    "rabbitMQUser": "guest",
+    "rabbitMQPassword": "guest",
+    "linux": {
+        "rabbitMQDockerImageName": "easynetq/rabbitmq",
+        "rabbitMQDockerImageTag": "3.8-alpine"
+    },
+    "windows": {
+        "rabbitMQDockerImageName": "easynetq/rabbitmq",
+        "rabbitMQDockerImageTag": "3.8-windowsservercore-ltsc2019"
+    }
+}
