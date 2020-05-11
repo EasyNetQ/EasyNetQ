@@ -36,7 +36,7 @@ namespace EasyNetQ.IntegrationTests.Utils
         )
         {
             foreach (var message in messages)
-                await scheduler.FuturePublishAsync(message, delay, null, cancellationToken).ConfigureAwait(false);
+                await scheduler.FuturePublishAsync(message, delay, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task SendBatchAsync<T>(

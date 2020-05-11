@@ -26,9 +26,10 @@ namespace EasyNetQ.Scheduling
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
-        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic = null, CancellationToken cancellationToken = default)
+        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(topic, "topic");
 
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
             var futureExchangeName = exchangeName + "_delayed";

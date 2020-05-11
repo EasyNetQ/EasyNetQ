@@ -22,7 +22,7 @@ namespace EasyNetQ.Scheduling
         Task FuturePublishAsync<T>(
             T message,
             TimeSpan delay,
-            string topic = null,
+            string topic,
             CancellationToken cancellationToken = default
         );
     }
