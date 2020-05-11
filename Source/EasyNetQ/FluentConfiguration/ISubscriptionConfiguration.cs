@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EasyNetQ.FluentConfiguration
 {
@@ -8,7 +8,6 @@ namespace EasyNetQ.FluentConfiguration
     /// e.g.
     /// x => x.WithTopic("*.brighton")
     /// </summary>
-    /// <typeparam name="T">The message type to be published</typeparam>
     public interface ISubscriptionConfiguration
     {
         /// <summary>
@@ -100,7 +99,7 @@ namespace EasyNetQ.FluentConfiguration
         /// Sets the queue mode. Valid modes are "default" and "lazy". Works with RabbitMQ version 3.6+.
         /// </summary>
         /// <param name="queueMode">Desired queue mode.</param>
-        /// <returns>Returns a reference to itself.</returns>
+        /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default);
     }
 

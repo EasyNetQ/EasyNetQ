@@ -1,10 +1,20 @@
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
 
 pull_requests:
   do_not_increment_build_number: true
 
 test: off
+
+install:
+  - ps: |
+      $dockerPathName = (Get-WmiObject win32_service | ?{$_.Name -eq 'docker'}).PathName
+      Write-Host $dockerPathName
+      $dockerConfigFile = $dockerPathName.split()[-1].trim('"')
+      Get-Content $dockerConfigFile
+      $integTestsConfigFile = '.\Source\EasyNetQ.IntegrationTests\settings.json'
+      $integTestsConfig = Get-Content $integTestsConfigFile
+      $integTestsConfig -replace ("""dockerHttpApiUri"": ""http://127.0.0.1:2375""", """dockerHttpApiUri"": ""npipe://./pipe/docker_engine_windows""") | Set-Content $integTestsConfigFile
 
 build:
   project: Build\EasyNetQ.proj
@@ -15,7 +25,6 @@ branches:
   only:
   - master
   - develop
-  - feature/*
 
 artifacts:
   - path: Package\**\*.nupkg
@@ -38,22 +47,6 @@ deploy:
     skip_symbols: false
     on:
       branch: develop
-  - provider: NuGet
-    artifact: /.*\.s?nupkg/
-    server:
-    api_key:
-      secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
-    skip_symbols: false
-    on:
-      branch: /release\/.+/
-  - provider: NuGet
-    artifact: /.*\.s?nupkg/
-    server: https://www.myget.org/F/easynetq-unstable/api/v2/package
-    api_key:
-       secure: +0aKxcCHqWvvdJxA4dh1ToRqwA6x8yqhfrYDIeOjQu6Skpg/UrwxAPBik8z6be99
-    skip_symbols: false
-    on:
-      branch: /feature\/.+/
 
 skip_commits:
   files:

@@ -32,13 +32,11 @@
 
     public class PublishConfiguration : IPublishConfiguration
     {
-        private readonly string defaultTopic;
-
         public PublishConfiguration(string defaultTopic)
         {
             Preconditions.CheckNotNull(defaultTopic, "defaultTopic");
 
-            this.defaultTopic = defaultTopic;
+            Topic = defaultTopic;
         }
 
         public IPublishConfiguration WithPriority(byte priority)
@@ -49,6 +47,8 @@
 
         public IPublishConfiguration WithTopic(string topic)
         {
+            Preconditions.CheckNotNull(topic, "topic");
+
             Topic = topic;
             return this;
         }
@@ -60,15 +60,7 @@
         }
 
         public byte? Priority { get; private set; }
-
-        private string topic;
-
-        public string Topic
-        {
-            get { return topic ?? defaultTopic; }
-            private set { topic = value; }
-        }
-
+        public string Topic { get; private set; }
         public int? Expires { get; private set; }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -67,31 +67,15 @@ namespace EasyNetQ.Consumer
             ConsumerTag = consumerTag;
         }
 
-        public void HandleBasicCancelOk(string consumerTag)
-        {
-            Cancel();
-        }
-
-        public void HandleBasicCancel(string consumerTag)
-        {
-            Cancel();
-            logger.InfoFormat(
-                "Consumer with consumerTag {consumerTag} has cancelled",
-                consumerTag
-            );
-        }
-
-        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
-        {
-            logger.InfoFormat(
-                "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
-                ConsumerTag,
-                Queue.Name,
-                reason
-            );
-        }
-
-        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, ReadOnlyMemory<byte> body)
+        public void HandleBasicDeliver(
+            string consumerTag,
+            ulong deliveryTag,
+            bool redelivered,
+            string exchange,
+            string routingKey,
+            IBasicProperties properties,
+            ReadOnlyMemory<byte> body
+        )
         {
             if (logger.IsDebugEnabled())
             {
@@ -130,6 +114,42 @@ namespace EasyNetQ.Consumer
                 );
         }
 
+        /// <summary>
+        /// Cancel means that an external signal has requested that this consumer should
+        /// be cancelled. This is _not_ the same as when an internal consumer stops consuming
+        /// because it has lost its channel/connection.
+        /// </summary>
+        private void Cancel()
+        {
+            cancelled?.Invoke(this);
+            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
+        }
+
+        public void HandleBasicCancelOk(string consumerTag)
+        {
+            Cancel();
+        }
+
+        public void HandleBasicCancel(string consumerTag)
+        {
+            Cancel();
+            logger.InfoFormat(
+                "Consumer with consumerTag {consumerTag} has cancelled",
+                consumerTag
+            );
+        }
+
+        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
+        {
+            Cancel();
+            logger.InfoFormat(
+                "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
+                ConsumerTag,
+                Queue.Name,
+                reason
+            );
+        }
+
         public IModel Model { get; }
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
 
@@ -139,21 +159,6 @@ namespace EasyNetQ.Consumer
             disposed = true;
 
             eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTag));
-        }
-
-        /// <summary>
-        /// Cancel means that an external signal has requested that this consumer should
-        /// be cancelled. This is _not_ the same as when an internal consumer stops consuming
-        /// because it has lost its channel/connection.
-        /// </summary>
-        private void Cancel()
-        {
-            // copy to temp variable to be thread safe.
-            var localCancelled = cancelled;
-            localCancelled?.Invoke(this);
-
-            var consumerCancelled = ConsumerCancelled;
-            consumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] { ConsumerTag }));
         }
     }
 
@@ -326,22 +331,29 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             if (disposed) return;
+
             disposed = true;
 
             var model = Model;
-            if (model != null)
+            if (model == null) return;
+
+            // Queued because we may be on the RabbitMQ.Client dispatch thread.
+            var disposedEvent = new AutoResetEvent(false);
+            consumerDispatcher.QueueAction(() =>
             {
-                // Queued because we may be on the RabbitMQ.Client dispatch thread.
-                var disposedEvent = new AutoResetEvent(false);
-                consumerDispatcher.QueueAction(() =>
+                try
                 {
                     foreach (var c in basicConsumers)
                         c.Dispose();
                     model.Dispose();
+                }
+                finally
+                {
                     disposedEvent.Set();
-                });
-                disposedEvent.WaitOne();
-            }
+                }
+            }, surviveDisconnect: true);
+
+            disposedEvent.WaitOne();
         }
 
         private void InitModel(ushort prefetchCount, bool globalQos)

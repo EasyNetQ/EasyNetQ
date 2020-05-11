@@ -12,7 +12,7 @@ namespace EasyNetQ
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-            return typesAttributes.GetOrAdd(type, t => t.GetTypeInfo().GetCustomAttributes(true)
+            return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));

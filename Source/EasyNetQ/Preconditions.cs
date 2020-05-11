@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace EasyNetQ
 {
@@ -29,7 +28,13 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckNotNull<T>(T value, string name)
         {
-            CheckNotNull(value, name, string.Format("{0} must not be null", name));
+            // Avoid boxing here
+            if (value == null)
+            {
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+
+                throw new ArgumentNullException(name, $"{name} must not be null");
+            }
         }
 
         /// <summary>
@@ -54,12 +59,12 @@ namespace EasyNetQ
         /// Thrown if <paramref name="name"/> or <paramref name="message"/> are
         /// blank.
         /// </exception>
-        public static void CheckNotNull<T>(T value, string name, string message)
+        public static void CheckNotNull<T>(T value, string name, string message) where T : class
         {
             if (value == null)
             {
-                CheckNotBlank(name, "name", "name must not be blank");
-                CheckNotBlank(message, "message", "message must not be blank");
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+                CheckNotBlank(message, nameof(message), "message must not be blank");
 
                 throw new ArgumentNullException(name, message);
             }
@@ -117,7 +122,15 @@ namespace EasyNetQ
         /// </exception>
         public static void CheckNotBlank(string value, string name)
         {
-            CheckNotBlank(value, name, string.Format("{0} must not be blank", name));
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("name must not be blank", nameof(name));
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException(string.Format("{0} must not be blank", name), name);
+            }
         }
 
         /// <summary>
@@ -137,73 +150,72 @@ namespace EasyNetQ
         /// is empty, must not be blank.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Thrown if <paramref name="collection"/> is empty, or if
-        /// <paramref name="value"/> or <paramref name="name"/> are blank.
+        /// Thrown if <paramref name="collection"/> is empty, or <c>null</c>.
         /// </exception>
         public static void CheckAny<T>(IEnumerable<T> collection, string name, string message)
         {
             if (collection == null || !collection.Any())
             {
-                CheckNotBlank(name, "name", "name must not be blank");
-                CheckNotBlank(message, "message", "message must not be blank");
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+                CheckNotBlank(message, nameof(message), "message must not be blank");
 
                 throw new ArgumentException(message, name);
             }
         }
 
         /// <summary>
-        /// Ensures that <paramref name="value"/> is true.
+        /// Ensures that <paramref name="value"/> is <c>true</c>.
         /// </summary>
         /// <param name="value">
-        /// The value to check, must be true.
+        /// The value to check, must be <c>true</c>.
         /// </param>
         /// <param name="name">
         /// The name of the parameter the value is taken from, must not be
         /// blank.
         /// </param>
         /// <param name="message">
-        /// The message to provide to the exception if <paramref name="collection"/>
-        /// is false, must not be blank.
+        /// The message to provide to the exception if <paramref name="value"/>
+        /// is <c>false</c>, must not be blank.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Thrown if <paramref name="value"/> is false, or if <paramref name="name"/>
+        /// Thrown if <paramref name="value"/> is <c>false</c>, or if <paramref name="name"/>
         /// or <paramref name="message"/> are blank.
         /// </exception>
         public static void CheckTrue(bool value, string name, string message)
         {
             if (!value)
             {
-                CheckNotBlank(name, "name", "name must not be blank");
-                CheckNotBlank(message, "message", "message must not be blank");
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+                CheckNotBlank(message, nameof(message), "message must not be blank");
 
                 throw new ArgumentException(message, name);
             }
         }
 
         /// <summary>
-        /// Ensures that <paramref name="value"/> is false.
+        /// Ensures that <paramref name="value"/> is <c>false</c>.
         /// </summary>
         /// <param name="value">
-        /// The value to check, must be false.
+        /// The value to check, must be <c>false</c>.
         /// </param>
         /// <param name="name">
         /// The name of the parameter the value is taken from, must not be
         /// blank.
         /// </param>
         /// <param name="message">
-        /// The message to provide to the exception if <paramref name="collection"/>
-        /// is true, must not be blank.
+        /// The message to provide to the exception if <paramref name="value"/>
+        /// is <c>true</c>, must not be blank.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Thrown if <paramref name="value"/> is true, or if <paramref name="name"/>
+        /// Thrown if <paramref name="value"/> is <c>true</c>, or if <paramref name="name"/>
         /// or <paramref name="message"/> are blank.
         /// </exception>
         public static void CheckFalse(bool value, string name, string message)
         {
             if (value)
             {
-                CheckNotBlank(name, "name", "name must not be blank");
-                CheckNotBlank(message, "message", "message must not be blank");
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+                CheckNotBlank(message, nameof(message), "message must not be blank");
 
                 throw new ArgumentException(message, name);
             }
@@ -223,8 +235,8 @@ namespace EasyNetQ
             bool assignable = expectedType.IsAssignableFrom(value.GetType());
             if (!assignable)
             {
-                CheckNotBlank(name, "name", "name must not be blank");
-                CheckNotBlank(message, "message", "message must not be blank");
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+                CheckNotBlank(message, nameof(message), "message must not be blank");
 
                 throw new ArgumentException(message, name);
             }
@@ -237,7 +249,7 @@ namespace EasyNetQ
             throw new ArgumentOutOfRangeException(name, string.Format("Arguments {0} must be less than maxValue", name));
         }
 
-        public static void CheckNull<T>(T value, string name)
+        public static void CheckNull<T>(T value, string name) where T : class
         {
             if (value == null)
                 return;

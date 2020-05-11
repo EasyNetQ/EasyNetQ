@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using EasyNetQ.Events;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using Xunit;
@@ -14,7 +13,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
             bus = mockBuilder.Bus;
-            waitTime = TimeSpan.FromMinutes(2);
+            waitTime = TimeSpan.FromSeconds(10);
         }
 
         private readonly IBus bus;
@@ -36,7 +35,7 @@ namespace EasyNetQ.Tests
             bus.PubSub.Publish(new TestMessage());
             bus.Dispose();
 
-            mockBuilder.Channels[0].Received().Dispose();
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
         }
 
         [Fact]
@@ -55,23 +54,25 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            bool signalReceived = are.WaitOne(waitTime);
+            var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Fact]
         public void Should_cleanup_respond_model()
         {
-            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage)null);
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage) null);
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
 
-            bool signalReceived = are.WaitOne(waitTime);
+            var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
 
@@ -83,9 +84,10 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            bool signalReceived = are.WaitOne(waitTime);
+            var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
 
@@ -97,9 +99,10 @@ namespace EasyNetQ.Tests
 
             bus.Dispose();
 
-            bool signalReceived = are.WaitOne(waitTime);
+            var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
+            mockBuilder.Channels[0].DidNotReceive().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
     }

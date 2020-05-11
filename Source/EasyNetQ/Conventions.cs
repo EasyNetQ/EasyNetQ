@@ -83,8 +83,13 @@ namespace EasyNetQ
             ConsumerTagConvention = () => Guid.NewGuid().ToString();
         }
 
-        public ExchangeNameConvention ExchangeNamingConvention { get; set; }
-        public TopicNameConvention TopicNamingConvention { get; set; }
+        private QueueAttribute GetQueueAttribute(Type messageType)
+        {
+            return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
+        }
+
+		public ExchangeNameConvention ExchangeNamingConvention { get; set; }
+		public TopicNameConvention TopicNamingConvention { get; set; }
         public QueueNameConvention QueueNamingConvention { get; set; }
         public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
 
@@ -95,10 +100,5 @@ namespace EasyNetQ
         public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
 
         public ConsumerTagConvention ConsumerTagConvention { get; set; }
-
-        private QueueAttribute GetQueueAttribute(Type messageType)
-        {
-            return messageType.GetAttribute<QueueAttribute>() ?? new QueueAttribute(string.Empty);
-        }
-    }
+	}
 }

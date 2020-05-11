@@ -70,6 +70,7 @@
             <TestProjects Include="$(Source)\EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj" />
             <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj" />
             <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj" />
+            <TestProjects Include="$(Source)\EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj" />
         </ItemGroup>
 
         <Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
@@ -85,8 +86,9 @@
         <ItemGroup>
             <ClientLibraries Include="$(Source)\EasyNetQ\EasyNetQ.csproj" />
             <ClientLibraries Include="$(Source)\EasyNetQ.DI.*\EasyNetQ.DI.*.csproj" Exclude="$(Source)\*Tests*\*.csproj" />
-       
+
             <FilesToDelete Include="$(NuGetPackageDirectory)\*.nupkg" />
+            <FilesToDelete Include="$(NuGetPackageDirectory)\*.snupkg" />
         </ItemGroup>
 
         <MakeDir Directories="$(NuGetPackageDirectory)" Condition="!Exists('$(NuGetPackageDirectory)')" />
