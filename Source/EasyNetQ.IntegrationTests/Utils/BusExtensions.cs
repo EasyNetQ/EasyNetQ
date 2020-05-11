@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.FluentConfiguration;
+using EasyNetQ.Producer;
 using EasyNetQ.Scheduling;
 
 namespace EasyNetQ.IntegrationTests.Utils
@@ -10,55 +11,43 @@ namespace EasyNetQ.IntegrationTests.Utils
     internal static class BusExtensions
     {
         public static Task PublishBatchAsync<T>(
-            this IBus bus, IEnumerable<T> messages, CancellationToken cancellationToken = default
-        ) where T : class
+            this IPubSub pubSub, IEnumerable<T> messages, CancellationToken cancellationToken = default
+        )
         {
-            return bus.PublishBatchAsync(messages, c => { }, cancellationToken);
+            return pubSub.PublishBatchAsync(messages, c => { }, cancellationToken);
         }
 
         public static async Task PublishBatchAsync<T>(
-            this IBus bus,
+            this IPubSub pubSub,
             IEnumerable<T> messages,
             Action<IPublishConfiguration> configuration,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             foreach (var message in messages)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                await bus.PublishAsync(message, configuration).ConfigureAwait(false);
-            }
+                await pubSub.PublishAsync(message, configuration, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task FuturePublishBatchAsync<T>(
-            this IBus bus,
+            this IScheduler scheduler,
             IEnumerable<T> messages,
             TimeSpan delay,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             foreach (var message in messages)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                await bus.FuturePublishAsync(delay, message).ConfigureAwait(false);
-            }
+                await scheduler.FuturePublishAsync(message, delay, null, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task SendBatchAsync<T>(
-            this IBus bus,
+            this ISendReceive sendReceive,
             string queue,
             IEnumerable<T> messages,
             CancellationToken cancellationToken = default
-        ) where T : class
+        )
         {
             foreach (var message in messages)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                await bus.SendAsync(queue, message).ConfigureAwait(false);
-            }
+                await sendReceive.SendAsync(queue, message, cancellationToken).ConfigureAwait(false);
         }
     }
 }

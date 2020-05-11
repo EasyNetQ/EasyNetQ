@@ -37,7 +37,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var bunnies = MessagesFactories.Create(MessagesCount, i => new BunnyMessage(i));
             var rabbits = MessagesFactories.Create(MessagesCount, MessagesCount, i => new RabbitMessage(i));
 
-            using (bus.Subscribe<Message>(subscriptionId, x =>
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, x =>
             {
                 switch (x)
                 {
@@ -50,9 +50,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     default:
                         throw new ArgumentOutOfRangeException(nameof(x), x, null);
                 }
-            }))
+            }, timeoutCts.Token))
             {
-                await bus.PublishBatchAsync(bunnies.Concat(rabbits), timeoutCts.Token)
+                await bus.PubSub.PublishBatchAsync(bunnies.Concat(rabbits), timeoutCts.Token)
                     .ConfigureAwait(false);
 
                 await Task.WhenAll(

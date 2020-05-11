@@ -36,24 +36,26 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var secondTopicMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
 
             using (
-                bus.Subscribe<Message>(
+                await bus.PubSub.SubscribeAsync<Message>(
                     Guid.NewGuid().ToString(),
                     firstTopicMessagesSink.Receive,
-                    x => x.WithTopic("first")
+                    x => x.WithTopic("first"),
+                    timeoutCts.Token
                 )
             )
             using (
-                bus.Subscribe<Message>(
+                await bus.PubSub.SubscribeAsync<Message>(
                     Guid.NewGuid().ToString(),
                     secondTopicMessagesSink.Receive,
-                    x => x.WithTopic("second")
+                    x => x.WithTopic("second"),
+                    timeoutCts.Token
                 )
             )
             {
-                await bus.PublishBatchAsync(
+                await bus.PubSub.PublishBatchAsync(
                     firstTopicMessages, x => x.WithTopic("first"), timeoutCts.Token
                 ).ConfigureAwait(false);
-                await bus.PublishBatchAsync(
+                await bus.PubSub.PublishBatchAsync(
                     secondTopicMessages, x => x.WithTopic("second"), timeoutCts.Token
                 ).ConfigureAwait(false);
 

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
@@ -23,11 +24,16 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_exception()
         {
-            using (bus.RespondAsync<Request, Response>(x =>
-                Task.FromException<Response>(new RequestFailedException("Oops"))))
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            using (
+                await bus.Rpc.RespondAsync<Request, Response>(x =>
+                        Task.FromException<Response>(new RequestFailedException("Oops")), timeoutCts.Token
+                )
+            )
             {
                 var exception = await Assert.ThrowsAsync<EasyNetQResponderException>(
-                    () => bus.RequestAsync<Request, Response>(new Request(42))
+                    () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), timeoutCts.Token)
                 ).ConfigureAwait(false);
                 exception.Message.Should().Be("Oops");
             }
@@ -36,9 +42,12 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_response()
         {
-            using (bus.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id))))
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), timeoutCts.Token))
             {
-                var response = await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
+                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), timeoutCts.Token)
+                    .ConfigureAwait(false);
                 response.Should().Be(new Response(42));
             }
         }

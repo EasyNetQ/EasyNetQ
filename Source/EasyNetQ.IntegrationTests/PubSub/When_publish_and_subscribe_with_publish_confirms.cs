@@ -34,9 +34,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
             {
-                await bus.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);

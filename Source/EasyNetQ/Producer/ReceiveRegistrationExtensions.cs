@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ
 {
     public static class ReceiveRegistrationExtensions
     {

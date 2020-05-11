@@ -11,7 +11,8 @@ namespace EasyNetQ.IntegrationTests.Scheduler
     [Collection("RabbitMQ")]
     public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_with_publish_confirms : IDisposable
     {
-        public When_publish_and_subscribe_using_delay_using_dead_letter_exchange_with_publish_confirms(RabbitMQFixture fixture)
+        public When_publish_and_subscribe_using_delay_using_dead_letter_exchange_with_publish_confirms(
+            RabbitMQFixture fixture)
         {
             bus = RabbitHutch.CreateBus(
                 $"host={fixture.Host};prefetchCount=1;publisherConfirms=True",
@@ -37,9 +38,9 @@ namespace EasyNetQ.IntegrationTests.Scheduler
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
             {
-                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), timeoutCts.Token)
+                await bus.Scheduler.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), timeoutCts.Token)
                     .ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);

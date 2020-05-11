@@ -35,10 +35,11 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var messages = MessagesFactories.Create(MessagesCount);
 
             using (
-                bus.Subscribe<Message>(
+                await bus.PubSub.SubscribeAsync<Message>(
                     Guid.NewGuid().ToString(),
                     firstConsumerMessagesSink.Receive,
-                    x => x.AsExclusive()
+                    x => x.AsExclusive(),
+                    timeoutCts.Token
                 )
             )
             {
@@ -46,14 +47,15 @@ namespace EasyNetQ.IntegrationTests.PubSub
                 await Task.Delay(TimeSpan.FromSeconds(1), timeoutCts.Token).ConfigureAwait(false);
 
                 using (
-                    bus.Subscribe<Message>(
+                    await bus.PubSub.SubscribeAsync<Message>(
                         Guid.NewGuid().ToString(),
                         secondConsumerMessagesSink.Receive,
-                        x => x.AsExclusive()
+                        x => x.AsExclusive(),
+                        timeoutCts.Token
                     )
                 )
                 {
-                    await bus.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                    await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
 
                     await Task.WhenAll(
                         firstConsumerMessagesSink.WaitAllReceivedAsync(timeoutCts.Token),

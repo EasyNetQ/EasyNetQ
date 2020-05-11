@@ -37,18 +37,26 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var lowPriorityMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
 
             var subscriptionId = Guid.NewGuid().ToString();
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2)))
+            using (
+                await bus.PubSub.SubscribeAsync<Message>(
+                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), timeoutCts.Token
+                )
+            )
             {
             }
 
-            await bus.PublishBatchAsync(
+            await bus.PubSub.PublishBatchAsync(
                 lowPriorityMessages, x => x.WithPriority(LowPriority), timeoutCts.Token
             ).ConfigureAwait(false);
-            await bus.PublishBatchAsync(
+            await bus.PubSub.PublishBatchAsync(
                 highPriorityMessages, x => x.WithPriority(HighPriority), timeoutCts.Token
             ).ConfigureAwait(false);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2)))
+            using (
+                await bus.PubSub.SubscribeAsync<Message>(
+                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), timeoutCts.Token
+                )
+            )
             {
                 await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
 

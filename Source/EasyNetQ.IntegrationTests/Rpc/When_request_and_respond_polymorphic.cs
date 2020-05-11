@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
@@ -23,23 +24,25 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_response()
         {
-            using (bus.RespondAsync<Request, Response>(x =>
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            using (await bus.Rpc.RespondAsync<Request, Response>(x =>
             {
-                return Task.FromResult<Response>(x switch
+                return x switch
                 {
                     BunnyRequest b => new BunnyResponse(b.Id),
                     RabbitRequest r => new RabbitResponse(r.Id),
                     _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
-                });
-            }))
+                };
+            }, timeoutCts.Token))
             {
-                var bunnyResponse = await bus.RequestAsync<Request, Response>(
-                    new BunnyRequest(42)
+                var bunnyResponse = await bus.Rpc.RequestAsync<Request, Response>(
+                    new BunnyRequest(42), timeoutCts.Token
                 ).ConfigureAwait(false);
                 bunnyResponse.Should().Be(new BunnyResponse(42));
 
-                var rabbitResponse = await bus.RequestAsync<Request, Response>(
-                    new RabbitRequest(42)
+                var rabbitResponse = await bus.Rpc.RequestAsync<Request, Response>(
+                    new RabbitRequest(42), timeoutCts.Token
                 ).ConfigureAwait(false);
                 rabbitResponse.Should().Be(new RabbitResponse(42));
             }

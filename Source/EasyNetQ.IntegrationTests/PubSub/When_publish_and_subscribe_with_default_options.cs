@@ -33,9 +33,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive))
             {
-                await bus.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
@@ -51,10 +51,18 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var secondConsumerMessagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (bus.Subscribe<Message>(Guid.NewGuid().ToString(), firstConsumerMessagesSink.Receive))
-            using (bus.Subscribe<Message>(Guid.NewGuid().ToString(), secondConsumerMessagesSink.Receive))
+            using (
+                await bus.PubSub.SubscribeAsync<Message>(
+                    Guid.NewGuid().ToString(), firstConsumerMessagesSink.Receive, timeoutCts.Token
+                )
+            )
+            using (
+                await bus.PubSub.SubscribeAsync<Message>(
+                    Guid.NewGuid().ToString(), secondConsumerMessagesSink.Receive, timeoutCts.Token
+                )
+            )
             {
-                await bus.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
 
                 await Task.WhenAll(
                     firstConsumerMessagesSink.WaitAllReceivedAsync(timeoutCts.Token),
@@ -75,11 +83,11 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
             {
-                await bus.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);

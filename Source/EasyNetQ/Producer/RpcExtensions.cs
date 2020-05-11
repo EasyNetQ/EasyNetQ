@@ -87,6 +87,26 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         public static AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
             this IRpc rpc,
+            Func<TRequest, TResponse> responder,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(rpc, "rpc");
+
+            var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, c) => responder(m));
+            return rpc.RespondAsync<TRequest, TResponse>(asyncResponder, c => { }, cancellationToken);
+        }
+
+        /// <summary>
+        ///     Set up a responder for an RPC service.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="rpc">The rpc instance</param>
+        /// <param name="responder">A function that performs the response</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        public static AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+            this IRpc rpc,
             Func<TRequest, Task<TResponse>> responder,
             CancellationToken cancellationToken = default
         )
