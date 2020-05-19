@@ -19,7 +19,7 @@ namespace EasyNetQ.Producer
         protected const string IsFaultedKey = "IsFaulted";
         protected const string ExceptionMessageKey = "ExceptionMessage";
         protected readonly IAdvancedBus advancedBus;
-        private readonly ConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration configuration;
         protected readonly IConventions conventions;
 
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -32,7 +32,7 @@ namespace EasyNetQ.Producer
         private readonly IDisposable onConnectedEventSubscription;
 
         public DefaultRpc(
-            ConnectionConfiguration connectionConfiguration,
+            ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,
             IEventBus eventBus,
             IConventions conventions,
@@ -41,7 +41,7 @@ namespace EasyNetQ.Producer
             ITypeNameSerializer typeNameSerializer
         )
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
@@ -49,7 +49,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
-            this.connectionConfiguration = connectionConfiguration;
+            this.configuration = configuration;
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.exchangeDeclareStrategy = exchangeDeclareStrategy;
@@ -69,14 +69,15 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(request, "request");
 
             var requestType = typeof(TRequest);
-            var configuration = new RequestConfiguration(
+            var requestConfiguration = new RequestConfiguration(
                 conventions.RpcRoutingKeyNamingConvention(requestType),
-                connectionConfiguration.Timeout
+                configuration.Timeout
             );
-            configure(configuration);
+            configure(requestConfiguration);
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(configuration.Expiration);
+            if(requestConfiguration.Expiration != Timeout.InfiniteTimeSpan)
+                cts.CancelAfter(requestConfiguration.Expiration);
 
             var correlationId = Guid.NewGuid();
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -84,8 +85,8 @@ namespace EasyNetQ.Producer
             using var callback = DisposableActions.Create(DeRegisterResponseActions, correlationId);
 
             var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
-            var routingKey = configuration.QueueName;
-            var expiration = configuration.Expiration;
+            var routingKey = requestConfiguration.QueueName;
+            var expiration = requestConfiguration.Expiration;
             await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
 
             return await TaskHelpers.WithCancellation(tcs.Task, cts.Token).ConfigureAwait(false);
@@ -235,7 +236,7 @@ namespace EasyNetQ.Producer
         {
             var requestType = typeof(TRequest);
 
-            var configuration = new ResponderConfiguration(connectionConfiguration.PrefetchCount);
+            var configuration = new ResponderConfiguration(this.configuration.PrefetchCount);
             configure(configuration);
 
             var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);

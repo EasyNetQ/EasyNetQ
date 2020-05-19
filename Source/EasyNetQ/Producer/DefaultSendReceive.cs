@@ -129,7 +129,8 @@ namespace EasyNetQ.Producer
         private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(configuration.Timeout);
+            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
+                cts.CancelAfter(configuration.Timeout);
             return cts;
         }
 
