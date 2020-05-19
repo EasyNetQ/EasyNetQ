@@ -1,6 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Producer;
 using NSubstitute;
@@ -10,16 +12,16 @@ using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again
+    public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again: IDisposable
     {
         public When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again()
         {
-            persistentConnection = Substitute.For<IPersistentConnection>();
+            var persistentConnection = Substitute.For<IPersistentConnection>();
             var eventBus = Substitute.For<IEventBus>();
 
             var configuration = new ConnectionConfiguration
             {
-                Timeout = 1
+                Timeout = TimeSpan.FromSeconds(1)
             };
 
             var shutdownArgs = new ShutdownEventArgs(
@@ -34,12 +36,20 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         }
 
         private readonly IPersistentChannel persistentChannel;
-        private readonly IPersistentConnection persistentConnection;
 
         [Fact]
         public void Should_throw_timeout_exception()
         {
-            Assert.Throws<TimeoutException>(() => { persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct")); });
+            Assert.Throws<TaskCanceledException>(() =>
+            {
+                using var cts = new CancellationTokenSource(1000);
+                persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
+            });
+        }
+
+        public void Dispose()
+        {
+            persistentChannel.Dispose();
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace EasyNetQ.Internals
 {
-    public sealed class ConcurrentSet<T> : IEnumerable<T>
+    internal sealed class ConcurrentSet<T> : IEnumerable<T>
     {
         private readonly ConcurrentDictionary<T, bool> dictionary = new ConcurrentDictionary<T, bool>();
 

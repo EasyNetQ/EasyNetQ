@@ -20,21 +20,25 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(persistentChannelFactory, "persistentChannelFactory");
 
             dispatcher = new Lazy<IClientCommandDispatcher>(
-                () => new ClientCommandDispatcherSingleton(configuration, connection, persistentChannelFactory));
+                () => new ClientCommandDispatcherSingleton(configuration, connection, persistentChannelFactory)
+            );
         }
 
+        /// <inheritdoc />
         public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
             return dispatcher.Value.InvokeAsync(channelAction, cancellationToken);
         }
 
+        /// <inheritdoc />
         public Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
             return dispatcher.Value.InvokeAsync(channelAction, cancellationToken);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (dispatcher.IsValueCreated) dispatcher.Value.Dispose();

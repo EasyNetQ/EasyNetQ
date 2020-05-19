@@ -6,6 +6,9 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ.Producer
 {
+    /// <summary>
+    ///     An abstraction for send-receive pattern
+    /// </summary>
     //TODO Need support of non-generic overloads
     public interface ISendReceive
     {

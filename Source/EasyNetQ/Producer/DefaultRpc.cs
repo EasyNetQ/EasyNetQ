@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +30,6 @@ namespace EasyNetQ.Producer
         private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions = new ConcurrentDictionary<RpcKey, ResponseSubscription>();
 
         private readonly AsyncLock responseSubscriptionsLock = new AsyncLock();
-        private readonly ITimeoutStrategy timeoutStrategy;
         private readonly ITypeNameSerializer typeNameSerializer;
 
         public DefaultRpc(
@@ -39,17 +39,15 @@ namespace EasyNetQ.Producer
             IConventions conventions,
             IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
-            ITimeoutStrategy timeoutStrategy,
             ITypeNameSerializer typeNameSerializer
         )
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "configuration");
+            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(eventBus, "eventBus");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(timeoutStrategy, "timeoutStrategy");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             this.connectionConfiguration = connectionConfiguration;
@@ -57,56 +55,55 @@ namespace EasyNetQ.Producer
             this.conventions = conventions;
             this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
-            this.timeoutStrategy = timeoutStrategy;
             this.typeNameSerializer = typeNameSerializer;
 
             eventBusSubscriptions.Add(eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated));
         }
 
+        /// <inheritdoc />
         public virtual async Task<TResponse> RequestAsync<TRequest, TResponse>(
             TRequest request,
             Action<IRequestConfiguration> configure,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(request, "request");
 
-            var correlationId = Guid.NewGuid();
             var requestType = typeof(TRequest);
-            var configuration = new RequestConfiguration();
+            var configuration = new RequestConfiguration(
+                conventions.RpcRoutingKeyNamingConvention(requestType),
+                connectionConfiguration.Timeout
+            );
             configure(configuration);
 
-            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(configuration.Expiration);
+
+            var correlationId = Guid.NewGuid();
+            var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+            RegisterResponseActions(correlationId, tcs);
+            using var callback = DisposableCallback<Guid>.Create(DeRegisterResponseActions, correlationId);
+
+            try
             {
-                var timeoutSeconds = timeoutStrategy.GetTimeoutSeconds(requestType);
-                if (timeoutSeconds > 0) cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+                var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
+                var routingKey = configuration.QueueName;
+                var expiration = configuration.Expiration;
+                await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
 
-                var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-                RegisterResponseActions(correlationId, tcs);
-
-                using (cts.Token.Register(() => DeRegisterResponseActions(correlationId)))
-                using (cts.Token.Register(() => tcs.TrySetCanceled()))
-                {
-                    try
-                    {
-                        var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
-                        var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
-                        await RequestPublishAsync(request, routingKey, queueName, correlationId, cts.Token).ConfigureAwait(false);
-
-                        return await tcs.Task.ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-                    {
-                        throw new TimeoutException();
-                    }
-                }
+                return await TaskHelpers.WithCancellation(tcs.Task, cts.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException();
             }
         }
 
+        /// <inheritdoc />
         public virtual AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
             Func<TRequest, CancellationToken, Task<TResponse>> responder,
             Action<IResponderConfiguration> configure,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(responder, "responder");
@@ -118,6 +115,7 @@ namespace EasyNetQ.Producer
             return RespondAsyncInternal(responder, configure, cancellationToken).ToAwaitableDisposable();
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             foreach (var eventBusSubscription in eventBusSubscriptions)
@@ -141,7 +139,7 @@ namespace EasyNetQ.Producer
 
         protected void DeRegisterResponseActions(Guid correlationId)
         {
-            responseActions.TryRemove(correlationId, out _);
+            responseActions.Remove(correlationId);
         }
 
         protected void RegisterResponseActions<TResponse>(Guid correlationId, TaskCompletionSource<TResponse> tcs)
@@ -218,6 +216,7 @@ namespace EasyNetQ.Producer
             string routingKey,
             string returnQueueName,
             Guid correlationId,
+            TimeSpan expiration,
             CancellationToken cancellationToken
         )
         {
@@ -234,7 +233,7 @@ namespace EasyNetQ.Producer
                 {
                     ReplyTo = returnQueueName,
                     CorrelationId = correlationId.ToString(),
-                    Expiration = (timeoutStrategy.GetTimeoutSeconds(requestType) * 1000).ToString(),
+                    Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture),
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
                 }
             };

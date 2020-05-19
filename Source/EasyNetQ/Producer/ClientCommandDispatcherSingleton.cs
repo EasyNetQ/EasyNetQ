@@ -30,6 +30,7 @@ namespace EasyNetQ.Producer
                 StartDispatcherThread(configuration);
         }
 
+        /// <inheritdoc />
         public Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
@@ -42,13 +43,20 @@ namespace EasyNetQ.Producer
                 {
                     if (cancellation.IsCancellationRequested)
                     {
-                        tcs.TrySetCanceled();
+                        tcs.TrySetCanceled(cancellation.Token);
                         return;
                     }
 
                     try
                     {
-                        persistentChannel.InvokeChannelAction(channel => tcs.TrySetResult(channelAction(channel)));
+                        persistentChannel.InvokeChannelAction(
+                            channel => tcs.TrySetResult(channelAction(channel)),
+                            default
+                        );
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        tcs.TrySetCanceled(e.CancellationToken);
                     }
                     catch (Exception e)
                     {
@@ -64,6 +72,7 @@ namespace EasyNetQ.Producer
             return tcs.Task;
         }
 
+        /// <inheritdoc />
         public Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
@@ -75,6 +84,7 @@ namespace EasyNetQ.Producer
             }, cancellationToken);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             queue.CompleteAdding();

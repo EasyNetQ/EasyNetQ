@@ -12,8 +12,8 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
     public class When_an_action_is_invoked_that_throws : IDisposable
     {
-        private IClientCommandDispatcher dispatcher;
-        private IPersistentChannel channel;
+        private readonly IClientCommandDispatcher dispatcher;
+        private readonly IPersistentChannel channel;
 
         public When_an_action_is_invoked_that_throws()
         {
@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channel = Substitute.For<IPersistentChannel>();
 
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.WhenForAnyArgs(x => x.InvokeChannelAction(null))
+            channel.WhenForAnyArgs(x => x.InvokeChannelAction(null, default))
                    .Do(x => ((Action<IModel>)x[0])(null));
 
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
@@ -40,10 +40,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         {
             var exception = new CrazyTestOnlyException();
 
-            var task = dispatcher.InvokeAsync(x =>
-            {
-                throw exception;
-            });
+            var task = dispatcher.InvokeAsync(x => throw exception, default);
 
             try
             {
@@ -64,14 +61,14 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 
             try
             {
-                dispatcher.InvokeAsync(errorAction).Wait();
+                dispatcher.InvokeAsync(errorAction, default).Wait();
             }
             catch
             {
                 // ignore exception
             }
 
-            dispatcher.InvokeAsync(goodAction).Wait();
+            dispatcher.InvokeAsync(goodAction, default).Wait();
             goodActionWasInvoked.Should().BeTrue();
         }
 

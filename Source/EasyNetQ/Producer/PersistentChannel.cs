@@ -2,7 +2,7 @@
 using System.Threading;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
+using EasyNetQ.Internals;
 using EasyNetQ.Sprache;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -10,6 +10,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Producer
 {
+    /// <inheritdoc />
     public class PersistentChannel : IPersistentChannel
     {
         private const int MinRetryTimeoutMs = 50;
@@ -18,9 +19,14 @@ namespace EasyNetQ.Producer
         private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
 
-        private readonly ILog logger = LogProvider.For<PersistentChannel>();
         private IModel channel;
 
+        /// <summary>
+        /// Creates PersistentChannel
+        /// </summary>
+        /// <param name="connection">The connection</param>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="eventBus">The event's bus</param>
         public PersistentChannel(
             IPersistentConnection connection,
             ConnectionConfiguration configuration,
@@ -36,18 +42,19 @@ namespace EasyNetQ.Producer
             this.eventBus = eventBus;
         }
 
-        public void InvokeChannelAction(Action<IModel> channelAction)
+        /// <inheritdoc />
+        public void InvokeChannelAction(Action<IModel> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            var timeout = TimeBudget.Start(configuration.GetTimeout());
-
             var retryTimeoutMs = MinRetryTimeoutMs;
-            while (!timeout.IsExpired())
+            while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
-                    channelAction(channel ?? (channel = CreateChannel()));
+                    channelAction(channel ??= CreateChannel());
                     return;
                 }
                 catch (OperationInterruptedException exception)
@@ -58,15 +65,12 @@ namespace EasyNetQ.Producer
                 {
                 }
 
-                Thread.Sleep(retryTimeoutMs);
-
+                TaskHelpers.Delay(retryTimeoutMs, cancellationToken);
                 retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
             }
-
-            logger.Error("Channel action timed out");
-            throw new TimeoutException("The operation requested on PersistentChannel timed out");
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             channel?.Dispose();

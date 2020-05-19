@@ -146,7 +146,7 @@ namespace EasyNetQ
                 VirtualHost = virtualHost,
                 UserName = username,
                 Password = password,
-                RequestedHeartbeat = requestedHeartbeat
+                RequestedHeartbeat = TimeSpan.FromSeconds(requestedHeartbeat)
             };
             return CreateBus(connectionConfiguration, registerServices);
         }

@@ -49,8 +49,8 @@ namespace EasyNetQ.Tests.Integration
                     for (var j = 0; j < 100000; j++)
                     {
                         dispatcher.InvokeAsync(
-                            x =>
-                                x.BasicPublish("", "MyQueue", false, x.CreateBasicProperties(), body)
+                            x => x.BasicPublish("", "MyQueue", false, x.CreateBasicProperties(), body),
+                            default
                         ).Wait();
                     }
                 }, TaskCreationOptions.LongRunning));
@@ -76,7 +76,7 @@ namespace EasyNetQ.Tests.Integration
         [Fact]
         public void Should_be_able_to_get_result_back()
         {
-            var task = dispatcher.InvokeAsync(x => x.QueueDeclare("MyQueue", true, false, false, null));
+            var task = dispatcher.InvokeAsync(x => x.QueueDeclare("MyQueue", true, false, false, null), default);
             task.Wait();
             var queueDeclareOk = task.Result;
             Console.Out.WriteLine(queueDeclareOk.QueueName);
@@ -89,7 +89,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 x.ExchangeDeclare("MyExchange", "topic", true, false, new Dictionary<string, object>());
                 Console.Out.WriteLine("declare executed");
-            });
+            }, default);
             task.Wait();
             Console.Out.WriteLine("Task complete");
         }
@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests.Integration
             {
                 x.ExchangeDeclare("MyExchange", "direct", true, false, new Dictionary<string, object>());
                 Console.Out.WriteLine("declare executed");
-            });
+            }, default);
             task.Wait();
             Console.Out.WriteLine("Task complete");
         }

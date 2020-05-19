@@ -37,10 +37,13 @@ namespace EasyNetQ.Producer
             this.advancedBus = advancedBus;
         }
 
+        /// <inheritdoc />
         public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
+
+            var cts = CreateCancellationTokenSource(cancellationToken);
 
             var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
             configure(configuration);
@@ -48,20 +51,18 @@ namespace EasyNetQ.Producer
             var messageType = typeof(T);
             var easyNetQMessage = new Message<T>(message)
             {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
-                }
+                Properties = { DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)}
             };
             if (configuration.Priority != null)
                 easyNetQMessage.Properties.Priority = configuration.Priority.Value;
             if (configuration.Expires != null)
                 easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
 
-            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cts.Token).ConfigureAwait(false);
+            await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage, cts.Token).ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public virtual AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
             string subscriptionId,
             Func<T, CancellationToken, Task> onMessage,
@@ -83,6 +84,8 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
+            using var cts = CreateCancellationTokenSource(cancellationToken);
+
             var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
             configure(configuration);
 
@@ -101,14 +104,14 @@ namespace EasyNetQ.Producer
                     if (configuration.MaxLengthBytes.HasValue) c.WithMaxLengthBytes(configuration.MaxLengthBytes.Value);
                     if (!string.IsNullOrEmpty(configuration.QueueMode)) c.WithQueueMode(configuration.QueueMode);
                 },
-                cancellationToken
+                cts.Token
             ).ConfigureAwait(false);
 
-            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
 
             foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
             {
-                await advancedBus.BindAsync(exchange, queue, topic, cancellationToken).ConfigureAwait(false);
+                await advancedBus.BindAsync(exchange, queue, topic, cts.Token).ConfigureAwait(false);
             }
 
             var consumerCancellation = advancedBus.Consume<T>(
@@ -120,6 +123,13 @@ namespace EasyNetQ.Producer
             );
 
             return new SubscriptionResult(exchange, queue, consumerCancellation);
+        }
+
+        private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
+        {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(connectionConfiguration.Timeout);
+            return cts;
         }
     }
 }

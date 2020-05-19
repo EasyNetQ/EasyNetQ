@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    public static class TaskHelpers
+    internal static class TaskHelpers
     {
         public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
         {
@@ -130,5 +130,19 @@ namespace EasyNetQ.Internals
         }
 
         public static Task Completed { get; } = FromResult<object>(null);
+
+        public static void Delay(int millisecondsDelay, CancellationToken cancellationToken)
+        {
+            Task.Delay(millisecondsDelay, cancellationToken).GetAwaiter().GetResult();
+        }
+
+        public static async Task<T> WithCancellation<T>(Task<T> task, CancellationToken cancellationToken)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            using(cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs, false))
+                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
+                    throw new OperationCanceledException(cancellationToken);
+            return await task.ConfigureAwait(false);
+        }
     }
 }

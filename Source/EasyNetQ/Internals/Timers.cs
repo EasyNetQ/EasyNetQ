@@ -5,7 +5,7 @@ using EasyNetQ.Logging;
 namespace EasyNetQ.Internals
 {
     //https://stackoverflow.com/questions/4962172/why-does-a-system-timers-timer-survive-gc-but-not-system-threading-timer
-    public static class Timers
+    internal static class Timers
     {
         private static readonly ILog logger = LogProvider.GetLogger(typeof(Timers));
 

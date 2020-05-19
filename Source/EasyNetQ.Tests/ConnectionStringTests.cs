@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Linq;
 using EasyNetQ.ConnectionString;
 using FluentAssertions;
@@ -92,7 +93,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_parse_heartbeat()
         {
-            connectionString.RequestedHeartbeat.Should().Be(3);
+            connectionString.RequestedHeartbeat.Should().Be(TimeSpan.FromSeconds(3));
         }
 
         [Fact]
@@ -128,7 +129,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_set_default_requestHeartbeat()
         {
-            defaults.RequestedHeartbeat.Should().Be(10);
+            defaults.RequestedHeartbeat.Should().Be(TimeSpan.FromSeconds(10));
         }
 
         [Fact]
@@ -145,7 +146,7 @@ namespace EasyNetQ.Tests
             parsed.UserName.Should().Be("Copa");
             parsed.Password.Should().Be("abc_xyz");
             parsed.Port.Should().Be(12345);
-            parsed.RequestedHeartbeat.Should().Be(3);
+            parsed.RequestedHeartbeat.Should().Be(TimeSpan.FromSeconds(3));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace EasyNetQ.DI
             if (connectionFactory.Port == -1)
                 connectionFactory.Port = connectionConfiguration.Port;
 
-            connectionFactory.RequestedHeartbeat = TimeSpan.FromSeconds(connectionConfiguration.RequestedHeartbeat);
+            connectionFactory.RequestedHeartbeat = connectionConfiguration.RequestedHeartbeat;
             connectionFactory.ClientProperties = connectionConfiguration.ClientProperties;
             connectionFactory.AuthMechanisms = connectionConfiguration.AuthMechanisms;
 

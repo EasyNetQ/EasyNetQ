@@ -13,8 +13,8 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
     public class When_an_action_is_invoked : IDisposable
     {
-        private IClientCommandDispatcher dispatcher;
-        private IPersistentChannel channel;
+        private readonly IClientCommandDispatcher dispatcher;
+        private readonly IPersistentChannel channel;
         private bool actionWasInvoked;
         private string actionThreadName;
 
@@ -36,12 +36,12 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
                 };
 
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.When(x => x.InvokeChannelAction(Arg.Any<Action<IModel>>()))
+            channel.When(x => x.InvokeChannelAction(Arg.Any<Action<IModel>>(), Arg.Any<CancellationToken>()))
                    .Do(x => ((Action<IModel>)x[0])(null));
 
             dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
 
-            dispatcher.InvokeAsync(action).Wait();
+            dispatcher.InvokeAsync(action, default).Wait();
         }
 
         public void Dispose()

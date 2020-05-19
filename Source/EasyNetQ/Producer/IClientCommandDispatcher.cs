@@ -10,7 +10,7 @@ namespace EasyNetQ.Producer
     /// </summary>
     public interface IClientCommandDispatcher : IDisposable
     {
-        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken = default);
-        Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken = default);
+        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken);
+        Task InvokeAsync(Action<IModel> channelAction, CancellationToken cancellationToken);
     }
 }

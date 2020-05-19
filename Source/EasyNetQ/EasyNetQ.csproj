@@ -5,11 +5,10 @@
     <Description>EasyNetQ</Description>
     <PackageTags>RabbitMQ;Messaging;AMQP;C#</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
+    <LangVersion>latest</LangVersion>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <DefineConstants>$(DefineConstants);LIBLOG_PUBLIC;LIBLOG_PORTABLE</DefineConstants>
     <LangVersion>latest</LangVersion>
-    <DefineConstants>$(DefineConstants);LIBLOG_PUBLIC</DefineConstants>
-    <LangVersion>7.1</LangVersion>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>

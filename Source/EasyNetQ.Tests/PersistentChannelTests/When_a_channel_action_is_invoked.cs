@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NSubstitute;
@@ -8,7 +9,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    public class When_a_channel_action_is_invoked
+    public class When_a_channel_action_is_invoked: IDisposable
     {
         public When_a_channel_action_is_invoked()
         {
@@ -21,13 +22,13 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
 
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), default);
         }
 
-        private IPersistentChannel persistentChannel;
-        private IPersistentConnection persistentConnection;
-        private IModel channel;
-        private IEventBus eventBus;
+        private readonly IPersistentChannel persistentChannel;
+        private readonly IPersistentConnection persistentConnection;
+        private readonly IModel channel;
+        private readonly IEventBus eventBus;
 
         [Fact]
         public void Should_open_a_channel()
@@ -45,6 +46,11 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         public void Should_run_action_on_channel()
         {
             channel.Received().ExchangeDeclare("MyExchange", "direct");
+        }
+
+        public void Dispose()
+        {
+            persistentChannel.Dispose();
         }
     }
 }

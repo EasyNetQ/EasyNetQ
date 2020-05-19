@@ -19,8 +19,8 @@ namespace EasyNetQ
             VirtualHost = "/";
             UserName = "guest";
             Password = "guest";
-            RequestedHeartbeat = 10;
-            Timeout = 10; // seconds
+            RequestedHeartbeat = TimeSpan.FromSeconds(10);
+            Timeout = TimeSpan.FromSeconds(10);
             PublisherConfirms = false;
             PersistentMessages = true;
             UseBackgroundThreads = false;
@@ -46,9 +46,9 @@ namespace EasyNetQ
         public string Password { get; set; }
 
         /// <summary>
-        ///     Heartbeat interval seconds. (default is 10)
+        ///     Heartbeat interval. (default is 10)
         /// </summary>
-        public ushort RequestedHeartbeat { get; set; }
+        public TimeSpan RequestedHeartbeat { get; set; }
 
         public ushort PrefetchCount { get; set; }
         public Uri AmqpConnectionString { get; set; }
@@ -58,9 +58,9 @@ namespace EasyNetQ
         public SslOption Ssl { get; }
 
         /// <summary>
-        ///     Operation timeout seconds. (default is 10)
+        ///     Operations timeout. (default is 10)
         /// </summary>
-        public ushort Timeout { get; set; }
+        public TimeSpan Timeout { get; set; }
 
         public bool PublisherConfirms { get; set; }
         public bool PersistentMessages { get; set; }
