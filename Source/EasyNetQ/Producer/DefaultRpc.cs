@@ -82,7 +82,7 @@ namespace EasyNetQ.Producer
             var correlationId = Guid.NewGuid();
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             RegisterResponseActions(correlationId, tcs);
-            using var callback = DisposableCallback<Guid>.Create(DeRegisterResponseActions, correlationId);
+            using var callback = DisposableAction<Guid>.Create(DeRegisterResponseActions, correlationId);
 
             try
             {
