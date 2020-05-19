@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Producer
 {
+    /// <inheritdoc />
     public class ClientCommandDispatcherSingleton : IClientCommandDispatcher
     {
         private readonly ILog logger = LogProvider.For<ClientCommandDispatcherSingleton>();

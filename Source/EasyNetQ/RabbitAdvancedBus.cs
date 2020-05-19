@@ -241,56 +241,50 @@ namespace EasyNetQ
             using var cts = CreateCancellationTokenSource(cancellationToken);
 
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
-            try
-            {
-                if (connectionConfiguration.PublisherConfirms)
-                {
-                    while (true)
-                    {
-                        var pendingConfirmation = await clientCommandDispatcher.InvokeAsync(model =>
-                        {
-                            var properties = model.CreateBasicProperties();
-                            rawMessage.Properties.CopyTo(properties);
-                            var confirmation = confirmationListener.CreatePendingConfirmation(model);
-                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
-                            return confirmation;
-                        }, cts.Token).ConfigureAwait(false);
 
-                        try
-                        {
-                            await pendingConfirmation.WaitAsync(cts.Token).ConfigureAwait(false);
-                            break;
-                        }
-                        catch (PublishInterruptedException)
-                        {
-                        }
-                    }
-                }
-                else
+            if (connectionConfiguration.PublisherConfirms)
+            {
+                while (true)
                 {
-                    await clientCommandDispatcher.InvokeAsync(model =>
+                    var pendingConfirmation = await clientCommandDispatcher.InvokeAsync(model =>
                     {
                         var properties = model.CreateBasicProperties();
                         rawMessage.Properties.CopyTo(properties);
+                        var confirmation = confirmationListener.CreatePendingConfirmation(model);
                         model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
+                        return confirmation;
                     }, cts.Token).ConfigureAwait(false);
-                }
 
-                eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
-
-                if (logger.IsDebugEnabled())
-                {
-                    logger.DebugFormat(
-                        "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
-                        exchange.Name,
-                        routingKey,
-                        messageProperties.CorrelationId
-                    );
+                    try
+                    {
+                        await pendingConfirmation.WaitAsync(cts.Token).ConfigureAwait(false);
+                        break;
+                    }
+                    catch (PublishInterruptedException)
+                    {
+                    }
                 }
             }
-            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            else
             {
-                throw new TimeoutException($"Publish timed out after {connectionConfiguration.Timeout} seconds");
+                await clientCommandDispatcher.InvokeAsync(model =>
+                {
+                    var properties = model.CreateBasicProperties();
+                    rawMessage.Properties.CopyTo(properties);
+                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
+                }, cts.Token).ConfigureAwait(false);
+            }
+
+            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                    exchange.Name,
+                    routingKey,
+                    messageProperties.CorrelationId
+                );
             }
         }
 

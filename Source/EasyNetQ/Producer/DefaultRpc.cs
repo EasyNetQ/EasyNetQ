@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading;
@@ -22,7 +21,6 @@ namespace EasyNetQ.Producer
         protected readonly IAdvancedBus advancedBus;
         private readonly ConnectionConfiguration connectionConfiguration;
         protected readonly IConventions conventions;
-        private readonly List<IDisposable> eventBusSubscriptions = new List<IDisposable>();
 
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
@@ -31,6 +29,7 @@ namespace EasyNetQ.Producer
 
         private readonly AsyncLock responseSubscriptionsLock = new AsyncLock();
         private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly IDisposable onConnectedEventSubscription;
 
         public DefaultRpc(
             ConnectionConfiguration connectionConfiguration,
@@ -57,7 +56,7 @@ namespace EasyNetQ.Producer
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.typeNameSerializer = typeNameSerializer;
 
-            eventBusSubscriptions.Add(eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated));
+            onConnectedEventSubscription = eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
         }
 
         /// <inheritdoc />
@@ -82,21 +81,14 @@ namespace EasyNetQ.Producer
             var correlationId = Guid.NewGuid();
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             RegisterResponseActions(correlationId, tcs);
-            using var callback = DisposableAction<Guid>.Create(DeRegisterResponseActions, correlationId);
+            using var callback = DisposableActions.Create(DeRegisterResponseActions, correlationId);
 
-            try
-            {
-                var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
-                var routingKey = configuration.QueueName;
-                var expiration = configuration.Expiration;
-                await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
+            var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
+            var routingKey = configuration.QueueName;
+            var expiration = configuration.Expiration;
+            await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
 
-                return await TaskHelpers.WithCancellation(tcs.Task, cts.Token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-            {
-                throw new TimeoutException();
-            }
+            return await TaskHelpers.WithCancellation(tcs.Task, cts.Token).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -118,9 +110,7 @@ namespace EasyNetQ.Producer
         /// <inheritdoc />
         public void Dispose()
         {
-            foreach (var eventBusSubscription in eventBusSubscriptions)
-                eventBusSubscription.Dispose();
-
+            onConnectedEventSubscription.Dispose();
             foreach (var responseSubscription in responseSubscriptions.Values)
                 responseSubscription.Unsubscribe();
         }
@@ -227,17 +217,16 @@ namespace EasyNetQ.Producer
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var requestMessage = new Message<TRequest>(request)
+            var requestProperties = new MessageProperties
             {
-                Properties =
-                {
-                    ReplyTo = returnQueueName,
-                    CorrelationId = correlationId.ToString(),
-                    Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture),
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
-                }
+                ReplyTo = returnQueueName,
+                CorrelationId = correlationId.ToString(),
+                DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
             };
+            if (expiration != Timeout.InfiniteTimeSpan)
+                requestProperties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
 
+            var requestMessage = new Message<TRequest>(request, requestProperties);
             await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken).ConfigureAwait(false);
         }
 
@@ -266,7 +255,10 @@ namespace EasyNetQ.Producer
             );
         }
 
-        private async Task RespondToMessageAsync<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder, IMessage<TRequest> requestMessage,
+        private async Task RespondToMessageAsync<TRequest, TResponse>(
+            Func<TRequest, CancellationToken,
+            Task<TResponse>> responder,
+            IMessage<TRequest> requestMessage,
             CancellationToken cancellationToken)
         {
             //TODO Cache declaration of exchange
