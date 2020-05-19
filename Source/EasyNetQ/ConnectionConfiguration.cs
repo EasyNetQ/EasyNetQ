@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using RabbitMQ.Client;
 
 namespace EasyNetQ
@@ -40,47 +42,80 @@ namespace EasyNetQ
             ClientProperties = new Dictionary<string, object>();
         }
 
+        /// <summary>
+        /// Dictionary of client properties to be sent to the server.
+        /// You can browse these properties when selecting connection in RabbitMQ Management Plugin.
+        /// All properties with <c>null</c> values will be displayed as 'undefined'.
+        /// </summary>
+        public IDictionary<string, object> ClientProperties { get; }
+
         public ushort Port { get; set; }
+
         public string VirtualHost { get; set; }
+
+        /// <summary>
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
+        /// </summary>
         public string UserName { get; set; }
+
         public string Password { get; set; }
 
         /// <summary>
-        ///     Heartbeat interval seconds. (default is 10)
+        /// Heartbeat interval seconds. (default is 10)
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
         /// </summary>
         public ushort RequestedHeartbeat { get; set; }
 
         public ushort PrefetchCount { get; set; }
+
         public Uri AmqpConnectionString { get; set; }
-        public IDictionary<string, object> ClientProperties { get; }
 
         public IEnumerable<HostConfiguration> Hosts { get; set; }
+
         public SslOption Ssl { get; }
 
         /// <summary>
-        ///     Operation timeout seconds. (default is 10)
+        /// Operation timeout seconds. (default is 10)
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
         /// </summary>
         public ushort Timeout { get; set; }
 
+        /// <summary>
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
+        /// </summary>
         public bool PublisherConfirms { get; set; }
+
+        /// <summary>
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
+        /// </summary>
         public bool PersistentMessages { get; set; }
+
+        /// <summary>
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
+        /// </summary>
         public string Product { get; set; }
+
+        /// <summary>
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
+        /// </summary>
         public string Platform { get; set; }
+
+        /// <summary>
+        /// This property will be written to <see cref="ClientProperties"/> if it is not there yet.
+        /// </summary>
         public string Name { get; set; }
+
         public bool UseBackgroundThreads { get; set; }
+
         public IList<IAuthMechanismFactory> AuthMechanisms { get; set; }
+
         public TimeSpan ConnectIntervalAttempt { get; set; }
+
         public int DispatcherQueueSize { get; set; }
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {
-            string applicationNameAndPath = null;
-#if !NETFX
-            var version = GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
-#else
-            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-#endif
-            applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+            var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
             var applicationName = "unknown";
             var applicationPath = "unknown";
@@ -99,23 +134,16 @@ namespace EasyNetQ
                 {
                 }
 
-            var hostname = Environment.MachineName;
-
-            var netVersion = Environment.Version.ToString();
-            var product = Product ?? applicationName;
-            var platform = Platform ?? hostname;
-            var name = Name ?? applicationName;
-
             AddValueIfNotExists(clientProperties, "client_api", "EasyNetQ");
-            AddValueIfNotExists(clientProperties, "product", product);
-            AddValueIfNotExists(clientProperties, "platform", platform);
-            AddValueIfNotExists(clientProperties, "net_version", netVersion);
-            AddValueIfNotExists(clientProperties, "version", version);
-            AddValueIfNotExists(clientProperties, "connection_name", name);
-            AddValueIfNotExists(clientProperties, "easynetq_version", version);
+            AddValueIfNotExists(clientProperties, "product", Product ?? applicationName);
+            AddValueIfNotExists(clientProperties, "platform", Platform ?? GetPlatform());
+            AddValueIfNotExists(clientProperties, "os", Environment.OSVersion.ToString());
+            AddValueIfNotExists(clientProperties, "version", GetApplicationVersion());
+            AddValueIfNotExists(clientProperties, "connection_name", Name ?? applicationName);
+            AddValueIfNotExists(clientProperties, "easynetq_version", typeof(ConnectionConfiguration).Assembly.GetName().Version.ToString());
             AddValueIfNotExists(clientProperties, "application", applicationName);
             AddValueIfNotExists(clientProperties, "application_location", applicationPath);
-            AddValueIfNotExists(clientProperties, "machine_name", hostname);
+            AddValueIfNotExists(clientProperties, "machine_name", Environment.MachineName);
             AddValueIfNotExists(clientProperties, "user", UserName);
             AddValueIfNotExists(clientProperties, "connected", DateTime.UtcNow.ToString("u")); // UniversalSortableDateTimePattern: yyyy'-'MM'-'dd HH':'mm':'ss'Z'
             AddValueIfNotExists(clientProperties, "requested_heartbeat", RequestedHeartbeat.ToString());
@@ -126,6 +154,7 @@ namespace EasyNetQ
 
         private static void AddValueIfNotExists(IDictionary<string, object> clientProperties, string name, string value)
         {
+            // allow set nulls, null values will be displayed as 'undefined'
             if (!clientProperties.ContainsKey(name))
                 clientProperties.Add(name, value);
         }
@@ -155,6 +184,34 @@ namespace EasyNetQ
                     hostConfiguration.Port = Port;
 
             SetDefaultClientProperties(ClientProperties);
+        }
+
+        private static string GetApplicationVersion()
+        {
+            try
+            {
+                return Assembly.GetEntryAssembly()?.GetName().Version.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string GetPlatform()
+        {
+#if NETSTANDARD2_0
+            string platform = RuntimeInformation.FrameworkDescription;
+#else
+            string platform = Environment.Version.ToString();
+#endif
+
+            string frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+            if (frameworkName != null)
+                platform = platform + " [" + frameworkName + "]";
+
+            // example: .NET Core 4.6.27317.07 [.NETCoreApp,Version=v2.0]
+            return platform;
         }
     }
 
