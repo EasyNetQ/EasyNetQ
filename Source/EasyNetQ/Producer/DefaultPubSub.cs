@@ -43,7 +43,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = CreateCancellationTokenSource(cancellationToken);
 
             var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
             configure(configuration);
