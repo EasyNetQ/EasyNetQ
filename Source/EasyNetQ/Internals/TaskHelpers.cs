@@ -139,7 +139,7 @@ namespace EasyNetQ.Internals
         public static async Task<T> WithCancellation<T>(Task<T> task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
-            using(cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs, false))
+            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs, false))
                 if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                     throw new OperationCanceledException(cancellationToken);
             return await task.ConfigureAwait(false);
