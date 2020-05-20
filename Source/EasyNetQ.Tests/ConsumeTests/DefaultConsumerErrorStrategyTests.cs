@@ -22,6 +22,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             Assert.Equal(AckStrategies.Ack, ackStrategy);
             modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
+            modelMock.Received().ConfirmSelect();
         }
 
         [Fact]
@@ -38,6 +39,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
             modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
+            modelMock.Received().ConfirmSelect();
         }
 
         [Fact]
