@@ -45,7 +45,7 @@ namespace EasyNetQ.DI
                     var connectionConfiguration = c.Resolve<ConnectionConfiguration>();
                     return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
                 })
-                .Register<IClientCommandDispatcher, ClientCommandDispatcher>()
+                .Register<IClientCommandDispatcher, DefaultClientCommandDispatcher>()
                 .Register<IPersistentConnection>(c =>
                 {
                     var connection = new PersistentConnection(c.Resolve<ConnectionConfiguration>(), c.Resolve<IConnectionFactory>(), c.Resolve<IEventBus>());

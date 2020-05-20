@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    public sealed class AsyncLock
+    internal sealed class AsyncLock : IDisposable
     {
         private readonly SemaphoreSlim semaphore;
         private readonly IDisposable semaphoreReleaser;
@@ -25,15 +25,11 @@ namespace EasyNetQ.Internals
         {
             private readonly SemaphoreSlim semaphore;
 
-            public SemaphoreSlimReleaser(SemaphoreSlim semaphore)
-            {
-                this.semaphore = semaphore;
-            }
+            public SemaphoreSlimReleaser(SemaphoreSlim semaphore) => this.semaphore = semaphore;
 
-            public void Dispose()
-            {
-                semaphore.Release();
-            }
+            public void Dispose() => semaphore.Release();
         }
+
+        public void Dispose() => semaphore.Dispose();
     }
 }

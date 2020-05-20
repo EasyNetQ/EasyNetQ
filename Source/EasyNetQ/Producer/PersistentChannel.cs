@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
-using EasyNetQ.Internals;
 using EasyNetQ.Sprache;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -43,7 +43,7 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public void InvokeChannelAction(Action<IModel> channelAction, CancellationToken cancellationToken)
+        public async Task<T> InvokeChannelActionAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
@@ -54,8 +54,7 @@ namespace EasyNetQ.Producer
 
                 try
                 {
-                    channelAction(channel ??= CreateChannel());
-                    return;
+                    return channelAction(channel ??= CreateChannel());
                 }
                 catch (OperationInterruptedException exception)
                 {
@@ -65,16 +64,13 @@ namespace EasyNetQ.Producer
                 {
                 }
 
-                TaskHelpers.Delay(retryTimeoutMs, cancellationToken);
+                await Task.Delay(retryTimeoutMs, cancellationToken).ConfigureAwait(false);
                 retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
             }
         }
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-            channel?.Dispose();
-        }
+        public void Dispose() => channel?.Dispose();
 
         private IModel CreateChannel()
         {

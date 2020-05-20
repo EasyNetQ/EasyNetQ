@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
@@ -14,6 +15,6 @@ namespace EasyNetQ.Producer
         /// </summary>
         /// <param name="channelAction">The action to invoke</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        void InvokeChannelAction(Action<IModel> channelAction, CancellationToken cancellationToken);
+        Task<T> InvokeChannelActionAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken);
     }
 }
