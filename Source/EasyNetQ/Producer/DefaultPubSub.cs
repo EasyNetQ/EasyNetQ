@@ -45,22 +45,22 @@ namespace EasyNetQ.Producer
 
             using var cts = CreateCancellationTokenSource(cancellationToken);
 
-            var publishConfirmation = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
-            configure(publishConfirmation);
+            var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(publishConfiguration);
 
             var messageType = typeof(T);
             var advancedMessageProperties = new MessageProperties
             {
                 DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
             };
-            if (publishConfirmation.Priority != null)
-                advancedMessageProperties.Priority = publishConfirmation.Priority.Value;
-            if (publishConfirmation.Expires != null)
-                advancedMessageProperties.Expiration = publishConfirmation.Expires.ToString();
+            if (publishConfiguration.Priority != null)
+                advancedMessageProperties.Priority = publishConfiguration.Priority.Value;
+            if (publishConfiguration.Expires != null)
+                advancedMessageProperties.Expiration = publishConfiguration.Expires.ToString();
 
             var advancedMessage = new Message<T>(message, advancedMessageProperties);
             var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cts.Token).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, publishConfirmation.Topic, false, advancedMessage, cts.Token).ConfigureAwait(false);
+            await advancedBus.PublishAsync(exchange, publishConfiguration.Topic, false, advancedMessage, cts.Token).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
