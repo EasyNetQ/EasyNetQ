@@ -76,6 +76,8 @@ namespace EasyNetQ.Consumer
             {
                 using (var model = connection.CreateModel())
                 {
+                    if (configuration.PublisherConfirms) model.ConfirmSelect();
+
                     var errorExchange = DeclareErrorExchangeWithQueue(model, context);
 
                     var messageBody = CreateErrorMessage(context, exception);
