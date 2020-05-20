@@ -31,12 +31,12 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_try_to_reconnect_until_timeout()
         {
-            Assert.Throws<TimeoutException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
+            Assert.Throws<OperationCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
         }
     }
 }
