@@ -12,7 +12,7 @@ namespace EasyNetQ.Producer
     /// <inheritdoc />
     public class PublishConfirmationListener : IPublishConfirmationListener
     {
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<ulong, TaskCompletionSource<object>>> unconfirmedChannelRequests = new ConcurrentDictionary<int, ConcurrentDictionary<ulong, TaskCompletionSource<object>>>();
+        private readonly ConcurrentDictionary<int, ConcurrentDictionary<ulong, TaskCompletionSource<object>>> unconfirmedChannelRequests;
         private readonly IDisposable[] subscriptions;
 
         /// <summary>
@@ -21,6 +21,7 @@ namespace EasyNetQ.Producer
         /// <param name="eventBus"></param>
         public PublishConfirmationListener(IEventBus eventBus)
         {
+            unconfirmedChannelRequests = new ConcurrentDictionary<int, ConcurrentDictionary<ulong, TaskCompletionSource<object>>>();
             subscriptions = new[]
             {
                 eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation),
@@ -31,10 +32,10 @@ namespace EasyNetQ.Producer
         /// <inheritdoc />
         public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
         {
-            var deliveryTag = model.NextPublishSeqNo;
+            var sequenceNumber = model.NextPublishSeqNo;
             var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
             var confirmationTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-            requests.Add(deliveryTag, confirmationTcs);
+            requests.Add(sequenceNumber, confirmationTcs);
             return new PublishPendingConfirmation(confirmationTcs);
         }
 
@@ -67,30 +68,35 @@ namespace EasyNetQ.Producer
 
         private void OnPublishChannelCreated(PublishChannelCreatedEvent @event)
         {
-            InterruptAllUnconfirmedRequests();
-            InitializeUnconfirmedRequests(@event.Channel);
+            InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
         }
 
-        private void InterruptAllUnconfirmedRequests(bool cancellationInsteadOfInterruption=false)
+        private void InterruptUnconfirmedRequests(int channelNumber, bool cancellationInsteadOfInterruption = false)
         {
-            foreach (var channelNumber in unconfirmedChannelRequests.Select(x => x.Key))
+            if (!unconfirmedChannelRequests.TryRemove(channelNumber, out var requests))
+                return;
+
+            do
             {
-                if (!unconfirmedChannelRequests.TryRemove(channelNumber, out var requests)) continue;
-                foreach (var deliveryTag in requests.Select(x => x.Key))
+                foreach (var sequenceNumber in requests.Select(x => x.Key))
                 {
-                    if (!requests.TryRemove(deliveryTag, out var confirmationTcs)) continue;
+                    if (!requests.TryRemove(sequenceNumber, out var confirmationTcs)) continue;
 
                     if (cancellationInsteadOfInterruption)
                         confirmationTcs.TrySetCanceled();
                     else
                         confirmationTcs.TrySetException(new PublishInterruptedException());
                 }
-            }
+            } while (!requests.IsEmpty);
         }
 
-        private void InitializeUnconfirmedRequests(IModel model)
+        private void InterruptAllUnconfirmedRequests(bool cancellationInsteadOfInterruption=false)
         {
-            unconfirmedChannelRequests.Add(model.ChannelNumber, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
+            do
+            {
+                foreach (var channelNumber in unconfirmedChannelRequests.Select(x => x.Key))
+                    InterruptUnconfirmedRequests(channelNumber, cancellationInsteadOfInterruption);
+            } while (!unconfirmedChannelRequests.IsEmpty);
         }
 
         private static void Confirm(TaskCompletionSource<object> tcs, ulong sequenceNumber, bool isNack)

@@ -15,11 +15,12 @@ namespace EasyNetQ.Producer
     {
         private const int MinRetryTimeoutMs = 50;
         private const int MaxRetryTimeoutMs = 5000;
+
         private readonly ConnectionConfiguration configuration;
         private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
 
-        private IModel channel;
+        private volatile IModel initializedChannel;
 
         /// <summary>
         /// Creates PersistentChannel
@@ -54,11 +55,10 @@ namespace EasyNetQ.Producer
 
                 try
                 {
-                    return channelAction(channel ??= CreateChannel());
+                    return channelAction(initializedChannel ??= CreateChannel());
                 }
-                catch (OperationInterruptedException exception)
+                catch (OperationInterruptedException exception) when(!NeedRethrow(exception))
                 {
-                    if (NeedRethrow(exception)) throw;
                 }
                 catch (EasyNetQException)
                 {
@@ -70,7 +70,7 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public void Dispose() => channel?.Dispose();
+        public void Dispose() => initializedChannel?.Dispose();
 
         private IModel CreateChannel()
         {
@@ -93,12 +93,12 @@ namespace EasyNetQ.Producer
             channel.BasicReturn += OnReturn;
 
             if (channel is IRecoverable recoverable)
-                recoverable.Recovery += OnConnectionRestored;
+                recoverable.Recovery += OnChannelRestored;
             else
                 throw new NotSupportedException("Non-recoverable channel is not supported");
         }
 
-        private void OnConnectionRestored(object sender, EventArgs e)
+        private void OnChannelRestored(object sender, EventArgs e)
         {
             eventBus.Publish(new PublishChannelCreatedEvent((IModel)sender));
         }
