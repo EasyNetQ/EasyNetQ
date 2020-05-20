@@ -1,7 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
-using EasyNetQ.Producer;
+using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_try_to_reconnect_until_timeout()
         {
-            Assert.Throws<OperationCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
+            Assert.Throws<TaskCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
         }
     }
 }

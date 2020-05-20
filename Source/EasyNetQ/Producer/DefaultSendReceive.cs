@@ -145,7 +145,7 @@ namespace EasyNetQ.Producer
 
             public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
             {
-                handlerRegistration.Add<T>((message, info) => onMessage(message.Body, default));
+                handlerRegistration.Add<T>((message, info, c) => onMessage(message.Body, c));
                 return this;
             }
         }

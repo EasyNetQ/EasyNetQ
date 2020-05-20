@@ -20,7 +20,7 @@ namespace EasyNetQ
         private readonly IClientCommandDispatcher clientCommandDispatcher;
         private readonly IPublishConfirmationListener confirmationListener;
         private readonly IPersistentConnection connection;
-        private readonly ConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration configuration;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEventBus eventBus;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
@@ -38,7 +38,7 @@ namespace EasyNetQ
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
             IServiceResolver container,
-            ConnectionConfiguration connectionConfiguration,
+            ConnectionConfiguration configuration,
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
@@ -51,7 +51,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
             Preconditions.CheckNotNull(container, "container");
             Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
@@ -62,7 +62,7 @@ namespace EasyNetQ
             this.eventBus = eventBus;
             this.handlerCollectionFactory = handlerCollectionFactory;
             this.Container = container;
-            this.connectionConfiguration = connectionConfiguration;
+            this.configuration = configuration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
@@ -130,7 +130,7 @@ namespace EasyNetQ
                 return Tuple.Create(x.Queue, onMessage);
             }).ToList();
 
-            var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
+            var consumerConfiguration = new ConsumerConfiguration(configuration.PrefetchCount);
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queueOnMessages, consumerConfiguration);
 
@@ -175,7 +175,7 @@ namespace EasyNetQ
             if (disposed)
                 throw new EasyNetQException("This bus has been disposed");
 
-            var consumerConfiguration = new ConsumerConfiguration(connectionConfiguration.PrefetchCount);
+            var consumerConfiguration = new ConsumerConfiguration(configuration.PrefetchCount);
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receivedInfo, cancellationToken) =>
             {
@@ -242,7 +242,7 @@ namespace EasyNetQ
 
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
 
-            if (connectionConfiguration.PublisherConfirms)
+            if (configuration.PublisherConfirms)
             {
                 while (true)
                 {
@@ -327,12 +327,12 @@ namespace EasyNetQ
 
             using var cts = CreateCancellationTokenSource(cancellationToken);
 
-            var configuration = new QueueDeclareConfiguration();
-            configure.Invoke(configuration);
-            var isDurable = configuration.IsDurable;
-            var isExclusive = configuration.IsExclusive;
-            var isAutoDelete = configuration.IsAutoDelete;
-            var arguments = configuration.Arguments;
+            var queueDeclareConfiguration = new QueueDeclareConfiguration();
+            configure.Invoke(queueDeclareConfiguration);
+            var isDurable = queueDeclareConfiguration.IsDurable;
+            var isExclusive = queueDeclareConfiguration.IsExclusive;
+            var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
+            var arguments = queueDeclareConfiguration.Arguments;
 
             var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(
                     x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments), cts.Token
@@ -409,12 +409,12 @@ namespace EasyNetQ
 
             using var cts = CreateCancellationTokenSource(cancellationToken);
 
-            var configuration = new ExchangeDeclareConfiguration();
-            configure(configuration);
-            var type = configuration.Type;
-            var isDurable = configuration.IsDurable;
-            var isAutoDelete = configuration.IsAutoDelete;
-            var arguments = configuration.Arguments;
+            var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
+            configure(exchangeDeclareConfiguration);
+            var type = exchangeDeclareConfiguration.Type;
+            var isDurable = exchangeDeclareConfiguration.IsDurable;
+            var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
+            var arguments = exchangeDeclareConfiguration.Arguments;
 
             await clientCommandDispatcher.InvokeAsync(
                 x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments), cts.Token
@@ -675,7 +675,8 @@ namespace EasyNetQ
         private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(connectionConfiguration.Timeout);
+            if(configuration.Timeout != Timeout.InfiniteTimeSpan)
+                cts.CancelAfter(configuration.Timeout);
             return cts;
         }
     }

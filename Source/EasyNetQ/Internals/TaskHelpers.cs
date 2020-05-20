@@ -131,11 +131,6 @@ namespace EasyNetQ.Internals
 
         public static Task Completed { get; } = FromResult<object>(null);
 
-        public static void Delay(int millisecondsDelay, CancellationToken cancellationToken)
-        {
-            Task.Delay(millisecondsDelay, cancellationToken).GetAwaiter().GetResult();
-        }
-
         public static async Task<T> WithCancellation<T>(Task<T> task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
