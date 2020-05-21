@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 namespace EasyNetQ.Internals
 {
     /// <summary>
-    /// An awaitable wrapper around a task whose result is disposable. The wrapper is not disposable,
-    /// so this prevents usage errors like "using (MyAsync())" when the appropriate usage should be "using (await MyAsync())".
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    /// <typeparam name="T">The type of the result of the underlying task.</typeparam>
-    public struct AwaitableDisposable<T> where T : IDisposable
+    public readonly struct AwaitableDisposable<T> where T : IDisposable
     {
         /// <summary>
         /// The underlying task.
