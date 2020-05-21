@@ -84,15 +84,15 @@ namespace EasyNetQ.Tests.ProducerTests
         public async Task Should_work_after_reconnection()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
-            var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
+            var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(new PublishChannelCreatedEvent(model));
             await Assert.ThrowsAsync<PublishInterruptedException>(
-                () => confirmation.WaitAsync(default)
+                () => confirmation1.WaitAsync(default)
             ).ConfigureAwait(false);
 
-            var publishConfirmationWaiter2 = publishConfirmationListener.CreatePendingConfirmation(model);
+            var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-            await publishConfirmationWaiter2.WaitAsync(default).ConfigureAwait(false);
+            await confirmation2.WaitAsync(default).ConfigureAwait(false);
         }
     }
 }
