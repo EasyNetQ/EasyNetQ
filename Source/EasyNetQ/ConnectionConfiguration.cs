@@ -25,7 +25,6 @@ namespace EasyNetQ
             PersistentMessages = true;
             UseBackgroundThreads = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
-            DispatcherQueueSize = 1024;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -70,7 +69,6 @@ namespace EasyNetQ
         public bool UseBackgroundThreads { get; set; }
         public IList<IAuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get; set; }
-        public int DispatcherQueueSize { get; set; }
 
         private void SetDefaultClientProperties(IDictionary<string, object> clientProperties)
         {

@@ -14,10 +14,12 @@ namespace EasyNetQ.ConnectionString
     {
         internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
         internal static readonly Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
-        internal static readonly Parser<TimeSpan> TimeSpanSeconds = UShortNumber.Select(
-            x => x == 0 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
-        );
-        internal static readonly Parser<int> IntNumber = Parse.Number.Select(int.Parse);
+        internal static readonly Parser<string> MinusOne = Parse.String("-1").Text();
+        internal static readonly Parser<TimeSpan> TimeSpanSeconds = Parse.Number.Or(MinusOne)
+            .Select(int.Parse)
+            .Select(
+                x => x == 0 || x == -1 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
+            );
 
         internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text().Select(x => x.ToLower() == "true");
 
@@ -47,7 +49,6 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform),
             BuildKeyValueParser("useBackgroundThreads", Bool, c => c.UseBackgroundThreads),
-            BuildKeyValueParser("dispatcherQueueSize", IntNumber, c => c.DispatcherQueueSize),
             BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));
 
