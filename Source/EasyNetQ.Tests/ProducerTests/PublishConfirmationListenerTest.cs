@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
@@ -20,20 +21,20 @@ namespace EasyNetQ.Tests.ProducerTests
         private readonly EventBus eventBus;
         private readonly PublishConfirmationListener publishConfirmationListener;
         private readonly IModel model;
-        private readonly ulong DeliveryTag = 42;
+        private const ulong DeliveryTag = 42;
 
         [Fact]
         public async Task Should_fail_with_multiple_nack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
-            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(model);
-            var publishConfirmationWaiter2 = publishConfirmationListener.GetWaiter(model);
+            var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
+            var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, true));
             await Assert.ThrowsAsync<PublishNackedException>(
-                () => publishConfirmationWaiter1.WaitAsync(TimeSpan.FromMilliseconds(10))
+                () => confirmation1.WaitAsync(default)
             ).ConfigureAwait(false);
             await Assert.ThrowsAsync<PublishNackedException>(
-                () => publishConfirmationWaiter2.WaitAsync(TimeSpan.FromMilliseconds(10))
+                () => confirmation2.WaitAsync(default)
             ).ConfigureAwait(false);
         }
 
@@ -41,10 +42,10 @@ namespace EasyNetQ.Tests.ProducerTests
         public async Task Should_fail_with_nack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
-            var publishConfirmationWaiter = publishConfirmationListener.GetWaiter(model);
+            var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, false));
             await Assert.ThrowsAsync<PublishNackedException>(
-                () => publishConfirmationWaiter.WaitAsync(TimeSpan.FromMilliseconds(10))
+                () => confirmation.WaitAsync(default)
             ).ConfigureAwait(false);
         }
 
@@ -52,29 +53,30 @@ namespace EasyNetQ.Tests.ProducerTests
         public async Task Should_success_with_ack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
-            var publishConfirmationWaiter = publishConfirmationListener.GetWaiter(model);
+            var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-            await publishConfirmationWaiter.WaitAsync(TimeSpan.FromMilliseconds(10)).ConfigureAwait(false);
+            await confirmation.WaitAsync(default).ConfigureAwait(false);
         }
 
         [Fact]
         public async Task Should_success_with_multiple_ack_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
-            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(model);
-            var publishConfirmationWaiter2 = publishConfirmationListener.GetWaiter(model);
+            var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
+            var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, true));
-            await publishConfirmationWaiter1.WaitAsync(TimeSpan.FromMilliseconds(10)).ConfigureAwait(false);
-            await publishConfirmationWaiter2.WaitAsync(TimeSpan.FromMilliseconds(10)).ConfigureAwait(false);
+            await confirmation1.WaitAsync(default).ConfigureAwait(false);
+            await confirmation2.WaitAsync(default).ConfigureAwait(false);
         }
 
         [Fact]
-        public async Task Should_timeout_without_confirmation_event()
+        public async Task Should_cancel_without_confirmation_event()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
-            var publishConfirmationWaiter = publishConfirmationListener.GetWaiter(model);
-            await Assert.ThrowsAsync<TimeoutException>(
-                () => publishConfirmationWaiter.WaitAsync(TimeSpan.FromMilliseconds(10))
+            var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
+            using var cts = new CancellationTokenSource(1000);
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => confirmation.WaitAsync(cts.Token)
             ).ConfigureAwait(false);
         }
 
@@ -82,15 +84,15 @@ namespace EasyNetQ.Tests.ProducerTests
         public async Task Should_work_after_reconnection()
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
-            var publishConfirmationWaiter1 = publishConfirmationListener.GetWaiter(model);
+            var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(new PublishChannelCreatedEvent(model));
             await Assert.ThrowsAsync<PublishInterruptedException>(
-                () => publishConfirmationWaiter1.WaitAsync(TimeSpan.FromMilliseconds(50))
+                () => confirmation1.WaitAsync(default)
             ).ConfigureAwait(false);
 
-            var publishConfirmationWaiter2 = publishConfirmationListener.GetWaiter(model);
+            var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-            await publishConfirmationWaiter2.WaitAsync(TimeSpan.FromMilliseconds(50)).ConfigureAwait(false);
+            await confirmation2.WaitAsync(default).ConfigureAwait(false);
         }
     }
 }

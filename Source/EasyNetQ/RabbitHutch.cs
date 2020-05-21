@@ -113,7 +113,7 @@ namespace EasyNetQ
         /// The password to use to connect to the RabbitMQ broker.
         /// </param>
         /// <param name="requestedHeartbeat">
-        /// The initially requested heartbeat interval, in seconds; zero for none.
+        /// The initially requested heartbeat interval
         /// </param>
         /// <param name="registerServices">
         /// Override default services. For example, to override the default <see cref="ISerializer"/>:
@@ -128,7 +128,7 @@ namespace EasyNetQ
             string virtualHost,
             string username,
             string password,
-            ushort requestedHeartbeat,
+            TimeSpan requestedHeartbeat,
             Action<IServiceRegister> registerServices)
         {
             Preconditions.CheckNotNull(hostName, "hostName");

@@ -6,42 +6,33 @@ using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using System;
-using System.Threading;
 using Xunit;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
     public class When_an_action_is_invoked : IDisposable
     {
-        private IClientCommandDispatcher dispatcher;
-        private IPersistentChannel channel;
-        private bool actionWasInvoked;
-        private string actionThreadName;
+        private readonly IClientCommandDispatcher dispatcher;
+        private readonly IPersistentChannelFactory channelFactory;
+        private readonly IPersistentConnection connection;
+        private readonly int actionResult;
 
         public When_an_action_is_invoked()
         {
-            actionWasInvoked = false;
-            actionThreadName = "Not set";
-
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            var connection = Substitute.For<IPersistentConnection>();
-            var channelFactory = Substitute.For<IPersistentChannelFactory>();
-            channel = Substitute.For<IPersistentChannel>();
-
-            Action<IModel> action = x =>
-                {
-                    actionWasInvoked = true;
-                    actionThreadName = Thread.CurrentThread.Name;
-                };
-
+            connection = Substitute.For<IPersistentConnection>();
+            channelFactory = Substitute.For<IPersistentChannelFactory>();
+            var channel = Substitute.For<IPersistentChannel>();
+            var action = Substitute.For<Func<IModel, int>>();
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.When(x => x.InvokeChannelAction(Arg.Any<Action<IModel>>()))
-                   .Do(x => ((Action<IModel>)x[0])(null));
+            channel.InvokeChannelActionAsync(action, default).Returns(42);
 
-            dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
+            dispatcher = new DefaultClientCommandDispatcher(configuration, connection, channelFactory);
 
-            dispatcher.InvokeAsync(action).Wait();
+            actionResult = dispatcher.InvokeAsync(action, default)
+                .GetAwaiter()
+                .GetResult();
         }
 
         public void Dispose()
@@ -52,19 +43,13 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         [Fact]
         public void Should_create_a_persistent_channel()
         {
-            channel.Should().NotBeNull();
+            channelFactory.Received().CreatePersistentChannel(connection);
         }
 
         [Fact]
-        public void Should_invoke_the_action()
+        public void Should_receive_action_result()
         {
-            actionWasInvoked.Should().BeTrue();
-        }
-
-        [Fact]
-        public void Should_invoke_the_action_on_the_dispatcher_thread()
-        {
-            actionThreadName.Should().Be("EasyNetQ client command dispatch thread");
+            actionResult.Should().Be(42);
         }
     }
 }

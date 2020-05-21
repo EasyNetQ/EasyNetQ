@@ -9,6 +9,7 @@ namespace EasyNetQ.Scheduling
 {
     public class ExternalScheduler : IScheduler
     {
+        private readonly ConnectionConfiguration configuration;
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -16,6 +17,7 @@ namespace EasyNetQ.Scheduling
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
         public ExternalScheduler(
+            ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,
             IConventions conventions,
             IExchangeDeclareStrategy exchangeDeclareStrategy,
@@ -23,12 +25,14 @@ namespace EasyNetQ.Scheduling
             IMessageSerializationStrategy messageSerializationStrategy
         )
         {
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
             Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
             Preconditions.CheckNotNull(conventions, nameof(conventions));
             Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
             Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
 
+            this.configuration = configuration;
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.exchangeDeclareStrategy = exchangeDeclareStrategy;
@@ -36,14 +40,20 @@ namespace EasyNetQ.Scheduling
             this.messageSerializationStrategy = messageSerializationStrategy;
         }
 
-        //TODO Cache exchange
+        /// <inheritdoc />s
         public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
 
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
+                cts.CancelAfter(configuration.Timeout);
+
             var scheduleMeType = typeof(ScheduleMe);
-            var scheduleMeExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(scheduleMeType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
+            var scheduleMeExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
+                scheduleMeType, ExchangeType.Topic, cts.Token
+            ).ConfigureAwait(false);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
             var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
@@ -62,14 +72,16 @@ namespace EasyNetQ.Scheduling
                 Exchange = conventions.ExchangeNamingConvention(baseMessageType),
                 RoutingKey = topic
             };
-            var easyNetQMessage = new Message<ScheduleMe>(scheduleMe)
+            var advancedMessage = new Message<ScheduleMe>(scheduleMe)
             {
                 Properties =
                 {
                     DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType)
                 }
             };
-            await advancedBus.PublishAsync(scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
+            await advancedBus.PublishAsync(
+                scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, advancedMessage, cts.Token
+            ).ConfigureAwait(false);
         }
     }
 }

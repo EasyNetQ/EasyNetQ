@@ -11,57 +11,59 @@ namespace EasyNetQ.Producer
     public class DefaultPubSub : IPubSub
     {
         private readonly IAdvancedBus advancedBus;
-        private readonly ConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration configuration;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
 
         public DefaultPubSub(
-            ConnectionConfiguration connectionConfiguration,
+            ConnectionConfiguration configuration,
             IConventions conventions,
             IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
             IAdvancedBus advancedBus
         )
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
 
-            this.connectionConfiguration = connectionConfiguration;
+            this.configuration = configuration;
             this.conventions = conventions;
             this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.advancedBus = advancedBus;
         }
 
+        /// <inheritdoc />
         public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
 
-            var configuration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
-            configure(configuration);
+            using var cts = CreateCancellationTokenSource(cancellationToken);
+
+            var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(publishConfiguration);
 
             var messageType = typeof(T);
-            var easyNetQMessage = new Message<T>(message)
+            var advancedMessageProperties = new MessageProperties
             {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
-                }
+                DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
             };
-            if (configuration.Priority != null)
-                easyNetQMessage.Properties.Priority = configuration.Priority.Value;
-            if (configuration.Expires != null)
-                easyNetQMessage.Properties.Expiration = configuration.Expires.ToString();
+            if (publishConfiguration.Priority != null)
+                advancedMessageProperties.Priority = publishConfiguration.Priority.Value;
+            if (publishConfiguration.Expires != null)
+                advancedMessageProperties.Expiration = publishConfiguration.Expires.ToString();
 
-            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cancellationToken).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, configuration.Topic, false, easyNetQMessage, cancellationToken).ConfigureAwait(false);
+            var advancedMessage = new Message<T>(message, advancedMessageProperties);
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cts.Token).ConfigureAwait(false);
+            await advancedBus.PublishAsync(exchange, publishConfiguration.Topic, false, advancedMessage, cts.Token).ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public virtual AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
             string subscriptionId,
             Func<T, CancellationToken, Task> onMessage,
@@ -83,43 +85,56 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
-            var configuration = new SubscriptionConfiguration(connectionConfiguration.PrefetchCount);
-            configure(configuration);
+            using var cts = CreateCancellationTokenSource(cancellationToken);
 
-            var queueName = configuration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
+            var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount);
+            configure(subscriptionConfiguration);
+
+            var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
 
             var queue = await advancedBus.QueueDeclareAsync(
                 queueName,
                 c =>
                 {
-                    c.AsDurable(configuration.Durable);
-                    c.AsAutoDelete(configuration.AutoDelete);
-                    if (configuration.Expires.HasValue) c.WithExpires(TimeSpan.FromMilliseconds(configuration.Expires.Value));
-                    if (configuration.MaxPriority.HasValue) c.WithMaxPriority(configuration.MaxPriority.Value);
-                    if (configuration.MaxLength.HasValue) c.WithMaxLength(configuration.MaxLength.Value);
-                    if (configuration.MaxLengthBytes.HasValue) c.WithMaxLengthBytes(configuration.MaxLengthBytes.Value);
-                    if (!string.IsNullOrEmpty(configuration.QueueMode)) c.WithQueueMode(configuration.QueueMode);
+                    c.AsDurable(subscriptionConfiguration.Durable);
+                    c.AsAutoDelete(subscriptionConfiguration.AutoDelete);
+                    if (subscriptionConfiguration.Expires.HasValue)
+                        c.WithExpires(TimeSpan.FromMilliseconds(subscriptionConfiguration.Expires.Value));
+                    if (subscriptionConfiguration.MaxPriority.HasValue)
+                        c.WithMaxPriority(subscriptionConfiguration.MaxPriority.Value);
+                    if (subscriptionConfiguration.MaxLength.HasValue)
+                        c.WithMaxLength(subscriptionConfiguration.MaxLength.Value);
+                    if (subscriptionConfiguration.MaxLengthBytes.HasValue)
+                        c.WithMaxLengthBytes(subscriptionConfiguration.MaxLengthBytes.Value);
+                    if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueMode))
+                        c.WithQueueMode(subscriptionConfiguration.QueueMode);
                 },
-                cancellationToken
+                cts.Token
             ).ConfigureAwait(false);
 
-            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
 
-            foreach (var topic in configuration.Topics.DefaultIfEmpty("#"))
-            {
-                await advancedBus.BindAsync(exchange, queue, topic, cancellationToken).ConfigureAwait(false);
-            }
+            foreach (var topic in subscriptionConfiguration.Topics.DefaultIfEmpty("#"))
+                await advancedBus.BindAsync(exchange, queue, topic, cts.Token).ConfigureAwait(false);
 
             var consumerCancellation = advancedBus.Consume<T>(
                 queue,
                 (message, messageReceivedInfo) => onMessage(message.Body, default),
-                x => x.WithPriority(configuration.Priority)
-                    .WithPrefetchCount(configuration.PrefetchCount)
-                    .WithExclusive(configuration.IsExclusive)
+                x => x.WithPriority(subscriptionConfiguration.Priority)
+                    .WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
+                    .WithExclusive(subscriptionConfiguration.IsExclusive)
             );
 
             return new SubscriptionResult(exchange, queue, consumerCancellation);
+        }
+
+        private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
+        {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
+                cts.CancelAfter(configuration.Timeout);
+            return cts;
         }
     }
 }

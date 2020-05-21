@@ -12,6 +12,10 @@ namespace EasyNetQ.DI
     /// </summary>
     public static class DefaultServicesRegistration
     {
+        /// <summary>
+        /// Registers the default EasyNetQ components
+        /// </summary>
+        /// <param name="container"></param>
         public static void RegisterDefaultServices(this IServiceRegister container)
         {
             Preconditions.CheckNotNull(container, "container");
@@ -27,7 +31,6 @@ namespace EasyNetQ.DI
                 .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
-                .Register<ITimeoutStrategy, TimeoutStrategy>()
                 .Register(AdvancedBusEventHandlers.Default)
                 .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
@@ -42,7 +45,7 @@ namespace EasyNetQ.DI
                     var connectionConfiguration = c.Resolve<ConnectionConfiguration>();
                     return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
                 })
-                .Register<IClientCommandDispatcher, ClientCommandDispatcher>()
+                .Register<IClientCommandDispatcher, DefaultClientCommandDispatcher>()
                 .Register<IPersistentConnection>(c =>
                 {
                     var connection = new PersistentConnection(c.Resolve<ConnectionConfiguration>(), c.Resolve<IConnectionFactory>(), c.Resolve<IEventBus>());

@@ -90,9 +90,9 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.UserName.Should().Be("Copa");
             connectionConfiguration.Password.Should().Be("abc_xyz");
             connectionConfiguration.Port.Should().Be(12345);
-            connectionConfiguration.RequestedHeartbeat.Should().Be(3);
+            connectionConfiguration.RequestedHeartbeat.Should().Be(TimeSpan.FromSeconds(3));
             connectionConfiguration.PrefetchCount.Should().Be(2);
-            connectionConfiguration.Timeout.Should().Be(12);
+            connectionConfiguration.Timeout.Should().Be(TimeSpan.FromSeconds(12));
             connectionConfiguration.PublisherConfirms.Should().BeTrue();
             connectionConfiguration.UseBackgroundThreads.Should().BeTrue();
             connectionConfiguration.Name.Should().Be("unit-test");
@@ -121,7 +121,7 @@ namespace EasyNetQ.Tests.ConnectionString
             const string connectionStringWithTimeout = "host=localhost;timeout=13";
             var connectionConfiguration = connectionStringParser.Parse(connectionStringWithTimeout);
 
-            connectionConfiguration.Timeout.Should().Be(13);
+            connectionConfiguration.Timeout.Should().Be(TimeSpan.FromSeconds(13));
         }
 
         [Fact]

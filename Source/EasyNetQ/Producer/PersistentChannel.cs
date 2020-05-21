@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
 using EasyNetQ.Sprache;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -10,17 +10,24 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Producer
 {
+    /// <inheritdoc />
     public class PersistentChannel : IPersistentChannel
     {
         private const int MinRetryTimeoutMs = 50;
         private const int MaxRetryTimeoutMs = 5000;
+
         private readonly ConnectionConfiguration configuration;
         private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
 
-        private readonly ILog logger = LogProvider.For<PersistentChannel>();
-        private IModel channel;
+        private volatile IModel initializedChannel;
 
+        /// <summary>
+        /// Creates PersistentChannel
+        /// </summary>
+        /// <param name="connection">The connection</param>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="eventBus">The event's bus</param>
         public PersistentChannel(
             IPersistentConnection connection,
             ConnectionConfiguration configuration,
@@ -36,41 +43,34 @@ namespace EasyNetQ.Producer
             this.eventBus = eventBus;
         }
 
-        public void InvokeChannelAction(Action<IModel> channelAction)
+        /// <inheritdoc />
+        public async Task<T> InvokeChannelActionAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            var timeout = TimeBudget.Start(configuration.GetTimeout());
-
             var retryTimeoutMs = MinRetryTimeoutMs;
-            while (!timeout.IsExpired())
+            while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
-                    channelAction(channel ?? (channel = CreateChannel()));
-                    return;
+                    return channelAction(initializedChannel ??= CreateChannel());
                 }
-                catch (OperationInterruptedException exception)
+                catch (OperationInterruptedException exception) when(!NeedRethrow(exception))
                 {
-                    if (NeedRethrow(exception)) throw;
                 }
                 catch (EasyNetQException)
                 {
                 }
 
-                Thread.Sleep(retryTimeoutMs);
-
+                await Task.Delay(retryTimeoutMs, cancellationToken).ConfigureAwait(false);
                 retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
             }
-
-            logger.Error("Channel action timed out");
-            throw new TimeoutException("The operation requested on PersistentChannel timed out");
         }
 
-        public void Dispose()
-        {
-            channel?.Dispose();
-        }
+        /// <inheritdoc />
+        public void Dispose() => initializedChannel?.Dispose();
 
         private IModel CreateChannel()
         {
@@ -93,12 +93,12 @@ namespace EasyNetQ.Producer
             channel.BasicReturn += OnReturn;
 
             if (channel is IRecoverable recoverable)
-                recoverable.Recovery += OnConnectionRestored;
+                recoverable.Recovery += OnChannelRestored;
             else
                 throw new NotSupportedException("Non-recoverable channel is not supported");
         }
 
-        private void OnConnectionRestored(object sender, EventArgs e)
+        private void OnChannelRestored(object sender, EventArgs e)
         {
             eventBus.Publish(new PublishChannelCreatedEvent((IModel)sender));
         }

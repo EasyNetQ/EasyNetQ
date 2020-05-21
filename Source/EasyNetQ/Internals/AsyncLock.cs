@@ -4,7 +4,13 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
-    public sealed class AsyncLock
+    /// <summary>
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
+    /// </summary>
+    internal sealed class AsyncLock : IDisposable
     {
         private readonly SemaphoreSlim semaphore;
         private readonly IDisposable semaphoreReleaser;
@@ -25,15 +31,11 @@ namespace EasyNetQ.Internals
         {
             private readonly SemaphoreSlim semaphore;
 
-            public SemaphoreSlimReleaser(SemaphoreSlim semaphore)
-            {
-                this.semaphore = semaphore;
-            }
+            public SemaphoreSlimReleaser(SemaphoreSlim semaphore) => this.semaphore = semaphore;
 
-            public void Dispose()
-            {
-                semaphore.Release();
-            }
+            public void Dispose() => semaphore.Release();
         }
+
+        public void Dispose() => semaphore.Dispose();
     }
 }

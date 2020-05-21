@@ -89,7 +89,7 @@ namespace EasyNetQ.Consumer
 
                     if (!configuration.PublisherConfirms) return AckStrategies.Ack;
 
-                    return model.WaitForConfirms(new TimeSpan(0, 0, configuration.Timeout)) ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
+                    return model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
                 }
             }
             catch (BrokerUnreachableException unreachableException)

@@ -8,32 +8,42 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Producer
 {
+    /// <summary>
+    ///     Default implementation of EasyNetQ's send-receive pattern
+    /// </summary>
     public class DefaultSendReceive : ISendReceive
     {
         private readonly AsyncLock asyncLock = new AsyncLock();
         private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>();
 
+        private readonly ConnectionConfiguration configuration;
         private readonly IAdvancedBus advancedBus;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
         public DefaultSendReceive(
+            ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy
         )
         {
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
 
+            this.configuration = configuration;
             this.advancedBus = advancedBus;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
         }
 
+        /// <inheritdoc />
         public async Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(message, "message");
 
-            await DeclareQueueAsync(queue, cancellationToken).ConfigureAwait(false);
+            using var cts = CreateCancellationTokenSource(cancellationToken);
+
+            await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
 
             var wrappedMessage = new Message<T>(message)
             {
@@ -43,9 +53,10 @@ namespace EasyNetQ.Producer
                 }
             };
 
-            await advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage, cancellationToken).ConfigureAwait(false);
+            await advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage, cts.Token).ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public AwaitableDisposable<IDisposable> ReceiveAsync<T>(
             string queue,
             Func<T, CancellationToken, Task> onMessage,
@@ -60,6 +71,7 @@ namespace EasyNetQ.Producer
             return ReceiveInternalAsync(queue, onMessage, configure, cancellationToken).ToAwaitableDisposable();
         }
 
+        /// <inheritdoc />
         public AwaitableDisposable<IDisposable> ReceiveAsync(
             string queue,
             Action<IReceiveRegistration> addHandlers,
@@ -81,7 +93,9 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
-            var declaredQueue = await DeclareQueueAsync(queue, cancellationToken).ConfigureAwait(false);
+            using var cts = CreateCancellationTokenSource(cancellationToken);
+
+            var declaredQueue = await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
             return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body, default), configure);
         }
 
@@ -92,7 +106,9 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
-            var declaredQueue = await DeclareQueueAsync(queue, cancellationToken).ConfigureAwait(false);
+            using var cts = CreateCancellationTokenSource(cancellationToken);
+
+            var declaredQueue = await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
             return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)), configure);
         }
 
@@ -104,10 +120,18 @@ namespace EasyNetQ.Producer
             {
                 if (declaredQueues.TryGetValue(queueName, out queue)) return queue;
 
-                queue = await advancedBus.QueueDeclareAsync(queueName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                queue = await advancedBus.QueueDeclareAsync(queueName, cancellationToken).ConfigureAwait(false);
                 declaredQueues[queueName] = queue;
                 return queue;
             }
+        }
+
+        private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
+        {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
+                cts.CancelAfter(configuration.Timeout);
+            return cts;
         }
 
         private sealed class HandlerAdder : IReceiveRegistration
@@ -121,7 +145,7 @@ namespace EasyNetQ.Producer
 
             public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
             {
-                handlerRegistration.Add<T>((message, info) => onMessage(message.Body, default));
+                handlerRegistration.Add<T>((message, info, c) => onMessage(message.Body, c));
                 return this;
             }
         }

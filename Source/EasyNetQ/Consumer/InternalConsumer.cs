@@ -351,7 +351,7 @@ namespace EasyNetQ.Consumer
                 {
                     disposedEvent.Set();
                 }
-            }, surviveDisconnect: true);
+            }, true);
 
             disposedEvent.WaitOne();
         }

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Tests
 {
     public static class PublishExchangeDeclareStrategyExtensions
     {

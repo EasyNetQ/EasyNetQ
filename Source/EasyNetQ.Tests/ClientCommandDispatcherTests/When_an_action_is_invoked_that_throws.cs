@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading.Tasks;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
 using FluentAssertions;
@@ -12,8 +13,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
     public class When_an_action_is_invoked_that_throws : IDisposable
     {
-        private IClientCommandDispatcher dispatcher;
-        private IPersistentChannel channel;
+        private readonly IClientCommandDispatcher dispatcher;
 
         public When_an_action_is_invoked_that_throws()
         {
@@ -21,13 +21,13 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             var configuration = parser.Parse("host=localhost");
             var connection = Substitute.For<IPersistentConnection>();
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
-            channel = Substitute.For<IPersistentChannel>();
+            var channel = Substitute.For<IPersistentChannel>();
 
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.WhenForAnyArgs(x => x.InvokeChannelAction(null))
-                   .Do(x => ((Action<IModel>)x[0])(null));
+            channel.InvokeChannelActionAsync<int>(null, default)
+                .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
-            dispatcher = new ClientCommandDispatcher(configuration, connection, channelFactory);
+            dispatcher = new DefaultClientCommandDispatcher(configuration, connection, channelFactory);
         }
 
         public void Dispose()
@@ -36,43 +36,22 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         }
 
         [Fact]
-        public void Should_raise_the_exception_on_the_calling_thread()
+        public async Task Should_raise_the_exception_on_the_calling_thread()
         {
-            var exception = new CrazyTestOnlyException();
-
-            var task = dispatcher.InvokeAsync(x =>
-            {
-                throw exception;
-            });
-
-            try
-            {
-                task.Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                aggregateException.InnerException.Should().BeSameAs(exception);
-            }
+            await Assert.ThrowsAsync<CrazyTestOnlyException>(
+                () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException(), default)
+            ).ConfigureAwait(false);
         }
 
         [Fact]
-        public void Should_call_action_when_previous_throwed_an_exception()
+        public async Task Should_call_action_when_previous_throwed_an_exception()
         {
-            Action<IModel> errorAction = x => { throw new Exception(); };
-            var goodActionWasInvoked = false;
-            Action<IModel> goodAction = x => { goodActionWasInvoked = true; };
+            await Assert.ThrowsAsync<Exception>(
+                () => dispatcher.InvokeAsync<int>(x => throw new Exception(), default)
+            ).ConfigureAwait(false);
 
-            try
-            {
-                dispatcher.InvokeAsync(errorAction).Wait();
-            }
-            catch
-            {
-                // ignore exception
-            }
-
-            dispatcher.InvokeAsync(goodAction).Wait();
-            goodActionWasInvoked.Should().BeTrue();
+            var result = await dispatcher.InvokeAsync(x => 42, default).ConfigureAwait(false);
+            result.Should().Be(42);
         }
 
         private class CrazyTestOnlyException : Exception { }
