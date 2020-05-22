@@ -137,13 +137,48 @@ namespace EasyNetQ.Internals
 
         public static Task Completed { get; } = FromResult<object>(null);
 
-        public static async Task<T> WithCancellation<T>(Task<T> task, CancellationToken cancellationToken)
+        /// <summary>
+        /// Attached CancellationToken to TaskCompletionSource
+        /// </summary>
+        /// <param name="taskCompletionSource"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void AttachCancellation<T>(this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs, false))
-                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                    throw new OperationCanceledException(cancellationToken);
-            return await task.ConfigureAwait(false);
+            var state = new TcsWithCancellationToken<T>(taskCompletionSource, cancellationToken);
+            state.CancellationTokenRegistration = cancellationToken.Register(
+                s =>
+                {
+                    var t = (TcsWithCancellationToken<T>)s;
+                    t.Tcs.TrySetCanceled(t.CancellationToken);
+                },
+                state,
+                false
+            );
+            taskCompletionSource.Task.ContinueWith(
+                (_, s) =>
+                {
+                    var r = (TcsWithCancellationToken<T>)s;
+                    r.CancellationTokenRegistration.Dispose();
+                },
+                state,
+                default,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default
+            );
+        }
+
+        private class TcsWithCancellationToken<T>
+        {
+            public TcsWithCancellationToken(TaskCompletionSource<T> tcs, CancellationToken cancellationToken)
+            {
+                Tcs = tcs;
+                CancellationToken = cancellationToken;
+            }
+
+            public TaskCompletionSource<T> Tcs { get; }
+            public CancellationToken CancellationToken { get; }
+            public CancellationTokenRegistration CancellationTokenRegistration { get; set; }
         }
     }
 }

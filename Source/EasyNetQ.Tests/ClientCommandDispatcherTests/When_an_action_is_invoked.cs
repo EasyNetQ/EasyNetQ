@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
             channel.InvokeChannelActionAsync(action, default).Returns(42);
 
-            dispatcher = new DefaultClientCommandDispatcher(configuration, connection, channelFactory);
+            dispatcher = new SingleChannelClientCommandDispatcher(configuration, connection, channelFactory);
 
             actionResult = dispatcher.InvokeAsync(action, default)
                 .GetAwaiter()

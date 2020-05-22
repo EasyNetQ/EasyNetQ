@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channel.InvokeChannelActionAsync<int>(null, default)
                 .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
-            dispatcher = new DefaultClientCommandDispatcher(configuration, connection, channelFactory);
+            dispatcher = new SingleChannelClientCommandDispatcher(configuration, connection, channelFactory);
         }
 
         public void Dispose()

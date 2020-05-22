@@ -118,7 +118,8 @@ namespace EasyNetQ.Producer
 
             public Task WaitAsync(CancellationToken cancellationToken)
             {
-                return TaskHelpers.WithCancellation(confirmationTcs.Task, cancellationToken);
+                confirmationTcs.AttachCancellation(cancellationToken);
+                return confirmationTcs.Task;
             }
         }
     }

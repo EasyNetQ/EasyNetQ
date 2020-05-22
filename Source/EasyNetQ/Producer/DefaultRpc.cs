@@ -82,14 +82,14 @@ namespace EasyNetQ.Producer
             var correlationId = Guid.NewGuid();
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             RegisterResponseActions(correlationId, tcs);
-            using var callback = DisposableActions.Create(DeRegisterResponseActions, correlationId);
+            using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
             var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
             var routingKey = requestConfiguration.QueueName;
             var expiration = requestConfiguration.Expiration;
             await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
-
-            return await TaskHelpers.WithCancellation(tcs.Task, cts.Token).ConfigureAwait(false);
+            tcs.AttachCancellation(cts.Token);
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         /// <inheritdoc />
