@@ -22,9 +22,13 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Fact]
-        public Task Should_throw_a_timeout_exception()
+        public Task Should_throw_a_cancelled_exception()
         {
-            return Assert.ThrowsAsync<OperationCanceledException>(() => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), c => { }));
+            return Assert.ThrowsAsync<TaskCanceledException>(
+                () => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                    new TestRequestMessage(), c => { }
+                )
+            );
         }
     }
 }
