@@ -3,7 +3,6 @@
   <PropertyGroup>
     <Description>EasyNetQ.Tests</Description>
     <LangVersion>latest</LangVersion>
-    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
     <TargetFrameworks>netcoreapp3.0;net461</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>

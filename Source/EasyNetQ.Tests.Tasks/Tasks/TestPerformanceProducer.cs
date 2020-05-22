@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.Tasks
                             {
                                 Interlocked.Increment(ref messageCount);
                             }
-                            if (task.IsFaulted)
+                            if (task.IsFaulted || task.IsCanceled)
                             {
                                 Interlocked.Increment(ref faultMessageCount);
                             }
