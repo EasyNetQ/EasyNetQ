@@ -29,8 +29,15 @@ namespace EasyNetQ.Producer
         /// <inheritdoc />
         public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
-            using var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
-            return await channel.InvokeChannelActionAsync(channelAction, cancellationToken).ConfigureAwait(false);
+            var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                return await channel.InvokeChannelActionAsync(channelAction, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                channelsPool.Enqueue(channel);
+            }
         }
     }
 }
