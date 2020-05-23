@@ -23,10 +23,32 @@ namespace EasyNetQ.Internals
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new EasyNetQ release.
         /// </summary>
+        public AsyncQueue()
+        {
+        }
+
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public AsyncQueue(IEnumerable<T> collection)
         {
             foreach(var element in collection)
                 elements.Enqueue(element);
+        }
+
+        /// <summary>
+        /// Returns count of elements in queue
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                lock (mutex)
+                    return elements.Count;
+            }
         }
 
         /// <summary>

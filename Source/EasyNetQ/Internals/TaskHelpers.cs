@@ -36,6 +36,7 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
@@ -46,7 +47,9 @@ namespace EasyNetQ.Internals
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new EasyNetQ release.
         /// </summary>
-        public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(Action<T1, T2, T3, CancellationToken> action)
+        public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(
+            Action<T1, T2, T3, CancellationToken> action
+        )
         {
             return (x, y, z, c) =>
             {
@@ -64,6 +67,7 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
@@ -92,6 +96,7 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
@@ -120,6 +125,7 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
@@ -134,6 +140,12 @@ namespace EasyNetQ.Internals
             this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken
         )
         {
+            if (
+                (taskCompletionSource.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) !=
+                TaskCreationOptions.RunContinuationsAsynchronously
+            )
+                throw new ArgumentOutOfRangeException(nameof(taskCompletionSource));
+
             if (!cancellationToken.CanBeCanceled)
                 return;
 
@@ -141,7 +153,7 @@ namespace EasyNetQ.Internals
             state.CancellationTokenRegistration = cancellationToken.Register(
                 s =>
                 {
-                    var t = (TcsWithCancellationToken<T>)s;
+                    var t = (TcsWithCancellationToken<T>) s;
                     t.Tcs.TrySetCanceled(t.CancellationToken);
                 },
                 state,
@@ -150,7 +162,7 @@ namespace EasyNetQ.Internals
             taskCompletionSource.Task.ContinueWith(
                 (_, s) =>
                 {
-                    var r = (TcsWithCancellationToken<T>)s;
+                    var r = (TcsWithCancellationToken<T>) s;
                     r.CancellationTokenRegistration.Dispose();
                 },
                 state,

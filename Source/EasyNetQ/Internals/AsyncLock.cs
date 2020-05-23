@@ -48,7 +48,7 @@ namespace EasyNetQ.Internals
                 );
         }
 
-        private class Releaser : IDisposable
+        private sealed class Releaser : IDisposable
         {
             private readonly SemaphoreSlim semaphore;
 
