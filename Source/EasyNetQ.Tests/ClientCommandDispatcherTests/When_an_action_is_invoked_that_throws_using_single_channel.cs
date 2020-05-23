@@ -10,18 +10,18 @@ using Xunit;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    public class When_an_action_is_invoked_that_throws : IDisposable
+    public class When_an_action_is_invoked_that_throws_using_single_channel : IDisposable
     {
         private readonly IClientCommandDispatcher dispatcher;
 
-        public When_an_action_is_invoked_that_throws()
+        public When_an_action_is_invoked_that_throws_using_single_channel()
         {
             var connection = Substitute.For<IPersistentConnection>();
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
 
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.InvokeChannelActionAsync<int>(null, default)
+            channel.InvokeChannelActionAsync<int>(null)
                 .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
             dispatcher = new SingleChannelClientCommandDispatcher(connection, channelFactory);
@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public async Task Should_raise_the_exception_on_the_calling_thread()
         {
             await Assert.ThrowsAsync<CrazyTestOnlyException>(
-                () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException(), default)
+                () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException())
             ).ConfigureAwait(false);
         }
 
@@ -44,10 +44,10 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public async Task Should_call_action_when_previous_throwed_an_exception()
         {
             await Assert.ThrowsAsync<Exception>(
-                () => dispatcher.InvokeAsync<int>(x => throw new Exception(), default)
+                () => dispatcher.InvokeAsync<int>(x => throw new Exception())
             ).ConfigureAwait(false);
 
-            var result = await dispatcher.InvokeAsync(x => 42, default).ConfigureAwait(false);
+            var result = await dispatcher.InvokeAsync(x => 42).ConfigureAwait(false);
             result.Should().Be(42);
         }
 

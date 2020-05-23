@@ -9,25 +9,25 @@ using Xunit;
 
 namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
-    public class When_an_action_is_invoked : IDisposable
+    public class When_an_action_is_invoked_using_single_channel : IDisposable
     {
         private readonly IClientCommandDispatcher dispatcher;
         private readonly IPersistentChannelFactory channelFactory;
         private readonly IPersistentConnection connection;
         private readonly int actionResult;
 
-        public When_an_action_is_invoked()
+        public When_an_action_is_invoked_using_single_channel()
         {
             connection = Substitute.For<IPersistentConnection>();
             channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
             var action = Substitute.For<Func<IModel, int>>();
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
-            channel.InvokeChannelActionAsync(action, default).Returns(42);
+            channel.InvokeChannelActionAsync(action).Returns(42);
 
             dispatcher = new SingleChannelClientCommandDispatcher(connection, channelFactory);
 
-            actionResult = dispatcher.InvokeAsync(action, default)
+            actionResult = dispatcher.InvokeAsync(action)
                 .GetAwaiter()
                 .GetResult();
         }

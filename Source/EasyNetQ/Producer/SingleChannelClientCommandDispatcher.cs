@@ -15,11 +15,10 @@ namespace EasyNetQ.Producer
         private readonly AsyncLock channelLock = new AsyncLock();
 
         /// <summary>
-        /// Creates DefaultClientCommandDispatcher
+        /// Creates a dispatcher
         /// </summary>
-        /// <param name="configuration">The configuration</param>
         /// <param name="connection">The connection</param>
-        /// <param name="channelFactory">The persistent channel factory</param>
+        /// <param name="channelFactory">The channel factory</param>
         public SingleChannelClientCommandDispatcher(
             IPersistentConnection connection, IPersistentChannelFactory channelFactory
         )

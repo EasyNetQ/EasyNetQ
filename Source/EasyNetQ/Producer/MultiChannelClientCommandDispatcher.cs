@@ -14,6 +14,12 @@ namespace EasyNetQ.Producer
     {
         private readonly AsyncQueue<IPersistentChannel> channelsPool;
 
+        /// <summary>
+        /// Creates a dispatcher
+        /// </summary>
+        /// <param name="channelsCount">The max number of channels</param>
+        /// <param name="connection">The connection</param>
+        /// <param name="channelFactory">The channel factory</param>
         public MultiChannelClientCommandDispatcher(
             int channelsCount, IPersistentConnection connection, IPersistentChannelFactory channelFactory
         )
