@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
@@ -19,7 +18,6 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 
         public When_an_action_is_invoked()
         {
-            var parser = new ConnectionStringParser();
             connection = Substitute.For<IPersistentConnection>();
             channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();

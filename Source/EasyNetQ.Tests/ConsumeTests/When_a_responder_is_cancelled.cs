@@ -26,7 +26,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
             serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
-            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m => Task.FromCanceled<RpcResponse>(default));
+            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m =>
+            {
+                var tcs = new TaskCompletionSource<RpcResponse>();
+                tcs.SetCanceled();
+                return tcs.Task;
+            });
 
             DeliverMessage(new RpcRequest { Value = 42 });
         }

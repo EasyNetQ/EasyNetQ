@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading.Tasks;
-using EasyNetQ.ConnectionString;
 using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
@@ -17,7 +16,6 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 
         public When_an_action_is_invoked_that_throws()
         {
-            var parser = new ConnectionStringParser();
             var connection = Substitute.For<IPersistentConnection>();
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
