@@ -35,7 +35,7 @@ namespace EasyNetQ.Internals
         /// </summary>
         public AsyncQueue(IEnumerable<T> collection)
         {
-            foreach(var element in collection)
+            foreach (var element in collection)
                 elements.Enqueue(element);
         }
 
