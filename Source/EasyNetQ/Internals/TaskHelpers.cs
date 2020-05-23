@@ -140,10 +140,7 @@ namespace EasyNetQ.Internals
             this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken
         )
         {
-            if (
-                (taskCompletionSource.Task.CreationOptions & TaskCreationOptions.RunContinuationsAsynchronously) !=
-                TaskCreationOptions.RunContinuationsAsynchronously
-            )
+            if (taskCompletionSource.Task.CreationOptions.HasFlag(TaskCreationOptions.RunContinuationsAsynchronously))
                 throw new ArgumentOutOfRangeException(nameof(taskCompletionSource));
 
             if (!cancellationToken.CanBeCanceled)
