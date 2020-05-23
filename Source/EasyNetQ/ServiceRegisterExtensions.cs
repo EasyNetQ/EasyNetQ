@@ -172,7 +172,6 @@ namespace EasyNetQ
             return registrator.Register();
         }
 
-
         /// <summary>
         ///     Enables gzip compression interceptor
         /// </summary>
