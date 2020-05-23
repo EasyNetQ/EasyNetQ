@@ -162,7 +162,7 @@ namespace EasyNetQ.Internals
             taskCompletionSource.Task.ContinueWith(
                 (_, s) =>
                 {
-                    var r = (TcsWithCancellationToken<T>) s;
+                    var r = (TcsWithCancellationToken<T>)s;
                     r.CancellationTokenRegistration.Dispose();
                 },
                 state,
