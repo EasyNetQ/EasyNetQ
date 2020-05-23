@@ -12,11 +12,14 @@ namespace EasyNetQ.Internals
     public static class CancellationTokenExtensions
     {
         /// <summary>
-        /// Attaches a timeout to a cancellation token
+        ///     Attaches a timeout to a cancellation token
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="timeout">The timeout</param>
+        /// <returns>
+        ///     CancellationTokenSource associated with <paramref name="cancellationToken"/>
+        ///     and with <paramref name="timeout"/>
+        /// </returns>
         public static CancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);

@@ -17,13 +17,24 @@ namespace EasyNetQ.Internals
         private readonly Queue<T> elements = new Queue<T>();
         private readonly Queue<TaskCompletionSource<T>> waiters = new Queue<TaskCompletionSource<T>>();
 
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public AsyncQueue(IEnumerable<T> collection)
         {
             foreach(var element in collection)
                 elements.Enqueue(element);
         }
 
-        public Task<T> DequeueAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// Dequeue element from queue
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The dequeued element</returns>
+        public Task<T> DequeueAsync(CancellationToken cancellationToken = default)
         {
             lock (mutex)
             {
@@ -39,6 +50,10 @@ namespace EasyNetQ.Internals
             }
         }
 
+        /// <summary>
+        /// Enqueue element to queue
+        /// </summary>
+        /// <param name="element">The element to enqueue</param>
         public void Enqueue(T element)
         {
             lock (mutex)

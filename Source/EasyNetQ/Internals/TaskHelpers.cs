@@ -12,6 +12,12 @@ namespace EasyNetQ.Internals
     /// </summary>
     public static class TaskHelpers
     {
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
         {
             return (x, c) =>
@@ -34,6 +40,12 @@ namespace EasyNetQ.Internals
             };
         }
 
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(Action<T1, T2, T3, CancellationToken> action)
         {
             return (x, y, z, c) =>
@@ -56,6 +68,12 @@ namespace EasyNetQ.Internals
             };
         }
 
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
         {
             return (x, y, c) =>
@@ -78,6 +96,12 @@ namespace EasyNetQ.Internals
             };
         }
 
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
         {
             return (x, c) =>
@@ -101,13 +125,18 @@ namespace EasyNetQ.Internals
         }
 
         /// <summary>
-        /// Attaches CancellationToken to TaskCompletionSource
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
         /// </summary>
-        /// <param name="taskCompletionSource"></param>
-        /// <param name="cancellationToken"></param>
-        /// <typeparam name="T"></typeparam>
-        public static void AttachCancellation<T>(this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken)
+        public static void AttachCancellation<T>(
+            this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken
+        )
         {
+            if (!cancellationToken.CanBeCanceled)
+                return;
+
             var state = new TcsWithCancellationToken<T>(taskCompletionSource, cancellationToken);
             state.CancellationTokenRegistration = cancellationToken.Register(
                 s =>
