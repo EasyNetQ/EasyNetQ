@@ -19,7 +19,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Registers the default EasyNetQ components
         /// </summary>
-        /// <param name="serviceRegister"></param>
+        /// <param name="serviceRegister">The register</param>
         public static void RegisterDefaultServices(this IServiceRegister serviceRegister)
         {
             Preconditions.CheckNotNull(serviceRegister, "container");
@@ -68,6 +68,11 @@ namespace EasyNetQ
                 .Register<IBus, RabbitBus>();
         }
 
+        /// <summary>
+        ///     Enables support of using multiple channels for clients operations
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
+        /// <param name="channelsCount">Max count of channels</param>
         public static IServiceRegister EnableMultiChannelClientCommandDispatcher(
             this IServiceRegister serviceRegister, int channelsCount
         )
@@ -79,16 +84,28 @@ namespace EasyNetQ
             );
         }
 
+        /// <summary>
+        ///     Enables legacy type naming. See <see cref="LegacyTypeNameSerializer"/> for more details
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableLegacyTypeNaming(this IServiceRegister serviceRegister)
         {
             return serviceRegister.Register<ITypeNameSerializer, LegacyTypeNameSerializer>();
         }
 
+        /// <summary>
+        ///     Enables legacy rpc conventions. See <see cref="LegacyRpcConventions"/> for more details
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableLegacyRpcConventions(this IServiceRegister serviceRegister)
         {
             return serviceRegister.Register<IConventions, LegacyRpcConventions>();
         }
 
+        /// <summary>
+        ///     Enables all legacy conventions
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableLegacyConventions(this IServiceRegister serviceRegister)
         {
             return serviceRegister
@@ -96,23 +113,43 @@ namespace EasyNetQ
                 .EnableLegacyRpcConventions();
         }
 
+        /// <summary>
+        ///     Enables support of scheduling messages using delayed exchange plugin.
+        ///     See <see cref="DelayedExchangeScheduler"/> for more details
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableDelayedExchangeScheduler(this IServiceRegister serviceRegister)
         {
             return serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
         }
 
+        /// <summary>
+        ///     Enables support of scheduling messages using DLX + Message TTL.
+        ///     See <see cref="DeadLetterExchangeAndMessageTtlScheduler"/> for more details
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableDeadLetterExchangeAndMessageTtlScheduler(
-            this IServiceRegister serviceRegister)
+            this IServiceRegister serviceRegister
+        )
         {
             return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         }
 
+        /// <summary>
+        ///     Enables AdvancedMessagePolymorphism. See <see cref="MultipleExchangeDeclareStrategy"/> for more details
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableAdvancedMessagePolymorphism(this IServiceRegister serviceRegister)
         {
-            return serviceRegister
-                .Register<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
+            return serviceRegister.Register<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
         }
 
+        /// <summary>
+        ///     Enables versioning of messages.
+        ///     See <see cref="VersionedExchangeDeclareStrategy"/> and
+        ///     <see cref="VersionedMessageSerializationStrategy"/> for more details
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
         public static IServiceRegister EnableMessageVersioning(this IServiceRegister serviceRegister)
         {
             return serviceRegister
@@ -120,6 +157,11 @@ namespace EasyNetQ
                 .Register<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
         }
 
+        /// <summary>
+        ///     Enables interception of messages
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
+        /// <param name="configure">The action to add interceptors</param>
         public static IServiceRegister EnableInterception(
             this IServiceRegister serviceRegister,
             Action<IInterceptorRegistrator> configure
@@ -130,17 +172,29 @@ namespace EasyNetQ
             return registrator.Register();
         }
 
-        public static IInterceptorRegistrator EnableGZipCompression(this IInterceptorRegistrator interceptorRegistrator)
+
+        /// <summary>
+        ///     Enables gzip compression interceptor
+        /// </summary>
+        /// <param name="registrator">The registrator</param>
+        public static IInterceptorRegistrator EnableGZipCompression(this IInterceptorRegistrator registrator)
         {
-            interceptorRegistrator.Add(new GZipInterceptor());
-            return interceptorRegistrator;
+            registrator.Add(new GZipInterceptor());
+            return registrator;
         }
 
+        /// <summary>
+        ///     Enables triple DES interceptor
+        /// </summary>
+        /// <param name="registrator">The registrator</param>
+        /// <param name="key">the secret key for the TripleDES algorithm</param>
+        /// <param name="iv">The initialization vector (IV) for the symmetric algorithm</param>
         public static IInterceptorRegistrator EnableTripleDESEncryption(
-            this IInterceptorRegistrator interceptorRegistrator, byte[] key, byte[] iv)
+            this IInterceptorRegistrator registrator, byte[] key, byte[] iv
+        )
         {
-            interceptorRegistrator.Add(new TripleDESInterceptor(key, iv));
-            return interceptorRegistrator;
+            registrator.Add(new TripleDESInterceptor(key, iv));
+            return registrator;
         }
     }
 }
