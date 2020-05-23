@@ -100,45 +100,8 @@ namespace EasyNetQ.Internals
             };
         }
 
-        public static Task FromCancelled()
-        {
-            var tcs = new TaskCompletionSource<object>();
-            tcs.SetCanceled();
-            return tcs.Task;
-        }
-
-        public static Task<T> FromCancelled<T>()
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetCanceled();
-            return tcs.Task;
-        }
-
-        public static Task FromException(Exception exception)
-        {
-            var tcs = new TaskCompletionSource<object>();
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
-
-        public static Task<T> FromException<T>(Exception exception)
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
-
-        public static Task<T> FromResult<T>(T result)
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetResult(result);
-            return tcs.Task;
-        }
-
-        public static Task Completed { get; } = FromResult<object>(null);
-
         /// <summary>
-        /// Attached CancellationToken to TaskCompletionSource
+        /// Attaches CancellationToken to TaskCompletionSource
         /// </summary>
         /// <param name="taskCompletionSource"></param>
         /// <param name="cancellationToken"></param>

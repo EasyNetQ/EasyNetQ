@@ -1,5 +1,4 @@
-﻿using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+﻿using EasyNetQ.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +58,7 @@ namespace EasyNetQ.Consumer
                 throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
             }
 
-            return (m, i, c) => TaskHelpers.Completed;
+            return (m, i, c) => Task.CompletedTask;
         }
 
         public bool ThrowOnNoMatchingHandler { get; set; }

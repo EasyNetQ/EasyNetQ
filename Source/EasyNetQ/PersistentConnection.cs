@@ -18,7 +18,7 @@ namespace EasyNetQ
     public class PersistentConnection : IPersistentConnection
     {
         private readonly CancellationTokenSource connectCancellation = new CancellationTokenSource();
-        private readonly ConnectionConfiguration connectionConfiguration;
+        private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;
         private readonly ILog logger = LogProvider.For<PersistentConnection>();
@@ -26,13 +26,15 @@ namespace EasyNetQ
         private Task connectTask;
         private bool disposed;
 
-        public PersistentConnection(ConnectionConfiguration connectionConfiguration, IConnectionFactory connectionFactory, IEventBus eventBus)
+        public PersistentConnection(
+            ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
+        )
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
-            this.connectionConfiguration = connectionConfiguration;
+            this.configuration = configuration;
             this.connectionFactory = connectionFactory;
             this.eventBus = eventBus;
         }
@@ -76,8 +78,8 @@ namespace EasyNetQ
                 logger.Error(
                     exception,
                     "Failed to connect to any of hosts {hosts} and vhost {vhost}",
-                    string.Join(",", connectionConfiguration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
-                    connectionConfiguration.VirtualHost
+                    string.Join(",", configuration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
+                    configuration.VirtualHost
                 );
 
                 connectTask = Task.Run(StartTryToConnect, connectCancellation.Token);
@@ -98,24 +100,24 @@ namespace EasyNetQ
                     logger.Error(
                         exception,
                         "Failed to connect to any of hosts {hosts} and vhost {vhost}",
-                        string.Join(",", connectionConfiguration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
-                        connectionConfiguration.VirtualHost
+                        string.Join(",", configuration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
+                        configuration.VirtualHost
                     );
                 }
 
-                await Task.Delay(connectionConfiguration.ConnectIntervalAttempt, connectCancellation.Token).ConfigureAwait(false);
+                await Task.Delay(configuration.ConnectIntervalAttempt, connectCancellation.Token).ConfigureAwait(false);
             }
         }
 
         private void TryToConnect()
         {
-            var endpoints = connectionConfiguration.Hosts.Select(x =>
+            var endpoints = configuration.Hosts.Select(x =>
             {
                 var endpoint = new AmqpTcpEndpoint(x.Host, x.Port);
                 if (x.Ssl.Enabled)
                     endpoint.Ssl = x.Ssl;
-                else if (connectionConfiguration.Ssl.Enabled)
-                    endpoint.Ssl = connectionConfiguration.Ssl;
+                else if (configuration.Ssl.Enabled)
+                    endpoint.Ssl = configuration.Ssl;
                 return endpoint;
             }).ToArray();
 

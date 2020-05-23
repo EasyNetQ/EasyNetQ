@@ -2,6 +2,7 @@
 
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
@@ -40,7 +41,7 @@ namespace EasyNetQ.Tests
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
+                (bytes, properties, info, cancellation) => Task.CompletedTask,
                 new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {

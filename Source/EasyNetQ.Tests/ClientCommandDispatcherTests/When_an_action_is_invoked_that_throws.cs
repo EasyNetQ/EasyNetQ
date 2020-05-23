@@ -18,7 +18,6 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public When_an_action_is_invoked_that_throws()
         {
             var parser = new ConnectionStringParser();
-            var configuration = parser.Parse("host=localhost");
             var connection = Substitute.For<IPersistentConnection>();
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
@@ -27,7 +26,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channel.InvokeChannelActionAsync<int>(null, default)
                 .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
-            dispatcher = new SingleChannelClientCommandDispatcher(configuration, connection, channelFactory);
+            dispatcher = new SingleChannelClientCommandDispatcher(connection, channelFactory);
         }
 
         public void Dispose()

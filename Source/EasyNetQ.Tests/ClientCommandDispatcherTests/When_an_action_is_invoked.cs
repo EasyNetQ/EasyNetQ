@@ -20,7 +20,6 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public When_an_action_is_invoked()
         {
             var parser = new ConnectionStringParser();
-            var configuration = parser.Parse("host=localhost");
             connection = Substitute.For<IPersistentConnection>();
             channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
@@ -28,7 +27,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channelFactory.CreatePersistentChannel(connection).Returns(channel);
             channel.InvokeChannelActionAsync(action, default).Returns(42);
 
-            dispatcher = new SingleChannelClientCommandDispatcher(configuration, connection, channelFactory);
+            dispatcher = new SingleChannelClientCommandDispatcher(connection, channelFactory);
 
             actionResult = dispatcher.InvokeAsync(action, default)
                 .GetAwaiter()

@@ -3,10 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -29,7 +26,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
             serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
-            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m => TaskHelpers.FromCancelled<RpcResponse>());
+            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m => Task.FromCanceled<RpcResponse>(default));
 
             DeliverMessage(new RpcRequest { Value = 42 });
         }

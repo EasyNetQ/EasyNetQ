@@ -7,6 +7,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -238,7 +239,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
 
@@ -325,17 +326,17 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(name, "name");
             Preconditions.CheckNotNull(configure, "configure");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var queueDeclareConfiguration = new QueueDeclareConfiguration();
-            configure.Invoke(queueDeclareConfiguration);
+            configure(queueDeclareConfiguration);
             var isDurable = queueDeclareConfiguration.IsDurable;
             var isExclusive = queueDeclareConfiguration.IsExclusive;
             var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
             var arguments = queueDeclareConfiguration.Arguments;
 
             var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(
-                    x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments), cts.Token
+                x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments), cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -358,7 +359,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, "queue");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(x => x.QueueDelete(queue.Name, ifUnused, ifEmpty), cts.Token).ConfigureAwait(false);
 
@@ -373,7 +374,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, "queue");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(x => x.QueuePurge(queue.Name), cts.Token).ConfigureAwait(false);
 
@@ -388,7 +389,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckShortString(name, "name");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(x => x.ExchangeDeclarePassive(name), cts.Token).ConfigureAwait(false);
 
@@ -407,7 +408,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckShortString(name, "name");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
             configure(exchangeDeclareConfiguration);
@@ -440,7 +441,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(exchange, "exchange");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
                 x => x.ExchangeDelete(exchange.Name, ifUnused), cts.Token
@@ -466,7 +467,7 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(arguments, "arguments");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
                 x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments), cts.Token
@@ -500,7 +501,7 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(arguments, "arguments");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
                 x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments), cts.Token
@@ -525,7 +526,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(binding, "binding");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             if (binding.Bindable is IQueue queue)
             {
@@ -588,7 +589,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, "queue");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var result = await clientCommandDispatcher.InvokeAsync(x => x.BasicGet(queue.Name, true), cts.Token).ConfigureAwait(false);
             if (result == null)
@@ -622,7 +623,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(queue, "queue");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var declareResult = await clientCommandDispatcher.InvokeAsync(x => x.QueueDeclarePassive(queue.Name), cts.Token).ConfigureAwait(false);
 
@@ -671,13 +672,5 @@ namespace EasyNetQ
         protected void OnUnblocked() => Unblocked?.Invoke(this, EventArgs.Empty);
 
         protected void OnMessageReturned(ReturnedMessageEvent args) => MessageReturned?.Invoke(this, new MessageReturnedEventArgs(args.Body, args.Properties, args.Info));
-
-        private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
-        {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            if(configuration.Timeout != Timeout.InfiniteTimeSpan)
-                cts.CancelAfter(configuration.Timeout);
-            return cts;
-        }
     }
 }

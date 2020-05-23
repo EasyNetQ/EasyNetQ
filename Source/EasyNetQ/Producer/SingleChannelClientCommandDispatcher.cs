@@ -21,12 +21,9 @@ namespace EasyNetQ.Producer
         /// <param name="connection">The connection</param>
         /// <param name="channelFactory">The persistent channel factory</param>
         public SingleChannelClientCommandDispatcher(
-            ConnectionConfiguration configuration,
-            IPersistentConnection connection,
-            IPersistentChannelFactory channelFactory
+            IPersistentConnection connection, IPersistentChannelFactory channelFactory
         )
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(channelFactory, "channelFactory");
 

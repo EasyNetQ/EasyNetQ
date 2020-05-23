@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                (body, properties, info, cancellation) => TaskHelpers.FromCancelled(),
+                (body, properties, info, cancellation) => Task.FromCanceled(default),
                 messageInfo,
                 messageProperties,
                 messageBody

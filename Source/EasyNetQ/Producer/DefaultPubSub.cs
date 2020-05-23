@@ -43,7 +43,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(configure, "configure");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
             configure(publishConfiguration);
@@ -85,7 +85,7 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount);
             configure(subscriptionConfiguration);
@@ -127,14 +127,6 @@ namespace EasyNetQ.Producer
             );
 
             return new SubscriptionResult(exchange, queue, consumerCancellation);
-        }
-
-        private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
-        {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
-                cts.CancelAfter(configuration.Timeout);
-            return cts;
         }
     }
 }
