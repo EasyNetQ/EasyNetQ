@@ -63,7 +63,7 @@ namespace EasyNetQ.Internals
                 if (elements.Count > 0)
                     return Task.FromResult(elements.Dequeue());
 
-                FreeCancelledWaiters();
+                CleanUpCancelledWaiters();
 
                 var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
                 waiter.AttachCancellation(cancellationToken);
@@ -85,10 +85,13 @@ namespace EasyNetQ.Internals
                 {
                     var waiter = waiters.Dequeue();
                     if (waiter.TrySetResult(element))
+                    {
                         wasAttachedToWaiter = true;
+                        break;
+                    }
                 }
 
-                FreeCancelledWaiters();
+                CleanUpCancelledWaiters();
 
                 if (wasAttachedToWaiter)
                     return;
@@ -97,13 +100,15 @@ namespace EasyNetQ.Internals
             }
         }
 
-        private void FreeCancelledWaiters()
+        private void CleanUpCancelledWaiters()
         {
             while (waiters.Count > 0)
             {
                 var waiter = waiters.Peek();
                 if (waiter.Task.IsCompleted)
                     waiters.Dequeue();
+                else
+                    break;
             }
         }
 
@@ -117,6 +122,7 @@ namespace EasyNetQ.Internals
                     var waiter = waiters.Dequeue();
                     waiter.TrySetCanceled();
                 }
+                elements.Clear();
             }
         }
     }

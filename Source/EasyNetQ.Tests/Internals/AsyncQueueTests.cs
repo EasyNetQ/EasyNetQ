@@ -33,11 +33,14 @@ namespace EasyNetQ.Tests.Internals
         public async Task Should_complete_dequeue_task()
         {
             using var queue = new AsyncQueue<int>();
-            var dequeueTask = queue.DequeueAsync();
-            dequeueTask.IsCompleted.Should().BeFalse();
+            var firstDequeueTask = queue.DequeueAsync();
+            var secondDequeueTask = queue.DequeueAsync();
+            firstDequeueTask.IsCompleted.Should().BeFalse();
+            secondDequeueTask.IsCompleted.Should().BeFalse();
             queue.Enqueue(1);
-            dequeueTask.IsCompleted.Should().BeTrue();
-            (await dequeueTask.ConfigureAwait(false)).Should().Be(1);
+            firstDequeueTask.IsCompleted.Should().BeTrue();
+            secondDequeueTask.IsCompleted.Should().BeFalse();
+            (await firstDequeueTask.ConfigureAwait(false)).Should().Be(1);
         }
     }
 }
