@@ -153,7 +153,7 @@ namespace EasyNetQ.Internals
             state.CancellationTokenRegistration = cancellationToken.Register(
                 s =>
                 {
-                    var t = (TcsWithCancellationToken<T>) s;
+                    var t = (TcsWithCancellationToken<T>)s;
                     t.Tcs.TrySetCanceled(t.CancellationToken);
                 },
                 state,
