@@ -13,8 +13,8 @@ namespace EasyNetQ.Internals
     /// </summary>
     public sealed class AsyncQueue<T> : IDisposable
     {
-        private readonly object mutex = new object();
         private readonly Queue<T> elements = new Queue<T>();
+        private readonly object mutex = new object();
         private readonly Queue<TaskCompletionSource<T>> waiters = new Queue<TaskCompletionSource<T>>();
 
         /// <summary>
@@ -40,19 +40,36 @@ namespace EasyNetQ.Internals
         }
 
         /// <summary>
-        /// Returns count of elements in queue
+        ///     Returns count of elements in queue
         /// </summary>
         public int Count
         {
             get
             {
                 lock (mutex)
+                {
                     return elements.Count;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            lock (mutex)
+            {
+                while (waiters.Count > 0)
+                {
+                    var waiter = waiters.Dequeue();
+                    waiter.TrySetCanceled();
+                }
+
+                elements.Clear();
             }
         }
 
         /// <summary>
-        /// Dequeue element from queue
+        ///     Dequeue element from queue
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The dequeued element</returns>
@@ -65,7 +82,7 @@ namespace EasyNetQ.Internals
 
                 CleanUpCancelledWaiters();
 
-                var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+                var waiter = new TaskCompletionSource<T>();
                 waiter.AttachCancellation(cancellationToken);
                 waiters.Enqueue(waiter);
                 return waiter.Task;
@@ -73,7 +90,7 @@ namespace EasyNetQ.Internals
         }
 
         /// <summary>
-        /// Enqueue element to queue
+        ///     Enqueue element to queue
         /// </summary>
         /// <param name="element">The element to enqueue</param>
         public void Enqueue(T element)
@@ -103,20 +120,6 @@ namespace EasyNetQ.Internals
                     waiters.Dequeue();
                 else
                     break;
-            }
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            lock (mutex)
-            {
-                while (waiters.Count > 0)
-                {
-                    var waiter = waiters.Dequeue();
-                    waiter.TrySetCanceled();
-                }
-                elements.Clear();
             }
         }
     }
