@@ -15,7 +15,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         public When_publish_and_subscribe_with_default_options(RabbitMQFixture rmqFixture)
         {
             this.rmqFixture = rmqFixture;
-            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()

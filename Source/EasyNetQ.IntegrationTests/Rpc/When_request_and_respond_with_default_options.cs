@@ -14,7 +14,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
         public When_request_and_respond_with_default_options(RabbitMQFixture rmqFixture)
         {
             this.rmqFixture = rmqFixture;
-            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -54,15 +54,15 @@ namespace EasyNetQ.IntegrationTests.Rpc
             {
                 await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
 
-                await rmqFixture.RestartAsync(CancellationToken.None).ConfigureAwait(false);
+                await rmqFixture.RestartAsync(timeoutCts.Token).ConfigureAwait(false);
 
-                // The crunch to deal with the race when Rpc has not handled reconnection yet
                 try
                 {
                     await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
                 }
-                catch (EasyNetQException)
+                catch (Exception)
                 {
+                    // The crunch to deal with the race when Rpc has not handled reconnection yet
                 }
 
                 await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);

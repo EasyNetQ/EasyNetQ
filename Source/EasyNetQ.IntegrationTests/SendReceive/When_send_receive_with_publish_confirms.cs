@@ -16,7 +16,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
 
         public When_send_receive_with_publish_confirms(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5");
         }
 
         public void Dispose()

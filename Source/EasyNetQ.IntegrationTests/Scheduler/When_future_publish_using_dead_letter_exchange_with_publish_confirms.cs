@@ -14,7 +14,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         public When_publish_and_subscribe_using_delay_using_dead_letter_exchange_with_publish_confirms(RabbitMQFixture fixture)
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True",
+                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5",
                 c => c.EnableDeadLetterExchangeAndMessageTtlScheduler()
             );
         }
