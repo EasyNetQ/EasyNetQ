@@ -10,13 +10,15 @@ namespace EasyNetQ.IntegrationTests.SendReceive
     [Collection("RabbitMQ")]
     public class When_send_receive_with_default_options : IDisposable
     {
+        private readonly RabbitMQFixture rmqFixture;
         private const int MessagesCount = 10;
 
         private readonly IBus bus;
 
-        public When_send_receive_with_default_options(RabbitMQFixture fixture)
+        public When_send_receive_with_default_options(RabbitMQFixture rmqFixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            this.rmqFixture = rmqFixture;
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1");
         }
 
         public void Dispose()
@@ -38,6 +40,23 @@ namespace EasyNetQ.IntegrationTests.SendReceive
 
                 await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
+            }
+        }
+
+        [Fact]
+        public async Task Should_survive_restart()
+        {
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+            var queue = Guid.NewGuid().ToString();
+            var messagesSink = new MessagesSink(2);
+            using (bus.Receive(queue, x => x.Add<Message>(messagesSink.Receive)))
+            {
+                var message = new Message(0);
+                await bus.SendAsync(queue, message).ConfigureAwait(false);
+                await rmqFixture.RestartAsync(timeoutCts.Token).ConfigureAwait(false);
+                await bus.SendAsync(queue, message).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
             }
         }
     }

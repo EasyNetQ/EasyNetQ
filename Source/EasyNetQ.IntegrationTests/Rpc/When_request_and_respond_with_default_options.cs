@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
@@ -8,9 +9,12 @@ namespace EasyNetQ.IntegrationTests.Rpc
     [Collection("RabbitMQ")]
     public class When_request_and_respond_with_default_options : IDisposable
     {
-        public When_request_and_respond_with_default_options(RabbitMQFixture fixture)
+        private readonly RabbitMQFixture rmqFixture;
+
+        public When_request_and_respond_with_default_options(RabbitMQFixture rmqFixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            this.rmqFixture = rmqFixture;
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1");
         }
 
         public void Dispose()
@@ -38,6 +42,28 @@ namespace EasyNetQ.IntegrationTests.Rpc
             {
                 var response = await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
                 response.Should().Be(new Response(42));
+            }
+        }
+
+        [Fact]
+        public async Task Should_survive_restart()
+        {
+            using (bus.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id))))
+            {
+                await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
+
+                await rmqFixture.RestartAsync(CancellationToken.None).ConfigureAwait(false);
+
+                // The crunch to deal with the race when Rpc has not handled reconnection yet
+                try
+                {
+                    await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
+                }
+                catch (EasyNetQException)
+                {
+                }
+
+                await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
             }
         }
     }
