@@ -2,12 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
-using EasyNetQ.Internals;
 using EasyNetQ.SystemMessages;
 using FluentAssertions;
 using RabbitMQ.Client;
@@ -64,7 +63,7 @@ namespace EasyNetQ.Tests.Integration
             var exception = new Exception("I just threw!");
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
+                (bytes, properties, info, cancellation) => Task.CompletedTask,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {
@@ -114,7 +113,7 @@ namespace EasyNetQ.Tests.Integration
             var exception = new Exception("I just threw!");
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, info, cancellation) => TaskHelpers.Completed,
+                (bytes, properties, info, cancellation) => Task.CompletedTask,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {

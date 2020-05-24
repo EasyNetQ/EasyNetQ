@@ -10,6 +10,18 @@ namespace EasyNetQ.IntegrationTests.Utils
 {
     internal static class BusExtensions
     {
+        public static async Task PublishBatchInParallelAsync<T>(
+            this IPubSub pubSub, IEnumerable<T> messages, CancellationToken cancellationToken = default
+        )
+        {
+            var publishTasks = new List<Task>();
+
+            foreach (var message in messages)
+                publishTasks.Add(pubSub.PublishAsync(message, cancellationToken));
+
+            await Task.WhenAll(publishTasks).ConfigureAwait(false);
+        }
+
         public static Task PublishBatchAsync<T>(
             this IPubSub pubSub, IEnumerable<T> messages, CancellationToken cancellationToken = default
         )

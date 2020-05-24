@@ -17,6 +17,6 @@ namespace EasyNetQ.Producer
         /// <param name="cancellationToken"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken);
+        Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken = default);
     }
 }

@@ -41,7 +41,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(message, "message");
 
-            using var cts = CreateCancellationTokenSource(cancellationToken);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
 
@@ -93,8 +93,7 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
-            using var cts = CreateCancellationTokenSource(cancellationToken);
-
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
             var declaredQueue = await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
             return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body, default), configure);
         }
@@ -106,8 +105,7 @@ namespace EasyNetQ.Producer
             CancellationToken cancellationToken
         )
         {
-            using var cts = CreateCancellationTokenSource(cancellationToken);
-
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
             var declaredQueue = await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
             return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)), configure);
         }
@@ -124,14 +122,6 @@ namespace EasyNetQ.Producer
                 declaredQueues[queueName] = queue;
                 return queue;
             }
-        }
-
-        private CancellationTokenSource CreateCancellationTokenSource(CancellationToken cancellationToken)
-        {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
-                cts.CancelAfter(configuration.Timeout);
-            return cts;
         }
 
         private sealed class HandlerAdder : IReceiveRegistration

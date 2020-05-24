@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             mockBuilder = new MockBuilder();
 
             queue = new Queue(queueName, false);
-            onMessage = (body, properties, info, cancellation) => TaskHelpers.Completed;
+            onMessage = (body, properties, info, cancellation) => Task.CompletedTask;
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
 

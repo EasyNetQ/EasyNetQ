@@ -4,7 +4,7 @@
     <Description>Common library for EasyNetQ.Tests</Description>
     <AssemblyTitle>EasyNetQ.Tests.Common</AssemblyTitle>
     <VersionPrefix>2.0.4-netcore1435</VersionPrefix>
-    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyName>EasyNetQ.Tests.Common</AssemblyName>
     <PackageId>EasyNetQ.Tests.Common</PackageId>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

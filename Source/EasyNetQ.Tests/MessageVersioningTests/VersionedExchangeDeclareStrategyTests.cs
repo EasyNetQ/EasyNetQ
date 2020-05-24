@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             IExchange exchange = new Exchange(exchangeName);
 
             advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(
-                x => TaskHelpers.FromException(new Exception()),
+                x => Task.FromException(new Exception()),
                 x =>
                 {
                     exchangeDeclareCount++;

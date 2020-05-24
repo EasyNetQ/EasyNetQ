@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.Tasks
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer");
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer", c => c.EnableMultiChannelClientCommandDispatcher(2));
 
             var messageCount = 0;
             var faultMessageCount = 0;
@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.Tasks
                             {
                                 Interlocked.Increment(ref messageCount);
                             }
-                            if (task.IsFaulted)
+                            if (task.IsFaulted || task.IsCanceled)
                             {
                                 Interlocked.Increment(ref faultMessageCount);
                             }

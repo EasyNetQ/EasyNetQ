@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests.ProducerTests
             model.NextPublishSeqNo.Returns(DeliveryTag);
             var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
             using var cts = new CancellationTokenSource(1000);
-            await Assert.ThrowsAsync<OperationCanceledException>(
+            await Assert.ThrowsAsync<TaskCanceledException>(
                 () => confirmation.WaitAsync(cts.Token)
             ).ConfigureAwait(false);
         }

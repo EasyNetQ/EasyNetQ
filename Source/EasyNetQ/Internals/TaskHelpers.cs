@@ -12,6 +12,12 @@ namespace EasyNetQ.Internals
     /// </summary>
     public static class TaskHelpers
     {
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
         {
             return (x, c) =>
@@ -30,11 +36,20 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
 
-        public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(Action<T1, T2, T3, CancellationToken> action)
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
+        public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(
+            Action<T1, T2, T3, CancellationToken> action
+        )
         {
             return (x, y, z, c) =>
             {
@@ -52,10 +67,17 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
 
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
         {
             return (x, y, c) =>
@@ -74,10 +96,17 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
 
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
         {
             return (x, c) =>
@@ -96,54 +125,64 @@ namespace EasyNetQ.Internals
                 {
                     tcs.SetException(exception);
                 }
+
                 return tcs.Task;
             };
         }
 
-        public static Task FromCancelled()
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
+        public static void AttachCancellation<T>(
+            this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken
+        )
         {
-            var tcs = new TaskCompletionSource<object>();
-            tcs.SetCanceled();
-            return tcs.Task;
+            if (!cancellationToken.CanBeCanceled || taskCompletionSource.Task.IsCompleted)
+                return;
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                taskCompletionSource.TrySetCanceled(cancellationToken);
+                return;
+            }
+
+            var state = new TcsWithCancellationToken<T>(taskCompletionSource, cancellationToken);
+            state.CancellationTokenRegistration = cancellationToken.Register(
+                s =>
+                {
+                    var t = (TcsWithCancellationToken<T>) s;
+                    t.Tcs.TrySetCanceled(t.CancellationToken);
+                },
+                state,
+                false
+            );
+            taskCompletionSource.Task.ContinueWith(
+                (_, s) =>
+                {
+                    var r = (TcsWithCancellationToken<T>) s;
+                    r.CancellationTokenRegistration.Dispose();
+                },
+                state,
+                default,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default
+            );
         }
 
-        public static Task<T> FromCancelled<T>()
+        private class TcsWithCancellationToken<T>
         {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetCanceled();
-            return tcs.Task;
-        }
+            public TcsWithCancellationToken(TaskCompletionSource<T> tcs, CancellationToken cancellationToken)
+            {
+                Tcs = tcs;
+                CancellationToken = cancellationToken;
+            }
 
-        public static Task FromException(Exception exception)
-        {
-            var tcs = new TaskCompletionSource<object>();
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
-
-        public static Task<T> FromException<T>(Exception exception)
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
-
-        public static Task<T> FromResult<T>(T result)
-        {
-            var tcs = new TaskCompletionSource<T>();
-            tcs.SetResult(result);
-            return tcs.Task;
-        }
-
-        public static Task Completed { get; } = FromResult<object>(null);
-
-        public static async Task<T> WithCancellation<T>(Task<T> task, CancellationToken cancellationToken)
-        {
-            var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs, false))
-                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                    throw new OperationCanceledException(cancellationToken);
-            return await task.ConfigureAwait(false);
+            public TaskCompletionSource<T> Tcs { get; }
+            public CancellationToken CancellationToken { get; }
+            public CancellationTokenRegistration CancellationTokenRegistration { get; set; }
         }
     }
 }

@@ -75,21 +75,19 @@ namespace EasyNetQ.Producer
             );
             configure(requestConfiguration);
 
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            if(requestConfiguration.Expiration != Timeout.InfiniteTimeSpan)
-                cts.CancelAfter(requestConfiguration.Expiration);
+            using var cts = cancellationToken.WithTimeout(requestConfiguration.Expiration);
 
             var correlationId = Guid.NewGuid();
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             RegisterResponseActions(correlationId, tcs);
-            using var callback = DisposableActions.Create(DeRegisterResponseActions, correlationId);
+            using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
             var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
             var routingKey = requestConfiguration.QueueName;
             var expiration = requestConfiguration.Expiration;
             await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
-
-            return await TaskHelpers.WithCancellation(tcs.Task, cts.Token).ConfigureAwait(false);
+            tcs.AttachCancellation(cts.Token);
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -231,15 +229,18 @@ namespace EasyNetQ.Producer
             await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(Func<TRequest, CancellationToken, Task<TResponse>> responder,
-            Action<IResponderConfiguration> configure, CancellationToken cancellationToken)
+        private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
+            Func<TRequest, CancellationToken, Task<TResponse>> responder,
+            Action<IResponderConfiguration> configure,
+            CancellationToken cancellationToken
+        )
         {
             var requestType = typeof(TRequest);
 
-            var configuration = new ResponderConfiguration(this.configuration.PrefetchCount);
-            configure(configuration);
+            var requestConfiguration = new ResponderConfiguration(configuration.PrefetchCount);
+            configure(requestConfiguration);
 
-            var routingKey = configuration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
+            var routingKey = requestConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
             var exchange = await advancedBus.ExchangeDeclareAsync(
                 conventions.RpcRequestExchangeNamingConvention(requestType),
@@ -252,15 +253,15 @@ namespace EasyNetQ.Producer
             return advancedBus.Consume<TRequest>(
                 queue,
                 (m, i, c) => RespondToMessageAsync(responder, m, c),
-                c => c.WithPrefetchCount(configuration.PrefetchCount)
+                c => c.WithPrefetchCount(requestConfiguration.PrefetchCount)
             );
         }
 
         private async Task RespondToMessageAsync<TRequest, TResponse>(
-            Func<TRequest, CancellationToken,
-            Task<TResponse>> responder,
+            Func<TRequest, CancellationToken, Task<TResponse>> responder,
             IMessage<TRequest> requestMessage,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             //TODO Cache declaration of exchange
             var exchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));

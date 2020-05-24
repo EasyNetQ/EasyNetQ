@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -43,9 +44,7 @@ namespace EasyNetQ.Scheduling
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckNotNull(topic, "topic");
 
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            if (configuration.Timeout != Timeout.InfiniteTimeSpan)
-                cts.CancelAfter(configuration.Timeout);
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
                 conventions.ExchangeNamingConvention(typeof(T)),

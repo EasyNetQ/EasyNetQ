@@ -84,7 +84,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var ex = Assert.ThrowsAny<Exception>(() =>
             {
-                bus.Rpc.Respond<RpcRequest, RpcResponse>(req => TaskHelpers.FromException<RpcResponse>(new Exception("Simulated Exception!")));
+                bus.Rpc.Respond<RpcRequest, RpcResponse>(req => Task.FromException<RpcResponse>(new Exception("Simulated Exception!")));
                 var request = new RpcRequest { Value = 5 };
 
                 var response = bus.Rpc.Request<RpcRequest, RpcResponse>(request);
@@ -100,7 +100,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var ex = Assert.ThrowsAny<Exception>(() =>
             {
-                bus.Rpc.Respond<string, string>(req => TaskHelpers.FromException<string>(new Exception("Simulated Exception!")));
+                bus.Rpc.Respond<string, string>(req => Task.FromException<string>(new Exception("Simulated Exception!")));
                 var request = "Hello";
 
                 var response = bus.Rpc.Request<string, string>(request);
@@ -116,7 +116,7 @@ namespace EasyNetQ.Tests.Integration
         {
             var ex = Assert.ThrowsAny<Exception>(() =>
             {
-                bus.Rpc.Respond<RpcRequest, RpcResponseWithoutParameterlessConstructor>(req => TaskHelpers.FromException<RpcResponseWithoutParameterlessConstructor>(new Exception("Simulated Exception!")));
+                bus.Rpc.Respond<RpcRequest, RpcResponseWithoutParameterlessConstructor>(req => Task.FromException<RpcResponseWithoutParameterlessConstructor>(new Exception("Simulated Exception!")));
                 var request = new RpcRequest { Value = 5 };
 
                 var response = bus.Rpc.Request<RpcRequest, RpcResponseWithoutParameterlessConstructor>(request);
