@@ -14,7 +14,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         public When_publish_and_subscribe_with_delay_using_delay_exchange_with_publish_confirms(RabbitMQFixture fixture)
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True",
+                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5",
                 c => c.EnableDelayedExchangeScheduler()
             );
         }
@@ -31,7 +31,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             var subscriptionId = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(MessagesCount);
@@ -39,10 +39,10 @@ namespace EasyNetQ.IntegrationTests.Scheduler
 
             using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
             {
-                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), timeoutCts.Token)
+                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), cts.Token)
                     .ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }

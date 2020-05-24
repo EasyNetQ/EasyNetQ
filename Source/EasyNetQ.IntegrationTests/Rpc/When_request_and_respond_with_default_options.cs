@@ -1,5 +1,7 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.IntegrationTests.Utils;
 using FluentAssertions;
 using Xunit;
 
@@ -8,9 +10,12 @@ namespace EasyNetQ.IntegrationTests.Rpc
     [Collection("RabbitMQ")]
     public class When_request_and_respond_with_default_options : IDisposable
     {
-        public When_request_and_respond_with_default_options(RabbitMQFixture fixture)
+        private readonly RabbitMQFixture rmqFixture;
+
+        public When_request_and_respond_with_default_options(RabbitMQFixture rmqFixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            this.rmqFixture = rmqFixture;
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -38,6 +43,30 @@ namespace EasyNetQ.IntegrationTests.Rpc
             {
                 var response = await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
                 response.Should().Be(new Response(42));
+            }
+        }
+
+        [Fact]
+        public async Task Should_survive_restart()
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+            using (bus.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id))))
+            {
+                await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
+
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
+
+                try
+                {
+                    await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    // The crunch to deal with the race when Rpc has not handled reconnection yet
+                }
+
+                await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
             }
         }
     }

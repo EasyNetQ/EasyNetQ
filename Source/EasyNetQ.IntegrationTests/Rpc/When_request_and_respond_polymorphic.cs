@@ -10,7 +10,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
     {
         public When_request_and_respond_polymorphic(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()

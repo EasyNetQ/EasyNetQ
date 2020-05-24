@@ -16,7 +16,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
 
         public When_send_receive_with_publish_confirms(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5");
         }
 
         public void Dispose()
@@ -27,16 +27,16 @@ namespace EasyNetQ.IntegrationTests.SendReceive
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var queue = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
             using (bus.Receive(queue, x => x.Add<Message>(messagesSink.Receive)))
             {
-                await bus.SendBatchAsync(queue, messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.SendBatchAsync(queue, messages, cts.Token).ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }
