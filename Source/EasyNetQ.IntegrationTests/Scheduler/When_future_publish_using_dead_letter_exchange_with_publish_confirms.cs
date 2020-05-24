@@ -31,7 +31,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             var subscriptionId = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(MessagesCount);
@@ -39,10 +39,10 @@ namespace EasyNetQ.IntegrationTests.Scheduler
 
             using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
             {
-                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), timeoutCts.Token)
+                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), cts.Token)
                     .ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }

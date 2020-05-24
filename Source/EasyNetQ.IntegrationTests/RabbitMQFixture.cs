@@ -31,30 +31,20 @@ namespace EasyNetQ.IntegrationTests
 
         public async Task InitializeAsync()
         {
-            using var timeoutCts = new CancellationTokenSource(InitializationTimeout);
-            dockerEngineOsPlatform = await dockerProxy.GetDockerEngineOsAsync(timeoutCts.Token).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(InitializationTimeout);
+            dockerEngineOsPlatform = await dockerProxy.GetDockerEngineOsAsync(cts.Token).ConfigureAwait(false);
             dockerNetworkName = dockerEngineOsPlatform == OSPlatform.Windows ? null : "bridgeWhaleNet";
-            await DisposeAsync(timeoutCts.Token).ConfigureAwait(false);
-            await CreateNetworkAsync(timeoutCts.Token).ConfigureAwait(false);
-            var rabbitMQDockerImage = await PullImageAsync(timeoutCts.Token).ConfigureAwait(false);
-            var containerId = await RunNewContainerAsync(rabbitMQDockerImage, timeoutCts.Token).ConfigureAwait(false);
+            await DisposeAsync(cts.Token).ConfigureAwait(false);
+            await CreateNetworkAsync(cts.Token).ConfigureAwait(false);
+            var rabbitMQDockerImage = await PullImageAsync(cts.Token).ConfigureAwait(false);
+            var containerId = await RunNewContainerAsync(rabbitMQDockerImage, cts.Token).ConfigureAwait(false);
             if (dockerEngineOsPlatform == OSPlatform.Windows)
-                Host = await dockerProxy.GetContainerIpAsync(containerId, timeoutCts.Token).ConfigureAwait(false);
+                Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token).ConfigureAwait(false);
             ManagementClient = new ManagementClient(
                 Host, Configuration.RabbitMqUser, Configuration.RabbitMqPassword,
                 Configuration.RabbitMqManagementPort
             );
-            await WaitForRabbitMqReadyAsync(timeoutCts.Token);
-        }
-
-        public async Task RestartAsync(CancellationToken cancellationToken)
-        {
-            var containersIds = await dockerProxy.FindContainerIdsAsync(Configuration.RabbitMqHostName)
-                .ConfigureAwait(false);
-            var containerId = containersIds.Single();
-            await dockerProxy.StopContainerByIdAsync(containerId, cancellationToken).ConfigureAwait(false);
-            await dockerProxy.StartContainerAsync(containerId, cancellationToken).ConfigureAwait(false);
-            await WaitForRabbitMqReadyAsync(cancellationToken).ConfigureAwait(false);
+            await WaitForRabbitMqReadyAsync(cts.Token);
         }
 
         public async Task DisposeAsync()

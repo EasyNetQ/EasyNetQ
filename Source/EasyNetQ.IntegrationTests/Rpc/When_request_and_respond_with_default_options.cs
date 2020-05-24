@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.IntegrationTests.Utils;
 using FluentAssertions;
 using Xunit;
 
@@ -48,13 +49,13 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_survive_restart()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
             using (bus.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id))))
             {
                 await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
 
-                await rmqFixture.RestartAsync(timeoutCts.Token).ConfigureAwait(false);
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
 
                 try
                 {

@@ -29,16 +29,16 @@ namespace EasyNetQ.IntegrationTests.SendReceive
         [Fact]
         public async Task Should_work_with_default_options()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var queue = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
             using (bus.Receive(queue, x => x.Add<Message>(messagesSink.Receive)))
             {
-                await bus.SendBatchAsync(queue, messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.SendBatchAsync(queue, messages, cts.Token).ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }
@@ -46,7 +46,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
         [Fact]
         public async Task Should_survive_restart()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
             var queue = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(2);
@@ -54,9 +54,9 @@ namespace EasyNetQ.IntegrationTests.SendReceive
             {
                 var message = new Message(0);
                 await bus.SendAsync(queue, message).ConfigureAwait(false);
-                await rmqFixture.RestartAsync(timeoutCts.Token).ConfigureAwait(false);
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
                 await bus.SendAsync(queue, message).ConfigureAwait(false);
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
             }
         }
     }
