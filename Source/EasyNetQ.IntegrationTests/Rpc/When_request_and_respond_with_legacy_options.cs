@@ -11,7 +11,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
     {
         public When_request_and_respond_with_legacy_options(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1", c => c.EnableLegacyConventions());
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5", c => c.EnableLegacyConventions());
         }
 
         public void Dispose()

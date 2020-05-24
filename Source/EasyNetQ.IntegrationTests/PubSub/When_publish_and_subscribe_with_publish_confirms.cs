@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_publish_confirms(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5");
         }
 
         public void Dispose()
@@ -27,18 +27,18 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var subscriptionId = Guid.NewGuid().ToString();
 
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
-                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }

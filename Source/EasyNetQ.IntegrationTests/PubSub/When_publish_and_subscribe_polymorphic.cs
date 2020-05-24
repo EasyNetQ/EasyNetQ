@@ -13,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_polymorphic(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -28,7 +28,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var subscriptionId = Guid.NewGuid().ToString();
 
@@ -50,14 +50,14 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     default:
                         throw new ArgumentOutOfRangeException(nameof(x), x, null);
                 }
-            }, timeoutCts.Token))
+            }, cts.Token))
             {
-                await bus.PubSub.PublishBatchAsync(bunnies.Concat(rabbits), timeoutCts.Token)
+                await bus.PubSub.PublishBatchAsync(bunnies.Concat(rabbits), cts.Token)
                     .ConfigureAwait(false);
 
                 await Task.WhenAll(
-                    bunniesSink.WaitAllReceivedAsync(timeoutCts.Token),
-                    rabbitsSink.WaitAllReceivedAsync(timeoutCts.Token)
+                    bunniesSink.WaitAllReceivedAsync(cts.Token),
+                    rabbitsSink.WaitAllReceivedAsync(cts.Token)
                 ).ConfigureAwait(false);
 
                 bunniesSink.ReceivedMessages.Should().Equal(bunnies);

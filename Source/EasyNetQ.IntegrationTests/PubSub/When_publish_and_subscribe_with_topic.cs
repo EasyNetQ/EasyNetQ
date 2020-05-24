@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_topic(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -27,7 +27,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var firstTopicMessagesSink = new MessagesSink(MessagesCount);
             var secondTopicMessagesSink = new MessagesSink(MessagesCount);
@@ -40,7 +40,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     Guid.NewGuid().ToString(),
                     firstTopicMessagesSink.Receive,
                     x => x.WithTopic("first"),
-                    timeoutCts.Token
+                    cts.Token
                 )
             )
             using (
@@ -48,20 +48,20 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     Guid.NewGuid().ToString(),
                     secondTopicMessagesSink.Receive,
                     x => x.WithTopic("second"),
-                    timeoutCts.Token
+                    cts.Token
                 )
             )
             {
                 await bus.PubSub.PublishBatchAsync(
-                    firstTopicMessages, x => x.WithTopic("first"), timeoutCts.Token
+                    firstTopicMessages, x => x.WithTopic("first"), cts.Token
                 ).ConfigureAwait(false);
                 await bus.PubSub.PublishBatchAsync(
-                    secondTopicMessages, x => x.WithTopic("second"), timeoutCts.Token
+                    secondTopicMessages, x => x.WithTopic("second"), cts.Token
                 ).ConfigureAwait(false);
 
                 await Task.WhenAll(
-                    firstTopicMessagesSink.WaitAllReceivedAsync(timeoutCts.Token),
-                    secondTopicMessagesSink.WaitAllReceivedAsync(timeoutCts.Token)
+                    firstTopicMessagesSink.WaitAllReceivedAsync(cts.Token),
+                    secondTopicMessagesSink.WaitAllReceivedAsync(cts.Token)
                 ).ConfigureAwait(false);
 
                 firstTopicMessagesSink.ReceivedMessages.Should().Equal(firstTopicMessages);

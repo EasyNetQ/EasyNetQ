@@ -13,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_priority(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -30,7 +30,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var messagesSink = new MessagesSink(MessagesCount * 2);
             var highPriorityMessages = MessagesFactories.Create(MessagesCount);
@@ -39,26 +39,26 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var subscriptionId = Guid.NewGuid().ToString();
             using (
                 await bus.PubSub.SubscribeAsync<Message>(
-                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), timeoutCts.Token
+                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), cts.Token
                 )
             )
             {
             }
 
             await bus.PubSub.PublishBatchAsync(
-                lowPriorityMessages, x => x.WithPriority(LowPriority), timeoutCts.Token
+                lowPriorityMessages, x => x.WithPriority(LowPriority), cts.Token
             ).ConfigureAwait(false);
             await bus.PubSub.PublishBatchAsync(
-                highPriorityMessages, x => x.WithPriority(HighPriority), timeoutCts.Token
+                highPriorityMessages, x => x.WithPriority(HighPriority), cts.Token
             ).ConfigureAwait(false);
 
             using (
                 await bus.PubSub.SubscribeAsync<Message>(
-                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), timeoutCts.Token
+                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), cts.Token
                 )
             )
             {
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
 
                 messagesSink.ReceivedMessages.Should().Equal(highPriorityMessages.Concat(lowPriorityMessages));
             }

@@ -10,9 +10,12 @@ namespace EasyNetQ.IntegrationTests.PubSub
     [Collection("RabbitMQ")]
     public class When_publish_and_subscribe_with_default_options : IDisposable
     {
-        public When_publish_and_subscribe_with_default_options(RabbitMQFixture fixture)
+        private readonly RabbitMQFixture rmqFixture;
+
+        public When_publish_and_subscribe_with_default_options(RabbitMQFixture rmqFixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            this.rmqFixture = rmqFixture;
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -27,7 +30,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Should_publish_and_consume()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var subscriptionId = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(MessagesCount);
@@ -35,9 +38,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
 
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive))
             {
-                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }
@@ -45,7 +48,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Should_publish_and_consume_with_multiple_subscription_ids()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var firstConsumerMessagesSink = new MessagesSink(MessagesCount);
             var secondConsumerMessagesSink = new MessagesSink(MessagesCount);
@@ -53,20 +56,20 @@ namespace EasyNetQ.IntegrationTests.PubSub
 
             using (
                 await bus.PubSub.SubscribeAsync<Message>(
-                    Guid.NewGuid().ToString(), firstConsumerMessagesSink.Receive, timeoutCts.Token
+                    Guid.NewGuid().ToString(), firstConsumerMessagesSink.Receive, cts.Token
                 )
             )
             using (
                 await bus.PubSub.SubscribeAsync<Message>(
-                    Guid.NewGuid().ToString(), secondConsumerMessagesSink.Receive, timeoutCts.Token
+                    Guid.NewGuid().ToString(), secondConsumerMessagesSink.Receive, cts.Token
                 )
             )
             {
-                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
 
                 await Task.WhenAll(
-                    firstConsumerMessagesSink.WaitAllReceivedAsync(timeoutCts.Token),
-                    secondConsumerMessagesSink.WaitAllReceivedAsync(timeoutCts.Token)
+                    firstConsumerMessagesSink.WaitAllReceivedAsync(cts.Token),
+                    secondConsumerMessagesSink.WaitAllReceivedAsync(cts.Token)
                 ).ConfigureAwait(false);
 
                 firstConsumerMessagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
@@ -77,20 +80,37 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Should_publish_and_consume_with_same_subscription_ids()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var subscriptionId = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
-            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
-            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
-                await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
                 messagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
+            }
+        }
+
+        [Fact]
+        public async Task Should_survive_restart()
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+            var subscriptionId = Guid.NewGuid().ToString();
+            var messagesSink = new MessagesSink(2);
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive))
+            {
+                var message = new Message(0);
+                await bus.PubSub.PublishAsync(message, cts.Token).ConfigureAwait(false);
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
+                await bus.PubSub.PublishAsync(message, cts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
             }
         }
     }

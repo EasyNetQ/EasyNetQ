@@ -11,7 +11,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
     {
         public When_request_and_respond_with_publish_confirms(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5");
         }
 
         public void Dispose()

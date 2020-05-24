@@ -141,7 +141,6 @@ namespace EasyNetQ.Consumer
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
-            Cancel();
             logger.InfoFormat(
                 "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
                 ConsumerTag,

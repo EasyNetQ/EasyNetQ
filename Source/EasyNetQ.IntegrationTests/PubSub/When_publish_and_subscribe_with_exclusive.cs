@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_exclusive(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
         }
 
         public void Dispose()
@@ -27,7 +27,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Test()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var firstConsumerMessagesSink = new MessagesSink(MessagesCount);
             var secondConsumerMessagesSink = new MessagesSink(0);
@@ -39,27 +39,27 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     Guid.NewGuid().ToString(),
                     firstConsumerMessagesSink.Receive,
                     x => x.AsExclusive(),
-                    timeoutCts.Token
+                    cts.Token
                 )
             )
             {
                 // To ensure that ^ subscriber started successfully
-                await Task.Delay(TimeSpan.FromSeconds(1), timeoutCts.Token).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(1), cts.Token).ConfigureAwait(false);
 
                 using (
                     await bus.PubSub.SubscribeAsync<Message>(
                         Guid.NewGuid().ToString(),
                         secondConsumerMessagesSink.Receive,
                         x => x.AsExclusive(),
-                        timeoutCts.Token
+                        cts.Token
                     )
                 )
                 {
-                    await bus.PubSub.PublishBatchAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                    await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
 
                     await Task.WhenAll(
-                        firstConsumerMessagesSink.WaitAllReceivedAsync(timeoutCts.Token),
-                        secondConsumerMessagesSink.WaitAllReceivedAsync(timeoutCts.Token)
+                        firstConsumerMessagesSink.WaitAllReceivedAsync(cts.Token),
+                        secondConsumerMessagesSink.WaitAllReceivedAsync(cts.Token)
                     ).ConfigureAwait(false);
 
                     firstConsumerMessagesSink.ReceivedMessages.Should().Equal(messages);

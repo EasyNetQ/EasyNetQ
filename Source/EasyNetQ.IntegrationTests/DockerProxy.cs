@@ -94,6 +94,11 @@ namespace EasyNetQ.IntegrationTests
             await Task.WhenAll(stopTasks);
         }
 
+        public Task StopContainerByIdAsync(string id, CancellationToken token = default)
+        {
+            return client.Containers.StopContainerAsync(id, new ContainerStopParameters(), token);
+        }
+
         public async Task RemoveContainerAsync(string name, CancellationToken token = default)
         {
             var ids = await FindContainerIdsAsync(name).ConfigureAwait(false);
@@ -123,7 +128,7 @@ namespace EasyNetQ.IntegrationTests
             return hostPorts.Select(x => new PortBinding {HostPort = x}).ToList();
         }
 
-        private async Task<IEnumerable<string>> FindContainerIdsAsync(string name)
+        public async Task<IEnumerable<string>> FindContainerIdsAsync(string name)
         {
             var containers = await client.Containers
                 .ListContainersAsync(new ContainersListParameters {All = true, Filters = ListFilters(name)})
