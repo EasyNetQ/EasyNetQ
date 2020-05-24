@@ -50,7 +50,7 @@ namespace EasyNetQ.Consumer
                         }
                     }
                     logger.Debug("EasyNetQ consumer dispatch thread finished");
-                }) { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
+                }) { Name = "EasyNetQ consumer dispatch thread", IsBackground = true};
 
                 thread.Start();
                 logger.Debug("EasyNetQ consumer dispatch thread started");

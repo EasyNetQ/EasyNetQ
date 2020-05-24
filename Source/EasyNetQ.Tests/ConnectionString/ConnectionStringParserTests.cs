@@ -94,7 +94,6 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.PrefetchCount.Should().Be(2);
             connectionConfiguration.Timeout.Should().Be(TimeSpan.FromSeconds(12));
             connectionConfiguration.PublisherConfirms.Should().BeTrue();
-            connectionConfiguration.UseBackgroundThreads.Should().BeTrue();
             connectionConfiguration.Name.Should().Be("unit-test");
         }
 
