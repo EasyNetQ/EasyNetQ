@@ -15,7 +15,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         public When_publish_and_subscribe_with_default_options(RabbitMQFixture rmqFixture)
         {
             this.rmqFixture = rmqFixture;
-            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
@@ -104,11 +104,11 @@ namespace EasyNetQ.IntegrationTests.PubSub
 
             var subscriptionId = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(2);
-            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
                 var message = new Message(0);
                 await bus.PubSub.PublishAsync(message, cts.Token).ConfigureAwait(false);
-                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token).ConfigureAwait(false);
                 await bus.PubSub.PublishAsync(message, cts.Token).ConfigureAwait(false);
                 await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
             }

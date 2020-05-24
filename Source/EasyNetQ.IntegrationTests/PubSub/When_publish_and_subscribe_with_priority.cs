@@ -13,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_priority(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()

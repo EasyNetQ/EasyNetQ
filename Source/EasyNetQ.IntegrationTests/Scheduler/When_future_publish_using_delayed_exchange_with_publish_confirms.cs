@@ -14,7 +14,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         public When_publish_and_subscribe_with_delay_using_delay_exchange_with_publish_confirms(RabbitMQFixture fixture)
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5",
+                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=-1",
                 c => c.EnableDelayedExchangeScheduler()
             );
         }

@@ -11,7 +11,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
     {
         public When_request_and_respond_with_publish_confirms(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=-1");
         }
 
         public void Dispose()
@@ -24,16 +24,16 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_exception()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             using (
                 await bus.Rpc.RespondAsync<Request, Response>(
-                    x => Task.FromException<Response>(new RequestFailedException()), timeoutCts.Token
+                    x => Task.FromException<Response>(new RequestFailedException()), cts.Token
                 )
             )
             {
                 await Assert.ThrowsAsync<EasyNetQResponderException>(
-                    () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), timeoutCts.Token)
+                    () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
                 ).ConfigureAwait(false);
             }
         }
@@ -41,11 +41,11 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_response()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), timeoutCts.Token))
+            using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
             {
-                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), timeoutCts.Token)
+                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
                     .ConfigureAwait(false);
                 response.Should().Be(new Response(42));
             }

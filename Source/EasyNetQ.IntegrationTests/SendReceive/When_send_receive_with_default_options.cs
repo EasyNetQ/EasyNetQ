@@ -18,7 +18,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
         public When_send_receive_with_default_options(RabbitMQFixture rmqFixture)
         {
             this.rmqFixture = rmqFixture;
-            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()

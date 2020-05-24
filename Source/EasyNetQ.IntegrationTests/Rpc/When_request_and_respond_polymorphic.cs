@@ -11,7 +11,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
     {
         public When_request_and_respond_polymorphic(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
@@ -24,7 +24,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_response()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             using (await bus.Rpc.RespondAsync<Request, Response>(x =>
             {
@@ -34,15 +34,15 @@ namespace EasyNetQ.IntegrationTests.Rpc
                     RabbitRequest r => new RabbitResponse(r.Id),
                     _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
                 };
-            }, timeoutCts.Token))
+            }, cts.Token))
             {
                 var bunnyResponse = await bus.Rpc.RequestAsync<Request, Response>(
-                    new BunnyRequest(42), timeoutCts.Token
+                    new BunnyRequest(42), cts.Token
                 ).ConfigureAwait(false);
                 bunnyResponse.Should().Be(new BunnyResponse(42));
 
                 var rabbitResponse = await bus.Rpc.RequestAsync<Request, Response>(
-                    new RabbitRequest(42), timeoutCts.Token
+                    new RabbitRequest(42), cts.Token
                 ).ConfigureAwait(false);
                 rabbitResponse.Should().Be(new RabbitResponse(42));
             }

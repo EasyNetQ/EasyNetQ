@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
     {
         public When_send_receive_with_publish_confirms(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=-1");
         }
 
         public void Dispose()

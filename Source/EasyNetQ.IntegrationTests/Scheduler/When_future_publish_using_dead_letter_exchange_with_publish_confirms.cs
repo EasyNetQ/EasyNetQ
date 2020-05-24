@@ -16,7 +16,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         )
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=5",
+                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=-1",
                 c => c.EnableDeadLetterExchangeAndMessageTtlScheduler()
             );
         }
