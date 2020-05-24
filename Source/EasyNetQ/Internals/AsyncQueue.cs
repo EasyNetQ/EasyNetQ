@@ -80,21 +80,15 @@ namespace EasyNetQ.Internals
         {
             lock (mutex)
             {
-                var wasAttachedToWaiter = false;
                 while (waiters.Count > 0)
                 {
                     var waiter = waiters.Dequeue();
                     if (waiter.TrySetResult(element))
                     {
-                        wasAttachedToWaiter = true;
-                        break;
+                        CleanUpCancelledWaiters();
+                        return;
                     }
                 }
-
-                CleanUpCancelledWaiters();
-
-                if (wasAttachedToWaiter)
-                    return;
 
                 elements.Enqueue(element);
             }
