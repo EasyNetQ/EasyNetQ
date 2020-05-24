@@ -10,9 +10,20 @@ namespace EasyNetQ.IntegrationTests.Utils
             this IManagementClient client, CancellationToken cancellationToken
         )
         {
-            var connections = await client.GetConnectionsAsync(cancellationToken).ConfigureAwait(false);
-            foreach (var connection in connections)
-                await client.CloseConnectionAsync(connection, cancellationToken).ConfigureAwait(false);
+            // We need this crunch with loop because it seems that management plugin has some delay in showing info
+            // and we could receive an empty list of connections even if connections are open
+            var wasClosed = false;
+            do
+            {
+                var connections = await client.GetConnectionsAsync(cancellationToken).ConfigureAwait(false);
+                foreach (var connection in connections)
+                {
+                    await client.CloseConnectionAsync(connection, cancellationToken).ConfigureAwait(false);
+                    wasClosed = true;
+                }
+
+                await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+            } while (!wasClosed);
         }
     }
 }
