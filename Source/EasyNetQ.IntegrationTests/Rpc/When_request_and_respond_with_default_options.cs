@@ -48,6 +48,8 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_survive_restart()
         {
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
             using (bus.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id))))
             {
                 await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);

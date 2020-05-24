@@ -92,7 +92,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         [Fact]
         public async Task Should_survive_restart()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
 
             var subscriptionId = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(2);

@@ -27,7 +27,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
         }
 
         [Fact]
-        public async Task Test()
+        public async Task Should_work_with_default_options()
         {
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
@@ -46,7 +46,7 @@ namespace EasyNetQ.IntegrationTests.SendReceive
         [Fact]
         public async Task Should_survive_restart()
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
 
             var queue = Guid.NewGuid().ToString();
             var messagesSink = new MessagesSink(2);
