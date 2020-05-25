@@ -20,7 +20,8 @@ namespace EasyNetQ.DI
                 ClientProperties = configuration.ClientProperties,
                 AuthMechanisms = configuration.AuthMechanisms,
                 ClientProvidedName = configuration.Name,
-                NetworkRecoveryInterval = configuration.ConnectIntervalAttempt
+                NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
+                ContinuationTimeout = configuration.Timeout
             };
 
             if (configuration.AmqpConnectionString != null)
