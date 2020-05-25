@@ -7,7 +7,7 @@ namespace EasyNetQ
     /// <summary>
     ///     Contains various settings of a connection and more
     /// </summary>
-    public sealed class ConnectionConfiguration
+    public class ConnectionConfiguration
     {
         /// <summary>
         ///     Default AMQP port
@@ -140,7 +140,7 @@ namespace EasyNetQ
     /// <summary>
     ///     Represents a host configuration
     /// </summary>
-    public sealed class HostConfiguration
+    public class HostConfiguration
     {
         /// <summary>
         ///     Address of the host
@@ -151,7 +151,6 @@ namespace EasyNetQ
         ///     Port of the host
         /// </summary>
         public ushort Port { get; set; }
-
 
         /// <summary>
         ///     TSL configuration of the host
