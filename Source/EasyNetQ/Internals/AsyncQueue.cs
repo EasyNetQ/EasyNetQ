@@ -82,7 +82,7 @@ namespace EasyNetQ.Internals
 
                 CleanUpCancelledWaiters();
 
-                var waiter = new TaskCompletionSource<T>();
+                var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
                 waiter.AttachCancellation(cancellationToken);
                 waiters.Enqueue(waiter);
                 return waiter.Task;
