@@ -23,7 +23,6 @@ namespace EasyNetQ
             Timeout = TimeSpan.FromSeconds(10);
             PublisherConfirms = false;
             PersistentMessages = true;
-            UseBackgroundThreads = false;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
@@ -66,7 +65,6 @@ namespace EasyNetQ
         public string Product { get; set; }
         public string Platform { get; set; }
         public string Name { get; set; }
-        public bool UseBackgroundThreads { get; set; }
         public IList<IAuthMechanismFactory> AuthMechanisms { get; set; }
         public TimeSpan ConnectIntervalAttempt { get; set; }
 

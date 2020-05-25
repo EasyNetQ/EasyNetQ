@@ -1,5 +1,4 @@
-﻿using System;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 
 namespace EasyNetQ.DI
 {
@@ -11,7 +10,6 @@ namespace EasyNetQ.DI
 
             var connectionFactory = new ConnectionFactory
             {
-                UseBackgroundThreadsForIO = connectionConfiguration.UseBackgroundThreads,
                 AutomaticRecoveryEnabled = true,
                 TopologyRecoveryEnabled = false
             };

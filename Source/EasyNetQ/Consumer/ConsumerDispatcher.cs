@@ -7,9 +7,9 @@ namespace EasyNetQ.Consumer
 {
     public class ConsumerDispatcher : IConsumerDispatcher
     {
-        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly BlockingCollection<Action> durableActions = new BlockingCollection<Action>();
+        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly BlockingCollection<Action> transientActions = new BlockingCollection<Action>();
 
         public ConsumerDispatcher(ConnectionConfiguration configuration)
@@ -20,7 +20,7 @@ namespace EasyNetQ.Consumer
             {
                 var thread = new Thread(_ =>
                 {
-                    var blockingCollections = new[] { durableActions, transientActions };
+                    var blockingCollections = new[] {durableActions, transientActions};
                     while (!cancellation.IsCancellationRequested)
                         try
                         {
@@ -39,7 +39,6 @@ namespace EasyNetQ.Consumer
                         }
 
                     while (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action) >= 0)
-                    {
                         try
                         {
                             action();
@@ -48,9 +47,9 @@ namespace EasyNetQ.Consumer
                         {
                             logger.ErrorException(string.Empty, exception);
                         }
-                    }
+
                     logger.Debug("EasyNetQ consumer dispatch thread finished");
-                }) { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
+                }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = true};
 
                 thread.Start();
                 logger.Debug("EasyNetQ consumer dispatch thread started");
@@ -76,10 +75,7 @@ namespace EasyNetQ.Consumer
 
             // throw away any queued actions. RabbitMQ will redeliver any in-flight
             // messages that have not been acked when the connection is lost.
-            while (transientActions.TryTake(out _))
-            {
-                ++count;
-            }
+            while (transientActions.TryTake(out _)) ++count;
 
             if (count > 0)
                 logger.Debug("{count} queued transient actions were thrown", count);
