@@ -28,7 +28,7 @@ namespace EasyNetQ.ConnectionString
             from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
             select new HostConfiguration { Host = host, Port = port };
 
-        internal static readonly Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
+        internal static readonly Parser<IList<HostConfiguration>> Hosts = Host.ListDelimitedBy(',').Select(hosts => hosts.ToList());
 
         internal static readonly Parser<Uri> Amqp = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
 
