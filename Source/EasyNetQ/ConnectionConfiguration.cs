@@ -67,7 +67,7 @@ namespace EasyNetQ
         public string Password { get; set; }
 
         /// <summary>
-        ///     Heartbeat interval (default is 10)
+        ///     Heartbeat interval (default is 10 seconds)
         /// </summary>
         public TimeSpan RequestedHeartbeat { get; set; }
 
