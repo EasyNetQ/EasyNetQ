@@ -2,36 +2,30 @@
 
 namespace EasyNetQ.DI
 {
-    public static class ConnectionFactoryFactory
+    internal static class ConnectionFactoryFactory
     {
-        public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration connectionConfiguration)
+        public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration configuration)
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(configuration, "configuration");
 
             var connectionFactory = new ConnectionFactory
             {
                 AutomaticRecoveryEnabled = true,
-                TopologyRecoveryEnabled = false
+                TopologyRecoveryEnabled = false,
+                VirtualHost = configuration.VirtualHost,
+                UserName = configuration.UserName,
+                Password = configuration.Password,
+                Port = configuration.Port,
+                RequestedHeartbeat = configuration.RequestedHeartbeat,
+                ClientProperties = configuration.ClientProperties,
+                AuthMechanisms = configuration.AuthMechanisms,
+                ClientProvidedName = configuration.Name,
+                NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
+                ContinuationTimeout = configuration.Timeout
             };
 
-            if (connectionConfiguration.AmqpConnectionString != null)
-                connectionFactory.Uri = connectionConfiguration.AmqpConnectionString;
-
-            if (connectionFactory.VirtualHost == "/")
-                connectionFactory.VirtualHost = connectionConfiguration.VirtualHost;
-
-            if (connectionFactory.UserName == "guest")
-                connectionFactory.UserName = connectionConfiguration.UserName;
-
-            if (connectionFactory.Password == "guest")
-                connectionFactory.Password = connectionConfiguration.Password;
-
-            if (connectionFactory.Port == -1)
-                connectionFactory.Port = connectionConfiguration.Port;
-
-            connectionFactory.RequestedHeartbeat = connectionConfiguration.RequestedHeartbeat;
-            connectionFactory.ClientProperties = connectionConfiguration.ClientProperties;
-            connectionFactory.AuthMechanisms = connectionConfiguration.AuthMechanisms;
+            if (configuration.AmqpConnectionString != null)
+                connectionFactory.Uri = configuration.AmqpConnectionString;
 
             return connectionFactory;
         }

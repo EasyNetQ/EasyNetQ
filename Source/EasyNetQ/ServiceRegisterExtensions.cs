@@ -52,8 +52,9 @@ namespace EasyNetQ
                 .Register<IClientCommandDispatcher, SingleChannelClientCommandDispatcher>()
                 .Register<IPersistentConnection>(c =>
                 {
-                    var connection = new PersistentConnection(c.Resolve<ConnectionConfiguration>(),
-                        c.Resolve<IConnectionFactory>(), c.Resolve<IEventBus>());
+                    var connection = new PersistentConnection(
+                        c.Resolve<ConnectionConfiguration>(), c.Resolve<IConnectionFactory>(), c.Resolve<IEventBus>()
+                    );
                     connection.Initialize();
                     return connection;
                 })

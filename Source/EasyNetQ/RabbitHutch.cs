@@ -212,9 +212,9 @@ namespace EasyNetQ
 
             serviceRegister.Register(c =>
             {
-                var connectionConfiguration = connectionConfigurationFactory.Invoke(c);
-                connectionConfiguration.Validate();
-                return connectionConfiguration;
+                var configuration = connectionConfigurationFactory(c);
+                configuration.SetDefaultProperties();
+                return configuration;
             });
 
             serviceRegister.RegisterDefaultServices();

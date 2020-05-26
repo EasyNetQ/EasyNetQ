@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.Integration
                 Password = "guest"
             };
 
-            configuration.Validate();
+            configuration.SetDefaultProperties();
 
             var typeNameSerializer = new DefaultTypeNameSerializer();
             var errorMessageSerializer = new DefaultErrorMessageSerializer();
