@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_message_is_sent : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private const string queueName = "the_queue_name";
 
         public When_a_message_is_sent()
@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_publish_the_message()
         {
-            mockBuilder.Channels[0].Received().BasicPublish(
+            mockBuilder.Channels[1].Received().BasicPublish(
                 Arg.Is(""),
                 Arg.Is(queueName),
                 Arg.Is(false),
