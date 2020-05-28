@@ -12,9 +12,6 @@ namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
-        public const string Host = "my_host";
-        public const string VirtualHost = "my_virtual_host";
-        public const int PortNumber = 1234;
         private readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IBus bus;
         private readonly Stack<IModel> channelPool = new Stack<IModel>();

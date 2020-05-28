@@ -17,7 +17,6 @@
 
     public class PersistentChannelFactory : IPersistentChannelFactory
     {
-        private readonly ConnectionConfiguration configuration;
         private readonly IEventBus eventBus;
 
         public PersistentChannelFactory(IEventBus eventBus)

@@ -1,10 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
@@ -13,11 +12,9 @@ namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_polymorphic_message_is_sent : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
         private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
-        private ReadOnlyMemory<byte> publishedMessage;
-        private IBasicProperties properties;
 
         public When_a_polymorphic_message_is_sent()
         {
@@ -29,14 +26,7 @@ namespace EasyNetQ.Tests.ProducerTests
                     NotInInterface = "Hi"
                 };
 
-            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
-               .Do(x =>
-               {
-                   properties = (IBasicProperties)x[3];
-                   publishedMessage = (ReadOnlyMemory<byte>)x[4];
-               });
-
-            mockBuilder.PubSub.Publish<IMyMessageInterface>(message, c => { });
+            mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
         }
 
         public void Dispose()
@@ -52,31 +42,23 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Any<IDictionary<string, object>>());
-        }
-
-        [Fact]
-        public void Should_name_type_as_actual_object_type()
-        {
-            properties.Type.Should().Be(implementationTypeName);
-        }
-
-        [Fact]
-        public void Should_correctly_serialize_implementation()
-        {
-            var json = Encoding.UTF8.GetString(publishedMessage.ToArray());
-            json.Should().Be("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}");
+                Arg.Any<IDictionary<string, object>>()
+            );
         }
 
         [Fact]
         public void Should_publish_to_correct_exchange()
         {
-            mockBuilder.Channels[0].Received().BasicPublish(
+            mockBuilder.Channels[1].Received().BasicPublish(
                     Arg.Is(interfaceTypeName),
                     Arg.Is(""),
                     Arg.Is(false),
-                    Arg.Any<IBasicProperties>(),
-                    Arg.Any<ReadOnlyMemory<byte>>()
+                    Arg.Is<IBasicProperties>(x => x.Type == implementationTypeName),
+                    Arg.Is<ReadOnlyMemory<byte>>(
+                        x => x.ToArray().SequenceEqual(
+                            Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
+                        )
+                    )
                 );
         }
     }
