@@ -6,7 +6,6 @@ using EasyNetQ.Scheduling;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 
 namespace EasyNetQ.Tests.Mocking
 {
@@ -99,8 +98,6 @@ namespace EasyNetQ.Tests.Mocking
         public List<IModel> Channels => channels;
 
         public List<IBasicConsumer> Consumers => consumers;
-
-        public IBasicProperties BasicProperties => basicProperties;
 
         public IBus Bus => bus;
 
