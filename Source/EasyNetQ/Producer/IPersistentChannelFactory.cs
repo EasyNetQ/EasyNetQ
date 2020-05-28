@@ -1,8 +1,18 @@
 ﻿namespace EasyNetQ.Producer
 {
+    public readonly struct PersistentChannelOptions
+    {
+        public PersistentChannelOptions(bool publisherConfirms)
+        {
+            PublisherConfirms = publisherConfirms;
+        }
+
+        public bool PublisherConfirms { get; }
+    }
+
     public interface IPersistentChannelFactory
     {
-        IPersistentChannel CreatePersistentChannel(IPersistentConnection connection);
+        IPersistentChannel CreatePersistentChannel(IPersistentConnection connection, PersistentChannelOptions options);
     }
 
     public class PersistentChannelFactory : IPersistentChannelFactory
@@ -10,20 +20,20 @@
         private readonly ConnectionConfiguration configuration;
         private readonly IEventBus eventBus;
 
-        public PersistentChannelFactory(ConnectionConfiguration configuration, IEventBus eventBus)
+        public PersistentChannelFactory(IEventBus eventBus)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
-            this.configuration = configuration;
             this.eventBus = eventBus;
         }
 
-        public IPersistentChannel CreatePersistentChannel(IPersistentConnection connection)
+        public IPersistentChannel CreatePersistentChannel(
+            IPersistentConnection connection, PersistentChannelOptions options
+        )
         {
             Preconditions.CheckNotNull(connection, "connection");
 
-            return new PersistentChannel(connection, configuration, eventBus);
+            return new PersistentChannel(options, connection, eventBus);
         }
     }
 }

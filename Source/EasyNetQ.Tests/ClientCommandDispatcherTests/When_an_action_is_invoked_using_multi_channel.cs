@@ -22,11 +22,11 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
             channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
             var action = Substitute.For<Func<IModel, int>>();
-            channelFactory.CreatePersistentChannel(connection).Returns(channel);
+            channelFactory.CreatePersistentChannel(connection, default).Returns(channel);
             channel.InvokeChannelActionAsync(action).Returns(42);
 
             dispatcher = new MultiChannelClientCommandDispatcher(1, connection, channelFactory);
-            actionResult = dispatcher.InvokeAsync(action)
+            actionResult = dispatcher.InvokeAsync(action, ChannelDispatchOptions.Default)
                 .GetAwaiter()
                 .GetResult();
         }
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         [Fact]
         public void Should_create_a_persistent_channel()
         {
-            channelFactory.Received().CreatePersistentChannel(connection);
+            channelFactory.Received().CreatePersistentChannel(connection, new PersistentChannelOptions());
         }
 
         [Fact]

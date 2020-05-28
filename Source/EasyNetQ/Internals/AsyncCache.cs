@@ -11,7 +11,7 @@ namespace EasyNetQ.Internals
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public sealed class AsyncCache<TKey, TValue>
+    public sealed class AsyncCache<TKey, TValue> : IDisposable
     {
         private readonly AsyncLock mutex = new AsyncLock();
         private readonly ConcurrentDictionary<TKey, Task<TValue>> storage = new ConcurrentDictionary<TKey, Task<TValue>>();
@@ -49,6 +49,12 @@ namespace EasyNetQ.Internals
                 storage[key] = Task.FromResult(newValue);
                 return newValue;
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            mutex.Dispose();
         }
     }
 }

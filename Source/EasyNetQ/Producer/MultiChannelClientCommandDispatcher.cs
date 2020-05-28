@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,8 @@ namespace EasyNetQ.Producer
     /// </summary>
     public sealed class MultiChannelClientCommandDispatcher : IClientCommandDispatcher
     {
-        private readonly AsyncQueue<IPersistentChannel> channelsPool;
+        private readonly ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
+        private readonly Func<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
 
         /// <summary>
         /// Creates a dispatcher
@@ -24,17 +26,37 @@ namespace EasyNetQ.Producer
             int channelsCount, IPersistentConnection connection, IPersistentChannelFactory channelFactory
         )
         {
-            channelsPool = new AsyncQueue<IPersistentChannel>(
-                Enumerable.Range(0, channelsCount).Select(_ => channelFactory.CreatePersistentChannel(connection))
+            channelsPoolPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>>();
+            channelsPoolFactory = o => new AsyncQueue<IPersistentChannel>(
+                Enumerable.Range(0, channelsCount)
+                    .Select(
+                        _ => channelFactory.CreatePersistentChannel(
+                            connection, new PersistentChannelOptions(o.PublisherConfirms)
+                        )
+                    )
             );
         }
 
         /// <inheritdoc />
-        public void Dispose() => channelsPool.Dispose();
+        public void Dispose()
+        {
+            channelsPoolPerOptions.ClearAndDispose(x =>
+            {
+                while(x.TryDequeue(out var channel))
+                    channel.Dispose();
+                x.Dispose();
+            });
+        }
 
         /// <inheritdoc />
-        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
+        public async Task<T> InvokeAsync<T>(
+            Func<IModel, T> channelAction, ChannelDispatchOptions options, CancellationToken cancellationToken
+        )
         {
+            Preconditions.CheckNotNull(channelAction, "channelAction");
+
+            // TODO channelsPoolFactory could be called multiple time, fix it
+            var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);
             var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
             try
             {

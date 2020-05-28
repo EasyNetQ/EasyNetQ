@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Sprache;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,37 +17,35 @@ namespace EasyNetQ.Producer
         private const int MinRetryTimeoutMs = 50;
         private const int MaxRetryTimeoutMs = 5000;
 
-        private readonly ConnectionConfiguration configuration;
+        private readonly AsyncLock mutex = new AsyncLock();
         private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
+        private readonly PersistentChannelOptions options;
 
         private volatile IModel initializedChannel;
 
         /// <summary>
         /// Creates PersistentChannel
         /// </summary>
+        /// <param name="options"></param>
         /// <param name="connection">The connection</param>
-        /// <param name="configuration">The configuration</param>
         /// <param name="eventBus">The event's bus</param>
-        public PersistentChannel(
-            IPersistentConnection connection,
-            ConnectionConfiguration configuration,
-            IEventBus eventBus
-        )
+        public PersistentChannel(PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
-            this.configuration = configuration;
             this.connection = connection;
             this.eventBus = eventBus;
+            this.options = options;
         }
 
         /// <inheritdoc />
         public async Task<T> InvokeChannelActionAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
+
+            using var releaser = await mutex.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
             var retryTimeoutMs = MinRetryTimeoutMs;
             while (true)
@@ -70,7 +69,11 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public void Dispose() => initializedChannel?.Dispose();
+        public void Dispose()
+        {
+            mutex.Dispose();
+            initializedChannel?.Dispose();
+        }
 
         private IModel CreateChannel()
         {
@@ -82,7 +85,7 @@ namespace EasyNetQ.Producer
 
         private void WireUpChannelEvents(IModel channel)
         {
-            if (configuration.PublisherConfirms)
+            if (options.PublisherConfirms)
             {
                 channel.ConfirmSelect();
 

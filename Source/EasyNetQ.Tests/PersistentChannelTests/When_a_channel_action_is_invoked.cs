@@ -15,12 +15,11 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel, IRecoverable>();
-            var configuration = new ConnectionConfiguration();
             eventBus = Substitute.For<IEventBus>();
 
             persistentConnection.CreateModel().Returns(channel);
 
-            persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
+            persistentChannel = new PersistentChannel(new PersistentChannelOptions(), persistentConnection, eventBus);
 
             persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), default);
         }

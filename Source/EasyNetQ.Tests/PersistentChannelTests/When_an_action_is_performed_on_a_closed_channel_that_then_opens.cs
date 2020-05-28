@@ -18,7 +18,6 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel, IRecoverable>();
             var eventBus = new EventBus();
-            var configuration = new ConnectionConfiguration();
 
             var shutdownArgs = new ShutdownEventArgs(
                 ShutdownInitiator.Peer,
@@ -33,7 +32,9 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 x => channel
             );
 
-            var persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
+            var persistentChannel = new PersistentChannel(
+                new PersistentChannelOptions(), persistentConnection, eventBus
+            );
 
             new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent()), null, 100, Timeout.Infinite);
 

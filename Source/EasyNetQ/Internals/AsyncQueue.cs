@@ -53,6 +53,21 @@ namespace EasyNetQ.Internals
             }
         }
 
+        /// <summary>
+        ///     Tries to take the element from queue
+        /// </summary>
+        /// <param name="element">Dequeued element</param>
+        /// <returns>True if an element was dequeued</returns>
+        public bool TryDequeue(out T element)
+        {
+            lock (mutex)
+            {
+                var hasElements = elements.Count > 0;
+                element = hasElements ? elements.Dequeue() : default;
+                return hasElements;
+            }
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -63,13 +78,12 @@ namespace EasyNetQ.Internals
                     var waiter = waiters.Dequeue();
                     waiter.TrySetCanceled();
                 }
-
                 elements.Clear();
             }
         }
 
         /// <summary>
-        ///     Dequeue element from queue
+        ///     Takes the element from queue
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The dequeued element</returns>
@@ -90,7 +104,7 @@ namespace EasyNetQ.Internals
         }
 
         /// <summary>
-        ///     Enqueue element to queue
+        ///     Adds the element to queue
         /// </summary>
         /// <param name="element">The element to enqueue</param>
         public void Enqueue(T element)

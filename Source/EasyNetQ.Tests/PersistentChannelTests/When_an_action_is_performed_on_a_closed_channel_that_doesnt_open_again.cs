@@ -18,12 +18,6 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var eventBus = Substitute.For<IEventBus>();
-
-            var configuration = new ConnectionConfiguration
-            {
-                Timeout = TimeSpan.FromSeconds(1)
-            };
-
             var shutdownArgs = new ShutdownEventArgs(
                 ShutdownInitiator.Peer,
                 AmqpException.ConnectionClosed,
@@ -31,8 +25,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var exception = new OperationInterruptedException(shutdownArgs);
 
             persistentConnection.When(x => x.CreateModel()).Do(x => throw exception);
-
-            persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
+            persistentChannel = new PersistentChannel(new PersistentChannelOptions(), persistentConnection, eventBus);
         }
 
         private readonly IPersistentChannel persistentChannel;
