@@ -4,7 +4,7 @@ using EasyNetQ.Sprache;
 
 namespace EasyNetQ.AmqpExceptions
 {
-    public static class AmqpExceptionGrammar
+    internal static class AmqpExceptionGrammar
     {
         private static readonly Parser<ushort> Number = Parse.Number.Select(ushort.Parse);
 

@@ -28,7 +28,8 @@ namespace EasyNetQ.Producer
             subscriptions = new[]
             {
                 eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation),
-                eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated)
+                eventBus.Subscribe<ChannelRecoveredEvent>(OnChannelRecovered),
+                eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown)
             };
         }
 
@@ -36,6 +37,10 @@ namespace EasyNetQ.Producer
         public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
         {
             var sequenceNumber = model.NextPublishSeqNo;
+
+            if (model.NextPublishSeqNo == 0UL)
+                throw new InvalidOperationException("Confirms not selected");
+
             var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
             var confirmationTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
             requests.Add(sequenceNumber, confirmationTcs);
@@ -52,7 +57,8 @@ namespace EasyNetQ.Producer
 
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
         {
-            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests)) return;
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
+                return;
 
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
@@ -69,10 +75,22 @@ namespace EasyNetQ.Producer
             }
         }
 
-        private void OnPublishChannelCreated(PublishChannelCreatedEvent @event)
+        private void OnChannelRecovered(ChannelRecoveredEvent @event)
         {
+            if (@event.Channel.NextPublishSeqNo == 0)
+                return;
+
             InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
         }
+
+        private void OnChannelShutdown(ChannelShutdownEvent @event)
+        {
+            if (@event.Channel.NextPublishSeqNo == 0)
+                return;
+
+            InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
+        }
+
 
         private void InterruptUnconfirmedRequests(int channelNumber, bool cancellationInsteadOfInterruption = false)
         {

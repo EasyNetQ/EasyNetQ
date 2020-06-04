@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             model.NextPublishSeqNo.Returns(DeliveryTag);
             var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
-            eventBus.Publish(new PublishChannelCreatedEvent(model));
+            eventBus.Publish(new ChannelRecoveredEvent(model));
             await Assert.ThrowsAsync<PublishInterruptedException>(
                 () => confirmation1.WaitAsync(default)
             ).ConfigureAwait(false);

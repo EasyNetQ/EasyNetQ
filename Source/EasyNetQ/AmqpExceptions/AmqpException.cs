@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace EasyNetQ.AmqpExceptions
 {
-    public class AmqpException
+    internal class AmqpException
     {
         public AmqpExceptionPreface Preface { get; }
         public IList<IAmqpExceptionElement> Elements { get; }
@@ -23,7 +23,8 @@ namespace EasyNetQ.AmqpExceptions
         public int ClassId => GetElement<AmqpExceptionClassIdElement>();
         public int MethodId => GetElement<AmqpExceptionMethodIdElement>();
 
-        public static ushort ConnectionClosed = 320;
+        public const ushort ConnectionClosed = 320;
+        public const ushort NotFound = 404;
     }
 
     public class AmqpExceptionPreface

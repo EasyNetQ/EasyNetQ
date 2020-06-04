@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel, IRecoverable>();
-            eventBus = Substitute.For<IEventBus>();
+            var eventBus = Substitute.For<IEventBus>();
 
             persistentConnection.CreateModel().Returns(channel);
 
@@ -27,18 +27,11 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private readonly IPersistentChannel persistentChannel;
         private readonly IPersistentConnection persistentConnection;
         private readonly IModel channel;
-        private readonly IEventBus eventBus;
 
         [Fact]
         public void Should_open_a_channel()
         {
             persistentConnection.Received().CreateModel();
-        }
-
-        [Fact]
-        public void Should_raise_a_PublishChannelCreatedEvent()
-        {
-            eventBus.Received().Publish(Arg.Any<PublishChannelCreatedEvent>());
         }
 
         [Fact]

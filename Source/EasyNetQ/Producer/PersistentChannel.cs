@@ -56,8 +56,17 @@ namespace EasyNetQ.Producer
                 {
                     return channelAction(initializedChannel ??= CreateChannel());
                 }
-                catch (OperationInterruptedException exception) when(!NeedRethrow(exception))
+                catch (OperationInterruptedException exception)
                 {
+                    var verdict = GetAmqpExceptionVerdict(exception);
+                    if (verdict.NeedCloseChannel)
+                    {
+                        CloseChannel(initializedChannel);
+                        initializedChannel = null;
+                    }
+
+                    if (verdict.NeedRethrow)
+                        throw;
                 }
                 catch (EasyNetQException)
                 {
@@ -72,18 +81,28 @@ namespace EasyNetQ.Producer
         public void Dispose()
         {
             mutex.Dispose();
-            initializedChannel?.Dispose();
+            CloseChannel(initializedChannel);
+            initializedChannel = null;
         }
 
         private IModel CreateChannel()
         {
             var channel = connection.CreateModel();
-            WireUpChannelEvents(channel);
-            eventBus.Publish(new PublishChannelCreatedEvent(channel));
+            AttachChannelEvents(channel);
             return channel;
         }
 
-        private void WireUpChannelEvents(IModel channel)
+        private void CloseChannel(IModel channel)
+        {
+            if (channel == null)
+                return;
+
+            channel.Close();
+            DetachChannelEvents(channel);
+            channel.Dispose();
+        }
+
+        private void AttachChannelEvents(IModel channel)
         {
             if (options.PublisherConfirms)
             {
@@ -94,16 +113,37 @@ namespace EasyNetQ.Producer
             }
 
             channel.BasicReturn += OnReturn;
+            channel.ModelShutdown += OnChannelShutdown;
 
             if (channel is IRecoverable recoverable)
-                recoverable.Recovery += OnChannelRestored;
+                recoverable.Recovery += OnChannelRecovered;
             else
                 throw new NotSupportedException("Non-recoverable channel is not supported");
         }
 
-        private void OnChannelRestored(object sender, EventArgs e)
+        private void DetachChannelEvents(IModel channel)
         {
-            eventBus.Publish(new PublishChannelCreatedEvent((IModel)sender));
+            if (channel is IRecoverable recoverable)
+                recoverable.Recovery -= OnChannelRecovered;
+
+            channel.ModelShutdown -= OnChannelShutdown;
+            channel.BasicReturn -= OnReturn;
+
+            if (!options.PublisherConfirms)
+                return;
+
+            channel.BasicNacks -= OnNack;
+            channel.BasicAcks -= OnAck;
+        }
+
+        private void OnChannelRecovered(object sender, EventArgs e)
+        {
+            eventBus.Publish(new ChannelRecoveredEvent((IModel)sender));
+        }
+
+        private void OnChannelShutdown(object sender, EventArgs e)
+        {
+            eventBus.Publish(new ChannelShutdownEvent((IModel)sender));
         }
 
         private void OnReturn(object sender, BasicReturnEventArgs args)
@@ -126,17 +166,34 @@ namespace EasyNetQ.Producer
             eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
-        private static bool NeedRethrow(OperationInterruptedException exception)
+        private static AmqpExceptionVerdict GetAmqpExceptionVerdict(OperationInterruptedException exception)
         {
             try
             {
                 var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
-                return amqpException.Code != AmqpException.ConnectionClosed;
+                return amqpException.Code switch
+                {
+                    AmqpException.ConnectionClosed => new AmqpExceptionVerdict(false, false),
+                    AmqpException.NotFound => new AmqpExceptionVerdict(true, true),
+                    _ => new AmqpExceptionVerdict(true, false)
+                };
             }
             catch (ParseException)
             {
-                return true;
+                return new AmqpExceptionVerdict(true, false);
             }
+        }
+
+        private readonly struct AmqpExceptionVerdict
+        {
+            public AmqpExceptionVerdict(bool needRethrow, bool needCloseChannel)
+            {
+                NeedRethrow = needRethrow;
+                NeedCloseChannel = needCloseChannel;
+            }
+
+            public bool NeedRethrow { get; }
+            public bool NeedCloseChannel { get; }
         }
     }
 }
