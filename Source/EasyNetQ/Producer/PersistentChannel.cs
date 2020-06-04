@@ -174,7 +174,10 @@ namespace EasyNetQ.Producer
                 return amqpException.Code switch
                 {
                     AmqpException.ConnectionClosed => new AmqpExceptionVerdict(false, false),
+                    AmqpException.AccessRefused => new AmqpExceptionVerdict(true, true),
                     AmqpException.NotFound => new AmqpExceptionVerdict(true, true),
+                    AmqpException.ResourceLocked => new AmqpExceptionVerdict(true, true),
+                    AmqpException.PreconditionFailed => new AmqpExceptionVerdict(true, true),
                     _ => new AmqpExceptionVerdict(true, false)
                 };
             }
