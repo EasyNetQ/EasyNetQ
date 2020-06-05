@@ -11,7 +11,7 @@ namespace EasyNetQ.IntegrationTests
 {
     public class RabbitMQFixture : IAsyncLifetime, IDisposable
     {
-        private static readonly TimeSpan InitializationTimeout = TimeSpan.FromMinutes(3);
+        private static readonly TimeSpan InitializationTimeout = TimeSpan.FromMinutes(5);
 
         private readonly DockerProxy dockerProxy;
         private OSPlatform dockerEngineOsPlatform;
