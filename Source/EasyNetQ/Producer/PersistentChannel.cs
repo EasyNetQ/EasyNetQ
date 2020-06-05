@@ -141,7 +141,7 @@ namespace EasyNetQ.Producer
             eventBus.Publish(new ChannelRecoveredEvent((IModel)sender));
         }
 
-        private void OnChannelShutdown(object sender, EventArgs e)
+        private void OnChannelShutdown(object sender, ShutdownEventArgs e)
         {
             eventBus.Publish(new ChannelShutdownEvent((IModel)sender));
         }
