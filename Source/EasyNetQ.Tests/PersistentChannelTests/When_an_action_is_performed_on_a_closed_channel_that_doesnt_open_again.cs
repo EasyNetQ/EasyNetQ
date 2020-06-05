@@ -3,7 +3,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -20,8 +19,9 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var eventBus = Substitute.For<IEventBus>();
             var shutdownArgs = new ShutdownEventArgs(
                 ShutdownInitiator.Peer,
-                AmqpException.ConnectionClosed,
-                "connection closed by peer");
+                AmqpErrorCodes.ConnectionClosed,
+                "connection closed by peer"
+            );
             var exception = new OperationInterruptedException(shutdownArgs);
 
             persistentConnection.When(x => x.CreateModel()).Do(x => throw exception);

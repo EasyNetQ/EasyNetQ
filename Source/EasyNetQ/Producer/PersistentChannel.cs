@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Sprache;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -58,7 +56,7 @@ namespace EasyNetQ.Producer
                 }
                 catch (OperationInterruptedException exception)
                 {
-                    var verdict = GetAmqpExceptionVerdict(exception);
+                    var verdict = GetAmqpExceptionVerdict(exception.ShutdownReason);
                     if (verdict.NeedCloseChannel)
                     {
                         CloseChannel(initializedChannel);
@@ -166,25 +164,17 @@ namespace EasyNetQ.Producer
             eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
-        private static AmqpExceptionVerdict GetAmqpExceptionVerdict(OperationInterruptedException exception)
+        private static AmqpExceptionVerdict GetAmqpExceptionVerdict(ShutdownEventArgs shutdownReason)
         {
-            try
+            return shutdownReason?.ReplyCode switch
             {
-                var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
-                return amqpException.Code switch
-                {
-                    AmqpException.ConnectionClosed => new AmqpExceptionVerdict(false, false),
-                    AmqpException.AccessRefused => new AmqpExceptionVerdict(true, true),
-                    AmqpException.NotFound => new AmqpExceptionVerdict(true, true),
-                    AmqpException.ResourceLocked => new AmqpExceptionVerdict(true, true),
-                    AmqpException.PreconditionFailed => new AmqpExceptionVerdict(true, true),
-                    _ => new AmqpExceptionVerdict(true, false)
-                };
-            }
-            catch (ParseException)
-            {
-                return new AmqpExceptionVerdict(true, false);
-            }
+                AmqpErrorCodes.ConnectionClosed => new AmqpExceptionVerdict(false, false),
+                AmqpErrorCodes.AccessRefused => new AmqpExceptionVerdict(true, true),
+                AmqpErrorCodes.NotFound => new AmqpExceptionVerdict(true, true),
+                AmqpErrorCodes.ResourceLocked => new AmqpExceptionVerdict(true, true),
+                AmqpErrorCodes.PreconditionFailed => new AmqpExceptionVerdict(true, true),
+                _ => new AmqpExceptionVerdict(true, false)
+            };
         }
 
         private readonly struct AmqpExceptionVerdict

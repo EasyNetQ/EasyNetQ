@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Threading;
-using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NSubstitute;
@@ -21,7 +20,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
             var shutdownArgs = new ShutdownEventArgs(
                 ShutdownInitiator.Peer,
-                AmqpException.ConnectionClosed,
+                AmqpErrorCodes.ConnectionClosed,
                 "connection closed by peer"
             );
             var exception = new OperationInterruptedException(shutdownArgs);
