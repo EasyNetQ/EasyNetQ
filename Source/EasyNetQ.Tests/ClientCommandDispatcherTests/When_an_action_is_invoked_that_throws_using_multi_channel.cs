@@ -16,15 +16,14 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 
         public When_an_action_is_invoked_that_throws_using_multi_channel()
         {
-            var connection = Substitute.For<IPersistentConnection>();
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
 
-            channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions()).Returns(channel);
+            channelFactory.CreatePersistentChannel(new PersistentChannelOptions()).Returns(channel);
             channel.InvokeChannelActionAsync<int>(null)
                 .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
-            dispatcher = new MultiChannelClientCommandDispatcher(1, connection, channelFactory);
+            dispatcher = new MultiChannelClientCommandDispatcher(1, channelFactory);
         }
 
         public void Dispose()

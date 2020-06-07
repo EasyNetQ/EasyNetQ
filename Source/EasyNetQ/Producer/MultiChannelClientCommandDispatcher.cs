@@ -20,19 +20,14 @@ namespace EasyNetQ.Producer
         /// Creates a dispatcher
         /// </summary>
         /// <param name="channelsCount">The max number of channels</param>
-        /// <param name="connection">The connection</param>
         /// <param name="channelFactory">The channel factory</param>
-        public MultiChannelClientCommandDispatcher(
-            int channelsCount, IPersistentConnection connection, IPersistentChannelFactory channelFactory
-        )
+        public MultiChannelClientCommandDispatcher(int channelsCount, IPersistentChannelFactory channelFactory)
         {
             channelsPoolPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>>();
             channelsPoolFactory = o => new AsyncQueue<IPersistentChannel>(
                 Enumerable.Range(0, channelsCount)
                     .Select(
-                        _ => channelFactory.CreatePersistentChannel(
-                            connection, new PersistentChannelOptions(o.PublisherConfirms)
-                        )
+                        _ => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms))
                     )
             );
         }

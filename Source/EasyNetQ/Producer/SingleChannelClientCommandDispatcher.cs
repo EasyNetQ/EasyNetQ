@@ -18,19 +18,13 @@ namespace EasyNetQ.Producer
         /// <summary>
         /// Creates a dispatcher
         /// </summary>
-        /// <param name="connection">The connection</param>
         /// <param name="channelFactory">The channel factory</param>
-        public SingleChannelClientCommandDispatcher(
-            IPersistentConnection connection, IPersistentChannelFactory channelFactory
-        )
+        public SingleChannelClientCommandDispatcher(IPersistentChannelFactory channelFactory)
         {
-            Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(channelFactory, "channelFactory");
 
             channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
-            createChannelFactory = o => channelFactory.CreatePersistentChannel(
-                connection, new PersistentChannelOptions(o.PublisherConfirms)
-            );
+            createChannelFactory = o => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms));
         }
 
         /// <inheritdoc />

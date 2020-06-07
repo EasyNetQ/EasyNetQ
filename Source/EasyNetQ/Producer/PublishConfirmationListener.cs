@@ -21,7 +21,7 @@ namespace EasyNetQ.Producer
         /// <summary>
         ///     Creates publish confirmations listener
         /// </summary>
-        /// <param name="eventBus"></param>
+        /// <param name="eventBus">The event bus</param>
         public PublishConfirmationListener(IEventBus eventBus)
         {
             unconfirmedChannelRequests = new ConcurrentDictionary<int, UnconfirmedRequests>();
