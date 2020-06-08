@@ -23,7 +23,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
         [Fact]
         public async Task Should_not_affect_publish_to_existent_exchange()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             await bus.Advanced.ExchangeDeclareAsync("existent", ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
             await Assert.ThrowsAsync<AlreadyClosedException>(() =>
