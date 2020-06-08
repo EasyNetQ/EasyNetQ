@@ -12,22 +12,25 @@ namespace EasyNetQ.Producer
     /// <inheritdoc />
     public class PersistentChannel : IPersistentChannel
     {
+        private const string RequestPipeliningForbiddenMessage = "Pipelining of requests forbidden";
+
         private const int MinRetryTimeoutMs = 50;
         private const int MaxRetryTimeoutMs = 5000;
-
-        private readonly AsyncLock mutex = new AsyncLock();
         private readonly IPersistentConnection connection;
+
+        private readonly CancellationTokenSource disposeCts = new CancellationTokenSource();
         private readonly IEventBus eventBus;
+        private readonly AsyncLock mutex = new AsyncLock();
         private readonly PersistentChannelOptions options;
 
         private volatile IModel initializedChannel;
 
         /// <summary>
-        /// Creates PersistentChannel
+        ///     Creates PersistentChannel
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">The channel options</param>
         /// <param name="connection">The connection</param>
-        /// <param name="eventBus">The event's bus</param>
+        /// <param name="eventBus">The event bus</param>
         public PersistentChannel(PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connection, "connection");
@@ -39,38 +42,48 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public async Task<T> InvokeChannelActionAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
+        public async Task<T> InvokeChannelActionAsync<T>(
+            Func<IModel, T> channelAction, CancellationToken cancellationToken
+        )
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            using var releaser = await mutex.AcquireAsync(cancellationToken).ConfigureAwait(false);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposeCts.Token);
+            using var releaser = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
 
             var retryTimeoutMs = MinRetryTimeoutMs;
+            var isRetryRequested = false;
+
             while (true)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                cts.Token.ThrowIfCancellationRequested();
 
                 try
                 {
-                    return channelAction(initializedChannel ??= CreateChannel());
+                    var channel = initializedChannel ??= CreateChannel();
+                    return channelAction(channel);
                 }
-                catch (OperationInterruptedException exception)
+                catch (Exception exception)
                 {
-                    var verdict = GetAmqpExceptionVerdict(exception.ShutdownReason);
-                    if (verdict.NeedCloseChannel)
+                    var exceptionVerdict = GetExceptionVerdict(exception);
+                    if (exceptionVerdict.CloseChannel)
+                        CloseChannel();
+
+                    // We need such a crunch because soft failures in case of non RPC requests, for instance,
+                    // publish to a non-existent exchange, will arrive asynchronously and will affect
+                    // next operation. That's why we need to retry current one because the reason of an error
+                    // could be the previous one.
+                    if (exceptionVerdict.RetryBeforeRethrow && !isRetryRequested)
                     {
-                        CloseChannel(initializedChannel);
-                        initializedChannel = null;
+                        isRetryRequested = true;
+                        continue;
                     }
 
-                    if (verdict.NeedRethrow)
+                    if (exceptionVerdict.Rethrow)
                         throw;
                 }
-                catch (EasyNetQException)
-                {
-                }
 
-                await Task.Delay(retryTimeoutMs, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
                 retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
             }
         }
@@ -78,9 +91,10 @@ namespace EasyNetQ.Producer
         /// <inheritdoc />
         public void Dispose()
         {
+            disposeCts.Cancel();
             mutex.Dispose();
-            CloseChannel(initializedChannel);
-            initializedChannel = null;
+            CloseChannel();
+            disposeCts.Dispose();
         }
 
         private IModel CreateChannel()
@@ -90,8 +104,9 @@ namespace EasyNetQ.Producer
             return channel;
         }
 
-        private void CloseChannel(IModel channel)
+        private void CloseChannel()
         {
+            var channel = Interlocked.Exchange(ref initializedChannel, null);
             if (channel == null)
                 return;
 
@@ -136,12 +151,12 @@ namespace EasyNetQ.Producer
 
         private void OnChannelRecovered(object sender, EventArgs e)
         {
-            eventBus.Publish(new ChannelRecoveredEvent((IModel)sender));
+            eventBus.Publish(new ChannelRecoveredEvent((IModel) sender));
         }
 
         private void OnChannelShutdown(object sender, ShutdownEventArgs e)
         {
-            eventBus.Publish(new ChannelShutdownEvent((IModel)sender));
+            eventBus.Publish(new ChannelShutdownEvent((IModel) sender));
         }
 
         private void OnReturn(object sender, BasicReturnEventArgs args)
@@ -156,37 +171,61 @@ namespace EasyNetQ.Producer
 
         private void OnAck(object sender, BasicAckEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Ack((IModel)sender, args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Ack((IModel) sender, args.DeliveryTag, args.Multiple));
         }
 
         private void OnNack(object sender, BasicNackEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Nack((IModel) sender, args.DeliveryTag, args.Multiple));
         }
 
-        private static AmqpExceptionVerdict GetAmqpExceptionVerdict(ShutdownEventArgs shutdownReason)
+        private static ExceptionVerdict GetExceptionVerdict(Exception exception)
         {
-            return shutdownReason?.ReplyCode switch
+            switch (exception)
             {
-                AmqpErrorCodes.ConnectionClosed => new AmqpExceptionVerdict(false, false),
-                AmqpErrorCodes.AccessRefused => new AmqpExceptionVerdict(true, true),
-                AmqpErrorCodes.NotFound => new AmqpExceptionVerdict(true, true),
-                AmqpErrorCodes.ResourceLocked => new AmqpExceptionVerdict(true, true),
-                AmqpErrorCodes.PreconditionFailed => new AmqpExceptionVerdict(true, true),
-                _ => new AmqpExceptionVerdict(true, false)
-            };
+                case OperationInterruptedException e:
+                    return e.ShutdownReason?.ReplyCode switch
+                    {
+                        AmqpErrorCodes.ConnectionClosed => ExceptionVerdict.Suppress,
+                        AmqpErrorCodes.AccessRefused => ExceptionVerdict.ThrowWithChannelClosure(true),
+                        AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowWithChannelClosure(true),
+                        AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowWithChannelClosure(true),
+                        AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowWithChannelClosure(true),
+                        _ => ExceptionVerdict.Throw
+                    };
+                case NotSupportedException e:
+                    var isRequestPipeliningForbiddenException = e.Message.Contains(RequestPipeliningForbiddenMessage);
+                    return isRequestPipeliningForbiddenException
+                        ? ExceptionVerdict.SuppressWithChannelClosure
+                        : ExceptionVerdict.Throw;
+                case EasyNetQException _:
+                    return ExceptionVerdict.Suppress;
+                default:
+                    return ExceptionVerdict.Throw;
+            }
         }
 
-        private readonly struct AmqpExceptionVerdict
+        private readonly struct ExceptionVerdict
         {
-            public AmqpExceptionVerdict(bool needRethrow, bool needCloseChannel)
+            private ExceptionVerdict(bool rethrow, bool closeChannel, bool retryBeforeRethrow = false)
             {
-                NeedRethrow = needRethrow;
-                NeedCloseChannel = needCloseChannel;
+                Rethrow = rethrow;
+                CloseChannel = closeChannel;
+                RetryBeforeRethrow = retryBeforeRethrow;
             }
 
-            public bool NeedRethrow { get; }
-            public bool NeedCloseChannel { get; }
+            public static ExceptionVerdict Suppress { get; } = new ExceptionVerdict(false, false);
+            public static ExceptionVerdict Throw { get; } = new ExceptionVerdict(true, false);
+            public static ExceptionVerdict SuppressWithChannelClosure { get; } = new ExceptionVerdict(false, true);
+
+            public bool Rethrow { get; }
+            public bool CloseChannel { get; }
+            public bool RetryBeforeRethrow { get; }
+
+            public static ExceptionVerdict ThrowWithChannelClosure(bool retryBeforeRethrow)
+            {
+                return new ExceptionVerdict(true, true, retryBeforeRethrow);
+            }
         }
     }
 }

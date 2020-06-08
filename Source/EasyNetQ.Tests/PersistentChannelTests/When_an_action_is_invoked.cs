@@ -9,19 +9,20 @@ using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    public class When_a_channel_action_is_invoked: IDisposable
+    public class When_an_action_is_invoked: IDisposable
     {
-        public When_a_channel_action_is_invoked()
+        public When_an_action_is_invoked()
         {
             persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel, IRecoverable>();
-            var eventBus = Substitute.For<IEventBus>();
 
             persistentConnection.CreateModel().Returns(channel);
 
-            persistentChannel = new PersistentChannel(new PersistentChannelOptions(), persistentConnection, eventBus);
+            persistentChannel = new PersistentChannel(
+                new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
+            );
 
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), default);
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
 
         private readonly IPersistentChannel persistentChannel;

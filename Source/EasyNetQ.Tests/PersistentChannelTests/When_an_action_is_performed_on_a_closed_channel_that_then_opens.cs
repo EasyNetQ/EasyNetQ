@@ -26,18 +26,13 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var exception = new OperationInterruptedException(shutdownArgs);
 
             persistentConnection.CreateModel().Returns(
-                x => throw exception,
-                x => channel,
-                x => channel
+                x => throw exception, x => channel, x => channel
             );
 
             var persistentChannel = new PersistentChannel(
                 new PersistentChannelOptions(), persistentConnection, eventBus
             );
-
-            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent()), null, 100, Timeout.Infinite);
-
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), default);
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
 
         private readonly IModel channel;
