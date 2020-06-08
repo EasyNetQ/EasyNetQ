@@ -52,7 +52,6 @@ namespace EasyNetQ.Producer
             using var releaser = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
 
             var retryTimeoutMs = MinRetryTimeoutMs;
-            var isRetryRequested = false;
 
             while (true)
             {
@@ -68,16 +67,6 @@ namespace EasyNetQ.Producer
                     var exceptionVerdict = GetExceptionVerdict(exception);
                     if (exceptionVerdict.CloseChannel)
                         CloseChannel();
-
-                    // We need such a crunch because soft failures in case of non RPC requests, for instance,
-                    // publish to a non-existent exchange, will arrive asynchronously and will affect
-                    // next operation. That's why we need to retry current one because the reason of an error
-                    // could be the previous one.
-                    if (exceptionVerdict.RetryBeforeRethrow && !isRetryRequested)
-                    {
-                        isRetryRequested = true;
-                        continue;
-                    }
 
                     if (exceptionVerdict.Rethrow)
                         throw;
@@ -187,10 +176,10 @@ namespace EasyNetQ.Producer
                     return e.ShutdownReason?.ReplyCode switch
                     {
                         AmqpErrorCodes.ConnectionClosed => ExceptionVerdict.Suppress,
-                        AmqpErrorCodes.AccessRefused => ExceptionVerdict.ThrowWithChannelClosure(true),
-                        AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowWithChannelClosure(true),
-                        AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowWithChannelClosure(true),
-                        AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowWithChannelClosure(true),
+                        AmqpErrorCodes.AccessRefused => ExceptionVerdict.ThrowWithChannelClosure,
+                        AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowWithChannelClosure,
+                        AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowWithChannelClosure,
+                        AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowWithChannelClosure,
                         _ => ExceptionVerdict.Throw
                     };
                 case NotSupportedException e:
@@ -207,11 +196,10 @@ namespace EasyNetQ.Producer
 
         private readonly struct ExceptionVerdict
         {
-            private ExceptionVerdict(bool rethrow, bool closeChannel, bool retryBeforeRethrow = false)
+            private ExceptionVerdict(bool rethrow, bool closeChannel)
             {
                 Rethrow = rethrow;
                 CloseChannel = closeChannel;
-                RetryBeforeRethrow = retryBeforeRethrow;
             }
 
             public static ExceptionVerdict Suppress { get; } = new ExceptionVerdict(false, false);
@@ -220,12 +208,8 @@ namespace EasyNetQ.Producer
 
             public bool Rethrow { get; }
             public bool CloseChannel { get; }
-            public bool RetryBeforeRethrow { get; }
 
-            public static ExceptionVerdict ThrowWithChannelClosure(bool retryBeforeRethrow)
-            {
-                return new ExceptionVerdict(true, true, retryBeforeRethrow);
-            }
+            public static ExceptionVerdict ThrowWithChannelClosure { get; } = new ExceptionVerdict(true, true);
         }
     }
 }

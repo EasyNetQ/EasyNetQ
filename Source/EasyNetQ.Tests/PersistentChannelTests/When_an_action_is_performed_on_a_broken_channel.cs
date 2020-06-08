@@ -55,9 +55,8 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             };
 
         [Theory]
-        [MemberData(nameof(SoftChannelTestCases))]
         [MemberData(nameof(PipeliningForbiddenTestCases))]
-        public void Should_run_action_on_channel(Exception exception)
+        public void Should_succeed_after_channel_recreation(Exception exception)
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var brokenChannel = Substitute.For<IModel, IRecoverable>();
@@ -81,14 +80,14 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
         [Theory]
         [MemberData(nameof(SoftChannelTestCases))]
-        public void Should_throw_exception_after_unsuccessful_retry(Exception exception)
+        public void Should_throw_exception_and_close_channel(Exception exception)
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var brokenChannel = Substitute.For<IModel, IRecoverable>();
             brokenChannel.When(x => x.ExchangeDeclare("MyExchange", "direct"))
                 .Do(x => throw exception);
 
-            persistentConnection.CreateModel().Returns(x => brokenChannel, x => brokenChannel);
+            persistentConnection.CreateModel().Returns(x => brokenChannel);
 
             using var persistentChannel = new PersistentChannel(
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
@@ -99,9 +98,9 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"))
             );
 
-            brokenChannel.Received(2).ExchangeDeclare("MyExchange", "direct");
-            brokenChannel.Received(2).Close();
-            brokenChannel.Received(2).Dispose();
+            brokenChannel.Received().ExchangeDeclare("MyExchange", "direct");
+            brokenChannel.Received().Close();
+            brokenChannel.Received().Dispose();
         }
     }
 }
