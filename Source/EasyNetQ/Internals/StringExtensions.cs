@@ -1,10 +1,21 @@
 ﻿using System;
 
-namespace EasyNetQ
+namespace EasyNetQ.Internals
 {
-    public static class Extensions
+    /// <summary>
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
+    /// </summary>
+    public static class StringExtensions
     {
-
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
         public static string Trim(this string s, int start, int length)
         {
             // References: https://referencesource.microsoft.com/#mscorlib/system/string.cs,2691
