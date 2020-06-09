@@ -176,16 +176,16 @@ namespace EasyNetQ.Producer
                     return e.ShutdownReason?.ReplyCode switch
                     {
                         AmqpErrorCodes.ConnectionClosed => ExceptionVerdict.Suppress,
-                        AmqpErrorCodes.AccessRefused => ExceptionVerdict.ThrowWithChannelClosure,
-                        AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowWithChannelClosure,
-                        AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowWithChannelClosure,
-                        AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowWithChannelClosure,
+                        AmqpErrorCodes.AccessRefused => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowAndCloseChannel,
                         _ => ExceptionVerdict.Throw
                     };
                 case NotSupportedException e:
                     var isRequestPipeliningForbiddenException = e.Message.Contains(RequestPipeliningForbiddenMessage);
                     return isRequestPipeliningForbiddenException
-                        ? ExceptionVerdict.SuppressWithChannelClosure
+                        ? ExceptionVerdict.SuppressAndCloseChannel
                         : ExceptionVerdict.Throw;
                 case EasyNetQException _:
                     return ExceptionVerdict.Suppress;
@@ -196,20 +196,19 @@ namespace EasyNetQ.Producer
 
         private readonly struct ExceptionVerdict
         {
+            public static ExceptionVerdict Suppress { get; } = new ExceptionVerdict(false, false);
+            public static ExceptionVerdict SuppressAndCloseChannel { get; } = new ExceptionVerdict(false, true);
+            public static ExceptionVerdict Throw { get; } = new ExceptionVerdict(true, false);
+            public static ExceptionVerdict ThrowAndCloseChannel { get; } = new ExceptionVerdict(true, true);
+
             private ExceptionVerdict(bool rethrow, bool closeChannel)
             {
                 Rethrow = rethrow;
                 CloseChannel = closeChannel;
             }
 
-            public static ExceptionVerdict Suppress { get; } = new ExceptionVerdict(false, false);
-            public static ExceptionVerdict Throw { get; } = new ExceptionVerdict(true, false);
-            public static ExceptionVerdict SuppressWithChannelClosure { get; } = new ExceptionVerdict(false, true);
-
             public bool Rethrow { get; }
             public bool CloseChannel { get; }
-
-            public static ExceptionVerdict ThrowWithChannelClosure { get; } = new ExceptionVerdict(true, true);
         }
     }
 }

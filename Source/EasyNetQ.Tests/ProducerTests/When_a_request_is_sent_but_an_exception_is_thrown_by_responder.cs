@@ -3,11 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
@@ -34,20 +32,20 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Fact]
-        public void Should_throw_an_EasyNetQResponderException()
+        public async Task Should_throw_an_EasyNetQResponderException()
         {
-            Assert.Throws<EasyNetQResponderException>(() =>
+            await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
             {
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
                 DeliverMessage(correlationId, null);
-                task.GetAwaiter().GetResult();
-            });
+                await task.ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
 
         [Fact]
-        public void Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
+        public async Task Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
         {
-            Assert.Throws<EasyNetQResponderException>(() =>
+            await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
             {
                 var waiter = new CountdownEvent(2);
 
@@ -60,8 +58,8 @@ namespace EasyNetQ.Tests.ProducerTests
 
                 DeliverMessage(correlationId, "Why you are so bad with me?");
 
-                task.GetAwaiter().GetResult();
-            }); // ,"Why you are so bad with me?"
+                await task.ConfigureAwait(false);
+            }).ConfigureAwait(false); // ,"Why you are so bad with me?"
         }
 
         private void DeliverMessage(string correlationId, string exceptionMessage)
