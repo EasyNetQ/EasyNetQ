@@ -252,7 +252,15 @@ namespace EasyNetQ
                         var properties = model.CreateBasicProperties();
                         rawMessage.Properties.CopyTo(properties);
                         var confirmation = confirmationListener.CreatePendingConfirmation(model);
-                        model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
+                        try
+                        {
+                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
+                        }
+                        catch (Exception)
+                        {
+                            confirmation.Cancel();
+                            throw;
+                        }
                         return confirmation;
                     }, ChannelDispatchOptions.PublishWithConfirms, cts.Token).ConfigureAwait(false);
 

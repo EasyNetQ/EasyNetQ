@@ -44,7 +44,7 @@ namespace EasyNetQ.Producer
             var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
             var confirmationTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
             requests.Add(sequenceNumber, confirmationTcs);
-            return new PublishPendingConfirmation(confirmationTcs);
+            return new PublishPendingConfirmation(confirmationTcs, () => requests.Remove(sequenceNumber));
         }
 
         /// <inheritdoc />
@@ -66,13 +66,11 @@ namespace EasyNetQ.Producer
             if (multiple)
             {
                 foreach (var sequenceNumber in requests.Select(x => x.Key))
-                    if (sequenceNumber <= deliveryTag && requests.TryRemove(sequenceNumber, out var confirmation))
-                        Confirm(confirmation, sequenceNumber, isNack);
+                    if (sequenceNumber <= deliveryTag && requests.TryRemove(sequenceNumber, out var confirmationTcs))
+                        Confirm(confirmationTcs, sequenceNumber, isNack);
             }
             else if (requests.TryRemove(deliveryTag, out var confirmation))
-            {
                 Confirm(confirmation, deliveryTag, isNack);
-            }
         }
 
         private void OnChannelRecovered(ChannelRecoveredEvent @event)
@@ -101,7 +99,8 @@ namespace EasyNetQ.Producer
             {
                 foreach (var sequenceNumber in requests.Select(x => x.Key))
                 {
-                    if (!requests.TryRemove(sequenceNumber, out var confirmationTcs)) continue;
+                    if (!requests.TryRemove(sequenceNumber, out var confirmationTcs))
+                        continue;
 
                     if (cancellationInsteadOfInterruption)
                         confirmationTcs.TrySetCanceled();
@@ -120,28 +119,50 @@ namespace EasyNetQ.Producer
             } while (!unconfirmedChannelRequests.IsEmpty);
         }
 
-        private static void Confirm(TaskCompletionSource<object> tcs, ulong sequenceNumber, bool isNack)
+        private static void Confirm(TaskCompletionSource<object> confirmationTcs, ulong sequenceNumber, bool isNack)
         {
             if (isNack)
-                tcs.TrySetException(
-                    new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful"));
+                confirmationTcs.TrySetException(
+                    new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful")
+                );
             else
-                tcs.TrySetResult(null);
+                confirmationTcs.TrySetResult(null);
         }
 
-        private class PublishPendingConfirmation : IPublishPendingConfirmation
+        private sealed class PublishPendingConfirmation : IPublishPendingConfirmation
         {
             private readonly TaskCompletionSource<object> confirmationTcs;
+            private readonly Action cleanup;
 
-            public PublishPendingConfirmation(TaskCompletionSource<object> confirmationTcs)
+            public PublishPendingConfirmation(TaskCompletionSource<object> confirmationTcs, Action cleanup)
             {
                 this.confirmationTcs = confirmationTcs;
+                this.cleanup = cleanup;
             }
 
-            public Task WaitAsync(CancellationToken cancellationToken)
+            public async Task WaitAsync(CancellationToken cancellationToken)
             {
-                confirmationTcs.AttachCancellation(cancellationToken);
-                return confirmationTcs.Task;
+                try
+                {
+                    confirmationTcs.AttachCancellation(cancellationToken);
+                    await confirmationTcs.Task.ConfigureAwait(false);
+                }
+                finally
+                {
+                    cleanup();
+                }
+            }
+
+            public void Cancel()
+            {
+                try
+                {
+                    confirmationTcs.TrySetCanceled();
+                }
+                finally
+                {
+                    cleanup();
+                }
             }
         }
     }
