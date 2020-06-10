@@ -38,12 +38,14 @@ namespace EasyNetQ.Producer
         {
             var sequenceNumber = model.NextPublishSeqNo;
 
-            if (model.NextPublishSeqNo == 0UL)
+            if (sequenceNumber == 0UL)
                 throw new InvalidOperationException("Confirms not selected");
 
             var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
             var confirmationTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-            requests.Add(sequenceNumber, confirmationTcs);
+            if (!requests.TryAdd(sequenceNumber, confirmationTcs))
+                throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
+
             return new PublishPendingConfirmation(confirmationTcs, () => requests.Remove(sequenceNumber));
         }
 
