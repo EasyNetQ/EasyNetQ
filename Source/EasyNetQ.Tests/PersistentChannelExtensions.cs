@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
     public static class PersistentChannelExtensions
     {
         public static void InvokeChannelAction(
-            this IPersistentChannel source, Action<IModel> channelAction, CancellationToken cancellationToken
+            this IPersistentChannel source, Action<IModel> channelAction, CancellationToken cancellationToken = default
         )
         {
             source.InvokeChannelActionAsync<NoContentStruct>(model =>

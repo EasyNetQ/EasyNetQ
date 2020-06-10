@@ -2,12 +2,17 @@
 {
     /// <summary>
     /// Allows configuration to be fluently extended without adding overloads to IBus
-    /// 
+    ///
     /// e.g.
     /// x => x.WithPrefetchCount(50)
     /// </summary>
     public interface IResponderConfiguration
     {
+        /// <summary>
+        /// Configures the consumer's prefetch count
+        /// </summary>
+        /// <param name="prefetchCount">Consumer's prefetch count value</param>
+        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining.</returns>
         IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
 
         /// <summary>
@@ -24,12 +29,12 @@
         IResponderConfiguration WithDurable(bool durable = true);
 
         /// <summary>
-        /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy. 
-        /// This controls for how long a queue can be unused before it is automatically deleted. 
-        /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period. 
+        /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy.
+        /// This controls for how long a queue can be unused before it is automatically deleted.
+        /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period.
         /// This can be used, for example, for RPC-style reply queues, where many queues can be created which may never be drained.
-        /// The server guarantees that the queue will be deleted, if unused for at least the expiration period. 
-        /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed. 
+        /// The server guarantees that the queue will be deleted, if unused for at least the expiration period.
+        /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed.
         /// Leases of durable queues restart when the server restarts.
         /// </summary>
         /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>

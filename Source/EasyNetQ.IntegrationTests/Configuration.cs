@@ -20,9 +20,7 @@ namespace EasyNetQ.IntegrationTests
         private static readonly Lazy<Configuration> LazyInstance = new Lazy<Configuration>(() => new Configuration());
         private readonly string dockerHttpApiUri;
         private readonly Dictionary<OSPlatform, IConfigurationSection> osSpecificSettings;
-        private readonly int rabbitMqClientPort;
         private readonly string rabbitMqHostName;
-        private readonly int rabbitMqManagementPort;
         private readonly string rabbitMqPassword;
         private readonly string rabbitMqUser;
         private readonly Vhost rabbitMqVirtualHost;
@@ -36,8 +34,6 @@ namespace EasyNetQ.IntegrationTests
                 .Build();
             dockerHttpApiUri = settings["dockerHttpApiUri"];
             rabbitMqHostName = settings["rabbitMQHostName"];
-            rabbitMqClientPort = int.Parse(settings["rabbitMQClientPort"]);
-            rabbitMqManagementPort = int.Parse(settings["rabbitMQManagementPort"]);
             rabbitMqVirtualHostName = settings["rabbitMQVirtualHost"];
             rabbitMqVirtualHost = new Vhost {Name = rabbitMqVirtualHostName, Tracing = false};
             rabbitMqUser = settings["rabbitMQUser"];
@@ -52,10 +48,6 @@ namespace EasyNetQ.IntegrationTests
         public static string DockerHttpApiUri => Instance.dockerHttpApiUri;
 
         public static string RabbitMqHostName => Instance.rabbitMqHostName;
-
-        public static int RabbitMqClientPort => Instance.rabbitMqClientPort;
-
-        public static int RabbitMqManagementPort => Instance.rabbitMqManagementPort;
 
         public static string RabbitMqVirtualHostName => Instance.rabbitMqVirtualHostName;
 

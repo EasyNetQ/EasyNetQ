@@ -21,11 +21,9 @@ namespace EasyNetQ.IntegrationTests
         {
             dockerProxy = new DockerProxy(new Uri(Configuration.DockerHttpApiUri));
             Host = "localhost";
-            Port = Configuration.RabbitMqClientPort;
         }
 
         public string Host { get; private set; }
-        public int Port { get; }
 
         public IManagementClient ManagementClient { get; private set; }
 
@@ -40,10 +38,7 @@ namespace EasyNetQ.IntegrationTests
             var containerId = await RunNewContainerAsync(rabbitMQDockerImage, cts.Token).ConfigureAwait(false);
             if (dockerEngineOsPlatform == OSPlatform.Windows)
                 Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token).ConfigureAwait(false);
-            ManagementClient = new ManagementClient(
-                Host, Configuration.RabbitMqUser, Configuration.RabbitMqPassword,
-                Configuration.RabbitMqManagementPort
-            );
+            ManagementClient = new ManagementClient(Host, Configuration.RabbitMqUser, Configuration.RabbitMqPassword);
             await WaitForRabbitMqReadyAsync(cts.Token);
         }
 

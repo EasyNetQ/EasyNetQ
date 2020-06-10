@@ -16,15 +16,14 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 
         public When_an_action_is_invoked_that_throws_using_multi_channel()
         {
-            var connection = Substitute.For<IPersistentConnection>();
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
             var channel = Substitute.For<IPersistentChannel>();
 
-            channelFactory.CreatePersistentChannel(connection).Returns(channel);
+            channelFactory.CreatePersistentChannel(new PersistentChannelOptions()).Returns(channel);
             channel.InvokeChannelActionAsync<int>(null)
                 .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
-            dispatcher = new MultiChannelClientCommandDispatcher(1, connection, channelFactory);
+            dispatcher = new MultiChannelClientCommandDispatcher(1, channelFactory);
         }
 
         public void Dispose()
@@ -36,7 +35,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public async Task Should_raise_the_exception_on_the_calling_thread()
         {
             await Assert.ThrowsAsync<CrazyTestOnlyException>(
-                () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException())
+                () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException(), ChannelDispatchOptions.Default)
             ).ConfigureAwait(false);
         }
 
@@ -44,10 +43,10 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public async Task Should_call_action_when_previous_throwed_an_exception()
         {
             await Assert.ThrowsAsync<Exception>(
-                () => dispatcher.InvokeAsync<int>(x => throw new Exception())
+                () => dispatcher.InvokeAsync<int>(x => throw new Exception(), ChannelDispatchOptions.Default)
             ).ConfigureAwait(false);
 
-            var result = await dispatcher.InvokeAsync(x => 42).ConfigureAwait(false);
+            var result = await dispatcher.InvokeAsync(x => 42, ChannelDispatchOptions.Default).ConfigureAwait(false);
             result.Should().Be(42);
         }
 

@@ -24,11 +24,12 @@ namespace EasyNetQ.Producer
 
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
-        private readonly ConcurrentDictionary<Guid, ResponseAction> responseActions = new ConcurrentDictionary<Guid, ResponseAction>();
+        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
         private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions = new ConcurrentDictionary<RpcKey, ResponseSubscription>();
 
         private readonly AsyncLock responseSubscriptionsLock = new AsyncLock();
         private readonly ITypeNameSerializer typeNameSerializer;
+        private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
         private readonly IDisposable onConnectedEventSubscription;
 
         public DefaultRpc(
@@ -38,7 +39,8 @@ namespace EasyNetQ.Producer
             IConventions conventions,
             IExchangeDeclareStrategy exchangeDeclareStrategy,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
-            ITypeNameSerializer typeNameSerializer
+            ITypeNameSerializer typeNameSerializer,
+            ICorrelationIdGenerationStrategy correlationIdGenerationStrategy
         )
         {
             Preconditions.CheckNotNull(configuration, "configuration");
@@ -48,6 +50,7 @@ namespace EasyNetQ.Producer
             Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
             Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(correlationIdGenerationStrategy, "correlationIdGenerationStrategy");
 
             this.configuration = configuration;
             this.advancedBus = advancedBus;
@@ -55,6 +58,7 @@ namespace EasyNetQ.Producer
             this.exchangeDeclareStrategy = exchangeDeclareStrategy;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.typeNameSerializer = typeNameSerializer;
+            this.correlationIdGenerationStrategy = correlationIdGenerationStrategy;
 
             onConnectedEventSubscription = eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
         }
@@ -77,7 +81,7 @@ namespace EasyNetQ.Producer
 
             using var cts = cancellationToken.WithTimeout(requestConfiguration.Expiration);
 
-            var correlationId = Guid.NewGuid();
+            var correlationId = correlationIdGenerationStrategy.GetCorrelationId();
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             RegisterResponseActions(correlationId, tcs);
             using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
@@ -126,12 +130,12 @@ namespace EasyNetQ.Producer
             foreach (var responseSubscription in responseSubscriptionsValues) responseSubscription.Unsubscribe();
         }
 
-        protected void DeRegisterResponseActions(Guid correlationId)
+        protected void DeRegisterResponseActions(string correlationId)
         {
             responseActions.Remove(correlationId);
         }
 
-        protected void RegisterResponseActions<TResponse>(Guid correlationId, TaskCompletionSource<TResponse> tcs)
+        protected void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
         {
             var responseAction = new ResponseAction(
                 message =>
@@ -191,7 +195,7 @@ namespace EasyNetQ.Producer
 
                 var subscription = advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) =>
                 {
-                    if (Guid.TryParse(message.Properties.CorrelationId, out var correlationId) && responseActions.TryRemove(correlationId, out var responseAction))
+                    if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
                         responseAction.OnSuccess(message);
                 });
 
@@ -204,7 +208,7 @@ namespace EasyNetQ.Producer
             TRequest request,
             string routingKey,
             string returnQueueName,
-            Guid correlationId,
+            string correlationId,
             TimeSpan expiration,
             CancellationToken cancellationToken
         )
@@ -219,7 +223,7 @@ namespace EasyNetQ.Producer
             var requestProperties = new MessageProperties
             {
                 ReplyTo = returnQueueName,
-                CorrelationId = correlationId.ToString(),
+                CorrelationId = correlationId,
                 DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
             };
             if (expiration != Timeout.InfiniteTimeSpan)

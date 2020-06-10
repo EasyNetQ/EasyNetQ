@@ -14,7 +14,6 @@ namespace EasyNetQ.Internals
     {
         private readonly SemaphoreSlim semaphore;
         private readonly IDisposable releaser;
-        private readonly Task<IDisposable> releaserTask;
 
         /// <summary>
         ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -26,7 +25,6 @@ namespace EasyNetQ.Internals
         {
             semaphore = new SemaphoreSlim(1);
             releaser = new Releaser(semaphore);
-            releaserTask = Task.FromResult(releaser);
         }
 
         /// <summary>
@@ -34,18 +32,10 @@ namespace EasyNetQ.Internals
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>Releaser, which should be disposed to release a lock</returns>
-        public Task<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
+        public async Task<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
         {
-            var acquireTask = semaphore.WaitAsync(cancellationToken);
-            return acquireTask.IsCompleted
-                ? releaserTask
-                : acquireTask.ContinueWith(
-                    (_, state) => (IDisposable)state,
-                    releaser,
-                    default,
-                    TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Default
-                );
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return releaser;
         }
 
         private sealed class Releaser : IDisposable

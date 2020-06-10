@@ -164,18 +164,19 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private ITypeNameSerializer typeNameSerializer;
+        private readonly MockBuilder mockBuilder;
+        private readonly ITypeNameSerializer typeNameSerializer;
 
         [Fact]
         public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
         {
-            mockBuilder.Channels[0].Received().BasicPublish(
+            mockBuilder.Channels[1].Received().BasicPublish(
                 Arg.Is("CustomExchangeNamingConvention"),
                 Arg.Any<string>(),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<ReadOnlyMemory<byte>>());
+                Arg.Any<ReadOnlyMemory<byte>>()
+            );
         }
 
         [Fact]
@@ -186,18 +187,20 @@ namespace EasyNetQ.Tests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>()))
+            );
         }
 
         [Fact]
         public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
         {
-            mockBuilder.Channels[0].Received().BasicPublish(
+            mockBuilder.Channels[1].Received().BasicPublish(
                 Arg.Any<string>(),
                 Arg.Is("CustomTopicNamingConvention"),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<ReadOnlyMemory<byte>>());
+                Arg.Any<ReadOnlyMemory<byte>>()
+            );
         }
     }
 

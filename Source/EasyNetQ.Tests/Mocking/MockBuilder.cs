@@ -6,15 +6,11 @@ using EasyNetQ.Scheduling;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 
 namespace EasyNetQ.Tests.Mocking
 {
     public class MockBuilder
     {
-        public const string Host = "my_host";
-        public const string VirtualHost = "my_virtual_host";
-        public const int PortNumber = 1234;
         private readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IBus bus;
         private readonly Stack<IModel> channelPool = new Stack<IModel>();
@@ -102,8 +98,6 @@ namespace EasyNetQ.Tests.Mocking
         public List<IModel> Channels => channels;
 
         public List<IBasicConsumer> Consumers => consumers;
-
-        public IBasicProperties BasicProperties => basicProperties;
 
         public IBus Bus => bus;
 

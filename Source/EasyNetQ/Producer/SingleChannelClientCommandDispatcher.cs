@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
@@ -11,38 +12,34 @@ namespace EasyNetQ.Producer
     /// </summary>
     public sealed class SingleChannelClientCommandDispatcher : IClientCommandDispatcher
     {
-        private readonly IPersistentChannel channel;
-        private readonly AsyncLock channelLock = new AsyncLock();
+        private readonly ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel> channelPerOptions;
+        private readonly Func<ChannelDispatchOptions, IPersistentChannel> createChannelFactory;
 
         /// <summary>
         /// Creates a dispatcher
         /// </summary>
-        /// <param name="connection">The connection</param>
         /// <param name="channelFactory">The channel factory</param>
-        public SingleChannelClientCommandDispatcher(
-            IPersistentConnection connection, IPersistentChannelFactory channelFactory
-        )
+        public SingleChannelClientCommandDispatcher(IPersistentChannelFactory channelFactory)
         {
-            Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(channelFactory, "channelFactory");
 
-            channel = channelFactory.CreatePersistentChannel(connection);
+            channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
+            createChannelFactory = o => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms));
         }
 
         /// <inheritdoc />
-        public async Task<T> InvokeAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken)
+        public Task<T> InvokeAsync<T>(
+            Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken
+        )
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            using var releaser = await channelLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
-            return await channel.InvokeChannelActionAsync(channelAction, cancellationToken).ConfigureAwait(false);
+            // TODO createChannelFactory could be called multiple time, fix it
+            var channel = channelPerOptions.GetOrAdd(channelOptions, createChannelFactory);
+            return channel.InvokeChannelActionAsync(channelAction, cancellationToken);
         }
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-            channelLock.Dispose();
-            channel.Dispose();
-        }
+        public void Dispose() => channelPerOptions.ClearAndDispose();
     }
 }

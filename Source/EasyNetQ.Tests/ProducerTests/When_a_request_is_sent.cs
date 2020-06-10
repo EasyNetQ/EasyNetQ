@@ -18,26 +18,22 @@ namespace EasyNetQ.Tests.ProducerTests
     {
         public When_a_request_is_sent()
         {
-            mockBuilder = new MockBuilder();
+            var correlationId = Guid.NewGuid().ToString();
+            mockBuilder = new MockBuilder(
+                c => c.Register<ICorrelationIdGenerationStrategy>(
+                    _ => new StaticCorrelationIdGenerationStrategy(correlationId)
+                )
+            );
 
             requestMessage = new TestRequestMessage();
             responseMessage = new TestResponseMessage();
-
-            var correlationId = "";
-
-            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
-                .Do(invocation =>
-                {
-                    var properties = (IBasicProperties)invocation[3];
-                    correlationId = properties.CorrelationId;
-                });
 
             var waiter = new CountdownEvent(2);
 
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
             mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
-            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
@@ -51,11 +47,11 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private TestRequestMessage requestMessage;
-        private TestResponseMessage responseMessage;
+        private readonly MockBuilder mockBuilder;
+        private readonly TestRequestMessage requestMessage;
+        private readonly TestResponseMessage responseMessage;
 
-        protected void DeliverMessage(string correlationId)
+        private void DeliverMessage(string correlationId)
         {
             var properties = new BasicProperties
             {
@@ -102,7 +98,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_publish_request_message()
         {
-            mockBuilder.Channels[0].Received().BasicPublish(
+            mockBuilder.Channels[2].Received().BasicPublish(
                 Arg.Is("easy_net_q_rpc"),
                 Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests.Common"),
                 Arg.Is(false),

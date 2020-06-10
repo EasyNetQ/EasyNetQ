@@ -3,33 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private readonly TestRequestMessage requestMessage;
-        private string _correlationId;
+        private readonly string correlationId;
 
         public When_a_request_is_sent_but_an_exception_is_thrown_by_responder()
         {
-            mockBuilder = new MockBuilder();
+            correlationId = Guid.NewGuid().ToString();
+            mockBuilder = new MockBuilder(
+                c => c.Register<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId))
+            );
 
             requestMessage = new TestRequestMessage();
-
-            mockBuilder.NextModel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null))
-                       .Do(invocation =>
-                       {
-                           var properties = (IBasicProperties)invocation[3];
-                           _correlationId = properties.CorrelationId;
-                       });
         }
 
         public void Dispose()
@@ -37,45 +31,38 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder.Bus.Dispose();
         }
 
-        [Fact(Skip = "TODO: this unit test should be fixed, skipping for now to test build")]
-        public void Should_throw_an_EasyNetQResponderException()
+        [Fact]
+        public async Task Should_throw_an_EasyNetQResponderException()
         {
-            Assert.Throws<EasyNetQResponderException>(() =>
+            await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
             {
-                try
-                {
-                    var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
-                    DeliverMessage(_correlationId, null);
-                    task.Wait(1000);
-                }
-                catch (AggregateException aggregateException)
-                {
-                    throw aggregateException.InnerException;
-                }
-            });
+                var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+                DeliverMessage(correlationId, null);
+                await task.ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
 
         [Fact]
-        public void Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
+        public async Task Should_throw_an_EasyNetQResponderException_with_a_specific_exception_message()
         {
-            Assert.Throws<EasyNetQResponderException>(() =>
+            await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
             {
                 var waiter = new CountdownEvent(2);
 
                 mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
                 mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
-                var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, c => { });
+                var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
                 if (!waiter.Wait(5000))
                     throw new TimeoutException();
 
-                DeliverMessage(_correlationId, "Why you are so bad with me?");
+                DeliverMessage(correlationId, "Why you are so bad with me?");
 
-                task.GetAwaiter().GetResult();
-            }); // ,"Why you are so bad with me?"
+                await task.ConfigureAwait(false);
+            }).ConfigureAwait(false); // ,"Why you are so bad with me?"
         }
 
-        protected void DeliverMessage(string correlationId, string exceptionMessage)
+        private void DeliverMessage(string correlationId, string exceptionMessage)
         {
             var properties = new BasicProperties
             {
@@ -105,7 +92,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 "the_routing_key",
                 properties,
                 body
-                );
+            );
         }
     }
 }

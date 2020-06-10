@@ -16,7 +16,7 @@ namespace EasyNetQ
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="pubSub">The pubSub instance</param>
-        /// /// <param name="message">The message to publish</param>
+        /// <param name="message">The message to publish</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
         public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)

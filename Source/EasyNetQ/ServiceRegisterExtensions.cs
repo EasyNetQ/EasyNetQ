@@ -79,9 +79,7 @@ namespace EasyNetQ
         )
         {
             return serviceRegister.Register<IClientCommandDispatcher>(
-                x => new MultiChannelClientCommandDispatcher(
-                    channelsCount, x.Resolve<IPersistentConnection>(), x.Resolve<IPersistentChannelFactory>()
-                )
+                x => new MultiChannelClientCommandDispatcher(channelsCount, x.Resolve<IPersistentChannelFactory>())
             );
         }
 

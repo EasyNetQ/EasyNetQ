@@ -1,8 +1,6 @@
 {
     "dockerHttpApiUri": "http://127.0.0.1:2375",
     "rabbitMQHostName": "rmq",
-    "rabbitMQClientPort": 5672,
-    "rabbitMQManagementPort": 15672,
     "rabbitMQVirtualHost": "/",
     "rabbitMQUser": "guest",
     "rabbitMQPassword": "guest",

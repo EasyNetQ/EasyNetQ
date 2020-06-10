@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Threading;
-using EasyNetQ.AmqpExceptions;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
 using NSubstitute;
@@ -18,26 +17,22 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel, IRecoverable>();
             var eventBus = new EventBus();
-            var configuration = new ConnectionConfiguration();
 
             var shutdownArgs = new ShutdownEventArgs(
                 ShutdownInitiator.Peer,
-                AmqpException.ConnectionClosed,
+                AmqpErrorCodes.ConnectionClosed,
                 "connection closed by peer"
             );
             var exception = new OperationInterruptedException(shutdownArgs);
 
             persistentConnection.CreateModel().Returns(
-                x => throw exception,
-                x => channel,
-                x => channel
+                x => throw exception, x => channel, x => channel
             );
 
-            var persistentChannel = new PersistentChannel(persistentConnection, configuration, eventBus);
-
-            new Timer(_ => eventBus.Publish(new ConnectionCreatedEvent()), null, 100, Timeout.Infinite);
-
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), default);
+            var persistentChannel = new PersistentChannel(
+                new PersistentChannelOptions(), persistentConnection, eventBus
+            );
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
         }
 
         private readonly IModel channel;
