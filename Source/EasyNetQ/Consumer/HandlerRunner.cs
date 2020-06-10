@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Events;
+using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client.Exceptions;
 using System;
@@ -85,13 +85,6 @@ namespace EasyNetQ.Consumer
                 }
                 catch (Exception exception)
                 {
-                    logger.Error(
-                        exception,
-                        "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
-                        context.Info,
-                        context.Properties,
-                        Convert.ToBase64String(context.Body)
-                    );
                     return consumerErrorStrategy.HandleConsumerError(context, exception);
                 }
             }
