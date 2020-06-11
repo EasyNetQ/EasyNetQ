@@ -32,6 +32,14 @@ namespace EasyNetQ
         /// </summary>
         public EventHandler<MessageReturnedEventArgs> MessageReturned { get; }
 
+        /// <summary>
+        ///     Creates AdvancedBusEventHandlers
+        /// </summary>
+        /// <param name="connected">The connected event handler</param>
+        /// <param name="disconnected">The disconnected event handler</param>
+        /// <param name="blocked">The blocked event handler</param>
+        /// <param name="unblocked">The unblocked event handler</param>
+        /// <param name="messageReturned">The message returned event handler</param>
         public AdvancedBusEventHandlers(
             EventHandler<ConnectedEventArgs> connected = null,
             EventHandler<DisconnectedEventArgs> disconnected = null,
