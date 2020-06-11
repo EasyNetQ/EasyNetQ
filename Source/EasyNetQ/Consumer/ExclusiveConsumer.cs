@@ -51,7 +51,7 @@ namespace EasyNetQ.Consumer
 
         public IDisposable StartConsuming()
         {
-            disposables.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
+            disposables.Add(eventBus.Subscribe<ConnectionConnectedEvent>(e => ConnectionOnConnected()));
             disposables.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
             disposables.Add(Timers.Start(StartConsumingInternal, RestartConsumingPeriod, RestartConsumingPeriod));
 

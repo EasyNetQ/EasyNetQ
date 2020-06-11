@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests
                 .GetResult();
         }
 
-        private struct NoContentStruct
+        private readonly struct NoContentStruct
         {
         }
     }

@@ -60,7 +60,7 @@ namespace EasyNetQ.Producer
             this.typeNameSerializer = typeNameSerializer;
             this.correlationIdGenerationStrategy = correlationIdGenerationStrategy;
 
-            onConnectedEventSubscription = eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
+            onConnectedEventSubscription = eventBus.Subscribe<ConnectionConnectedEvent>(OnConnectionCreated);
         }
 
         /// <inheritdoc />
@@ -118,7 +118,7 @@ namespace EasyNetQ.Producer
                 responseSubscription.Unsubscribe();
         }
 
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        private void OnConnectionCreated(ConnectionConnectedEvent @event)
         {
             var responseActionsValues = responseActions.Values;
             var responseSubscriptionsValues = responseSubscriptions.Values;

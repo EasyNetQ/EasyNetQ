@@ -26,7 +26,6 @@ namespace EasyNetQ.Tests
 
             var connectionConfiguration = new ConnectionConfiguration();
             var connection = new PersistentConnection(connectionConfiguration, mockBuilder.ConnectionFactory, new EventBus());
-            connection.Initialize();
 
             errorStrategy = new DefaultConsumerErrorStrategy(
                 connection,

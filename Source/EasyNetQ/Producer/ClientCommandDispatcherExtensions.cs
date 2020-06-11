@@ -39,7 +39,7 @@ namespace EasyNetQ.Producer
             return dispatcher.InvokeAsync(channelAction, ChannelDispatchOptions.Default, cancellationToken);
         }
 
-        private struct NoContentStruct
+        private readonly struct NoContentStruct
         {
         }
     }
