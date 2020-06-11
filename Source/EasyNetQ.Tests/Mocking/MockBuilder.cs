@@ -107,6 +107,8 @@ namespace EasyNetQ.Tests.Mocking
 
         public IEventBus EventBus => ServiceProvider.Resolve<IEventBus>();
 
+        public IPersistentConnection PersistentConnection => ServiceProvider.Resolve<IPersistentConnection>();
+
         public List<string> ConsumerQueueNames => consumerQueueNames;
     }
 }

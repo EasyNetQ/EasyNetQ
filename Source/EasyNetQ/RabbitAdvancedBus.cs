@@ -69,15 +69,6 @@ namespace EasyNetQ
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
 
-            eventSubscriptions = new[]
-            {
-                this.eventBus.Subscribe<ConnectionConnectedEvent>(OnConnectionConnected),
-                this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
-                this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
-                this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
-                this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
-            };
-
             if (advancedBusEventHandlers.Connected != null)
                 Connected += advancedBusEventHandlers.Connected;
 
@@ -92,6 +83,15 @@ namespace EasyNetQ
 
             if (advancedBusEventHandlers.MessageReturned != null)
                 MessageReturned += advancedBusEventHandlers.MessageReturned;
+
+            eventSubscriptions = new[]
+            {
+                this.eventBus.Subscribe<ConnectionConnectedEvent>(OnConnectionConnected),
+                this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
+                this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
+                this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
+                this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
+            };
         }
 
         #region Consume
