@@ -106,7 +106,7 @@ namespace EasyNetQ
             connection.ConnectionShutdown += OnConnectionShutdown;
             connection.ConnectionBlocked += OnConnectionBlocked;
             connection.ConnectionUnblocked += OnConnectionUnblocked;
-            connection.RecoverySucceeded += OnConnectionRestored;
+            connection.RecoverySucceeded += OnConnectionRecovered;
 
             logger.InfoFormat(
                 "Connected to broker {broker}, port {port}",
@@ -119,7 +119,7 @@ namespace EasyNetQ
             return connection;
         }
 
-        private void OnConnectionRestored(object sender, EventArgs e)
+        private void OnConnectionRecovered(object sender, EventArgs e)
         {
             var connection = (IConnection)sender;
             logger.InfoFormat(
@@ -127,7 +127,7 @@ namespace EasyNetQ
                 connection.Endpoint.HostName,
                 connection.Endpoint.Port
             );
-            eventBus.Publish(new ConnectionConnectedEvent(connection.Endpoint));
+            eventBus.Publish(new ConnectionRecoveredEvent(connection.Endpoint));
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)

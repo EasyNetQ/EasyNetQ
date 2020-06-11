@@ -39,6 +39,7 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
+        /// <inheritdoc />
         public IDisposable StartConsuming()
         {
             internalConsumer = internalConsumerFactory.CreateConsumer();
@@ -59,6 +60,7 @@ namespace EasyNetQ.Consumer
             return new ConsumerCancellation(Dispose);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;

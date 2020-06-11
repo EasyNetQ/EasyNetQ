@@ -87,6 +87,7 @@ namespace EasyNetQ
             eventSubscriptions = new[]
             {
                 this.eventBus.Subscribe<ConnectionConnectedEvent>(OnConnectionConnected),
+                this.eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
                 this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
                 this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
                 this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
@@ -701,6 +702,11 @@ namespace EasyNetQ
         }
 
         private void OnConnectionConnected(ConnectionConnectedEvent @event)
+        {
+            Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
+        }
+
+        private void OnConnectionRecovered(ConnectionRecoveredEvent @event)
         {
             Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
         }
