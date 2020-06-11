@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected override void AdditionalSetup()
         {
             consumer.StartConsuming();
-            eventBus.Publish(new ConnectionConnectedEvent(new AmqpTcpEndpoint()));
+            eventBus.Publish(new ConnectionRecoveredEvent(new AmqpTcpEndpoint()));
         }
 
         [Fact]
