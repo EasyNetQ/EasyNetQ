@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
@@ -71,6 +71,14 @@ namespace EasyNetQ.Consumer
 
                 return AckStrategies.NackWithRequeue;
             }
+
+            logger.Error(
+                exception,
+                "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
+                context.Info,
+                context.Properties,
+                Convert.ToBase64String(context.Body)
+            );
 
             try
             {
