@@ -17,7 +17,8 @@
             bool redelivered,
             string exchange,
             string routingKey,
-            string queue)
+            string queue
+        )
         {
             Preconditions.CheckNotNull(consumerTag, "consumerTag");
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -32,9 +33,10 @@
             Queue = queue;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return $"[ConsumerTag={ConsumerTag}, DeliverTag={DeliveryTag}, Redelivered={Redelivered}, Exchange={Exchange}, RoutingKey={RoutingKey}, Queue={Queue}]";
+            return $"[ConsumerTag={ConsumerTag}, DeliveryTag={DeliveryTag}, Redelivered={Redelivered}, Exchange={Exchange}, RoutingKey={RoutingKey}, Queue={Queue}]";
         }
     }
 }
