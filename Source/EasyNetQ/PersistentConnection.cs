@@ -114,7 +114,7 @@ namespace EasyNetQ
                 connection.Endpoint.Port
             );
 
-            eventBus.Publish(new ConnectionConnectedEvent(connection.Endpoint));
+            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint));
 
             return connection;
         }
