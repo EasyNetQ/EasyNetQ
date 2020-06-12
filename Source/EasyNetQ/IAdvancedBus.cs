@@ -297,6 +297,14 @@ namespace EasyNetQ
         Task<uint> GetMessagesCountAsync(IQueue queue, CancellationToken cancellationToken = default);
 
         /// <summary>
+        ///     Creates a new pulling consumer
+        /// </summary>
+        /// <param name="queue">The queue</param>
+        /// <param name="autoAck"></param>
+        /// <returns></returns>
+        IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true);
+
+        /// <summary>
         /// Event fires when the bus has connected to a RabbitMQ broker.
         /// </summary>
         event EventHandler<ConnectedEventArgs> Connected;

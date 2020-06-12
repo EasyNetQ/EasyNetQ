@@ -1,15 +1,14 @@
 ﻿namespace EasyNetQ.Interception
 {
+    /// <summary>
+    ///     An empty interceptor
+    /// </summary>
     public class DefaultInterceptor : IProduceConsumeInterceptor
     {
-        public RawMessage OnProduce(RawMessage rawMessage)
-        {
-            return rawMessage;
-        }
+        /// <inheritdoc />
+        public ProducedMessage OnProduce(ProducedMessage message) => message;
 
-        public RawMessage OnConsume(RawMessage rawMessage)
-        {
-            return rawMessage;
-        }
+        /// <inheritdoc />
+        public ConsumedMessage OnConsume(ConsumedMessage message) => message;
     }
 }

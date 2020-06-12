@@ -6,10 +6,7 @@ using System.Text;
 
 namespace EasyNetQ
 {
-    public class MessageProperties
-#if NETFX
-        : ICloneable
-#endif
+    public class MessageProperties : ICloneable
     {
         public MessageProperties()
         {

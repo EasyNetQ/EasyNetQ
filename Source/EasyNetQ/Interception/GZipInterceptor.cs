@@ -3,33 +3,33 @@ using System.IO.Compression;
 
 namespace EasyNetQ.Interception
 {
+    /// <summary>
+    ///     An interceptor which compresses and decompressed messages
+    /// </summary>
     public class GZipInterceptor : IProduceConsumeInterceptor
     {
-        public RawMessage OnProduce(RawMessage rawMessage)
+        /// <inheritdoc />
+        public ProducedMessage OnProduce(ProducedMessage message)
         {
-            var properties = rawMessage.Properties;
-            var body = rawMessage.Body;
-            using (var output = new MemoryStream())
-            {
-                using (var compressingStream = new GZipStream(output, CompressionMode.Compress))
-                    compressingStream.Write(body, 0, body.Length);
-                return new RawMessage(properties, output.ToArray());
-            }
+            var properties = message.Properties;
+            var body = message.Body;
+            using var output = new MemoryStream();
+            using (var compressingStream = new GZipStream(output, CompressionMode.Compress))
+                compressingStream.Write(body, 0, body.Length);
+            return new ProducedMessage(properties, output.ToArray());
         }
 
-        public RawMessage OnConsume(RawMessage rawMessage)
+        /// <inheritdoc />
+        public ConsumedMessage OnConsume(ConsumedMessage message)
         {
-            var properties = rawMessage.Properties;
-            var body = rawMessage.Body;
-            using (var output = new MemoryStream())
-            {
-                using (var compressedStream = new MemoryStream(body))
-                {
-                    using (var decompressingStream = new GZipStream(compressedStream, CompressionMode.Decompress))
-                        decompressingStream.CopyTo(output);
-                }
-                return new RawMessage(properties, output.ToArray());
-            }
+            var receivedInfo = message.ReceivedInfo;
+            var properties = message.Properties;
+            var body = message.Body;
+            using var output = new MemoryStream();
+            using (var compressedStream = new MemoryStream(body))
+            using (var decompressingStream = new GZipStream(compressedStream, CompressionMode.Decompress))
+                decompressingStream.CopyTo(output);
+            return new ConsumedMessage(receivedInfo, properties, output.ToArray());
         }
     }
 }

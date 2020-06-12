@@ -26,6 +26,7 @@ namespace EasyNetQ
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly ILog logger = LogProvider.For<RabbitAdvancedBus>();
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IPullingConsumerFactory pullingConsumerFactory;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
         private bool disposed;
@@ -43,6 +44,7 @@ namespace EasyNetQ
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
+            IPullingConsumerFactory pullingConsumerFactory,
             AdvancedBusEventHandlers advancedBusEventHandlers
         )
         {
@@ -55,6 +57,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(pullingConsumerFactory, "receiverFactory");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
 
             this.connection = connection;
@@ -67,6 +70,7 @@ namespace EasyNetQ
             this.configuration = configuration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.pullingConsumerFactory = pullingConsumerFactory;
             this.Conventions = conventions;
 
             if (advancedBusEventHandlers.Connected != null)
@@ -182,7 +186,7 @@ namespace EasyNetQ
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receivedInfo, cancellationToken) =>
             {
-                var rawMessage = produceConsumeInterceptor.OnConsume(new RawMessage(properties, body));
+                var rawMessage = produceConsumeInterceptor.OnConsume(new ConsumedMessage(receivedInfo, properties, body));
                 return onMessage(rawMessage.Body, rawMessage.Properties, receivedInfo, cancellationToken);
             }, consumerConfiguration);
             return consumer.StartConsuming();
@@ -243,7 +247,7 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
+            var rawMessage = produceConsumeInterceptor.OnProduce(new ProducedMessage(messageProperties, body));
 
             if (configuration.PublisherConfirms)
             {
@@ -660,6 +664,13 @@ namespace EasyNetQ
             }
 
             return declareResult.MessageCount;
+        }
+
+        /// <inheritdoc />
+        public IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true)
+        {
+            var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
+            return pullingConsumerFactory.CreateConsumer(queue, options);
         }
 
         /// <inheritdoc />
