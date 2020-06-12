@@ -38,15 +38,15 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                pullResult.IsAvailable.Should().BeTrue();
                 await consumer.AckAsync(
-                    pullResult.Message.ReceivedInfo.DeliveryTag, cts.Token
+                    pullResult.ReceivedInfo.DeliveryTag, cts.Token
                 ).ConfigureAwait(false);
             }
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.Should().Be(PullResult.NotAvailable);
+                pullResult.IsAvailable.Should().BeFalse();
             }
         }
 
@@ -66,15 +66,15 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                pullResult.IsAvailable.Should().BeTrue();
                 await consumer.RejectAsync(
-                    pullResult.Message.ReceivedInfo.DeliveryTag, false, cts.Token
+                    pullResult.ReceivedInfo.DeliveryTag, false, cts.Token
                 ).ConfigureAwait(false);
             }
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.Should().Be(PullResult.NotAvailable);
+                pullResult.IsAvailable.Should().BeFalse();
             }
         }
 
@@ -94,15 +94,15 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                pullResult.IsAvailable.Should().BeTrue();
                 await consumer.RejectAsync(
-                    pullResult.Message.ReceivedInfo.DeliveryTag, true, cts.Token
+                    pullResult.ReceivedInfo.DeliveryTag, true, cts.Token
                 ).ConfigureAwait(false);
             }
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                pullResult.IsAvailable.Should().BeTrue();
             }
         }
 
@@ -122,12 +122,12 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                pullResult.IsAvailable.Should().BeTrue();
             }
 
             {
                 var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.Should().Be(PullResult.NotAvailable);
+                pullResult.IsAvailable.Should().BeFalse();
             }
         }
     }

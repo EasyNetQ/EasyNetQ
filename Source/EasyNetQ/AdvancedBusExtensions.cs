@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for IAdvancedBus
+    /// </summary>
     public static class AdvancedBusExtensions
     {
         /// <summary>
@@ -248,50 +251,18 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        /// Get a message from the given queue.
+        /// Gets stats for the given queue
         /// </summary>
-        /// <typeparam name="T">The message type to get</typeparam>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="queue">The queue from which to retrieve the message</param>
+        /// <param name="queue">The queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>An IBasicGetResult.</returns>
-        public static IBasicGetResult<T> GetMessage<T>(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
+        /// <returns>The stats of the queue</returns>
+        public static QueueStats GetQueueStats(
+            this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
-            return bus.GetMessageAsync<T>(queue, cancellationToken)
-                .GetAwaiter()
-                .GetResult();
-        }
-
-        /// <summary>
-        /// Get the raw message from the given queue.
-        /// </summary>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="queue">The queue from which to retrieve the message</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>An IBasicGetResult</returns>
-        public static IBasicGetResult GetMessage(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
-        {
-            Preconditions.CheckNotNull(bus, "bus");
-
-            return bus.GetMessageAsync(queue, cancellationToken)
-                .GetAwaiter()
-                .GetResult();
-        }
-
-        /// <summary>
-        /// Counts messages in the given queue
-        /// </summary>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="queue">The queue in which to count messages</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>The number of counted messages</returns>
-        public static uint GetMessagesCount(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
-        {
-            Preconditions.CheckNotNull(bus, "bus");
-
-            return bus.GetMessagesCountAsync(queue, cancellationToken)
+            return bus.GetQueueStatsAsync(queue, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }

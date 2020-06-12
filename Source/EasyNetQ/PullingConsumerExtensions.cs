@@ -7,15 +7,49 @@ using System.Threading.Tasks;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Represent a result of a pull a messages batch
+    ///     The item of the messages batch
+    /// </summary>
+    public readonly struct PullBatchItem
+    {
+        /// <summary>
+        ///     Creates PullBatchItem
+        /// </summary>
+        /// <param name="receivedInfo">The received info</param>
+        /// <param name="properties">The properties</param>
+        /// <param name="body">The body</param>
+        public PullBatchItem(MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body)
+        {
+            ReceivedInfo = receivedInfo;
+            Properties = properties;
+            Body = body;
+        }
+
+        /// <summary>
+        ///     A received info associated with the message
+        /// </summary>
+        public MessageReceivedInfo ReceivedInfo { get; }
+
+        /// <summary>
+        ///     Various message properties
+        /// </summary>
+        public MessageProperties Properties { get; }
+
+        /// <summary>
+        ///     The message body
+        /// </summary>
+        public byte[] Body { get; }
+    }
+
+    /// <summary>
+    ///     The result of a pull batch operation
     /// </summary>
     public readonly struct PullBatchResult
     {
         /// <summary>
-        ///     Creates BatchPullResult
+        ///     Creates PullBatchResult
         /// </summary>
         /// <param name="messages">The messages</param>
-        public PullBatchResult(IReadOnlyList<ConsumedMessage> messages)
+        public PullBatchResult(IReadOnlyList<PullBatchItem> messages)
         {
             Messages = messages;
         }
@@ -23,7 +57,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Messages of the batch
         /// </summary>
-        public IReadOnlyList<ConsumedMessage> Messages { get; }
+        public IReadOnlyList<PullBatchItem> Messages { get; }
 
         /// <summary>
         ///     Returns delivery tag of the batch
@@ -91,14 +125,14 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(consumer, "consumer");
 
-            var messages = new List<ConsumedMessage>(batchSize);
+            var messages = new List<PullBatchItem>(batchSize);
             for (var i = 0; i < batchSize; ++i)
             {
                 var pullResult = await consumer.PullAsync(cancellationToken).ConfigureAwait(false);
-                if (!pullResult.MessageAvailable)
+                if (!pullResult.IsAvailable)
                     break;
 
-                messages.Add(pullResult.Message);
+                messages.Add(new PullBatchItem(pullResult.ReceivedInfo, pullResult.Properties, pullResult.Body));
             }
 
             return new PullBatchResult(messages);

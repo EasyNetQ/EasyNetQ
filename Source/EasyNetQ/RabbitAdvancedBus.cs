@@ -592,63 +592,7 @@ namespace EasyNetQ
         #endregion
 
         /// <inheritdoc />
-        public async Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue, CancellationToken cancellationToken)
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-
-            var result = await GetMessageAsync(queue, cancellationToken).ConfigureAwait(false);
-            if (result == null)
-            {
-                return null;
-            }
-
-            var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
-            if (typeof(T).IsAssignableFrom(message.MessageType))
-            {
-                return new BasicGetResult<T>(new Message<T>((T)message.GetBody(), message.Properties));
-            }
-
-            throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
-        }
-
-        /// <inheritdoc />
-        public async Task<IBasicGetResult> GetMessageAsync(IQueue queue, CancellationToken cancellationToken)
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-
-            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-            var result = await clientCommandDispatcher.InvokeAsync(
-                x => x.BasicGet(queue.Name, true), cts.Token
-            ).ConfigureAwait(false);
-            if (result == null)
-            {
-                return null;
-            }
-
-            var getResult = new BasicGetResult(
-                result.Body.ToArray(),
-                new MessageProperties(result.BasicProperties),
-                new MessageReceivedInfo(
-                    "",
-                    result.DeliveryTag,
-                    result.Redelivered,
-                    result.Exchange,
-                    result.RoutingKey,
-                    queue.Name
-                )
-            );
-
-            if (logger.IsDebugEnabled())
-            {
-                logger.DebugFormat("Got message from queue {queue}", queue.Name);
-            }
-
-            return getResult;
-        }
-
-        /// <inheritdoc />
-        public async Task<uint> GetMessagesCountAsync(IQueue queue, CancellationToken cancellationToken)
+        public async Task<QueueStats> GetQueueStatsAsync(IQueue queue, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(queue, "queue");
 
@@ -660,10 +604,15 @@ namespace EasyNetQ
 
             if (logger.IsDebugEnabled())
             {
-                logger.DebugFormat("{messagesCount} messages in queue {queue}", declareResult.MessageCount, queue.Name);
+                logger.DebugFormat(
+                    "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
+                    declareResult.MessageCount,
+                    declareResult.ConsumerCount,
+                    queue.Name
+                );
             }
 
-            return declareResult.MessageCount;
+            return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
         }
 
         /// <inheritdoc />
@@ -671,6 +620,13 @@ namespace EasyNetQ
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer(queue, options);
+        }
+
+        /// <inheritdoc />
+        public IPullingConsumer<T> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
+        {
+            var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
+            return pullingConsumerFactory.CreateConsumer<T>(queue, options);
         }
 
         /// <inheritdoc />

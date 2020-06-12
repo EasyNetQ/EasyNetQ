@@ -13,45 +13,150 @@ namespace EasyNetQ
     /// </summary>
     public readonly struct PullResult
     {
-        private readonly ConsumedMessage? message;
+        private readonly MessageReceivedInfo receivedInfo;
+        private readonly MessageProperties properties;
+        private readonly byte[] body;
+        private readonly bool isAvailable;
 
         /// <summary>
-        ///     Represents a result when no messages are available
+        ///     Represents a result when no message is available
         /// </summary>
-        public static PullResult NotAvailable { get; } = new PullResult(null);
+        public static PullResult NotAvailable { get; } = new PullResult(false, null, null, null);
 
         /// <summary>
         ///     Represents a result when a message is available
         /// </summary>
-        /// <param name="message"></param>
         /// <returns></returns>
-        public static PullResult Available(ConsumedMessage message)
+        public static PullResult Available(MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body)
         {
-            return new PullResult(message);
+            return new PullResult(true, receivedInfo, properties, body);
         }
 
-        private PullResult(ConsumedMessage? message)
+        private PullResult(
+            bool isAvailable, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
+        )
         {
+            this.isAvailable = isAvailable;
+            this.receivedInfo = receivedInfo;
+            this.properties = properties;
+            this.body = body;
+        }
+
+        /// <summary>
+        ///     True is a message is available
+        /// </summary>
+        public bool IsAvailable => isAvailable;
+
+        /// <summary>
+        ///     Returns received info if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public MessageReceivedInfo ReceivedInfo
+        {
+            get
+            {
+                if (!isAvailable)
+                    throw new InvalidOperationException("No message is available");
+
+                return receivedInfo;
+            }
+        }
+
+        /// <summary>
+        ///     Returns properties if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public MessageProperties Properties
+        {
+            get
+            {
+                if (!isAvailable)
+                    throw new InvalidOperationException("No message is available");
+
+                return properties;
+            }
+        }
+
+        /// <summary>
+        ///     Returns body info if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public byte[] Body
+        {
+            get
+            {
+                if (!IsAvailable)
+                    throw new InvalidOperationException("No message is available");
+
+                return body;
+            }
+        }
+    }
+
+        /// <summary>
+    ///     Represents a result of a message pull
+    /// </summary>
+    public readonly struct PullResult<T>
+    {
+        private readonly MessageReceivedInfo receivedInfo;
+        private readonly IMessage<T> message;
+        private readonly bool isAvailable;
+
+
+        /// <summary>
+        ///     Represents a result when no message is available
+        /// </summary>
+        public static PullResult<T> NotAvailable { get; } = new PullResult<T>(false, null, null);
+
+        /// <summary>
+        ///     Represents a result when a message is available
+        /// </summary>
+        /// <returns></returns>
+        public static PullResult<T> Available(MessageReceivedInfo receivedInfo, IMessage<T> message)
+        {
+            return new PullResult<T>(true, receivedInfo, message);
+        }
+
+        private PullResult(bool isAvailable, MessageReceivedInfo receivedInfo, IMessage<T> message)
+        {
+            this.isAvailable = isAvailable;
+            this.receivedInfo = receivedInfo;
             this.message = message;
         }
 
         /// <summary>
         ///     True is a message is available
         /// </summary>
-        public bool MessageAvailable => message.HasValue;
+        public bool IsAvailable => isAvailable;
 
         /// <summary>
-        ///     Returns a message if it's available
+        ///     Returns received info if the message is available
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public ConsumedMessage Message
+        public MessageReceivedInfo ReceivedInfo
         {
             get
             {
-                if (!message.HasValue)
+                if (!isAvailable)
                     throw new InvalidOperationException("No message is available");
 
-                return message.Value;
+                return receivedInfo;
+            }
+        }
+
+
+        /// <summary>
+        ///     Returns message if it is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public IMessage<T> Message
+        {
+            get
+            {
+                if (!isAvailable)
+                    throw new InvalidOperationException("No message is available");
+
+                return message;
             }
         }
     }
@@ -85,11 +190,41 @@ namespace EasyNetQ
         /// <param name="requeue"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task RejectAsync(
-            ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default
-        );
+        Task RejectAsync(ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default);
     }
 
+
+    /// <summary>
+    ///     Allows to receive messages by pulling them one by one
+    /// </summary>
+    public interface IPullingConsumer<T> : IDisposable
+    {
+        /// <summary>
+        ///     Receives a single message
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns></returns>
+        Task<PullResult<T>> PullAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        ///     Acknowledges one or more messages
+        /// </summary>
+        /// <param name="deliveryTag"></param>
+        /// <param name="multiple"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        ///     Rejects one or more messages
+        /// </summary>
+        /// <param name="deliveryTag"></param>
+        /// <param name="multiple"></param>
+        /// <param name="requeue"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task RejectAsync(ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default);
+    }
 
     /// <summary>
     ///     Represent pulling consumer options
@@ -129,13 +264,13 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates PullingConsumer
         /// </summary>
-        /// <param name="queue">The queue</param>
         /// <param name="options">The options</param>
+        /// <param name="queue">The queue</param>
         /// <param name="channel">The channel</param>
         /// <param name="interceptor">The produce-consumer interceptor</param>
         public PullingConsumer(
-            IQueue queue,
             PullingConsumerOptions options,
+            IQueue queue,
             IPersistentChannel channel,
             IProduceConsumeInterceptor interceptor
         )
@@ -170,13 +305,14 @@ namespace EasyNetQ
                 new MessageProperties(basicGetResult.BasicProperties),
                 basicGetResult.Body.ToArray()
             );
-            return PullResult.Available(interceptor.OnConsume(message));
+            var interceptedMessage = interceptor.OnConsume(message);
+            return PullResult.Available(
+                interceptedMessage.ReceivedInfo, interceptedMessage.Properties, interceptedMessage.Body
+            );
         }
 
         /// <inheritdoc />
-        public async Task AckAsync(
-            ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default
-        )
+        public async Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default)
         {
             if (options.AutoAck)
                 throw new InvalidOperationException("Cannot ack in auto ack mode");
@@ -205,5 +341,56 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public void Dispose() => channel.Dispose();
+    }
+
+    /// <inheritdoc />
+    public class PullingConsumer<T> : IPullingConsumer<T>
+    {
+        private readonly IPullingConsumer consumer;
+        private readonly IMessageSerializationStrategy messageSerializationStrategy;
+
+        /// <summary>
+        ///     Creates PullingConsumer
+        /// </summary>
+        public PullingConsumer(IPullingConsumer consumer, IMessageSerializationStrategy messageSerializationStrategy)
+        {
+            this.consumer = consumer;
+            this.messageSerializationStrategy = messageSerializationStrategy;
+        }
+
+        /// <inheritdoc />
+        public async Task<PullResult<T>> PullAsync(CancellationToken cancellationToken = default)
+        {
+            var pullResult = await consumer.PullAsync(cancellationToken).ConfigureAwait(false);
+            if (!pullResult.IsAvailable)
+                return PullResult<T>.NotAvailable;
+
+            var message = messageSerializationStrategy.DeserializeMessage(pullResult.Properties, pullResult.Body);
+            if (typeof(T).IsAssignableFrom(message.MessageType))
+                return PullResult<T>.Available(
+                    pullResult.ReceivedInfo, new Message<T>((T) message.GetBody(), message.Properties)
+                );
+
+            throw new EasyNetQException(
+                $"Incorrect message type returned. Expected {typeof(T).Name}, but was {message.MessageType.Name}"
+            );
+        }
+
+        /// <inheritdoc />
+        public Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default)
+        {
+            return consumer.AckAsync(deliveryTag, multiple, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task RejectAsync(
+            ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default
+        )
+        {
+            return consumer.RejectAsync(deliveryTag, multiple, requeue, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public void Dispose() => consumer.Dispose();
     }
 }
