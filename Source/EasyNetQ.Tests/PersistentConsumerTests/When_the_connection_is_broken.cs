@@ -3,6 +3,7 @@
 using EasyNetQ.Events;
 using FluentAssertions;
 using NSubstitute;
+using RabbitMQ.Client;
 using Xunit;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
@@ -12,7 +13,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected override void AdditionalSetup()
         {
             consumer.StartConsuming();
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionRecoveredEvent(new AmqpTcpEndpoint()));
         }
 
         [Fact]

@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
@@ -9,23 +7,40 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     An abstraction on top of connection which manages its persistence and allows to open channels
+    /// </summary>
     public interface IPersistentConnection : IDisposable
     {
+        /// <summary>
+        ///     True if a connection is connected
+        /// </summary>
         bool IsConnected { get; }
+
+        /// <summary>
+        ///     Creates a new channel
+        /// </summary>
+        /// <returns>New channel</returns>
         IModel CreateModel();
     }
 
+    /// <inheritdoc />
     public class PersistentConnection : IPersistentConnection
     {
-        private readonly CancellationTokenSource connectCancellation = new CancellationTokenSource();
+        private readonly object mutex = new object();
         private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;
         private readonly ILog logger = LogProvider.For<PersistentConnection>();
-        private volatile IConnection connection;
-        private Task connectTask;
-        private bool disposed;
+        private volatile IAutorecoveringConnection initializedConnection;
+        private volatile bool disposed;
 
+        /// <summary>
+        ///     Creates PersistentConnection
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="connectionFactory">The connection factory</param>
+        /// <param name="eventBus">The event bus</param>
         public PersistentConnection(
             ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
         )
@@ -39,77 +54,40 @@ namespace EasyNetQ
             this.eventBus = eventBus;
         }
 
+        /// <inheritdoc />
         public IModel CreateModel()
         {
-            var connection = this.connection;
-            if (connection == null || !connection.IsOpen)
+            var connection = initializedConnection;
+            if (connection == null)
+                lock (mutex)
+                    connection = initializedConnection ??= Connect();
+
+            if (!connection.IsOpen)
                 throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
+
             return connection.CreateModel();
         }
 
+        /// <inheritdoc />
         public bool IsConnected
         {
             get
             {
-                var connection = this.connection;
+                var connection = initializedConnection;
                 return connection != null && connection.IsOpen;
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;
 
-            connectCancellation.Cancel();
-            connectTask?.ContinueWith(_ => { }).Wait();
-            connection?.Dispose();
-
+            initializedConnection?.Dispose();
             disposed = true;
         }
 
-        public void Initialize()
-        {
-            try
-            {
-                TryToConnect();
-            }
-            catch (Exception exception)
-            {
-                logger.Error(
-                    exception,
-                    "Failed to connect to any of hosts {hosts} and vhost {vhost}",
-                    string.Join(",", configuration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
-                    configuration.VirtualHost
-                );
-
-                connectTask = Task.Run(StartTryToConnect, connectCancellation.Token);
-            }
-        }
-
-        private async Task StartTryToConnect()
-        {
-            while (!connectCancellation.IsCancellationRequested)
-            {
-                try
-                {
-                    TryToConnect();
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    logger.Error(
-                        exception,
-                        "Failed to connect to any of hosts {hosts} and vhost {vhost}",
-                        string.Join(",", configuration.Hosts.Select(x => $"{x.Host}:{x.Port}")),
-                        configuration.VirtualHost
-                    );
-                }
-
-                await Task.Delay(configuration.ConnectIntervalAttempt, connectCancellation.Token).ConfigureAwait(false);
-            }
-        }
-
-        private void TryToConnect()
+        private IAutorecoveringConnection Connect()
         {
             var endpoints = configuration.Hosts.Select(x =>
             {
@@ -121,15 +99,14 @@ namespace EasyNetQ
                 return endpoint;
             }).ToArray();
 
-            connection = connectionFactory.CreateConnection(endpoints);
+            var connection = connectionFactory.CreateConnection(endpoints) as IAutorecoveringConnection;
+            if (connection == null)
+                throw new NotSupportedException("Non-recoverable connection is not supported");
+
             connection.ConnectionShutdown += OnConnectionShutdown;
             connection.ConnectionBlocked += OnConnectionBlocked;
             connection.ConnectionUnblocked += OnConnectionUnblocked;
-
-            if (connection is IAutorecoveringConnection recoverable)
-                recoverable.RecoverySucceeded += OnConnectionRestored;
-            else
-                throw new NotSupportedException("Non-recoverable connection is not supported");
+            connection.RecoverySucceeded += OnConnectionRecovered;
 
             logger.InfoFormat(
                 "Connected to broker {broker}, port {port}",
@@ -137,25 +114,32 @@ namespace EasyNetQ
                 connection.Endpoint.Port
             );
 
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint));
+
+            return connection;
         }
 
-        private void OnConnectionRestored(object sender, EventArgs e)
+        private void OnConnectionRecovered(object sender, EventArgs e)
         {
             var connection = (IConnection)sender;
             logger.InfoFormat(
-                "Reconnected to broker {broker}, port {port}",
+                "Reconnected to broker {host}:{port}",
                 connection.Endpoint.HostName,
                 connection.Endpoint.Port
             );
-
-            eventBus.Publish(new ConnectionCreatedEvent());
+            eventBus.Publish(new ConnectionRecoveredEvent(connection.Endpoint));
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            eventBus.Publish(new ConnectionDisconnectedEvent());
-            logger.InfoFormat("Disconnected from broker");
+            var connection = (IConnection)sender;
+            logger.InfoFormat(
+                "Disconnected from broker {host}:{port} because of {reason}",
+                connection.Endpoint.HostName,
+                connection.Endpoint.Port,
+                e.ReplyText
+            );
+            eventBus.Publish(new ConnectionDisconnectedEvent(connection.Endpoint, e.ReplyText));
         }
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)

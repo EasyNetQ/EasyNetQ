@@ -11,7 +11,6 @@ using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
-using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -30,6 +29,7 @@ namespace EasyNetQ
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
         private bool disposed;
+        private readonly IDisposable[] eventSubscriptions;
 
         public RabbitAdvancedBus(
             IPersistentConnection connection,
@@ -59,6 +59,7 @@ namespace EasyNetQ
 
             this.connection = connection;
             this.consumerFactory = consumerFactory;
+            this.clientCommandDispatcher = clientCommandDispatcher;
             this.confirmationListener = confirmationListener;
             this.eventBus = eventBus;
             this.handlerCollectionFactory = handlerCollectionFactory;
@@ -68,37 +69,30 @@ namespace EasyNetQ
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.Conventions = conventions;
 
-            this.eventBus.Subscribe<ConnectionCreatedEvent>(e => OnConnected());
             if (advancedBusEventHandlers.Connected != null)
-            {
                 Connected += advancedBusEventHandlers.Connected;
-            }
 
-            this.eventBus.Subscribe<ConnectionDisconnectedEvent>(e => OnDisconnected());
             if (advancedBusEventHandlers.Disconnected != null)
-            {
                 Disconnected += advancedBusEventHandlers.Disconnected;
-            }
 
-            this.eventBus.Subscribe<ConnectionBlockedEvent>(OnBlocked);
             if (advancedBusEventHandlers.Blocked != null)
-            {
                 Blocked += advancedBusEventHandlers.Blocked;
-            }
 
-            this.eventBus.Subscribe<ConnectionUnblockedEvent>(e => OnUnblocked());
             if (advancedBusEventHandlers.Unblocked != null)
-            {
                 Unblocked += advancedBusEventHandlers.Unblocked;
-            }
 
-            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned);
             if (advancedBusEventHandlers.MessageReturned != null)
-            {
                 MessageReturned += advancedBusEventHandlers.MessageReturned;
-            }
 
-            this.clientCommandDispatcher = clientCommandDispatcher;
+            eventSubscriptions = new[]
+            {
+                this.eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated),
+                this.eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
+                this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
+                this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
+                this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
+                this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
+            };
         }
 
         #region Consume
@@ -139,7 +133,11 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> onMessage, Action<IConsumerConfiguration> configure)
+        public IDisposable Consume<T>(
+            IQueue queue,
+            Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -167,7 +165,11 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public virtual IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, Action<IConsumerConfiguration> configure)
+        public virtual IDisposable Consume(
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
@@ -659,25 +661,37 @@ namespace EasyNetQ
             return declareResult.MessageCount;
         }
 
-        public virtual event EventHandler Connected;
+        /// <inheritdoc />
+        public event EventHandler<ConnectedEventArgs> Connected;
 
-        public virtual event EventHandler Disconnected;
+        /// <inheritdoc />
+        public event EventHandler<DisconnectedEventArgs> Disconnected;
 
-        public virtual event EventHandler<ConnectionBlockedEventArgs> Blocked;
+        /// <inheritdoc />
+        public event EventHandler<BlockedEventArgs> Blocked;
 
-        public virtual event EventHandler Unblocked;
+        /// <inheritdoc />
+        public event EventHandler Unblocked;
 
-        public virtual event EventHandler<MessageReturnedEventArgs> MessageReturned;
+        /// <inheritdoc />
+        public event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
-        public virtual bool IsConnected => connection.IsConnected;
+        /// <inheritdoc />
+        public bool IsConnected => connection.IsConnected;
 
+        /// <inheritdoc />
         public IServiceResolver Container { get; }
 
+        /// <inheritdoc />
         public IConventions Conventions { get; }
 
+        /// <inheritdoc />
         public virtual void Dispose()
         {
             if (disposed) return;
+
+            foreach(var eventSubscription in eventSubscriptions)
+                eventSubscription.Dispose();
 
             consumerFactory.Dispose();
             clientCommandDispatcher.Dispose();
@@ -687,14 +701,36 @@ namespace EasyNetQ
             disposed = true;
         }
 
-        protected void OnConnected() => Connected?.Invoke(this, EventArgs.Empty);
+        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        {
+            Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
+        }
 
-        protected void OnDisconnected() => Disconnected?.Invoke(this, EventArgs.Empty);
+        private void OnConnectionRecovered(ConnectionRecoveredEvent @event)
+        {
+            Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
+        }
 
-        protected void OnBlocked(ConnectionBlockedEvent args) => Blocked?.Invoke(this, new ConnectionBlockedEventArgs(args.Reason));
+        private void OnConnectionDisconnected(ConnectionDisconnectedEvent @event)
+        {
+            Disconnected?.Invoke(
+                this, new DisconnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port, @event.Reason)
+            );
+        }
 
-        protected void OnUnblocked() => Unblocked?.Invoke(this, EventArgs.Empty);
+        private void OnConnectionBlocked(ConnectionBlockedEvent @event)
+        {
+            Blocked?.Invoke(this, new BlockedEventArgs(@event.Reason));
+        }
 
-        protected void OnMessageReturned(ReturnedMessageEvent args) => MessageReturned?.Invoke(this, new MessageReturnedEventArgs(args.Body, args.Properties, args.Info));
+        private void OnConnectionUnblocked(ConnectionUnblockedEvent @event)
+        {
+            Unblocked?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnMessageReturned(ReturnedMessageEvent @event)
+        {
+            MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
+        }
     }
 }

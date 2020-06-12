@@ -44,16 +44,18 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
+        /// <inheritdoc />
         public IDisposable StartConsuming()
         {
-            subscriptions.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
-            subscriptions.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
+            subscriptions.Add(eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered));
+            subscriptions.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected));
 
             StartConsumingInternal();
 
             return new ConsumerCancellation(Dispose);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;
@@ -63,14 +65,10 @@ namespace EasyNetQ.Consumer
             eventBus.Publish(new StoppedConsumingEvent(this));
 
             foreach (var subscription in subscriptions)
-            {
                 subscription.Dispose();
-            }
 
             foreach (var internalConsumer in internalConsumers)
-            {
                 internalConsumer.Dispose();
-            }
         }
 
         private void StartConsumingInternal()
@@ -93,15 +91,12 @@ namespace EasyNetQ.Consumer
             );
         }
 
-        private void ConnectionOnDisconnected()
+        private void OnConnectionDisconnected(ConnectionDisconnectedEvent _)
         {
             internalConsumerFactory.OnDisconnected();
             internalConsumers.Clear();
         }
 
-        private void ConnectionOnConnected()
-        {
-            StartConsumingInternal();
-        }
+        private void OnConnectionRecovered(ConnectionRecoveredEvent _) => StartConsumingInternal();
     }
 }

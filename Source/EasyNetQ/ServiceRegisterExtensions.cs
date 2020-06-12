@@ -35,7 +35,7 @@ namespace EasyNetQ
                 .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
-                .Register(AdvancedBusEventHandlers.Default)
+                .Register(new AdvancedBusEventHandlers())
                 .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
                 .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
@@ -50,14 +50,7 @@ namespace EasyNetQ
                     return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
                 })
                 .Register<IClientCommandDispatcher, SingleChannelClientCommandDispatcher>()
-                .Register<IPersistentConnection>(c =>
-                {
-                    var connection = new PersistentConnection(
-                        c.Resolve<ConnectionConfiguration>(), c.Resolve<IConnectionFactory>(), c.Resolve<IEventBus>()
-                    );
-                    connection.Initialize();
-                    return connection;
-                })
+                .Register<IPersistentConnection, PersistentConnection>()
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()

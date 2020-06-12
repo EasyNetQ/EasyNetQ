@@ -10,8 +10,15 @@ namespace EasyNetQ.Events
     /// </summary>
     public class StoppedConsumingEvent
     {
+        /// <summary>
+        ///     The stopped consumer
+        /// </summary>
         public IConsumer Consumer { get; }
 
+        /// <summary>
+        ///     Creates StoppedConsumingEvent
+        /// </summary>
+        /// <param name="consumer">The consumer</param>
         public StoppedConsumingEvent(IConsumer consumer)
         {
             Consumer = consumer;

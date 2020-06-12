@@ -14,31 +14,31 @@ namespace EasyNetQ.Tests
         public void Should_be_not_connected_if_connection_not_established()
         {
             var mockBuilder = new MockBuilder();
-            using (mockBuilder.Bus)
-            {
-                mockBuilder.ConnectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(c => throw new Exception("Test"));
-                using (var connection = new PersistentConnection(new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus))
-                {
-                    connection.Initialize();
+            mockBuilder.ConnectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>())
+                .Returns(c => throw new Exception("Test"));
 
-                    connection.IsConnected.Should().BeFalse();
-                    mockBuilder.ConnectionFactory.Received().CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
-                }
-            }
+            using var connection = new PersistentConnection(
+                new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus
+            );
+
+            Assert.Throws<Exception>(() => connection.CreateModel());
+
+            connection.IsConnected.Should().BeFalse();
+            mockBuilder.ConnectionFactory.Received().CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
         }
 
         [Fact]
         public void Should_establish_connection_when_persistent_connection_created()
         {
             var mockBuilder = new MockBuilder();
-            using (mockBuilder.Bus)
-            using (var connection = new PersistentConnection(new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus))
-            {
-                connection.Initialize();
+            using var connection = new PersistentConnection(
+                new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus
+            );
 
-                connection.IsConnected.Should().BeTrue();
-                mockBuilder.ConnectionFactory.Received(2).CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
-            }
+            connection.CreateModel();
+
+            connection.IsConnected.Should().BeTrue();
+            mockBuilder.ConnectionFactory.Received(1).CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
         }
     }
 }

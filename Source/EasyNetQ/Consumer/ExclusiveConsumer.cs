@@ -49,10 +49,11 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
+        /// <inheritdoc />
         public IDisposable StartConsuming()
         {
-            disposables.Add(eventBus.Subscribe<ConnectionCreatedEvent>(e => ConnectionOnConnected()));
-            disposables.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(e => ConnectionOnDisconnected()));
+            disposables.Add(eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered));
+            disposables.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected));
             disposables.Add(Timers.Start(StartConsumingInternal, RestartConsumingPeriod, RestartConsumingPeriod));
 
             StartConsumingInternal();
@@ -60,6 +61,7 @@ namespace EasyNetQ.Consumer
             return new ConsumerCancellation(Dispose);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed)
@@ -70,14 +72,10 @@ namespace EasyNetQ.Consumer
             eventBus.Publish(new StoppedConsumingEvent(this));
 
             foreach (var disposal in disposables)
-            {
                 disposal.Dispose();
-            }
 
             foreach (var internalConsumer in internalConsumers)
-            {
                 internalConsumer.Dispose();
-            }
         }
 
         private void StartConsumingInternal()
@@ -108,7 +106,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private void ConnectionOnDisconnected()
+        private void OnConnectionDisconnected(ConnectionDisconnectedEvent _)
         {
             lock (syncLock)
             {
@@ -118,9 +116,6 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private void ConnectionOnConnected()
-        {
-            StartConsumingInternal();
-        }
+        private void OnConnectionRecovered(ConnectionRecoveredEvent _) => StartConsumingInternal();
     }
 }

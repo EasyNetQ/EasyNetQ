@@ -30,7 +30,7 @@ namespace EasyNetQ.Producer
         private readonly AsyncLock responseSubscriptionsLock = new AsyncLock();
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
-        private readonly IDisposable onConnectedEventSubscription;
+        private readonly IDisposable eventSubscription;
 
         public DefaultRpc(
             ConnectionConfiguration configuration,
@@ -60,7 +60,7 @@ namespace EasyNetQ.Producer
             this.typeNameSerializer = typeNameSerializer;
             this.correlationIdGenerationStrategy = correlationIdGenerationStrategy;
 
-            onConnectedEventSubscription = eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated);
+            eventSubscription = eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered);
         }
 
         /// <inheritdoc />
@@ -113,12 +113,12 @@ namespace EasyNetQ.Producer
         /// <inheritdoc />
         public void Dispose()
         {
-            onConnectedEventSubscription.Dispose();
+            eventSubscription.Dispose();
             foreach (var responseSubscription in responseSubscriptions.Values)
                 responseSubscription.Unsubscribe();
         }
 
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        private void OnConnectionRecovered(ConnectionRecoveredEvent @event)
         {
             var responseActionsValues = responseActions.Values;
             var responseSubscriptionsValues = responseSubscriptions.Values;

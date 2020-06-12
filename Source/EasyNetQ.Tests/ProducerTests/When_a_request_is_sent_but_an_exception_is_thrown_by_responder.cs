@@ -20,7 +20,9 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             correlationId = Guid.NewGuid().ToString();
             mockBuilder = new MockBuilder(
-                c => c.Register<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId))
+                c => c.Register<ICorrelationIdGenerationStrategy>(
+                    _ => new StaticCorrelationIdGenerationStrategy(correlationId)
+                )
             );
 
             requestMessage = new TestRequestMessage();
@@ -36,8 +38,16 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
             {
+                var waiter = new CountdownEvent(2);
+
+                mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
+                mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
-                DeliverMessage(correlationId, null);
+                if (!waiter.Wait(5000))
+                    throw new TimeoutException();
+
+                DeliverMessage(null);
                 await task.ConfigureAwait(false);
             }).ConfigureAwait(false);
         }
@@ -56,13 +66,13 @@ namespace EasyNetQ.Tests.ProducerTests
                 if (!waiter.Wait(5000))
                     throw new TimeoutException();
 
-                DeliverMessage(correlationId, "Why you are so bad with me?");
+                DeliverMessage("Why you are so bad with me?");
 
                 await task.ConfigureAwait(false);
             }).ConfigureAwait(false); // ,"Why you are so bad with me?"
         }
 
-        private void DeliverMessage(string correlationId, string exceptionMessage)
+        private void DeliverMessage(string exceptionMessage)
         {
             var properties = new BasicProperties
             {
