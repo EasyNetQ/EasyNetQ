@@ -8,9 +8,9 @@ using Xunit;
 namespace EasyNetQ.IntegrationTests.Advanced
 {
     [Collection("RabbitMQ")]
-    public class When_pull_messages : IDisposable
+    public class When_pull_messages_batch : IDisposable
     {
-        public When_pull_messages(RabbitMQFixture rmqFixture)
+        public When_pull_messages_batch(RabbitMQFixture rmqFixture)
         {
             bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
         }
@@ -33,20 +33,23 @@ namespace EasyNetQ.IntegrationTests.Advanced
             await bus.Advanced.PublishAsync(
                 Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             ).ConfigureAwait(false);
+            await bus.Advanced.PublishAsync(
+                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            ).ConfigureAwait(false);
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
-                await consumer.AckAsync(
-                    pullResult.Message.ReceivedInfo.DeliverTag, cts.Token
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(2);
+                await consumer.AckBatchAsync(
+                    pullResult.DeliverTag, cts.Token
                 ).ConfigureAwait(false);
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.Should().Be(PullResult.NotAvailable);
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(0);
             }
         }
 
@@ -61,20 +64,23 @@ namespace EasyNetQ.IntegrationTests.Advanced
             await bus.Advanced.PublishAsync(
                 Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             ).ConfigureAwait(false);
+            await bus.Advanced.PublishAsync(
+                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            ).ConfigureAwait(false);
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
-                await consumer.RejectAsync(
-                    pullResult.Message.ReceivedInfo.DeliverTag, false, cts.Token
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(2);
+                await consumer.RejectBatchAsync(
+                    pullResult.DeliverTag, false, cts.Token
                 ).ConfigureAwait(false);
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.Should().Be(PullResult.NotAvailable);
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(0);
             }
         }
 
@@ -89,20 +95,23 @@ namespace EasyNetQ.IntegrationTests.Advanced
             await bus.Advanced.PublishAsync(
                 Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             ).ConfigureAwait(false);
+            await bus.Advanced.PublishAsync(
+                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            ).ConfigureAwait(false);
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
-                await consumer.RejectAsync(
-                    pullResult.Message.ReceivedInfo.DeliverTag, true, cts.Token
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(2);
+                await consumer.RejectBatchAsync(
+                    pullResult.DeliverTag, true, cts.Token
                 ).ConfigureAwait(false);
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(2);
             }
         }
 
@@ -117,17 +126,20 @@ namespace EasyNetQ.IntegrationTests.Advanced
             await bus.Advanced.PublishAsync(
                 Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             ).ConfigureAwait(false);
+            await bus.Advanced.PublishAsync(
+                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            ).ConfigureAwait(false);
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.MessageAvailable.Should().BeTrue();
+                var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(2);
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token).ConfigureAwait(false);
-                pullResult.Should().Be(PullResult.NotAvailable);
+                var pullResult = await consumer.PullBatchAsync(0, cts.Token).ConfigureAwait(false);
+                pullResult.Messages.Should().HaveCount(0);
             }
         }
     }

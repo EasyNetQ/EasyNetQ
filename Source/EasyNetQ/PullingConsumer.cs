@@ -75,7 +75,7 @@ namespace EasyNetQ
         /// <param name="multiple"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task AckAsync(ulong deliveryTag, bool multiple = true, CancellationToken cancellationToken = default);
+        Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Rejects one or more messages
@@ -86,7 +86,7 @@ namespace EasyNetQ
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task RejectAsync(
-            ulong deliveryTag, bool multiple = true, bool requeue = false, CancellationToken cancellationToken = default
+            ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default
         );
     }
 
@@ -96,10 +96,21 @@ namespace EasyNetQ
     /// </summary>
     public readonly struct PullingConsumerOptions
     {
+        /// <summary>
+        ///     True if auto ack is enabled for the consumer
+        /// </summary>
         public bool AutoAck { get; }
 
+        /// <summary>
+        ///     Operations timeout
+        /// </summary>
         public TimeSpan Timeout { get; }
 
+        /// <summary>
+        ///     Creates PullingConsumerOptions
+        /// </summary>
+        /// <param name="autoAck">The autoAck</param>
+        /// <param name="timeout">The timeout</param>
         public PullingConsumerOptions(bool autoAck, TimeSpan timeout)
         {
             AutoAck = autoAck;
@@ -164,7 +175,7 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task AckAsync(
-            ulong deliveryTag, bool multiple = false, CancellationToken cancellationToken = default
+            ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default
         )
         {
             if (options.AutoAck)
@@ -179,8 +190,7 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task RejectAsync(
-            ulong deliveryTag, bool multiple = false, bool requeue = false,
-            CancellationToken cancellationToken = default
+            ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default
         )
         {
             if (options.AutoAck)
