@@ -29,14 +29,14 @@ namespace EasyNetQ
         ///     Returns delivery tag of the batch
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public ulong DeliverTag
+        public ulong DeliveryTag
         {
             get
             {
                 if (Messages.Count == 0)
                     throw new InvalidOperationException("No messages");
 
-                return Messages.Max(x => x.ReceivedInfo.DeliverTag);
+                return Messages.Max(x => x.ReceivedInfo.DeliveryTag);
             }
         }
     }

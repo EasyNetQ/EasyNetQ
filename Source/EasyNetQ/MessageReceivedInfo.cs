@@ -3,7 +3,7 @@
     public class MessageReceivedInfo
     {
         public string ConsumerTag { get; set; }
-        public ulong DeliverTag { get; set; }
+        public ulong DeliveryTag { get; set; }
         public bool Redelivered { get; set; }
         public string Exchange { get; set; }
         public string RoutingKey { get; set; }
@@ -13,7 +13,7 @@
 
         public MessageReceivedInfo(
             string consumerTag,
-            ulong deliverTag,
+            ulong deliveryTag,
             bool redelivered,
             string exchange,
             string routingKey,
@@ -25,7 +25,7 @@
             Preconditions.CheckNotNull(queue, "queue");
 
             ConsumerTag = consumerTag;
-            DeliverTag = deliverTag;
+            DeliveryTag = deliveryTag;
             Redelivered = redelivered;
             Exchange = exchange;
             RoutingKey = routingKey;
@@ -34,7 +34,7 @@
 
         public override string ToString()
         {
-            return $"[ConsumerTag={ConsumerTag}, DeliverTag={DeliverTag}, Redelivered={Redelivered}, Exchange={Exchange}, RoutingKey={RoutingKey}, Queue={Queue}]";
+            return $"[ConsumerTag={ConsumerTag}, DeliverTag={DeliveryTag}, Redelivered={Redelivered}, Exchange={Exchange}, RoutingKey={RoutingKey}, Queue={Queue}]";
         }
     }
 }

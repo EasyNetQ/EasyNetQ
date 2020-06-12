@@ -388,7 +388,7 @@ namespace EasyNetQ.Tests
         {
             basicDeliverEventArgs.Should().NotBeNull();
             basicDeliverEventArgs.Info.ConsumerTag.Should().Be(consumerTag);
-            basicDeliverEventArgs.Info.DeliverTag.Should().Be(deliveryTag);
+            basicDeliverEventArgs.Info.DeliveryTag.Should().Be(deliveryTag);
             basicDeliverEventArgs.Info.RoutingKey.Should().Be("#");
         }
     }

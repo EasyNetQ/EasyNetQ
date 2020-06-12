@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_deliver_the_delivery_tag()
         {
-            DeliveredMessageInfo.DeliverTag.Should().Be(DeliverTag);
+            DeliveredMessageInfo.DeliveryTag.Should().Be(DeliverTag);
         }
 
         [Fact]

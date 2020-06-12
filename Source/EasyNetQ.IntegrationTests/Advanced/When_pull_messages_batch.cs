@@ -43,7 +43,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
                 pullResult.Messages.Should().HaveCount(2);
                 await consumer.AckBatchAsync(
-                    pullResult.DeliverTag, cts.Token
+                    pullResult.DeliveryTag, cts.Token
                 ).ConfigureAwait(false);
             }
 
@@ -74,7 +74,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
                 pullResult.Messages.Should().HaveCount(2);
                 await consumer.RejectBatchAsync(
-                    pullResult.DeliverTag, false, cts.Token
+                    pullResult.DeliveryTag, false, cts.Token
                 ).ConfigureAwait(false);
             }
 
@@ -105,7 +105,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 var pullResult = await consumer.PullBatchAsync(2, cts.Token).ConfigureAwait(false);
                 pullResult.Messages.Should().HaveCount(2);
                 await consumer.RejectBatchAsync(
-                    pullResult.DeliverTag, true, cts.Token
+                    pullResult.DeliveryTag, true, cts.Token
                 ).ConfigureAwait(false);
             }
 
