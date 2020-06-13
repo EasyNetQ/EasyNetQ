@@ -1,7 +1,7 @@
-﻿namespace EasyNetQ.FluentConfiguration
+﻿namespace EasyNetQ
 {
     /// <summary>
-    /// Allows publish configuration to be fluently extended without adding overloads to IBus
+    /// Allows publish configuration to be fluently extended without adding overloads
     ///
     /// e.g.
     /// x => x.WithTopic("*.brighton").WithPriority(2)
@@ -30,7 +30,7 @@
         IPublishConfiguration WithExpires(int expires);
     }
 
-    public class PublishConfiguration : IPublishConfiguration
+    internal class PublishConfiguration : IPublishConfiguration
     {
         public PublishConfiguration(string defaultTopic)
         {

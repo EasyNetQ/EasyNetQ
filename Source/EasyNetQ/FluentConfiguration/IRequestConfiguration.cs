@@ -3,7 +3,7 @@
 namespace EasyNetQ.FluentConfiguration
 {
     /// <summary>
-    /// Allows request configuration to be fluently extended without adding overloads to IBus
+    /// Allows request configuration to be fluently extended without adding overloads
     ///
     /// e.g.
     /// x => x.WithQueueName("MyQueue")
