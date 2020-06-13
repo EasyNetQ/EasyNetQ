@@ -4,12 +4,11 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ
 {
     /// <summary>
     ///     An abstraction for send-receive pattern
     /// </summary>
-    //TODO Need support of non-generic overloads
     public interface ISendReceive
     {
         /// <summary>

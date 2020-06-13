@@ -2,8 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ
 {
+    /// <summary>
+    ///     Allow to add multiple asynchronous message handlers
+    /// </summary>
     public interface IReceiveRegistration
     {
         /// <summary>

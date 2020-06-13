@@ -3,10 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for ISendReceive
+    /// </summary>
     public static class SendReceiveExtensions
     {
         /// <summary>
