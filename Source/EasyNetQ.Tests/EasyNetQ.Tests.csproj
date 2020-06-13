@@ -6,7 +6,7 @@
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
     <AssemblyOriginatorKeyFile>../../Assets/EasyNetQ.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PublicSign>true</PublicSign>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
