@@ -17,26 +17,30 @@ namespace EasyNetQ
         private readonly MessageProperties properties;
         private readonly byte[] body;
         private readonly bool isAvailable;
+        private readonly ulong messagesCount;
 
         /// <summary>
         ///     Represents a result when no message is available
         /// </summary>
-        public static PullResult NotAvailable { get; } = new PullResult(false, null, null, null);
+        public static PullResult NotAvailable { get; } = new PullResult(false, 0, null, null, null);
 
         /// <summary>
         ///     Represents a result when a message is available
         /// </summary>
         /// <returns></returns>
-        public static PullResult Available(MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body)
+        public static PullResult Available(
+            ulong messagesCount, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
+        )
         {
-            return new PullResult(true, receivedInfo, properties, body);
+            return new PullResult(true, messagesCount, receivedInfo, properties, body);
         }
 
         private PullResult(
-            bool isAvailable, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
+            bool isAvailable, ulong messagesCount, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
         )
         {
             this.isAvailable = isAvailable;
+            this.messagesCount = messagesCount;
             this.receivedInfo = receivedInfo;
             this.properties = properties;
             this.body = body;
@@ -46,6 +50,21 @@ namespace EasyNetQ
         ///     True is a message is available
         /// </summary>
         public bool IsAvailable => isAvailable;
+
+        /// <summary>
+        ///     Returns remained messages count if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public ulong RemainedMessagesCount
+        {
+            get
+            {
+                if (!isAvailable)
+                    throw new InvalidOperationException("No message is available");
+
+                return messagesCount;
+            }
+        }
 
         /// <summary>
         ///     Returns received info if the message is available
@@ -101,25 +120,28 @@ namespace EasyNetQ
         private readonly MessageReceivedInfo receivedInfo;
         private readonly IMessage<T> message;
         private readonly bool isAvailable;
+        private readonly ulong messagesCount;
 
 
         /// <summary>
         ///     Represents a result when no message is available
         /// </summary>
-        public static PullResult<T> NotAvailable { get; } = new PullResult<T>(false, null, null);
+        public static PullResult<T> NotAvailable { get; } = new PullResult<T>(false, 0, null, null);
 
         /// <summary>
         ///     Represents a result when a message is available
         /// </summary>
-        /// <returns></returns>
-        public static PullResult<T> Available(MessageReceivedInfo receivedInfo, IMessage<T> message)
+        public static PullResult<T> Available(
+            ulong messagesCount, MessageReceivedInfo receivedInfo, IMessage<T> message
+        )
         {
-            return new PullResult<T>(true, receivedInfo, message);
+            return new PullResult<T>(true, messagesCount, receivedInfo, message);
         }
 
-        private PullResult(bool isAvailable, MessageReceivedInfo receivedInfo, IMessage<T> message)
+        private PullResult(bool isAvailable, ulong messagesCount, MessageReceivedInfo receivedInfo, IMessage<T> message)
         {
             this.isAvailable = isAvailable;
+            this.messagesCount = messagesCount;
             this.receivedInfo = receivedInfo;
             this.message = message;
         }
@@ -128,6 +150,21 @@ namespace EasyNetQ
         ///     True is a message is available
         /// </summary>
         public bool IsAvailable => isAvailable;
+
+        /// <summary>
+        ///     Returns remained messages count if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public ulong RemainedMessagesCount
+        {
+            get
+            {
+                if (!isAvailable)
+                    throw new InvalidOperationException("No message is available");
+
+                return messagesCount;
+            }
+        }
 
         /// <summary>
         ///     Returns received info if the message is available
@@ -143,7 +180,6 @@ namespace EasyNetQ
                 return receivedInfo;
             }
         }
-
 
         /// <summary>
         ///     Returns message if it is available
@@ -293,6 +329,7 @@ namespace EasyNetQ
             if (basicGetResult == null)
                 return PullResult.NotAvailable;
 
+            var messagesCount = basicGetResult.MessageCount;
             var message = new ConsumedMessage(
                 new MessageReceivedInfo(
                     "",
@@ -307,7 +344,7 @@ namespace EasyNetQ
             );
             var interceptedMessage = interceptor.OnConsume(message);
             return PullResult.Available(
-                interceptedMessage.ReceivedInfo, interceptedMessage.Properties, interceptedMessage.Body
+                messagesCount, interceptedMessage.ReceivedInfo, interceptedMessage.Properties, interceptedMessage.Body
             );
         }
 
@@ -368,7 +405,9 @@ namespace EasyNetQ
             var message = messageSerializationStrategy.DeserializeMessage(pullResult.Properties, pullResult.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))
                 return PullResult<T>.Available(
-                    pullResult.ReceivedInfo, new Message<T>((T) message.GetBody(), message.Properties)
+                    pullResult.RemainedMessagesCount,
+                    pullResult.ReceivedInfo,
+                    new Message<T>((T) message.GetBody(), message.Properties)
                 );
 
             throw new EasyNetQException(
