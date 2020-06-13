@@ -1,5 +1,4 @@
-﻿using EasyNetQ.FluentConfiguration;
-using EasyNetQ.Internals;
+﻿using EasyNetQ.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;

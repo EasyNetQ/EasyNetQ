@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;

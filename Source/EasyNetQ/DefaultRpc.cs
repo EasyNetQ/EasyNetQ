@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ
 {
     /// <summary>
     ///     Default implementation of EasyNetQ's request-response pattern
