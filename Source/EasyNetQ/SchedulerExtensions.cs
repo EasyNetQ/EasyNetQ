@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Scheduling;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for IScheduler
+    /// </summary>
     public static class SchedulerExtensions
     {
         /// <summary>

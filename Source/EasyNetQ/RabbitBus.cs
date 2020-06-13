@@ -1,5 +1,3 @@
-using EasyNetQ.Scheduling;
-
 namespace EasyNetQ
 {
     public class RabbitBus : IBus
