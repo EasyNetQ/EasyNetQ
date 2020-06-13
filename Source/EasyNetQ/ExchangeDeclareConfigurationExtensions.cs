@@ -2,6 +2,9 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for IExchangeDeclareConfiguration
+    /// </summary>
     public static class ExchangeDeclareConfigurationExtensions
     {
         /// <summary>
