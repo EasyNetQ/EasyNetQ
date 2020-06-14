@@ -9,6 +9,11 @@ namespace EasyNetQ.Producer
     public interface IPublishPendingConfirmation
     {
         /// <summary>
+        ///     Identifier of the confirmation
+        /// </summary>
+        ulong Id { get; }
+
+        /// <summary>
         ///     Wait confirmation for ack, nack and etc.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>

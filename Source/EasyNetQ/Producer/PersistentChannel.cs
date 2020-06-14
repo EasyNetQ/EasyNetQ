@@ -151,6 +151,7 @@ namespace EasyNetQ.Producer
         private void OnReturn(object sender, BasicReturnEventArgs args)
         {
             var returnedMessageEvent = new ReturnedMessageEvent(
+                (IModel) sender,
                 args.Body.ToArray(),
                 new MessageProperties(args.BasicProperties),
                 new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)

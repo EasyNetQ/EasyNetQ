@@ -251,9 +251,10 @@ namespace EasyNetQ
                 {
                     var pendingConfirmation = await clientCommandDispatcher.InvokeAsync(model =>
                     {
+                        var confirmation = confirmationListener.CreatePendingConfirmation(model);
+                        rawMessage.Properties.SetConfirmationId(confirmation.Id);
                         var properties = model.CreateBasicProperties();
                         rawMessage.Properties.CopyTo(properties);
-                        var confirmation = confirmationListener.CreatePendingConfirmation(model);
                         try
                         {
                             model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);

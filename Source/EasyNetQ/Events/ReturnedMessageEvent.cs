@@ -1,13 +1,17 @@
-﻿namespace EasyNetQ.Events
+﻿using RabbitMQ.Client;
+
+namespace EasyNetQ.Events
 {
     public class ReturnedMessageEvent
     {
+        public IModel Channel { get; }
         public byte[] Body { get; }
         public MessageProperties Properties { get; }
         public MessageReturnedInfo Info { get; }
 
-        public ReturnedMessageEvent(byte[] body, MessageProperties properties, MessageReturnedInfo info)
+        public ReturnedMessageEvent(IModel channel, byte[] body, MessageProperties properties, MessageReturnedInfo info)
         {
+            Channel = channel;
             Body = body;
             Properties = properties;
             Info = info;
