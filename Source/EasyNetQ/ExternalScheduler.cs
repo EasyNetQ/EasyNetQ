@@ -6,8 +6,11 @@ using EasyNetQ.Producer;
 using EasyNetQ.SystemMessages;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ
 {
+    /// <summary>
+    ///     Scheduler based on external scheduler service
+    /// </summary>
     public class ExternalScheduler : IScheduler
     {
         private readonly ConnectionConfiguration configuration;
@@ -17,6 +20,15 @@ namespace EasyNetQ.Scheduling
         private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
+        /// <summary>
+        ///     Creates ExternalScheduler
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="advancedBus">The advanced bus</param>
+        /// <param name="conventions">The conventions</param>
+        /// <param name="exchangeDeclareStrategy">The exchange declare strategy</param>
+        /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
+        /// <param name="messageSerializationStrategy">The message serialization strategy</param>
         public ExternalScheduler(
             ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,
@@ -41,7 +53,7 @@ namespace EasyNetQ.Scheduling
             this.messageSerializationStrategy = messageSerializationStrategy;
         }
 
-        /// <inheritdoc />s
+        /// <inheritdoc />
         public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(message, "message");

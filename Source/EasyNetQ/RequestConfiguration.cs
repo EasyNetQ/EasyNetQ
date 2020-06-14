@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace EasyNetQ.FluentConfiguration
+namespace EasyNetQ
 {
     /// <summary>
-    /// Allows request configuration to be fluently extended without adding overloads to IBus
+    /// Allows request configuration to be fluently extended without adding overloads
     ///
     /// e.g.
     /// x => x.WithQueueName("MyQueue")
@@ -25,8 +25,7 @@ namespace EasyNetQ.FluentConfiguration
         IRequestConfiguration WithQueueName(string queueName);
     }
 
-    /// <inheritdoc />
-    public class RequestConfiguration : IRequestConfiguration
+    internal class RequestConfiguration : IRequestConfiguration
     {
         public RequestConfiguration(string queueName, TimeSpan expiration)
         {
@@ -37,14 +36,12 @@ namespace EasyNetQ.FluentConfiguration
         public string QueueName { get; private set; }
         public TimeSpan Expiration { get; private set; }
 
-        /// <inheritdoc />
         public IRequestConfiguration WithExpiration(TimeSpan expiration)
         {
             Expiration = expiration;
             return this;
         }
 
-        /// <inheritdoc />
         public IRequestConfiguration WithQueueName(string queueName)
         {
             QueueName = queueName;

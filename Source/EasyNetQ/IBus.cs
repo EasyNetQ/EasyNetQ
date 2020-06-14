@@ -1,6 +1,4 @@
 using System;
-using EasyNetQ.Producer;
-using EasyNetQ.Scheduling;
 
 namespace EasyNetQ
 {

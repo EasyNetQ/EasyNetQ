@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
-using EasyNetQ.Scheduling;
 using FluentAssertions;
 using Xunit;
 

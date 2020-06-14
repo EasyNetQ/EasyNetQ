@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for IPubSub
+    /// </summary>
     public static class PubSubExtensions
     {
         /// <summary>

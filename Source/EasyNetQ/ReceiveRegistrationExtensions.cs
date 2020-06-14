@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for IReceiveRegistration
+    /// </summary>
     public static class ReceiveRegistrationExtensions
     {
         /// <summary>

@@ -40,7 +40,7 @@ namespace EasyNetQ
         IQueueDeclareConfiguration WithArgument(string name, object value);
     }
 
-    public sealed class QueueDeclareConfiguration : IQueueDeclareConfiguration
+    internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
     {
         public bool IsDurable { get; private set; } = true;
         public bool IsExclusive { get; private set; }

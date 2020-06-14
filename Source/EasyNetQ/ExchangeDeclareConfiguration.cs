@@ -2,6 +2,12 @@ using System.Collections.Generic;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    /// Allows exchange configuration to be fluently extended without adding overloads
+    ///
+    /// e.g.
+    /// x => x.AsDurable(true)
+    /// </summary>
     public interface IExchangeDeclareConfiguration
     {
         /// <summary>
@@ -34,7 +40,7 @@ namespace EasyNetQ
         IExchangeDeclareConfiguration WithArgument(string name, object value);
     }
 
-    public sealed class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
+    internal class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
     {
         public bool IsDurable { get; private set; } = true;
 

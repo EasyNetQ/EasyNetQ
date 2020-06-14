@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace EasyNetQ.FluentConfiguration
+namespace EasyNetQ
 {
     /// <summary>
-    /// Allows configuration to be fluently extended without adding overloads to IBus
+    /// Allows subscription configuration to be fluently extended without adding overloads
     ///
     /// e.g.
     /// x => x.WithTopic("*.brighton")
@@ -103,14 +103,13 @@ namespace EasyNetQ.FluentConfiguration
         ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default);
     }
 
-    public class SubscriptionConfiguration : ISubscriptionConfiguration
+    internal class SubscriptionConfiguration : ISubscriptionConfiguration
     {
         public IList<string> Topics { get; }
         public bool AutoDelete { get; private set; }
         public int Priority { get; private set; }
         public ushort PrefetchCount { get; private set; }
         public int? Expires { get; private set; }
-
         public bool IsExclusive { get; private set; }
         public byte? MaxPriority { get; private set; }
         public bool Durable { get; private set; }
@@ -152,6 +151,7 @@ namespace EasyNetQ.FluentConfiguration
             Priority = priority;
             return this;
         }
+
 
         public ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount)
         {

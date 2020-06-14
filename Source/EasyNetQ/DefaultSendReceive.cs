@@ -6,7 +6,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ
 {
     /// <summary>
     ///     Default implementation of EasyNetQ's send-receive pattern
@@ -20,6 +20,12 @@ namespace EasyNetQ.Producer
         private readonly IAdvancedBus advancedBus;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
+        /// <summary>
+        ///     Creates DefaultSendReceive
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="advancedBus">The advanced bus</param>
+        /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
         public DefaultSendReceive(
             ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,

@@ -3,6 +3,9 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Various extensions for IQueueDeclareConfiguration
+    /// </summary>
     public static class QueueDeclareConfigurationExtensions
     {
         /// <summary>

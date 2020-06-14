@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using EasyNetQ.DI;
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduling;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;

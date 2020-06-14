@@ -2,12 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ
 {
     /// <summary>
     /// Provides a simple Publish API to schedule a message to be published at some time in the future.
     /// </summary>
-    //TODO Need support of non-generic overloads
     public interface IScheduler
     {
         /// <summary>

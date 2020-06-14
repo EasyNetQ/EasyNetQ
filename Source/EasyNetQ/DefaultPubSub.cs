@@ -2,12 +2,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ
 {
+    /// <inheritdoc />
     public class DefaultPubSub : IPubSub
     {
         private readonly IAdvancedBus advancedBus;
@@ -16,6 +17,14 @@ namespace EasyNetQ.Producer
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
         private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
 
+        /// <summary>
+        ///     Creates DefaultPubSub
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="conventions">The conventions</param>
+        /// <param name="exchangeDeclareStrategy">The exchange declare strategy</param>
+        /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
+        /// <param name="advancedBus">The advanced bus</param>
         public DefaultPubSub(
             ConnectionConfiguration configuration,
             IConventions conventions,

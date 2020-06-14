@@ -1,7 +1,7 @@
 ﻿namespace EasyNetQ
 {
     /// <summary>
-    ///     A strategy of generation of correlation identifier
+    ///     A strategy of generation a correlation identifier
     /// </summary>
     public interface ICorrelationIdGenerationStrategy
     {

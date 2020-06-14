@@ -10,7 +10,7 @@ namespace EasyNetQ.ConnectionString
 {
     using UpdateConfiguration = Func<ConnectionConfiguration, ConnectionConfiguration>;
 
-    public static class ConnectionStringGrammar
+    internal static class ConnectionStringGrammar
     {
         internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
         internal static readonly Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);

@@ -1,8 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Producer;
-using EasyNetQ.Scheduling;
 using Net.CommandLine;
 using Serilog;
 

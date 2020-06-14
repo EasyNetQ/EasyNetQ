@@ -5,8 +5,11 @@ using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ
 {
+    /// <summary>
+    ///     Scheduler based on DLE and Message TTL
+    /// </summary>
     public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
     {
         private readonly ConnectionConfiguration configuration;
@@ -15,6 +18,14 @@ namespace EasyNetQ.Scheduling
         private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
+        /// <summary>
+        ///     Creates DeadLetterExchangeAndMessageTtlScheduler
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="advancedBus">The advanced bus</param>
+        /// <param name="conventions">The conventions</param>
+        /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
+        /// <param name="exchangeDeclareStrategy">The exchange declare strategy</param>
         public DeadLetterExchangeAndMessageTtlScheduler(
             ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,

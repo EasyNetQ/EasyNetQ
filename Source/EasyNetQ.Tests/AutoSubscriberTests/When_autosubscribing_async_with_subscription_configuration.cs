@@ -1,8 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
 using System;

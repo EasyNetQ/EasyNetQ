@@ -4,8 +4,11 @@ using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Scheduling
+namespace EasyNetQ
 {
+    /// <summary>
+    ///     Scheduler based on delayed exchange
+    /// </summary>
     public class DelayedExchangeScheduler : IScheduler
     {
         private readonly ConnectionConfiguration configuration;
@@ -13,6 +16,13 @@ namespace EasyNetQ.Scheduling
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
+        /// <summary>
+        ///     Creates DelayedExchangeScheduler
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="advancedBus">The advanced bus</param>
+        /// <param name="conventions">The conventions</param>
+        /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
         public DelayedExchangeScheduler(
             ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,

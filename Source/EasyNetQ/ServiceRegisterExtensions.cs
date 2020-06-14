@@ -6,7 +6,6 @@ using EasyNetQ.Interception;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Producer;
-using EasyNetQ.Scheduling;
 using RabbitMQ.Client;
 
 namespace EasyNetQ

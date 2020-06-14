@@ -1,7 +1,7 @@
-﻿namespace EasyNetQ.Producer
+﻿namespace EasyNetQ
 {
     /// <summary>
-    /// Allows configuration to be fluently extended without adding overloads to IBus
+    /// Allows configuration to be fluently extended without adding overloads
     ///
     /// e.g.
     /// x => x.WithPrefetchCount(50)
@@ -42,7 +42,7 @@
         IResponderConfiguration WithExpires(int expires);
     }
 
-    public class ResponderConfiguration : IResponderConfiguration
+    internal class ResponderConfiguration : IResponderConfiguration
     {
         public ResponderConfiguration(ushort defaultPrefetchCount)
         {
@@ -50,17 +50,8 @@
         }
 
         public ushort PrefetchCount { get; private set; }
-
         public string QueueName { get; private set; }
-
-        /// <summary>
-        /// Durable queues remain active when a server restarts.
-        /// </summary>
         public bool Durable { get; private set; } = true;
-
-        /// <summary>
-        /// Determines how long (in milliseconds) a queue can remain unused before it is automatically deleted by the server.
-        /// </summary>
         public int? Expires { get; private set; }
 
         public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
