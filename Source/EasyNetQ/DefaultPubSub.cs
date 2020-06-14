@@ -58,18 +58,20 @@ namespace EasyNetQ
             configure(publishConfiguration);
 
             var messageType = typeof(T);
-            var advancedMessageProperties = new MessageProperties
-            {
-                DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType)
-            };
+            var advancedMessageProperties = new MessageProperties();
             if (publishConfiguration.Priority != null)
                 advancedMessageProperties.Priority = publishConfiguration.Priority.Value;
             if (publishConfiguration.Expires != null)
                 advancedMessageProperties.Expiration = publishConfiguration.Expires.ToString();
+            advancedMessageProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType);
 
             var advancedMessage = new Message<T>(message, advancedMessageProperties);
-            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(messageType, ExchangeType.Topic, cts.Token).ConfigureAwait(false);
-            await advancedBus.PublishAsync(exchange, publishConfiguration.Topic, false, advancedMessage, cts.Token).ConfigureAwait(false);
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
+                messageType, ExchangeType.Topic, cts.Token
+            ).ConfigureAwait(false);
+            await advancedBus.PublishAsync(
+                exchange, publishConfiguration.Topic, false, advancedMessage, cts.Token
+            ).ConfigureAwait(false);
         }
 
         /// <inheritdoc />

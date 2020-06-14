@@ -49,14 +49,21 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task FuturePublishAsync<T>(
-            T message, TimeSpan delay, string topic, CancellationToken cancellationToken = default
+            T message,
+            TimeSpan delay,
+            Action<IFuturePublishConfiguration> configure,
+            CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(configure, "configure");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+            var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(publishConfiguration);
+
+            var topic = publishConfiguration.Topic;
             var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
                 conventions.ExchangeNamingConvention(typeof(T)),
                 ExchangeType.Topic,
@@ -80,15 +87,15 @@ namespace EasyNetQ
 
             await advancedBus.BindAsync(futureExchange, futureQueue, topic, cts.Token).ConfigureAwait(false);
 
-            var advancedMessage = new Message<T>(message)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
-                }
-            };
-            await advancedBus.PublishAsync(futureExchange, topic, false, advancedMessage, cts.Token)
-                .ConfigureAwait(false);
+            var properties = new MessageProperties();
+            if (publishConfiguration.Priority != null)
+                properties.Priority = publishConfiguration.Priority.Value;
+            properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
+
+            var advancedMessage = new Message<T>(message, properties);
+            await advancedBus.PublishAsync(
+                futureExchange, topic, false, advancedMessage, cts.Token
+            ).ConfigureAwait(false);
         }
     }
 }

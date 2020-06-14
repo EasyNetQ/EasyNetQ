@@ -89,7 +89,10 @@ namespace EasyNetQ
             var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
             var routingKey = requestConfiguration.QueueName;
             var expiration = requestConfiguration.Expiration;
-            await RequestPublishAsync(request, routingKey, queueName, correlationId, expiration, cts.Token).ConfigureAwait(false);
+            var priority = requestConfiguration.Priority;
+            await RequestPublishAsync(
+                request, routingKey, queueName, correlationId, expiration, priority, cts.Token
+            ).ConfigureAwait(false);
             tcs.AttachCancellation(cts.Token);
             return await tcs.Task.ConfigureAwait(false);
         }
@@ -210,6 +213,7 @@ namespace EasyNetQ
             string returnQueueName,
             string correlationId,
             TimeSpan expiration,
+            byte? priority,
             CancellationToken cancellationToken
         )
         {
@@ -220,16 +224,18 @@ namespace EasyNetQ
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var requestProperties = new MessageProperties
+            var properties = new MessageProperties
             {
                 ReplyTo = returnQueueName,
                 CorrelationId = correlationId,
                 DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
             };
             if (expiration != Timeout.InfiniteTimeSpan)
-                requestProperties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+            if (priority != null)
+                properties.Priority = priority.Value;
 
-            var requestMessage = new Message<TRequest>(request, requestProperties);
+            var requestMessage = new Message<TRequest>(request, properties);
             await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken).ConfigureAwait(false);
         }
 

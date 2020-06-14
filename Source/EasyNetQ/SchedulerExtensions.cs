@@ -27,7 +27,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(scheduler, "scheduler");
 
-            return scheduler.FuturePublishAsync(message, delay, "", cancellationToken);
+            return scheduler.FuturePublishAsync(message, delay, c => {}, cancellationToken);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(scheduler, "scheduler");
 
-            scheduler.FuturePublishAsync(message, delay, topic, cancellationToken)
+            scheduler.FuturePublishAsync(message, delay, c => c.WithTopic(topic), cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }

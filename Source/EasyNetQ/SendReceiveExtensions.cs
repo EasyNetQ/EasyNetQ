@@ -19,6 +19,26 @@ namespace EasyNetQ
         /// <param name="queue">The queue to send to</param>
         /// <param name="message">The message</param>
         /// <param name="cancellationToken">The cancellation token</param>
+        public static Task SendAsync<T>(
+            this ISendReceive sendReceive,
+            string queue,
+            T message,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.SendAsync(queue, message, c => { }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Send a message directly to a queue
+        /// </summary>
+        /// <typeparam name="T">The type of message to send</typeparam>
+        /// <param name="sendReceive">The sendReceive instance</param>
+        /// <param name="queue">The queue to send to</param>
+        /// <param name="message">The message</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         public static void Send<T>(
             this ISendReceive sendReceive,
             string queue,
@@ -28,7 +48,31 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(sendReceive, "sendReceive");
 
-            sendReceive.SendAsync(queue, message, cancellationToken)
+            sendReceive.Send(queue, message, c => { }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Send a message directly to a queue
+        /// </summary>
+        /// <typeparam name="T">The type of message to send</typeparam>
+        /// <param name="sendReceive">The sendReceive instance</param>
+        /// <param name="queue">The queue to send to</param>
+        /// <param name="message">The message</param>
+        /// <param name="configure">
+        ///     Fluent configuration e.g. x => x.WithPriority(2)
+        /// </param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        public static void Send<T>(
+            this ISendReceive sendReceive,
+            string queue,
+            T message,
+            Action<ISendConfiguration> configure,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            sendReceive.SendAsync(queue, message, configure, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }

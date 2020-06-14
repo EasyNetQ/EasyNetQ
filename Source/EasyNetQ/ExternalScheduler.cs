@@ -54,12 +54,20 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public async Task FuturePublishAsync<T>(T message, TimeSpan delay, string topic, CancellationToken cancellationToken = default)
+        public async Task FuturePublishAsync<T>(
+            T message,
+            TimeSpan delay,
+            Action<IFuturePublishConfiguration> configure,
+            CancellationToken cancellationToken = default
+        )
         {
             Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(configure, "configure");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+            var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(publishConfiguration);
 
             var scheduleMeType = typeof(ScheduleMe);
             var scheduleMeExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
@@ -67,13 +75,15 @@ namespace EasyNetQ
             ).ConfigureAwait(false);
             var baseMessageType = typeof(T);
             var concreteMessageType = message.GetType();
-            var serializedMessage = messageSerializationStrategy.SerializeMessage(new Message<T>(message)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType)
-                }
-            });
+
+            var messageProperties = new MessageProperties();
+            if (publishConfiguration.Priority != null)
+                messageProperties.Priority = publishConfiguration.Priority.Value;
+            messageProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(concreteMessageType);
+
+            var serializedMessage = messageSerializationStrategy.SerializeMessage(
+                new Message<T>(message, messageProperties)
+            );
             var scheduleMe = new ScheduleMe
             {
                 WakeTime = DateTime.UtcNow.Add(delay),
@@ -81,17 +91,16 @@ namespace EasyNetQ
                 MessageProperties = serializedMessage.Properties,
                 ExchangeType = ExchangeType.Topic,
                 Exchange = conventions.ExchangeNamingConvention(baseMessageType),
-                RoutingKey = topic
+                RoutingKey = publishConfiguration.Topic
             };
-            var advancedMessage = new Message<ScheduleMe>(scheduleMe)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType)
-                }
-            };
+            var scheduleMeProperties = new MessageProperties();
+            scheduleMeProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType);
             await advancedBus.PublishAsync(
-                scheduleMeExchange, conventions.TopicNamingConvention(scheduleMeType), false, advancedMessage, cts.Token
+                scheduleMeExchange,
+                conventions.TopicNamingConvention(scheduleMeType),
+                false,
+                new Message<ScheduleMe>(scheduleMe, scheduleMeProperties),
+                cts.Token
             ).ConfigureAwait(false);
         }
     }
