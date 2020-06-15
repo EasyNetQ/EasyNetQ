@@ -67,7 +67,7 @@ namespace EasyNetQ.Producer
 
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
-            var type = @event.IsNack ? ConfirmationType.Nack : ConfirmationType.Ack;
+            var type = @event.IsNack ? ConfirmationType.Nacked : ConfirmationType.Acked;
             if (multiple)
             {
                 foreach (var sequenceNumber in requests.Select(x => x.Key))
@@ -153,12 +153,12 @@ namespace EasyNetQ.Producer
                         new MessageReturnedException("Broker has signalled that message is returned")
                     );
                     break;
-                case ConfirmationType.Nack:
+                case ConfirmationType.Nacked:
                     confirmationTcs.TrySetException(
                         new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful")
                     );
                     break;
-                case ConfirmationType.Ack:
+                case ConfirmationType.Acked:
                     confirmationTcs.TrySetResult(null);;
                     break;
                 default:
@@ -168,8 +168,8 @@ namespace EasyNetQ.Producer
 
         private enum ConfirmationType
         {
-            Ack,
-            Nack,
+            Acked,
+            Nacked,
             Returned,
         }
 
