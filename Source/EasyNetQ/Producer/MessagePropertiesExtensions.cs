@@ -5,11 +5,12 @@ namespace EasyNetQ.Producer
 {
     internal static class MessagePropertiesExtensions
     {
-        private const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
+        public const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
-        public static void SetConfirmationId(this MessageProperties properties, ulong confirmationId)
+        public static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
         {
             properties.Headers[ConfirmationIdHeader] = confirmationId.ToString();
+            return properties;
         }
 
         public static bool TryGetConfirmationId(this MessageProperties properties, out ulong confirmationId)
