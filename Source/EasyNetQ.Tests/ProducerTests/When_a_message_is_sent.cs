@@ -29,23 +29,13 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_publish_the_message()
         {
-            mockBuilder.Channels[1].Received().BasicPublish(
+            mockBuilder.Channels[0].Received().BasicPublish(
                 Arg.Is(""),
                 Arg.Is(queueName),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<ReadOnlyMemory<byte>>());
-        }
-
-        [Fact]
-        public void Should_declare_the_queue()
-        {
-            mockBuilder.Channels[0].Received().QueueDeclare(
-                Arg.Is(queueName),
-                Arg.Is(true),
-                Arg.Is(false),
-                Arg.Is(false),
-                Arg.Any<IDictionary<string, object>>());
+                Arg.Any<ReadOnlyMemory<byte>>()
+            );
         }
     }
 }

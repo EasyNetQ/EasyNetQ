@@ -17,8 +17,16 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to send</typeparam>
         /// <param name="queue">The queue to send the message to</param>
         /// <param name="message">The message to send</param>
+        /// <param name="configure">
+        ///     Fluent configuration e.g. x => x.WithPriority(2)
+        /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken = default);
+        Task SendAsync<T>(
+            string queue,
+            T message,
+            Action<ISendConfiguration> configure,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Receive a message from the specified queue

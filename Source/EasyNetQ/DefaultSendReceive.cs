@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
@@ -13,9 +12,6 @@ namespace EasyNetQ
     /// </summary>
     public class DefaultSendReceive : ISendReceive
     {
-        private readonly AsyncLock asyncLock = new AsyncLock();
-        private readonly ConcurrentDictionary<string, IQueue> declaredQueues = new ConcurrentDictionary<string, IQueue>();
-
         private readonly ConnectionConfiguration configuration;
         private readonly IAdvancedBus advancedBus;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -42,24 +38,26 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public async Task SendAsync<T>(string queue, T message, CancellationToken cancellationToken)
+        public async Task SendAsync<T>(
+            string queue, T message, Action<ISendConfiguration> configure, CancellationToken cancellationToken
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(message, "message");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
+            var sendConfiguration = new SendConfiguration();
+            configure(sendConfiguration);
 
-            var wrappedMessage = new Message<T>(message)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
-                }
-            };
+            var properties = new MessageProperties();
+            if (sendConfiguration.Priority != null)
+                properties.Priority = sendConfiguration.Priority.Value;
+            properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
-            await advancedBus.PublishAsync(Exchange.GetDefault(), queue, false, wrappedMessage, cts.Token).ConfigureAwait(false);
+            await advancedBus.PublishAsync(
+                Exchange.GetDefault(), queue, false, new Message<T>(message, properties), cts.Token
+            ).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -100,7 +98,7 @@ namespace EasyNetQ
         )
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-            var declaredQueue = await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
+            var declaredQueue = await advancedBus.QueueDeclareAsync(queue, cts.Token).ConfigureAwait(false);
             return advancedBus.Consume<T>(declaredQueue, (message, info) => onMessage(message.Body, default), configure);
         }
 
@@ -112,22 +110,8 @@ namespace EasyNetQ
         )
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-            var declaredQueue = await DeclareQueueAsync(queue, cts.Token).ConfigureAwait(false);
+            var declaredQueue = await advancedBus.QueueDeclareAsync(queue, cts.Token).ConfigureAwait(false);
             return advancedBus.Consume(declaredQueue, x => addHandlers(new HandlerAdder(x)), configure);
-        }
-
-        private async Task<IQueue> DeclareQueueAsync(string queueName, CancellationToken cancellationToken)
-        {
-            if (declaredQueues.TryGetValue(queueName, out var queue)) return queue;
-
-            using (await asyncLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
-            {
-                if (declaredQueues.TryGetValue(queueName, out queue)) return queue;
-
-                queue = await advancedBus.QueueDeclareAsync(queueName, cancellationToken).ConfigureAwait(false);
-                declaredQueues[queueName] = queue;
-                return queue;
-            }
         }
 
         private sealed class HandlerAdder : IReceiveRegistration

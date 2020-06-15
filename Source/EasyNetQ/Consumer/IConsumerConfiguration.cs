@@ -11,7 +11,7 @@
         IConsumerConfiguration WithExclusive(bool isExclusive);
     }
 
-    public class ConsumerConfiguration : IConsumerConfiguration
+    internal class ConsumerConfiguration : IConsumerConfiguration
     {
         public ConsumerConfiguration(ushort defaultPrefetchCount)
         {

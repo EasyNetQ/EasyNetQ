@@ -11,14 +11,14 @@ namespace EasyNetQ
     public interface ISubscriptionConfiguration
     {
         /// <summary>
-        /// Add a topic for the queue binding
+        /// Adds a topic for the queue binding
         /// </summary>
         /// <param name="topic">The topic to add</param>
         /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithTopic(string topic);
 
         /// <summary>
-        /// Configures the queue's durability
+        /// Configures the queue as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
         /// </summary>
         /// <param name="autoDelete">Queue's durability flag</param>
         /// <returns>Returns a reference to itself</returns>

@@ -43,35 +43,44 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task FuturePublishAsync<T>(
-            T message, TimeSpan delay, string topic, CancellationToken cancellationToken = default
+            T message,
+            TimeSpan delay,
+            Action<IFuturePublishConfiguration> configure,
+            CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(configure, "configure");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+            var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            configure(publishConfiguration);
+
+            var topic = publishConfiguration.Topic;
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
             var futureExchangeName = exchangeName + "_delayed";
             var futureExchange = await advancedBus.ExchangeDeclareAsync(
                 futureExchangeName,
-                c => c.AsDelayedExchange(ExchangeType.Direct),
+                c => c.AsDelayedExchange(ExchangeType.Topic),
                 cts.Token
             ).ConfigureAwait(false);
+
             var exchange = await advancedBus.ExchangeDeclareAsync(
                 exchangeName,
                 c => c.WithType(ExchangeType.Topic),
                 cts.Token
             ).ConfigureAwait(false);
             await advancedBus.BindAsync(futureExchange, exchange, topic, cts.Token).ConfigureAwait(false);
-            var advancedMessage = new Message<T>(message)
-            {
-                Properties =
-                {
-                    DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
-                }
-            };
-            await advancedBus.PublishAsync(futureExchange, topic, false, advancedMessage.WithDelay(delay), cts.Token).ConfigureAwait(false);
+
+            var properties = new MessageProperties();
+            if (publishConfiguration.Priority != null)
+                properties.Priority = publishConfiguration.Priority.Value;
+            properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
+
+            await advancedBus.PublishAsync(
+                futureExchange, topic, false, new Message<T>(message, properties).WithDelay(delay), cts.Token
+            ).ConfigureAwait(false);
         }
     }
 }
