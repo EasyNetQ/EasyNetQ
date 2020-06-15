@@ -1,7 +1,9 @@
-﻿namespace EasyNetQ
+﻿using System;
+
+namespace EasyNetQ
 {
     /// <summary>
-    /// Allows configuration to be fluently extended without adding overloads
+    /// Allows responder configuration to be fluently extended without adding overloads
     ///
     /// e.g.
     /// x => x.WithPrefetchCount(50)
@@ -12,20 +14,20 @@
         /// Configures the consumer's prefetch count
         /// </summary>
         /// <param name="prefetchCount">Consumer's prefetch count value</param>
-        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining.</returns>
+        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
         IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
 
         /// <summary>
         /// Sets the queue name
         /// </summary>
         /// <param name="queueName"></param>
-        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining.</returns>
+        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
         IResponderConfiguration WithQueueName(string queueName);
 
         /// <summary>
         /// Configures the queue's durability
         /// </summary>
-        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining.</returns>
+        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
         IResponderConfiguration WithDurable(bool durable = true);
 
         /// <summary>
@@ -37,9 +39,16 @@
         /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed.
         /// Leases of durable queues restart when the server restarts.
         /// </summary>
-        /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
-        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining.</returns>
-        IResponderConfiguration WithExpires(int expires);
+        /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1 means a queue which is unused for 1 second will be deleted.</param>
+        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+        IResponderConfiguration WithExpires(TimeSpan expires);
+
+        /// <summary>
+        /// Configures the queue's maxPriority
+        /// </summary>
+        /// <param name="priority">Queue's maxPriority value</param>
+        /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+        IResponderConfiguration WithMaxPriority(byte priority);
     }
 
     internal class ResponderConfiguration : IResponderConfiguration
@@ -52,7 +61,8 @@
         public ushort PrefetchCount { get; private set; }
         public string QueueName { get; private set; }
         public bool Durable { get; private set; } = true;
-        public int? Expires { get; private set; }
+        public TimeSpan? Expires { get; private set; }
+        public byte? MaxPriority { get; private set; }
 
         public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
         {
@@ -72,9 +82,15 @@
             return this;
         }
 
-        public IResponderConfiguration WithExpires(int expires)
+        public IResponderConfiguration WithExpires(TimeSpan expires)
         {
             Expires = expires;
+            return this;
+        }
+
+        public IResponderConfiguration WithMaxPriority(byte priority)
+        {
+            MaxPriority = MaxPriority;
             return this;
         }
     }

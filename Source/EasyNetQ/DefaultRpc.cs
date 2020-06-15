@@ -21,16 +21,20 @@ namespace EasyNetQ
         protected readonly IAdvancedBus advancedBus;
         private readonly ConnectionConfiguration configuration;
         protected readonly IConventions conventions;
+        private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
+        private readonly IDisposable eventSubscription;
+        protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
 
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
-        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new ConcurrentDictionary<string, ResponseAction>();
-        private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions = new ConcurrentDictionary<RpcKey, ResponseSubscription>();
+
+        private readonly ConcurrentDictionary<string, ResponseAction> responseActions =
+            new ConcurrentDictionary<string, ResponseAction>();
+
+        private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions =
+            new ConcurrentDictionary<RpcKey, ResponseSubscription>();
 
         private readonly AsyncLock responseSubscriptionsLock = new AsyncLock();
         private readonly ITypeNameSerializer typeNameSerializer;
-        private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
-        private readonly IDisposable eventSubscription;
 
         public DefaultRpc(
             ConnectionConfiguration configuration,
@@ -143,7 +147,7 @@ namespace EasyNetQ
             var responseAction = new ResponseAction(
                 message =>
                 {
-                    var msg = (IMessage<TResponse>)message;
+                    var msg = (IMessage<TResponse>) message;
 
                     var isFaulted = false;
                     var exceptionMessage = "The exception message has not been specified.";
@@ -152,7 +156,8 @@ namespace EasyNetQ
                         if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
                             isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
                         if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
-                            exceptionMessage = Encoding.UTF8.GetString((byte[])msg.Properties.Headers[ExceptionMessageKey]);
+                            exceptionMessage =
+                                Encoding.UTF8.GetString((byte[]) msg.Properties.Headers[ExceptionMessageKey]);
                     }
 
                     if (isFaulted)
@@ -160,13 +165,17 @@ namespace EasyNetQ
                     else
                         tcs.TrySetResult(msg.Body);
                 },
-                () => tcs.TrySetException(new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId))
+                () => tcs.TrySetException(
+                    new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}",
+                        correlationId))
             );
 
             responseActions.TryAdd(correlationId, responseAction);
         }
 
-        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(CancellationToken cancellationToken)
+        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
+            CancellationToken cancellationToken
+        )
         {
             var responseType = typeof(TResponse);
             var requestType = typeof(TRequest);
@@ -236,7 +245,8 @@ namespace EasyNetQ
                 properties.Priority = priority.Value;
 
             var requestMessage = new Message<TRequest>(request, properties);
-            await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken).ConfigureAwait(false);
+            await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
@@ -247,23 +257,34 @@ namespace EasyNetQ
         {
             var requestType = typeof(TRequest);
 
-            var requestConfiguration = new ResponderConfiguration(configuration.PrefetchCount);
-            configure(requestConfiguration);
+            var responderConfiguration = new ResponderConfiguration(configuration.PrefetchCount);
+            configure(responderConfiguration);
 
-            var routingKey = requestConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
+            var routingKey = responderConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
             var exchange = await advancedBus.ExchangeDeclareAsync(
                 conventions.RpcRequestExchangeNamingConvention(requestType),
                 ExchangeType.Direct,
                 cancellationToken: cancellationToken
             ).ConfigureAwait(false);
-            var queue = await advancedBus.QueueDeclareAsync(routingKey, cancellationToken).ConfigureAwait(false);
+            var queue = await advancedBus.QueueDeclareAsync(
+                routingKey,
+                c =>
+                {
+                    c.AsDurable(responderConfiguration.Durable);
+                    if (responderConfiguration.Expires != null)
+                        c.WithExpires(responderConfiguration.Expires.Value);
+                    if (responderConfiguration.MaxPriority.HasValue)
+                        c.WithMaxPriority(responderConfiguration.MaxPriority.Value);
+                },
+                cancellationToken
+            ).ConfigureAwait(false);
             await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
             return advancedBus.Consume<TRequest>(
                 queue,
                 (m, i, c) => RespondToMessageAsync(responder, m, c),
-                c => c.WithPrefetchCount(requestConfiguration.PrefetchCount)
+                c => c.WithPrefetchCount(responderConfiguration.PrefetchCount)
             );
         }
 
