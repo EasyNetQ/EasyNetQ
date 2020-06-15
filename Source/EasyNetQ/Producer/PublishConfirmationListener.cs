@@ -150,7 +150,7 @@ namespace EasyNetQ.Producer
             {
                 case ConfirmationType.Return:
                     confirmationTcs.TrySetException(
-                        new MessageReturnedException("Broker has signalled that message is returned")
+                        new PublishReturnedException("Broker has signalled that message is returned")
                     );
                     break;
                 case ConfirmationType.Nack:

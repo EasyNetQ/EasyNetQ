@@ -7,7 +7,7 @@ namespace EasyNetQ.Producer
     ///     This exception indicates that a message was returned
     /// </summary>
     [Serializable]
-    public class MessageReturnedException : Exception
+    public class PublishReturnedException : Exception
     {
         //
         // For guidelines regarding the creation of new exception types, see
@@ -16,29 +16,23 @@ namespace EasyNetQ.Producer
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        /// <summary>
-        ///     Creates MessageReturnedException
-        /// </summary>
-        public MessageReturnedException()
+        /// <inheritdoc />
+        public PublishReturnedException()
         {
         }
 
-        /// <summary>
-        ///     Creates MessageReturnedException
-        /// </summary>
-        /// <param name="message">The message</param>
-        public MessageReturnedException(string message) : base(message)
+        /// <inheritdoc />
+        public PublishReturnedException(string message) : base(message)
         {
         }
 
-        public MessageReturnedException(string message, Exception inner) : base(message, inner)
+        /// <inheritdoc />
+        public PublishReturnedException(string message, Exception inner) : base(message, inner)
         {
         }
 
-        protected MessageReturnedException(
-            SerializationInfo info,
-            StreamingContext context
-        ) : base(info, context)
+        /// <inheritdoc />
+        protected PublishReturnedException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

@@ -28,7 +28,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Guid.NewGuid().ToString("N"), ExchangeType.Direct, cancellationToken: cts.Token
             ).ConfigureAwait(false);
 
-            await Assert.ThrowsAsync<MessageReturnedException>(
+            await Assert.ThrowsAsync<PublishReturnedException>(
                 () => bus.Advanced.PublishAsync(
                     exchange, "#", true, new MessageProperties(), Array.Empty<byte>(), cts.Token
                 )

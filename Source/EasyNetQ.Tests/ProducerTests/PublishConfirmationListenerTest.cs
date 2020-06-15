@@ -116,7 +116,7 @@ namespace EasyNetQ.Tests.ProducerTests
                     new MessageReturnedInfo("exchange", "routingKey", "returnReason")
                 )
             );
-            await Assert.ThrowsAsync<MessageReturnedException>(
+            await Assert.ThrowsAsync<PublishReturnedException>(
                 () => confirmation1.WaitAsync()
             ).ConfigureAwait(false);
         }
