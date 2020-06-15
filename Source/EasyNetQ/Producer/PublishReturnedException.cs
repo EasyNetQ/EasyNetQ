@@ -4,10 +4,10 @@ using System.Runtime.Serialization;
 namespace EasyNetQ.Producer
 {
     /// <summary>
-    ///     This exception indicates that a publish was interrupted(for instance, because of a reconnection)
+    ///     This exception indicates that a message was returned
     /// </summary>
     [Serializable]
-    public class PublishInterruptedException : Exception
+    public class PublishReturnedException : Exception
     {
         //
         // For guidelines regarding the creation of new exception types, see
@@ -17,24 +17,22 @@ namespace EasyNetQ.Producer
         //
 
         /// <inheritdoc />
-        public PublishInterruptedException()
+        public PublishReturnedException()
         {
         }
 
         /// <inheritdoc />
-        public PublishInterruptedException(string message)
-            : base(message)
+        public PublishReturnedException(string message) : base(message)
         {
         }
 
         /// <inheritdoc />
-        public PublishInterruptedException(string message, Exception inner)
-            : base(message, inner)
+        public PublishReturnedException(string message, Exception inner) : base(message, inner)
         {
         }
 
         /// <inheritdoc />
-        protected PublishInterruptedException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected PublishReturnedException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
@@ -93,6 +94,31 @@ namespace EasyNetQ.Tests.ProducerTests
             var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
             await confirmation2.WaitAsync().ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task Should_fail_with_returned_message_event()
+        {
+            model.NextPublishSeqNo.Returns(DeliveryTag);
+            var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
+            var properties = new MessageProperties
+            {
+                Headers =
+                {
+                    [MessagePropertiesExtensions.ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmation1.Id.ToString())
+                }
+            };
+            eventBus.Publish(
+                new ReturnedMessageEvent(
+                    model,
+                    Array.Empty<byte>(),
+                    properties,
+                    new MessageReturnedInfo("exchange", "routingKey", "returnReason")
+                )
+            );
+            await Assert.ThrowsAsync<PublishReturnedException>(
+                () => confirmation1.WaitAsync()
+            ).ConfigureAwait(false);
         }
     }
 }

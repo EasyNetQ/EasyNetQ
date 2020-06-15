@@ -29,7 +29,8 @@ namespace EasyNetQ.Producer
             {
                 eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation),
                 eventBus.Subscribe<ChannelRecoveredEvent>(OnChannelRecovered),
-                eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown)
+                eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown),
+                eventBus.Subscribe<ReturnedMessageEvent>(OnReturnedMessage)
             };
         }
 
@@ -46,7 +47,9 @@ namespace EasyNetQ.Producer
             if (!requests.TryAdd(sequenceNumber, confirmationTcs))
                 throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
 
-            return new PublishPendingConfirmation(confirmationTcs, () => requests.Remove(sequenceNumber));
+            return new PublishPendingConfirmation(
+                sequenceNumber, confirmationTcs, () => requests.Remove(sequenceNumber)
+            );
         }
 
         /// <inheritdoc />
@@ -64,15 +67,15 @@ namespace EasyNetQ.Producer
 
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
-            var isNack = @event.IsNack;
+            var type = @event.IsNack ? ConfirmationType.Nack : ConfirmationType.Ack;
             if (multiple)
             {
                 foreach (var sequenceNumber in requests.Select(x => x.Key))
                     if (sequenceNumber <= deliveryTag && requests.TryRemove(sequenceNumber, out var confirmationTcs))
-                        Confirm(confirmationTcs, sequenceNumber, isNack);
+                        Confirm(confirmationTcs, sequenceNumber, type);
             }
             else if (requests.TryRemove(deliveryTag, out var confirmation))
-                Confirm(confirmation, deliveryTag, isNack);
+                Confirm(confirmation, deliveryTag, type);
         }
 
         private void OnChannelRecovered(ChannelRecoveredEvent @event)
@@ -89,6 +92,24 @@ namespace EasyNetQ.Producer
                 return;
 
             InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
+        }
+
+
+        private void OnReturnedMessage(ReturnedMessageEvent @event)
+        {
+            if (@event.Channel.NextPublishSeqNo == 0)
+                return;
+
+            if (!@event.Properties.TryGetConfirmationId(out var confirmationId))
+                return;
+
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
+                return;
+
+            if (!requests.TryRemove(confirmationId, out var confirmationTcs))
+                return;
+
+            Confirm(confirmationTcs, confirmationId, ConfirmationType.Return);
         }
 
 
@@ -121,26 +142,51 @@ namespace EasyNetQ.Producer
             } while (!unconfirmedChannelRequests.IsEmpty);
         }
 
-        private static void Confirm(TaskCompletionSource<object> confirmationTcs, ulong sequenceNumber, bool isNack)
+        private static void Confirm(
+            TaskCompletionSource<object> confirmationTcs, ulong sequenceNumber, ConfirmationType type
+        )
         {
-            if (isNack)
-                confirmationTcs.TrySetException(
-                    new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful")
-                );
-            else
-                confirmationTcs.TrySetResult(null);
+            switch (type)
+            {
+                case ConfirmationType.Return:
+                    confirmationTcs.TrySetException(
+                        new PublishReturnedException("Broker has signalled that message is returned")
+                    );
+                    break;
+                case ConfirmationType.Nack:
+                    confirmationTcs.TrySetException(
+                        new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful")
+                    );
+                    break;
+                case ConfirmationType.Ack:
+                    confirmationTcs.TrySetResult(null);;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        private enum ConfirmationType
+        {
+            Ack,
+            Nack,
+            Return
         }
 
         private sealed class PublishPendingConfirmation : IPublishPendingConfirmation
         {
+            private readonly ulong id;
             private readonly TaskCompletionSource<object> confirmationTcs;
             private readonly Action cleanup;
 
-            public PublishPendingConfirmation(TaskCompletionSource<object> confirmationTcs, Action cleanup)
+            public PublishPendingConfirmation(ulong id, TaskCompletionSource<object> confirmationTcs, Action cleanup)
             {
+                this.id = id;
                 this.confirmationTcs = confirmationTcs;
                 this.cleanup = cleanup;
             }
+
+            public ulong Id => id;
 
             public async Task WaitAsync(CancellationToken cancellationToken)
             {
