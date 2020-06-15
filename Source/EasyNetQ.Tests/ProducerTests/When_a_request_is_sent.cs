@@ -9,7 +9,6 @@ using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests
@@ -25,15 +24,12 @@ namespace EasyNetQ.Tests.ProducerTests
                 )
             );
 
-            requestMessage = new TestRequestMessage();
-            responseMessage = new TestResponseMessage();
-
             var waiter = new CountdownEvent(2);
 
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
             mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
-            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
@@ -48,14 +44,13 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         private readonly MockBuilder mockBuilder;
-        private readonly TestRequestMessage requestMessage;
         private readonly TestResponseMessage responseMessage;
 
         private void DeliverMessage(string correlationId)
         {
             var properties = new BasicProperties
             {
-                Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests.Common",
+                Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests",
                 CorrelationId = correlationId
             };
             var body = Encoding.UTF8.GetBytes("{ Id:12, Text:\"Hello World\"}");
@@ -100,7 +95,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             mockBuilder.Channels[2].Received().BasicPublish(
                 Arg.Is("easy_net_q_rpc"),
-                Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests.Common"),
+                Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests"),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
                 Arg.Any<ReadOnlyMemory<byte>>()

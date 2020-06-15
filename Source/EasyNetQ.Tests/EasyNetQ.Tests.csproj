@@ -4,10 +4,12 @@
     <Description>EasyNetQ.Tests</Description>
     <LangVersion>latest</LangVersion>
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
+    <AssemblyOriginatorKeyFile>../../Assets/EasyNetQ.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
-    <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EasyNetQ.Management.Client" Version="1.3.0" />
