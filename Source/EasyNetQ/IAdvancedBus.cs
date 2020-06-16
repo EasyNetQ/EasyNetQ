@@ -272,29 +272,28 @@ namespace EasyNetQ
         Task UnbindAsync(IBinding binding, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Get a message from the given queue.
+        /// Gets stats for the given queue
         /// </summary>
-        /// <typeparam name="T">The message type to get</typeparam>
-        /// <param name="queue">The queue from which to retrieve the message</param>
+        /// <param name="queue">The queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>An IBasicGetResult.</returns>
-        Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue, CancellationToken cancellationToken = default);
+        /// <returns>The stats of the queue</returns>
+        Task<QueueStats> GetQueueStatsAsync(IQueue queue, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Get the raw message from the given queue.
+        ///     Creates a new pulling consumer
         /// </summary>
-        /// <param name="queue">The queue from which to retrieve the message</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>An IBasicGetResult</returns>
-        Task<IBasicGetResult> GetMessageAsync(IQueue queue, CancellationToken cancellationToken = default);
+        /// <param name="queue">The queue</param>
+        /// <param name="autoAck"></param>
+        /// <returns></returns>
+        IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true);
 
         /// <summary>
-        /// Counts messages in the given queue
+        ///     Creates a new pulling consumer
         /// </summary>
-        /// <param name="queue">The queue in which to count messages</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>The number of counted messages</returns>
-        Task<uint> GetMessagesCountAsync(IQueue queue, CancellationToken cancellationToken = default);
+        /// <param name="queue">The queue</param>
+        /// <param name="autoAck"></param>
+        /// <returns></returns>
+        IPullingConsumer<T> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true);
 
         /// <summary>
         /// Event fires when the bus has connected to a RabbitMQ broker.

@@ -26,6 +26,7 @@ namespace EasyNetQ
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
         private readonly ILog logger = LogProvider.For<RabbitAdvancedBus>();
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IPullingConsumerFactory pullingConsumerFactory;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
         private bool disposed;
@@ -43,6 +44,7 @@ namespace EasyNetQ
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
+            IPullingConsumerFactory pullingConsumerFactory,
             AdvancedBusEventHandlers advancedBusEventHandlers
         )
         {
@@ -55,6 +57,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
+            Preconditions.CheckNotNull(pullingConsumerFactory, "receiverFactory");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
 
             this.connection = connection;
@@ -67,6 +70,7 @@ namespace EasyNetQ
             this.configuration = configuration;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
+            this.pullingConsumerFactory = pullingConsumerFactory;
             this.Conventions = conventions;
 
             if (advancedBusEventHandlers.Connected != null)
@@ -182,7 +186,7 @@ namespace EasyNetQ
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receivedInfo, cancellationToken) =>
             {
-                var rawMessage = produceConsumeInterceptor.OnConsume(new RawMessage(properties, body));
+                var rawMessage = produceConsumeInterceptor.OnConsume(new ConsumedMessage(receivedInfo, properties, body));
                 return onMessage(rawMessage.Body, rawMessage.Properties, receivedInfo, cancellationToken);
             }, consumerConfiguration);
             return consumer.StartConsuming();
@@ -243,7 +247,7 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var rawMessage = produceConsumeInterceptor.OnProduce(new RawMessage(messageProperties, body));
+            var rawMessage = produceConsumeInterceptor.OnProduce(new ProducedMessage(messageProperties, body));
 
             if (configuration.PublisherConfirms)
             {
@@ -588,63 +592,7 @@ namespace EasyNetQ
         #endregion
 
         /// <inheritdoc />
-        public async Task<IBasicGetResult<T>> GetMessageAsync<T>(IQueue queue, CancellationToken cancellationToken)
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-
-            var result = await GetMessageAsync(queue, cancellationToken).ConfigureAwait(false);
-            if (result == null)
-            {
-                return null;
-            }
-
-            var message = messageSerializationStrategy.DeserializeMessage(result.Properties, result.Body);
-            if (typeof(T).IsAssignableFrom(message.MessageType))
-            {
-                return new BasicGetResult<T>(new Message<T>((T)message.GetBody(), message.Properties));
-            }
-
-            throw new EasyNetQException("Incorrect message type returned. Expected {0}, but was {1}", typeof(T).Name, message.MessageType.Name);
-        }
-
-        /// <inheritdoc />
-        public async Task<IBasicGetResult> GetMessageAsync(IQueue queue, CancellationToken cancellationToken)
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-
-            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-            var result = await clientCommandDispatcher.InvokeAsync(
-                x => x.BasicGet(queue.Name, true), cts.Token
-            ).ConfigureAwait(false);
-            if (result == null)
-            {
-                return null;
-            }
-
-            var getResult = new BasicGetResult(
-                result.Body.ToArray(),
-                new MessageProperties(result.BasicProperties),
-                new MessageReceivedInfo(
-                    "",
-                    result.DeliveryTag,
-                    result.Redelivered,
-                    result.Exchange,
-                    result.RoutingKey,
-                    queue.Name
-                )
-            );
-
-            if (logger.IsDebugEnabled())
-            {
-                logger.DebugFormat("Got message from queue {queue}", queue.Name);
-            }
-
-            return getResult;
-        }
-
-        /// <inheritdoc />
-        public async Task<uint> GetMessagesCountAsync(IQueue queue, CancellationToken cancellationToken)
+        public async Task<QueueStats> GetQueueStatsAsync(IQueue queue, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(queue, "queue");
 
@@ -656,10 +604,29 @@ namespace EasyNetQ
 
             if (logger.IsDebugEnabled())
             {
-                logger.DebugFormat("{messagesCount} messages in queue {queue}", declareResult.MessageCount, queue.Name);
+                logger.DebugFormat(
+                    "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
+                    declareResult.MessageCount,
+                    declareResult.ConsumerCount,
+                    queue.Name
+                );
             }
 
-            return declareResult.MessageCount;
+            return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
+        }
+
+        /// <inheritdoc />
+        public IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true)
+        {
+            var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
+            return pullingConsumerFactory.CreateConsumer(queue, options);
+        }
+
+        /// <inheritdoc />
+        public IPullingConsumer<T> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
+        {
+            var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
+            return pullingConsumerFactory.CreateConsumer<T>(queue, options);
         }
 
         /// <inheritdoc />

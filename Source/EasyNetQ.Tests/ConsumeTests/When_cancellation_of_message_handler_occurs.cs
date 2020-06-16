@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             ConsumerErrorStrategy.Received().HandleConsumerCancelled(
                Arg.Is<ConsumerExecutionContext>(args => args.Info.ConsumerTag == ConsumerTag &&
-                                                        args.Info.DeliverTag == DeliverTag &&
+                                                        args.Info.DeliveryTag == DeliverTag &&
                                                         args.Info.Exchange == "the_exchange" &&
                                                         args.Body.SequenceEqual(OriginalBody)));
         }

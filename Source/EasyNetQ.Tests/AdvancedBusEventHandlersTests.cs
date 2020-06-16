@@ -53,6 +53,7 @@ namespace EasyNetQ.Tests
                 Substitute.For<IProduceConsumeInterceptor>(),
                 Substitute.For<IMessageSerializationStrategy>(),
                 Substitute.For<IConventions>(),
+                Substitute.For<IPullingConsumerFactory>(),
                 advancedBusEventHandlers
             );
         }

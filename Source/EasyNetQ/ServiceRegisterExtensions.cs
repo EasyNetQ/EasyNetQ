@@ -53,6 +53,7 @@ namespace EasyNetQ
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
+                .Register<IPullingConsumerFactory, PullingConsumerFactory>()
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IPubSub, DefaultPubSub>()
                 .Register<IRpc, DefaultRpc>()
