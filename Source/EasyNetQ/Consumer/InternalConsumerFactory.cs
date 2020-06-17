@@ -8,6 +8,7 @@ namespace EasyNetQ.Consumer
         void OnDisconnected();
     }
 
+    /// <inheritdoc />
     public class InternalConsumerFactory : IInternalConsumerFactory
     {
         private readonly IPersistentConnection connection;
@@ -35,17 +36,20 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
+        /// <inheritdoc />
         public IInternalConsumer CreateConsumer()
         {
             var dispatcher = consumerDispatcherFactory.GetConsumerDispatcher();
             return new InternalConsumer(connection, handlerRunner, dispatcher, conventions, eventBus);
         }
 
+        /// <inheritdoc />
         public void OnDisconnected()
         {
             consumerDispatcherFactory.OnDisconnected();
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             consumerDispatcherFactory.Dispose();

@@ -20,18 +20,20 @@ namespace EasyNetQ.Producer
             declaredExchanges = new AsyncCache<ExchangeKey, IExchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
         }
 
+        /// <inheritdoc />
         public Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
             return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
         }
 
+        /// <inheritdoc />
         public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         {
             var exchangeName = conventions.ExchangeNamingConvention(messageType);
             return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);
         }
 
-        private struct ExchangeKey
+        private readonly struct ExchangeKey
         {
             public ExchangeKey(string name, string type)
             {

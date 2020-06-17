@@ -25,6 +25,7 @@ namespace EasyNetQ.Consumer
             this.consumerErrorStrategy = consumerErrorStrategy;
         }
 
+        /// <inheritdoc />
         public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(context, "context");
@@ -97,6 +98,7 @@ namespace EasyNetQ.Consumer
             return AckStrategies.Ack;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             consumerErrorStrategy.Dispose();

@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
+    /// <summary>
+    ///     Version extensions for IHandlerRegistration
+    /// </summary>
     public static class HandlerRegistrationExtensions
     {
         /// <summary>

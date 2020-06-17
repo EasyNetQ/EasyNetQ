@@ -15,6 +15,7 @@ namespace EasyNetQ.DI.StructureMap
             this.registry.For<IServiceResolver>(Lifecycles.Container).Use<StructureMapResolver>();
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             switch (lifetime)
@@ -30,12 +31,14 @@ namespace EasyNetQ.DI.StructureMap
             }
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             registry.For<TService>(Lifecycles.Singleton).Use(instance);
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             switch (lifetime)
@@ -57,7 +60,7 @@ namespace EasyNetQ.DI.StructureMap
 
             public StructureMapResolver(IContainer container)
             {
-                this.Container = container;
+                Container = container;
             }
 
             public TService Resolve<TService>() where TService : class

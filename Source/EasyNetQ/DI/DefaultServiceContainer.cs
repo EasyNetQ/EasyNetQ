@@ -11,18 +11,21 @@ namespace EasyNetQ.DI
             container.Register<IServiceResolver>(x => new LightInjectResolver(x), new LightInject.PerRequestLifeTime());
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             container.Register<TService, TImplementation>(ToLifetime(lifetime));
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             container.RegisterInstance(instance);
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));

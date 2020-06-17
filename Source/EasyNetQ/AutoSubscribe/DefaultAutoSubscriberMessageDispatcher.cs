@@ -19,6 +19,7 @@ namespace EasyNetQ.AutoSubscribe
         {
         }
 
+        /// <inheritdoc />
         public void Dispatch<TMessage, TConsumer>(TMessage message, CancellationToken cancellationToken = default)
             where TMessage : class
             where TConsumer : class, IConsume<TMessage>
@@ -30,6 +31,7 @@ namespace EasyNetQ.AutoSubscribe
             }
         }
 
+        /// <inheritdoc />
         public async Task DispatchAsync<TMessage, TAsyncConsumer>(TMessage message, CancellationToken cancellationToken = default)
             where TMessage : class
             where TAsyncConsumer : class, IConsumeAsync<TMessage>

@@ -1,4 +1,5 @@
 ﻿using System;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
@@ -17,6 +18,7 @@ namespace EasyNetQ
             this.connectionConfiguration = connectionConfiguration;
         }
 
+        /// <inheritdoc />
         public byte GetDeliveryMode(Type messageType)
         {
             Preconditions.CheckNotNull(messageType, "messageType");

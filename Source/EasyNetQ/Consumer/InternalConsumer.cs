@@ -62,11 +62,13 @@ namespace EasyNetQ.Consumer
         public IQueue Queue { get; }
         public string ConsumerTag { get; private set; }
 
+        /// <inheritdoc />
         public void HandleBasicConsumeOk(string consumerTag)
         {
             ConsumerTag = consumerTag;
         }
 
+        /// <inheritdoc />
         public void HandleBasicDeliver(
             string consumerTag,
             ulong deliveryTag,
@@ -125,11 +127,13 @@ namespace EasyNetQ.Consumer
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
         }
 
+        /// <inheritdoc />
         public void HandleBasicCancelOk(string consumerTag)
         {
             Cancel();
         }
 
+        /// <inheritdoc />
         public void HandleBasicCancel(string consumerTag)
         {
             Cancel();
@@ -139,6 +143,7 @@ namespace EasyNetQ.Consumer
             );
         }
 
+        /// <inheritdoc />
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
             logger.InfoFormat(
@@ -149,9 +154,13 @@ namespace EasyNetQ.Consumer
             );
         }
 
+        /// <inheritdoc />
         public IModel Model { get; }
+
+        /// <inheritdoc />
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;
@@ -200,8 +209,10 @@ namespace EasyNetQ.Consumer
 
         public IModel Model { get; private set; }
 
+        /// <inheritdoc />
         public event Action<IInternalConsumer> Cancelled;
 
+        /// <inheritdoc />
         public StartConsumingStatus StartConsuming(
             ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
             IConsumerConfiguration configuration
@@ -273,6 +284,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
+        /// <inheritdoc />
         public StartConsumingStatus StartConsuming(
             IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
@@ -327,6 +339,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;

@@ -12,6 +12,7 @@ namespace EasyNetQ
         private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();
         private readonly ConcurrentDictionary<string, Type> deSerializedTypes = new ConcurrentDictionary<string, Type>();
 
+        /// <inheritdoc />
         public string Serialize(Type type)
         {
             Preconditions.CheckNotNull(type, "type");
@@ -27,6 +28,7 @@ namespace EasyNetQ
             });
         }
 
+        /// <inheritdoc />
         public Type DeSerialize(string typeName)
         {
             Preconditions.CheckNotBlank(typeName, "typeName");

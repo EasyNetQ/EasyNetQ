@@ -13,6 +13,7 @@ namespace EasyNetQ.DI.SimpleInjector
             this.container.RegisterInstance<IServiceResolver>(this);
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton)
             where TService : class
             where TImplementation : class, TService
@@ -30,12 +31,14 @@ namespace EasyNetQ.DI.SimpleInjector
             }
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             container.RegisterInstance(instance);
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             switch (lifetime)
@@ -51,11 +54,13 @@ namespace EasyNetQ.DI.SimpleInjector
             }
         }
 
+        /// <inheritdoc />
         public TService Resolve<TService>() where TService : class
         {
             return container.GetInstance<TService>();
         }
 
+        /// <inheritdoc />
         public IServiceResolverScope CreateScope()
         {
             return new ServiceResolverScope(this);
