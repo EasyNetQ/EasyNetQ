@@ -36,11 +36,9 @@ namespace EasyNetQ.AutoSubscribe
             where TMessage : class
             where TAsyncConsumer : class, IConsumeAsync<TMessage>
         {
-            using (var scope = resolver.CreateScope())
-            {
-                var asyncConsumer = scope.Resolve<TAsyncConsumer>();
-                await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
-            }
+            using var scope = resolver.CreateScope();
+            var asyncConsumer = scope.Resolve<TAsyncConsumer>();
+            await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
         }
 
         private class ActivatorBasedResolver : IServiceResolver
