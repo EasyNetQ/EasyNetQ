@@ -24,6 +24,7 @@ namespace EasyNetQ.MultipleExchange
             declaredExchanges = new AsyncCache<ExchangeKey, IExchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
         }
 
+        /// <inheritdoc />
         public async Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         {
             var sourceExchangeName = conventions.ExchangeNamingConvention(messageType);
@@ -42,12 +43,13 @@ namespace EasyNetQ.MultipleExchange
             return sourceExchange;
         }
 
+        /// <inheritdoc />
         public Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
             return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
         }
 
-        private struct ExchangeKey
+        private readonly struct ExchangeKey
         {
             public ExchangeKey(string name, string type)
             {

@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
@@ -36,6 +37,7 @@ namespace EasyNetQ
         ConsumerTagConvention ConsumerTagConvention { get; set; }
     }
 
+    /// <inheritdoc />
     public class Conventions : IConventions
     {
         public Conventions(ITypeNameSerializer typeNameSerializer)
@@ -88,17 +90,34 @@ namespace EasyNetQ
             return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
         }
 
-		public ExchangeNameConvention ExchangeNamingConvention { get; set; }
-		public TopicNameConvention TopicNamingConvention { get; set; }
+        /// <inheritdoc />
+        public ExchangeNameConvention ExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
+        public TopicNameConvention TopicNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public QueueNameConvention QueueNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
 
+        /// <inheritdoc />
         public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
 
+        /// <inheritdoc />
         public ConsumerTagConvention ConsumerTagConvention { get; set; }
 	}
 }

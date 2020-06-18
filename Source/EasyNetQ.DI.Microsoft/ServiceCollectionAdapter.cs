@@ -14,6 +14,7 @@ namespace EasyNetQ.DI.Microsoft
             this.serviceCollection.AddSingleton<IServiceResolver, ServiceProviderAdapter>();
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             switch (lifetime)
@@ -31,12 +32,14 @@ namespace EasyNetQ.DI.Microsoft
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             serviceCollection.AddSingleton(instance);
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             switch (lifetime)
@@ -76,7 +79,7 @@ namespace EasyNetQ.DI.Microsoft
 
         private class MicrosoftServiceResolverScope : IServiceResolverScope
         {
-            private IServiceScope serviceScope;
+            private readonly IServiceScope serviceScope;
 
             public MicrosoftServiceResolverScope(IServiceProvider serviceProvider)
             {

@@ -253,6 +253,7 @@ namespace EasyNetQ
         /// <summary>
         /// Gets stats for the given queue
         /// </summary>
+        /// <param name="bus">The bus instance</param>
         /// <param name="queue">The queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The stats of the queue</returns>

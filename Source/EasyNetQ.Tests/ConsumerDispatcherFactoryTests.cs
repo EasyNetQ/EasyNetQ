@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests
         {
             var parser = new ConnectionStringParser();
             var configuration = parser.Parse("host=localhost");
-            dispatcherFactory = new ConsumerDispatcherFactory(configuration);
+            dispatcherFactory = new ConsumerDispatcherFactory();
         }
 
         public void Dispose()

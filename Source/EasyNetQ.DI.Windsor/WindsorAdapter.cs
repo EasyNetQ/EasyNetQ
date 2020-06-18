@@ -19,6 +19,7 @@ namespace EasyNetQ.DI.Windsor
                           .LifestyleTransient());
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             var registration = Component.For<TService>()
@@ -30,6 +31,7 @@ namespace EasyNetQ.DI.Windsor
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             var registration = Component.For<TService>()
@@ -41,6 +43,7 @@ namespace EasyNetQ.DI.Windsor
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             var registration = Component.For<TService>()

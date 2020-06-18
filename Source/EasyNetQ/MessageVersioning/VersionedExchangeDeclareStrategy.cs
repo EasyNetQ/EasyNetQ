@@ -24,11 +24,13 @@ namespace EasyNetQ.MessageVersioning
             declaredExchanges = new AsyncCache<ExchangeKey, IExchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
         }
 
+        /// <inheritdoc />
         public Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
         {
             return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
         }
 
+        /// <inheritdoc />
         public Task<IExchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         {
             var messageVersions = new MessageVersionStack(messageType);

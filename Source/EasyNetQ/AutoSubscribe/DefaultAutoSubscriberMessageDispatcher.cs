@@ -19,6 +19,7 @@ namespace EasyNetQ.AutoSubscribe
         {
         }
 
+        /// <inheritdoc />
         public void Dispatch<TMessage, TConsumer>(TMessage message, CancellationToken cancellationToken = default)
             where TMessage : class
             where TConsumer : class, IConsume<TMessage>
@@ -30,15 +31,14 @@ namespace EasyNetQ.AutoSubscribe
             }
         }
 
+        /// <inheritdoc />
         public async Task DispatchAsync<TMessage, TAsyncConsumer>(TMessage message, CancellationToken cancellationToken = default)
             where TMessage : class
             where TAsyncConsumer : class, IConsumeAsync<TMessage>
         {
-            using (var scope = resolver.CreateScope())
-            {
-                var asyncConsumer = scope.Resolve<TAsyncConsumer>();
-                await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
-            }
+            using var scope = resolver.CreateScope();
+            var asyncConsumer = scope.Resolve<TAsyncConsumer>();
+            await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
         }
 
         private class ActivatorBasedResolver : IServiceResolver

@@ -13,6 +13,7 @@ namespace EasyNetQ.Consumer
             this.onCancellation = onCancellation;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             onCancellation();

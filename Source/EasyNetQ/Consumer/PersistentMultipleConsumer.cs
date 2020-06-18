@@ -29,7 +29,8 @@ namespace EasyNetQ.Consumer
             IPersistentConnection connection,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
             Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
             Preconditions.CheckNotNull(connection, nameof(connection));

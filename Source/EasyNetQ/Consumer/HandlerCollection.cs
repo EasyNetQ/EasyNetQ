@@ -19,6 +19,7 @@ namespace EasyNetQ.Consumer
             ThrowOnNoMatchingHandler = true;
         }
 
+        /// <inheritdoc />
         public IHandlerRegistration Add<T>(Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler)
         {
             Preconditions.CheckNotNull(handler, "handler");
@@ -32,11 +33,13 @@ namespace EasyNetQ.Consumer
             return this;
         }
 
+        /// <inheritdoc />
         public Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> GetHandler<T>()
         {
             return GetHandler(typeof(T));
         }
 
+        /// <inheritdoc />
         public Func<IMessage, MessageReceivedInfo, CancellationToken, Task> GetHandler(Type messageType)
         {
             if (handlers.TryGetValue(messageType, out var func))
@@ -61,6 +64,7 @@ namespace EasyNetQ.Consumer
             return (m, i, c) => Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public bool ThrowOnNoMatchingHandler { get; set; }
     }
 }

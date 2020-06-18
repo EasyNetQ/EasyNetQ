@@ -24,6 +24,7 @@ namespace EasyNetQ.Logging
         {
         }
 
+        /// <inheritdoc />
         public Logger GetLogger(string name)
         {
             return (logLevel, messageFunc, exception, formatParameters) =>
@@ -69,11 +70,13 @@ namespace EasyNetQ.Logging
             Console.WriteLine("[{0:HH:mm:ss} {1}] {2} {3}", DateTime.UtcNow, logLevel, name, formattedMessage);
         }
 
+        /// <inheritdoc />
         public IDisposable OpenNestedContext(string message)
         {
             return NullDisposable.Instance;
         }
 
+        /// <inheritdoc />
         public IDisposable OpenMappedContext(string key, object value, bool destructure = false)
         {
             return NullDisposable.Instance;

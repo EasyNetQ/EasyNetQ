@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public class ConsumerFactory : IConsumerFactory
     {
         private readonly IPersistentConnection connection;
@@ -18,6 +19,12 @@ namespace EasyNetQ.Consumer
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
 
+        /// <summary>
+        ///     Creates ConsumerFactory
+        /// </summary>
+        /// <param name="connection">The connection</param>
+        /// <param name="internalConsumerFactory">The internal consumer factory</param>
+        /// <param name="eventBus">The event bus</param>
         public ConsumerFactory(
             IPersistentConnection connection,
             IInternalConsumerFactory internalConsumerFactory,
@@ -34,6 +41,7 @@ namespace EasyNetQ.Consumer
             eventBus.Subscribe<StoppedConsumingEvent>(stoppedConsumingEvent => consumers.Remove(stoppedConsumingEvent.Consumer));
         }
 
+        /// <inheritdoc />
         public IConsumer CreateConsumer(
             IQueue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
@@ -49,9 +57,11 @@ namespace EasyNetQ.Consumer
             return consumer;
         }
 
+        /// <inheritdoc />
         public IConsumer CreateConsumer(
             ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
-            IConsumerConfiguration configuration)
+            IConsumerConfiguration configuration
+        )
         {
             if (configuration.IsExclusive || queueConsumerPairs.Any(x => x.Item1.IsExclusive))
                 throw new NotSupportedException("Exclusive multiple consuming is not supported.");
@@ -59,9 +69,11 @@ namespace EasyNetQ.Consumer
             return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
-            foreach (var consumer in consumers) consumer.Dispose();
+            foreach (var consumer in consumers)
+                consumer.Dispose();
 
             internalConsumerFactory.Dispose();
         }

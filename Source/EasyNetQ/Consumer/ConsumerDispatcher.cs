@@ -5,6 +5,7 @@ using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public class ConsumerDispatcher : IConsumerDispatcher
     {
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
@@ -12,10 +13,11 @@ namespace EasyNetQ.Consumer
         private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly BlockingCollection<Action> transientActions = new BlockingCollection<Action>();
 
-        public ConsumerDispatcher(ConnectionConfiguration configuration)
+        /// <summary>
+        ///     Creates ConsumerDispatcher
+        /// </summary>
+        public ConsumerDispatcher()
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-
             using (ExecutionContext.SuppressFlow())
             {
                 var thread = new Thread(_ =>
@@ -56,6 +58,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
+        /// <inheritdoc />
         public void QueueAction(Action action, bool surviveDisconnect = false)
         {
             Preconditions.CheckNotNull(action, "action");
@@ -69,6 +72,7 @@ namespace EasyNetQ.Consumer
                 transientActions.Add(action);
         }
 
+        /// <inheritdoc />
         public void OnDisconnected()
         {
             var count = 0;
@@ -81,6 +85,7 @@ namespace EasyNetQ.Consumer
                 logger.Debug("{count} queued transient actions were thrown", count);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             durableActions.CompleteAdding();

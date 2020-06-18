@@ -24,6 +24,7 @@ namespace EasyNetQ.Interception
             return serviceRegister;
         }
 
+        /// <inheritdoc />
         public void Add(IProduceConsumeInterceptor interceptor)
         {
             compositeInterceptor.Add(interceptor);

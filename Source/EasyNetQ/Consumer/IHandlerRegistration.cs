@@ -22,6 +22,7 @@ namespace EasyNetQ.Consumer
         bool ThrowOnNoMatchingHandler { get; set; }
     }
 
+    /// <inheritdoc />
     public interface IHandlerCollection : IHandlerRegistration
     {
         /// <summary>

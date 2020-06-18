@@ -42,7 +42,8 @@ namespace EasyNetQ.Consumer
             IConventions conventions,
             ITypeNameSerializer typeNameSerializer,
             IErrorMessageSerializer errorMessageSerializer,
-            ConnectionConfiguration connectionConfiguration)
+            ConnectionConfiguration configuration
+        )
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(serializer, "serializer");
@@ -54,9 +55,10 @@ namespace EasyNetQ.Consumer
             this.conventions = conventions;
             this.typeNameSerializer = typeNameSerializer;
             this.errorMessageSerializer = errorMessageSerializer;
-            this.configuration = connectionConfiguration;
+            this.configuration = configuration;
         }
 
+        /// <inheritdoc />
         public virtual AckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception)
         {
             Preconditions.CheckNotNull(context, "context");
@@ -82,23 +84,21 @@ namespace EasyNetQ.Consumer
 
             try
             {
-                using (var model = connection.CreateModel())
-                {
-                    if (configuration.PublisherConfirms) model.ConfirmSelect();
+                using var model = connection.CreateModel();
+                if (configuration.PublisherConfirms) model.ConfirmSelect();
 
-                    var errorExchange = DeclareErrorExchangeWithQueue(model, context);
+                var errorExchange = DeclareErrorExchangeWithQueue(model, context);
 
-                    var messageBody = CreateErrorMessage(context, exception);
-                    var properties = model.CreateBasicProperties();
-                    properties.Persistent = true;
-                    properties.Type = typeNameSerializer.Serialize(typeof(Error));
+                var messageBody = CreateErrorMessage(context, exception);
+                var properties = model.CreateBasicProperties();
+                properties.Persistent = true;
+                properties.Type = typeNameSerializer.Serialize(typeof(Error));
 
-                    model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
+                model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
 
-                    if (!configuration.PublisherConfirms) return AckStrategies.Ack;
+                if (!configuration.PublisherConfirms) return AckStrategies.Ack;
 
-                    return model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
-                }
+                return model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
             }
             catch (BrokerUnreachableException unreachableException)
             {
@@ -125,11 +125,13 @@ namespace EasyNetQ.Consumer
             return AckStrategies.NackWithRequeue;
         }
 
+        /// <inheritdoc />
         public virtual AckStrategy HandleConsumerCancelled(ConsumerExecutionContext context)
         {
             return AckStrategies.NackWithRequeue;
         }
 
+        /// <inheritdoc />
         public virtual void Dispose()
         {
             if (disposed) return;
@@ -142,14 +144,8 @@ namespace EasyNetQ.Consumer
 
         private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string routingKey)
         {
-            model.QueueDeclare(
-                queue: queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
-
-            model.ExchangeDeclare(exchangeName, ExchangeType.Direct, durable: true);
+            model.QueueDeclare(queueName, true, false, false, null);
+            model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
             model.QueueBind(queueName, exchangeName, routingKey);
         }
 
@@ -201,7 +197,7 @@ namespace EasyNetQ.Consumer
 
                 error.BasicProperties.Headers = context.Properties.Headers.ToDictionary(
                     kvp => kvp.Key,
-                    kvp => kvp.Value is byte[] ? Encoding.UTF8.GetString((byte[])kvp.Value) : kvp.Value);
+                    kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value);
             }
 
             return serializer.MessageToBytes(typeof(Error), error);
