@@ -47,7 +47,7 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var sendConfiguration = new SendConfiguration();
+            var sendConfiguration = new SendConfiguration(configuration.PublisherConfirms);
             configure(sendConfiguration);
 
             var properties = new MessageProperties();
@@ -56,7 +56,11 @@ namespace EasyNetQ
             properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
             await advancedBus.PublishAsync(
-                Exchange.GetDefault(), queue, false, new Message<T>(message, properties), cts.Token
+                Exchange.GetDefault(),
+                new Message<T>(message, properties),
+                c => c.WithRoutingKey(queue)
+                    .WithPublisherConfirms(sendConfiguration.PublisherConfirms),
+                cts.Token
             ).ConfigureAwait(false);
         }
 

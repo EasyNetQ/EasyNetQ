@@ -200,6 +200,77 @@ namespace EasyNetQ
         /// <param name="messageProperties">The message properties</param>
         /// <param name="body">The message body</param>
         /// <param name="cancellationToken">The cancellation token</param>
+        public static Task PublishAsync(
+            this IAdvancedBus bus,
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            MessageProperties messageProperties,
+            byte[] body,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.PublishAsync(
+                exchange,
+                messageProperties,
+                body,
+                c => c.WithRoutingKey(routingKey).AsMandatory(mandatory),
+                cancellationToken
+            );
+        }
+
+        /// <summary>
+        ///     Publish a message as a .NET type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="exchange">The exchange to publish to</param>
+        /// <param name="routingKey">
+        ///     The routing key for the message. The routing key is used for routing messages depending on the
+        ///     exchange configuration.
+        /// </param>
+        /// <param name="mandatory">
+        ///     This flag tells the server how to react if the message cannot be routed to a queue.
+        ///     If this flag is true, the server will return an unroutable message with a Return method.
+        ///     If this flag is false, the server silently drops the message.
+        /// </param>
+        /// <param name="message">The message to publish</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        public static Task PublishAsync<T>(
+            this IAdvancedBus bus,
+            IExchange exchange,
+            string routingKey,
+            bool mandatory,
+            IMessage<T> message,
+            CancellationToken cancellationToken = default
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.PublishAsync(
+                exchange, message, c => c.WithRoutingKey(routingKey).AsMandatory(mandatory), cancellationToken
+            );
+        }
+
+        /// <summary>
+        ///     Publish a message as a byte array
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="exchange">The exchange to publish to</param>
+        /// <param name="routingKey">
+        ///     The routing key for the message. The routing key is used for routing messages depending on the
+        ///     exchange configuration.
+        /// </param>
+        /// <param name="mandatory">
+        ///     This flag tells the server how to react if the message cannot be routed to a queue.
+        ///     If this flag is true, the server will return an unroutable message with a Return method.
+        ///     If this flag is false, the server silently drops the message.
+        /// </param>
+        /// <param name="messageProperties">The message properties</param>
+        /// <param name="body">The message body</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         public static void Publish(
             this IAdvancedBus bus,
             IExchange exchange,

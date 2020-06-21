@@ -199,57 +199,59 @@ namespace EasyNetQ
         /// <inheritdoc />
         public virtual Task PublishAsync(
             IExchange exchange,
-            string routingKey,
-            bool mandatory,
             IMessage message,
+            Action<IAdvancedPublishConfiguration> configure,
             CancellationToken cancellationToken
         )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken);
+            return PublishAsync(
+                exchange, serializedMessage.Properties, serializedMessage.Body, configure, cancellationToken
+            );
         }
 
         /// <inheritdoc />
         public virtual Task PublishAsync<T>(
             IExchange exchange,
-            string routingKey,
-            bool mandatory,
             IMessage<T> message,
+            Action<IAdvancedPublishConfiguration> configure,
             CancellationToken cancellationToken
         )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(configure, "configure");
 
             var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken);
+            return PublishAsync(
+                exchange, serializedMessage.Properties, serializedMessage.Body, configure, cancellationToken
+            );
         }
 
         /// <inheritdoc />
         public virtual async Task PublishAsync(
             IExchange exchange,
-            string routingKey,
-            bool mandatory,
             MessageProperties messageProperties,
             byte[] body,
+            Action<IAdvancedPublishConfiguration> configure,
             CancellationToken cancellationToken
         )
         {
             Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckNotNull(configure, "configure");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+            var publishConfiguration = new AdvancedPublishConfiguration("", false, configuration.PublisherConfirms);
             var rawMessage = produceConsumeInterceptor.OnProduce(new ProducedMessage(messageProperties, body));
 
-            if (configuration.PublisherConfirms)
+            if (publishConfiguration.PublisherConfirms)
             {
                 while (true)
                 {
@@ -261,7 +263,13 @@ namespace EasyNetQ
                         rawMessage.Properties.CopyTo(properties);
                         try
                         {
-                            model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
+                            model.BasicPublish(
+                                exchange.Name,
+                                publishConfiguration.RoutingKey,
+                                publishConfiguration.Mandatory,
+                                properties,
+                                rawMessage.Body
+                            );
                         }
                         catch (Exception)
                         {
@@ -287,18 +295,27 @@ namespace EasyNetQ
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
-                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
+                    model.BasicPublish(
+                        exchange.Name,
+                        publishConfiguration.RoutingKey,
+                        publishConfiguration.Mandatory,
+                        properties,
+                        rawMessage.Body
+                    );
                 }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
             }
 
-            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body));
+            var @event = new PublishedMessageEvent(
+                exchange.Name, publishConfiguration.RoutingKey, rawMessage.Properties, rawMessage.Body
+            );
+            eventBus.Publish(@event);
 
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat(
                     "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
                     exchange.Name,
-                    routingKey,
+                    publishConfiguration.RoutingKey,
                     messageProperties.CorrelationId
                 );
             }
