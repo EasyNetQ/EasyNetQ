@@ -54,7 +54,9 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            var publishConfiguration = new PublishConfiguration(
+                conventions.TopicNamingConvention(typeof(T)), configuration.PublisherConfirms
+            );
             configure(publishConfiguration);
 
             var messageType = typeof(T);
@@ -70,7 +72,11 @@ namespace EasyNetQ
                 messageType, ExchangeType.Topic, cts.Token
             ).ConfigureAwait(false);
             await advancedBus.PublishAsync(
-                exchange, publishConfiguration.Topic, false, advancedMessage, cts.Token
+                exchange,
+                advancedMessage,
+                c => c.WithRoutingKey(publishConfiguration.Topic)
+                    .WithPublisherConfirms(publishConfiguration.PublisherConfirms),
+                cts.Token
             ).ConfigureAwait(false);
         }
 

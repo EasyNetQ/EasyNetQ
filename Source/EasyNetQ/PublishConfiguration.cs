@@ -28,15 +28,18 @@
         /// <param name="expires">The TTL to set in milliseconds</param>
         /// <returns>IPublishConfiguration</returns>
         IPublishConfiguration WithExpires(int expires);
+
+        IPublishConfiguration WithPublisherConfirms(bool publisherConfirms = true);
     }
 
     internal class PublishConfiguration : IPublishConfiguration
     {
-        public PublishConfiguration(string defaultTopic)
+        public PublishConfiguration(string defaultTopic, bool publisherConfirms)
         {
             Preconditions.CheckNotNull(defaultTopic, "defaultTopic");
 
             Topic = defaultTopic;
+            PublisherConfirms = publisherConfirms;
         }
 
         public IPublishConfiguration WithPriority(byte priority)
@@ -59,8 +62,15 @@
             return this;
         }
 
+        public IPublishConfiguration WithPublisherConfirms(bool publisherConfirms = true)
+        {
+            PublisherConfirms = publisherConfirms;
+            return this;
+        }
+
         public byte? Priority { get; private set; }
         public string Topic { get; private set; }
         public int? Expires { get; private set; }
+        public bool PublisherConfirms { get; private set; }
     }
 }

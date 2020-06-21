@@ -79,7 +79,8 @@ namespace EasyNetQ
             var requestType = typeof(TRequest);
             var requestConfiguration = new RequestConfiguration(
                 conventions.RpcRoutingKeyNamingConvention(requestType),
-                configuration.Timeout
+                configuration.Timeout,
+                configuration.PublisherConfirms
             );
             configure(requestConfiguration);
 
@@ -90,12 +91,13 @@ namespace EasyNetQ
             RegisterResponseActions(correlationId, tcs);
             using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
-            var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
+            var replyToQueue = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
             var routingKey = requestConfiguration.QueueName;
             var expiration = requestConfiguration.Expiration;
             var priority = requestConfiguration.Priority;
+            var publisherConfirms = requestConfiguration.PublisherConfirms;
             await RequestPublishAsync(
-                request, routingKey, queueName, correlationId, expiration, priority, cts.Token
+                request, routingKey, replyToQueue, correlationId, expiration, priority, publisherConfirms, cts.Token
             ).ConfigureAwait(false);
             tcs.AttachCancellation(cts.Token);
             return await tcs.Task.ConfigureAwait(false);
@@ -219,10 +221,11 @@ namespace EasyNetQ
         protected virtual async Task RequestPublishAsync<TRequest>(
             TRequest request,
             string routingKey,
-            string returnQueueName,
+            string replyToQueue,
             string correlationId,
             TimeSpan expiration,
             byte? priority,
+            bool publisherConfirms,
             CancellationToken cancellationToken
         )
         {
@@ -235,7 +238,7 @@ namespace EasyNetQ
 
             var properties = new MessageProperties
             {
-                ReplyTo = returnQueueName,
+                ReplyTo = replyToQueue,
                 CorrelationId = correlationId,
                 DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
             };
@@ -245,8 +248,12 @@ namespace EasyNetQ
                 properties.Priority = priority.Value;
 
             var requestMessage = new Message<TRequest>(request, properties);
-            await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken)
-                .ConfigureAwait(false);
+            await advancedBus.PublishAsync(
+                exchange,
+                requestMessage,
+                c => c.WithRoutingKey(routingKey).WithPublisherConfirms(publisherConfirms),
+                cancellationToken
+            ).ConfigureAwait(false);
         }
 
         private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
@@ -344,7 +351,7 @@ namespace EasyNetQ
             }
         }
 
-        protected struct RpcKey
+        private readonly struct RpcKey
         {
             public RpcKey(Type requestType, Type responseType)
             {
@@ -356,7 +363,7 @@ namespace EasyNetQ
             public Type ResponseType { get; }
         }
 
-        protected struct ResponseAction
+        private readonly struct ResponseAction
         {
             public ResponseAction(Action<object> onSuccess, Action onFailure)
             {
@@ -368,7 +375,7 @@ namespace EasyNetQ
             public Action OnFailure { get; }
         }
 
-        protected struct ResponseSubscription
+        private readonly struct ResponseSubscription
         {
             public ResponseSubscription(string queueName, IDisposable subscription)
             {

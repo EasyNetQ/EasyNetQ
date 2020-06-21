@@ -92,9 +92,8 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync(
             IExchange exchange,
-            string routingKey,
-            bool mandatory,
             IMessage message,
+            Action<IAdvancedPublishConfiguration> configure,
             CancellationToken cancellationToken = default
         );
 
@@ -117,9 +116,8 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync<T>(
             IExchange exchange,
-            string routingKey,
-            bool mandatory,
             IMessage<T> message,
+            Action<IAdvancedPublishConfiguration> configure,
             CancellationToken cancellationToken = default
         );
 
@@ -142,10 +140,9 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync(
             IExchange exchange,
-            string routingKey,
-            bool mandatory,
             MessageProperties messageProperties,
             byte[] body,
+            Action<IAdvancedPublishConfiguration> configure,
             CancellationToken cancellationToken = default
         );
 

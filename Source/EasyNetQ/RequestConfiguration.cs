@@ -27,14 +27,17 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="queueName">The queue name</param>
         IRequestConfiguration WithQueueName(string queueName);
+
+        IRequestConfiguration WithPublisherConfirms(bool publisherConfirms = true);
     }
 
     internal class RequestConfiguration : IRequestConfiguration
     {
-        public RequestConfiguration(string queueName, TimeSpan expiration)
+        public RequestConfiguration(string queueName, TimeSpan expiration, bool publisherConfirms)
         {
             QueueName = queueName;
             Expiration = expiration;
+            PublisherConfirms = publisherConfirms;
         }
 
         public string QueueName { get; private set; }
@@ -58,5 +61,13 @@ namespace EasyNetQ
             QueueName = queueName;
             return this;
         }
+
+        public IRequestConfiguration WithPublisherConfirms(bool publisherConfirms = true)
+        {
+            PublisherConfirms = publisherConfirms;
+            return this;
+        }
+
+        public bool PublisherConfirms { get; set; }
     }
 }

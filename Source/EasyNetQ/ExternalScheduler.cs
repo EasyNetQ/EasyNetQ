@@ -66,7 +66,9 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+            var publishConfiguration = new FuturePublishConfiguration(
+                conventions.TopicNamingConvention(typeof(T)), configuration.PublisherConfirms
+            );
             configure(publishConfiguration);
 
             var scheduleMeType = typeof(ScheduleMe);
@@ -97,9 +99,9 @@ namespace EasyNetQ
             scheduleMeProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(scheduleMeType);
             await advancedBus.PublishAsync(
                 scheduleMeExchange,
-                conventions.TopicNamingConvention(scheduleMeType),
-                false,
                 new Message<ScheduleMe>(scheduleMe, scheduleMeProperties),
+                c => c.WithRoutingKey(publishConfiguration.Topic)
+                    .WithPublisherConfirms(publishConfiguration.PublisherConfirms),
                 cts.Token
             ).ConfigureAwait(false);
         }
