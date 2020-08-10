@@ -24,10 +24,10 @@ namespace EasyNetQ.Consumer
                     while (!cancellation.IsCancellationRequested)
                         try
                         {
-                            BlockingCollection<Action>.TakeFromAny(
-                                blockingCollections, out var action, cancellation.Token
-                            );
-                            action();
+                            if (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action, -1, cancellation.Token) >= 0)
+                            {
+                                action();
+                            }
                         }
                         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
                         {
