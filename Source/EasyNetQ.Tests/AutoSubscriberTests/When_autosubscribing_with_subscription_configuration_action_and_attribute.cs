@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
                 {
                         ConfigureSubscriptionConfiguration =
-                                c => c.WithAutoDelete(false)
+                            (c, info) => c.WithAutoDelete(false)
                                     .WithExpires(11)
                                     .WithPrefetchCount(11)
                                     .WithPriority(11)
