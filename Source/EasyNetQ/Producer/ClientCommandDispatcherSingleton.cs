@@ -101,8 +101,8 @@ namespace EasyNetQ.Producer
                 {
                     try
                     {
-                        var channelAction = queue.Take(cancellation.Token);
-                        channelAction();
+                        if (queue.TryTake(out var channelAction, -1, cancellation.Token))
+                            channelAction();
                     }
                     catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
                     {
