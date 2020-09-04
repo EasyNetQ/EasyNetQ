@@ -24,7 +24,7 @@ namespace EasyNetQ.Consumer
                     while (!cancellation.IsCancellationRequested)
                         try
                         {
-                            if (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action, -1, cancellation.Token) >= 0)
+                            if (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action, Timeout.Infinite, cancellation.Token) >= 0)
                             {
                                 action();
                             }
