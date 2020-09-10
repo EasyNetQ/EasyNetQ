@@ -54,21 +54,21 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
 
-            if(contentTypePresent)      basicProperties.ContentType      =  ContentType; 
-            if(contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding; 
-            if(deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode; 
-            if(priorityPresent)         basicProperties.Priority         =  Priority; 
-            if(correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId; 
-            if(replyToPresent)          basicProperties.ReplyTo          =  ReplyTo; 
-            if(expirationPresent)       basicProperties.Expiration       =  Expiration; 
-            if(messageIdPresent)        basicProperties.MessageId        =  MessageId; 
-            if(timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp); 
-            if(typePresent)             basicProperties.Type             =  Type; 
-            if(userIdPresent)           basicProperties.UserId           =  UserId; 
-            if(appIdPresent)            basicProperties.AppId            =  AppId; 
+            if(contentTypePresent)      basicProperties.ContentType      =  ContentType;
+            if(contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding;
+            if(deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode;
+            if(priorityPresent)         basicProperties.Priority         =  Priority;
+            if(correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId;
+            if(replyToPresent)          basicProperties.ReplyTo          =  ReplyTo;
+            if(expirationPresent)       basicProperties.Expiration       =  Expiration;
+            if(messageIdPresent)        basicProperties.MessageId        =  MessageId;
+            if(timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp);
+            if(typePresent)             basicProperties.Type             =  Type;
+            if(userIdPresent)           basicProperties.UserId           =  UserId;
+            if(appIdPresent)            basicProperties.AppId            =  AppId;
             if(clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
 
-            if (headersPresent)
+            if (headersPresent && Headers.Any())
             {
                 basicProperties.Headers = new Dictionary<string, object>(Headers);
             }
@@ -91,7 +91,7 @@ namespace EasyNetQ
             if (appIdPresent) copy.AppId = AppId;
             if (clusterIdPresent) copy.ClusterId = ClusterId;
 
-            if (headersPresent)
+            if (headersPresent && Headers.Any())
             {
                 copy.Headers = new Dictionary<string, object>(Headers);
             }
@@ -117,7 +117,7 @@ namespace EasyNetQ
         private string contentType;
 
         /// <summary>
-        /// MIME Content type 
+        /// MIME Content type
         /// </summary>
         public string ContentType
         {
@@ -128,7 +128,7 @@ namespace EasyNetQ
         private string contentEncoding;
 
         /// <summary>
-        /// MIME content encoding 
+        /// MIME content encoding
         /// </summary>
         public string ContentEncoding
         {
@@ -139,7 +139,7 @@ namespace EasyNetQ
         private IDictionary<string, object> headers;
 
         /// <summary>
-        /// message header field table 
+        /// message header field table
         /// </summary>
         public IDictionary<string, object> Headers
         {
@@ -150,7 +150,7 @@ namespace EasyNetQ
         private byte deliveryMode;
 
         /// <summary>
-        /// non-persistent (1) or persistent (2) 
+        /// non-persistent (1) or persistent (2)
         /// </summary>
         public byte DeliveryMode
         {
@@ -161,7 +161,7 @@ namespace EasyNetQ
         private byte priority;
 
         /// <summary>
-        /// message priority, 0 to 9 
+        /// message priority, 0 to 9
         /// </summary>
         public byte Priority
         {
@@ -172,7 +172,7 @@ namespace EasyNetQ
         private string correlationId;
 
         /// <summary>
-        /// application correlation identifier 
+        /// application correlation identifier
         /// </summary>
         public string CorrelationId
         {
@@ -183,7 +183,7 @@ namespace EasyNetQ
         private string replyTo;
 
         /// <summary>
-        /// destination to reply to 
+        /// destination to reply to
         /// </summary>
         public string ReplyTo
         {
@@ -194,7 +194,7 @@ namespace EasyNetQ
         private string expiration;
 
         /// <summary>
-        /// message expiration specification 
+        /// message expiration specification
         /// </summary>
         public string Expiration
         {
@@ -205,7 +205,7 @@ namespace EasyNetQ
         private string messageId;
 
         /// <summary>
-        /// application message identifier 
+        /// application message identifier
         /// </summary>
         public string MessageId
         {
@@ -216,7 +216,7 @@ namespace EasyNetQ
         private long timestamp;
 
         /// <summary>
-        /// message timestamp 
+        /// message timestamp
         /// </summary>
         public long Timestamp
         {
@@ -227,7 +227,7 @@ namespace EasyNetQ
         private string type;
 
         /// <summary>
-        /// message type name 
+        /// message type name
         /// </summary>
         public string Type
         {
@@ -238,7 +238,7 @@ namespace EasyNetQ
         private string userId;
 
         /// <summary>
-        /// creating user id 
+        /// creating user id
         /// </summary>
         public string UserId
         {
@@ -249,7 +249,7 @@ namespace EasyNetQ
         private string appId;
 
         /// <summary>
-        /// creating application id 
+        /// creating application id
         /// </summary>
         public string AppId
         {
@@ -260,7 +260,7 @@ namespace EasyNetQ
         private string clusterId;
 
         /// <summary>
-        /// intra-cluster routing identifier 
+        /// intra-cluster routing identifier
         /// </summary>
         public string ClusterId
         {
