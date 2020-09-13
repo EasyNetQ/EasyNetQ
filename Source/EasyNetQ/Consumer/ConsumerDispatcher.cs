@@ -22,11 +22,11 @@ namespace EasyNetQ.Consumer
             {
                 var thread = new Thread(_ =>
                 {
-                    var blockingCollections = new[] {durableActions, transientActions};
+                    var blockingCollections = new[] { durableActions, transientActions };
                     while (!cancellation.IsCancellationRequested)
                         try
                         {
-                            if (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action, -1, cancellation.Token) >= 0)
+                            if (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action, Timeout.Infinite, cancellation.Token) >= 0)
                             {
                                 action();
                             }

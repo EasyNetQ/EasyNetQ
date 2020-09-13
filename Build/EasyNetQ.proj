@@ -68,15 +68,15 @@
             <TestProjects Include="$(Source)\EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj" />
             <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj" />
             <TestProjects Include="$(Source)\EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj" />
-            <TestProjects Include="$(Source)\EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj" />
-        </ItemGroup>
+            <!--<TestProjects Include="$(Source)\EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj" />-->
+</ItemGroup>
 
-        <Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
-              Command='dotnet test --configuration $(Configuration) --no-build --filter "(Category!=Explicit) &#038; (Category!=Integration)"'
-              ContinueOnError="ErrorAndContinue" />
-    </Target>
+<Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
+      Command='dotnet test --configuration $(Configuration) --no-build --filter "(Category!=Explicit) &#038; (Category!=Integration)"'
+      ContinueOnError="ErrorAndContinue" />
+</Target>
 
-    <!-- Packaging -->
+<!-- Packaging -->
     <Target Name="Package" DependsOnTargets="Test">
         <PropertyGroup>
             <NuGetPackageDirectory>$(Package)</NuGetPackageDirectory>

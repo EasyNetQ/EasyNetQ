@@ -65,7 +65,7 @@ namespace EasyNetQ
             if (appIdPresent)            basicProperties.AppId            =  AppId;
             if (clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
 
-            if (headersPresent)
+            if (headersPresent && Headers.Any())
             {
                 basicProperties.Headers = new Dictionary<string, object>(Headers);
             }
@@ -88,7 +88,7 @@ namespace EasyNetQ
             if (appIdPresent) copy.AppId = AppId;
             if (clusterIdPresent) copy.ClusterId = ClusterId;
 
-            if (headersPresent)
+            if (headersPresent && Headers.Any())
             {
                 copy.Headers = new Dictionary<string, object>(Headers);
             }
