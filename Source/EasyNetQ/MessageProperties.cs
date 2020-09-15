@@ -41,7 +41,7 @@ namespace EasyNetQ
             if (basicProperties.IsAppIdPresent())               AppId               = basicProperties.AppId;
             if (basicProperties.IsClusterIdPresent())           ClusterId           = basicProperties.ClusterId;
 
-            if (basicProperties.IsHeadersPresent())
+            if (basicProperties.IsHeadersPresent() && basicProperties.Headers != null)
             {
                 foreach (var header in basicProperties.Headers)
                 {
