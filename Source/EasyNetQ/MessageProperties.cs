@@ -84,19 +84,19 @@ namespace EasyNetQ
         {
             var copy = new MessageProperties();
 
-            if (contentTypePresent)     copy.contentType     = contentType;
-            if (contentEncodingPresent) copy.contentEncoding = contentEncoding;
-            if (deliveryModePresent)    copy.deliveryMode    = deliveryMode;
-            if (priorityPresent)        copy.priority        = priority;
-            if (correlationIdPresent)   copy.correlationId   = correlationId;
-            if (replyToPresent)         copy.replyTo         = replyTo;
-            if (expirationPresent)      copy.expiration      = expiration;
-            if (messageIdPresent)       copy.messageId       = messageId;
-            if (timestampPresent)       copy.timestamp       = timestamp;
-            if (typePresent)            copy.type            = type;
-            if (userIdPresent)          copy.userId          = userId;
-            if (appIdPresent)           copy.appId           = appId;
-            if (clusterIdPresent)       copy.clusterId       = clusterId;
+            if (contentTypePresent)     copy.ContentType     = contentType;
+            if (contentEncodingPresent) copy.ContentEncoding = contentEncoding;
+            if (deliveryModePresent)    copy.DeliveryMode    = deliveryMode;
+            if (priorityPresent)        copy.Priority        = priority;
+            if (correlationIdPresent)   copy.CorrelationId   = correlationId;
+            if (replyToPresent)         copy.ReplyTo         = replyTo;
+            if (expirationPresent)      copy.Expiration      = expiration;
+            if (messageIdPresent)       copy.MessageId       = messageId;
+            if (timestampPresent)       copy.Timestamp       = timestamp;
+            if (typePresent)            copy.Type            = type;
+            if (userIdPresent)          copy.UserId          = userId;
+            if (appIdPresent)           copy.AppId           = appId;
+            if (clusterIdPresent)       copy.ClusterId       = clusterId;
 
             if (headers != null && headers.Count > 0)
                 copy.headers = new Dictionary<string, object>(headers);

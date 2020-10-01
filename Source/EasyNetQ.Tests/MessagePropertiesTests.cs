@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests
 
             var properties = new MessageProperties {
                 ReplyTo = replyTo,
-                Headers = new Dictionary<string, object>()
+                Headers = new Dictionary<string, object>
                           {
                               { "AString", "ThisIsAString" },
                               { "AnInt", 123 }
