@@ -3,26 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RabbitMQ.Client;
-using System.Reflection;
 
 namespace EasyNetQ
 {
-    public class MessageProperties
-#if NETFX
-        : ICloneable
-#endif
+    /// <summary>
+    ///     Represents various properties of a message
+    /// </summary>
+    public class MessageProperties : ICloneable
     {
+        /// <summary>
+        ///     Creates empty MessageProperties
+        /// </summary>
         public MessageProperties()
         {
-            Headers = new Dictionary<string, object>();
         }
 
+        /// <summary>
+        ///     Creates MessageProperties from IBasicProperties
+        /// </summary>
         public MessageProperties(IBasicProperties basicProperties)
             : this()
         {
             CopyFrom(basicProperties);
         }
 
+        /// <summary>
+        ///     Copies IBasicProperties to MessageProperties
+        /// </summary>
         public void CopyFrom(IBasicProperties basicProperties)
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
@@ -42,322 +49,300 @@ namespace EasyNetQ
             if (basicProperties.IsClusterIdPresent())           ClusterId           = basicProperties.ClusterId;
 
             if (basicProperties.IsHeadersPresent())
-            {
-                foreach (var header in basicProperties.Headers)
-                {
-                    Headers.Add(header.Key, header.Value);
-                }
-            }
+                Headers = basicProperties.Headers == null || basicProperties.Headers.Count == 0
+                    ? null
+                    : new Dictionary<string, object>(basicProperties.Headers);
         }
 
+        /// <summary>
+        ///     Copies MessageProperties to IBasicProperties
+        /// </summary>
         public void CopyTo(IBasicProperties basicProperties)
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
 
-            if(contentTypePresent)      basicProperties.ContentType      =  ContentType;
-            if(contentEncodingPresent)  basicProperties.ContentEncoding  =  ContentEncoding;
-            if(deliveryModePresent)     basicProperties.DeliveryMode     =  DeliveryMode;
-            if(priorityPresent)         basicProperties.Priority         =  Priority;
-            if(correlationIdPresent)    basicProperties.CorrelationId    =  CorrelationId;
-            if(replyToPresent)          basicProperties.ReplyTo          =  ReplyTo;
-            if(expirationPresent)       basicProperties.Expiration       =  Expiration;
-            if(messageIdPresent)        basicProperties.MessageId        =  MessageId;
-            if(timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(Timestamp);
-            if(typePresent)             basicProperties.Type             =  Type;
-            if(userIdPresent)           basicProperties.UserId           =  UserId;
-            if(appIdPresent)            basicProperties.AppId            =  AppId;
-            if(clusterIdPresent)        basicProperties.ClusterId        =  ClusterId;
+            if (contentTypePresent)      basicProperties.ContentType      =  contentType;
+            if (contentEncodingPresent)  basicProperties.ContentEncoding  =  contentEncoding;
+            if (deliveryModePresent)     basicProperties.DeliveryMode     =  deliveryMode;
+            if (priorityPresent)         basicProperties.Priority         =  priority;
+            if (correlationIdPresent)    basicProperties.CorrelationId    =  correlationId;
+            if (replyToPresent)          basicProperties.ReplyTo          =  replyTo;
+            if (expirationPresent)       basicProperties.Expiration       =  expiration;
+            if (messageIdPresent)        basicProperties.MessageId        =  messageId;
+            if (timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(timestamp);
+            if (typePresent)             basicProperties.Type             =  type;
+            if (userIdPresent)           basicProperties.UserId           =  userId;
+            if (appIdPresent)            basicProperties.AppId            =  appId;
+            if (clusterIdPresent)        basicProperties.ClusterId        =  clusterId;
 
-            if (headersPresent && Headers.Any())
-            {
-                basicProperties.Headers = new Dictionary<string, object>(Headers);
-            }
+            if (headers != null && headers.Count > 0)
+                basicProperties.Headers = new Dictionary<string, object>(headers);
         }
+
+        /// <inheritdoc />
         public object Clone()
         {
             var copy = new MessageProperties();
 
-            if (contentTypePresent) copy.ContentType = ContentType;
-            if (contentEncodingPresent) copy.ContentEncoding = ContentEncoding;
-            if (deliveryModePresent) copy.DeliveryMode = DeliveryMode;
-            if (priorityPresent) copy.Priority = Priority;
-            if (correlationIdPresent) copy.CorrelationId = CorrelationId;
-            if (replyToPresent) copy.ReplyTo = ReplyTo;
-            if (expirationPresent) copy.Expiration = Expiration;
-            if (messageIdPresent) copy.MessageId = MessageId;
-            if (timestampPresent) copy.Timestamp = Timestamp;
-            if (typePresent) copy.Type = Type;
-            if (userIdPresent) copy.UserId = UserId;
-            if (appIdPresent) copy.AppId = AppId;
-            if (clusterIdPresent) copy.ClusterId = ClusterId;
+            if (contentTypePresent)     copy.ContentType     = contentType;
+            if (contentEncodingPresent) copy.ContentEncoding = contentEncoding;
+            if (deliveryModePresent)    copy.DeliveryMode    = deliveryMode;
+            if (priorityPresent)        copy.Priority        = priority;
+            if (correlationIdPresent)   copy.CorrelationId   = correlationId;
+            if (replyToPresent)         copy.ReplyTo         = replyTo;
+            if (expirationPresent)      copy.Expiration      = expiration;
+            if (messageIdPresent)       copy.MessageId       = messageId;
+            if (timestampPresent)       copy.Timestamp       = timestamp;
+            if (typePresent)            copy.Type            = type;
+            if (userIdPresent)          copy.UserId          = userId;
+            if (appIdPresent)           copy.AppId           = appId;
+            if (clusterIdPresent)       copy.ClusterId       = clusterId;
 
-            if (headersPresent && Headers.Any())
-            {
-                copy.Headers = new Dictionary<string, object>(Headers);
-            }
+            if (headers != null && headers.Count > 0)
+                copy.headers = new Dictionary<string, object>(headers);
 
             return copy;
         }
 
-        private bool contentTypePresent = false;
-        private bool contentEncodingPresent = false;
-        private bool headersPresent = false;
-        private bool deliveryModePresent = false;
-        private bool priorityPresent = false;
-        private bool correlationIdPresent = false;
-        private bool replyToPresent = false;
-        private bool expirationPresent = false;
-        private bool messageIdPresent = false;
-        private bool timestampPresent = false;
-        private bool typePresent = false;
-        private bool userIdPresent = false;
-        private bool appIdPresent = false;
-        private bool clusterIdPresent = false;
-
+        private bool contentTypePresent;
+        private bool contentEncodingPresent;
+        private bool deliveryModePresent;
+        private bool priorityPresent;
+        private bool correlationIdPresent;
+        private bool replyToPresent;
+        private bool expirationPresent;
+        private bool messageIdPresent;
+        private bool timestampPresent;
+        private bool typePresent;
+        private bool userIdPresent;
+        private bool appIdPresent;
+        private bool clusterIdPresent;
         private string contentType;
 
         /// <summary>
-        /// MIME Content type
+        ///     MIME Content type
         /// </summary>
         public string ContentType
         {
-            get { return contentType; }
+            get => contentType;
             set { contentType = CheckShortString(value, "ContentType"); contentTypePresent = true; }
         }
 
         private string contentEncoding;
 
         /// <summary>
-        /// MIME content encoding
+        ///     MIME content encoding
         /// </summary>
         public string ContentEncoding
         {
-            get { return contentEncoding; }
+            get => contentEncoding;
             set { contentEncoding = CheckShortString(value, "ContentEncoding"); contentEncodingPresent = true; }
         }
 
         private IDictionary<string, object> headers;
 
         /// <summary>
-        /// message header field table
+        ///     Various headers
         /// </summary>
         public IDictionary<string, object> Headers
         {
-            get { return headers; }
-            set { headers = value; headersPresent = true; }
+            get => headers ?? (headers = new Dictionary<string, object>());
+            set => headers = value;
         }
 
         private byte deliveryMode;
 
         /// <summary>
-        /// non-persistent (1) or persistent (2)
+        ///     non-persistent (1) or persistent (2)
         /// </summary>
         public byte DeliveryMode
         {
-            get { return deliveryMode; }
+            get => deliveryMode;
             set { deliveryMode = value; deliveryModePresent = true; }
         }
 
         private byte priority;
 
         /// <summary>
-        /// message priority, 0 to 9
+        ///     message priority, 0 to 9
         /// </summary>
         public byte Priority
         {
-            get { return priority; }
+            get => priority;
             set { priority = value; priorityPresent = true; }
         }
 
         private string correlationId;
 
         /// <summary>
-        /// application correlation identifier
+        ///     application correlation identifier
         /// </summary>
         public string CorrelationId
         {
-            get { return correlationId; }
+            get => correlationId;
             set { correlationId = CheckShortString(value, "CorrelationId"); correlationIdPresent = true; }
         }
 
         private string replyTo;
 
         /// <summary>
-        /// destination to reply to
+        ///     destination to reply to
         /// </summary>
         public string ReplyTo
         {
-            get { return replyTo; }
+            get => replyTo;
             set { replyTo = CheckShortString(value, "ReplyTo"); replyToPresent = true; }
         }
 
         private string expiration;
 
         /// <summary>
-        /// message expiration specification
+        ///     message expiration specification
         /// </summary>
         public string Expiration
         {
-            get { return expiration; }
+            get => expiration;
             set { expiration = CheckShortString(value, "Expiration"); expirationPresent = true; }
         }
 
         private string messageId;
 
         /// <summary>
-        /// application message identifier
+        ///     application message identifier
         /// </summary>
         public string MessageId
         {
-            get { return messageId; }
+            get => messageId;
             set { messageId = CheckShortString(value, "MessageId"); messageIdPresent = true; }
         }
 
         private long timestamp;
 
         /// <summary>
-        /// message timestamp
+        ///     message timestamp
         /// </summary>
         public long Timestamp
         {
-            get { return timestamp; }
+            get => timestamp;
             set { timestamp = value; timestampPresent = true; }
         }
 
         private string type;
 
         /// <summary>
-        /// message type name
+        ///     message type name
         /// </summary>
         public string Type
         {
-            get { return type; }
+            get => type;
             set { type = CheckShortString(value, "Type"); typePresent = true; }
         }
 
         private string userId;
 
         /// <summary>
-        /// creating user id
+        ///     creating user id
         /// </summary>
         public string UserId
         {
-            get { return userId; }
+            get => userId;
             set { userId = CheckShortString(value, "UserId"); userIdPresent = true; }
         }
 
         private string appId;
 
         /// <summary>
-        /// creating application id
+        ///     Application id
         /// </summary>
         public string AppId
         {
-            get { return appId; }
+            get => appId;
             set { appId = CheckShortString(value, "AppId"); appIdPresent = true; }
         }
 
         private string clusterId;
 
         /// <summary>
-        /// intra-cluster routing identifier
+        ///     intra-cluster routing identifier
         /// </summary>
         public string ClusterId
         {
-            get { return clusterId; }
+            get => clusterId;
             set { clusterId = CheckShortString(value, "ClusterId"); clusterIdPresent = true; }
         }
 
-        public bool ContentTypePresent
-        {
-            get { return contentTypePresent; }
-            set { contentTypePresent = value; }
-        }
+        /// <summary>
+        ///     True if ContentType is present
+        /// </summary>
+        public bool ContentTypePresent => contentTypePresent;
 
-        public bool ContentEncodingPresent
-        {
-            get { return contentEncodingPresent; }
-            set { contentEncodingPresent = value; }
-        }
+        /// <summary>
+        ///     True if ContentEncoding is present
+        /// </summary>
+        public bool ContentEncodingPresent => contentEncodingPresent;
 
-        public bool HeadersPresent
-        {
-            get { return headersPresent; }
-            set { headersPresent = value; }
-        }
+        /// <summary>
+        ///     True if Headers is present
+        /// </summary>
+        public bool HeadersPresent => headers != null && headers.Count > 0;
 
-        public bool DeliveryModePresent
-        {
-            get { return deliveryModePresent; }
-            set { deliveryModePresent = value; }
-        }
+        /// <summary>
+        ///     True if DeliveryMode is present
+        /// </summary>
+        public bool DeliveryModePresent => deliveryModePresent;
 
-        public bool PriorityPresent
-        {
-            get { return priorityPresent; }
-            set { priorityPresent = value; }
-        }
+        /// <summary>
+        ///     True if Priority is present
+        /// </summary>
+        public bool PriorityPresent => priorityPresent;
 
-        public bool CorrelationIdPresent
-        {
-            get { return correlationIdPresent; }
-            set { correlationIdPresent = value; }
-        }
+        /// <summary>
+        ///     True if CorrelationId is present
+        /// </summary>
+        public bool CorrelationIdPresent => correlationIdPresent;
 
-        public bool ReplyToPresent
-        {
-            get { return replyToPresent; }
-            set { replyToPresent = value; }
-        }
+        /// <summary>
+        ///     True if ReplyTo is present
+        /// </summary>
+        public bool ReplyToPresent => replyToPresent;
 
-        public bool ExpirationPresent
-        {
-            get { return expirationPresent; }
-            set { expirationPresent = value; }
-        }
+        /// <summary>
+        ///     True if Expiration is present
+        /// </summary>
+        public bool ExpirationPresent => expirationPresent;
 
-        public bool MessageIdPresent
-        {
-            get { return messageIdPresent; }
-            set { messageIdPresent = value; }
-        }
+        /// <summary>
+        ///     True if MessageId is present
+        /// </summary>
+        public bool MessageIdPresent => messageIdPresent;
 
-        public bool TimestampPresent
-        {
-            get { return timestampPresent; }
-            set { timestampPresent = value; }
-        }
+        /// <summary>
+        ///     True if Timestamp is present
+        /// </summary>
+        public bool TimestampPresent => timestampPresent;
 
-        public bool TypePresent
-        {
-            get { return typePresent; }
-            set { typePresent = value; }
-        }
+        /// <summary>
+        ///     True if Type is present
+        /// </summary>
+        public bool TypePresent => typePresent;
 
-        public bool UserIdPresent
-        {
-            get { return userIdPresent; }
-            set { userIdPresent = value; }
-        }
+        /// <summary>
+        ///     True if UserId is present
+        /// </summary>
+        public bool UserIdPresent => userIdPresent;
 
-        public bool AppIdPresent
-        {
-            get { return appIdPresent; }
-            set { appIdPresent = value; }
-        }
+        /// <summary>
+        ///     True if ClusterId is present
+        /// </summary>        public bool AppIdPresent => appIdPresent;
+        public bool ClusterIdPresent => clusterIdPresent;
 
-        public bool ClusterIdPresent
-        {
-            get { return clusterIdPresent; }
-            set { clusterIdPresent = value; }
-        }
-
+        /// <inheritdoc />
         public override string ToString()
         {
             return GetType()
                 .GetProperties()
                 .Where(x => !x.Name.EndsWith("Present"))
-                .Select(x => string.Format("{0}={1}", x.Name, GetValueString(x.GetValue(this, null))))
+                .Select(x => $"{x.Name}={GetValueString(x.GetValue(this, null))}")
                 .Intersperse(", ")
                 .Aggregate(new StringBuilder(), (sb, x) => sb.Append(x))
                 .ToString();
@@ -367,15 +352,14 @@ namespace EasyNetQ
         {
             if (value == null) return "NULL";
 
-            var dictionary = value as IDictionary<string, object>;
-            if (dictionary == null) return value.ToString();
-
-            return dictionary
-                .Select(x => string.Format("{0}={1}", x.Key, x.Value))
-                .Intersperse(", ")
-                .SurroundWith("[", "]")
-                .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
-                .ToString();
+            return value is IDictionary<string, object> dictionary
+                ? dictionary
+                    .Select(x => $"{x.Key}={x.Value}")
+                    .Intersperse(", ")
+                    .SurroundWith("[", "]")
+                    .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
+                    .ToString()
+                : value.ToString();
         }
 
         private static string CheckShortString(string input, string name)

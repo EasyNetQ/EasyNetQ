@@ -22,7 +22,7 @@
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,7.0.0)" />
+    <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
     <PackageReference Include="Topshelf" Version="4.2.1" />
     <PackageReference Include="GitVersionTask" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
