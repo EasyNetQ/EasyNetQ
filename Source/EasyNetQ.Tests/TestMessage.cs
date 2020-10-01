@@ -2,7 +2,6 @@
 {
     public class TestMessage
     {
-         
     }
 
     [Queue("MyQueue", ExchangeName = "MyExchange")]
