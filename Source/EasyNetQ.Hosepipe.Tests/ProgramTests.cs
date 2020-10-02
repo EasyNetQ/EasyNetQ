@@ -19,7 +19,6 @@ namespace EasyNetQ.Hosepipe.Tests
         private MockQueueInsertion queueInsertion;
         private MockErrorRetry errorRetry;
         private Conventions conventions;
-        private IErrorMessageSerializer defaultErrorMessageSerializer;
 
         public ProgramTests()
         {
@@ -29,7 +28,6 @@ namespace EasyNetQ.Hosepipe.Tests
             queueInsertion = new MockQueueInsertion();
             errorRetry = new MockErrorRetry();
             conventions = new Conventions(new LegacyTypeNameSerializer());
-            defaultErrorMessageSerializer = new DefaultErrorMessageSerializer();
 
             program = new Program(
                 new ArgParser(),
@@ -59,7 +57,8 @@ namespace EasyNetQ.Hosepipe.Tests
 
             program.Start(args);
 
-            writer.GetStringBuilder().ToString().ShouldEqual(expectedDumpOutput);
+            var actualOutput = writer.GetStringBuilder().ToString();
+            actualOutput.ShouldEqual(expectedDumpOutput);
 
             messageWriter.Parameters.QueueName.ShouldEqual("EasyNetQ_Default_Error_Queue");
             messageWriter.Parameters.HostName.ShouldEqual("localhost");
@@ -125,7 +124,7 @@ namespace EasyNetQ.Hosepipe.Tests
         }
     }
 
-    public class MockQueueRetrieval : IQueueRetreival
+    public class MockQueueRetrieval : IQueueRetrieval
     {
         public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
         {

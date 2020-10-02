@@ -11,7 +11,7 @@ namespace EasyNetQ.Hosepipe
     public class Program
     {
         private readonly ArgParser argParser;
-        private readonly IQueueRetreival queueRetreival;
+        private readonly IQueueRetrieval queueRetrieval;
         private readonly IMessageWriter messageWriter;
         private readonly IMessageReader messageReader;
         private readonly IQueueInsertion queueInsertion;
@@ -27,16 +27,16 @@ namespace EasyNetQ.Hosepipe
         };
 
         public Program(
-            ArgParser argParser, 
-            IQueueRetreival queueRetreival, 
-            IMessageWriter messageWriter, 
-            IMessageReader messageReader, 
-            IQueueInsertion queueInsertion, 
+            ArgParser argParser,
+            IQueueRetrieval queueRetrieval,
+            IMessageWriter messageWriter,
+            IMessageReader messageReader,
+            IQueueInsertion queueInsertion,
             IErrorRetry errorRetry,
             IConventions conventions)
         {
             this.argParser = argParser;
-            this.queueRetreival = queueRetreival;
+            this.queueRetrieval = queueRetrieval;
             this.messageWriter = messageWriter;
             this.messageReader = messageReader;
             this.queueInsertion = queueInsertion;
@@ -62,14 +62,14 @@ namespace EasyNetQ.Hosepipe
             else
             {
                 errorMessageSerializer = new DefaultErrorMessageSerializer();
-            }            
+            }
 
-            // poor man's dependency injection FTW ;)            
+            // poor man's dependency injection FTW ;)
             var program = new Program(
-                argParser, 
-                new QueueRetreival(errorMessageSerializer), 
+                argParser,
+                new QueueRetrieval(errorMessageSerializer),
                 new FileMessageWriter(),
-                new MessageReader(), 
+                new MessageReader(),
                 new QueueInsertion(errorMessageSerializer),
                 new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
                 new Conventions(typeNameSerializer));
@@ -91,11 +91,11 @@ namespace EasyNetQ.Hosepipe
             arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
                 .FailWith(messsage("Invalid number of messages to retrieve"));
             arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
-                .FailWith(messsage("Invalid purge (x) parameter"));            
+                .FailWith(messsage("Invalid purge (x) parameter"));
 
             try
             {
-                arguments.At(0, "dump", () => arguments.WithKey("q", a => 
+                arguments.At(0, "dump", () => arguments.WithKey("q", a =>
                 {
                     parameters.QueueName = a.Value;
                     Dump(parameters);
@@ -114,7 +114,7 @@ namespace EasyNetQ.Hosepipe
             }
             catch (EasyNetQHosepipeException easyNetQHosepipeException)
             {
-                Console.WriteLine("Operation Failed:");    
+                Console.WriteLine("Operation Failed:");
                 Console.WriteLine(easyNetQHosepipeException.Message);
             }
 
@@ -130,9 +130,9 @@ namespace EasyNetQ.Hosepipe
         private void Dump(QueueParameters parameters)
         {
             var count = 0;
-            messageWriter.Write(WithEach(queueRetreival.GetMessagesFromQueue(parameters), () => count++), parameters);
-            
-            Console.WriteLine("{0} Messages from queue '{1}'\r\noutput to directory '{2}'", 
+            messageWriter.Write(WithEach(queueRetrieval.GetMessagesFromQueue(parameters), () => count++), parameters);
+
+            Console.WriteLine("{0} Messages from queue '{1}'\r\noutput to directory '{2}'",
                 count, parameters.QueueName, parameters.MessagesOutputDirectory);
         }
 
@@ -140,8 +140,8 @@ namespace EasyNetQ.Hosepipe
         {
             var count = 0;
             queueInsertion.PublishMessagesToQueue(
-                WithEach(messageReader.ReadMessages(parameters), () => count++), parameters);       
-            
+                WithEach(messageReader.ReadMessages(parameters), () => count++), parameters);
+
             Console.WriteLine("{0} Messages from directory '{1}'\r\ninserted into queue '{2}'",
                 count, parameters.MessagesOutputDirectory, parameters.QueueName);
         }
@@ -157,11 +157,11 @@ namespace EasyNetQ.Hosepipe
         {
             var count = 0;
             var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
-            
+
             errorRetry.RetryErrors(
                 WithEach(
-                    messageReader.ReadMessages(parameters, queueName), 
-                    () => count++), 
+                    messageReader.ReadMessages(parameters, queueName),
+                    () => count++),
                 parameters);
 
             Console.WriteLine("{0} Error messages from directory '{1}' republished",
