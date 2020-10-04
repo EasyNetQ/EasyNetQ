@@ -27,7 +27,10 @@ namespace EasyNetQ.Hosepipe
                     var properties = channel.CreateBasicProperties();
                     message.Properties.CopyTo(properties);
 
-                    channel.BasicPublish(message.Info.Exchange, message.Info.RoutingKey, true, properties, body);
+                    var queueName = string.IsNullOrEmpty(parameters.QueueName)
+                        ? message.Info.Queue
+                        : parameters.QueueName;
+                    channel.BasicPublish("", queueName, true, properties, body);
                 }
             }
         }

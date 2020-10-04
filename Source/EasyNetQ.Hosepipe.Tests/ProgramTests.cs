@@ -3,9 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
-using EasyNetQ.Consumer;
-
 using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -19,7 +16,6 @@ namespace EasyNetQ.Hosepipe.Tests
         private MockQueueInsertion queueInsertion;
         private MockErrorRetry errorRetry;
         private Conventions conventions;
-        private IErrorMessageSerializer defaultErrorMessageSerializer;
 
         public ProgramTests()
         {
@@ -29,7 +25,6 @@ namespace EasyNetQ.Hosepipe.Tests
             queueInsertion = new MockQueueInsertion();
             errorRetry = new MockErrorRetry();
             conventions = new Conventions(new LegacyTypeNameSerializer());
-            defaultErrorMessageSerializer = new DefaultErrorMessageSerializer();
 
             program = new Program(
                 new ArgParser(),
@@ -38,11 +33,12 @@ namespace EasyNetQ.Hosepipe.Tests
                 messageReader,
                 queueInsertion,
                 errorRetry,
-                conventions);
+                conventions
+            );
         }
 
         private readonly string expectedDumpOutput =
-            "2 Messages from queue 'EasyNetQ_Default_Error_Queue'\r\noutput to directory '" + Directory.GetCurrentDirectory() + "'\r\n";
+            $"2 messages from queue 'EasyNetQ_Default_Error_Queue' were dumped to directory '{Directory.GetCurrentDirectory()}'{Environment.NewLine}";
 
         [Fact]
         public void Should_output_messages_to_directory_with_dump()
@@ -59,14 +55,15 @@ namespace EasyNetQ.Hosepipe.Tests
 
             program.Start(args);
 
-            writer.GetStringBuilder().ToString().ShouldEqual(expectedDumpOutput);
+            var actualOutput = writer.GetStringBuilder().ToString();
+            actualOutput.ShouldEqual(expectedDumpOutput);
 
             messageWriter.Parameters.QueueName.ShouldEqual("EasyNetQ_Default_Error_Queue");
             messageWriter.Parameters.HostName.ShouldEqual("localhost");
         }
 
         private readonly string expectedInsertOutput =
-            "2 Messages from directory '" + Directory.GetCurrentDirectory() + "'\r\ninserted into queue ''\r\n";
+            $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue ''{Environment.NewLine}";
 
         [Fact]
         public void Should_insert_messages_with_insert()
@@ -82,13 +79,38 @@ namespace EasyNetQ.Hosepipe.Tests
 
             program.Start(args);
 
-            writer.GetStringBuilder().ToString().ShouldEqual(expectedInsertOutput);
+            var actualInsertOutput = writer.GetStringBuilder().ToString();
+            actualInsertOutput.ShouldEqual(expectedInsertOutput);
+
+            messageReader.Parameters.HostName.ShouldEqual("localhost");
+        }
+
+        private readonly string expectedInsertOutputWithQueue =
+            $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue 'queue'{Environment.NewLine}";
+
+        [Fact]
+        public void Should_insert_messages_with_insert_and_queue()
+        {
+            var args = new[]
+            {
+                "insert",
+                "s:localhost",
+                "q:queue"
+            };
+
+            var writer = new StringWriter();
+            Console.SetOut(writer);
+
+            program.Start(args);
+
+            var actualInsertOutput = writer.GetStringBuilder().ToString();
+            actualInsertOutput.ShouldEqual(expectedInsertOutputWithQueue);
 
             messageReader.Parameters.HostName.ShouldEqual("localhost");
         }
 
         private readonly string expectedRetryOutput =
-            "2 Error messages from directory '" + Directory.GetCurrentDirectory() + "' republished\r\n";
+            $"2 error messages from directory '{Directory.GetCurrentDirectory()}' were republished{Environment.NewLine}";
 
 
         [Fact]
@@ -118,14 +140,13 @@ namespace EasyNetQ.Hosepipe.Tests
         public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters queueParameters)
         {
             Parameters = queueParameters;
-            foreach (var message in messages)
+            foreach (var _ in messages)
             {
-                // Console.Out.WriteLine("message = {0}", message);
             }
         }
     }
 
-    public class MockQueueRetrieval : IQueueRetreival
+    public class MockQueueRetrieval : IQueueRetrieval
     {
         public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
         {
@@ -155,9 +176,8 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
         {
-            foreach (var message in messages)
+            foreach (var _ in messages)
             {
-                // Console.Out.WriteLine("message = {0}", message);
             }
         }
     }
@@ -166,9 +186,8 @@ namespace EasyNetQ.Hosepipe.Tests
     {
         public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
         {
-            foreach (var rawErrorMessage in rawErrorMessages)
+            foreach (var _ in rawErrorMessages)
             {
-                //
             }
         }
     }

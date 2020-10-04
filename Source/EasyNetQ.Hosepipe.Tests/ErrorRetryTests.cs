@@ -9,8 +9,8 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class ErrorRetryTests
     {
-        private ErrorRetry errorRetry;
-        private IConventions conventions;
+        private readonly ErrorRetry errorRetry;
+        private readonly IConventions conventions;
 
         public ErrorRetryTests()
         {
@@ -43,6 +43,7 @@ namespace EasyNetQ.Hosepipe.Tests
                 {
                     Exchange = "", // default exchange
                     RoutingKey = "hosepipe.test",
+                    Queue = "queue",
                     Message = "Hosepipe test message",
                     BasicProperties = new MessageProperties()
                 };
@@ -53,7 +54,6 @@ namespace EasyNetQ.Hosepipe.Tests
                 Password = "guest",
                 MessagesOutputDirectory = @"C:\temp\MessageOutput"
             };
-
             errorRetry.RepublishError(error, parameters);
         }
     }
