@@ -18,11 +18,11 @@ namespace EasyNetQ.Hosepipe
         private readonly IErrorRetry errorRetry;
         private readonly IConventions conventions;
 
-        private static StringBuilder results = new StringBuilder();
+        private static readonly StringBuilder Results = new StringBuilder();
         private static bool succeeded = true;
-        private static Func<string, Action> messsage = m => () =>
+        private static readonly Func<string, Action> Message = m => () =>
         {
-            results.AppendLine(m);
+            Results.AppendLine(m);
             succeeded = false;
         };
 
@@ -50,9 +50,9 @@ namespace EasyNetQ.Hosepipe
             var argParser = new ArgParser();
             var arguments = argParser.Parse(args);
 
-            bool enableBinaryPayloads = false;
+            var enableBinaryPayloads = false;
             arguments.WithTypedKeyOptional<bool>("b", a => enableBinaryPayloads = bool.Parse(a.Value))
-                .FailWith(messsage("Invalid enable binary payloads (b) parameter"));
+                .FailWith(Message("Invalid enable binary payloads (b) parameter"));
 
             IErrorMessageSerializer errorMessageSerializer;
             if (enableBinaryPayloads)
@@ -90,9 +90,9 @@ namespace EasyNetQ.Hosepipe
             arguments.WithKey("o", a => parameters.MessagesOutputDirectory = a.Value);
             arguments.WithKey("q", a => parameters.QueueName = a.Value);
             arguments.WithTypedKeyOptional<int>("n", a => parameters.NumberOfMessagesToRetrieve = int.Parse(a.Value))
-                .FailWith(messsage("Invalid number of messages to retrieve"));
+                .FailWith(Message("Invalid number of messages to retrieve"));
             arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
-                .FailWith(messsage("Invalid purge (x) parameter"));
+                .FailWith(Message("Invalid purge (x) parameter"));
 
             try
             {
@@ -100,7 +100,7 @@ namespace EasyNetQ.Hosepipe
                 {
                     parameters.QueueName = a.Value;
                     Dump(parameters);
-                }).FailWith(messsage("No Queue Name given")));
+                }).FailWith(Message("No Queue Name given")));
 
                 arguments.At(0, "insert", () => Insert(parameters));
 
@@ -122,7 +122,7 @@ namespace EasyNetQ.Hosepipe
             if(!succeeded)
             {
                 Console.WriteLine("Operation failed");
-                Console.Write(results.ToString());
+                Console.Write(Results.ToString());
                 Console.WriteLine();
                 PrintUsage();
             }

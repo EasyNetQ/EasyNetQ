@@ -85,6 +85,30 @@ namespace EasyNetQ.Hosepipe.Tests
             messageReader.Parameters.HostName.ShouldEqual("localhost");
         }
 
+        private readonly string expectedInsertOutputWithQueue =
+            $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue 'queue'{Environment.NewLine}";
+
+        [Fact]
+        public void Should_insert_messages_with_insert_and_queue()
+        {
+            var args = new[]
+            {
+                "insert",
+                "s:localhost",
+                "q:queue"
+            };
+
+            var writer = new StringWriter();
+            Console.SetOut(writer);
+
+            program.Start(args);
+
+            var actualInsertOutput = writer.GetStringBuilder().ToString();
+            actualInsertOutput.ShouldEqual(expectedInsertOutputWithQueue);
+
+            messageReader.Parameters.HostName.ShouldEqual("localhost");
+        }
+
         private readonly string expectedRetryOutput =
             $"2 error messages from directory '{Directory.GetCurrentDirectory()}' were republished{Environment.NewLine}";
 
