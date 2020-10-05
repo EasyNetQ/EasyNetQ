@@ -11,11 +11,14 @@ namespace EasyNetQ.Scheduling
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+        private readonly bool setDeadLetterRoutingKey;
 
         public DeadLetterExchangeAndMessageTtlScheduler(
             IAdvancedBus advancedBus,
             IConventions conventions,
-            IMessageDeliveryModeStrategy messageDeliveryModeStrategy)
+            IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
+            bool setDeadLetterRoutingKey = false
+        )
         {
             Preconditions.CheckNotNull(advancedBus, "advancedBus");
             Preconditions.CheckNotNull(conventions, "conventions");
@@ -24,6 +27,7 @@ namespace EasyNetQ.Scheduling
             this.advancedBus = advancedBus;
             this.conventions = conventions;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
+            this.setDeadLetterRoutingKey = setDeadLetterRoutingKey;
         }
 
         public Task FuturePublishAsync<T>(DateTime futurePublishDate, T message, string cancellationKey = null) where T : class
@@ -77,13 +81,19 @@ namespace EasyNetQ.Scheduling
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
             Preconditions.CheckNull(cancellationKey, "cancellationKey");
+
             var delay = Round(messageDelay);
             var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_" + delayString;
             var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
             var futureExchange = await advancedBus.ExchangeDeclareAsync(futureExchangeName, ExchangeType.Topic).ConfigureAwait(false);
-            var futureQueue = await advancedBus.QueueDeclareAsync(futureQueueName, perQueueMessageTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName, deadLetterRoutingKey: topic).ConfigureAwait(false);
+            var futureQueue = await advancedBus.QueueDeclareAsync(
+                futureQueueName,
+                perQueueMessageTtl: (int) delay.TotalMilliseconds,
+                deadLetterExchange: exchangeName,
+                deadLetterRoutingKey: setDeadLetterRoutingKey ? topic : null
+            ).ConfigureAwait(false);
             await advancedBus.BindAsync(futureExchange, futureQueue, topic).ConfigureAwait(false);
             var easyNetQMessage = new Message<T>(message)
             {
@@ -100,13 +110,19 @@ namespace EasyNetQ.Scheduling
             Preconditions.CheckNotNull(message, "message");
             Preconditions.CheckLess(messageDelay, MaxMessageDelay, "messageDelay");
             Preconditions.CheckNull(cancellationKey, "cancellationKey");
+
             var delay = Round(messageDelay);
             var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
             var exchangeName = conventions.ExchangeNamingConvention(typeof (T));
             var futureExchangeName = exchangeName + "_" + delayString;
             var futureQueueName = conventions.QueueNamingConvention(typeof (T), delayString);
             var futureExchange = advancedBus.ExchangeDeclare(futureExchangeName, ExchangeType.Topic);
-            var futureQueue = advancedBus.QueueDeclare(futureQueueName, perQueueMessageTtl: (int) delay.TotalMilliseconds, deadLetterExchange: exchangeName, deadLetterRoutingKey: topic);
+            var futureQueue = advancedBus.QueueDeclare(
+                futureQueueName,
+                perQueueMessageTtl: (int) delay.TotalMilliseconds,
+                deadLetterExchange: exchangeName,
+                deadLetterRoutingKey: setDeadLetterRoutingKey ? topic : null
+            );
             advancedBus.Bind(futureExchange, futureQueue, topic);
             var easyNetQMessage = new Message<T>(message)
             {

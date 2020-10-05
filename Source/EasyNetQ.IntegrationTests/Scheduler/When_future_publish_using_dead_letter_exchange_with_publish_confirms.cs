@@ -39,7 +39,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
 
             using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
             {
-                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), cts.Token)
+                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), "#", cts.Token)
                     .ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);

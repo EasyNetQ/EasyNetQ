@@ -11,7 +11,25 @@ namespace EasyNetQ.Scheduling
 
         public static IServiceRegister EnableDeadLetterExchangeAndMessageTtlScheduler(this IServiceRegister serviceRegister)
         {
-            return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
+            return serviceRegister.Register<IScheduler>(
+                x => new DeadLetterExchangeAndMessageTtlScheduler(
+                    x.Resolve<IAdvancedBus>(),
+                    x.Resolve<IConventions>(),
+                    x.Resolve<IMessageDeliveryModeStrategy>()
+                )
+            );
+        }
+
+        public static IServiceRegister EnableLegacyDeadLetterExchangeAndMessageTtlScheduler(this IServiceRegister serviceRegister)
+        {
+            return serviceRegister.Register<IScheduler>(
+                x => new DeadLetterExchangeAndMessageTtlScheduler(
+                    x.Resolve<IAdvancedBus>(),
+                    x.Resolve<IConventions>(),
+                    x.Resolve<IMessageDeliveryModeStrategy>(),
+                    true
+                )
+            );
         }
     }
 }

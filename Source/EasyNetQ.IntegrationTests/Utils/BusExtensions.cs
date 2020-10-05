@@ -35,6 +35,7 @@ namespace EasyNetQ.IntegrationTests.Utils
             this IBus bus,
             IEnumerable<T> messages,
             TimeSpan delay,
+            string topic = "#",
             CancellationToken cancellationToken = default
         ) where T : class
         {
@@ -42,7 +43,7 @@ namespace EasyNetQ.IntegrationTests.Utils
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await bus.FuturePublishAsync(delay, message).ConfigureAwait(false);
+                await bus.FuturePublishAsync(delay, message, topic).ConfigureAwait(false);
             }
         }
 
