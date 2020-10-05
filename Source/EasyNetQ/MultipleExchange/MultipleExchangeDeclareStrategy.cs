@@ -69,6 +69,7 @@ namespace EasyNetQ.MultipleExchange
             return sourceExchange;
         }
 
+
         public async Task<IExchange> DeclareExchangeAsync(string exchangeName, string exchangeType)
         {
             if (exchanges.TryGetValue(exchangeName, out var exchange)) return exchange;

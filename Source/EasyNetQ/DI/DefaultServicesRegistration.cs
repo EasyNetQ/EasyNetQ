@@ -24,7 +24,7 @@ namespace EasyNetQ.DI
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
                 .Register<ITypeNameSerializer, DefaultTypeNameSerializer>()
-                .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()                
+                .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
                 .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
                 .Register<ITimeoutStrategy, TimeoutStrategy>()
@@ -47,7 +47,11 @@ namespace EasyNetQ.DI
                 .Register<IAdvancedBus, RabbitAdvancedBus>()
                 .Register<IRpc, Rpc>()
                 .Register<ISendReceive, SendReceive>()
-                .Register<IScheduler, ExternalScheduler>()
+                .Register<IScheduler>(
+                    x => new DeadLetterExchangeAndMessageTtlScheduler(
+                        x.Resolve<IAdvancedBus>(), x.Resolve<IConventions>(), x.Resolve<IMessageDeliveryModeStrategy>()
+                    )
+                )
                 .Register<IBus, RabbitBus>();
         }
     }
