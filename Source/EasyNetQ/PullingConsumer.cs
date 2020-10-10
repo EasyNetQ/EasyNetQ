@@ -47,7 +47,7 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        ///     True is a message is available
+        ///     True if a message is available
         /// </summary>
         public bool IsAvailable => isAvailable;
 
@@ -55,7 +55,7 @@ namespace EasyNetQ
         ///     Returns remained messages count if the message is available
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public ulong RemainedMessagesCount
+        public ulong MessagesCount
         {
             get
             {
@@ -104,7 +104,7 @@ namespace EasyNetQ
         {
             get
             {
-                if (!IsAvailable)
+                if (!isAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return body;
@@ -112,7 +112,7 @@ namespace EasyNetQ
         }
     }
 
-        /// <summary>
+    /// <summary>
     ///     Represents a result of a message pull
     /// </summary>
     public readonly struct PullResult<T>
@@ -147,7 +147,7 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        ///     True is a message is available
+        ///     True if a message is available
         /// </summary>
         public bool IsAvailable => isAvailable;
 
@@ -155,7 +155,7 @@ namespace EasyNetQ
         ///     Returns remained messages count if the message is available
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public ulong RemainedMessagesCount
+        public ulong MessagesCount
         {
             get
             {
@@ -405,7 +405,7 @@ namespace EasyNetQ
             var message = messageSerializationStrategy.DeserializeMessage(pullResult.Properties, pullResult.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))
                 return PullResult<T>.Available(
-                    pullResult.RemainedMessagesCount,
+                    pullResult.MessagesCount,
                     pullResult.ReceivedInfo,
                     new Message<T>((T) message.GetBody(), message.Properties)
                 );
