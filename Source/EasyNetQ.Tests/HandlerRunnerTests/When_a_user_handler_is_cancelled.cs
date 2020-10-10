@@ -3,7 +3,6 @@
 using System;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.Events;
 using Xunit;
 using RabbitMQ.Client;
 using NSubstitute;
@@ -59,7 +58,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                 throw new TimeoutException();
             }
         }
-    
+
         [Fact]
         public void Should_handle_consumer_cancelled()
         {

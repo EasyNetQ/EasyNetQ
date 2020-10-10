@@ -107,7 +107,7 @@ namespace EasyNetQ.Tests
                 var succeeded = false;
                 mockBuilder.ConnectionFactory.Succeeded.Returns(c => succeeded);
                 mockBuilder.ConnectionFactory.When(x => x.Success()).Do(c => succeeded = true);
-                mockBuilder.ConnectionFactory.Configuration.ConnectIntervalAttempt = TimeSpan.FromSeconds(1);          
+                mockBuilder.ConnectionFactory.Configuration.ConnectIntervalAttempt = TimeSpan.FromSeconds(1);
                 var connection = new PersistentConnection(mockBuilder.ConnectionFactory, mockBuilder.EventBus);
                 mockBuilder.EventBus.Subscribe<ConnectionCreatedEvent>(e => {
                     if (first)
@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests
                 });
 
                 connection.Initialize();
-                Thread.Sleep(TimeSpan.FromSeconds(2));
+                Thread.Sleep(TimeSpan.FromSeconds(2.5));
                 mockBuilder.ConnectionFactory.Received(3).CreateConnection();
                 first.Should().BeFalse();
             }

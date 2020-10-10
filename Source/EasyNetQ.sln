@@ -14,30 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Version.cs = Version.cs
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DatabaseScripts", "DatabaseScripts", "{896B72E7-50D5-49B9-987B-4250092E39BB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler", "{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mssql", "mssql", "{F11F4058-9B0E-40B5-800F-628BC884A783}"
-	ProjectSection(SolutionItems) = preProject
-		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\CreateWorkTables.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspAddNewMessageToSchedule.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspAddNewMessageToSchedule.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspCancelScheduledMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspCancelScheduledMessages.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspGetNextBatchOfMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspGetNextBatchOfMessages.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspMarkWorkItemForPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspMarkWorkItemForPurge.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\mssql\uspWorkItemsSelfPurge.sql
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postgres", "postgres", "{CD6358E2-E182-4771-BF73-45704B05237D}"
-	ProjectSection(SolutionItems) = preProject
-		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\CreateWorkTables.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\CreateWorkTables.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspAddNewMessageToSchedule.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspAddNewMessageToSchedule.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspCancelScheduledMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspCancelScheduledMessages.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspGetNextBatchOfMessages.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspGetNextBatchOfMessages.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspMarkWorkItemForPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspMarkWorkItemForPurge.sql
-		..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspWorkItemsSelfPurge.sql = ..\DatabaseScripts\EasyNetQ.Scheduler\postgres\uspWorkItemsSelfPurge.sql
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ", "EasyNetQ\EasyNetQ.csproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Autofac", "EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj", "{9D8E2017-010D-4A62-8634-CB702A99D6BE}"
@@ -59,16 +35,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe", "EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj", "{99A7A83D-6F75-4A1C-83E8-7C4AF881B273}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.Tests", "EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj", "{DA597678-7873-4156-8112-8C70B164381A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler", "EasyNetQ.Scheduler\EasyNetQ.Scheduler.csproj", "{03B93AAD-6CAB-4726-826E-B05684AEC1B9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Mongo.Core", "EasyNetQ.Scheduler.Mongo.Core\EasyNetQ.Scheduler.Mongo.Core.csproj", "{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Mongo", "EasyNetQ.Scheduler.Mongo\EasyNetQ.Scheduler.Mongo.csproj", "{AFD272B4-4A2B-43D4-81ED-666F8918FD01}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Mongo.Tests", "EasyNetQ.Scheduler.Mongo.Tests\EasyNetQ.Scheduler.Mongo.Tests.csproj", "{4E7F926F-D939-4962-A7EF-112DE41B4236}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Scheduler.Tests", "EasyNetQ.Scheduler.Tests\EasyNetQ.Scheduler.Tests.csproj", "{530A771C-B12E-48E4-AE10-11B8F6537F4F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
 EndProject
@@ -128,26 +94,6 @@ Global
 		{DA597678-7873-4156-8112-8C70B164381A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03B93AAD-6CAB-4726-826E-B05684AEC1B9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F444E58F-DA2A-47E8-8246-C4BDD9A192B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AFD272B4-4A2B-43D4-81ED-666F8918FD01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFD272B4-4A2B-43D4-81ED-666F8918FD01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFD272B4-4A2B-43D4-81ED-666F8918FD01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFD272B4-4A2B-43D4-81ED-666F8918FD01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E7F926F-D939-4962-A7EF-112DE41B4236}.Release|Any CPU.Build.0 = Release|Any CPU
-		{530A771C-B12E-48E4-AE10-11B8F6537F4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{530A771C-B12E-48E4-AE10-11B8F6537F4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{530A771C-B12E-48E4-AE10-11B8F6537F4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{530A771C-B12E-48E4-AE10-11B8F6537F4F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -169,9 +115,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{F8DF03D5-863A-4F10-89DF-D0ADA3269FB2} = {896B72E7-50D5-49B9-987B-4250092E39BB}
-		{F11F4058-9B0E-40B5-800F-628BC884A783} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
-		{CD6358E2-E182-4771-BF73-45704B05237D} = {F8DF03D5-863A-4F10-89DF-D0ADA3269FB2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3DE3E7F-B61C-4398-AA54-A0DDE3BD850E}
