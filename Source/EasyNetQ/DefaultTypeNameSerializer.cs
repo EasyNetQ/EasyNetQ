@@ -245,7 +245,7 @@ namespace EasyNetQ
             return null;
         }
 
-        private struct TypeNameKey
+        private readonly struct TypeNameKey
         {
             public string AssemblyName { get; }
             public string TypeName { get; }
