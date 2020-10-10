@@ -16,7 +16,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
-            var queueRetrieval = new QueueRetreival(new DefaultErrorMessageSerializer());
+            var queueRetrieval = new QueueRetrieval(new DefaultErrorMessageSerializer());
             var parameters = new QueueParameters
             {
                 QueueName = queue,

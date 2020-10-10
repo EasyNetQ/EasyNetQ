@@ -1,11 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 using FluentAssertions;
-using RabbitMQ.Client.Framing;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -49,11 +46,11 @@ namespace EasyNetQ.Tests
             {
                 ReplyTo = replyTo,
                 Headers = new Dictionary<string, object>
-                {
-                    { "AString", "ThisIsAString" },
-                    { "AnInt", 123 }
-                }
-            };
+                          {
+                              { "AString", "ThisIsAString" },
+                              { "AnInt", 123 }
+                          }
+                };
 
             var destinationProperties = (MessageProperties)properties.Clone();
 
@@ -72,7 +69,6 @@ namespace EasyNetQ.Tests
                 "ReplyTo=reply_to, Expiration=expiration, MessageId=message_id, Timestamp=123456, Type=type, " +
                 "UserId=userid, AppId=app_id, ClusterId=cluster_id";
 
-            var stringBuilder = new StringBuilder();
             var headers = new Dictionary<string, object>
                 {
                     { "key1", "value1" },

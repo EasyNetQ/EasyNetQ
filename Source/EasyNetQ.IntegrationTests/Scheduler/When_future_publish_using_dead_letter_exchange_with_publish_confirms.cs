@@ -15,8 +15,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         )
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=-1",
-                c => c.EnableDeadLetterExchangeAndMessageTtlScheduler()
+                $"host={fixture.Host};prefetchCount=1;publisherConfirms=True;timeout=-1", c => { }
             );
         }
 
@@ -40,7 +39,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
 
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
-                await bus.Scheduler.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), cts.Token)
+                await bus.Scheduler.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), "#", cts.Token)
                     .ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);

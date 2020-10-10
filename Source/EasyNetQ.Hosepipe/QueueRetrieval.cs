@@ -5,16 +5,16 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe
 {
-    public interface IQueueRetreival
+    public interface IQueueRetrieval
     {
         IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters);
     }
 
-    public class QueueRetreival : IQueueRetreival
+    public class QueueRetrieval : IQueueRetrieval
     {
         private readonly IErrorMessageSerializer errorMessageSerializer;
 
-        public QueueRetreival(IErrorMessageSerializer errorMessageSerializer)
+        public QueueRetrieval(IErrorMessageSerializer errorMessageSerializer)
         {
             this.errorMessageSerializer = errorMessageSerializer;
         }
@@ -47,7 +47,8 @@ namespace EasyNetQ.Hosepipe
                         basicGetResult.Redelivered,
                         basicGetResult.Exchange,
                         basicGetResult.RoutingKey,
-                        parameters.QueueName);
+                        parameters.QueueName
+                    );
 
                     yield return new HosepipeMessage(errorMessageSerializer.Serialize(basicGetResult.Body.ToArray()), properties, info);
                 }

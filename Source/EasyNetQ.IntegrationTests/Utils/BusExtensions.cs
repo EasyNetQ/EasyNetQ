@@ -41,11 +41,12 @@ namespace EasyNetQ.IntegrationTests.Utils
             this IScheduler scheduler,
             IEnumerable<T> messages,
             TimeSpan delay,
+            string topic = "#",
             CancellationToken cancellationToken = default
         )
         {
             foreach (var message in messages)
-                await scheduler.FuturePublishAsync(message, delay, cancellationToken).ConfigureAwait(false);
+                await scheduler.FuturePublishAsync(message, delay, c => c.WithTopic(topic), cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task SendBatchAsync<T>(

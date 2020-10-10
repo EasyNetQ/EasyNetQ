@@ -58,7 +58,15 @@ namespace EasyNetQ
                 .Register<IPubSub, DefaultPubSub>()
                 .Register<IRpc, DefaultRpc>()
                 .Register<ISendReceive, DefaultSendReceive>()
-                .Register<IScheduler, ExternalScheduler>()
+                .Register<IScheduler>(
+                    x => new DeadLetterExchangeAndMessageTtlScheduler(
+                        x.Resolve<ConnectionConfiguration>(),
+                        x.Resolve<IAdvancedBus>(),
+                        x.Resolve<IConventions>(),
+                        x.Resolve<IMessageDeliveryModeStrategy>(),
+                        x.Resolve<IExchangeDeclareStrategy>()
+                    )
+                )
                 .Register<IBus, RabbitBus>();
         }
 
@@ -116,15 +124,24 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        ///     Enables support of scheduling messages using DLX + Message TTL.
+        ///     Enables legacy support of scheduling messages using DLX + Message TTL.
         ///     See <see cref="DeadLetterExchangeAndMessageTtlScheduler"/> for more details
         /// </summary>
         /// <param name="serviceRegister">The register</param>
-        public static IServiceRegister EnableDeadLetterExchangeAndMessageTtlScheduler(
+        public static IServiceRegister EnableLegacyDeadLetterExchangeAndMessageTtlScheduler(
             this IServiceRegister serviceRegister
         )
         {
-            return serviceRegister.Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
+            return serviceRegister.Register<IScheduler>(
+                x => new DeadLetterExchangeAndMessageTtlScheduler(
+                    x.Resolve<ConnectionConfiguration>(),
+                    x.Resolve<IAdvancedBus>(),
+                    x.Resolve<IConventions>(),
+                    x.Resolve<IMessageDeliveryModeStrategy>(),
+                    x.Resolve<IExchangeDeclareStrategy>(),
+                    true
+                )
+            );
         }
 
         /// <summary>

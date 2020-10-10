@@ -16,6 +16,7 @@ namespace EasyNetQ
         private readonly IAdvancedBus advancedBus;
         private readonly IConventions conventions;
         private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
+        private readonly bool setDeadLetterRoutingKey;
         private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
         /// <summary>
@@ -26,12 +27,14 @@ namespace EasyNetQ
         /// <param name="conventions">The conventions</param>
         /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
         /// <param name="exchangeDeclareStrategy">The exchange declare strategy</param>
+        /// <param name="setDeadLetterRoutingKey">Set deadLetterRoutingKey for backward compability</param>
         public DeadLetterExchangeAndMessageTtlScheduler(
             ConnectionConfiguration configuration,
             IAdvancedBus advancedBus,
             IConventions conventions,
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy,
-            IExchangeDeclareStrategy exchangeDeclareStrategy
+            IExchangeDeclareStrategy exchangeDeclareStrategy,
+            bool setDeadLetterRoutingKey = false
         )
         {
             Preconditions.CheckNotNull(configuration, "configuration");
@@ -45,6 +48,7 @@ namespace EasyNetQ
             this.conventions = conventions;
             this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
             this.exchangeDeclareStrategy = exchangeDeclareStrategy;
+            this.setDeadLetterRoutingKey = setDeadLetterRoutingKey;
         }
 
         /// <inheritdoc />
@@ -79,9 +83,13 @@ namespace EasyNetQ
 
             var futureQueue = await advancedBus.QueueDeclareAsync(
                 conventions.QueueNamingConvention(typeof(T), delayString),
-                c => c.WithMessageTtl(delay)
-                    .WithDeadLetterExchange(exchange)
-                    .WithDeadLetterRoutingKey(topic),
+                c =>
+                {
+                    c.WithMessageTtl(delay);
+                    c.WithDeadLetterExchange(exchange);
+                    if (setDeadLetterRoutingKey)
+                        c.WithDeadLetterRoutingKey(topic);
+                },
                 cts.Token
             ).ConfigureAwait(false);
 
