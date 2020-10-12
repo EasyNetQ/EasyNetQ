@@ -616,14 +616,14 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult> CreatePullingConsumer(IQueue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer(queue, options);
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<T> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer<T>(queue, options);

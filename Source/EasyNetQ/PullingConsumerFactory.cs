@@ -15,7 +15,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="options">The options</param>
         /// <returns></returns>
-        IPullingConsumer CreateConsumer(IQueue queue, PullingConsumerOptions options);
+        IPullingConsumer<PullResult> CreateConsumer(IQueue queue, PullingConsumerOptions options);
 
         /// <summary>
         ///     Creates a pulling consumer
@@ -23,15 +23,15 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="options">The options</param>
         /// <returns></returns>
-        IPullingConsumer<T> CreateConsumer<T>(IQueue queue, PullingConsumerOptions options);
+        IPullingConsumer<PullResult<T>> CreateConsumer<T>(IQueue queue, PullingConsumerOptions options);
     }
 
     /// <inheritdoc />
     public class PullingConsumerFactory : IPullingConsumerFactory
     {
         private readonly IPersistentChannelFactory channelFactory;
-        private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
+        private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
         /// <summary>
         ///     Creates PullingConsumerFactory
@@ -51,14 +51,14 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IPullingConsumer CreateConsumer(IQueue queue, PullingConsumerOptions options)
+        public IPullingConsumer<PullResult> CreateConsumer(IQueue queue, PullingConsumerOptions options)
         {
             var channel = channelFactory.CreatePersistentChannel(new PersistentChannelOptions());
             return new PullingConsumer(options, queue, channel, produceConsumeInterceptor);
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<T> CreateConsumer<T>(IQueue queue, PullingConsumerOptions options)
+        public IPullingConsumer<PullResult<T>> CreateConsumer<T>(IQueue queue, PullingConsumerOptions options)
         {
             var consumer = CreateConsumer(queue, options);
             return new PullingConsumer<T>(consumer, messageSerializationStrategy);
