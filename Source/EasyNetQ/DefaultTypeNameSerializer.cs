@@ -7,6 +7,7 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
+    /// <inheritdoc />
     public class DefaultTypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();

@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace EasyNetQ
 {
+    /// <inheritdoc />
     public class LegacyTypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
