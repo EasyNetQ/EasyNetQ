@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RabbitMQ.Client;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ
@@ -148,7 +147,7 @@ namespace EasyNetQ
         /// </summary>
         public IDictionary<string, object> Headers
         {
-            get => headers ?? (headers = new Dictionary<string, object>());
+            get => headers ??= new Dictionary<string, object>();
             set => headers = value;
         }
 

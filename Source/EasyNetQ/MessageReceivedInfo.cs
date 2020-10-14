@@ -1,16 +1,43 @@
 ﻿namespace EasyNetQ
 {
+    /// <summary>
+    ///     Represents various properties of a received message
+    /// </summary>
     public class MessageReceivedInfo
     {
-        public string ConsumerTag { get; set; }
-        public ulong DeliveryTag { get; set; }
-        public bool Redelivered { get; set; }
-        public string Exchange { get; set; }
-        public string RoutingKey { get; set; }
-        public string Queue { get; set; }
+        /// <summary>
+        ///     Consumer tag
+        /// </summary>
+        public string ConsumerTag { get; }
 
-        public MessageReceivedInfo() { }
+        /// <summary>
+        ///     Delivery tag
+        /// </summary>
+        public ulong DeliveryTag { get; }
 
+        /// <summary>
+        ///     True if a message is redelivered
+        /// </summary>
+        public bool Redelivered { get; }
+
+        /// <summary>
+        ///     Exchange
+        /// </summary>
+        public string Exchange { get; }
+
+        /// <summary>
+        ///     Routing key
+        /// </summary>
+        public string RoutingKey { get; }
+
+        /// <summary>
+        ///     Queue
+        /// </summary>
+        public string Queue { get; }
+
+        /// <summary>
+        ///     Creates MessageReceivedInfo
+        /// </summary>
         public MessageReceivedInfo(
             string consumerTag,
             ulong deliveryTag,

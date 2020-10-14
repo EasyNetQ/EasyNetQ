@@ -285,7 +285,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="autoAck"></param>
         /// <returns></returns>
-        IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true);
+        IPullingConsumer<PullResult> CreatePullingConsumer(IQueue queue, bool autoAck = true);
 
         /// <summary>
         ///     Creates a new pulling consumer
@@ -293,7 +293,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="autoAck"></param>
         /// <returns></returns>
-        IPullingConsumer<T> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true);
+        IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true);
 
         /// <summary>
         /// Event fires when the bus has connected to a RabbitMQ broker.

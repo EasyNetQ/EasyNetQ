@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.Interception
             var body = Encoding.UTF8.GetBytes("haha");
             var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
             var message = interceptor.OnProduce(outgoingMessage);
-            var incomingMessage = new ConsumedMessage(new MessageReceivedInfo(), message.Properties, message.Body);
+            var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
             Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body);
         }
 
@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests.Interception
             var body = Encoding.UTF8.GetBytes("haha");
             var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
             var message = interceptor.OnProduce(outgoingMessage);
-            var incomingMessage = new ConsumedMessage(new MessageReceivedInfo(), message.Properties, message.Body);
+            var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
             Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body);
         }
 
@@ -51,9 +51,9 @@ namespace EasyNetQ.Tests.Interception
         [Fact]
         public void ShouldCallAddedInterceptorsOnConsume()
         {
-            var sourceMessage = new ConsumedMessage(new MessageReceivedInfo(), new MessageProperties(), new byte[0]);
-            var firstMessage = new ConsumedMessage(new MessageReceivedInfo(), new MessageProperties(), new byte[0]);
-            var secondMessage = new ConsumedMessage(new MessageReceivedInfo(), new MessageProperties(), new byte[0]);
+            var sourceMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
+            var firstMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
+            var secondMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
 
             var first = Substitute.For<IProduceConsumeInterceptor>();
             var second = Substitute.For<IProduceConsumeInterceptor>();

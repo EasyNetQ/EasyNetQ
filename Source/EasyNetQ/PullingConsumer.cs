@@ -9,14 +9,36 @@ using EasyNetQ.Topology;
 namespace EasyNetQ
 {
     /// <summary>
+    ///     Represents a result of a pull
+    /// </summary>
+    public interface IPullResult
+    {
+        /// <summary>
+        ///     True if a message is available
+        /// </summary>
+        public bool IsAvailable { get; }
+
+        /// <summary>
+        ///     Returns remained messages count if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public ulong MessagesCount { get; }
+
+        /// <summary>
+        ///     Returns received info if the message is available
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public MessageReceivedInfo ReceivedInfo { get; }
+    }
+
+    /// <summary>
     ///     Represents a result of a message pull
     /// </summary>
-    public readonly struct PullResult
+    public readonly struct PullResult : IPullResult
     {
         private readonly MessageReceivedInfo receivedInfo;
         private readonly MessageProperties properties;
         private readonly byte[] body;
-        private readonly bool isAvailable;
         private readonly ulong messagesCount;
 
         /// <summary>
@@ -39,7 +61,7 @@ namespace EasyNetQ
             bool isAvailable, ulong messagesCount, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
         )
         {
-            this.isAvailable = isAvailable;
+            IsAvailable = isAvailable;
             this.messagesCount = messagesCount;
             this.receivedInfo = receivedInfo;
             this.properties = properties;
@@ -47,19 +69,19 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        ///     True is a message is available
+        ///     True if a message is available
         /// </summary>
-        public bool IsAvailable => isAvailable;
+        public bool IsAvailable { get; }
 
         /// <summary>
         ///     Returns remained messages count if the message is available
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public ulong RemainedMessagesCount
+        public ulong MessagesCount
         {
             get
             {
-                if (!isAvailable)
+                if (!IsAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return messagesCount;
@@ -74,7 +96,7 @@ namespace EasyNetQ
         {
             get
             {
-                if (!isAvailable)
+                if (!IsAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return receivedInfo;
@@ -89,7 +111,7 @@ namespace EasyNetQ
         {
             get
             {
-                if (!isAvailable)
+                if (!IsAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return properties;
@@ -112,16 +134,14 @@ namespace EasyNetQ
         }
     }
 
-        /// <summary>
+    /// <summary>
     ///     Represents a result of a message pull
     /// </summary>
-    public readonly struct PullResult<T>
+    public readonly struct PullResult<T> : IPullResult
     {
         private readonly MessageReceivedInfo receivedInfo;
         private readonly IMessage<T> message;
-        private readonly bool isAvailable;
         private readonly ulong messagesCount;
-
 
         /// <summary>
         ///     Represents a result when no message is available
@@ -131,6 +151,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Represents a result when a message is available
         /// </summary>
+        /// <returns></returns>
         public static PullResult<T> Available(
             ulong messagesCount, MessageReceivedInfo receivedInfo, IMessage<T> message
         )
@@ -138,28 +159,33 @@ namespace EasyNetQ
             return new PullResult<T>(true, messagesCount, receivedInfo, message);
         }
 
-        private PullResult(bool isAvailable, ulong messagesCount, MessageReceivedInfo receivedInfo, IMessage<T> message)
+        private PullResult(
+            bool isAvailable,
+            ulong messagesCount,
+            MessageReceivedInfo receivedInfo,
+            IMessage<T> message
+        )
         {
-            this.isAvailable = isAvailable;
+            IsAvailable = isAvailable;
             this.messagesCount = messagesCount;
             this.receivedInfo = receivedInfo;
             this.message = message;
         }
 
         /// <summary>
-        ///     True is a message is available
+        ///     True if a message is available
         /// </summary>
-        public bool IsAvailable => isAvailable;
+        public bool IsAvailable { get; }
 
         /// <summary>
         ///     Returns remained messages count if the message is available
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public ulong RemainedMessagesCount
+        public ulong MessagesCount
         {
             get
             {
-                if (!isAvailable)
+                if (!IsAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return messagesCount;
@@ -174,7 +200,7 @@ namespace EasyNetQ
         {
             get
             {
-                if (!isAvailable)
+                if (!IsAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return receivedInfo;
@@ -189,7 +215,7 @@ namespace EasyNetQ
         {
             get
             {
-                if (!isAvailable)
+                if (!IsAvailable)
                     throw new InvalidOperationException("No message is available");
 
                 return message;
@@ -197,50 +223,18 @@ namespace EasyNetQ
         }
     }
 
+
     /// <summary>
     ///     Allows to receive messages by pulling them one by one
     /// </summary>
-    public interface IPullingConsumer : IDisposable
+    public interface IPullingConsumer<TPullResult> : IDisposable where TPullResult : IPullResult
     {
         /// <summary>
         ///     Receives a single message
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
-        Task<PullResult> PullAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        ///     Acknowledges one or more messages
-        /// </summary>
-        /// <param name="deliveryTag"></param>
-        /// <param name="multiple"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        ///     Rejects one or more messages
-        /// </summary>
-        /// <param name="deliveryTag"></param>
-        /// <param name="multiple"></param>
-        /// <param name="requeue"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task RejectAsync(ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default);
-    }
-
-
-    /// <summary>
-    ///     Allows to receive messages by pulling them one by one
-    /// </summary>
-    public interface IPullingConsumer<T> : IDisposable
-    {
-        /// <summary>
-        ///     Receives a single message
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns></returns>
-        Task<PullResult<T>> PullAsync(CancellationToken cancellationToken = default);
+        Task<TPullResult> PullAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Acknowledges one or more messages
@@ -290,7 +284,7 @@ namespace EasyNetQ
     }
 
     /// <inheritdoc />
-    public class PullingConsumer : IPullingConsumer
+    public class PullingConsumer : IPullingConsumer<PullResult>
     {
         private readonly IPersistentChannel channel;
         private readonly IProduceConsumeInterceptor interceptor;
@@ -377,19 +371,24 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public void Dispose() => channel.Dispose();
+        public void Dispose()
+        {
+            channel.Dispose();
+        }
     }
 
     /// <inheritdoc />
-    public class PullingConsumer<T> : IPullingConsumer<T>
+    public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     {
-        private readonly IPullingConsumer consumer;
+        private readonly IPullingConsumer<PullResult> consumer;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
 
         /// <summary>
         ///     Creates PullingConsumer
         /// </summary>
-        public PullingConsumer(IPullingConsumer consumer, IMessageSerializationStrategy messageSerializationStrategy)
+        public PullingConsumer(
+            IPullingConsumer<PullResult> consumer, IMessageSerializationStrategy messageSerializationStrategy
+        )
         {
             this.consumer = consumer;
             this.messageSerializationStrategy = messageSerializationStrategy;
@@ -405,7 +404,7 @@ namespace EasyNetQ
             var message = messageSerializationStrategy.DeserializeMessage(pullResult.Properties, pullResult.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))
                 return PullResult<T>.Available(
-                    pullResult.RemainedMessagesCount,
+                    pullResult.MessagesCount,
                     pullResult.ReceivedInfo,
                     new Message<T>((T) message.GetBody(), message.Properties)
                 );
@@ -430,6 +429,9 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public void Dispose() => consumer.Dispose();
+        public void Dispose()
+        {
+            consumer.Dispose();
+        }
     }
 }

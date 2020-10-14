@@ -57,7 +57,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
             Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(pullingConsumerFactory, "receiverFactory");
+            Preconditions.CheckNotNull(pullingConsumerFactory, "pullingConsumerFactory");
             Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
 
             this.connection = connection;
@@ -616,14 +616,14 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IPullingConsumer CreatePullingConsumer(IQueue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult> CreatePullingConsumer(IQueue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer(queue, options);
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<T> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer<T>(queue, options);
