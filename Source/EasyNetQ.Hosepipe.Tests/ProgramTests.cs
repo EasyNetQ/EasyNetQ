@@ -9,10 +9,10 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class ProgramTests
     {
-        private Program program;
-        private MockMessageWriter messageWriter;
-        private MockQueueRetrieval queueRetrieval;
-        private MockMessageReader messageReader;
+        private readonly Program program;
+        private readonly MockMessageWriter messageWriter;
+        private readonly MockQueueRetrieval queueRetrieval;
+        private readonly MockMessageReader messageReader;
         private readonly MockQueueInsertion queueInsertion;
         private readonly MockErrorRetry errorRetry;
         private readonly Conventions conventions;

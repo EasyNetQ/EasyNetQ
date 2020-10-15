@@ -184,17 +184,14 @@ namespace EasyNetQ.Hosepipe
 
         private static void PrintUsage()
         {
-            using (var manifest = typeof(Program).GetTypeInfo().Assembly.GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt"))
+            using var manifest = typeof(Program).GetTypeInfo().Assembly.GetManifestResourceStream("EasyNetQ.Hosepipe.Usage.txt");
+            if (manifest == null)
             {
-                if (manifest == null)
-                {
-                    throw new Exception("Could not load usage");
-                }
-                using (var reader = new StreamReader(manifest))
-                {
-                    Console.Write(reader.ReadToEnd());
-                }
+                throw new Exception("Could not load usage");
             }
+
+            using var reader = new StreamReader(manifest);
+            Console.Write(reader.ReadToEnd());
         }
     }
 }

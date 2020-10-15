@@ -21,7 +21,7 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         [Fact]
-        public void Should_deserialise_error_message_correctly()
+        public void Should_deserialize_error_message_correctly()
         {
             var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
 
@@ -30,7 +30,7 @@ namespace EasyNetQ.Hosepipe.Tests
         }
 
         [Fact]
-        public void Should_fail_to_deseralize_some_other_random_message()
+        public void Should_fail_to_deserialize_some_other_random_message()
         {
             const string randomMessage = "{\"Text\":\"Hello World\"}";
             var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(randomMessage));
@@ -49,24 +49,22 @@ namespace EasyNetQ.Hosepipe.Tests
                 Password = "guest"
             };
 
-            using (var connection = connectionFactory.CreateConnection())
-            using (var model = connection.CreateModel())
+            using var connection = connectionFactory.CreateConnection();
+            using var model = connection.CreateModel();
+            try
             {
-                try
-                {
-                    model.ExchangeDeclarePassive(error.Exchange);
+                model.ExchangeDeclarePassive(error.Exchange);
 
-                    var properties = model.CreateBasicProperties();
-                    error.BasicProperties.CopyTo(properties);
+                var properties = model.CreateBasicProperties();
+                error.BasicProperties.CopyTo(properties);
 
-                    var body = Encoding.UTF8.GetBytes(error.Message);
+                var body = Encoding.UTF8.GetBytes(error.Message);
 
-                    model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
-                }
-                catch (OperationInterruptedException)
-                {
-                    testOutputHelper.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'", error.Exchange, connectionFactory.HostName, connectionFactory.VirtualHost);
-                }
+                model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
+            }
+            catch (OperationInterruptedException)
+            {
+                testOutputHelper.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'", error.Exchange, connectionFactory.HostName, connectionFactory.VirtualHost);
             }
         }
 

@@ -11,7 +11,7 @@
                 "exchange_name",
                 "routing_key",
                 "queue_name"
-                );
+            );
         }
     }
 }
