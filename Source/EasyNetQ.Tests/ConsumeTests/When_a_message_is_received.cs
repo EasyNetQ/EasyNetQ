@@ -14,13 +14,12 @@ namespace EasyNetQ.Tests.ConsumeTests
 {
     public class When_a_message_is_received : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private MyMessage deliveredMyMessage;
         private MyOtherMessage deliveredMyOtherMessage;
 
         public When_a_message_is_received()
         {
-            //mockBuilder = new MockBuilder(x => x.Register<IEasyNetQLogger, ConsoleLogger>());
             mockBuilder = new MockBuilder();
 
             mockBuilder.SendReceive.Receive("the_queue", x => x
@@ -70,7 +69,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "the_routing_key",
                 properties,
                 body
-                );
+            );
 
             if (!autoResetEvent.WaitOne(5000))
             {

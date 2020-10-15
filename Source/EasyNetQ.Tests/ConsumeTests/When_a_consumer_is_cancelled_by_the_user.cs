@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 {
     public class When_a_consumer_is_cancelled_by_the_user : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         public When_a_consumer_is_cancelled_by_the_user()
         {

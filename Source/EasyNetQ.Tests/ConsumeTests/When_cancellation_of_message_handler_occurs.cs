@@ -2,7 +2,6 @@
 
 using EasyNetQ.Consumer;
 using NSubstitute;
-using System;
 using System.Linq;
 using Xunit;
 
@@ -19,6 +18,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 {
                     Cancellation.Cancel();
                     Cancellation.Token.ThrowIfCancellationRequested();
+                    return AckStrategies.Ack;
                 });
             DeliverMessage();
         }
