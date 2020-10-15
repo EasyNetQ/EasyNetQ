@@ -30,16 +30,34 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(queue, nameof(queue));
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
 
-            var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => onMessage(m, p, i));
-            return new QueueConsumerPair(queue, new MessageHandler(onMessageAsync), null);
+            var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>(
+                (m, p, i, c) => onMessage(m, p, i)
+            );
+            return Consume(queue, onMessageAsync);
         }
 
-        public static QueueConsumerPair Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
+        public static QueueConsumerPair Consume(
+            IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage
+        )
         {
             Preconditions.CheckNotNull(queue, nameof(queue));
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
 
-            return new QueueConsumerPair(queue, (m, p, i, c) => onMessage(m, p, i), null);
+            return Consume(queue, (m, p, i, c) => onMessage(m, p, i));
+        }
+
+        public static QueueConsumerPair Consume(
+            IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage
+        )
+        {
+            Preconditions.CheckNotNull(queue, nameof(queue));
+            Preconditions.CheckNotNull(onMessage, nameof(onMessage));
+
+            return new QueueConsumerPair(queue, async (m, p, i, c) =>
+            {
+                await onMessage(m, p, i, c).ConfigureAwait(false);
+                return AckStrategies.Ack;
+            }, null);
         }
 
         private QueueConsumerPair(IQueue queue, MessageHandler onMessage, Action<IHandlerRegistration> addHandlers)

@@ -40,7 +40,7 @@ namespace EasyNetQ.Tests
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, info, cancellation) => Task.CompletedTask,
+                (bytes, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack),
                 new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {

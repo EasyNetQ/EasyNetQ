@@ -6,7 +6,7 @@ namespace EasyNetQ.Consumer
     /// <summary>
     ///     Represents a delegate which is called by consumer for every message
     /// </summary>
-    public delegate Task MessageHandler(
+    public delegate Task<AckStrategy> MessageHandler(
         byte[] body,
         MessageProperties properties,
         MessageReceivedInfo receivedInfo,
@@ -16,7 +16,7 @@ namespace EasyNetQ.Consumer
     /// <summary>
     ///     Represents a delegate which is called by consumer for every message
     /// </summary>
-    public delegate Task IMessageHandler(
+    public delegate Task<AckStrategy> IMessageHandler(
         IMessage message,
         MessageReceivedInfo receivedInfo,
         CancellationToken cancellationToken
@@ -25,7 +25,7 @@ namespace EasyNetQ.Consumer
     /// <summary>
     ///     Represents a delegate which is called by consumer for every message
     /// </summary>
-    public delegate Task IMessageHandler<in T>(
+    public delegate Task<AckStrategy> IMessageHandler<in T>(
         IMessage<T> message,
         MessageReceivedInfo receivedInfo,
         CancellationToken cancellationToken

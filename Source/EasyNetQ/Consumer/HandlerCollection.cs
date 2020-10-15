@@ -64,7 +64,7 @@ namespace EasyNetQ.Consumer
                 throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
             }
 
-            return (m, i, c) => Task.CompletedTask;
+            return (m, i, c) => Task.FromResult(AckStrategies.Ack);
         }
 
         /// <inheritdoc />

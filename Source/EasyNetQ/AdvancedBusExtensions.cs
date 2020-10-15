@@ -21,7 +21,9 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage)
+        public static IDisposable Consume<T>(
+            this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -38,12 +40,17 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage, Action<IConsumerConfiguration> configure)
+        public static IDisposable Consume<T>(
+            this IAdvancedBus bus,
+            IQueue queue,
+            Action<IMessage<T>, MessageReceivedInfo> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
             var onMessageAsync = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => onMessage(m, i));
-            return bus.Consume(queue, new IMessageHandler<T>(onMessageAsync), configure);
+            return bus.Consume(queue, onMessageAsync, configure);
         }
 
         /// <summary>
@@ -54,7 +61,9 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="onMessage">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage)
+        public static IDisposable Consume<T>(
+            this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -72,11 +81,43 @@ namespace EasyNetQ
         /// Fluent configuration e.g. x => x.WithPriority(10)
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume<T>(this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> onMessage, Action<IConsumerConfiguration> configure)
+        public static IDisposable Consume<T>(
+            this IAdvancedBus bus,
+            IQueue queue,
+            Func<IMessage<T>, MessageReceivedInfo, Task> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
             return bus.Consume<T>(queue, (m, i, c) => onMessage(m, i), configure);
+        }
+
+        /// <summary>
+        /// Consume a stream of messages asynchronously
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to take messages from</param>
+        /// <param name="onMessage">The message handler</param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume<T>(
+            this IAdvancedBus bus,
+            IQueue queue,
+            Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume<T>(queue, async (m, i, c) =>
+            {
+                await onMessage(m, i, c).ConfigureAwait(false);
+                return AckStrategies.Ack;
+            }, configure);
         }
 
         /// <summary>
@@ -134,7 +175,7 @@ namespace EasyNetQ
 
             var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => onMessage(m, p, i));
 
-            return bus.Consume(queue, new MessageHandler(onMessageAsync), configure);
+            return bus.Consume(queue, onMessageAsync, configure);
         }
 
         /// <summary>
@@ -181,6 +222,35 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             return bus.Consume(queue, (m, p, i, c) => onMessage(m, p, i), configure);
+        }
+
+        /// <summary>
+        /// Consume raw bytes from the queue.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="queue">The queue to subscribe to</param>
+        /// <param name="onMessage">
+        /// The message handler. Takes the message body, message properties and some information about the
+        /// receive context. Returns a Task.
+        /// </param>
+        /// <param name="configure">
+        /// Fluent configuration e.g. x => x.WithPriority(10)
+        /// </param>
+        /// <returns>A disposable to cancel the consumer</returns>
+        public static IDisposable Consume(
+            this IAdvancedBus bus,
+            IQueue queue,
+            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            Action<IConsumerConfiguration> configure
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.Consume(queue, async (m, p, i, c) =>
+            {
+                await onMessage(m, p, i, c).ConfigureAwait(false);
+                return AckStrategies.Ack;
+            }, configure);
         }
 
         /// <summary>
