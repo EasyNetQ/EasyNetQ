@@ -1,9 +1,8 @@
-﻿
-using System;
+﻿using System;
 
 namespace EasyNetQ.DI
 {
-    public class DefaultServiceContainer : IServiceRegister
+    public class DefaultServiceContainer : IServiceRegister, ICollectionServiceRegister
     {
         private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer();
 
@@ -18,15 +17,33 @@ namespace EasyNetQ.DI
             return this;
         }
 
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+        {
+            container.Register<TService, TImplementation>(typeof(TImplementation).Name, ToLifetime(lifetime));
+            return this;
+        }
+
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             container.RegisterInstance(instance);
             return this;
         }
 
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+        {
+            container.RegisterInstance(instance, instance.GetType().Name);
+            return this;
+        }
+
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
+            return this;
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+        {
+            container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), typeof(TService).Name + "_RegisterFunc", ToLifetime(lifetime));
             return this;
         }
 

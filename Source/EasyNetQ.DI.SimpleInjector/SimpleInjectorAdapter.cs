@@ -3,7 +3,8 @@ using SimpleInjector;
 
 namespace EasyNetQ.DI.SimpleInjector
 {
-    public class SimpleInjectorAdapter : IServiceRegister, IServiceResolver
+    // https://simpleinjector.readthedocs.io/en/latest/using.html
+    public class SimpleInjectorAdapter : IServiceRegister, ICollectionServiceRegister, IServiceResolver
     {
         private readonly Container container;
 
@@ -30,15 +31,35 @@ namespace EasyNetQ.DI.SimpleInjector
             }
         }
 
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    container.Collection.Append<TService, TImplementation>(Lifestyle.Transient);
+                    return this;
+                case Lifetime.Singleton:
+                    container.Collection.Append<TService, TImplementation>(Lifestyle.Singleton);
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             container.RegisterSingleton(instance);
             return this;
         }
 
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+        {
+            container.Collection.AppendInstance(instance);
+            return this;
+        }
+
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
-
             switch (lifetime)
             {
                 case Lifetime.Transient:
@@ -46,6 +67,21 @@ namespace EasyNetQ.DI.SimpleInjector
                     return this;
                 case Lifetime.Singleton:
                     container.RegisterSingleton(() => factory(this));
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton)
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    container.Collection.Append(() => factory(this), Lifestyle.Transient);
+                    return this;
+                case Lifetime.Singleton:
+                    container.Collection.Append(() => factory(this), Lifestyle.Singleton);
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);

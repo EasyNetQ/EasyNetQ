@@ -4,13 +4,17 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
 using EasyNetQ.DI.Microsoft;
 
-
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class EasyNetQServiceCollectionExtensions
     {
-        public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices) 
+        public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        {
+            return serviceCollection.RegisterEasyNetQ(connectionConfigurationFactory, (r, _) => registerServices(r));
+        }
+
+        public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister, ICollectionServiceRegister> registerServices) 
         {
             if (serviceCollection == null)
             {
@@ -24,31 +28,21 @@ namespace Microsoft.Extensions.DependencyInjection
         
         public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
         {
-            if (serviceCollection == null)
-            {
-                throw new ArgumentNullException(nameof(serviceCollection));
-            }
-            
-            return serviceCollection.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return serviceCollection.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, string connectionString, Action<IServiceRegister> registerServices)
         {
-            if (serviceCollection == null)
-            {
-                throw new ArgumentNullException(nameof(serviceCollection));
-            }
-            
+            return serviceCollection.RegisterEasyNetQ(connectionString, (r, _) => registerServices(r));
+        }
+
+        public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, string connectionString, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
+        {
             return serviceCollection.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
         }
-        
+
         public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, string connectionString)
         {
-            if (serviceCollection == null)
-            {
-                throw new ArgumentNullException(nameof(serviceCollection));
-            }
-            
             return serviceCollection.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
         }
     }

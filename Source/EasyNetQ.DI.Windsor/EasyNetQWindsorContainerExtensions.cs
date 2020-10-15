@@ -11,6 +11,11 @@ namespace Castle.Windsor
     {
         public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {
+            return container.RegisterEasyNetQ(connectionConfigurationFactory, (r, _) => registerServices(r));
+        }
+
+        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
+        {
             if (container == null)
             {
                 throw new ArgumentNullException(nameof(container));
@@ -20,34 +25,24 @@ namespace Castle.Windsor
             RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return container;
         }
-        
+
         public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-            
-            return container.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return container.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString, Action<IServiceRegister> registerServices)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-            
+            return container.RegisterEasyNetQ(connectionString, (r, _) => registerServices(r));
+        }
+
+        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
+        {
             return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
         }
-        
+
         public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-            
             return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
         }
     }

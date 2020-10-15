@@ -3,7 +3,7 @@ using Ninject;
 
 namespace EasyNetQ.DI.Ninject
 {
-    public class NinjectAdapter : IServiceRegister
+    public class NinjectAdapter : IServiceRegister, ICollectionServiceRegister
     {
         private readonly IKernel kernel;
 
@@ -29,9 +29,30 @@ namespace EasyNetQ.DI.Ninject
             }
         }
 
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    kernel.Bind<TService>().To<TImplementation>().InTransientScope();
+                    return this;
+                case Lifetime.Singleton:
+                    kernel.Bind<TService>().To<TImplementation>().InSingletonScope();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             kernel.Rebind<TService>().ToConstant(instance);
+            return this;
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+        {
+            kernel.Bind<TService>().ToConstant(instance);
             return this;
         }
 
@@ -44,6 +65,21 @@ namespace EasyNetQ.DI.Ninject
                     return this;
                 case Lifetime.Singleton:
                     kernel.Rebind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InSingletonScope();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    kernel.Bind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InTransientScope();
+                    return this;
+                case Lifetime.Singleton:
+                    kernel.Bind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InSingletonScope();
                     return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);

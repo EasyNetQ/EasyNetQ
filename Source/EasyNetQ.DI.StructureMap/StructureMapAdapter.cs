@@ -4,7 +4,7 @@ using StructureMap.Pipeline;
 
 namespace EasyNetQ.DI.StructureMap
 {
-    public class StructureMapAdapter : IServiceRegister
+    public class StructureMapAdapter : IServiceRegister, ICollectionServiceRegister
     {
         private readonly IRegistry registry;
 
@@ -20,6 +20,21 @@ namespace EasyNetQ.DI.StructureMap
             switch (lifetime)
             {
                 case Lifetime.Transient:
+                    registry.For<TService>(Lifecycles.Transient).ClearAll().Use<TImplementation>();
+                    return this;
+                case Lifetime.Singleton:
+                    registry.For<TService>(Lifecycles.Singleton).ClearAll().Use<TImplementation>();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
                     registry.For<TService>(Lifecycles.Transient).Use<TImplementation>();
                     return this;
                 case Lifetime.Singleton:
@@ -29,14 +44,35 @@ namespace EasyNetQ.DI.StructureMap
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
-
+        
         public IServiceRegister Register<TService>(TService instance) where TService : class
+        {
+            registry.For<TService>(Lifecycles.Singleton).ClearAll().Use(instance);
+            return this;
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
         {
             registry.For<TService>(Lifecycles.Singleton).Use(instance);
             return this;
         }
 
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    registry.For<TService>(Lifecycles.Transient).ClearAll().Use(y => factory(y.GetInstance<IServiceResolver>()));
+                    return this;
+                case Lifetime.Singleton:
+                    registry.For<TService>(Lifecycles.Singleton).ClearAll().Use(y => factory(y.GetInstance<IServiceResolver>()));
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
         {
             switch (lifetime)
             {

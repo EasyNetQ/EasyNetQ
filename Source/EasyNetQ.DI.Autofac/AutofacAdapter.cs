@@ -3,7 +3,8 @@ using Autofac;
 
 namespace EasyNetQ.DI.Autofac
 {
-    public class AutofacAdapter : IServiceRegister
+    // NOTE: Autofac does not allow to replace registrations
+    public class AutofacAdapter : IServiceRegister, ICollectionServiceRegister
     {
         private readonly ContainerBuilder containerBuilder;
 
@@ -35,7 +36,19 @@ namespace EasyNetQ.DI.Autofac
             }
         }
 
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+        {
+            Register<TService, TImplementation>(lifetime);
+            return this;
+        }
+
         public IServiceRegister Register<TService>(TService instance) where TService : class
+        {
+            containerBuilder.RegisterInstance(instance);
+            return this;
+        }
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
         {
             containerBuilder.RegisterInstance(instance);
             return this;
@@ -59,7 +72,13 @@ namespace EasyNetQ.DI.Autofac
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
-        
+
+        ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+        {
+            Register(factory, lifetime);
+            return this;
+        }
+
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;

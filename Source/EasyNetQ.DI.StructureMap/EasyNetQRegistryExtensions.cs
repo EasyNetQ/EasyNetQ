@@ -11,6 +11,11 @@ namespace StructureMap
     {
         public static IRegistry RegisterEasyNetQ(this IRegistry registry, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
         {
+            return registry.RegisterEasyNetQ(connectionConfigurationFactory, (r, _) => registerServices(r));
+        }
+
+        public static IRegistry RegisterEasyNetQ(this IRegistry registry, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
+        {
             if (registry == null)
             {
                 throw new ArgumentNullException(nameof(registry));
@@ -20,34 +25,24 @@ namespace StructureMap
             RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
             return registry;
         }
-        
+
         public static IRegistry RegisterEasyNetQ(this IRegistry registry, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
         {
-            if (registry == null)
-            {
-                throw new ArgumentNullException(nameof(registry));
-            }
-            
-            return registry.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return registry.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IRegistry RegisterEasyNetQ(this IRegistry registry, string connectionString, Action<IServiceRegister> registerServices)
         {
-            if (registry == null)
-            {
-                throw new ArgumentNullException(nameof(registry));
-            }
-            
+            return registry.RegisterEasyNetQ(connectionString, (r, _) => registerServices(r));
+        }
+
+        public static IRegistry RegisterEasyNetQ(this IRegistry registry, string connectionString, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
+        {
             return registry.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
         }
-        
+
         public static IRegistry RegisterEasyNetQ(this IRegistry registry, string connectionString)
         {
-            if (registry == null)
-            {
-                throw new ArgumentNullException(nameof(registry));
-            }
-            
             return registry.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
         }
     }
