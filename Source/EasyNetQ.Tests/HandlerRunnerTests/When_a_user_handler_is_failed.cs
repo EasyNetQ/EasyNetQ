@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_failed()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(null, null).ReturnsForAnyArgs(AckStrategies.Ack);
+            consumerErrorStrategy.HandleConsumerError(default, null).ReturnsForAnyArgs(AckStrategies.Ack);
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 

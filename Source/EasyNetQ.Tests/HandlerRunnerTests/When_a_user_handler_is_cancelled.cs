@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_cancelled()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerCancelled(null).ReturnsForAnyArgs(AckStrategies.Ack);
+            consumerErrorStrategy.HandleConsumerCancelled(default).ReturnsForAnyArgs(AckStrategies.Ack);
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 

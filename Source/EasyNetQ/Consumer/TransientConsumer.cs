@@ -11,7 +11,7 @@ namespace EasyNetQ.Consumer
         private readonly IConsumerConfiguration configuration;
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        private readonly MessageHandler onMessage;
         private readonly IQueue queue;
 
         private bool disposed;
@@ -20,7 +20,7 @@ namespace EasyNetQ.Consumer
 
         public TransientConsumer(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus

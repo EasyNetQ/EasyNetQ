@@ -18,14 +18,14 @@ namespace EasyNetQ.Consumer
 
         private readonly ConcurrentSet<IInternalConsumer> internalConsumers = new ConcurrentSet<IInternalConsumer>();
 
-        private readonly ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs;
+        private readonly IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs;
 
         private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
 
         private bool disposed;
 
         public PersistentMultipleConsumer(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
             IPersistentConnection connection,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,

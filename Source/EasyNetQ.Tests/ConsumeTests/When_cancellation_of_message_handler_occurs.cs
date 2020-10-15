@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerCancelled(null)
+            ConsumerErrorStrategy.HandleConsumerCancelled(default)
                                  .ReturnsForAnyArgs(AckStrategies.Ack);
 
             StartConsumer((body, properties, info) =>

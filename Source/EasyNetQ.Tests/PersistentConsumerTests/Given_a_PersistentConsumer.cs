@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected IInternalConsumerFactory internalConsumerFactory;
         protected List<IInternalConsumer> internalConsumers;
         protected MockBuilder mockBuilder;
-        protected Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        protected MessageHandler onMessage;
         protected IPersistentConnection persistentConnection;
         protected IQueue queue;
 

@@ -43,7 +43,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(bus, "bus");
 
             var onMessageAsync = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => onMessage(m, i));
-            return bus.Consume(queue, onMessageAsync, configure);
+            return bus.Consume(queue, new IMessageHandler<T>(onMessageAsync), configure);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace EasyNetQ
 
             var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => onMessage(m, p, i));
 
-            return bus.Consume(queue, onMessageAsync, configure);
+            return bus.Consume(queue, new MessageHandler(onMessageAsync), configure);
         }
 
         /// <summary>

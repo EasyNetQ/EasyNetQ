@@ -78,7 +78,7 @@ namespace EasyNetQ.Consumer
             {
                 try
                 {
-                    await context.UserHandler(context.Body, context.Properties, context.Info, cancellationToken).ConfigureAwait(false);
+                    await context.Handler(context.Body, context.Properties, context.Info, cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

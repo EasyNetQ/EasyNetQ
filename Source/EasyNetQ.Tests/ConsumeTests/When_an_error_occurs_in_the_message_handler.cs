@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerError(null, null)
+            ConsumerErrorStrategy.HandleConsumerError(default, null)
                      .ReturnsForAnyArgs(AckStrategies.Ack);
 
             exception = new Exception("I've had a bad day :(");

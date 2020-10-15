@@ -17,7 +17,7 @@ namespace EasyNetQ.Consumer
 
         private readonly ConcurrentSet<IInternalConsumer> internalConsumers = new ConcurrentSet<IInternalConsumer>();
 
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        private readonly MessageHandler onMessage;
         private readonly IQueue queue;
 
         private readonly IList<IDisposable> subscriptions = new List<IDisposable>();
@@ -26,7 +26,7 @@ namespace EasyNetQ.Consumer
 
         public PersistentConsumer(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus

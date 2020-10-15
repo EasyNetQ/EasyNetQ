@@ -7,7 +7,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {
-    public class QueueConsumerPair
+    public readonly struct QueueConsumerPair
     {
         public static QueueConsumerPair Create<T>(IQueue queue, Action<IMessage<T>, MessageReceivedInfo> onMessage) where T : class
         {
@@ -31,7 +31,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(onMessage, nameof(onMessage));
 
             var onMessageAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => onMessage(m, p, i));
-            return new QueueConsumerPair(queue, onMessageAsync, null);
+            return new QueueConsumerPair(queue, new MessageHandler(onMessageAsync), null);
         }
 
         public static QueueConsumerPair Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage)
@@ -42,7 +42,7 @@ namespace EasyNetQ
             return new QueueConsumerPair(queue, (m, p, i, c) => onMessage(m, p, i), null);
         }
 
-        private QueueConsumerPair(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, Action<IHandlerRegistration> addHandlers)
+        private QueueConsumerPair(IQueue queue, MessageHandler onMessage, Action<IHandlerRegistration> addHandlers)
         {
             Queue = queue;
             OnMessage = onMessage;
@@ -50,7 +50,7 @@ namespace EasyNetQ
         }
 
         public IQueue Queue { get; }
-        public Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> OnMessage { get; }
+        public MessageHandler OnMessage { get; }
         public Action<IHandlerRegistration> AddHandlers { get; }
     }
 }

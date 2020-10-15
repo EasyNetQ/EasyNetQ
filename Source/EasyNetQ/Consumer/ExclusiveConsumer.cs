@@ -19,7 +19,7 @@ namespace EasyNetQ.Consumer
         private readonly IInternalConsumerFactory internalConsumerFactory;
 
         private readonly ConcurrentSet<IInternalConsumer> internalConsumers = new ConcurrentSet<IInternalConsumer>();
-        private readonly Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        private readonly MessageHandler onMessage;
 
         private readonly IQueue queue;
 
@@ -30,7 +30,7 @@ namespace EasyNetQ.Consumer
 
         public ExclusiveConsumer(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus

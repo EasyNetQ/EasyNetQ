@@ -38,13 +38,13 @@ namespace EasyNetQ.Consumer
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
 
-            eventBus.Subscribe<StoppedConsumingEvent>(stoppedConsumingEvent => consumers.Remove(stoppedConsumingEvent.Consumer));
+            eventBus.Subscribe<StoppedConsumingEvent>(@event => consumers.Remove(@event.Consumer));
         }
 
         /// <inheritdoc />
         public IConsumer CreateConsumer(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration
         )
         {
@@ -59,7 +59,7 @@ namespace EasyNetQ.Consumer
 
         /// <inheritdoc />
         public IConsumer CreateConsumer(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
             IConsumerConfiguration configuration
         )
         {
@@ -87,7 +87,7 @@ namespace EasyNetQ.Consumer
         /// <returns></returns>
         private IConsumer CreateConsumerInstance(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration
         )
         {
