@@ -6,7 +6,7 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class ArgParserTests
     {
-        private ArgParser argParser;
+        private readonly ArgParser argParser;
 
         public ArgParserTests()
         {
@@ -16,7 +16,7 @@ namespace EasyNetQ.Hosepipe.Tests
         [Fact]
         public void Should_be_able_to_retrieve_args_by_position()
         {
-            var args = new string[]
+            var args = new[]
             {
                 "one",
                 "two",
@@ -25,10 +25,10 @@ namespace EasyNetQ.Hosepipe.Tests
 
             var arguments = argParser.Parse(args);
 
-            string one = "";
-            string two = "";
-            string three = "";
-            bool threeFailed = false;
+            var one = "";
+            var two = "";
+            var three = "";
+            var threeFailed = false;
 
             arguments.At(0, a => one = a.Value).FailWith(() => Assert.True(false, "should succeed"));
             arguments.At(1, a => two = a.Value).FailWith(() => Assert.True(false, "should succeed"));

@@ -4,9 +4,9 @@ namespace EasyNetQ.Hosepipe
 {
     public class HosepipeMessage
     {
-        public string Body { get; private set; }
-        public MessageProperties Properties { get; private set; }
-        public MessageReceivedInfo Info { get; private set; }
+        public string Body { get; }
+        public MessageProperties Properties { get; }
+        public MessageReceivedInfo Info { get; }
 
         public HosepipeMessage(string body, MessageProperties properties, MessageReceivedInfo info)
         {

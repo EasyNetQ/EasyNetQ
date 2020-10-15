@@ -8,7 +8,7 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class QueueInsertionTests
     {
-        private IQueueInsertion queueInsertion;
+        private readonly IQueueInsertion queueInsertion;
 
         public QueueInsertionTests()
         {

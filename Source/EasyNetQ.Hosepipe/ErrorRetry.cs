@@ -18,22 +18,19 @@ namespace EasyNetQ.Hosepipe
 
         public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
         {
+            using var connection = HosepipeConnection.FromParameters(parameters);
+            using var model = connection.CreateModel();
+
+            model.ConfirmSelect();
+
             foreach (var rawErrorMessage in rawErrorMessages)
             {
-                var error = (Error)serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
-                RepublishError(error, parameters);
-            }
-        }
-
-        public void RepublishError(Error error, QueueParameters parameters)
-        {
-            using (var connection = HosepipeConnection.FromParameters(parameters))
-            using (var model = connection.CreateModel())
-            {
+                var error = (Error) serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
                 var properties = model.CreateBasicProperties();
                 error.BasicProperties.CopyTo(properties);
                 var body = errorMessageSerializer.Deserialize(error.Message);
                 model.BasicPublish("", error.Queue, true, properties, body);
+                model.WaitForConfirmsOrDie();
             }
         }
     }

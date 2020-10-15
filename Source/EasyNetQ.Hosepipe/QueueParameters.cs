@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace EasyNetQ.Hosepipe
@@ -13,6 +14,7 @@ namespace EasyNetQ.Hosepipe
         public bool Purge { get; set; }
         public int NumberOfMessagesToRetrieve { get; set; }
         public string MessagesOutputDirectory { get; set; }
+        public TimeSpan ConfirmsTimeout { get; }
 
         public QueueParameters()
         {
@@ -25,6 +27,7 @@ namespace EasyNetQ.Hosepipe
             Purge = false;
             NumberOfMessagesToRetrieve = 1000;
             MessagesOutputDirectory = Directory.GetCurrentDirectory();
+            ConfirmsTimeout = TimeSpan.FromSeconds(30);
         }
     }
 }

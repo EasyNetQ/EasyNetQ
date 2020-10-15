@@ -8,8 +8,8 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class MessageReaderTests
     {
-        private IMessageReader messageReader;
-        private IConventions conventions;
+        private readonly IMessageReader messageReader;
+        private readonly IConventions conventions;
 
         public MessageReaderTests()
         {

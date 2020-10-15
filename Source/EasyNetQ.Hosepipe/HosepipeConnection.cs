@@ -3,7 +3,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe
 {
-    public class HosepipeConnection
+    public static class HosepipeConnection
     {
         public static IConnection FromParameters(QueueParameters parameters)
         {
