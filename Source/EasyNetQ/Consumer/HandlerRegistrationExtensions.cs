@@ -52,6 +52,23 @@ namespace EasyNetQ.Consumer
         /// <returns></returns>
         public static IHandlerRegistration Add<T>(
             this IHandlerRegistration handlerRegistration,
+            Func<IMessage<T>, MessageReceivedInfo, Task<AckStrategy>> handler
+        )
+        {
+            Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
+
+            return handlerRegistration.Add<T>((m, i, c) => handler(m, i));
+        }
+
+        /// <summary>
+        /// Add an asynchronous handler
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="handlerRegistration">The handler registration</param>
+        /// <param name="handler">The handler</param>
+        /// <returns></returns>
+        public static IHandlerRegistration Add<T>(
+            this IHandlerRegistration handlerRegistration,
             Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler
         )
         {
