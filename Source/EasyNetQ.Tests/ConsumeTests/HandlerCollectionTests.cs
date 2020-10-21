@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 {
     public class HandlerCollectionTests
     {
-        private IHandlerCollection handlerCollection;
+        private readonly IHandlerCollection handlerCollection;
 
         private bool myMessageHandlerExecuted = false;
         private bool animalHandlerExecuted = false;

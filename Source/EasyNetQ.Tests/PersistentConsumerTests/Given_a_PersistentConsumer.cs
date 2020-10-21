@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         protected IInternalConsumerFactory internalConsumerFactory;
         protected List<IInternalConsumer> internalConsumers;
         protected MockBuilder mockBuilder;
-        protected Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage;
+        protected MessageHandler onMessage;
         protected IPersistentConnection persistentConnection;
         protected IQueue queue;
 
@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             mockBuilder = new MockBuilder();
 
             queue = new Queue(queueName, false);
-            onMessage = (body, properties, info, cancellation) => Task.CompletedTask;
+            onMessage = (body, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack);
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
 

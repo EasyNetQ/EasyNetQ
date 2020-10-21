@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
@@ -10,7 +11,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => { });
+            StartConsumer((body, properties, info) => AckStrategies.Ack);
             DeliverMessage();
         }
 

@@ -32,6 +32,9 @@ namespace EasyNetQ
         private bool disposed;
         private readonly IDisposable[] eventSubscriptions;
 
+        /// <summary>
+        ///     Creates RabbitAdvancedBus
+        /// </summary>
         public RabbitAdvancedBus(
             IPersistentConnection connection,
             IConsumerFactory consumerFactory,
@@ -102,7 +105,7 @@ namespace EasyNetQ
         #region Consume
 
         /// <inheritdoc />
-        public IDisposable Consume(IEnumerable<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure)
+        public IDisposable Consume(IReadOnlyCollection<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure)
         {
             Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
             Preconditions.CheckNotNull(configure, "configure");
@@ -138,9 +141,7 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public IDisposable Consume<T>(
-            IQueue queue,
-            Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> onMessage,
-            Action<IConsumerConfiguration> configure
+            IQueue queue, IMessageHandler<T> onMessage, Action<IConsumerConfiguration> configure
         )
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -151,7 +152,9 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure)
+        public IDisposable Consume(
+            IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure
+        )
         {
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(addHandlers, "addHandlers");
@@ -170,9 +173,7 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public virtual IDisposable Consume(
-            IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
-            Action<IConsumerConfiguration> configure
+            IQueue queue, MessageHandler onMessage, Action<IConsumerConfiguration> configure
         )
         {
             Preconditions.CheckNotNull(queue, "queue");

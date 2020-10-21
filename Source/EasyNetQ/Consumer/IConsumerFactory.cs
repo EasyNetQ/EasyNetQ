@@ -9,13 +9,13 @@ namespace EasyNetQ.Consumer
     public interface IConsumerFactory : IDisposable
     {
         IConsumer CreateConsumer(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
             IConsumerConfiguration configuration
         );
 
         IConsumer CreateConsumer(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration
         );
     }

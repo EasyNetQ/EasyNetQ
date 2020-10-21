@@ -23,12 +23,16 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             var context = new ConsumerExecutionContext(
-                (body, properties, info, cancellation) => Task.Run(() =>
+                async (body, properties, info, cancellation) =>
                 {
-                    deliveredBody = body;
-                    deliveredProperties = properties;
-                    deliveredInfo = info;
-                }),
+                    await Task.Run(() =>
+                    {
+                        deliveredBody = body;
+                        deliveredProperties = properties;
+                        deliveredInfo = info;
+                    }).ConfigureAwait(false);
+                    return AckStrategies.Ack;
+                },
                 messageInfo,
                 messageProperties,
                 messageBody

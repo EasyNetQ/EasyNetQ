@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
 using NSubstitute;
 using RabbitMQ.Client;
 using System;
@@ -26,7 +25,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_failed()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(null, null).ReturnsForAnyArgs(AckStrategies.Ack);
+            consumerErrorStrategy.HandleConsumerError(default, null).ReturnsForAnyArgs(AckStrategies.Ack);
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
@@ -35,7 +34,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                (body, properties, info, cancellation) => Task.FromException(new Exception()),
+                async (body, properties, info, cancellation) => throw new Exception(),
                 messageInfo,
                 messageProperties,
                 messageBody

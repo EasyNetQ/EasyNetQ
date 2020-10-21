@@ -37,7 +37,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IEnumerable<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure);
+        IDisposable Consume(IReadOnlyCollection<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Consume a stream of messages asynchronously
@@ -48,7 +48,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IQueue queue, Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> onMessage, Action<IConsumerConfiguration> configure);
+        IDisposable Consume<T>(IQueue queue, IMessageHandler<T> onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Consume a stream of messages. Dispatch them to the given handlers
@@ -71,7 +71,7 @@ namespace EasyNetQ
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IQueue queue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage, Action<IConsumerConfiguration> configure);
+        IDisposable Consume(IQueue queue, MessageHandler onMessage, Action<IConsumerConfiguration> configure);
 
         /// <summary>
         /// Publish a message as a .NET type when the type is only known at runtime.

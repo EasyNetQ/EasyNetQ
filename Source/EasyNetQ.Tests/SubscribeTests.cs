@@ -320,7 +320,7 @@ namespace EasyNetQ.Tests
             };
 
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(null, null)
+            consumerErrorStrategy.HandleConsumerError(default, null)
                 .ReturnsForAnyArgs(i =>
                 {
                     basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
@@ -352,7 +352,8 @@ namespace EasyNetQ.Tests
                     Type = typeName,
                     CorrelationId = correlationId
                 },
-                body);
+                body
+            );
 
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);

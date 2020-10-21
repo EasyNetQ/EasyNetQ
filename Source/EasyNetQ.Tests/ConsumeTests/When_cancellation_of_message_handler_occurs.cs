@@ -2,7 +2,6 @@
 
 using EasyNetQ.Consumer;
 using NSubstitute;
-using System;
 using System.Linq;
 using Xunit;
 
@@ -12,13 +11,14 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerCancelled(null)
+            ConsumerErrorStrategy.HandleConsumerCancelled(default)
                                  .ReturnsForAnyArgs(AckStrategies.Ack);
 
             StartConsumer((body, properties, info) =>
                 {
                     Cancellation.Cancel();
                     Cancellation.Token.ThrowIfCancellationRequested();
+                    return AckStrategies.Ack;
                 });
             DeliverMessage();
         }

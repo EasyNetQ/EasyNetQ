@@ -26,10 +26,10 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
+        public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(
+            ConsumerExecutionContext context, CancellationToken cancellationToken
+        )
         {
-            Preconditions.CheckNotNull(context, "context");
-
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.Info);
@@ -72,13 +72,17 @@ namespace EasyNetQ.Consumer
             };
         }
 
-        private async Task<AckStrategy> InvokeUserMessageHandlerInternalAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
+        private async Task<AckStrategy> InvokeUserMessageHandlerInternalAsync(
+            ConsumerExecutionContext context, CancellationToken cancellationToken
+        )
         {
             try
             {
                 try
                 {
-                    await context.UserHandler(context.Body, context.Properties, context.Info, cancellationToken).ConfigureAwait(false);
+                    return await context.Handler(
+                        context.Body, context.Properties, context.Info, cancellationToken
+                    ).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -94,8 +98,6 @@ namespace EasyNetQ.Consumer
                 logger.Error(exception, "Consumer error strategy has failed");
                 return AckStrategies.NackWithRequeue;
             }
-
-            return AckStrategies.Ack;
         }
 
         /// <inheritdoc />

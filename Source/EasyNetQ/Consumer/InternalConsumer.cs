@@ -15,12 +15,12 @@ namespace EasyNetQ.Consumer
     {
         StartConsumingStatus StartConsuming(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration
         );
 
         StartConsumingStatus StartConsuming(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
             IConsumerConfiguration configuration
         );
 
@@ -43,7 +43,7 @@ namespace EasyNetQ.Consumer
             IQueue queue,
             IEventBus eventBus,
             IHandlerRunner handlerRunner,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IModel model
         )
         {
@@ -58,7 +58,7 @@ namespace EasyNetQ.Consumer
             Model = model;
         }
 
-        public Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> OnMessage { get; }
+        public MessageHandler OnMessage { get; }
         public IQueue Queue { get; }
         public string ConsumerTag { get; private set; }
 
@@ -184,7 +184,7 @@ namespace EasyNetQ.Consumer
 
         private bool disposed;
 
-        private object modelLock = new object();
+        private readonly object modelLock = new object();
 
         public InternalConsumer(
             IPersistentConnection connection,
@@ -214,7 +214,7 @@ namespace EasyNetQ.Consumer
 
         /// <inheritdoc />
         public StartConsumingStatus StartConsuming(
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task>>> queueConsumerPairs,
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
             IConsumerConfiguration configuration
         )
         {
@@ -287,7 +287,7 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public StartConsumingStatus StartConsuming(
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> onMessage,
+            MessageHandler onMessage,
             IConsumerConfiguration configuration
         )
         {

@@ -4,6 +4,7 @@ using FluentAssertions;
 using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;
+using EasyNetQ.Consumer;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -12,7 +13,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => { });
+            StartConsumer((body, properties, info) => AckStrategies.Ack);
         }
 
         [Fact]
@@ -40,7 +41,8 @@ namespace EasyNetQ.Tests.ConsumeTests
                    {
                         { "x-priority", 0 }
                    })),
-               Arg.Is(MockBuilder.Consumers[0]));
+               Arg.Is(MockBuilder.Consumers[0])
+            );
         }
     }
 }
