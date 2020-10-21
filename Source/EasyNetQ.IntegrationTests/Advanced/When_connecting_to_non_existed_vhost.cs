@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
         public When_connecting_to_non_existed_vhost(RabbitMQFixture rmqFixture)
         {
             Console.WriteLine(rmqFixture.Host);
-            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};virtualHost=BlaBlaBla;prefetchCount=1;timeout=-1;publisherConfirms=True");
         }
 
         public void Dispose() => bus.Dispose();
@@ -27,8 +27,9 @@ namespace EasyNetQ.IntegrationTests.Advanced
             IExchange e;
             try
             {
-                e = await bus.Advanced.ExchangeDeclareAsync("this_exchange_will_never_be_Created", c => { }, cts.Token);
-                Assert.True(false);
+                e = await bus.Advanced.ExchangeDeclareAsync("this_exchange_will_never_be_created", c => { }, cts.Token);
+
+                throw new Exception("Should never get here!");
             }
             catch (OperationCanceledException)
             {
