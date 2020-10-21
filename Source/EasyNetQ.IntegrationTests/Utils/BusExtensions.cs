@@ -16,7 +16,7 @@ namespace EasyNetQ.IntegrationTests.Utils
             foreach (var message in messages)
                 publishTasks.Add(pubSub.PublishAsync(message, cancellationToken));
 
-            await Task.WhenAll(publishTasks).ConfigureAwait(false);
+            await Task.WhenAll(publishTasks);
         }
 
         public static Task PublishBatchAsync<T>(
@@ -34,7 +34,7 @@ namespace EasyNetQ.IntegrationTests.Utils
         )
         {
             foreach (var message in messages)
-                await pubSub.PublishAsync(message, configuration, cancellationToken).ConfigureAwait(false);
+                await pubSub.PublishAsync(message, configuration, cancellationToken);
         }
 
         public static async Task FuturePublishBatchAsync<T>(
@@ -46,7 +46,7 @@ namespace EasyNetQ.IntegrationTests.Utils
         )
         {
             foreach (var message in messages)
-                await scheduler.FuturePublishAsync(message, delay, c => c.WithTopic(topic), cancellationToken).ConfigureAwait(false);
+                await scheduler.FuturePublishAsync(message, delay, c => c.WithTopic(topic), cancellationToken);
         }
 
         public static async Task SendBatchAsync<T>(
@@ -57,7 +57,7 @@ namespace EasyNetQ.IntegrationTests.Utils
         )
         {
             foreach (var message in messages)
-                await sendReceive.SendAsync(queue, message, cancellationToken).ConfigureAwait(false);
+                await sendReceive.SendAsync(queue, message, cancellationToken);
         }
     }
 }

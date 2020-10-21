@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -94,7 +94,7 @@ namespace EasyNetQ.Tests.Tasks
 
         private static async Task<T> RunDelayed<T>(int millisecondsDelay, Func<T> func)
         {
-            await Task.Delay(millisecondsDelay).ConfigureAwait(false);
+            await Task.Delay(millisecondsDelay);
             return func();
         }
 

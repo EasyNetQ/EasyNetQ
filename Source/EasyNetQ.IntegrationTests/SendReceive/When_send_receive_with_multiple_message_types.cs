@@ -42,13 +42,13 @@ namespace EasyNetQ.IntegrationTests.SendReceive
                 )
             )
             {
-                await bus.SendReceive.SendBatchAsync(queue, bunnies, cts.Token).ConfigureAwait(false);
-                await bus.SendReceive.SendBatchAsync(queue, rabbits, cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendBatchAsync(queue, bunnies, cts.Token);
+                await bus.SendReceive.SendBatchAsync(queue, rabbits, cts.Token);
 
                 await Task.WhenAll(
                     bunniesSink.WaitAllReceivedAsync(cts.Token),
                     rabbitsSink.WaitAllReceivedAsync(cts.Token)
-                ).ConfigureAwait(false);
+                );
 
                 bunniesSink.ReceivedMessages.Should().Equal(bunnies);
                 rabbitsSink.ReceivedMessages.Should().Equal(rabbits);

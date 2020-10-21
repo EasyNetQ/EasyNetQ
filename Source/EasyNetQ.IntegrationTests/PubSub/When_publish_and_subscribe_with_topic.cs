@@ -54,15 +54,15 @@ namespace EasyNetQ.IntegrationTests.PubSub
             {
                 await bus.PubSub.PublishBatchAsync(
                     firstTopicMessages, x => x.WithTopic("first"), cts.Token
-                ).ConfigureAwait(false);
+                );
                 await bus.PubSub.PublishBatchAsync(
                     secondTopicMessages, x => x.WithTopic("second"), cts.Token
-                ).ConfigureAwait(false);
+                );
 
                 await Task.WhenAll(
                     firstTopicMessagesSink.WaitAllReceivedAsync(cts.Token),
                     secondTopicMessagesSink.WaitAllReceivedAsync(cts.Token)
-                ).ConfigureAwait(false);
+                );
 
                 firstTopicMessagesSink.ReceivedMessages.Should().Equal(firstTopicMessages);
                 secondTopicMessagesSink.ReceivedMessages.Should().Equal(secondTopicMessages);

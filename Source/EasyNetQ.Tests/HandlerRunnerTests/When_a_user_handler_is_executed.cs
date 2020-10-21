@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
                         deliveredBody = body;
                         deliveredProperties = properties;
                         deliveredInfo = info;
-                    }).ConfigureAwait(false);
+                    });
                     return AckStrategies.Ack;
                 },
                 messageInfo,
@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
                 .ContinueWith(async x =>
                 {
-                    var ackStrategy = await x.ConfigureAwait(false);
+                    var ackStrategy = await x;
                     return ackStrategy(channel, 42);
                 }, TaskContinuationOptions.ExecuteSynchronously)
                 .Unwrap();

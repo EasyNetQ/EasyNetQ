@@ -48,8 +48,8 @@ namespace EasyNetQ.Tests.ProducerTests
                     throw new TimeoutException();
 
                 DeliverMessage(null);
-                await task.ConfigureAwait(false);
-            }).ConfigureAwait(false);
+                await task;
+            });
         }
 
         [Fact]
@@ -68,8 +68,8 @@ namespace EasyNetQ.Tests.ProducerTests
 
                 DeliverMessage("Why you are so bad with me?");
 
-                await task.ConfigureAwait(false);
-            }).ConfigureAwait(false); // ,"Why you are so bad with me?"
+                await task;
+            }); // ,"Why you are so bad with me?"
         }
 
         private void DeliverMessage(string exceptionMessage)

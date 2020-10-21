@@ -26,13 +26,13 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             var exchange = await bus.Advanced.ExchangeDeclareAsync(
                 Guid.NewGuid().ToString("N"), ExchangeType.Direct, cancellationToken: cts.Token
-            ).ConfigureAwait(false);
+            );
 
             await Assert.ThrowsAsync<PublishReturnedException>(
                 () => bus.Advanced.PublishAsync(
                     exchange, "#", true, new MessageProperties(), Array.Empty<byte>(), cts.Token
                 )
-            ).ConfigureAwait(false);
+            );
         }
     }
 }
