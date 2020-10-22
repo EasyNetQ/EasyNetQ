@@ -189,7 +189,7 @@ namespace EasyNetQ
                     return responseSubscription.QueueName;
 
                 var queue = await advancedBus.QueueDeclareAsync(
-                    conventions.RpcReturnQueueNamingConvention(),
+                    conventions.RpcReturnQueueNamingConvention(responseType),
                     c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
                     cancellationToken
                 ).ConfigureAwait(false);

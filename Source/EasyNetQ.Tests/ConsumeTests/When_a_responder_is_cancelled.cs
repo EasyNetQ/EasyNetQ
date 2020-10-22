@@ -53,9 +53,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             var properties = new BasicProperties
             {
-                Type = typeNameSerializer.Serialize(request.GetType()),
+                Type = typeNameSerializer.Serialize(typeof(RpcRequest)),
                 CorrelationId = "the_correlation_id",
-                ReplyTo = conventions.RpcReturnQueueNamingConvention()
+                ReplyTo = conventions.RpcReturnQueueNamingConvention(typeof(RpcResponse))
             };
 
             var body = serializer.MessageToBytes(typeof(RpcRequest), request);

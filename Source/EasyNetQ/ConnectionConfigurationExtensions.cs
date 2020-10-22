@@ -35,7 +35,8 @@ namespace EasyNetQ
 
             if (configuration.Hosts.Count == 0)
                 throw new EasyNetQException(
-                    "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\"");
+                    "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""
+                );
 
             foreach (var hostConfiguration in configuration.Hosts)
                 if (hostConfiguration.Port == 0)

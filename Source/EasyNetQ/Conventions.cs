@@ -17,7 +17,7 @@ namespace EasyNetQ
 
     public delegate string RpcExchangeNameConvention(Type messageType);
 
-    public delegate string RpcReturnQueueNamingConvention();
+    public delegate string RpcReturnQueueNamingConvention(Type messageType);
 
     public delegate string ConsumerTagConvention();
 
@@ -78,9 +78,9 @@ namespace EasyNetQ
 
             ErrorQueueNamingConvention = info => "EasyNetQ_Default_Error_Queue";
             ErrorExchangeNamingConvention = info => "ErrorExchange_" + info.RoutingKey;
-            RpcRequestExchangeNamingConvention = (type) => "easy_net_q_rpc";
-            RpcResponseExchangeNamingConvention = (type) => "easy_net_q_rpc";
-            RpcReturnQueueNamingConvention = () => "easynetq.response." + Guid.NewGuid();
+            RpcRequestExchangeNamingConvention = type => "easy_net_q_rpc";
+            RpcResponseExchangeNamingConvention = type => "easy_net_q_rpc";
+            RpcReturnQueueNamingConvention = type => "easynetq.response." + Guid.NewGuid();
 
             ConsumerTagConvention = () => Guid.NewGuid().ToString();
         }
