@@ -54,10 +54,8 @@ namespace EasyNetQ.IntegrationTests
 
         private async Task DisposeAsync(CancellationToken cancellationToken)
         {
-            await dockerProxy.StopContainerAsync(Configuration.RabbitMqHostName, cancellationToken)
-                ;
-            await dockerProxy.RemoveContainerAsync(Configuration.RabbitMqHostName, cancellationToken)
-                ;
+            await dockerProxy.StopContainerAsync(Configuration.RabbitMqHostName, cancellationToken);
+            await dockerProxy.RemoveContainerAsync(Configuration.RabbitMqHostName, cancellationToken);
             if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
                 await dockerProxy.DeleteNetworkAsync(dockerNetworkName, cancellationToken);
         }
@@ -72,8 +70,7 @@ namespace EasyNetQ.IntegrationTests
         {
             var rabbitMQDockerImageName = Configuration.RabbitMQDockerImageName(dockerEngineOsPlatform);
             var rabbitMQDockerImageTag = Configuration.RabbitMQDockerImageTag(dockerEngineOsPlatform);
-            await dockerProxy.PullImageAsync(rabbitMQDockerImageName, rabbitMQDockerImageTag, cancellationToken)
-                ;
+            await dockerProxy.PullImageAsync(rabbitMQDockerImageName, rabbitMQDockerImageTag, cancellationToken);
             return $"{rabbitMQDockerImageName}:{rabbitMQDockerImageTag}";
         }
 
@@ -91,10 +88,8 @@ namespace EasyNetQ.IntegrationTests
             var envVars = new List<string> {$"RABBITMQ_DEFAULT_VHOST={Configuration.RabbitMqVirtualHostName}"};
             var containerId = await dockerProxy
                 .CreateContainerAsync(
-                    rabbitMQDockerImage, Configuration.RabbitMqHostName, portMappings, dockerNetworkName, envVars,
-                    cancellationToken
-                )
-                ;
+                    rabbitMQDockerImage, Configuration.RabbitMqHostName, portMappings, dockerNetworkName, envVars, cancellationToken
+                );
             await dockerProxy.StartContainerAsync(containerId, cancellationToken);
             return containerId;
         }
@@ -114,8 +109,7 @@ namespace EasyNetQ.IntegrationTests
         {
             try
             {
-                return await ManagementClient.IsAliveAsync(Configuration.RabbitMqVirtualHost, cancellationToken)
-                    ;
+                return await ManagementClient.IsAliveAsync(Configuration.RabbitMqVirtualHost, cancellationToken);
             }
             catch (OperationCanceledException)
             {
