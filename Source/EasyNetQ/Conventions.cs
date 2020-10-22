@@ -11,9 +11,9 @@ namespace EasyNetQ
 
     public delegate string RpcRoutingKeyNamingConvention(Type messageType);
 
-    public delegate string ErrorQueueNameConvention(MessageReceivedInfo info);
+    public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
 
-    public delegate string ErrorExchangeNameConvention(MessageReceivedInfo info);
+    public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
 
     public delegate string RpcExchangeNameConvention(Type messageType);
 
@@ -45,25 +45,24 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
             // Establish default conventions.
-            ExchangeNamingConvention = messageType =>
+            ExchangeNamingConvention = type =>
             {
-                var attr = GetQueueAttribute(messageType);
+                var attr = GetQueueAttribute(type);
 
                 return string.IsNullOrEmpty(attr.ExchangeName)
-                    ? typeNameSerializer.Serialize(messageType)
+                    ? typeNameSerializer.Serialize(type)
                     : attr.ExchangeName;
             };
 
-            TopicNamingConvention = messageType => "";
+            TopicNamingConvention = type => "";
 
-            QueueNamingConvention =
-                (messageType, subscriptionId) =>
+            QueueNamingConvention = (type, subscriptionId) =>
                 {
-                    var attr = GetQueueAttribute(messageType);
+                    var attr = GetQueueAttribute(type);
 
                     if (string.IsNullOrEmpty(attr.QueueName))
                     {
-                        var typeName = typeNameSerializer.Serialize(messageType);
+                        var typeName = typeNameSerializer.Serialize(type);
 
                         return string.IsNullOrEmpty(subscriptionId)
                             ? typeName
@@ -76,8 +75,8 @@ namespace EasyNetQ
                 };
             RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
-            ErrorQueueNamingConvention = info => "EasyNetQ_Default_Error_Queue";
-            ErrorExchangeNamingConvention = info => "ErrorExchange_" + info.RoutingKey;
+            ErrorQueueNamingConvention = receivedInfo => "EasyNetQ_Default_Error_Queue";
+            ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
             RpcRequestExchangeNamingConvention = type => "easy_net_q_rpc";
             RpcResponseExchangeNamingConvention = type => "easy_net_q_rpc";
             RpcReturnQueueNamingConvention = type => "easynetq.response." + Guid.NewGuid();
