@@ -69,7 +69,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 DeliverMessage("Why you are so bad with me?");
 
                 await task;
-            }); // ,"Why you are so bad with me?"
+            });
         }
 
         private void DeliverMessage(string exceptionMessage)
