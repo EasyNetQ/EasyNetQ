@@ -23,18 +23,18 @@ namespace EasyNetQ
 
     public interface IConventions
     {
-        ExchangeNameConvention ExchangeNamingConvention { get; set; }
-        TopicNameConvention TopicNamingConvention { get; set; }
-        QueueNameConvention QueueNamingConvention { get; set; }
-        RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
+        ExchangeNameConvention ExchangeNamingConvention { get; }
+        TopicNameConvention TopicNamingConvention { get; }
+        QueueNameConvention QueueNamingConvention { get; }
+        RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; }
 
-        ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
-        ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
-        RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
-        RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
-        RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
+        ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
+        ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+        RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }
+        RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; }
+        RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; }
 
-        ConsumerTagConvention ConsumerTagConvention { get; set; }
+        ConsumerTagConvention ConsumerTagConvention { get; }
     }
 
     /// <inheritdoc />

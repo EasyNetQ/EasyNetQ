@@ -43,7 +43,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 });
 
             var conventions = Substitute.For<IConventions>();
-            conventions.ExchangeNamingConvention = t => t.Name;
+            conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
             var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
             try
@@ -85,7 +85,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 });
 
             var conventions = Substitute.For<IConventions>();
-            conventions.ExchangeNamingConvention = t => t.Name;
+            conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
             var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
@@ -120,7 +120,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 });
 
             var conventions = Substitute.For<IConventions>();
-            conventions.ExchangeNamingConvention = t => t.Name;
+            conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
             var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 

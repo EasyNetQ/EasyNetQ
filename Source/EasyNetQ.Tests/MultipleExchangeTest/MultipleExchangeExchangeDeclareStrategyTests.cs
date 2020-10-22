@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
                 .Returns(Task.FromResult(Substitute.For<IBinding>()));
 
             var conventions = Substitute.For<IConventions>();
-            conventions.ExchangeNamingConvention = t => t.Name;
+            conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
             var exchangeStrategy = new MultipleExchangeDeclareStrategy(conventions, advancedBus);
 
