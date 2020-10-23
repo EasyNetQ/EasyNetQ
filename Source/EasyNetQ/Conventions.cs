@@ -3,48 +3,117 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     Convention for exchange naming
+    /// </summary>
     public delegate string ExchangeNameConvention(Type messageType);
 
+    /// <summary>
+    ///     Convention for topic naming
+    /// </summary>
     public delegate string TopicNameConvention(Type messageType);
 
+    /// <summary>
+    ///     Convention for queue naming
+    /// </summary>
     public delegate string QueueNameConvention(Type messageType, string subscriberId);
 
-    public delegate string RpcRoutingKeyNamingConvention(Type messageType);
-
+    /// <summary>
+    ///     Convention for error queue routing key naming
+    /// </summary>
     public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
 
+    /// <summary>
+    ///     Convention for error exchange naming
+    /// </summary>
     public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
 
+    /// <summary>
+    ///     Convention for rpc routing key naming
+    /// </summary>
+    public delegate string RpcRoutingKeyNamingConvention(Type messageType);
+
+    /// <summary>
+    ///     Convention for RPC exchange naming
+    /// </summary>
     public delegate string RpcExchangeNameConvention(Type messageType);
 
+    /// <summary>
+    ///     Convention for RPC return queue naming
+    /// </summary>
     public delegate string RpcReturnQueueNamingConvention(Type messageType);
 
+    /// <summary>
+    ///     Convention for consumer tag naming
+    /// </summary>
     public delegate string ConsumerTagConvention();
 
+    /// <summary>
+    ///     Represents various naming conventions
+    /// </summary>
     public interface IConventions
     {
+        /// <summary>
+        ///     Convention for exchange naming
+        /// </summary>
         ExchangeNameConvention ExchangeNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for topic naming
+        /// </summary>
         TopicNameConvention TopicNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for queue naming
+        /// </summary>
         QueueNameConvention QueueNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for RPC routing key naming
+        /// </summary>
         RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; }
 
-        ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
-        ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+        /// <summary>
+        ///     Convention for RPC request exchange naming
+        /// </summary>
         RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for RPC response exchange naming
+        /// </summary>
         RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for RPC return queue naming
+        /// </summary>
         RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; }
 
+        /// <summary>
+        ///     Convention for consumer tag naming
+        /// </summary>
         ConsumerTagConvention ConsumerTagConvention { get; }
+
+        /// <summary>
+        ///     Convention for error queue naming
+        /// </summary>
+        ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for error exchange naming
+        /// </summary>
+        ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
     }
 
     /// <inheritdoc />
     public class Conventions : IConventions
     {
+        /// <summary>
+        ///     Creates Conventions
+        /// </summary>
         public Conventions(ITypeNameSerializer typeNameSerializer)
         {
             Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
 
-            // Establish default conventions.
             ExchangeNamingConvention = type =>
             {
                 var attr = GetQueueAttribute(type);
