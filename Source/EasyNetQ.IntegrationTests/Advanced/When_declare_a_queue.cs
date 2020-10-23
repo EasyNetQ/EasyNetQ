@@ -28,7 +28,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             foreach (var queueMode in queuesModes)
             {
                 await bus.Advanced.QueueDeclareAsync(
-                    Guid.NewGuid().ToString(), c => c.WithQueueMode(queueMode), cts.Token
+                    Guid.NewGuid().ToString("N"), c => c.WithQueueMode(queueMode), cts.Token
                 ).ConfigureAwait(false);
             }
 
@@ -36,7 +36,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             foreach (var queueType in queuesTypes)
             {
                 await bus.Advanced.QueueDeclareAsync(
-                    Guid.NewGuid().ToString(), c => c.WithQueueType(queueType), cts.Token
+                    Guid.NewGuid().ToString("N"), c => c.WithQueueType(queueType), cts.Token
                 ).ConfigureAwait(false);
             }
         }
