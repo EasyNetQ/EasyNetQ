@@ -26,7 +26,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             await bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
             await Assert.ThrowsAsync<OperationInterruptedException>(
-                () => bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Direct, cancellationToken: cts.Token)
+                () => bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Direct, cancellationToken: cts.Token)
             ).ConfigureAwait(false);
             await bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
         }
