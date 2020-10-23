@@ -116,7 +116,7 @@ namespace EasyNetQ
         /// Sets queueType. Valid types are classic and quorum.
         /// </summary>
         /// <param name="configuration">The configuration instance</param>
-        /// <param name="queueType">The queueMode to set</param>
+        /// <param name="queueType">The queueType to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithQueueType(this IQueueDeclareConfiguration configuration, string queueType = QueueType.Classic)
         {
