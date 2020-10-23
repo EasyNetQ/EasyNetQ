@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Producer;
 using Net.CommandLine;
 
 namespace EasyNetQ.Tests.Tasks
@@ -24,19 +23,32 @@ namespace EasyNetQ.Tests.Tasks
 
         public Task Run(CancellationToken cancellationToken)
         {
-            bus = RabbitHutch.CreateBus("host=localhost");
-
-            bus.Advanced.Conventions.RpcRequestExchangeNamingConvention = type => CustomRpcRequestConventionDictionary.ContainsKey(type) ? CustomRpcRequestConventionDictionary[type] : DefaultRpcExchange;
-            bus.Advanced.Conventions.RpcResponseExchangeNamingConvention = type => CustomRpcResponseConventionDictionary.ContainsKey(type) ? CustomRpcResponseConventionDictionary[type] : DefaultRpcExchange;
+            bus = RabbitHutch.CreateBus(
+                "host=localhost",
+                x => x.Register<IConventions>(
+                    r =>
+                    {
+                        var conventions = new Conventions(r.Resolve<ITypeNameSerializer>())
+                        {
+                            RpcRequestExchangeNamingConvention = x => CustomRpcRequestConventionDictionary.ContainsKey(x)
+                                ? CustomRpcRequestConventionDictionary[x]
+                                : DefaultRpcExchange,
+                            RpcResponseExchangeNamingConvention = x => CustomRpcResponseConventionDictionary.ContainsKey(x)
+                                ? CustomRpcResponseConventionDictionary[x]
+                                : DefaultRpcExchange
+                        };
+                        return conventions;
+                    })
+            );
 
             bus.Rpc.Respond<TestModifiedRequestExhangeRequestMessage, TestModifiedRequestExhangeResponseMessage>(
-                x => HandleModifiedRequestExchangeRequestAsync(x)
+                HandleModifiedRequestExchangeRequestAsync
             );
             bus.Rpc.Respond<TestModifiedResponseExhangeRequestMessage, TestModifiedResponseExhangeResponseMessage>(
-                x => HandleModifiedResponseExchangeRequestAsync(x)
+                HandleModifiedResponseExchangeRequestAsync
             );
-            bus.Rpc.Respond<TestAsyncRequestMessage, TestAsyncResponseMessage>(x => HandleAsyncRequest(x));
-            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => HandleRequest(x));
+            bus.Rpc.Respond<TestAsyncRequestMessage, TestAsyncResponseMessage>(HandleAsyncRequest);
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(HandleRequest);
 
             Console.WriteLine("Waiting to service requests");
             Console.WriteLine("Press enter to stop");
