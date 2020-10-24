@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -131,10 +132,9 @@ namespace EasyNetQ
 
             var consumerCancellation = advancedBus.Consume<T>(
                 queue,
-                (message, messageReceivedInfo) => onMessage(message.Body, default),
+                (m, r, c) => onMessage(m.Body, c),
                 x => x.WithPriority(subscriptionConfiguration.Priority)
                     .WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
-                    .WithExclusive(subscriptionConfiguration.IsExclusive)
             );
 
             return new SubscriptionResult(exchange, queue, consumerCancellation);

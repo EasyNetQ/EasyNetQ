@@ -59,13 +59,6 @@ namespace EasyNetQ
         ISubscriptionConfiguration WithExpires(int expires);
 
         /// <summary>
-        /// Configures the consumer's to be exclusive
-        /// </summary>
-        /// <param name="isExclusive">Consumer's exclusive flag</param>
-        /// <returns>Returns a reference to itself</returns>
-        ISubscriptionConfiguration AsExclusive(bool isExclusive = true);
-
-        /// <summary>
         /// Configures the queue's maxPriority
         /// </summary>
         /// <param name="priority">Queue's maxPriority value</param>
@@ -110,7 +103,6 @@ namespace EasyNetQ
         public int Priority { get; private set; }
         public ushort PrefetchCount { get; private set; }
         public int? Expires { get; private set; }
-        public bool IsExclusive { get; private set; }
         public byte? MaxPriority { get; private set; }
         public bool Durable { get; private set; }
         public string QueueName { get; private set; }
@@ -124,7 +116,6 @@ namespace EasyNetQ
             AutoDelete = false;
             Priority = 0;
             PrefetchCount = defaultPrefetchCount;
-            IsExclusive = false;
             Durable = true;
         }
 
@@ -162,12 +153,6 @@ namespace EasyNetQ
         public ISubscriptionConfiguration WithExpires(int expires)
         {
             Expires = expires;
-            return this;
-        }
-
-        public ISubscriptionConfiguration AsExclusive(bool isExclusive = true)
-        {
-            IsExclusive = isExclusive;
             return this;
         }
 

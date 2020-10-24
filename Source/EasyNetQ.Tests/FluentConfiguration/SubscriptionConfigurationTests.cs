@@ -12,7 +12,6 @@ namespace EasyNetQ.Tests.FluentConfiguration
             Assert.False(configuration.AutoDelete);
             Assert.Equal(0, configuration.Priority);
             Assert.Equal(99, configuration.PrefetchCount);
-            Assert.False(configuration.IsExclusive);
             Assert.True(configuration.Durable);
             Assert.Null(configuration.QueueName);
             Assert.Null(configuration.MaxLength);

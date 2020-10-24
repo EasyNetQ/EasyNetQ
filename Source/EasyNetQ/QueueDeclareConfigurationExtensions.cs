@@ -9,7 +9,7 @@ namespace EasyNetQ
     public static class QueueDeclareConfigurationExtensions
     {
         /// <summary>
-        /// Sets queue as autoDelete or not. If set, the queue is deleted when all consumers have finished using it.
+        /// Sets maxPriority
         /// </summary>
         /// <param name="configuration">The configuration instance</param>
         /// <param name="maxPriority">The maxPriority to set</param>

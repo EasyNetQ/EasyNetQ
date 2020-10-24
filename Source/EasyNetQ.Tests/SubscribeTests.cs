@@ -126,8 +126,8 @@ namespace EasyNetQ.Tests
 
     public class When_subscribe_with_configuration_is_called
     {
-        [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
-        [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
+        [InlineData("ttt", true, 99, 999, 10, (byte)11, false, "qqq", 1001, 10001)]
+        [InlineData(null, false, 0, 0, null, null, true, "qqq", null, null)]
         [Theory]
         public void Queue_should_be_declared_with_correct_options(
             string topic,
@@ -135,7 +135,6 @@ namespace EasyNetQ.Tests
             int priority,
             ushort prefetchCount,
             int? expires,
-            bool isExclusive,
             byte? maxPriority,
             bool durable,
             string queueName,
@@ -154,7 +153,6 @@ namespace EasyNetQ.Tests
                         c.WithAutoDelete(autoDelete)
                             .WithPriority(priority)
                             .WithPrefetchCount(prefetchCount)
-                            .AsExclusive(isExclusive)
                             .WithDurable(durable)
                             .WithQueueName(queueName);
 
@@ -202,9 +200,10 @@ namespace EasyNetQ.Tests
                     Arg.Is(false),
                     Arg.Any<string>(),
                     Arg.Is(true),
-                    Arg.Is(isExclusive),
+                    Arg.Is(false),
                     Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
-                    Arg.Any<IBasicConsumer>());
+                    Arg.Any<IBasicConsumer>()
+            );
 
             // Assert that QoS got configured correctly
             mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);

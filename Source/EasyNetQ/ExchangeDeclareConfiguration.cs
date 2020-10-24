@@ -48,7 +48,7 @@ namespace EasyNetQ
 
         public string Type { get; private set; }
 
-        public IDictionary<string, object> Arguments { get; } = new Dictionary<string, object>();
+        public IDictionary<string, object> Arguments { get; private set; }
 
         public IExchangeDeclareConfiguration AsDurable(bool isDurable)
         {
@@ -70,7 +70,7 @@ namespace EasyNetQ
 
         public IExchangeDeclareConfiguration WithArgument(string name, object value)
         {
-            Arguments[name] = value;
+            (Arguments ??= new Dictionary<string, object>())[name] = value;
             return this;
         }
     }

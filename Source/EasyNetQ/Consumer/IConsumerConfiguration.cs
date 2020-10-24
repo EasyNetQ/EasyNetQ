@@ -1,32 +1,35 @@
-﻿namespace EasyNetQ.Consumer
+﻿using System.Collections.Generic;
+
+namespace EasyNetQ.Consumer
 {
     public interface IConsumerConfiguration
     {
-        int Priority { get; }
-        ushort PrefetchCount { get; }
-        bool IsExclusive { get; }
-
-        IConsumerConfiguration WithPriority(int priority);
+        IConsumerConfiguration WithConsumerTag(string consumerTag);
         IConsumerConfiguration WithPrefetchCount(ushort prefetchCount);
-        IConsumerConfiguration WithExclusive(bool isExclusive);
+        IConsumerConfiguration WithArgument(string name, object value);
     }
 
-    internal class ConsumerConfiguration : IConsumerConfiguration
+    public class ConsumerConfiguration : IConsumerConfiguration
     {
         public ConsumerConfiguration(ushort defaultPrefetchCount)
         {
-            Priority = 0;
             PrefetchCount = defaultPrefetchCount;
-            IsExclusive = false;
         }
 
-        public int Priority { get; private set; }
-        public bool IsExclusive { get; private set; }
+        public string ConsumerTag { get; private set; } = "";
         public ushort PrefetchCount { get; private set; }
+        public IDictionary<string, object> Arguments { get; private set; }
 
-        public IConsumerConfiguration WithPriority(int priority)
+        public IConsumerConfiguration WithConsumerTag(string consumerTag)
         {
-            Priority = priority;
+            Preconditions.CheckNotNull(consumerTag, nameof(consumerTag));
+            ConsumerTag = consumerTag;
+            return this;
+        }
+
+        public IConsumerConfiguration WithArgument(string name, object value)
+        {
+            (Arguments ??= new Dictionary<string, object>())[name] = value;
             return this;
         }
 
@@ -34,17 +37,6 @@
         {
             PrefetchCount = prefetchCount;
             return this;
-        }
-
-        public IConsumerConfiguration WithExclusive(bool isExclusive)
-        {
-            IsExclusive = isExclusive;
-            return this;
-        }
-
-        public override string ToString()
-        {
-            return $"[Priority={Priority}, IsExclusive={IsExclusive}, PrefetchCount={PrefetchCount}]";
         }
     }
 }

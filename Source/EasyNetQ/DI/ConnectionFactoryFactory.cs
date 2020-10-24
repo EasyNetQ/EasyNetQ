@@ -11,7 +11,7 @@ namespace EasyNetQ.DI
             var connectionFactory = new ConnectionFactory
             {
                 AutomaticRecoveryEnabled = true,
-                TopologyRecoveryEnabled = false,
+                TopologyRecoveryEnabled = true,
                 VirtualHost = configuration.VirtualHost,
                 UserName = configuration.UserName,
                 Password = configuration.Password,
@@ -21,7 +21,9 @@ namespace EasyNetQ.DI
                 AuthMechanisms = configuration.AuthMechanisms,
                 ClientProvidedName = configuration.Name,
                 NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
-                ContinuationTimeout = configuration.Timeout
+                ContinuationTimeout = configuration.Timeout,
+                DispatchConsumersAsync = true,
+                ConsumerDispatchConcurrency = configuration.PrefetchCount
             };
 
             if (configuration.AmqpConnectionString != null)

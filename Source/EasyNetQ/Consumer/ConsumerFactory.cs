@@ -3,49 +3,36 @@ using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
     /// <inheritdoc />
     public class ConsumerFactory : IConsumerFactory
     {
-        private readonly IPersistentConnection connection;
-
         private readonly ConcurrentSet<IConsumer> consumers = new ConcurrentSet<IConsumer>();
-
+        private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
-        private readonly IInternalConsumerFactory internalConsumerFactory;
+        private readonly IHandlerRunner handlerRunner;
 
         /// <summary>
         ///     Creates ConsumerFactory
         /// </summary>
-        /// <param name="connection">The connection</param>
-        /// <param name="internalConsumerFactory">The internal consumer factory</param>
-        /// <param name="eventBus">The event bus</param>
-        public ConsumerFactory(
-            IPersistentConnection connection,
-            IInternalConsumerFactory internalConsumerFactory,
-            IEventBus eventBus
-        )
+        public ConsumerFactory(IPersistentConnection connection, IEventBus eventBus, IHandlerRunner handlerRunner)
         {
-            Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+            Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
 
             this.connection = connection;
-            this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
+            this.handlerRunner = handlerRunner;
 
             eventBus.Subscribe<StoppedConsumingEvent>(@event => consumers.Remove(@event.Consumer));
         }
 
         /// <inheritdoc />
         public IConsumer CreateConsumer(
-            IQueue queue,
-            MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            IQueue queue, MessageHandler onMessage, ConsumerConfiguration configuration
         )
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -59,14 +46,10 @@ namespace EasyNetQ.Consumer
 
         /// <inheritdoc />
         public IConsumer CreateConsumer(
-            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            IConsumerConfiguration configuration
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs, ConsumerConfiguration configuration
         )
         {
-            if (configuration.IsExclusive || queueConsumerPairs.Any(x => x.Item1.IsExclusive))
-                throw new NotSupportedException("Exclusive multiple consuming is not supported.");
-
-            return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
+            throw new NotSupportedException("Exclusive multiple consuming is not supported.");
         }
 
         /// <inheritdoc />
@@ -74,8 +57,6 @@ namespace EasyNetQ.Consumer
         {
             foreach (var consumer in consumers)
                 consumer.Dispose();
-
-            internalConsumerFactory.Dispose();
         }
 
         /// <summary>
@@ -86,16 +67,10 @@ namespace EasyNetQ.Consumer
         /// <param name="configuration"></param>
         /// <returns></returns>
         private IConsumer CreateConsumerInstance(
-            IQueue queue,
-            MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            IQueue queue, MessageHandler onMessage, ConsumerConfiguration configuration
         )
         {
-            if (queue.IsExclusive)
-                return new TransientConsumer(queue, onMessage, configuration, internalConsumerFactory, eventBus);
-            if (configuration.IsExclusive)
-                return new ExclusiveConsumer(queue, onMessage, configuration, internalConsumerFactory, eventBus);
-            return new PersistentConsumer(queue, onMessage, configuration, internalConsumerFactory, eventBus);
+            return new Consumer(connection, queue, onMessage, configuration, eventBus, handlerRunner);
         }
     }
 }
