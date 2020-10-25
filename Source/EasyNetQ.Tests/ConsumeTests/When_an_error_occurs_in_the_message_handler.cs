@@ -26,9 +26,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_invoke_the_error_strategy()
         {
             ConsumerErrorStrategy.Received().HandleConsumerError(
-                Arg.Is<ConsumerExecutionContext>(args => args.Info.ConsumerTag == ConsumerTag &&
-                                                           args.Info.DeliveryTag == DeliverTag &&
-                                                           args.Info.Exchange == "the_exchange" &&
+                Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
+                                                           args.ReceivedInfo.DeliveryTag == DeliverTag &&
+                                                           args.ReceivedInfo.Exchange == "the_exchange" &&
                                                            args.Body.SequenceEqual(OriginalBody)),
                 Arg.Is<Exception>(e => e == exception)
             );
