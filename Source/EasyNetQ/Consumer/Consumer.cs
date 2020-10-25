@@ -99,7 +99,9 @@ namespace EasyNetQ.Consumer
             var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(
                 context, cancellation.Token
             ).ConfigureAwait(false);
-            ackStrategy(consumer.Model, @event.DeliveryTag);
+
+            var ackResult = ackStrategy(consumer.Model, @event.DeliveryTag);
+            eventBus.Publish(new AckEvent(receivedInfo, properties, bodyBytes, ackResult));
         }
 
         /// <inheritdoc />
