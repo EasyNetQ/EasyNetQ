@@ -49,7 +49,7 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public void StartConsuming()
+        public void Start()
         {
             channel = connection.CreateModel();
             channel.BasicQos(0, configuration.PrefetchCount, false);
@@ -59,6 +59,17 @@ namespace EasyNetQ.Consumer
                 queue.Name, false, configuration.ConsumerTag, false, false, configuration.Arguments, consumer
             );
             eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            channel.BasicCancel(configuration.ConsumerTag);
+            consumer.Received -= OnMessageReceived;
+            cancellation.Cancel();
+            channel.Dispose();
+            cancellation.Dispose();
+            eventBus.Publish(new StoppedConsumingEvent(this));
         }
 
         private async Task OnMessageReceived(object sender, BasicDeliverEventArgs @event)
@@ -102,17 +113,6 @@ namespace EasyNetQ.Consumer
 
             var ackResult = ackStrategy(consumer.Model, @event.DeliveryTag);
             eventBus.Publish(new AckEvent(receivedInfo, properties, bodyBytes, ackResult));
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            channel.BasicCancel(configuration.ConsumerTag);
-            consumer.Received -= OnMessageReceived;
-            cancellation.Cancel();
-            channel.Dispose();
-            cancellation.Dispose();
-            eventBus.Publish(new StoppedConsumingEvent(this));
         }
     }
 }

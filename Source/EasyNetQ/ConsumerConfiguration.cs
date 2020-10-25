@@ -2,6 +2,56 @@
 
 namespace EasyNetQ
 {
+    /// <inheritdoc />
+    public class ConsumerConfiguration : IConsumerConfiguration
+    {
+        /// <summary>
+        ///     Create ConsumerConfiguration
+        /// </summary>
+        /// <param name="defaultPrefetchCount"></param>
+        public ConsumerConfiguration(ushort defaultPrefetchCount)
+        {
+            PrefetchCount = defaultPrefetchCount;
+        }
+
+        /// <summary>
+        ///     Consumer tag
+        /// </summary>
+        public string ConsumerTag { get; private set; } = "";
+
+        /// <summary>
+        ///     Prefetch count
+        /// </summary>
+        public ushort PrefetchCount { get; private set; }
+
+        /// <summary>
+        ///     Arguments
+        /// </summary>
+        public IDictionary<string, object> Arguments { get; private set; }
+
+        /// <inheritdoc />
+        public IConsumerConfiguration WithConsumerTag(string consumerTag)
+        {
+            Preconditions.CheckNotNull(consumerTag, nameof(consumerTag));
+            ConsumerTag = consumerTag;
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IConsumerConfiguration WithArgument(string name, object value)
+        {
+            (Arguments ??= new Dictionary<string, object>())[name] = value;
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IConsumerConfiguration WithPrefetchCount(ushort prefetchCount)
+        {
+            PrefetchCount = prefetchCount;
+            return this;
+        }
+    }
+
     /// <summary>
     /// Allows consumer configuration to be fluently extended without adding overloads to IBus
     ///
@@ -31,57 +81,5 @@ namespace EasyNetQ
         /// <param name="value">The argument value to set</param>
         /// <returns>IConsumerConfiguration</returns>
         IConsumerConfiguration WithArgument(string name, object value);
-    }
-
-    /// <inheritdoc />
-    public class ConsumerConfiguration : IConsumerConfiguration
-    {
-        /// <summary>
-        ///     Create ConsumerConfiguration
-        /// </summary>
-        /// <param name="defaultPrefetchCount"></param>
-        public ConsumerConfiguration(ushort defaultPrefetchCount)
-        {
-            PrefetchCount = defaultPrefetchCount;
-        }
-
-        /// <summary>
-        ///     Consumer tag
-        /// </summary>
-        public string ConsumerTag { get; private set; } = "";
-
-
-        /// <summary>
-        ///     Prefetch count
-        /// </summary>
-        public ushort PrefetchCount { get; private set; }
-
-
-        /// <summary>
-        ///     Arguments
-        /// </summary>
-        public IDictionary<string, object> Arguments { get; private set; }
-
-        /// <inheritdoc />
-        public IConsumerConfiguration WithConsumerTag(string consumerTag)
-        {
-            Preconditions.CheckNotNull(consumerTag, nameof(consumerTag));
-            ConsumerTag = consumerTag;
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IConsumerConfiguration WithArgument(string name, object value)
-        {
-            (Arguments ??= new Dictionary<string, object>())[name] = value;
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IConsumerConfiguration WithPrefetchCount(ushort prefetchCount)
-        {
-            PrefetchCount = prefetchCount;
-            return this;
-        }
     }
 }
