@@ -1,4 +1,4 @@
-namespace EasyNetQ.Consumer
+namespace EasyNetQ
 {
     /// <summary>
     ///     Various extensions for IConsumerConfiguration

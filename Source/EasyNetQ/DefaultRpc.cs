@@ -166,8 +166,8 @@ namespace EasyNetQ
                         tcs.TrySetResult(msg.Body);
                 },
                 () => tcs.TrySetException(
-                    new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}",
-                        correlationId))
+                    new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}", correlationId)
+                )
             );
 
             responseActions.TryAdd(correlationId, responseAction);
@@ -205,11 +205,11 @@ namespace EasyNetQ
                     await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
                 }
 
-                var subscription = advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) =>
+                var subscription = advancedBus.Consume<TResponse>(queue, (message, _) =>
                 {
                     if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
                         responseAction.OnSuccess(message);
-                });
+                }, c => c.WithConsumerTag(conventions.ConsumerTagConvention()));
 
                 responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
                 return queue.Name;
@@ -285,6 +285,7 @@ namespace EasyNetQ
                 queue,
                 (m, i, c) => RespondToMessageAsync(responder, m, c),
                 c => c.WithPrefetchCount(responderConfiguration.PrefetchCount)
+                    .WithConsumerTag(conventions.ConsumerTagConvention())
             );
         }
 

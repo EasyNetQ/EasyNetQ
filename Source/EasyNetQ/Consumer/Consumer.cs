@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
@@ -9,6 +8,7 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public class Consumer : IConsumer
     {
         private readonly ILog logger = LogProvider.For<Consumer>();
@@ -23,6 +23,9 @@ namespace EasyNetQ.Consumer
         private AsyncEventingBasicConsumer consumer;
         private IModel channel;
 
+        /// <summary>
+        ///     Creates Consumer
+        /// </summary>
         public Consumer(
             IPersistentConnection connection,
             IQueue queue,
@@ -46,7 +49,7 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public IDisposable StartConsuming()
+        public void StartConsuming()
         {
             channel = connection.CreateModel();
             channel.BasicQos(0, configuration.PrefetchCount, false);
@@ -56,7 +59,6 @@ namespace EasyNetQ.Consumer
                 queue.Name, false, configuration.ConsumerTag, false, false, configuration.Arguments, consumer
             );
             eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
-            return new ConsumerCancellation(Dispose);
         }
 
         private async Task OnMessageReceived(object sender, BasicDeliverEventArgs @event)
