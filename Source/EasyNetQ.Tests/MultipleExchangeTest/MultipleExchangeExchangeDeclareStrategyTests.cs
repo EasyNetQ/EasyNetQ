@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Producer;
@@ -23,7 +24,7 @@ namespace EasyNetQ.Tests.MultipleExchangeTest
                 )
                 .Returns(Task.FromResult(Substitute.For<IExchange>()));
 
-            advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Queue>(), Arg.Any<string>())
+            advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Queue>(), Arg.Any<string>(), Arg.Any<IDictionary<string, object>>())
                 .Returns(Task.FromResult(Substitute.For<IBinding>()));
 
             var conventions = Substitute.For<IConventions>();

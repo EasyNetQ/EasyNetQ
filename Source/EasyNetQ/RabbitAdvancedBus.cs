@@ -478,12 +478,6 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, CancellationToken cancellationToken)
-        {
-            return BindAsync(exchange, queue, routingKey, new Dictionary<string, object>(), cancellationToken);
-        }
-
-        /// <inheritdoc />
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
@@ -509,12 +503,6 @@ namespace EasyNetQ
             }
 
             return new Binding(queue, exchange, routingKey, arguments);
-        }
-
-        /// <inheritdoc />
-        public Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, CancellationToken cancellationToken)
-        {
-            return BindAsync(source, destination, routingKey, new Dictionary<string, object>(), cancellationToken);
         }
 
         /// <inheritdoc />

@@ -552,6 +552,50 @@ namespace EasyNetQ
         /// Bind two exchanges. Does nothing if the binding already exists.
         /// </summary>
         /// <param name="bus">The bus instance</param>
+        /// <param name="source">The exchange</param>
+        /// <param name="queue">The queue</param>
+        /// <param name="routingKey">The routing key</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>A binding</returns>
+        public static Task<IBinding> BindAsync(
+            this IAdvancedBus bus,
+            IExchange source,
+            IQueue queue,
+            string routingKey,
+            CancellationToken cancellationToken
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.BindAsync(source, queue, routingKey, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Bind two exchanges. Does nothing if the binding already exists.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="source">The source exchange</param>
+        /// <param name="destination">The destination exchange</param>
+        /// <param name="routingKey">The routing key</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>A binding</returns>
+        public static Task<IBinding> BindAsync(
+            this IAdvancedBus bus,
+            IExchange source,
+            IExchange destination,
+            string routingKey,
+            CancellationToken cancellationToken
+        )
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            return bus.BindAsync(source, destination, routingKey, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Bind two exchanges. Does nothing if the binding already exists.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
         /// <param name="source">The source exchange</param>
         /// <param name="destination">The destination exchange</param>
         /// <param name="routingKey">The routing key</param>
