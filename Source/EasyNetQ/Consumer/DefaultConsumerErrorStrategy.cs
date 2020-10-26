@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Text;
 using EasyNetQ.Logging;
@@ -68,7 +67,7 @@ namespace EasyNetQ.Consumer
             {
                 logger.ErrorFormat(
                     "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeued",
-                    context.Info
+                    context.ReceivedInfo
                 );
 
                 return AckStrategies.NackWithRequeue;
@@ -77,7 +76,7 @@ namespace EasyNetQ.Consumer
             logger.Error(
                 exception,
                 "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
-                context.Info,
+                context.ReceivedInfo,
                 context.Properties,
                 Convert.ToBase64String(context.Body)
             );
@@ -94,7 +93,7 @@ namespace EasyNetQ.Consumer
                 properties.Persistent = true;
                 properties.Type = typeNameSerializer.Serialize(typeof(Error));
 
-                model.BasicPublish(errorExchange, context.Info.RoutingKey, properties, messageBody);
+                model.BasicPublish(errorExchange, context.ReceivedInfo.RoutingKey, properties, messageBody);
 
                 if (!configuration.PublisherConfirms) return AckStrategies.Ack;
 
@@ -151,9 +150,9 @@ namespace EasyNetQ.Consumer
 
         private string DeclareErrorExchangeWithQueue(IModel model, ConsumerExecutionContext context)
         {
-            var errorExchangeName = conventions.ErrorExchangeNamingConvention(context.Info);
-            var errorQueueName = conventions.ErrorQueueNamingConvention(context.Info);
-            var routingKey = context.Info.RoutingKey;
+            var errorExchangeName = conventions.ErrorExchangeNamingConvention(context.ReceivedInfo);
+            var errorQueueName = conventions.ErrorQueueNamingConvention(context.ReceivedInfo);
+            var routingKey = context.ReceivedInfo.RoutingKey;
 
             var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
@@ -171,9 +170,9 @@ namespace EasyNetQ.Consumer
             var messageAsString = errorMessageSerializer.Serialize(context.Body);
             var error = new Error
             {
-                RoutingKey = context.Info.RoutingKey,
-                Exchange = context.Info.Exchange,
-                Queue = context.Info.Queue,
+                RoutingKey = context.ReceivedInfo.RoutingKey,
+                Exchange = context.ReceivedInfo.Exchange,
+                Queue = context.ReceivedInfo.Queue,
                 Exception = exception.ToString(),
                 Message = messageAsString,
                 DateTime = DateTime.UtcNow

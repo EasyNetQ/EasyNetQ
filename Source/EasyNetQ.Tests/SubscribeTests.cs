@@ -388,9 +388,9 @@ namespace EasyNetQ.Tests
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
             basicDeliverEventArgs.Should().NotBeNull();
-            basicDeliverEventArgs.Info.ConsumerTag.Should().Be(consumerTag);
-            basicDeliverEventArgs.Info.DeliveryTag.Should().Be(deliveryTag);
-            basicDeliverEventArgs.Info.RoutingKey.Should().Be("#");
+            basicDeliverEventArgs.ReceivedInfo.ConsumerTag.Should().Be(consumerTag);
+            basicDeliverEventArgs.ReceivedInfo.DeliveryTag.Should().Be(deliveryTag);
+            basicDeliverEventArgs.ReceivedInfo.RoutingKey.Should().Be("#");
         }
     }
 

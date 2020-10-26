@@ -489,7 +489,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(arguments, "arguments");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -524,7 +523,6 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(arguments, "arguments");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
