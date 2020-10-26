@@ -14,10 +14,10 @@
             byte[] body
         )
         {
-            Preconditions.CheckNotNull(handler, "userHandler");
-            Preconditions.CheckNotNull(receivedInfo, "info");
-            Preconditions.CheckNotNull(properties, "properties");
-            Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckNotNull(handler, nameof(handler));
+            Preconditions.CheckNotNull(receivedInfo, nameof(receivedInfo));
+            Preconditions.CheckNotNull(properties, nameof(properties));
+            Preconditions.CheckNotNull(body, nameof(body));
 
             Handler = handler;
             ReceivedInfo = receivedInfo;

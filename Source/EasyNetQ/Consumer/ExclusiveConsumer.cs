@@ -48,15 +48,13 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public IDisposable StartConsuming()
+        public void StartConsuming()
         {
             disposables.Add(eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered));
             disposables.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected));
             disposables.Add(Timers.Start(StartConsumingInternal, RestartConsumingPeriod, RestartConsumingPeriod));
 
             StartConsumingInternal();
-
-            return new ConsumerCancellation(Dispose);
         }
 
         /// <inheritdoc />

@@ -135,8 +135,8 @@ namespace EasyNetQ
             var consumerConfiguration = new ConsumerConfiguration(configuration.PrefetchCount);
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queueOnMessages, consumerConfiguration);
-
-            return consumer.StartConsuming();
+            consumer.StartConsuming();
+            return consumer;
         }
 
         /// <inheritdoc />
@@ -190,7 +190,8 @@ namespace EasyNetQ
                 var rawMessage = produceConsumeInterceptor.OnConsume(new ConsumedMessage(receivedInfo, properties, body));
                 return onMessage(rawMessage.Body, rawMessage.Properties, receivedInfo, cancellationToken);
             }, consumerConfiguration);
-            return consumer.StartConsuming();
+            consumer.StartConsuming();
+            return consumer;
         }
 
         #endregion
