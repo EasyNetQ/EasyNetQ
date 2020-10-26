@@ -8,7 +8,7 @@ namespace EasyNetQ.Consumer
 {
     public class TransientConsumer : IConsumer
     {
-        private readonly IConsumerConfiguration configuration;
+        private readonly ConsumerConfiguration configuration;
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly MessageHandler onMessage;
@@ -21,7 +21,7 @@ namespace EasyNetQ.Consumer
         public TransientConsumer(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration,
+            ConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )

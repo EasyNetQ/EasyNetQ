@@ -10,13 +10,13 @@ namespace EasyNetQ.Consumer
     {
         IConsumer CreateConsumer(
             IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         );
 
         IConsumer CreateConsumer(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         );
     }
 }

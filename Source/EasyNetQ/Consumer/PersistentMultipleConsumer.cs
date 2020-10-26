@@ -10,7 +10,7 @@ namespace EasyNetQ.Consumer
 {
     public class PersistentMultipleConsumer : IConsumer
     {
-        private readonly IConsumerConfiguration configuration;
+        private readonly ConsumerConfiguration configuration;
         private readonly IPersistentConnection connection;
         private readonly IEventBus eventBus;
 
@@ -27,7 +27,7 @@ namespace EasyNetQ.Consumer
         public PersistentMultipleConsumer(
             IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
             IPersistentConnection connection,
-            IConsumerConfiguration configuration,
+            ConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )
