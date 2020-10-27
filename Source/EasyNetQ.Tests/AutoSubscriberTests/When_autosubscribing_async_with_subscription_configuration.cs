@@ -44,10 +44,10 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe()
         {
             pubSub.Received().SubscribeAsync(
-                        Arg.Any<string>(),
-                        Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-                        Arg.Any<Action<ISubscriptionConfiguration>>()
-                        );
+                Arg.Any<string>(),
+                Arg.Any<Func<MessageA, CancellationToken, Task>>(),
+                Arg.Any<Action<ISubscriptionConfiguration>>()
+            );
         }
 
         [Fact]
@@ -114,10 +114,10 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_called_subscribe()
         {
             pubSub.Received().SubscribeAsync(
-                        Arg.Any<string>(),
-                        Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-                        Arg.Any<Action<ISubscriptionConfiguration>>()
-                        );
+                Arg.Any<string>(),
+                Arg.Any<Func<MessageA, CancellationToken, Task>>(),
+                Arg.Any<Action<ISubscriptionConfiguration>>()
+            );
         }
 
         [Fact]

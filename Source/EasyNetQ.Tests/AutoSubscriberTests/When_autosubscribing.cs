@@ -15,7 +15,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     public class When_autosubscribing : IDisposable
     {
         private MockBuilder mockBuilder;
-        private readonly Dictionary<string, object> parameters;
 
         private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
@@ -32,7 +31,6 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             mockBuilder = new MockBuilder();
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
-            parameters = new Dictionary<string, object>();
             autoSubscriber.Subscribe(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) });
         }
 
@@ -50,8 +48,8 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                     Arg.Is(true),
                     Arg.Is(false),
                     Arg.Is(false),
-                    Arg.Any<IDictionary<string, object>>()
-                    );
+                    Arg.Is((IDictionary<string, object>)null)
+                );
 
             assertQueueDeclared(expectedQueueName1);
             assertQueueDeclared(expectedQueueName2);
@@ -61,12 +59,14 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_bound_to_queues()
         {
-            Action<int, string, string> assertConsumerStarted = (channelIndex, queueName, topicName) =>
-                                                        mockBuilder.Channels[0].Received().QueueBind(
-                                                Arg.Is(queueName),
-                                                Arg.Any<string>(),
-                                                Arg.Is(topicName),
-                                                Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(parameters)));
+            Action<int, string, string> assertConsumerStarted =
+                (channelIndex, queueName, topicName) =>
+                    mockBuilder.Channels[0].Received().QueueBind(
+                        Arg.Is(queueName),
+                        Arg.Any<string>(),
+                        Arg.Is(topicName),
+                        Arg.Is((IDictionary<string, object>)null)
+                    );
 
             assertConsumerStarted(1, expectedQueueName1, "#");
             assertConsumerStarted(2, expectedQueueName2, "#");
