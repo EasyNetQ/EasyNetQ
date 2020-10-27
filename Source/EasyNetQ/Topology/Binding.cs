@@ -9,7 +9,6 @@ namespace EasyNetQ.Topology
             Preconditions.CheckNotNull(bindable, "bindable");
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(routingKey, "routingKey");
-            Preconditions.CheckNotNull(arguments, "arguments");
 
             Bindable = bindable;
             Exchange = exchange;
