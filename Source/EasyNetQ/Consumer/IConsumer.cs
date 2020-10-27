@@ -11,6 +11,6 @@ namespace EasyNetQ.Consumer
         ///     Starts the consumer
         /// </summary>
         /// <returns>Disposable to stop the consumer</returns>
-        IDisposable StartConsuming();
+        void StartConsuming();
     }
 }

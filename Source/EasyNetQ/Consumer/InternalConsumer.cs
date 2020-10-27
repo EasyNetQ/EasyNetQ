@@ -16,12 +16,12 @@ namespace EasyNetQ.Consumer
         StartConsumingStatus StartConsuming(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         );
 
         StartConsumingStatus StartConsuming(
             IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         );
 
         event Action<IInternalConsumer> Cancelled;
@@ -215,16 +215,12 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public StartConsumingStatus StartConsuming(
             IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         )
         {
             Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-            IDictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                { "x-priority", configuration.Priority }
-            };
             try
             {
                 InitModel(configuration.PrefetchCount, true);
@@ -246,7 +242,7 @@ namespace EasyNetQ.Consumer
                             consumerTag, // consumerTag
                             true,
                             configuration.IsExclusive,
-                            arguments, // arguments
+                            configuration.Arguments, // arguments
                             basicConsumer // consumer
                         );
 
@@ -288,7 +284,7 @@ namespace EasyNetQ.Consumer
         public StartConsumingStatus StartConsuming(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         )
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -296,10 +292,6 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(configuration, "configuration");
 
             var consumerTag = conventions.ConsumerTagConvention();
-            IDictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                { "x-priority", configuration.Priority }
-            };
             try
             {
                 InitModel(configuration.PrefetchCount, false);
@@ -314,7 +306,7 @@ namespace EasyNetQ.Consumer
                     consumerTag, // consumerTag
                     true,
                     configuration.IsExclusive,
-                    arguments, // arguments
+                    configuration.Arguments, // arguments
                     basicConsumer // consumer
                 );
 

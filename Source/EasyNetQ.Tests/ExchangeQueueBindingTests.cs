@@ -340,7 +340,8 @@ namespace EasyNetQ.Tests
                 Arg.Is("my_queue"),
                 Arg.Is("my_exchange"),
                 Arg.Is("my_routing_key"),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
     }
 

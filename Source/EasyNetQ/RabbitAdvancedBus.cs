@@ -135,8 +135,8 @@ namespace EasyNetQ
             var consumerConfiguration = new ConsumerConfiguration(configuration.PrefetchCount);
             configure(consumerConfiguration);
             var consumer = consumerFactory.CreateConsumer(queueOnMessages, consumerConfiguration);
-
-            return consumer.StartConsuming();
+            consumer.StartConsuming();
+            return consumer;
         }
 
         /// <inheritdoc />
@@ -190,7 +190,8 @@ namespace EasyNetQ
                 var rawMessage = produceConsumeInterceptor.OnConsume(new ConsumedMessage(receivedInfo, properties, body));
                 return onMessage(rawMessage.Body, rawMessage.Properties, receivedInfo, cancellationToken);
             }, consumerConfiguration);
-            return consumer.StartConsuming();
+            consumer.StartConsuming();
+            return consumer;
         }
 
         #endregion
@@ -478,18 +479,11 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, CancellationToken cancellationToken)
-        {
-            return BindAsync(exchange, queue, routingKey, new Dictionary<string, object>(), cancellationToken);
-        }
-
-        /// <inheritdoc />
         public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(arguments, "arguments");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -513,18 +507,11 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, CancellationToken cancellationToken)
-        {
-            return BindAsync(source, destination, routingKey, new Dictionary<string, object>(), cancellationToken);
-        }
-
-        /// <inheritdoc />
         public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(source, "source");
             Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(arguments, "arguments");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 

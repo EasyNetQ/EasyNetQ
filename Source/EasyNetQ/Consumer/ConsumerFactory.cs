@@ -45,7 +45,7 @@ namespace EasyNetQ.Consumer
         public IConsumer CreateConsumer(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         )
         {
             Preconditions.CheckNotNull(queue, "queue");
@@ -60,7 +60,7 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public IConsumer CreateConsumer(
             IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         )
         {
             if (configuration.IsExclusive || queueConsumerPairs.Any(x => x.Item1.IsExclusive))
@@ -88,7 +88,7 @@ namespace EasyNetQ.Consumer
         private IConsumer CreateConsumerInstance(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration
+            ConsumerConfiguration configuration
         )
         {
             if (queue.IsExclusive)

@@ -43,35 +43,32 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             void VerifyQueueDeclared(string queueName) =>
                 mockBuilder.Channels[0].Received().QueueDeclare(
-                    queue: Arg.Is(value: queueName),
-                    durable: Arg.Is(true),
-                    exclusive: Arg.Is(false),
-                    autoDelete: Arg.Is(false),
-                    arguments: Arg.Any<IDictionary<string, object>>()
+                    Arg.Is(queueName),
+                    Arg.Is(true),
+                    Arg.Is(false),
+                    Arg.Is(false),
+                    Arg.Is((IDictionary<string, object>)null)
                 );
 
-            VerifyQueueDeclared(queueName: expectedQueueName1);
-            VerifyQueueDeclared(queueName: expectedQueueName2);
-            VerifyQueueDeclared(queueName: expectedQueueName3);
+            VerifyQueueDeclared(expectedQueueName1);
+            VerifyQueueDeclared(expectedQueueName2);
+            VerifyQueueDeclared(expectedQueueName3);
         }
 
         [Fact]
         public void Should_have_bound_to_queues()
         {
-            // ReSharper disable once CollectionNeverUpdated.Local
-            var parameters = new Dictionary<string, object> { };
-
             void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
                 mockBuilder.Channels[0].Received().QueueBind(
-                    queue: Arg.Is(value: queueName),
-                    exchange: Arg.Any<string>(),
-                    routingKey: Arg.Is(value: topicName),
-                    arguments: Arg.Is<IDictionary<string, object>>(x => x.SequenceEqual(parameters))
+                    Arg.Is(queueName),
+                    Arg.Any<string>(),
+                    Arg.Is(topicName),
+                    Arg.Is((IDictionary<string, object>)null)
                 );
 
-            ConsumerStarted(channelIndex: 1, queueName: expectedQueueName1, topicName: "#");
-            ConsumerStarted(channelIndex: 2, queueName: expectedQueueName2, topicName: "#");
-            ConsumerStarted(channelIndex: 3, queueName: expectedQueueName3, topicName: "Important");
+            ConsumerStarted(1, expectedQueueName1, "#");
+            ConsumerStarted(2, expectedQueueName2, "#");
+            ConsumerStarted(3, expectedQueueName3, "Important");
         }
 
         [Fact]

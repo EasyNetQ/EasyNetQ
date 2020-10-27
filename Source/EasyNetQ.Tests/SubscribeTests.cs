@@ -72,7 +72,7 @@ namespace EasyNetQ.Tests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is(typeName),
                 Arg.Is("#"),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
 
         [Fact]
@@ -214,7 +214,7 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
     }
 
@@ -388,9 +388,9 @@ namespace EasyNetQ.Tests
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
             basicDeliverEventArgs.Should().NotBeNull();
-            basicDeliverEventArgs.Info.ConsumerTag.Should().Be(consumerTag);
-            basicDeliverEventArgs.Info.DeliveryTag.Should().Be(deliveryTag);
-            basicDeliverEventArgs.Info.RoutingKey.Should().Be("#");
+            basicDeliverEventArgs.ReceivedInfo.ConsumerTag.Should().Be(consumerTag);
+            basicDeliverEventArgs.ReceivedInfo.DeliveryTag.Should().Be(deliveryTag);
+            basicDeliverEventArgs.ReceivedInfo.RoutingKey.Should().Be("#");
         }
     }
 

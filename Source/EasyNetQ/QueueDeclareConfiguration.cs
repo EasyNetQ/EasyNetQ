@@ -46,7 +46,7 @@ namespace EasyNetQ
         public bool IsExclusive { get; private set; }
         public bool IsAutoDelete { get; private set; }
 
-        public IDictionary<string, object> Arguments { get; } = new Dictionary<string, object>();
+        public IDictionary<string, object> Arguments { get; private set; }
 
         public IQueueDeclareConfiguration AsDurable(bool isDurable)
         {
@@ -68,7 +68,7 @@ namespace EasyNetQ
 
         public IQueueDeclareConfiguration WithArgument(string name, object value)
         {
-            Arguments[name] = value;
+            (Arguments ??= new Dictionary<string, object>())[name] = value;
             return this;
         }
     }

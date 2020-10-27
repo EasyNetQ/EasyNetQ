@@ -32,7 +32,7 @@ namespace EasyNetQ.Consumer
         {
             if (logger.IsDebugEnabled())
             {
-                logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.Info);
+                logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.ReceivedInfo);
             }
 
             var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context, cancellationToken).ConfigureAwait(false);
@@ -48,7 +48,7 @@ namespace EasyNetQ.Consumer
                     logger.Info(
                         alreadyClosedException,
                         "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
-                        context.Info
+                        context.ReceivedInfo
                     );
                 }
                 catch (IOException ioException)
@@ -56,7 +56,7 @@ namespace EasyNetQ.Consumer
                     logger.Info(
                         ioException,
                         "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
-                        context.Info
+                        context.ReceivedInfo
                     );
                 }
                 catch (Exception exception)
@@ -64,7 +64,7 @@ namespace EasyNetQ.Consumer
                     logger.Error(
                         exception,
                         "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
-                        context.Info
+                        context.ReceivedInfo
                     );
                 }
 
@@ -81,7 +81,7 @@ namespace EasyNetQ.Consumer
                 try
                 {
                     return await context.Handler(
-                        context.Body, context.Properties, context.Info, cancellationToken
+                        context.Body, context.Properties, context.ReceivedInfo, cancellationToken
                     ).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)

@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     public abstract class Given_a_PersistentConsumer
     {
         protected const string queueName = "my_queue";
-        protected IConsumerConfiguration configuration;
+        protected ConsumerConfiguration configuration;
         protected IConsumer consumer;
         protected int createConsumerCalled;
         protected IEventBus eventBus;

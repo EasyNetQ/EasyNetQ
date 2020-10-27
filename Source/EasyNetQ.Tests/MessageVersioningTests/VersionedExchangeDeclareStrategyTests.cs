@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                     return Task.FromResult<IExchange>(exchange);
                 });
 
-            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
                 .Returns(mi =>
                 {
                     var source = (ExchangeStub)mi[0];
@@ -110,7 +110,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                     return Task.FromResult<IExchange>(exchange);
                 });
 
-            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"))
+            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
                 .Returns(mi =>
                 {
                     var source = (ExchangeStub)mi[0];

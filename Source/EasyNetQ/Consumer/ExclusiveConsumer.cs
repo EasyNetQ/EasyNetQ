@@ -3,15 +3,13 @@ using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
     public class ExclusiveConsumer : IConsumer
     {
         private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(10);
-        private readonly IConsumerConfiguration configuration;
+        private readonly ConsumerConfiguration configuration;
 
         private readonly IList<IDisposable> disposables = new List<IDisposable>();
         private readonly IEventBus eventBus;
@@ -31,7 +29,7 @@ namespace EasyNetQ.Consumer
         public ExclusiveConsumer(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration,
+            ConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )
@@ -50,15 +48,13 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public IDisposable StartConsuming()
+        public void StartConsuming()
         {
             disposables.Add(eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered));
             disposables.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected));
             disposables.Add(Timers.Start(StartConsumingInternal, RestartConsumingPeriod, RestartConsumingPeriod));
 
             StartConsumingInternal();
-
-            return new ConsumerCancellation(Dispose);
         }
 
         /// <inheritdoc />

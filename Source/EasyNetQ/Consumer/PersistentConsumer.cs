@@ -10,7 +10,7 @@ namespace EasyNetQ.Consumer
 {
     public class PersistentConsumer : IConsumer
     {
-        private readonly IConsumerConfiguration configuration;
+        private readonly ConsumerConfiguration configuration;
         private readonly IEventBus eventBus;
 
         private readonly IInternalConsumerFactory internalConsumerFactory;
@@ -27,7 +27,7 @@ namespace EasyNetQ.Consumer
         public PersistentConsumer(
             IQueue queue,
             MessageHandler onMessage,
-            IConsumerConfiguration configuration,
+            ConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )
@@ -46,14 +46,12 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public IDisposable StartConsuming()
+        public void StartConsuming()
         {
             subscriptions.Add(eventBus.Subscribe<ConnectionRecoveredEvent>(ConnectionOnConnected));
             subscriptions.Add(eventBus.Subscribe<ConnectionDisconnectedEvent>(ConnectionOnDisconnected));
 
             StartConsumingInternal();
-
-            return new ConsumerCancellation(Dispose);
         }
 
         /// <inheritdoc />
