@@ -36,7 +36,7 @@ deploy:
     artifact: /.*\.s?nupkg/
     server:
     api_key:
-      secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
+      secure: j0hMTOcdalYZo+isJFFL/FoFtqb/imD9VPtOF6F3fp73tmdFSupTfz5ygTIVUoF5
     skip_symbols: false
     on:
       branch: master
@@ -44,7 +44,7 @@ deploy:
     artifact: /.*\.s?nupkg/
     server:
     api_key:
-      secure: ejD7WLs3aqlXgHLyWq444QK6pnMT6g/QiRxptqIGaOgKvGM7SJ17r/QH6e1jEJ9M
+      secure: j0hMTOcdalYZo+isJFFL/FoFtqb/imD9VPtOF6F3fp73tmdFSupTfz5ygTIVUoF5
     skip_symbols: false
     on:
       branch: develop
