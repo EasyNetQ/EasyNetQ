@@ -4,10 +4,12 @@ using System.Reflection;
 
 namespace EasyNetQ
 {
+    /// <inheritdoc />
     public class LegacyTypeNameSerializer : ITypeNameSerializer
     {
         private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
 
+        /// <inheritdoc />
         public Type DeSerialize(string typeName)
         {
             Preconditions.CheckNotBlank(typeName, "typeName");
@@ -22,6 +24,10 @@ namespace EasyNetQ
                 var type = Type.GetType(nameParts[0] + ", " + nameParts[1]);
                 if (type == null)
                 {
+                    type = Type.GetType(nameParts[0]);
+                }
+                if (type == null)
+                {
                     throw new EasyNetQException("Cannot find type {0}", t);
                 }
                 return type;
@@ -30,6 +36,7 @@ namespace EasyNetQ
 
         private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();
 
+        /// <inheritdoc />
         public string Serialize(Type type)
         {
             Preconditions.CheckNotNull(type, "type");

@@ -1,102 +1,106 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ
 {
     /// <summary>
-    /// An internal pub-sub bus to distribute events within EasyNetQ
+    ///     An internal pub-sub bus to distribute events within EasyNetQ
     /// </summary>
     public interface IEventBus
     {
+        /// <summary>
+        ///     Publishes the event
+        /// </summary>
+        /// <param name="event">The event</param>
+        /// <typeparam name="TEvent">The event type</typeparam>
         void Publish<TEvent>(TEvent @event);
-        IDisposable Subscribe<TEvent>(Action<TEvent> eventHandler);
+
+        /// <summary>
+        ///     Subscribes to the event type
+        /// </summary>
+        /// <param name="handler">The event handler</param>
+        /// <typeparam name="TEvent">The event type</typeparam>
+        /// <returns>Unsubscription disposable</returns>
+        IDisposable Subscribe<TEvent>(Action<TEvent> handler);
     }
 
-    public class EventBus : IEventBus
+    /// <inheritdoc />
+    public sealed class EventBus : IEventBus
     {
-        private class Handlers
-        {
-            private readonly object internalHandlersLock = new object();
-            private readonly List<object> internalHandlers;
+        private readonly ConcurrentDictionary<Type, object> subscriptions = new ConcurrentDictionary<Type, object>();
 
-            public Handlers()
-            {
-                internalHandlers = new List<object>();
-            }
-
-            public Handlers(params object[] handlers)
-            {
-                internalHandlers = new List<object>(handlers);
-            }
-
-            public void Add(object handler)
-            {
-                lock (internalHandlersLock)
-                    internalHandlers.Add(handler);
-            }
-
-            public void Remove(object handler)
-            {
-                lock (internalHandlersLock)
-                    internalHandlers.Remove(handler);
-            }
-
-            public IEnumerable<object> AsEnumerable()
-            {
-                lock (internalHandlersLock)
-                    return internalHandlers.ToArray();
-            }
-        }
-
-        private readonly ConcurrentDictionary<Type, Handlers> subscriptions = new ConcurrentDictionary<Type, Handlers>();
-
+        /// <inheritdoc />
         public void Publish<TEvent>(TEvent @event)
         {
-            if (!subscriptions.TryGetValue(typeof (TEvent), out var handlers))
+            if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
-            foreach (var handler in handlers.AsEnumerable())
-                ((Action<TEvent>) handler)(@event);
+
+            ((Handlers<TEvent>) handlers).Handle(@event);
         }
 
-        public IDisposable Subscribe<TEvent>(Action<TEvent> eventHandler)
+        /// <inheritdoc />
+        public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
         {
-            AddSubscription(eventHandler);
-            return GetCancelSubscriptionDelegate(eventHandler);
+            var handlers = (Handlers<TEvent>)subscriptions.GetOrAdd(typeof(TEvent), _ => new Handlers<TEvent>());
+            handlers.Add(handler);
+            return new Subscription<TEvent>(handlers, handler);
         }
 
-        private void AddSubscription<TEvent>(Action<TEvent> handler)
+        private sealed class Handlers<TEvent>
         {
-            subscriptions.AddOrUpdate(
-                typeof (TEvent), 
-                new Handlers(handler),
-                (key, existingHandlers) => 
+            private readonly ILog log = LogProvider.For<Handlers<TEvent>>();
+            private readonly object mutex = new object();
+            private volatile List<Action<TEvent>> handlers = new List<Action<TEvent>>();
+
+            public void Add(Action<TEvent> handler)
+            {
+                lock (mutex)
                 {
-                    existingHandlers.Add(handler);
-                    return existingHandlers;
+                    var newHandlers = new List<Action<TEvent>>(handlers);
+                    newHandlers.Add(handler);
+                    handlers = newHandlers;
                 }
-            );
-        }
+            }
 
-        private IDisposable GetCancelSubscriptionDelegate<TEvent>(Action<TEvent> eventHandler)
-        {
-            return new Subscription(
-                () =>
+            public void Remove(Action<TEvent> handler)
+            {
+                lock (mutex)
                 {
-                    if (!subscriptions.TryGetValue(typeof (TEvent), out var handlers))
-                        return;
-                    handlers.Remove(eventHandler);
+                    var newHandlers = new List<Action<TEvent>>(handlers);
+                    newHandlers.Remove(handler);
+                    handlers = newHandlers;
                 }
-            );
+            }
+
+            public void Handle(TEvent @event)
+            {
+                // ReSharper disable once InconsistentlySynchronizedField
+                foreach (var handler in handlers)
+                    try
+                    {
+                        handler(@event);
+                    }
+                    catch (Exception exception)
+                    {
+                        log.ErrorException("Failed to handle {event}", exception, @event);
+                    }
+            }
         }
 
-        private sealed class Subscription : IDisposable
+        private sealed class Subscription<TEvent> : IDisposable
         {
-            private readonly Action unsubscribe;
+            private readonly Handlers<TEvent> handlers;
+            private readonly Action<TEvent> handler;
 
-            public Subscription(Action unsubscribe) => this.unsubscribe = unsubscribe;
+            public Subscription(Handlers<TEvent> handlers, Action<TEvent> handler)
+            {
+                this.handlers = handlers;
+                this.handler = handler;
+            }
 
-            public void Dispose() => unsubscribe();
+            public void Dispose() => handlers.Remove(handler);
         }
     }
 }

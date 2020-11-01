@@ -13,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_polymorphic(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
@@ -37,7 +37,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var bunnies = MessagesFactories.Create(MessagesCount, i => new BunnyMessage(i));
             var rabbits = MessagesFactories.Create(MessagesCount, MessagesCount, i => new RabbitMessage(i));
 
-            using (bus.Subscribe<Message>(subscriptionId, x =>
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, x =>
             {
                 switch (x)
                 {
@@ -50,9 +50,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     default:
                         throw new ArgumentOutOfRangeException(nameof(x), x, null);
                 }
-            }))
+            }, cts.Token))
             {
-                await bus.PublishBatchAsync(bunnies.Concat(rabbits), cts.Token)
+                await bus.PubSub.PublishBatchAsync(bunnies.Concat(rabbits), cts.Token)
                     .ConfigureAwait(false);
 
                 await Task.WhenAll(

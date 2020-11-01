@@ -1,8 +1,9 @@
-﻿using System;
+﻿using RabbitMQ.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RabbitMQ.Client;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
@@ -146,7 +147,7 @@ namespace EasyNetQ
         /// </summary>
         public IDictionary<string, object> Headers
         {
-            get => headers ?? (headers = new Dictionary<string, object>());
+            get => headers ??= new Dictionary<string, object>();
             set => headers = value;
         }
 
@@ -164,7 +165,7 @@ namespace EasyNetQ
         private byte priority;
 
         /// <summary>
-        ///     message priority, 0 to 9
+        ///     Message priority, 0 to 9
         /// </summary>
         public byte Priority
         {
@@ -175,7 +176,7 @@ namespace EasyNetQ
         private string correlationId;
 
         /// <summary>
-        ///     application correlation identifier
+        ///     Application correlation identifier
         /// </summary>
         public string CorrelationId
         {
@@ -186,7 +187,7 @@ namespace EasyNetQ
         private string replyTo;
 
         /// <summary>
-        ///     destination to reply to
+        ///     Destination to reply to
         /// </summary>
         public string ReplyTo
         {
@@ -197,7 +198,7 @@ namespace EasyNetQ
         private string expiration;
 
         /// <summary>
-        ///     message expiration specification
+        ///     Message expiration specification
         /// </summary>
         public string Expiration
         {
@@ -208,7 +209,7 @@ namespace EasyNetQ
         private string messageId;
 
         /// <summary>
-        ///     application message identifier
+        ///     Application message identifier
         /// </summary>
         public string MessageId
         {
@@ -219,7 +220,7 @@ namespace EasyNetQ
         private long timestamp;
 
         /// <summary>
-        ///     message timestamp
+        ///     Message timestamp
         /// </summary>
         public long Timestamp
         {
@@ -230,7 +231,7 @@ namespace EasyNetQ
         private string type;
 
         /// <summary>
-        ///     message type name
+        ///     Message type name
         /// </summary>
         public string Type
         {
@@ -241,7 +242,7 @@ namespace EasyNetQ
         private string userId;
 
         /// <summary>
-        ///     creating user id
+        ///     Creating user id
         /// </summary>
         public string UserId
         {
@@ -263,7 +264,7 @@ namespace EasyNetQ
         private string clusterId;
 
         /// <summary>
-        ///     intra-cluster routing identifier
+        ///     Intra-cluster routing identifier
         /// </summary>
         public string ClusterId
         {
@@ -332,8 +333,13 @@ namespace EasyNetQ
         public bool UserIdPresent => userIdPresent;
 
         /// <summary>
+        ///     True if AppId is present
+        /// </summary>
+        public bool AppIdPresent => appIdPresent;
+
+        /// <summary>
         ///     True if ClusterId is present
-        /// </summary>        public bool AppIdPresent => appIdPresent;
+        /// </summary>
         public bool ClusterIdPresent => clusterIdPresent;
 
         /// <inheritdoc />

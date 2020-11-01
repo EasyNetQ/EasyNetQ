@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Xunit;
 using System.Reflection;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.Tests
 {

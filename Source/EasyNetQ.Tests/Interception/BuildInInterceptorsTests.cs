@@ -1,8 +1,8 @@
-﻿using System;
-using System.Text;
-using EasyNetQ.Interception;
-using Xunit;
+﻿using EasyNetQ.Interception;
 using NSubstitute;
+using System;
+using System.Text;
+using Xunit;
 
 namespace EasyNetQ.Tests.Interception
 {
@@ -11,29 +11,32 @@ namespace EasyNetQ.Tests.Interception
         [Fact]
         public void ShouldCompressAndDecompress()
         {
-            var gZipInterceptor = new GZipInterceptor();
+            var interceptor = new GZipInterceptor();
             var body = Encoding.UTF8.GetBytes("haha");
-            var rawMessage = new RawMessage(new MessageProperties(), body);
-            Assert.Equal(body, gZipInterceptor.OnConsume(gZipInterceptor.OnProduce(rawMessage)).Body);
+            var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
+            var message = interceptor.OnProduce(outgoingMessage);
+            var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
+            Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body);
         }
-
 
         [Fact]
         public void ShouldEncryptAndDecrypt()
         {
-            var tripleDESInterceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="));
+            var interceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="));
             var body = Encoding.UTF8.GetBytes("haha");
-            var rawMessage = new RawMessage(new MessageProperties(), body);
-            Assert.Equal(body, tripleDESInterceptor.OnConsume(tripleDESInterceptor.OnProduce(rawMessage)).Body);
+            var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
+            var message = interceptor.OnProduce(outgoingMessage);
+            var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
+            Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body);
         }
 
         [Fact]
         public void ShouldCallAddedInterceptorsOnProduce()
         {
-            var sourceMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            var firstMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            
+            var sourceMessage = new ProducedMessage(new MessageProperties(), new byte[0]);
+            var firstMessage = new ProducedMessage(new MessageProperties(), new byte[0]);
+            var secondMessage = new ProducedMessage(new MessageProperties(), new byte[0]);
+
             var first = Substitute.For<IProduceConsumeInterceptor>();
             var second = Substitute.For<IProduceConsumeInterceptor>();
             first.OnProduce(sourceMessage).Returns(firstMessage);
@@ -48,12 +51,11 @@ namespace EasyNetQ.Tests.Interception
         [Fact]
         public void ShouldCallAddedInterceptorsOnConsume()
         {
-            var sourceMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            var firstMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            var secondMessage = new RawMessage(new MessageProperties(), new byte[0]);
-            
-            
-            var first = Substitute.For<IProduceConsumeInterceptor>();      
+            var sourceMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
+            var firstMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
+            var secondMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
+
+            var first = Substitute.For<IProduceConsumeInterceptor>();
             var second = Substitute.For<IProduceConsumeInterceptor>();
             first.OnConsume(secondMessage).Returns(firstMessage);
             second.OnConsume(sourceMessage).Returns(secondMessage);

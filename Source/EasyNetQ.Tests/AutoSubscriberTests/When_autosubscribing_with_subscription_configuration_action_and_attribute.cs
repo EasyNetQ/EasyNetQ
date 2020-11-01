@@ -1,11 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
-using System;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
-using Xunit;
-using NSubstitute;
-using System.Reflection;
+using EasyNetQ.Internals;
 using FluentAssertions;
+using NSubstitute;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -13,11 +14,14 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
-       
+        private IPubSub pubSub;
+
         public When_autosubscribing_with_subscription_configuration_action_and_attribute()
         {
+            pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
-           
+            bus.PubSub.Returns(pubSub);
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
                 {
                         ConfigureSubscriptionConfiguration =
@@ -27,17 +31,15 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                                     .WithPriority(11)
                 };
 
-            bus.When(x => x.Subscribe(
+            pubSub.SubscribeAsync(
                     Arg.Is("MyActionAndAttributeTest"),
-                    Arg.Any<Action<MessageA>>(),
+                    Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                     Arg.Any<Action<ISubscriptionConfiguration>>()
-                    ))
-                    .Do(a =>
-                    {
-                        capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
-                    });
+                )
+                .Returns(Task.FromResult(Substitute.For<ISubscriptionResult>()).ToAwaitableDisposable())
+                .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
+            autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithActionAndAttribute) });
         }
 
         public void Dispose()
@@ -48,16 +50,18 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_called_subscribe()
         {
-            bus.Received().Subscribe(Arg.Any<string>(),
-                                     Arg.Any<Action<MessageA>>(),
-                                     Arg.Any<Action<ISubscriptionConfiguration>>());
+            pubSub.Received().SubscribeAsync(
+                Arg.Any<string>(),
+                Arg.Any<Func<MessageA, CancellationToken, Task>>(),
+                Arg.Any<Action<ISubscriptionConfiguration>>()
+            );
         }
 
         [Fact]
         public void Should_have_called_subscribe_with_attribute_values_notaction_values()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.Should().BeTrue();
@@ -71,14 +75,13 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             [AutoSubscriberConsumer(SubscriptionId = "MyActionAndAttributeTest")]
             [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
-            public void Consume(MessageA message)
+            public void Consume(MessageA message, CancellationToken cancellationToken)
             {
             }
         }
 
         private class MessageA
         {
-            public string Text { get; set; }
         }
     }
 }

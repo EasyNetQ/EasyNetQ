@@ -14,16 +14,14 @@ namespace EasyNetQ.Consumer
     public interface IInternalConsumer : IDisposable
     {
         StartConsumingStatus StartConsuming(
-            IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
-            IConsumerConfiguration configuration
+            MessageHandler onMessage,
+            ConsumerConfiguration configuration
         );
 
         StartConsumingStatus StartConsuming(
-            IPersistentConnection connection,
-            ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs,
-            IConsumerConfiguration configuration
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
+            ConsumerConfiguration configuration
         );
 
         event Action<IInternalConsumer> Cancelled;
@@ -31,13 +29,23 @@ namespace EasyNetQ.Consumer
 
     public class BasicConsumer : IBasicConsumer, IDisposable
     {
-        private readonly ILog logger = LogProvider.For<BasicConsumer>();
         private readonly Action<BasicConsumer> cancelled;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
+        private readonly ILog logger = LogProvider.For<BasicConsumer>();
 
-        public BasicConsumer(Action<BasicConsumer> cancelled, IConsumerDispatcher consumerDispatcher, IQueue queue, IEventBus eventBus, IHandlerRunner handlerRunner, Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage, IModel model)
+        private bool disposed;
+
+        public BasicConsumer(
+            Action<BasicConsumer> cancelled,
+            IConsumerDispatcher consumerDispatcher,
+            IQueue queue,
+            IEventBus eventBus,
+            IHandlerRunner handlerRunner,
+            MessageHandler onMessage,
+            IModel model
+        )
         {
             Preconditions.CheckNotNull(onMessage, "onMessage");
 
@@ -50,19 +58,27 @@ namespace EasyNetQ.Consumer
             Model = model;
         }
 
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> OnMessage { get; }
+        public MessageHandler OnMessage { get; }
         public IQueue Queue { get; }
         public string ConsumerTag { get; private set; }
 
+        /// <inheritdoc />
         public void HandleBasicConsumeOk(string consumerTag)
         {
             ConsumerTag = consumerTag;
         }
 
-        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
-            IBasicProperties properties, ReadOnlyMemory<byte> body)
+        /// <inheritdoc />
+        public void HandleBasicDeliver(
+            string consumerTag,
+            ulong deliveryTag,
+            bool redelivered,
+            string exchange,
+            string routingKey,
+            IBasicProperties properties,
+            ReadOnlyMemory<byte> body
+        )
         {
-
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
@@ -111,11 +127,13 @@ namespace EasyNetQ.Consumer
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
         }
 
+        /// <inheritdoc />
         public void HandleBasicCancelOk(string consumerTag)
         {
             Cancel();
         }
 
+        /// <inheritdoc />
         public void HandleBasicCancel(string consumerTag)
         {
             Cancel();
@@ -125,6 +143,7 @@ namespace EasyNetQ.Consumer
             );
         }
 
+        /// <inheritdoc />
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
             logger.InfoFormat(
@@ -135,10 +154,13 @@ namespace EasyNetQ.Consumer
             );
         }
 
+        /// <inheritdoc />
         public IModel Model { get; }
+
+        /// <inheritdoc />
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
 
-        private bool disposed;
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;
@@ -150,51 +172,58 @@ namespace EasyNetQ.Consumer
 
     public class InternalConsumer : IInternalConsumer
     {
-        private readonly ILog logger = LogProvider.For<InternalConsumer>();
-
-        private readonly IHandlerRunner handlerRunner;
+        private readonly IPersistentConnection connection;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IConventions conventions;
         private readonly IEventBus eventBus;
+        private readonly IHandlerRunner handlerRunner;
+        private readonly ILog logger = LogProvider.For<InternalConsumer>();
         private ICollection<BasicConsumer> basicConsumers;
 
-        public IModel Model { get; private set; }
+        private HashSet<BasicConsumer> cancelledConsumer;
 
-        public event Action<IInternalConsumer> Cancelled;
+        private bool disposed;
+
+        private readonly object modelLock = new object();
 
         public InternalConsumer(
+            IPersistentConnection connection,
             IHandlerRunner handlerRunner,
             IConsumerDispatcher consumerDispatcher,
             IConventions conventions,
-            IEventBus eventBus)
+            IEventBus eventBus
+        )
         {
+            Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
             Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
             Preconditions.CheckNotNull(conventions, "conventions");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
+            this.connection = connection;
             this.handlerRunner = handlerRunner;
             this.consumerDispatcher = consumerDispatcher;
             this.conventions = conventions;
             this.eventBus = eventBus;
         }
 
-        public StartConsumingStatus StartConsuming(IPersistentConnection connection, ICollection<Tuple<IQueue, Func<byte[], MessageProperties, MessageReceivedInfo, Task>>> queueConsumerPairs, IConsumerConfiguration configuration)
+        public IModel Model { get; private set; }
+
+        /// <inheritdoc />
+        public event Action<IInternalConsumer> Cancelled;
+
+        /// <inheritdoc />
+        public StartConsumingStatus StartConsuming(
+            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
+            ConsumerConfiguration configuration
+        )
         {
-            Preconditions.CheckNotNull(connection, nameof(connection));
             Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-
-            IDictionary<string, object> arguments = new Dictionary<string, object>
-                {
-                    {"x-priority", configuration.Priority}
-                };
             try
             {
-                Model = connection.CreateModel();
-
-                Model.BasicQos(0, configuration.PrefetchCount, true);
+                InitModel(configuration.PrefetchCount, true);
 
                 basicConsumers = new List<BasicConsumer>();
 
@@ -213,7 +242,7 @@ namespace EasyNetQ.Consumer
                             consumerTag, // consumerTag
                             true,
                             configuration.IsExclusive,
-                            arguments, // arguments
+                            configuration.Arguments, // arguments
                             basicConsumer // consumer
                         );
 
@@ -251,41 +280,35 @@ namespace EasyNetQ.Consumer
             }
         }
 
+        /// <inheritdoc />
         public StartConsumingStatus StartConsuming(
-            IPersistentConnection connection,
             IQueue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> onMessage,
-            IConsumerConfiguration configuration
-            )
+            MessageHandler onMessage,
+            ConsumerConfiguration configuration
+        )
         {
-            Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckNotNull(onMessage, "onMessage");
             Preconditions.CheckNotNull(configuration, "configuration");
 
             var consumerTag = conventions.ConsumerTagConvention();
-            IDictionary<string, object> arguments = new Dictionary<string, object>
-                {
-                    {"x-priority", configuration.Priority}
-                };
             try
             {
-                Model = connection.CreateModel();
+                InitModel(configuration.PrefetchCount, false);
 
                 var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
 
                 basicConsumers = new[] { basicConsumer };
 
-                Model.BasicQos(0, configuration.PrefetchCount, false);
-
                 Model.BasicConsume(
-                    queue.Name,         // queue
-                    false,              // noAck
-                    consumerTag,        // consumerTag
+                    queue.Name, // queue
+                    false, // noAck
+                    consumerTag, // consumerTag
                     true,
                     configuration.IsExclusive,
-                    arguments,          // arguments
-                    basicConsumer);     // consumer
+                    configuration.Arguments, // arguments
+                    basicConsumer // consumer
+                );
 
                 logger.InfoFormat(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
@@ -308,23 +331,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
-        private HashSet<BasicConsumer> cancelledConsumer;
-
-        private void SingleBasicConsumerCancelled(BasicConsumer consumer)
-        {
-            if (cancelledConsumer == null)
-                cancelledConsumer = new HashSet<BasicConsumer>();
-            cancelledConsumer.Add(consumer);
-
-            if (cancelledConsumer.Count == basicConsumers.Count)
-            {
-                cancelledConsumer = null;
-                Cancelled?.Invoke(this);
-            }
-        }
-
-        private bool disposed;
-
+        /// <inheritdoc />
         public void Dispose()
         {
             if (disposed) return;
@@ -333,6 +340,7 @@ namespace EasyNetQ.Consumer
 
             var model = Model;
             if (model == null) return;
+
             // Queued because we may be on the RabbitMQ.Client dispatch thread.
             var disposedEvent = new AutoResetEvent(false);
             consumerDispatcher.QueueAction(() =>
@@ -347,9 +355,37 @@ namespace EasyNetQ.Consumer
                 {
                     disposedEvent.Set();
                 }
-            }, surviveDisconnect: true);
+            }, true);
 
             disposedEvent.WaitOne();
+        }
+
+        private void InitModel(ushort prefetchCount, bool globalQos)
+        {
+            if (Model == null)
+            {
+                lock (modelLock)
+                {
+                    if (Model == null)
+                    {
+                        Model = connection.CreateModel();
+                        Model.BasicQos(0, prefetchCount, globalQos);
+                    }
+                }
+            }
+        }
+
+        private void SingleBasicConsumerCancelled(BasicConsumer consumer)
+        {
+            if (cancelledConsumer == null)
+                cancelledConsumer = new HashSet<BasicConsumer>();
+            cancelledConsumer.Add(consumer);
+
+            if (cancelledConsumer.Count == basicConsumers.Count)
+            {
+                cancelledConsumer = null;
+                Cancelled?.Invoke(this);
+            }
         }
     }
 }

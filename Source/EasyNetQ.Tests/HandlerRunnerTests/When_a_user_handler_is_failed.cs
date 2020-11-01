@@ -1,14 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.Events;
-using FluentAssertions;
-using Xunit;
-using RabbitMQ.Client;
 using NSubstitute;
+using RabbitMQ.Client;
+using System;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
 {
@@ -28,7 +25,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_failed()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(null, null).ReturnsForAnyArgs(AckStrategies.Ack);
+            consumerErrorStrategy.HandleConsumerError(default, null).ReturnsForAnyArgs(AckStrategies.Ack);
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
@@ -37,18 +34,13 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                (body, properties, info) =>
-                {
-                    var tcs = new TaskCompletionSource<object>();
-                    tcs.SetException(new Exception());
-                    return tcs.Task;
-                },
+                async (body, properties, info, cancellation) => throw new Exception(),
                 messageInfo,
                 messageProperties,
                 messageBody
             );
 
-            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context)
+            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
                 .ContinueWith(async x =>
                 {
                     var ackStrategy = await x.ConfigureAwait(false);

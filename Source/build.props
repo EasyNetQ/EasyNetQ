@@ -1,10 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
     <!-- Properties common to all project builds -->
     <PropertyGroup>
-        <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo) </Authors>
+        <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
         <PackageProduct>EasyNetQ</PackageProduct>
         <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/master/licence.txt</PackageLicenseUrl>
+        <!-- Enable periodically if necessary -->
+        <UseAnalyzers Condition="'$(UseAnalyzers)' == ''">false</UseAnalyzers>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(UseAnalyzers)' == 'true'">
+        <RulesToConsider>SA1025;SA1107;SA1116;SA1117;SA1122;SA1127;SA1128;SA1133;SA1134;SA1214;SA1300;SA1303;SA1306;SA1307;SA1314;SA1401;SA1413;SA1501;SA1502;SA1513;SA1516;SA1519;</RulesToConsider>
+        <RulesForMissingDocumentation>SA1602;SA1614;SA1615;SA1616;SA1622;SA1629</RulesForMissingDocumentation>
+        <RulesToIgnore>SA1005;SA1009;SA1101;SA1111;SA1120;SA1200;SA1201;SA1202;SA1203;SA1204;SA1208;SA1304;SA1309;SA1311;SA1402;SA1408;SA1503;SA1512;SA1515;SA1600;SA1623;SA1633;SA1649;</RulesToIgnore>
+        <NoWarn>$(NoWarn);$(RulesToConsider);$(RulesForMissingDocumentation);$(RulesToIgnore)</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseAnalyzers)' == 'true'">
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 </Project>

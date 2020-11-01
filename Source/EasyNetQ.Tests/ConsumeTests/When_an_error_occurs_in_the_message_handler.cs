@@ -1,10 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
+using NSubstitute;
 using System;
 using System.Linq;
-using EasyNetQ.Consumer;
 using Xunit;
-using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerError(null, null)
+            ConsumerErrorStrategy.HandleConsumerError(default, null)
                      .ReturnsForAnyArgs(AckStrategies.Ack);
 
             exception = new Exception("I've had a bad day :(");
@@ -26,9 +26,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_invoke_the_error_strategy()
         {
             ConsumerErrorStrategy.Received().HandleConsumerError(
-                Arg.Is<ConsumerExecutionContext>(args => args.Info.ConsumerTag == ConsumerTag &&
-                                                           args.Info.DeliverTag == DeliverTag &&
-                                                           args.Info.Exchange == "the_exchange" &&
+                Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
+                                                           args.ReceivedInfo.DeliveryTag == DeliverTag &&
+                                                           args.ReceivedInfo.Exchange == "the_exchange" &&
                                                            args.Body.SequenceEqual(OriginalBody)),
                 Arg.Is<Exception>(e => e == exception)
             );

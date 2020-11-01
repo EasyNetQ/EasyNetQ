@@ -3,7 +3,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe
 {
-    public class HosepipeConnection
+    public static class HosepipeConnection
     {
         public static IConnection FromParameters(QueueParameters parameters)
         {
@@ -22,12 +22,12 @@ namespace EasyNetQ.Hosepipe
             catch (BrokerUnreachableException)
             {
                 throw new EasyNetQHosepipeException(string.Format(
-                    "The broker at '{0}{2}' VirtualHost '{1}', is unreachable. This message can also be caused " + 
+                    "The broker at '{0}{2}' VirtualHost '{1}', is unreachable. This message can also be caused " +
                     "by incorrect credentials.",
                     parameters.HostName,
                     parameters.VHost,
-                    parameters.HostPort == -1 ? string.Empty: ":" + parameters.HostPort));
+                    parameters.HostPort == -1 ? string.Empty : ":" + parameters.HostPort));
             }
-        } 
+        }
     }
 }

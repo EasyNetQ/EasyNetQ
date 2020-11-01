@@ -21,7 +21,6 @@ namespace EasyNetQ.Tests.ConnectionString
         private const string connectionString =
             "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
             "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;" +
-            "useBackgroundThreads=true;" +
             "name=unit-test";
 
         [Theory]
@@ -30,10 +29,10 @@ namespace EasyNetQ.Tests.ConnectionString
         {
             var connectionConfiguration = connectionStringParser.Parse(spec.amqpUri.ToString());
 
-            connectionConfiguration.Port.Should().Be((ushort) spec.port);
-            connectionConfiguration.AMQPConnectionString.Should().Be(spec.amqpUri);
+            connectionConfiguration.Port.Should().Be((ushort)spec.port);
+            connectionConfiguration.AmqpConnectionString.Should().Be(spec.amqpUri);
             connectionConfiguration.Hosts.First().Host.Should().Be(spec.host);
-            connectionConfiguration.Hosts.First().Port.Should().Be((ushort) spec.port);
+            connectionConfiguration.Hosts.First().Port.Should().Be((ushort)spec.port);
             connectionConfiguration.VirtualHost.Should().Be(spec.vhost);
         }
 
@@ -41,10 +40,10 @@ namespace EasyNetQ.Tests.ConnectionString
         public static IEnumerable<object[]> AppendixAExamples()
 // ReSharper restore UnusedMethodReturnValue.Local
         {
-            yield return new[] {new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000, "vhost")};
-            yield return new[] {new AmqpSpecification(new Uri("amqp://"), "", 5672, "/")};
-            yield return new[] {new AmqpSpecification(new Uri("amqp://host"), "host", 5672, "/")};
-            yield return new[] {new AmqpSpecification(new Uri("amqps://host"), "host", 5671, "/")};
+            yield return new[] { new AmqpSpecification(new Uri("amqp://user:pass@host:10000/vhost"), "host", 10000, "vhost") };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://"), "", 5672, "/") };
+            yield return new[] { new AmqpSpecification(new Uri("amqp://host"), "host", 5672, "/") };
+            yield return new[] { new AmqpSpecification(new Uri("amqps://host"), "host", 5671, "/") };
         }
 
         public class AmqpSpecification
@@ -90,11 +89,10 @@ namespace EasyNetQ.Tests.ConnectionString
             connectionConfiguration.UserName.Should().Be("Copa");
             connectionConfiguration.Password.Should().Be("abc_xyz");
             connectionConfiguration.Port.Should().Be(12345);
-            connectionConfiguration.RequestedHeartbeat.Should().Be(3);
+            connectionConfiguration.RequestedHeartbeat.Should().Be(TimeSpan.FromSeconds(3));
             connectionConfiguration.PrefetchCount.Should().Be(2);
-            connectionConfiguration.Timeout.Should().Be(12);
+            connectionConfiguration.Timeout.Should().Be(TimeSpan.FromSeconds(12));
             connectionConfiguration.PublisherConfirms.Should().BeTrue();
-            connectionConfiguration.UseBackgroundThreads.Should().BeTrue();
             connectionConfiguration.Name.Should().Be("unit-test");
         }
 
@@ -121,7 +119,7 @@ namespace EasyNetQ.Tests.ConnectionString
             const string connectionStringWithTimeout = "host=localhost;timeout=13";
             var connectionConfiguration = connectionStringParser.Parse(connectionStringWithTimeout);
 
-            connectionConfiguration.Timeout.Should().Be(13);
+            connectionConfiguration.Timeout.Should().Be(TimeSpan.FromSeconds(13));
         }
 
         [Fact]

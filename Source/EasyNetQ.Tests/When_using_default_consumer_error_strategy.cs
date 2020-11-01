@@ -1,7 +1,10 @@
 // ReSharper disable InconsistentNaming;
+
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -11,11 +14,6 @@ namespace EasyNetQ.Tests
 {
     public class When_using_default_consumer_error_strategy
     {
-        private DefaultConsumerErrorStrategy errorStrategy;
-        private MockBuilder mockBuilder;
-        private AckStrategy errorAckStrategy;
-        private AckStrategy cancelAckStrategy;
-
         public When_using_default_consumer_error_strategy()
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
@@ -26,19 +24,23 @@ namespace EasyNetQ.Tests
 
             mockBuilder = new MockBuilder();
 
+            var connectionConfiguration = new ConnectionConfiguration();
+            var connection = new PersistentConnection(connectionConfiguration, mockBuilder.ConnectionFactory, new EventBus());
+
             errorStrategy = new DefaultConsumerErrorStrategy(
-                mockBuilder.ConnectionFactory, 
-                new JsonSerializer(), 
+                connection,
+                new JsonSerializer(),
                 customConventions,
                 new DefaultTypeNameSerializer(),
-                new DefaultErrorMessageSerializer()
+                new DefaultErrorMessageSerializer(),
+                connectionConfiguration
             );
 
             const string originalMessage = "";
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
             var context = new ConsumerExecutionContext(
-                (bytes, properties, arg3) => null,
+                (bytes, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack),
                 new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {
@@ -59,6 +61,23 @@ namespace EasyNetQ.Tests
             }
         }
 
+        private DefaultConsumerErrorStrategy errorStrategy;
+        private MockBuilder mockBuilder;
+        private AckStrategy errorAckStrategy;
+        private AckStrategy cancelAckStrategy;
+
+        [Fact]
+        public void Should_Ack_canceled_message()
+        {
+            Assert.Same(AckStrategies.NackWithRequeue, cancelAckStrategy);
+        }
+
+        [Fact]
+        public void Should_Ack_failed_message()
+        {
+            Assert.Same(AckStrategies.Ack, errorAckStrategy);
+        }
+
         [Fact]
         public void Should_use_exchange_name_from_custom_names_provider()
         {
@@ -69,18 +88,6 @@ namespace EasyNetQ.Tests
         public void Should_use_queue_name_from_custom_names_provider()
         {
             mockBuilder.Channels[0].Received().QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null);
-        }
-
-        [Fact]
-        public void Should_Ack_failed_message()
-        {
-            Assert.Same(AckStrategies.Ack, errorAckStrategy);
-        }
-        
-        [Fact]
-        public void Should_Ack_canceled_message()
-        {
-            Assert.Same(AckStrategies.NackWithRequeue, cancelAckStrategy);
         }
     }
 }

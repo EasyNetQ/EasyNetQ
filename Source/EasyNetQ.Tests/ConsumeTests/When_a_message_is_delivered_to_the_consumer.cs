@@ -1,8 +1,9 @@
 // ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
 using FluentAssertions;
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -10,7 +11,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => { });
+            StartConsumer((body, properties, info) => AckStrategies.Ack);
             DeliverMessage();
         }
 
@@ -41,7 +42,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_deliver_the_delivery_tag()
         {
-            DeliveredMessageInfo.DeliverTag.Should().Be(DeliverTag);
+            DeliveredMessageInfo.DeliveryTag.Should().Be(DeliverTag);
         }
 
         [Fact]

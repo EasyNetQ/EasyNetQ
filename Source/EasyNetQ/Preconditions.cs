@@ -12,6 +12,7 @@ namespace EasyNetQ
         /// <summary>
         /// Ensures that <paramref name="value"/> is not null.
         /// </summary>
+        /// <typeparam name="T">Type of <paramref name="value"/></typeparam>
         /// <param name="value">
         /// The value to check, must not be null.
         /// </param>
@@ -25,19 +26,21 @@ namespace EasyNetQ
         /// <exception cref="ArgumentException">
         /// Thrown if <paramref name="name"/> is blank.
         /// </exception>
-        public static void CheckNotNull<T>(T value, string name) where T : class
+        public static void CheckNotNull<T>(T value, string name)
         {
+            // Avoid boxing here
             if (value == null)
             {
                 CheckNotBlank(name, nameof(name), "name must not be blank");
 
-                throw new ArgumentNullException(name, string.Format("{0} must not be null", name));
+                throw new ArgumentNullException(name, $"{name} must not be null");
             }
         }
 
         /// <summary>
         /// Ensures that <paramref name="value"/> is not null.
         /// </summary>
+        /// <typeparam name="T">Type of <paramref name="value"/></typeparam>
         /// <param name="value">
         /// The value to check, must not be null.
         /// </param>
@@ -134,6 +137,7 @@ namespace EasyNetQ
         /// Ensures that <paramref name="collection"/> contains at least one
         /// item.
         /// </summary>
+        /// <typeparam name="T">Collection item type</typeparam>
         /// <param name="collection">
         /// The collection to check, must not be null or empty.
         /// </param>

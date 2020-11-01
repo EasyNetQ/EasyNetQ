@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
     <!-- This target is executed when GitVersionTask is unable to ascertain the
     version. This occurs when the repo has been downloaded and does not include
     the .git folder. -->

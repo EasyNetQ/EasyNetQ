@@ -3,59 +3,63 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using EasyNetQ.Sprache;
 
 namespace EasyNetQ.ConnectionString
 {
     using UpdateConfiguration = Func<ConnectionConfiguration, ConnectionConfiguration>;
 
-    public static class ConnectionStringGrammar
+    internal static class ConnectionStringGrammar
     {
         internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
         internal static readonly Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
-        internal static readonly Parser<int> IntNumber = Parse.Number.Select(int.Parse);
+        internal static readonly Parser<string> MinusOne = Parse.String("-1").Text();
+        internal static readonly Parser<TimeSpan> TimeSpanSeconds = Parse.Number.Or(MinusOne)
+            .Select(int.Parse)
+            .Select(
+                x => x == 0 || x == -1 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
+            );
 
         internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text().Select(x => x.ToLower() == "true");
 
         internal static readonly Parser<HostConfiguration> Host =
             from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
-            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort) 0))
-            select new HostConfiguration {Host = host, Port = port};
+            from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
+            select new HostConfiguration { Host = host, Port = port };
 
-        internal static readonly Parser<IEnumerable<HostConfiguration>> Hosts = Host.ListDelimitedBy(',');
+        internal static readonly Parser<IList<HostConfiguration>> Hosts = Host.ListDelimitedBy(',').Select(hosts => hosts.ToList());
 
-        internal static readonly Parser<Uri> AMQP = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
+        internal static readonly Parser<Uri> Amqp = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
 
         internal static readonly Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
             // add new connection string parts here
-            BuildKeyValueParser("amqp", AMQP, c => c.AMQPConnectionString),
+            BuildKeyValueParser("amqp", Amqp, c => c.AmqpConnectionString),
             BuildKeyValueParser("host", Hosts, c => c.Hosts),
             BuildKeyValueParser("port", UShortNumber, c => c.Port),
             BuildKeyValueParser("virtualHost", Text, c => c.VirtualHost),
-            BuildKeyValueParser("requestedHeartbeat", UShortNumber, c => c.RequestedHeartbeat),
+            BuildKeyValueParser("requestedHeartbeat", TimeSpanSeconds, c => c.RequestedHeartbeat),
             BuildKeyValueParser("username", Text, c => c.UserName),
             BuildKeyValueParser("password", Text, c => c.Password),
             BuildKeyValueParser("prefetchCount", UShortNumber, c => c.PrefetchCount),
-            BuildKeyValueParser("timeout", UShortNumber, c => c.Timeout),
+            BuildKeyValueParser("timeout", TimeSpanSeconds, c => c.Timeout),
             BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
             BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform),
-            BuildKeyValueParser("useBackgroundThreads", Bool, c => c.UseBackgroundThreads),
-            BuildKeyValueParser("dispatcherQueueSize", IntNumber, c => c.DispatcherQueueSize),
             BuildKeyValueParser("name", Text, c => c.Name)
         }.Aggregate((a, b) => a.Or(b));
 
-        internal static readonly Parser<UpdateConfiguration> AMQPAlone =
-            AMQP.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>) (configuration
+        internal static readonly Parser<UpdateConfiguration> AmqpAlone =
+            Amqp.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>)(configuration
                 =>
             {
-                configuration.AMQPConnectionString = _;
+                configuration.AmqpConnectionString = _;
                 return configuration;
             }));
 
-        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AMQPAlone.Once());
+        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AmqpAlone.Once());
 
         public static IEnumerable<UpdateConfiguration> ParseConnectionString(string connectionString)
         {
@@ -71,7 +75,7 @@ namespace EasyNetQ.ConnectionString
             return from key in Parse.CaseInsensitiveString(keyName).Token()
                 from separator in Parse.Char('=')
                 from value in valueParser
-                select (Func<ConnectionConfiguration, ConnectionConfiguration>) (c =>
+                select (Func<ConnectionConfiguration, ConnectionConfiguration>)(c =>
                 {
                     CreateSetter(getter)(c, value);
                     return c;
@@ -105,7 +109,7 @@ namespace EasyNetQ.ConnectionString
             Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
 #if !NETFX
-            return (Action<TContaining, TProperty>) property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+            return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
 
 #else
             return (Action<TContaining, TProperty>)

@@ -8,12 +8,10 @@ namespace EasyNetQ.Tests
     {
     }
 
-
     [DeliveryMode(false)]
     public class NotPersistentMessageWithDeliveryAttribute
     {
     }
-
 
     public class MessageWithoutDeliveryAttribute
     {
@@ -27,7 +25,7 @@ namespace EasyNetQ.Tests
         [InlineData(typeof(MessageWithoutDeliveryAttribute), true)]
         public void TestWhenPersistentMessagesIsTrue(Type messageType, bool isPersistent)
         {
-            var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration {PersistentMessages = true});
+            var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration { PersistentMessages = true });
             Assert.Equal(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
         }
 

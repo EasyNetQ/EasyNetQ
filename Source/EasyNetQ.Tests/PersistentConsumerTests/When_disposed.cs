@@ -1,15 +1,14 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public class When_disposed : Given_a_PersistentConsumer
     {
-        public override void AdditionalSetup()
+        protected override void AdditionalSetup()
         {
-            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
             consumer.Dispose();
         }

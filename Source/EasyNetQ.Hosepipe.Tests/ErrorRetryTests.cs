@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
-using EasyNetQ.SystemMessages;
 using EasyNetQ.Tests;
 using Xunit;
 
@@ -31,30 +30,9 @@ namespace EasyNetQ.Hosepipe.Tests
             };
 
             var rawErrorMessages = new MessageReader()
-                .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(new MessageReceivedInfo()));
+                .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(null));
 
             errorRetry.RetryErrors(rawErrorMessages, parameters);
-        }
-
-        [Fact][Explicit("Requires a RabbitMQ instance")]
-        public void Should_republish_to_default_exchange()
-        {
-            var error = new Error
-                {
-                    Exchange = "", // default exchange
-                    RoutingKey = "hosepipe.test",
-                    Queue = "queue",
-                    Message = "Hosepipe test message",
-                    BasicProperties = new MessageProperties()
-                };
-            var parameters = new QueueParameters
-            {
-                HostName = "localhost",
-                Username = "guest",
-                Password = "guest",
-                MessagesOutputDirectory = @"C:\temp\MessageOutput"
-            };
-            errorRetry.RepublishError(error, parameters);
         }
     }
 }

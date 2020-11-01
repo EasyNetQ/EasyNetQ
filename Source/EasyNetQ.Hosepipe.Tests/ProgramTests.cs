@@ -9,13 +9,13 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class ProgramTests
     {
-        private Program program;
-        private MockMessageWriter messageWriter;
-        private MockQueueRetrieval queueRetrieval;
-        private MockMessageReader messageReader;
-        private MockQueueInsertion queueInsertion;
-        private MockErrorRetry errorRetry;
-        private Conventions conventions;
+        private readonly Program program;
+        private readonly MockMessageWriter messageWriter;
+        private readonly MockQueueRetrieval queueRetrieval;
+        private readonly MockMessageReader messageReader;
+        private readonly MockQueueInsertion queueInsertion;
+        private readonly MockErrorRetry errorRetry;
+        private readonly Conventions conventions;
 
         public ProgramTests()
         {
@@ -111,7 +111,6 @@ namespace EasyNetQ.Hosepipe.Tests
 
         private readonly string expectedRetryOutput =
             $"2 error messages from directory '{Directory.GetCurrentDirectory()}' were republished{Environment.NewLine}";
-
 
         [Fact]
         public void Should_retry_errors_with_retry()

@@ -11,7 +11,7 @@ namespace EasyNetQ.Interception
     {
         private readonly CompositeInterceptor compositeInterceptor;
         private readonly IServiceRegister serviceRegister;
-    
+
         public InterceptorRegistrator(IServiceRegister serviceRegister)
         {
             this.serviceRegister = serviceRegister;
@@ -24,6 +24,7 @@ namespace EasyNetQ.Interception
             return serviceRegister;
         }
 
+        /// <inheritdoc />
         public void Add(IProduceConsumeInterceptor interceptor)
         {
             compositeInterceptor.Add(interceptor);

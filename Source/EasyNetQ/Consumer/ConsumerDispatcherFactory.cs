@@ -10,18 +10,21 @@ namespace EasyNetQ.Consumer
     {
         private readonly Lazy<IConsumerDispatcher> dispatcher;
 
-        public ConsumerDispatcherFactory(ConnectionConfiguration configuration)
+        /// <summary>
+        ///     Creates ConsumerDispatcher
+        /// </summary>
+        public ConsumerDispatcherFactory()
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-            
-            dispatcher = new Lazy<IConsumerDispatcher>(() => new ConsumerDispatcher(configuration));
+            dispatcher = new Lazy<IConsumerDispatcher>(() => new ConsumerDispatcher());
         }
 
+        /// <inheritdoc />
         public IConsumerDispatcher GetConsumerDispatcher()
         {
             return dispatcher.Value;
         }
 
+        /// <inheritdoc />
         public void OnDisconnected()
         {
             if (dispatcher.IsValueCreated)
@@ -30,6 +33,7 @@ namespace EasyNetQ.Consumer
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (dispatcher.IsValueCreated)

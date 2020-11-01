@@ -1,137 +1,112 @@
 ﻿using System;
 using System.Threading;
-using EasyNetQ.AmqpExceptions;
+using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
-using EasyNetQ.Sprache;
+using EasyNetQ.Internals;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Producer
 {
+    /// <inheritdoc />
     public class PersistentChannel : IPersistentChannel
     {
+        private const string RequestPipeliningForbiddenMessage = "Pipelining of requests forbidden";
+
         private const int MinRetryTimeoutMs = 50;
         private const int MaxRetryTimeoutMs = 5000;
-        private readonly ConnectionConfiguration configuration;
         private readonly IPersistentConnection connection;
+
+        private readonly CancellationTokenSource disposeCts = new CancellationTokenSource();
         private readonly IEventBus eventBus;
+        private readonly AsyncLock mutex = new AsyncLock();
+        private readonly PersistentChannelOptions options;
 
-        private readonly ILog logger = LogProvider.For<PersistentChannel>();
-        private IModel internalChannel;
+        private volatile IModel initializedChannel;
 
-        public PersistentChannel(
-            IPersistentConnection connection,
-            ConnectionConfiguration configuration,
-            IEventBus eventBus
-        )
+        /// <summary>
+        ///     Creates PersistentChannel
+        /// </summary>
+        /// <param name="options">The channel options</param>
+        /// <param name="connection">The connection</param>
+        /// <param name="eventBus">The event bus</param>
+        public PersistentChannel(PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
             this.connection = connection;
-            this.configuration = configuration;
             this.eventBus = eventBus;
-
-            WireUpEvents();
+            this.options = options;
         }
 
-        public void InvokeChannelAction(Action<IModel> channelAction)
+        /// <inheritdoc />
+        public async Task<T> InvokeChannelActionAsync<T>(
+            Func<IModel, T> channelAction, CancellationToken cancellationToken
+        )
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
-            var timeout = TimeBudget.Start(configuration.GetTimeout());
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposeCts.Token);
+            using var releaser = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
 
             var retryTimeoutMs = MinRetryTimeoutMs;
-            while (!timeout.IsExpired())
+
+            while (true)
             {
+                cts.Token.ThrowIfCancellationRequested();
+
                 try
                 {
-                    var channel = OpenChannel();
-                    channelAction(channel);
-                    return;
+                    var channel = initializedChannel ??= CreateChannel();
+                    return channelAction(channel);
                 }
-                catch (OperationInterruptedException exception)
+                catch (Exception exception)
                 {
-                    CloseChannel();
-                    if (NeedRethrow(exception))
-                    {
+                    var exceptionVerdict = GetExceptionVerdict(exception);
+                    if (exceptionVerdict.CloseChannel)
+                        CloseChannel();
+
+                    if (exceptionVerdict.Rethrow)
                         throw;
-                    }
-                }
-                catch (EasyNetQException)
-                {
-                    CloseChannel();
                 }
 
-                Thread.Sleep(retryTimeoutMs);
-
+                await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
                 retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
             }
-
-            logger.Error("Channel action timed out");
-            throw new TimeoutException("The operation requested on PersistentChannel timed out");
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
+            disposeCts.Cancel();
+            mutex.Dispose();
             CloseChannel();
+            disposeCts.Dispose();
         }
 
-        private void WireUpEvents()
+        private IModel CreateChannel()
         {
-            eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected);
-            eventBus.Subscribe<ConnectionCreatedEvent>(ConnectionOnConnected);
-        }
-
-        private void OnConnectionDisconnected(ConnectionDisconnectedEvent @event)
-        {
-            CloseChannel();
-        }
-
-        private void ConnectionOnConnected(ConnectionCreatedEvent @event)
-        {
-            try
-            {
-                OpenChannel();
-            }
-            catch (OperationInterruptedException)
-            {
-            }
-            catch (EasyNetQException)
-            {
-            }
-        }
-
-        private IModel OpenChannel()
-        {
-            IModel channel;
-
-            lock (this)
-            {
-                if (internalChannel != null)
-                {
-                    return internalChannel;
-                }
-
-                channel = connection.CreateModel();
-
-                WireUpChannelEvents(channel);
-
-                eventBus.Publish(new PublishChannelCreatedEvent(channel));
-
-                internalChannel = channel;
-            }
-
-            logger.Debug("Persistent channel connected");
+            var channel = connection.CreateModel();
+            AttachChannelEvents(channel);
             return channel;
         }
 
-        private void WireUpChannelEvents(IModel channel)
+        private void CloseChannel()
         {
-            if (configuration.PublisherConfirms)
+            var channel = Interlocked.Exchange(ref initializedChannel, null);
+            if (channel == null)
+                return;
+
+            channel.Close();
+            DetachChannelEvents(channel);
+            channel.Dispose();
+        }
+
+        private void AttachChannelEvents(IModel channel)
+        {
+            if (options.PublisherConfirms)
             {
                 channel.ConfirmSelect();
 
@@ -140,13 +115,48 @@ namespace EasyNetQ.Producer
             }
 
             channel.BasicReturn += OnReturn;
+            channel.ModelShutdown += OnChannelShutdown;
+
+            if (channel is IRecoverable recoverable)
+                recoverable.Recovery += OnChannelRecovered;
+            else
+                throw new NotSupportedException("Non-recoverable channel is not supported");
+        }
+
+        private void DetachChannelEvents(IModel channel)
+        {
+            if (channel is IRecoverable recoverable)
+                recoverable.Recovery -= OnChannelRecovered;
+
+            channel.ModelShutdown -= OnChannelShutdown;
+            channel.BasicReturn -= OnReturn;
+
+            if (!options.PublisherConfirms)
+                return;
+
+            channel.BasicNacks -= OnNack;
+            channel.BasicAcks -= OnAck;
+        }
+
+        private void OnChannelRecovered(object sender, EventArgs e)
+        {
+            eventBus.Publish(new ChannelRecoveredEvent((IModel) sender));
+        }
+
+        private void OnChannelShutdown(object sender, ShutdownEventArgs e)
+        {
+            eventBus.Publish(new ChannelShutdownEvent((IModel) sender));
         }
 
         private void OnReturn(object sender, BasicReturnEventArgs args)
         {
-            eventBus.Publish(new ReturnedMessageEvent(args.Body.ToArray(),
+            var returnedMessageEvent = new ReturnedMessageEvent(
+                (IModel) sender,
+                args.Body.ToArray(),
                 new MessageProperties(args.BasicProperties),
-                new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)));
+                new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)
+            );
+            eventBus.Publish(returnedMessageEvent);
         }
 
         private void OnAck(object sender, BasicAckEventArgs args)
@@ -159,39 +169,47 @@ namespace EasyNetQ.Producer
             eventBus.Publish(MessageConfirmationEvent.Nack((IModel) sender, args.DeliveryTag, args.Multiple));
         }
 
-        private void CloseChannel()
+        private static ExceptionVerdict GetExceptionVerdict(Exception exception)
         {
-            lock (this)
+            switch (exception)
             {
-                if (internalChannel == null)
-                {
-                    return;
-                }
-
-                if (configuration.PublisherConfirms)
-                {
-                    internalChannel.BasicAcks -= OnAck;
-                    internalChannel.BasicNacks -= OnNack;
-                }
-
-                internalChannel.BasicReturn -= OnReturn;
-                internalChannel = null;
+                case OperationInterruptedException e:
+                    return e.ShutdownReason?.ReplyCode switch
+                    {
+                        AmqpErrorCodes.ConnectionClosed => ExceptionVerdict.Suppress,
+                        AmqpErrorCodes.AccessRefused => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowAndCloseChannel,
+                        _ => ExceptionVerdict.Throw
+                    };
+                case NotSupportedException e:
+                    var isRequestPipeliningForbiddenException = e.Message.Contains(RequestPipeliningForbiddenMessage);
+                    return isRequestPipeliningForbiddenException
+                        ? ExceptionVerdict.SuppressAndCloseChannel
+                        : ExceptionVerdict.Throw;
+                case EasyNetQException _:
+                    return ExceptionVerdict.Suppress;
+                default:
+                    return ExceptionVerdict.Throw;
             }
-
-            logger.Debug("Persistent channel disconnected");
         }
 
-        private static bool NeedRethrow(OperationInterruptedException exception)
+        private readonly struct ExceptionVerdict
         {
-            try
+            public static ExceptionVerdict Suppress { get; } = new ExceptionVerdict(false, false);
+            public static ExceptionVerdict SuppressAndCloseChannel { get; } = new ExceptionVerdict(false, true);
+            public static ExceptionVerdict Throw { get; } = new ExceptionVerdict(true, false);
+            public static ExceptionVerdict ThrowAndCloseChannel { get; } = new ExceptionVerdict(true, true);
+
+            private ExceptionVerdict(bool rethrow, bool closeChannel)
             {
-                var amqpException = AmqpExceptionGrammar.ParseExceptionString(exception.Message);
-                return amqpException.Code != AmqpException.ConnectionClosed;
+                Rethrow = rethrow;
+                CloseChannel = closeChannel;
             }
-            catch (ParseException)
-            {
-                return true;
-            }
+
+            public bool Rethrow { get; }
+            public bool CloseChannel { get; }
         }
     }
 }

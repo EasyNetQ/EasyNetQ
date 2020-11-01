@@ -14,7 +14,6 @@
     {
     }
 
-
     [Queue("MyQueue")]
     public class QueueNameOnlyAnnotatedTestMessage
     {
@@ -35,7 +34,6 @@
     {
     }
 
-
     public class MyMessage
     {
         public string Text { get; set; }
@@ -45,5 +43,4 @@
     {
         public string Text { get; set; }
     }
-
 }

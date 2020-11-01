@@ -45,12 +45,12 @@ namespace EasyNetQ.Sprache
 
                     return new Failure<char>(i,
                         () => string.Format("unexpected '{0}'", i.Current),
-                        () => new[] {description});
+                        () => new[] { description });
                 }
 
                 return new Failure<char>(i,
                     () => "Unexpected end of input reached",
-                    () => new[] {description});
+                    () => new[] { description });
             };
         }
 
@@ -82,7 +82,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<char> CharCaseInsensitive(char c)
         {
-            return Char(ch => System.Char.ToLower(c) == System.Char.ToLower(ch), c.ToString());
+            return Char(ch => char.ToLower(c) == char.ToLower(ch), c.ToString());
         }
 
         /// <summary>
@@ -213,11 +213,11 @@ namespace EasyNetQ.Sprache
 
             return i => parser(i).IfSuccess(s =>
                 s.Remainder.AtEnd
-                    ? (IResult<T>) s
+                    ? (IResult<T>)s
                     : new Failure<T>(
                         s.Remainder,
                         () => string.Format("unexpected '{0}'", s.Remainder.Current),
-                        () => new[] {"end of input"}));
+                        () => new[] { "end of input" }));
         }
 
         /// <summary>
@@ -306,14 +306,13 @@ namespace EasyNetQ.Sprache
             return i =>
             {
                 var fr = first(i);
-                var ff = fr as IFailure<T>;
-                if (ff != null)
+                if (fr is IFailure<T> ff)
                     return second(i).IfFailure(sf => new Failure<T>(
                         ff.FailedInput,
                         () => ff.Message,
                         () => ff.Expectations.Union(sf.Expectations)));
 
-                var fs = (ISuccess<T>) fr;
+                var fs = (ISuccess<T>)fr;
                 if (fs.Remainder == i)
                     return second(i).IfFailure(sf => fs);
 
@@ -333,7 +332,7 @@ namespace EasyNetQ.Sprache
             Preconditions.CheckNotNull(parser, "parser");
             Preconditions.CheckNotNull(name, "name");
 
-            return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] {name}) : f);
+            return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] { name }) : f);
         }
 
         /// <summary>
@@ -352,8 +351,7 @@ namespace EasyNetQ.Sprache
             return i =>
             {
                 var fr = first(i);
-                var ff = fr as IFailure<T>;
-                if (ff != null)
+                if (fr is IFailure<T> ff)
                 {
                     if (ff.FailedInput != i)
                         return ff;
@@ -364,7 +362,7 @@ namespace EasyNetQ.Sprache
                         () => ff.Expectations.Union(sf.Expectations)));
                 }
 
-                var fs = (ISuccess<T>) fr;
+                var fs = (ISuccess<T>)fr;
                 if (fs.Remainder == i)
                     return second(i).IfFailure(sf => fs);
 
@@ -382,7 +380,7 @@ namespace EasyNetQ.Sprache
         {
             Preconditions.CheckNotNull(parser, "parser");
 
-            return parser.Select(r => (IEnumerable<T>) new[] {r});
+            return parser.Select(r => (IEnumerable<T>)new[] { r });
         }
 
         /// <summary>
@@ -443,7 +441,7 @@ namespace EasyNetQ.Sprache
             {
                 var r = except(i);
                 if (r is ISuccess<U>)
-                    return new Failure<T>(i, () => "Excepted parser succeeded.", () => new[] {"other than the excepted input"});
+                    return new Failure<T>(i, () => "Excepted parser succeeded.", () => new[] { "other than the excepted input" });
                 return parser(i);
             };
         }
@@ -476,7 +474,7 @@ namespace EasyNetQ.Sprache
 
             return i => parser(i).IfSuccess(s =>
                 predicate(s.Result)
-                    ? (IResult<T>) s
+                    ? (IResult<T>)s
                     : new Failure<T>(i,
                         () => string.Format("Unexpected {0}.", s.Result),
                         () => new string[0]));
@@ -524,7 +522,7 @@ namespace EasyNetQ.Sprache
             return operand.Then(first => ChainOperatorRest(first, op, operand, apply));
         }
 
-        static Parser<T> ChainOperatorRest<T, TOp>(
+        private static Parser<T> ChainOperatorRest<T, TOp>(
             T firstOperand,
             Parser<TOp> op,
             Parser<T> operand,
@@ -559,7 +557,7 @@ namespace EasyNetQ.Sprache
             return operand.Then(first => ChainRightOperatorRest(first, op, operand, apply));
         }
 
-        static Parser<T> ChainRightOperatorRest<T, TOp>(
+        private static Parser<T> ChainRightOperatorRest<T, TOp>(
             T lastOperand,
             Parser<TOp> op,
             Parser<T> operand,

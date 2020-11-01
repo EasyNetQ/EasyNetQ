@@ -5,17 +5,19 @@ using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public class ConsumerDispatcher : IConsumerDispatcher
     {
-        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly BlockingCollection<Action> durableActions = new BlockingCollection<Action>();
+        private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly BlockingCollection<Action> transientActions = new BlockingCollection<Action>();
 
-        public ConsumerDispatcher(ConnectionConfiguration configuration)
+        /// <summary>
+        ///     Creates ConsumerDispatcher
+        /// </summary>
+        public ConsumerDispatcher()
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-
             using (ExecutionContext.SuppressFlow())
             {
                 var thread = new Thread(_ =>
@@ -39,7 +41,6 @@ namespace EasyNetQ.Consumer
                         }
 
                     while (BlockingCollection<Action>.TryTakeFromAny(blockingCollections, out var action) >= 0)
-                    {
                         try
                         {
                             action();
@@ -48,16 +49,16 @@ namespace EasyNetQ.Consumer
                         {
                             logger.ErrorException(string.Empty, exception);
                         }
-                    }
+
                     logger.Debug("EasyNetQ consumer dispatch thread finished");
-                })
-                { Name = "EasyNetQ consumer dispatch thread", IsBackground = configuration.UseBackgroundThreads };
+                }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = true};
 
                 thread.Start();
                 logger.Debug("EasyNetQ consumer dispatch thread started");
             }
         }
 
+        /// <inheritdoc />
         public void QueueAction(Action action, bool surviveDisconnect = false)
         {
             Preconditions.CheckNotNull(action, "action");
@@ -71,21 +72,20 @@ namespace EasyNetQ.Consumer
                 transientActions.Add(action);
         }
 
+        /// <inheritdoc />
         public void OnDisconnected()
         {
-            int count = 0;
+            var count = 0;
 
             // throw away any queued actions. RabbitMQ will redeliver any in-flight
             // messages that have not been acked when the connection is lost.
-            while (transientActions.TryTake(out _))
-            {
-                ++count;
-            }
+            while (transientActions.TryTake(out _)) ++count;
 
             if (count > 0)
                 logger.Debug("{count} queued transient actions were thrown", count);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             durableActions.CompleteAdding();

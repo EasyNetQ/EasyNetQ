@@ -1,100 +1,191 @@
 using System;
-
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
-	public delegate string ExchangeNameConvention(Type messageType);
-	public delegate string TopicNameConvention(Type messageType);
+    /// <summary>
+    ///     Convention for exchange naming
+    /// </summary>
+    public delegate string ExchangeNameConvention(Type messageType);
+
+    /// <summary>
+    ///     Convention for topic naming
+    /// </summary>
+    public delegate string TopicNameConvention(Type messageType);
+
+    /// <summary>
+    ///     Convention for queue naming
+    /// </summary>
     public delegate string QueueNameConvention(Type messageType, string subscriberId);
+
+    /// <summary>
+    ///     Convention for error queue routing key naming
+    /// </summary>
+    public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
+
+    /// <summary>
+    ///     Convention for error exchange naming
+    /// </summary>
+    public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
+
+    /// <summary>
+    ///     Convention for rpc routing key naming
+    /// </summary>
     public delegate string RpcRoutingKeyNamingConvention(Type messageType);
 
-    public delegate string ErrorQueueNameConvention(MessageReceivedInfo info);
-    public delegate string ErrorExchangeNameConvention(MessageReceivedInfo info);
+    /// <summary>
+    ///     Convention for RPC exchange naming
+    /// </summary>
     public delegate string RpcExchangeNameConvention(Type messageType);
 
-    public delegate string RpcReturnQueueNamingConvention();
+    /// <summary>
+    ///     Convention for RPC return queue naming
+    /// </summary>
+    public delegate string RpcReturnQueueNamingConvention(Type messageType);
 
+    /// <summary>
+    ///     Convention for consumer tag naming
+    /// </summary>
     public delegate string ConsumerTagConvention();
 
-	public interface IConventions
-	{
-		ExchangeNameConvention ExchangeNamingConvention { get; set; }
-		TopicNameConvention TopicNamingConvention { get; set; }
-        QueueNameConvention QueueNamingConvention { get; set; }
-        RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
+    /// <summary>
+    ///     Represents various naming conventions
+    /// </summary>
+    public interface IConventions
+    {
+        /// <summary>
+        ///     Convention for exchange naming
+        /// </summary>
+        ExchangeNameConvention ExchangeNamingConvention { get; }
 
-        ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
-        ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
-        RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
-        RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
-        RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
+        /// <summary>
+        ///     Convention for topic naming
+        /// </summary>
+        TopicNameConvention TopicNamingConvention { get; }
 
-        ConsumerTagConvention ConsumerTagConvention { get; set; }
-	}
+        /// <summary>
+        ///     Convention for queue naming
+        /// </summary>
+        QueueNameConvention QueueNamingConvention { get; }
 
-	public class Conventions : IConventions
-	{
-		public Conventions(ITypeNameSerializer typeNameSerializer)
-		{
-		    Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+        /// <summary>
+        ///     Convention for RPC routing key naming
+        /// </summary>
+        RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; }
 
-		    // Establish default conventions.
-            ExchangeNamingConvention = messageType =>
+        /// <summary>
+        ///     Convention for RPC request exchange naming
+        /// </summary>
+        RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for RPC response exchange naming
+        /// </summary>
+        RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for RPC return queue naming
+        /// </summary>
+        RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for consumer tag naming
+        /// </summary>
+        ConsumerTagConvention ConsumerTagConvention { get; }
+
+        /// <summary>
+        ///     Convention for error queue naming
+        /// </summary>
+        ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for error exchange naming
+        /// </summary>
+        ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+    }
+
+    /// <inheritdoc />
+    public class Conventions : IConventions
+    {
+        /// <summary>
+        ///     Creates Conventions
+        /// </summary>
+        public Conventions(ITypeNameSerializer typeNameSerializer)
+        {
+            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+
+            ExchangeNamingConvention = type =>
             {
-                var attr = GetQueueAttribute(messageType);
+                var attr = GetQueueAttribute(type);
 
                 return string.IsNullOrEmpty(attr.ExchangeName)
-                    ? typeNameSerializer.Serialize(messageType)
+                    ? typeNameSerializer.Serialize(type)
                     : attr.ExchangeName;
             };
-			
-            TopicNamingConvention = messageType => "";
-			
-            QueueNamingConvention =
-					(messageType, subscriptionId) =>
-					{
-                        var attr = GetQueueAttribute(messageType);
 
-                        if (string.IsNullOrEmpty(attr.QueueName))
-                        {
-                            var typeName = typeNameSerializer.Serialize(messageType);
+            TopicNamingConvention = type => "";
 
-                            return string.IsNullOrEmpty(subscriptionId)
-                                ? typeName
-                                : string.Format("{0}_{1}", typeName, subscriptionId);
-                        }
+            QueueNamingConvention = (type, subscriptionId) =>
+                {
+                    var attr = GetQueueAttribute(type);
+
+                    if (string.IsNullOrEmpty(attr.QueueName))
+                    {
+                        var typeName = typeNameSerializer.Serialize(type);
 
                         return string.IsNullOrEmpty(subscriptionId)
-                            ? attr.QueueName
-                            : string.Format("{0}_{1}", attr.QueueName, subscriptionId);
-					};
+                            ? typeName
+                            : $"{typeName}_{subscriptionId}";
+                    }
+
+                    return string.IsNullOrEmpty(subscriptionId)
+                        ? attr.QueueName
+                        : $"{attr.QueueName}_{subscriptionId}";
+                };
             RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
-            ErrorQueueNamingConvention = info => "EasyNetQ_Default_Error_Queue";
-		    ErrorExchangeNamingConvention = info => "ErrorExchange_" + info.RoutingKey;
-            RpcRequestExchangeNamingConvention = (type) => "easy_net_q_rpc";
-		    RpcResponseExchangeNamingConvention = (type) => "easy_net_q_rpc";
-            RpcReturnQueueNamingConvention = () => "easynetq.response." + Guid.NewGuid();
+            ErrorQueueNamingConvention = receivedInfo => "EasyNetQ_Default_Error_Queue";
+            ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
+            RpcRequestExchangeNamingConvention = type => "easy_net_q_rpc";
+            RpcResponseExchangeNamingConvention = type => "easy_net_q_rpc";
+            RpcReturnQueueNamingConvention = type => "easynetq.response." + Guid.NewGuid();
 
             ConsumerTagConvention = () => Guid.NewGuid().ToString();
-		}
+        }
 
         private QueueAttribute GetQueueAttribute(Type messageType)
         {
             return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
         }
 
-		public ExchangeNameConvention ExchangeNamingConvention { get; set; }
-		public TopicNameConvention TopicNamingConvention { get; set; }
+        /// <inheritdoc />
+        public ExchangeNameConvention ExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
+        public TopicNameConvention TopicNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public QueueNameConvention QueueNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
 
+        /// <inheritdoc />
         public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
+
+        /// <inheritdoc />
         public RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
 
+        /// <inheritdoc />
         public ConsumerTagConvention ConsumerTagConvention { get; set; }
 	}
 }

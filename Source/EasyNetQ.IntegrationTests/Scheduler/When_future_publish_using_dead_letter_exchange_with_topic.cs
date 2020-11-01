@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
-using EasyNetQ.Scheduling;
 using FluentAssertions;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         public When_publish_and_subscribe_with_delay_using_dead_letter_exchange_with_topic(RabbitMQFixture fixture)
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;timeout=5", c => c.EnableDeadLetterExchangeAndMessageTtlScheduler()
+                $"host={fixture.Host};prefetchCount=1;timeout=5", c => { }
             );
         }
 
@@ -30,19 +29,18 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         [Fact]
         public async Task Test()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
 
-            var subscriptionId = Guid.NewGuid().ToString();
             var firstTopicMessagesSink = new MessagesSink(MessagesCount);
             var firstTopicMessages = MessagesFactories.Create(MessagesCount);
             var secondTopicMessagesSink = new MessagesSink(MessagesCount);
-            var secondTopicMessages = MessagesFactories.Create(MessagesCount);
-            using (bus.Subscribe<Message>(subscriptionId, firstTopicMessagesSink.Receive, x => x.WithTopic("first")))
-            using (bus.Subscribe<Message>(subscriptionId, secondTopicMessagesSink.Receive, x => x.WithTopic("second")))
+            var secondTopicMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
+            using (await bus.PubSub.SubscribeAsync<Message>(Guid.NewGuid().ToString(), firstTopicMessagesSink.Receive, x => x.WithTopic("first")))
+            using (await bus.PubSub.SubscribeAsync<Message>(Guid.NewGuid().ToString(), secondTopicMessagesSink.Receive, x => x.WithTopic("second")))
             {
                 await Task.WhenAll(
-                    bus.FuturePublishBatchAsync(firstTopicMessages, TimeSpan.FromSeconds(5), "first", cts.Token),
-                    bus.FuturePublishBatchAsync(secondTopicMessages, TimeSpan.FromSeconds(5), "second", cts.Token)
+                    bus.Scheduler.FuturePublishBatchAsync(firstTopicMessages, TimeSpan.FromSeconds(5), "first", cts.Token),
+                    bus.Scheduler.FuturePublishBatchAsync(secondTopicMessages, TimeSpan.FromSeconds(5), "second", cts.Token)
                 ).ConfigureAwait(false);
 
                 await Task.WhenAll(

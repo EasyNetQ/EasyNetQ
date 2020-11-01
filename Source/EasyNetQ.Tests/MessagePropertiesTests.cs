@@ -1,9 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
+using FluentAssertions;
 using System.Collections.Generic;
-using System;
 using System.Linq;
 using System.Reflection;
-using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -16,7 +15,7 @@ namespace EasyNetQ.Tests
             const string replyTo = "reply to";
 
             var properties = new MessageProperties();
-            var originalProperties = new BasicProperties {ReplyTo = replyTo};
+            var originalProperties = new BasicProperties { ReplyTo = replyTo };
 
             properties.CopyFrom(originalProperties);
 
@@ -43,7 +42,8 @@ namespace EasyNetQ.Tests
         {
             const string replyTo = "reply to";
 
-            var properties = new MessageProperties {
+            var properties = new MessageProperties
+            {
                 ReplyTo = replyTo,
                 Headers = new Dictionary<string, object>
                           {
@@ -71,8 +71,8 @@ namespace EasyNetQ.Tests
 
             var headers = new Dictionary<string, object>
                 {
-                    {"key1", "value1"},
-                    {"key2", "value2"}
+                    { "key1", "value1" },
+                    { "key2", "value2" }
                 };
 
             var properties = new MessageProperties
@@ -99,10 +99,10 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_throw_if_any_string_property_exceeds_255_chars()
         {
-            var longInput = new String('*', 256);
+            var longInput = new string('*', 256);
 
             var properties = new MessageProperties();
-            var stringFields = properties.GetType().GetProperties().Where(x => x.PropertyType == typeof (String));
+            var stringFields = properties.GetType().GetProperties().Where(x => x.PropertyType == typeof(string));
             foreach (var propertyInfo in stringFields)
             {
                 var threw = false;

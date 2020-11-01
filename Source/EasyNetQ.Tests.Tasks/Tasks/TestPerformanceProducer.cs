@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Tests.Tasks;
-using EasyNetQ.Tests.Tasks.Tasks;
+using EasyNetQ.Producer;
 using Net.CommandLine;
-using Serilog;
 
-namespace EasyNetQ.Tests.Performance.Producer
+namespace EasyNetQ.Tests.Tasks
 {
     public class TestPerformanceParameters
     {
@@ -33,7 +31,7 @@ namespace EasyNetQ.Tests.Performance.Producer
             Console.Out.WriteLine("publishInterval = {0}", publishInterval);
             Console.Out.WriteLine("messageSize = {0}", messageSize);
 
-            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer");
+            bus = RabbitHutch.CreateBus("host=localhost;publisherConfirms=true;timeout=10;requestedHeartbeat=5;product=producer", c => c.EnableMultiChannelClientCommandDispatcher(2));
 
             var messageCount = 0;
             var faultMessageCount = 0;
@@ -51,17 +49,17 @@ namespace EasyNetQ.Tests.Performance.Producer
                 while (!cancelled)
                 {
                     var text = new string('#', messageSize);
-                    var message = new TestPerformanceMessage {Text = text};
+                    var message = new TestPerformanceMessage { Text = text };
 
                     try
                     {
-                        bus.PublishAsync(message).ContinueWith(task =>
+                        bus.PubSub.PublishAsync(message).ContinueWith(task =>
                         {
                             if (task.IsCompleted)
                             {
                                 Interlocked.Increment(ref messageCount);
                             }
-                            if (task.IsFaulted)
+                            if (task.IsFaulted || task.IsCanceled)
                             {
                                 Interlocked.Increment(ref faultMessageCount);
                             }

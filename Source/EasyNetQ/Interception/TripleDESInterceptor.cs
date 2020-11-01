@@ -2,6 +2,9 @@
 
 namespace EasyNetQ.Interception
 {
+    /// <summary>
+    ///     An interceptor which encrypts and decrypts messages
+    /// </summary>
     public class TripleDESInterceptor : IProduceConsumeInterceptor
     {
         private readonly byte[] iv;
@@ -13,32 +16,29 @@ namespace EasyNetQ.Interception
             this.key = key;
         }
 
-        public RawMessage OnProduce(RawMessage rawMessage)
+        /// <inheritdoc />
+        public ProducedMessage OnProduce(ProducedMessage message)
         {
-            var properties = rawMessage.Properties;
-            var body = rawMessage.Body;
-            using (var tripleDes = TripleDES.Create())
-            {
-                using (var tripleDesEncryptor = tripleDes.CreateEncryptor(key, iv))
-                {
-                    var encryptedBody = tripleDesEncryptor.TransformFinalBlock(body, 0, body.Length);
-                    return new RawMessage(properties, encryptedBody);
-                }
-            }
+            var properties = message.Properties;
+            var body = message.Body;
+            using var tripleDes = TripleDES.Create();
+            using var tripleDesEncryptor = tripleDes.CreateEncryptor(key, iv);
+            var encryptedBody = tripleDesEncryptor.TransformFinalBlock(body, 0, body.Length);
+            return new ProducedMessage(properties, encryptedBody);
         }
 
-        public RawMessage OnConsume(RawMessage rawMessage)
+        /// <inheritdoc />
+        public ConsumedMessage OnConsume(ConsumedMessage message)
         {
-            var properties = rawMessage.Properties;
-            var body = rawMessage.Body;
-            using (var tripleDes = TripleDES.Create())
-            {
-                using (var tripleDesDecryptor = tripleDes.CreateDecryptor(key, iv))
-                {
-                    var decryptedBody = tripleDesDecryptor.TransformFinalBlock(body, 0, body.Length);
-                    return new RawMessage(properties, decryptedBody);
-                }
-            }
+            using var tripleDes = TripleDES.Create();
+            using var tripleDesDecryptor = tripleDes.CreateDecryptor(key, iv);
+
+            var receivedInfo = message.ReceivedInfo;
+            var properties = message.Properties;
+            var body = message.Body;
+            return new ConsumedMessage(
+                receivedInfo, properties, tripleDesDecryptor.TransformFinalBlock(body, 0, body.Length)
+            );
         }
     }
 }

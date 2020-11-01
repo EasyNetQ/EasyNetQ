@@ -1,23 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Autofac;
+using Castle.Windsor;
 using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.LightInject;
+using EasyNetQ.DI.Ninject;
 using EasyNetQ.DI.SimpleInjector;
 using EasyNetQ.DI.StructureMap;
 using EasyNetQ.DI.Windsor;
-using EasyNetQ.DI.Ninject;
+using LightInject;
 using Ninject;
 using Xunit;
 using LightInjectContainer = LightInject.ServiceContainer;
+using NinjectContainer = Ninject.StandardKernel;
 using SimpleInjectorContainer = SimpleInjector.Container;
 using StructureMapContainer = StructureMap.Container;
-using WindsorContainer = Castle.Windsor.WindsorContainer;
-using NinjectContainer = Ninject.StandardKernel;
 #if !NETFX
 using EasyNetQ.DI.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
+
 #endif
 
 namespace EasyNetQ.DI.Tests
@@ -70,7 +72,7 @@ namespace EasyNetQ.DI.Tests
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_resolve_service_resolver(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory(c => {});
+            var resolver = resolverFactory(c => { });
 
             Assert.NotNull(resolver.Resolve<IServiceResolver>());
         }
@@ -99,65 +101,97 @@ namespace EasyNetQ.DI.Tests
             Assert.NotSame(first, second);
         }
 
+        [Theory]
+        [MemberData(nameof(GetContainerAdapters))]
+        public void Should_override_dependency_with_factory(ResolverFactory resolverFactory)
+        {
+            var resolver = resolverFactory(c => c.Register<IService, Service>().Register(_ => (IService)new DummyService()));
+            Assert.IsType<DummyService>(resolver.Resolve<IService>());
+        }
+
         public static IEnumerable<object[]> GetContainerAdapters()
         {
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var container = new DefaultServiceContainer();
-                c(container);
-                return container.Resolve<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var container = new DefaultServiceContainer();
+                    c(container);
+                    return container.Resolve<IServiceResolver>();
+                })
+            };
 
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var container = new LightInjectContainer();
-                c(new LightInjectAdapter(container));
-                return (IServiceResolver) container.GetInstance(typeof(IServiceResolver));
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var container = new LightInjectContainer();
+                    c(new LightInjectAdapter(container));
+                    return container.GetInstance<IServiceResolver>();
+                })
+            };
 
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var container = new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } };
-                c(new SimpleInjectorAdapter(container));
-                return container.GetInstance<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var container = new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } };
+                    c(new SimpleInjectorAdapter(container));
+                    return container.GetInstance<IServiceResolver>();
+                })
+            };
 
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var container = new StructureMapContainer(r => c(new StructureMapAdapter(r)));
-                return container.GetInstance<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var container = new StructureMapContainer(r => c(new StructureMapAdapter(r)));
+                    return container.GetInstance<IServiceResolver>();
+                })
+            };
 
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var containerBuilder = new ContainerBuilder();
-                c(new AutofacAdapter(containerBuilder));
-                var container = containerBuilder.Build();
-                return container.Resolve<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var containerBuilder = new ContainerBuilder();
+                    c(new AutofacAdapter(containerBuilder));
+                    var container = containerBuilder.Build();
+                    return container.Resolve<IServiceResolver>();
+                })
+            };
 
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var container = new WindsorContainer();
-                c(new WindsorAdapter(container));
-                return container.Resolve<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var container = new WindsorContainer();
+                    c(new WindsorAdapter(container));
+                    return container.Resolve<IServiceResolver>();
+                })
+            };
 
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var container = new NinjectContainer();
-                c(new NinjectAdapter(container));
-                return container.Get<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var container = new NinjectContainer();
+                    c(new NinjectAdapter(container));
+                    return container.Get<IServiceResolver>();
+                })
+            };
 
 #if !NETFX
-            yield return new object[] {(ResolverFactory) (c =>
+            yield return new object[]
             {
-                var serviceCollection = new ServiceCollection();
-                c(new ServiceCollectionAdapter(serviceCollection));
-                var serviceProvider = serviceCollection.BuildServiceProvider(true); //validate scopes
-                return serviceProvider.GetService<IServiceResolver>();
-            })};
+                (ResolverFactory)(c =>
+                {
+                    var serviceCollection = new ServiceCollection();
+                    c(new ServiceCollectionAdapter(serviceCollection));
+                    var serviceProvider = serviceCollection.BuildServiceProvider(true); //validate scopes
+                    return serviceProvider.GetService<IServiceResolver>();
+                })
+            };
 #endif
         }
 
@@ -165,9 +199,13 @@ namespace EasyNetQ.DI.Tests
         {
         }
 
+        public class DummyService : IService
+        {
+        }
+
         public class Service : IService
         {
-            private static volatile int sequenceNumber = 0;
+            private static volatile int sequenceNumber;
 
             private readonly int number;
 

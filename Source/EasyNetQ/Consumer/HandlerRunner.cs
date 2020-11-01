@@ -1,17 +1,16 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
     public interface IHandlerRunner : IDisposable
     {
-        Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context);
+        Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
     }
 
     public class HandlerRunner : IHandlerRunner
@@ -26,17 +25,18 @@ namespace EasyNetQ.Consumer
             this.consumerErrorStrategy = consumerErrorStrategy;
         }
 
-        public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context)
+        /// <inheritdoc />
+        public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(
+            ConsumerExecutionContext context, CancellationToken cancellationToken
+        )
         {
-            Preconditions.CheckNotNull(context, "context");
-
             if (logger.IsDebugEnabled())
             {
-                logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.Info);
+                logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.ReceivedInfo);
             }
 
-            var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context).ConfigureAwait(false);
-            
+            var ackStrategy = await InvokeUserMessageHandlerInternalAsync(context, cancellationToken).ConfigureAwait(false);
+
             return (model, tag) =>
             {
                 try
@@ -48,7 +48,7 @@ namespace EasyNetQ.Consumer
                     logger.Info(
                         alreadyClosedException,
                         "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
-                        context.Info
+                        context.ReceivedInfo
                     );
                 }
                 catch (IOException ioException)
@@ -56,29 +56,33 @@ namespace EasyNetQ.Consumer
                     logger.Info(
                         ioException,
                         "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
-                        context.Info
+                        context.ReceivedInfo
                     );
                 }
                 catch (Exception exception)
                 {
                     logger.Error(
-                        exception, 
+                        exception,
                         "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
-                        context.Info
+                        context.ReceivedInfo
                     );
                 }
-                
+
                 return AckResult.Exception;
             };
         }
 
-        private async Task<AckStrategy> InvokeUserMessageHandlerInternalAsync(ConsumerExecutionContext context)
+        private async Task<AckStrategy> InvokeUserMessageHandlerInternalAsync(
+            ConsumerExecutionContext context, CancellationToken cancellationToken
+        )
         {
             try
             {
                 try
                 {
-                    await context.UserHandler(context.Body, context.Properties, context.Info).ConfigureAwait(false);
+                    return await context.Handler(
+                        context.Body, context.Properties, context.ReceivedInfo, cancellationToken
+                    ).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -86,13 +90,6 @@ namespace EasyNetQ.Consumer
                 }
                 catch (Exception exception)
                 {
-                    logger.Error(
-                        exception,
-                        "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
-                        context.Info,
-                        context.Properties,
-                        Convert.ToBase64String(context.Body)
-                    );
                     return consumerErrorStrategy.HandleConsumerError(context, exception);
                 }
             }
@@ -101,10 +98,9 @@ namespace EasyNetQ.Consumer
                 logger.Error(exception, "Consumer error strategy has failed");
                 return AckStrategies.NackWithRequeue;
             }
-
-            return AckStrategies.Ack;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             consumerErrorStrategy.Dispose();

@@ -10,9 +10,9 @@ namespace EasyNetQ.MessageVersioning
     {
         private readonly Stack<Type> messageVersions;
 
-        public MessageVersionStack( Type messageType )
+        public MessageVersionStack(Type messageType)
         {
-            messageVersions = ExtractMessageVersions( messageType );
+            messageVersions = ExtractMessageVersions(messageType);
         }
 
         public Type Pop()
@@ -35,28 +35,28 @@ namespace EasyNetQ.MessageVersioning
             return messageVersions.GetEnumerator();
         }
 
-        private static Stack<Type> ExtractMessageVersions( Type type )
+        private static Stack<Type> ExtractMessageVersions(Type type)
         {
             var messageVersions = new Stack<Type>();
-            messageVersions.Push( type );
-            while( true )
+            messageVersions.Push(type);
+            while (true)
             {
                 var messageType = messageVersions.Peek();
-                var supersededType = GetSupersededType( messageType );
+                var supersededType = GetSupersededType(messageType);
 
-                if( supersededType == null )
+                if (supersededType == null)
                     break;
 
-                EnsureVersioningValid( messageType, supersededType );
-                messageVersions.Push( supersededType );
+                EnsureVersioningValid(messageType, supersededType);
+                messageVersions.Push(supersededType);
             }
             messageVersions.TrimExcess();
             return messageVersions;
         }
 
-        private static Type GetSupersededType( Type type )
+        private static Type GetSupersededType(Type type)
         {
-            if( type.BaseType == null )
+            if (type.BaseType == null)
                 return null;
 
             var types = FindSupersedes(type);
@@ -65,18 +65,18 @@ namespace EasyNetQ.MessageVersioning
             return types.Except(parentTypes).FirstOrDefault();
         }
 
-        private static IEnumerable<Type> FindSupersedes( Type type )
+        private static IEnumerable<Type> FindSupersedes(Type type)
         {
             return type
                 .GetInterfaces()
-                .Where( t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof( ISupersede<> ) )
-                .SelectMany( t => t.GetGenericArguments() );                
+                .Where(t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(ISupersede<>))
+                .SelectMany(t => t.GetGenericArguments());
         }
 
-        private static void EnsureVersioningValid( Type messageType, Type supersededType )
+        private static void EnsureVersioningValid(Type messageType, Type supersededType)
         {
-            if ( !messageType.GetTypeInfo().IsSubclassOf( supersededType ) )
-                throw new EasyNetQException( "Message cannot supersede a type it is not a subclass of. {0} is not a subclass of {1}", messageType.Name, supersededType.Name );
+            if (!messageType.GetTypeInfo().IsSubclassOf(supersededType))
+                throw new EasyNetQException("Message cannot supersede a type it is not a subclass of. {0} is not a subclass of {1}", messageType.Name, supersededType.Name);
         }
     }
 }

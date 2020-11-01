@@ -2,8 +2,15 @@
 
 namespace EasyNetQ.Consumer
 {
+    /// <summary>
+    ///     Represent an abstract consumer
+    /// </summary>
     public interface IConsumer : IDisposable
     {
-        IDisposable StartConsuming();
+        /// <summary>
+        ///     Starts the consumer
+        /// </summary>
+        /// <returns>Disposable to stop the consumer</returns>
+        void StartConsuming();
     }
 }

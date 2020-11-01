@@ -14,7 +14,7 @@ namespace EasyNetQ.Consumer
         AckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception);
 
         /// <summary>
-        /// This method is fired when the task returned from the UserHandler is cancelled. 
+        /// This method is fired when the task returned from the UserHandler is cancelled.
         /// Implement a strategy for handling the cancellation here.
         /// </summary>
         /// <param name="context">The consumer execution context.</param>

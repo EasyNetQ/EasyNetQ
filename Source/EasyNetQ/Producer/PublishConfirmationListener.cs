@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -8,95 +9,208 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
 {
+    using UnconfirmedRequests = ConcurrentDictionary<ulong, TaskCompletionSource<object>>;
+
+    /// <inheritdoc />
     public class PublishConfirmationListener : IPublishConfirmationListener
     {
-        private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
-        private readonly ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<object>>> unconfirmedChannelRequests = new ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<object>>>();
+        private readonly IDisposable[] subscriptions;
 
+        private readonly ConcurrentDictionary<int, UnconfirmedRequests> unconfirmedChannelRequests;
+
+        /// <summary>
+        ///     Creates publish confirmations listener
+        /// </summary>
+        /// <param name="eventBus">The event bus</param>
         public PublishConfirmationListener(IEventBus eventBus)
         {
-            eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation);
-            eventBus.Subscribe<PublishChannelCreatedEvent>(OnPublishChannelCreated);
+            unconfirmedChannelRequests = new ConcurrentDictionary<int, UnconfirmedRequests>();
+            subscriptions = new[]
+            {
+                eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation),
+                eventBus.Subscribe<ChannelRecoveredEvent>(OnChannelRecovered),
+                eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown),
+                eventBus.Subscribe<ReturnedMessageEvent>(OnReturnedMessage)
+            };
         }
 
-        public IPublishConfirmationWaiter GetWaiter(IModel model)
+        /// <inheritdoc />
+        public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
         {
-            var deliveryTag = model.NextPublishSeqNo;
-            var requests = unconfirmedChannelRequests.GetOrAdd(model, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
-            var confirmation = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-            requests.Add(deliveryTag, confirmation);
-            return new PublishConfirmationWaiter(deliveryTag, confirmation.Task, cancellation.Token, () => requests.Remove(deliveryTag));
+            var sequenceNumber = model.NextPublishSeqNo;
+
+            if (sequenceNumber == 0UL)
+                throw new InvalidOperationException("Confirms not selected");
+
+            var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
+            var confirmationTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            if (!requests.TryAdd(sequenceNumber, confirmationTcs))
+                throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
+
+            return new PublishPendingConfirmation(
+                sequenceNumber, confirmationTcs, () => requests.Remove(sequenceNumber)
+            );
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
-            cancellation.Cancel();
+            foreach (var subscription in subscriptions)
+                subscription.Dispose();
+            InterruptAllUnconfirmedRequests(true);
         }
 
         private void OnMessageConfirmation(MessageConfirmationEvent @event)
         {
-            ConcurrentDictionary<ulong, TaskCompletionSource<object>> requests;
-            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel, out requests))
-            {
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
                 return;
-            }
 
             var deliveryTag = @event.DeliveryTag;
             var multiple = @event.Multiple;
-            var isNack = @event.IsNack;
+            var type = @event.IsNack ? ConfirmationType.Nack : ConfirmationType.Ack;
             if (multiple)
             {
-                foreach (var sequenceNumber in requests.Keys.Where(x => x <= deliveryTag))
-                {
-                    TaskCompletionSource<object> confirmation;
-                    if (requests.TryGetValue(sequenceNumber, out confirmation))
-                    {
-                        Confirm(confirmation, sequenceNumber, isNack);
-                    }
-                }
+                foreach (var sequenceNumber in requests.Select(x => x.Key))
+                    if (sequenceNumber <= deliveryTag && requests.TryRemove(sequenceNumber, out var confirmationTcs))
+                        Confirm(confirmationTcs, sequenceNumber, type);
             }
-            else
-            {
-                TaskCompletionSource<object> confirmation;
-                if (requests.TryGetValue(deliveryTag, out confirmation))
-                {
-                    Confirm(confirmation, deliveryTag, isNack);
-                }
-            }
+            else if (requests.TryRemove(deliveryTag, out var confirmation))
+                Confirm(confirmation, deliveryTag, type);
         }
 
-        private void OnPublishChannelCreated(PublishChannelCreatedEvent @event)
+        private void OnChannelRecovered(ChannelRecoveredEvent @event)
         {
-            foreach (var channel in unconfirmedChannelRequests.Keys)
+            if (@event.Channel.NextPublishSeqNo == 0)
+                return;
+
+            InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
+        }
+
+        private void OnChannelShutdown(ChannelShutdownEvent @event)
+        {
+            if (@event.Channel.NextPublishSeqNo == 0)
+                return;
+
+            InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
+        }
+
+
+        private void OnReturnedMessage(ReturnedMessageEvent @event)
+        {
+            if (@event.Channel.NextPublishSeqNo == 0)
+                return;
+
+            if (!@event.Properties.TryGetConfirmationId(out var confirmationId))
+                return;
+
+            if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
+                return;
+
+            if (!requests.TryRemove(confirmationId, out var confirmationTcs))
+                return;
+
+            Confirm(confirmationTcs, confirmationId, ConfirmationType.Return);
+        }
+
+
+        private void InterruptUnconfirmedRequests(int channelNumber, bool cancellationInsteadOfInterruption = false)
+        {
+            if (!unconfirmedChannelRequests.TryRemove(channelNumber, out var requests))
+                return;
+
+            do
             {
-                ConcurrentDictionary<ulong, TaskCompletionSource<object>> confirmations;
-                if (!unconfirmedChannelRequests.TryRemove(channel, out confirmations))
+                foreach (var sequenceNumber in requests.Select(x => x.Key))
                 {
-                    continue;
-                }
-                foreach (var deliveryTag in confirmations.Keys)
-                {
-                    TaskCompletionSource<object> confirmation;
-                    if (!confirmations.TryRemove(deliveryTag, out confirmation))
-                    {
+                    if (!requests.TryRemove(sequenceNumber, out var confirmationTcs))
                         continue;
-                    }
 
-                    confirmation.TrySetException(new PublishInterruptedException());
+                    if (cancellationInsteadOfInterruption)
+                        confirmationTcs.TrySetCanceled();
+                    else
+                        confirmationTcs.TrySetException(new PublishInterruptedException());
                 }
-            }
-            unconfirmedChannelRequests.Add(@event.Channel, new ConcurrentDictionary<ulong, TaskCompletionSource<object>>());
+            } while (!requests.IsEmpty);
         }
 
-        private static void Confirm(TaskCompletionSource<object> tcs, ulong deliveryTag, bool isNack)
+        private void InterruptAllUnconfirmedRequests(bool cancellationInsteadOfInterruption = false)
         {
-            if (isNack)
+            do
             {
-                tcs.TrySetException(new PublishNackedException(string.Format("Broker has signalled that publish {0} was unsuccessful", deliveryTag)));
+                foreach (var channelNumber in unconfirmedChannelRequests.Select(x => x.Key))
+                    InterruptUnconfirmedRequests(channelNumber, cancellationInsteadOfInterruption);
+            } while (!unconfirmedChannelRequests.IsEmpty);
+        }
+
+        private static void Confirm(
+            TaskCompletionSource<object> confirmationTcs, ulong sequenceNumber, ConfirmationType type
+        )
+        {
+            switch (type)
+            {
+                case ConfirmationType.Return:
+                    confirmationTcs.TrySetException(
+                        new PublishReturnedException("Broker has signalled that message is returned")
+                    );
+                    break;
+                case ConfirmationType.Nack:
+                    confirmationTcs.TrySetException(
+                        new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful")
+                    );
+                    break;
+                case ConfirmationType.Ack:
+                    confirmationTcs.TrySetResult(null);;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-            else
+        }
+
+        private enum ConfirmationType
+        {
+            Ack,
+            Nack,
+            Return
+        }
+
+        private sealed class PublishPendingConfirmation : IPublishPendingConfirmation
+        {
+            private readonly ulong id;
+            private readonly TaskCompletionSource<object> confirmationTcs;
+            private readonly Action cleanup;
+
+            public PublishPendingConfirmation(ulong id, TaskCompletionSource<object> confirmationTcs, Action cleanup)
             {
-                tcs.TrySetResult(null);
+                this.id = id;
+                this.confirmationTcs = confirmationTcs;
+                this.cleanup = cleanup;
+            }
+
+            public ulong Id => id;
+
+            public async Task WaitAsync(CancellationToken cancellationToken)
+            {
+                try
+                {
+                    confirmationTcs.AttachCancellation(cancellationToken);
+                    await confirmationTcs.Task.ConfigureAwait(false);
+                }
+                finally
+                {
+                    cleanup();
+                }
+            }
+
+            public void Cancel()
+            {
+                try
+                {
+                    confirmationTcs.TrySetCanceled();
+                }
+                finally
+                {
+                    cleanup();
+                }
             }
         }
     }

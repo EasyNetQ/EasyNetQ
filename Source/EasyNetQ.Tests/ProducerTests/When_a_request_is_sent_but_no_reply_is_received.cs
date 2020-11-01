@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_request_is_sent_but_no_reply_is_received : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         public When_a_request_is_sent_but_no_reply_is_received()
         {
@@ -21,20 +22,14 @@ namespace EasyNetQ.Tests.ProducerTests
         }
 
         [Fact]
-        public void Should_throw_a_timeout_exception()
+        public Task Should_throw_a_cancelled_exception()
         {
-            Assert.Throws<TimeoutException>(() =>
-            {
-                try
-                {
-                    mockBuilder.Bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage()).Wait();
-                }
-                catch (AggregateException aggregateException)
-                {
-                    throw aggregateException.InnerException;
-                }
-            });
-        }         
+            return Assert.ThrowsAsync<TaskCanceledException>(
+                () => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
+                    new TestRequestMessage(), c => { }
+                )
+            );
+        }
     }
 }
 

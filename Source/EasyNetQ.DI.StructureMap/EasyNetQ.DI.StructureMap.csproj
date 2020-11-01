@@ -4,6 +4,7 @@
     <Description>An adaptor to allow EasyNetQ to use StructureMap as its internal IoC container</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <PackageTags>StructureMap;RabbitMQ;Messaging;AMQP;C#</PackageTags>
+    <LangVersion>latest</LangVersion>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>

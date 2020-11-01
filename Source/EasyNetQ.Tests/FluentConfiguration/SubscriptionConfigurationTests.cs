@@ -1,5 +1,4 @@
-﻿using EasyNetQ.FluentConfiguration;
-using Xunit;
+﻿using Xunit;
 
 namespace EasyNetQ.Tests.FluentConfiguration
 {
@@ -18,6 +17,7 @@ namespace EasyNetQ.Tests.FluentConfiguration
             Assert.Null(configuration.QueueName);
             Assert.Null(configuration.MaxLength);
             Assert.Null(configuration.MaxLengthBytes);
+            Assert.Null(configuration.QueueMode);
         }
     }
 }

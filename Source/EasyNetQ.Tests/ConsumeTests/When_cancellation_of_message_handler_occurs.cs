@@ -1,10 +1,9 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
-using System.Linq;
 using EasyNetQ.Consumer;
-using Xunit;
 using NSubstitute;
+using System.Linq;
+using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
@@ -12,13 +11,14 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerCancelled(null)
+            ConsumerErrorStrategy.HandleConsumerCancelled(default)
                                  .ReturnsForAnyArgs(AckStrategies.Ack);
 
             StartConsumer((body, properties, info) =>
                 {
                     Cancellation.Cancel();
                     Cancellation.Token.ThrowIfCancellationRequested();
+                    return AckStrategies.Ack;
                 });
             DeliverMessage();
         }
@@ -27,9 +27,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         public void Should_invoke_the_cancellation_strategy()
         {
             ConsumerErrorStrategy.Received().HandleConsumerCancelled(
-               Arg.Is<ConsumerExecutionContext>(args => args.Info.ConsumerTag == ConsumerTag &&
-                                                        args.Info.DeliverTag == DeliverTag &&
-                                                        args.Info.Exchange == "the_exchange" &&
+               Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
+                                                        args.ReceivedInfo.DeliveryTag == DeliverTag &&
+                                                        args.ReceivedInfo.Exchange == "the_exchange" &&
                                                         args.Body.SequenceEqual(OriginalBody)));
         }
 

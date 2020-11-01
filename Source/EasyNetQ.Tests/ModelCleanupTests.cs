@@ -32,10 +32,10 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_cleanup_publish_model()
         {
-            bus.Publish(new TestMessage());
+            bus.PubSub.Publish(new TestMessage());
             bus.Dispose();
 
-            mockBuilder.Channels[0].DidNotReceive().Dispose();
+            mockBuilder.Channels[0].Received().Dispose();
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
             mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
-            bus.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
@@ -57,14 +57,14 @@ namespace EasyNetQ.Tests
             var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-            mockBuilder.Channels[0].DidNotReceive().Dispose();
+            mockBuilder.Channels[0].Received().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Fact]
         public void Should_cleanup_respond_model()
         {
-            bus.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage) null);
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage) null);
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -72,14 +72,14 @@ namespace EasyNetQ.Tests
             var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-            mockBuilder.Channels[0].DidNotReceive().Dispose();
+            mockBuilder.Channels[0].Received().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Fact]
         public void Should_cleanup_subscribe_async_model()
         {
-            bus.Subscribe<TestMessage>("abc", msg => { });
+            bus.PubSub.Subscribe<TestMessage>("abc", msg => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -87,14 +87,14 @@ namespace EasyNetQ.Tests
             var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-            mockBuilder.Channels[0].DidNotReceive().Dispose();
+            mockBuilder.Channels[0].Received().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
 
         [Fact]
         public void Should_cleanup_subscribe_model()
         {
-            bus.Subscribe<TestMessage>("abc", mgs => { });
+            bus.PubSub.Subscribe<TestMessage>("abc", mgs => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             bus.Dispose();
@@ -102,7 +102,7 @@ namespace EasyNetQ.Tests
             var signalReceived = are.WaitOne(waitTime);
             Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-            mockBuilder.Channels[0].DidNotReceive().Dispose();
+            mockBuilder.Channels[0].Received().Dispose();
             mockBuilder.Channels[1].Received().Dispose();
         }
     }

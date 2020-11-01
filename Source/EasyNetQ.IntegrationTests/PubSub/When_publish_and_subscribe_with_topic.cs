@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_topic(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
@@ -36,24 +36,26 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var secondTopicMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
 
             using (
-                bus.Subscribe<Message>(
+                await bus.PubSub.SubscribeAsync<Message>(
                     Guid.NewGuid().ToString(),
                     firstTopicMessagesSink.Receive,
-                    x => x.WithTopic("first")
+                    x => x.WithTopic("first"),
+                    cts.Token
                 )
             )
             using (
-                bus.Subscribe<Message>(
+                await bus.PubSub.SubscribeAsync<Message>(
                     Guid.NewGuid().ToString(),
                     secondTopicMessagesSink.Receive,
-                    x => x.WithTopic("second")
+                    x => x.WithTopic("second"),
+                    cts.Token
                 )
             )
             {
-                await bus.PublishBatchAsync(
+                await bus.PubSub.PublishBatchAsync(
                     firstTopicMessages, x => x.WithTopic("first"), cts.Token
                 ).ConfigureAwait(false);
-                await bus.PublishBatchAsync(
+                await bus.PubSub.PublishBatchAsync(
                     secondTopicMessages, x => x.WithTopic("second"), cts.Token
                 ).ConfigureAwait(false);
 

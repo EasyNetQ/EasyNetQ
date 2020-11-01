@@ -1,55 +1,27 @@
 // ReSharper disable InconsistentNaming
 
-using EasyNetQ.Tests.Mocking;
-using Xunit;
-using RabbitMQ.Client;
-using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EasyNetQ.Producer;
+using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
+using NSubstitute;
+using RabbitMQ.Client;
+using Xunit;
 
 namespace EasyNetQ.Tests
 {
-	public class When_using_default_conventions
-	{
-		private Conventions conventions;
-	    private ITypeNameSerializer typeNameSerializer;
-
-		public When_using_default_conventions()
-		{
-            typeNameSerializer = new DefaultTypeNameSerializer();
-			conventions = new Conventions(typeNameSerializer);
-		}
-
-		[Fact]
-		public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
-		{
-			var result = conventions.ExchangeNamingConvention(typeof (TestMessage));
-		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
-		}
-
-		[Fact]
-		public void The_default_topic_naming_convention_should_return_an_empty_string()
-		{
-			var result = conventions.TopicNamingConvention(typeof (TestMessage));
-		    result.Should().Be("");
-		}
-
-		[Fact]
-		public void The_default_queue_naming_convention_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id()
-		{
-			const string subscriptionId = "test";
-			var result = conventions.QueueNamingConvention(typeof (TestMessage), subscriptionId);
-		    result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
-		}
-
-        [Fact]
-        public void The_default_error_queue_name_should_be()
+    public class When_using_default_conventions
+    {
+        public When_using_default_conventions()
         {
-            var result = conventions.ErrorQueueNamingConvention(new MessageReceivedInfo());
-            result.Should().Be("EasyNetQ_Default_Error_Queue");
+            typeNameSerializer = new DefaultTypeNameSerializer();
+            conventions = new Conventions(typeNameSerializer);
         }
+
+        private Conventions conventions;
+        private ITypeNameSerializer typeNameSerializer;
 
         [Fact]
         public void The_default_error_exchange_name_should_be()
@@ -61,10 +33,25 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void The_default_rpc_request_exchange_name_should_be()
+        public void The_default_error_queue_name_should_be()
         {
-            var result = conventions.RpcRequestExchangeNamingConvention(typeof (object));
-            result.Should().Be("easy_net_q_rpc");
+            var result = conventions.ErrorQueueNamingConvention(null);
+            result.Should().Be("EasyNetQ_Default_Error_Queue");
+        }
+
+        [Fact]
+        public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
+        {
+            var result = conventions.ExchangeNamingConvention(typeof(TestMessage));
+            result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
+        }
+
+        [Fact]
+        public void The_default_queue_naming_convention_should_use_the_TypeNameSerializers_Serialize_method_then_an_underscore_then_the_subscription_id()
+        {
+            const string subscriptionId = "test";
+            var result = conventions.QueueNamingConvention(typeof(TestMessage), subscriptionId);
+            result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)) + "_" + subscriptionId);
         }
 
         [Fact]
@@ -75,12 +62,26 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
+        public void The_default_rpc_request_exchange_name_should_be()
+        {
+            var result = conventions.RpcRequestExchangeNamingConvention(typeof(object));
+            result.Should().Be("easy_net_q_rpc");
+        }
+
+        [Fact]
         public void The_default_rpc_routingkey_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
         {
             var result = conventions.RpcRoutingKeyNamingConvention(typeof(TestMessage));
             result.Should().Be(typeNameSerializer.Serialize(typeof(TestMessage)));
         }
-	}
+
+        [Fact]
+        public void The_default_topic_naming_convention_should_return_an_empty_string()
+        {
+            var result = conventions.TopicNamingConvention(typeof(TestMessage));
+            result.Should().Be("");
+        }
+    }
 
     public class When_using_QueueAttribute
     {
@@ -113,7 +114,6 @@ namespace EasyNetQ.Tests
             result.Should().Be("MyQueue");
         }
 
-
         [Theory]
         [InlineData(typeof(EmptyQueueNameAnnotatedTestMessage))]
         [InlineData(typeof(IEmptyQueueNameAnnotatedTestMessage))]
@@ -143,13 +143,10 @@ namespace EasyNetQ.Tests
         }
     }
 
-	public class When_publishing_a_message : IDisposable
-	{
-        private MockBuilder mockBuilder;
-	    private ITypeNameSerializer typeNameSerializer;
-
-		public When_publishing_a_message()
-		{
+    public class When_publishing_a_message : IDisposable
+    {
+        public When_publishing_a_message()
+        {
             typeNameSerializer = new DefaultTypeNameSerializer();
             var customConventions = new Conventions(typeNameSerializer)
             {
@@ -159,52 +156,56 @@ namespace EasyNetQ.Tests
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
-            mockBuilder.Bus.Publish(new TestMessage());
-		}
+            mockBuilder.PubSub.Publish(new TestMessage());
+        }
 
         public void Dispose()
         {
             mockBuilder.Bus.Dispose();
         }
 
+        private readonly MockBuilder mockBuilder;
+        private readonly ITypeNameSerializer typeNameSerializer;
+
         [Fact]
-		public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
-		{
+        public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
+        {
+            mockBuilder.Channels[1].Received().BasicPublish(
+                Arg.Is("CustomExchangeNamingConvention"),
+                Arg.Any<string>(),
+                Arg.Is(false),
+                Arg.Any<IBasicProperties>(),
+                Arg.Any<ReadOnlyMemory<byte>>()
+            );
+        }
+
+        [Fact]
+        public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
+        {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
                 Arg.Is("CustomExchangeNamingConvention"),
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
-		}
-
-		[Fact]
-		public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
-		{
-            mockBuilder.Channels[0].Received().BasicPublish(
-                    Arg.Is("CustomExchangeNamingConvention"),
-                    Arg.Any<string>(),
-                    Arg.Is(false),
-                    Arg.Any<IBasicProperties>(),
-                    Arg.Any<ReadOnlyMemory<byte>>());
-		}
-
-		[Fact]
-		public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
-		{
-            mockBuilder.Channels[0].Received().BasicPublish(
-                    Arg.Any<string>(),
-                    Arg.Is("CustomTopicNamingConvention"),
-                    Arg.Is(false),
-                    Arg.Any<IBasicProperties>(),
-                    Arg.Any<ReadOnlyMemory<byte>>());
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
-	}
+
+        [Fact]
+        public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
+        {
+            mockBuilder.Channels[1].Received().BasicPublish(
+                Arg.Any<string>(),
+                Arg.Is("CustomTopicNamingConvention"),
+                Arg.Is(false),
+                Arg.Any<IBasicProperties>(),
+                Arg.Any<ReadOnlyMemory<byte>>()
+            );
+        }
+    }
 
     public class When_registering_response_handler : IDisposable
     {
-        private MockBuilder mockBuilder;
-
         public When_registering_response_handler()
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
@@ -215,7 +216,7 @@ namespace EasyNetQ.Tests
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-            mockBuilder.Bus.Respond<TestMessage, TestMessage>(t => new TestMessage());
+            mockBuilder.Rpc.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
         public void Dispose()
@@ -223,14 +224,17 @@ namespace EasyNetQ.Tests
             mockBuilder.Bus.Dispose();
         }
 
+        private MockBuilder mockBuilder;
+
         [Fact]
         public void Should_correctly_bind_using_new_conventions()
         {
             mockBuilder.Channels[0].Received().QueueBind(
-                    Arg.Is("CustomRpcRoutingKeyName"),
-                    Arg.Is("CustomRpcExchangeName"),
-                    Arg.Is("CustomRpcRoutingKeyName"),
-                    Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is("CustomRpcRoutingKeyName"),
+                Arg.Is("CustomRpcExchangeName"),
+                Arg.Is("CustomRpcRoutingKeyName"),
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
 
         [Fact]
@@ -241,9 +245,8 @@ namespace EasyNetQ.Tests
                 Arg.Is("direct"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
-
     }
 }
 

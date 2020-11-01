@@ -6,7 +6,7 @@ namespace EasyNetQ.Hosepipe
 {
     public class ArgParser
     {
-        readonly Regex argRegex = new Regex(@"([a-z]{1,2})\:(.*)");
+        private readonly Regex argRegex = new Regex(@"([a-z]{1,2})\:(.*)");
 
         public Arguments Parse(string[] args)
         {
@@ -32,7 +32,7 @@ namespace EasyNetQ.Hosepipe
     public class Arguments
     {
         private readonly IList<Argument> arguments = new List<Argument>();
-        private readonly IDictionary<string, Argument> keys = new Dictionary<string, Argument>();  
+        private readonly IDictionary<string, Argument> keys = new Dictionary<string, Argument>();
 
         public void Add(Argument argument)
         {
@@ -59,14 +59,14 @@ namespace EasyNetQ.Hosepipe
             return TryResult.Pass();
         }
 
-        public TryResult WithTypedKeyOptional<T>(string key, Action<Argument> argumentAction) where T:IConvertible
+        public TryResult WithTypedKeyOptional<T>(string key, Action<Argument> argumentAction) where T : IConvertible
         {
             if (!keys.ContainsKey(key)) return TryResult.Pass();
 
-            try 
+            try
             {
                 Convert.ChangeType(keys[key].Value, typeof(T));
-            } 
+            }
             catch (InvalidCastException)
             {
                 return TryResult.Fail();
@@ -118,7 +118,7 @@ namespace EasyNetQ.Hosepipe
 
         public static TryResult Fail()
         {
-            return new TryResult {pass = false};
+            return new TryResult { pass = false };
         }
 
         public void FailWith(Action action)

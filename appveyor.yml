@@ -1,5 +1,6 @@
 image:
   - Previous Visual Studio 2019
+skip_branch_with_pr: true
 
 pull_requests:
   do_not_increment_build_number: true

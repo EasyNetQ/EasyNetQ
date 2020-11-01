@@ -1,17 +1,22 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using FluentAssertions;
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public class When_a_Persistent_consumer_starts_consuming : Given_a_PersistentConsumer
     {
-        public override void AdditionalSetup()
+        protected override void AdditionalSetup()
         {
-            persistentConnection.IsConnected.Returns(true);
             consumer.StartConsuming();
+        }
+
+        [Fact]
+        public void Should_ask_the_internal_consumer_to_start_consuming()
+        {
+            internalConsumers[0].Received().StartConsuming(queue, onMessage, configuration);
         }
 
         [Fact]
@@ -19,12 +24,6 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         {
             internalConsumerFactory.Received().CreateConsumer();
             createConsumerCalled.Should().Be(1);
-        }
-
-        [Fact]
-        public void Should_ask_the_internal_consumer_to_start_consuming()
-        {
-            internalConsumers[0].Received().StartConsuming(persistentConnection, queue, onMessage, configuration);
         }
     }
 }

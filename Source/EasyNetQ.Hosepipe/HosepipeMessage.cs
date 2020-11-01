@@ -4,19 +4,15 @@ namespace EasyNetQ.Hosepipe
 {
     public class HosepipeMessage
     {
-        public string Body { get; private set; }
-        public MessageProperties Properties { get; private set; }
-        public MessageReceivedInfo Info { get; private set; }
+        public string Body { get; }
+        public MessageProperties Properties { get; }
+        public MessageReceivedInfo Info { get; }
 
         public HosepipeMessage(string body, MessageProperties properties, MessageReceivedInfo info)
         {
-            if(body == null) throw new ArgumentNullException("body");
-            if(properties == null) throw new ArgumentNullException("properties");
-            if(info == null) throw new ArgumentNullException("info");
-
-            Body = body;
-            Properties = properties;
-            Info = info;
+            Body = body ?? throw new ArgumentNullException(nameof(body));
+            Properties = properties ?? throw new ArgumentNullException(nameof(properties));
+            Info = info ?? throw new ArgumentNullException(nameof(info));
         }
     }
 }

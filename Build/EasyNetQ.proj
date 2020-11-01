@@ -32,8 +32,6 @@
     <!-- Properties that are set during build to find test/merge binaries -->
     <PropertyGroup>
         <Configuration>Release</Configuration>
-        <DesktopFrameworkVersion>net451</DesktopFrameworkVersion>
-        <BinaryDesktopFolder>bin\$(Configuration)\$(DesktopFrameworkVersion)</BinaryDesktopFolder>
     </PropertyGroup>
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>

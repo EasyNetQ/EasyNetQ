@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
-using EasyNetQ.Scheduling;
 using FluentAssertions;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.Scheduler
         public When_publish_and_subscribe_with_delay_using_delay_exchange(RabbitMQFixture fixture)
         {
             bus = RabbitHutch.CreateBus(
-                $"host={fixture.Host};prefetchCount=1;timeout=5", c => c.EnableDelayedExchangeScheduler()
+                $"host={fixture.Host};prefetchCount=1;timeout=-1", c => c.EnableDelayedExchangeScheduler()
             );
         }
 
@@ -36,9 +35,9 @@ namespace EasyNetQ.IntegrationTests.Scheduler
             var messagesSink = new MessagesSink(MessagesCount);
             var messages = MessagesFactories.Create(MessagesCount);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive))
+            using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
-                await bus.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), "#", cts.Token)
+                await bus.Scheduler.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), "#", cts.Token)
                     .ConfigureAwait(false);
 
                 await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);

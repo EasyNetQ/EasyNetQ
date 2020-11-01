@@ -1,195 +1,157 @@
 using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
+using System.Linq;
 using EasyNetQ.Events;
-using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     An abstraction on top of connection which manages its persistence and allows to open channels
+    /// </summary>
     public interface IPersistentConnection : IDisposable
     {
-        bool IsConnected { get; }
         /// <summary>
-        /// Initialization method that should be called only once,
-        /// usually right after the implementation constructor has run.
+        ///     True if a connection is connected
         /// </summary>
-        void Initialize();
+        bool IsConnected { get; }
+
+        /// <summary>
+        ///     Creates a new channel
+        /// </summary>
+        /// <returns>New channel</returns>
         IModel CreateModel();
     }
 
-    /// <summary>
-    /// A connection that attempts to reconnect if the inner connection is closed.
-    /// </summary>
+    /// <inheritdoc />
     public class PersistentConnection : IPersistentConnection
     {
-        private readonly ILog logger = LogProvider.For<PersistentConnection>();
-        
+        private readonly object mutex = new object();
+        private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;
-        private readonly object locker = new object();
-        private bool initialized;
-        private IConnection connection;
+        private readonly ILog logger = LogProvider.For<PersistentConnection>();
+        private volatile IAutorecoveringConnection initializedConnection;
+        private volatile bool disposed;
 
-        public PersistentConnection(IConnectionFactory connectionFactory, IEventBus eventBus)
+        /// <summary>
+        ///     Creates PersistentConnection
+        /// </summary>
+        /// <param name="configuration">The configuration</param>
+        /// <param name="connectionFactory">The connection factory</param>
+        /// <param name="eventBus">The event bus</param>
+        public PersistentConnection(
+            ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
+        )
         {
+            Preconditions.CheckNotNull(configuration, "configuration");
             Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
             Preconditions.CheckNotNull(eventBus, "eventBus");
 
+            this.configuration = configuration;
             this.connectionFactory = connectionFactory;
             this.eventBus = eventBus;
         }
 
-        public void Initialize()
-        {
-            lock (locker)
-            {
-                if (initialized)
-                {
-                    throw new EasyNetQException("This PersistentConnection has already been initialized.");
-                }
-                initialized = true;
-                TryToConnect();
-            }
-        }
-
+        /// <inheritdoc />
         public IModel CreateModel()
         {
-            if (!IsConnected)
-            {
+            var connection = initializedConnection;
+            if (connection == null)
+                lock (mutex)
+                    connection = initializedConnection ??= Connect();
+
+            if (!connection.IsOpen)
                 throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
-            }
 
             return connection.CreateModel();
         }
-        
-        public bool IsConnected => connection != null && connection.IsOpen && !disposed;
 
-        private void StartTryToConnect()
+        /// <inheritdoc />
+        public bool IsConnected
         {
-            Timers.RunOnce(s => TryToConnect(), connectionFactory.Configuration.ConnectIntervalAttempt);
-        }
-
-        private void TryToConnect()
-        {
-            logger.Debug("Trying to connect");
-            if (disposed) return;
-
-            connectionFactory.Reset();
-            do
+            get
             {
-                try
-                {
-                    connection = connectionFactory.CreateConnection(); // A possible dispose race condition exists, whereby the Dispose() method may run while this loop is waiting on connectionFactory.CreateConnection() returning a connection.  In that case, a connection could be created and assigned to the connection variable, without it ever being later disposed, leading to app hang on shutdown.  The following if clause guards against this condition and ensures such connections are always disposed.
-                    if (disposed)
-                    {
-                        connection.Dispose();
-                        break;
-                    }
-
-                    try
-                    {
-                        OnConnected();
-                    }
-                    catch
-                    {
-                        connection.Dispose();
-                        throw;
-                    }
-                    
-                    connection.ConnectionShutdown += OnConnectionShutdown;
-                    connection.ConnectionBlocked += OnConnectionBlocked;
-                    connection.ConnectionUnblocked += OnConnectionUnblocked;
-
-                    logger.InfoFormat(
-                        "Connected to broker {broker}, port {port}, vhost {vhost}",
-                        connectionFactory.CurrentHost.Host,
-                        connectionFactory.CurrentHost.Port,
-                        connectionFactory.Configuration.VirtualHost
-                    );
-
-                    connectionFactory.Success();
-                }
-                catch (Exception ex) when (ex is SocketException || ex is BrokerUnreachableException || ex is TimeoutException)
-                {
-                    LogException(ex);
-                }
-            } while (!disposed && connectionFactory.Next());
-
-            if (!connectionFactory.Succeeded && !disposed)
-            {
-                logger.ErrorFormat("Failed to connect to any Broker. Retrying in {connectInterval}", connectionFactory.Configuration.ConnectIntervalAttempt);
-                StartTryToConnect();
+                var connection = initializedConnection;
+                return connection != null && connection.IsOpen;
             }
         }
 
-        private void LogException(Exception exception)
+        /// <inheritdoc />
+        public void Dispose()
         {
-            logger.Error(
-                exception,
-                "Failed to connect to broker {broker}, port {port}, vhost {vhost}",
-                connectionFactory.CurrentHost.Host,
-                connectionFactory.CurrentHost.Port,
-                connectionFactory.Configuration.VirtualHost
+            if (disposed) return;
+
+            initializedConnection?.Dispose();
+            disposed = true;
+        }
+
+        private IAutorecoveringConnection Connect()
+        {
+            var endpoints = configuration.Hosts.Select(x =>
+            {
+                var endpoint = new AmqpTcpEndpoint(x.Host, x.Port);
+                if (x.Ssl.Enabled)
+                    endpoint.Ssl = x.Ssl;
+                else if (configuration.Ssl.Enabled)
+                    endpoint.Ssl = configuration.Ssl;
+                return endpoint;
+            }).ToArray();
+
+            var connection = connectionFactory.CreateConnection(endpoints) as IAutorecoveringConnection;
+            if (connection == null)
+                throw new NotSupportedException("Non-recoverable connection is not supported");
+
+            connection.ConnectionShutdown += OnConnectionShutdown;
+            connection.ConnectionBlocked += OnConnectionBlocked;
+            connection.ConnectionUnblocked += OnConnectionUnblocked;
+            connection.RecoverySucceeded += OnConnectionRecovered;
+
+            logger.InfoFormat(
+                "Connected to broker {broker}, port {port}",
+                connection.Endpoint.HostName,
+                connection.Endpoint.Port
             );
+
+            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint));
+
+            return connection;
+        }
+
+        private void OnConnectionRecovered(object sender, EventArgs e)
+        {
+            var connection = (IConnection)sender;
+            logger.InfoFormat(
+                "Reconnected to broker {host}:{port}",
+                connection.Endpoint.HostName,
+                connection.Endpoint.Port
+            );
+            eventBus.Publish(new ConnectionRecoveredEvent(connection.Endpoint));
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            if (disposed) return;
-            OnDisconnected();
-
-            // try to reconnect and re-subscribe
-            logger.InfoFormat("Disconnected from broker");
-
-            TryToConnect();
+            var connection = (IConnection)sender;
+            logger.InfoFormat(
+                "Disconnected from broker {host}:{port} because of {reason}",
+                connection.Endpoint.HostName,
+                connection.Endpoint.Port,
+                e.ReplyText
+            );
+            eventBus.Publish(new ConnectionDisconnectedEvent(connection.Endpoint, e.ReplyText));
         }
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
             logger.InfoFormat("Connection blocked with reason {reason}", e.Reason);
-
             eventBus.Publish(new ConnectionBlockedEvent(e.Reason));
         }
 
         private void OnConnectionUnblocked(object sender, EventArgs e)
         {
             logger.InfoFormat("Connection unblocked");
-
             eventBus.Publish(new ConnectionUnblockedEvent());
-        }
-
-        private void OnConnected()
-        {
-            logger.Debug("OnConnected event fired");
-            eventBus.Publish(new ConnectionCreatedEvent());
-        }
-
-        private void OnDisconnected()
-        {
-            eventBus.Publish(new ConnectionDisconnectedEvent());
-        }
-
-        private bool disposed;
-        public void Dispose()
-        {
-            if (disposed) return;
-            disposed = true;
-            if (connection != null)
-            {
-                try
-                {
-                    connection.Dispose();
-                }
-                catch (IOException exception)
-                {
-                    logger.Info(exception, "This is not normally a cause for concern");
-                }
-            }
         }
     }
 }

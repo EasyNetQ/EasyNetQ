@@ -1,6 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/easynetq/easynetq.svg?label=Ready&title=Ready)](http://waffle.io/easynetq/easynetq)
-[![Stories in Progress](https://badge.waffle.io/easynetq/easynetq.svg?label=In%20Progress&title=In%20Progress)](http://waffle.io/easynetq/easynetq)
-
 [![Build status](https://ci.appveyor.com/api/projects/status/github/EasyNetQ/easynetq?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
 
 [![NuGet Status](https://img.shields.io/nuget/v/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
@@ -44,20 +41,20 @@ To subscribe to a message...
 Remote procedure call...
 
     var request = new TestRequestMessage {Text = "Hello from the client! "};
-    bus.Request<TestRequestMessage, TestResponseMessage>(request, response => 
+    bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
         Console.WriteLine("Got response: '{0}'", response.Text));
 
 RPC server...
 
-    bus.Respond<TestRequestMessage, TestResponseMessage>(request => 
+    bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
 		new TestResponseMessage{ Text = request.Text + " all done!" });
-	
+
 
 ## Management API
 
 EasyNetQ also has a client-side library for the RabbitMQ Management HTTP API. This lets you control all aspects for your
-RabbitMQ broker from .NET code, including creating virtual hosts and users; setting permissions; monitoring queues, 
-connections and channels; and setting up exchanges, queues and bindings. 
+RabbitMQ broker from .NET code, including creating virtual hosts and users; setting permissions; monitoring queues,
+connections and channels; and setting up exchanges, queues and bindings.
 
 See the **[documentation](https://github.com/EasyNetQ/EasyNetQ/wiki/Management-API-Introduction)**.
 
@@ -69,7 +66,7 @@ http://mikehadlow.blogspot.co.uk/search/label/EasyNetQ
 
 ## Getting started
 
-Just open EasyNetQ.sln in VisualStudio 2017 and build.
+Just open EasyNetQ.sln in VisualStudio and build.
 
 All the required dependencies for the solution file to build the software are included. To run the explicit tests that send messages you will have to be running the EasyNetQ.Tests.SimpleService application and have a working local RabbitMQ server (see http://www.rabbitmq.com/ for more details).
 

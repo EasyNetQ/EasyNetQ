@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
@@ -10,7 +11,10 @@ namespace EasyNetQ.IntegrationTests.Rpc
     {
         public When_request_and_respond_with_legacy_options(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5", c => c.EnableLegacyConventions());
+            bus = RabbitHutch.CreateBus(
+                $"host={fixture.Host};prefetchCount=1;timeout=-1",
+                c => c.EnableLegacyConventions()
+            );
         }
 
         public void Dispose()
@@ -23,11 +27,16 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_exception()
         {
-            using (bus.RespondAsync<Request, Response>(x =>
-                Task.FromException<Response>(new RequestFailedException("Oops"))))
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            using (
+                await bus.Rpc.RespondAsync<Request, Response>(x =>
+                        Task.FromException<Response>(new RequestFailedException("Oops")), cts.Token
+                )
+            )
             {
                 var exception = await Assert.ThrowsAsync<EasyNetQResponderException>(
-                    () => bus.RequestAsync<Request, Response>(new Request(42))
+                    () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
                 ).ConfigureAwait(false);
                 exception.Message.Should().Be("Oops");
             }
@@ -36,9 +45,12 @@ namespace EasyNetQ.IntegrationTests.Rpc
         [Fact]
         public async Task Should_receive_response()
         {
-            using (bus.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id))))
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
             {
-                var response = await bus.RequestAsync<Request, Response>(new Request(42)).ConfigureAwait(false);
+                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
+                    .ConfigureAwait(false);
                 response.Should().Be(new Response(42));
             }
         }

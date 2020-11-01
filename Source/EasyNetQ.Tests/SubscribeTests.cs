@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -36,7 +37,7 @@ namespace EasyNetQ.Tests
                 .Register<IConventions>(conventions)
                 );
 
-            subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
+            subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
         public void Dispose()
@@ -71,7 +72,7 @@ namespace EasyNetQ.Tests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
 
         [Fact]
@@ -81,7 +82,7 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is(typeName),
                 Arg.Is("#"),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
 
         [Fact]
@@ -101,7 +102,8 @@ namespace EasyNetQ.Tests
                     Arg.Is(true),
                     Arg.Is(false),
                     Arg.Any<IDictionary<string, object>>(),
-                    Arg.Any<IBasicConsumer>());
+                    Arg.Any<IBasicConsumer>()
+            );
         }
 
         [Fact]
@@ -144,7 +146,9 @@ namespace EasyNetQ.Tests
             using (mockBuilder.Bus)
             {
                 // Configure subscription
-                mockBuilder.Bus.Subscribe<MyMessage>("x", message => { },
+                mockBuilder.PubSub.Subscribe<MyMessage>(
+                    "x",
+                    m => { },
                     c =>
                     {
                         c.WithAutoDelete(autoDelete)
@@ -210,11 +214,11 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
-                Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(new Dictionary<string, object>())));
+                Arg.Is((IDictionary<string, object>)null));
         }
     }
 
-        public class When_a_message_is_delivered : IDisposable
+    public class When_a_message_is_delivered : IDisposable
     {
         private MockBuilder mockBuilder;
 
@@ -239,7 +243,7 @@ namespace EasyNetQ.Tests
             var autoResetEvent = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
 
-            mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message =>
+            mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message =>
             {
                 deliveredMessage = message;
             });
@@ -303,7 +307,7 @@ namespace EasyNetQ.Tests
         private const string consumerTag = "the_consumer_tag";
         private const ulong deliveryTag = 123;
 
-        private MyMessage originalMessage;
+        private readonly MyMessage originalMessage;
         private readonly Exception originalException = new Exception("Some exception message");
         private ConsumerExecutionContext basicDeliverEventArgs;
         private Exception raisedException;
@@ -316,7 +320,7 @@ namespace EasyNetQ.Tests
             };
 
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(null, null)
+            consumerErrorStrategy.HandleConsumerError(default, null)
                 .ReturnsForAnyArgs(i =>
                 {
                     basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
@@ -329,7 +333,7 @@ namespace EasyNetQ.Tests
                 .Register(consumerErrorStrategy)
                 );
 
-            mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => throw originalException);
+            mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => throw originalException);
 
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
@@ -348,7 +352,8 @@ namespace EasyNetQ.Tests
                     Type = typeName,
                     CorrelationId = correlationId
                 },
-                body);
+                body
+            );
 
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
@@ -383,9 +388,9 @@ namespace EasyNetQ.Tests
         public void Should_pass_the_deliver_args_to_the_consumerErrorStrategy()
         {
             basicDeliverEventArgs.Should().NotBeNull();
-            basicDeliverEventArgs.Info.ConsumerTag.Should().Be(consumerTag);
-            basicDeliverEventArgs.Info.DeliverTag.Should().Be(deliveryTag);
-            basicDeliverEventArgs.Info.RoutingKey.Should().Be("#");
+            basicDeliverEventArgs.ReceivedInfo.ConsumerTag.Should().Be(consumerTag);
+            basicDeliverEventArgs.ReceivedInfo.DeliveryTag.Should().Be(deliveryTag);
+            basicDeliverEventArgs.ReceivedInfo.RoutingKey.Should().Be("#");
         }
     }
 
@@ -403,8 +408,8 @@ namespace EasyNetQ.Tests
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
-            var subscriptionResult = mockBuilder.Bus.Subscribe<MyMessage>(subscriptionId, message => { });
-             var are = new AutoResetEvent(false);
+            var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { });
+            var are = new AutoResetEvent(false);
             mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
             subscriptionResult.Dispose();
             are.WaitOne(500);

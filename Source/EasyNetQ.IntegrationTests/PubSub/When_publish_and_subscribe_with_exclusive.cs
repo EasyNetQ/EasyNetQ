@@ -12,7 +12,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_exclusive(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
@@ -35,10 +35,11 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var messages = MessagesFactories.Create(MessagesCount);
 
             using (
-                bus.Subscribe<Message>(
+                await bus.PubSub.SubscribeAsync<Message>(
                     Guid.NewGuid().ToString(),
                     firstConsumerMessagesSink.Receive,
-                    x => x.AsExclusive()
+                    x => x.AsExclusive(),
+                    cts.Token
                 )
             )
             {
@@ -46,14 +47,15 @@ namespace EasyNetQ.IntegrationTests.PubSub
                 await Task.Delay(TimeSpan.FromSeconds(1), cts.Token).ConfigureAwait(false);
 
                 using (
-                    bus.Subscribe<Message>(
+                    await bus.PubSub.SubscribeAsync<Message>(
                         Guid.NewGuid().ToString(),
                         secondConsumerMessagesSink.Receive,
-                        x => x.AsExclusive()
+                        x => x.AsExclusive(),
+                        cts.Token
                     )
                 )
                 {
-                    await bus.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
+                    await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
 
                     await Task.WhenAll(
                         firstConsumerMessagesSink.WaitAllReceivedAsync(cts.Token),

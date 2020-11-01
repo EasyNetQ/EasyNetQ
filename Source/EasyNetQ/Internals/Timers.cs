@@ -4,20 +4,31 @@ using EasyNetQ.Logging;
 
 namespace EasyNetQ.Internals
 {
-    //https://stackoverflow.com/questions/4962172/why-does-a-system-timers-timer-survive-gc-but-not-system-threading-timer
+    /// <summary>
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
+    /// </summary>
     public static class Timers
     {
         private static readonly ILog logger = LogProvider.GetLogger(typeof(Timers));
-        
-        public static IDisposable Start(TimerCallback callback, TimeSpan dueTime, TimeSpan period)
+
+        /// <summary>
+        ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+        ///     the same compatibility as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new EasyNetQ release.
+        /// </summary>
+        public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period)
         {
             var callbackLock = new object();
-            var timer = new Timer(state =>
+            var timer = new Timer(_ =>
             {
                 if (!Monitor.TryEnter(callbackLock)) return;
                 try
                 {
-                    callback.Invoke(state);
+                    callback.Invoke();
                 }
                 catch (Exception exception)
                 {
@@ -30,23 +41,6 @@ namespace EasyNetQ.Internals
             });
             timer.Change(dueTime, period);
             return timer;
-        }
-
-        public static void RunOnce(TimerCallback callback, TimeSpan dueTime)
-        {
-            var timer = new Timer(state =>
-            {
-                ((Timer) state).Dispose();
-                try
-                {
-                    callback(state);
-                }
-                catch (Exception exception)
-                {
-                    logger.Error(exception, string.Empty);
-                }
-            });
-            timer.Change(dueTime, Timeout.InfiniteTimeSpan);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
             
-            return serviceCollection.RegisterEasyNetQ(connectionConfigurationFactory, c => {});
+            return serviceCollection.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
         }
         
         public static IServiceCollection RegisterEasyNetQ(this IServiceCollection serviceCollection, string connectionString, Action<IServiceRegister> registerServices)

@@ -1,5 +1,4 @@
 ﻿using System;
-using RabbitMQ.Client.Events;
 
 namespace EasyNetQ
 {
@@ -8,35 +7,46 @@ namespace EasyNetQ
     /// </summary>
     public class AdvancedBusEventHandlers
     {
-        public static readonly AdvancedBusEventHandlers Default = new AdvancedBusEventHandlers();
-
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Connected"/>.
         /// </summary>
-        public EventHandler Connected { get; }
+        public EventHandler<ConnectedEventArgs> Connected { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Disconnected"/>.
         /// </summary>
-        public EventHandler Disconnected { get; }
+        public EventHandler<DisconnectedEventArgs> Disconnected { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Blocked"/>.
         /// </summary>
-        public EventHandler<ConnectionBlockedEventArgs> Blocked { get; }
+        public EventHandler<BlockedEventArgs> Blocked { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Unblocked"/>.
         /// </summary>
         public EventHandler Unblocked { get; }
+
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.MessageReturned"/>.
         /// </summary>
         public EventHandler<MessageReturnedEventArgs> MessageReturned { get; }
 
+        /// <summary>
+        ///     Creates AdvancedBusEventHandlers
+        /// </summary>
+        /// <param name="connected">The connected event handler</param>
+        /// <param name="disconnected">The disconnected event handler</param>
+        /// <param name="blocked">The blocked event handler</param>
+        /// <param name="unblocked">The unblocked event handler</param>
+        /// <param name="messageReturned">The message returned event handler</param>
         public AdvancedBusEventHandlers(
-            EventHandler connected = null,
-            EventHandler disconnected = null,
-            EventHandler<ConnectionBlockedEventArgs> blocked = null,
+            EventHandler<ConnectedEventArgs> connected = null,
+            EventHandler<DisconnectedEventArgs> disconnected = null,
+            EventHandler<BlockedEventArgs> blocked = null,
             EventHandler unblocked = null,
-            EventHandler<MessageReturnedEventArgs> messageReturned = null)
+            EventHandler<MessageReturnedEventArgs> messageReturned = null
+        )
         {
             // It's ok for any of the specified handler to be null.
             // This allows the caller to specify only the events that he wants to handle when RabbitAdvancedBus is instantiated.

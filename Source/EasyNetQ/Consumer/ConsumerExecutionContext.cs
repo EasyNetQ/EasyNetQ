@@ -1,30 +1,26 @@
-﻿using System;
-using System.Threading.Tasks;
-using RabbitMQ.Client;
-
-namespace EasyNetQ.Consumer
+﻿namespace EasyNetQ.Consumer
 {
-    public class ConsumerExecutionContext
+    public readonly struct ConsumerExecutionContext
     {
-        public Func<byte[], MessageProperties, MessageReceivedInfo, Task> UserHandler { get; }
-        public MessageReceivedInfo Info { get; }
+        public MessageHandler Handler { get; }
+        public MessageReceivedInfo ReceivedInfo { get; }
         public MessageProperties Properties { get; }
         public byte[] Body { get; }
 
         public ConsumerExecutionContext(
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> userHandler, 
-            MessageReceivedInfo info, 
-            MessageProperties properties, 
+            MessageHandler handler,
+            MessageReceivedInfo receivedInfo,
+            MessageProperties properties,
             byte[] body
         )
         {
-            Preconditions.CheckNotNull(userHandler, "userHandler");
-            Preconditions.CheckNotNull(info, "info");
-            Preconditions.CheckNotNull(properties, "properties");
-            Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckNotNull(handler, nameof(handler));
+            Preconditions.CheckNotNull(receivedInfo, nameof(receivedInfo));
+            Preconditions.CheckNotNull(properties, nameof(properties));
+            Preconditions.CheckNotNull(body, nameof(body));
 
-            UserHandler = userHandler;
-            Info = info;
+            Handler = handler;
+            ReceivedInfo = receivedInfo;
             Properties = properties;
             Body = body;
         }

@@ -16,6 +16,7 @@ namespace EasyNetQ.DI.Autofac
                                  .InstancePerLifetimeScope();
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
         {
             switch (lifetime)
@@ -35,12 +36,14 @@ namespace EasyNetQ.DI.Autofac
             }
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(TService instance) where TService : class
         {
             containerBuilder.RegisterInstance(instance);
             return this;
         }
 
+        /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
             switch (lifetime)
@@ -59,7 +62,7 @@ namespace EasyNetQ.DI.Autofac
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
         }
-        
+
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;

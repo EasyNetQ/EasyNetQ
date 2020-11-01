@@ -10,19 +10,19 @@ namespace EasyNetQ.IntegrationTests.SendReceive
     [Collection("RabbitMQ")]
     public class When_send_receive_multiple_message_types : IDisposable
     {
-        private const int MessagesCount = 10;
-
-        private readonly IBus bus;
-
         public When_send_receive_multiple_message_types(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
         {
             bus.Dispose();
         }
+
+        private const int MessagesCount = 10;
+
+        private readonly IBus bus;
 
         [Fact]
         public async Task Test()
@@ -35,14 +35,15 @@ namespace EasyNetQ.IntegrationTests.SendReceive
             var bunnies = MessagesFactories.Create(MessagesCount, i => new BunnyMessage(i));
             var rabbits = MessagesFactories.Create(MessagesCount, i => new RabbitMessage(i));
             using (
-                bus.Receive(
+                await bus.SendReceive.ReceiveAsync(
                     queue,
-                    x => x.Add<BunnyMessage>(bunniesSink.Receive).Add<RabbitMessage>(rabbitsSink.Receive)
+                    x => x.Add<BunnyMessage>(bunniesSink.Receive).Add<RabbitMessage>(rabbitsSink.Receive),
+                    cts.Token
                 )
             )
             {
-                await bus.SendBatchAsync(queue, bunnies, cts.Token).ConfigureAwait(false);
-                await bus.SendBatchAsync(queue, rabbits, cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendBatchAsync(queue, bunnies, cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendBatchAsync(queue, rabbits, cts.Token).ConfigureAwait(false);
 
                 await Task.WhenAll(
                     bunniesSink.WaitAllReceivedAsync(cts.Token),

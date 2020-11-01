@@ -13,7 +13,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
     {
         public When_publish_and_subscribe_with_priority(RabbitMQFixture fixture)
         {
-            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=5");
+            bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
         }
 
         public void Dispose()
@@ -37,18 +37,26 @@ namespace EasyNetQ.IntegrationTests.PubSub
             var lowPriorityMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
 
             var subscriptionId = Guid.NewGuid().ToString();
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2)))
+            using (
+                await bus.PubSub.SubscribeAsync<Message>(
+                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), cts.Token
+                )
+            )
             {
             }
 
-            await bus.PublishBatchAsync(
+            await bus.PubSub.PublishBatchAsync(
                 lowPriorityMessages, x => x.WithPriority(LowPriority), cts.Token
             ).ConfigureAwait(false);
-            await bus.PublishBatchAsync(
+            await bus.PubSub.PublishBatchAsync(
                 highPriorityMessages, x => x.WithPriority(HighPriority), cts.Token
             ).ConfigureAwait(false);
 
-            using (bus.Subscribe<Message>(subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2)))
+            using (
+                await bus.PubSub.SubscribeAsync<Message>(
+                    subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), cts.Token
+                )
+            )
             {
                 await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
 

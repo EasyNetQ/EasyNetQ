@@ -1,10 +1,11 @@
-using System;
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.FluentConfiguration;
-using Xunit;
-using NSubstitute;
-using System.Reflection;
+using EasyNetQ.Internals;
 using FluentAssertions;
+using NSubstitute;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
@@ -12,22 +13,25 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
-       
+        private IPubSub pubSub;
+
         public When_autosubscribing_with_subscription_configuration_attribute_no_expires()
         {
+            pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
-            
+            bus.PubSub.Returns(pubSub);
+
             var autoSubscriber = new AutoSubscriber(bus, "my_app");
 
-            bus.When(x => x.Subscribe(Arg.Is("MyAttrTest"),
-                                      Arg.Any<Action<MessageA>>(),
-                                      Arg.Any<Action<ISubscriptionConfiguration>>()))
-               .Do(a =>
-               {
-                   capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2];
-               });
+            pubSub.SubscribeAsync(
+                    Arg.Is("MyAttrTest"),
+                    Arg.Any<Func<MessageA, CancellationToken, Task>>(),
+                    Arg.Any<Action<ISubscriptionConfiguration>>()
+                )
+                .Returns(Task.FromResult(Substitute.For<ISubscriptionResult>()).ToAwaitableDisposable())
+                .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            autoSubscriber.Subscribe(GetType().GetTypeInfo().Assembly);
+            autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
         }
 
         public void Dispose()
@@ -38,16 +42,18 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         [Fact]
         public void Should_have_called_subscribe()
         {
-            bus.Received().Subscribe(Arg.Any<string>(), 
-                                     Arg.Any<Action<MessageA>>(),
-                                     Arg.Any<Action<ISubscriptionConfiguration>>());
+            pubSub.Received().SubscribeAsync(
+                Arg.Any<string>(),
+                Arg.Any<Func<MessageA, CancellationToken, Task>>(),
+                Arg.Any<Action<ISubscriptionConfiguration>>()
+            );
         }
 
         [Fact]
         public void Should_have_called_subscribe_with_no_expires()
         {
             var subscriptionConfiguration = new SubscriptionConfiguration(1);
-            
+
             capturedAction(subscriptionConfiguration);
 
             subscriptionConfiguration.AutoDelete.Should().BeTrue();
@@ -61,14 +67,13 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
             [SubscriptionConfiguration(AutoDelete = true, PrefetchCount = 10, Priority = 10)]
-            public void Consume(MessageA message)
+            public void Consume(MessageA message, CancellationToken cancellationToken)
             {
             }
         }
 
         private class MessageA
         {
-            public string Text { get; set; }
         }
     }
 }

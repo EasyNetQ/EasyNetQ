@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -10,14 +11,14 @@ namespace EasyNetQ.Tests.ProducerTests
 {
     public class When_a_message_is_sent : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private const string queueName = "the_queue_name";
 
         public When_a_message_is_sent()
         {
             mockBuilder = new MockBuilder();
 
-            mockBuilder.Bus.Send(queueName, new MyMessage { Text = "Hello World" });
+            mockBuilder.SendReceive.Send(queueName, new MyMessage { Text = "Hello World" });
         }
 
         public void Dispose()
@@ -33,18 +34,8 @@ namespace EasyNetQ.Tests.ProducerTests
                 Arg.Is(queueName),
                 Arg.Is(false),
                 Arg.Any<IBasicProperties>(),
-                Arg.Any<ReadOnlyMemory<byte>>());
-        }
-
-        [Fact]
-        public void Should_declare_the_queue()
-        {
-            mockBuilder.Channels[0].Received().QueueDeclare(
-                Arg.Is(queueName),
-                Arg.Is(true),
-                Arg.Is(false),
-                Arg.Is(false),
-                Arg.Any<IDictionary<string, object>>());
+                Arg.Any<ReadOnlyMemory<byte>>()
+            );
         }
     }
 }
