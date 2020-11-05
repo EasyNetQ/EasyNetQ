@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -10,31 +9,60 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Consumer
 {
+    /// <summary>
+    ///     Represents an internal consumer's status: which queues are consuming and which are not
+    /// </summary>
     public readonly struct InternalConsumerStatus
     {
+        /// <summary>
+        ///     Creates InternalConsumerStatus
+        /// </summary>
         public InternalConsumerStatus(IReadOnlyCollection<IQueue> succeed, IReadOnlyCollection<IQueue> failed)
         {
             Succeed = succeed;
             Failed = failed;
         }
 
+        /// <summary>
+        ///     Queues which for which consume is succeed
+        /// </summary>
         public IReadOnlyCollection<IQueue> Succeed { get; }
+
+        /// <summary>
+        ///     Queues which for which consume is failed
+        /// </summary>
         public IReadOnlyCollection<IQueue> Failed { get; }
     }
 
+    /// <summary>
+    ///     Consumer which starts/stops raw consumers
+    /// </summary>
     public interface IInternalConsumer : IDisposable
     {
+        /// <summary>
+        ///     Starts consuming
+        /// </summary>
         InternalConsumerStatus StartConsuming(bool firstStart = true);
+
+        /// <summary>
+        ///     Stops consuming
+        /// </summary>
         void StopConsuming();
+
+        /// <summary>
+        ///     Raised when consumer is completely cancelled
+        /// </summary>
         event EventHandler<EventArgs> Cancelled;
     }
 
+    /// <inheritdoc />
     public class InternalConsumer : IInternalConsumer
     {
         private readonly ConsumerConfiguration configuration;
         private readonly IPersistentConnection connection;
 
-        private readonly Dictionary<IQueue, AsyncBasicConsumer> consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
+        private readonly Dictionary<IQueue, AsyncBasicConsumer>
+            consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
 
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
@@ -44,6 +72,9 @@ namespace EasyNetQ.Consumer
         private volatile bool disposed;
         private volatile IModel model;
 
+        /// <summary>
+        ///     Creates InternalConsumer
+        /// </summary>
         public InternalConsumer(
             ConsumerConfiguration configuration,
             IPersistentConnection connection,
@@ -151,7 +182,7 @@ namespace EasyNetQ.Consumer
                 throw new ObjectDisposedException(nameof(InternalConsumer));
 
             using var _ = mutex.Acquire();
-            foreach (var consumer in consumers.Select(x => x.Value))
+            foreach (var consumer in consumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
@@ -171,8 +202,13 @@ namespace EasyNetQ.Consumer
             disposed = true;
 
             using var _ = mutex.Acquire();
-            foreach (var consumer in consumers.Select(x => x.Value))
+            foreach (var consumer in consumers.Values)
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
+            }
+
+            consumers.Clear();
             model?.Dispose();
         }
 
@@ -182,6 +218,7 @@ namespace EasyNetQ.Consumer
 
             if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
             {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
                 if (consumers.Count == 0)
                     Cancelled?.Invoke(this, EventArgs.Empty);
