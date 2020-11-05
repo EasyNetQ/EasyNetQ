@@ -31,13 +31,15 @@ namespace EasyNetQ.Consumer
 
     public class InternalConsumer : IInternalConsumer
     {
-        private readonly ILog logger = LogProvider.For<InternalConsumer>();
-
         private readonly ConsumerConfiguration configuration;
         private readonly IPersistentConnection connection;
+
+        private readonly Dictionary<IQueue, AsyncBasicConsumer>
+            consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
+
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
-        private readonly Dictionary<IQueue, AsyncBasicConsumer> consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
+        private readonly ILog logger = LogProvider.For<InternalConsumer>();
         private readonly AsyncLock mutex = new AsyncLock();
 
         private volatile bool disposed;
@@ -72,6 +74,7 @@ namespace EasyNetQ.Consumer
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
             }
+
             consumers.Clear();
         }
 
@@ -108,7 +111,7 @@ namespace EasyNetQ.Consumer
                 var queue = kvp.Key;
                 var perQueueConfiguration = kvp.Value;
 
-                if (queue.IsAutoDelete && !firstStart)
+                if (queue.IsExclusive && !firstStart)
                     continue;
 
                 if (consumers.ContainsKey(queue))
@@ -160,18 +163,6 @@ namespace EasyNetQ.Consumer
             return new InternalConsumerStatus(activeQueues, failedQueues);
         }
 
-        private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
-        {
-            using var _ = await mutex.AcquireAsync().ConfigureAwait(false);
-
-            if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
-            {
-                consumer.Dispose();
-                if (consumers.Count == 0)
-                    Cancelled?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {
@@ -183,6 +174,18 @@ namespace EasyNetQ.Consumer
             foreach (var consumer in consumers.Select(x => x.Value))
                 consumer.Dispose();
             model?.Dispose();
+        }
+
+        private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
+        {
+            using var _ = await mutex.AcquireAsync().ConfigureAwait(false);
+
+            if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
+            {
+                consumer.Dispose();
+                if (consumers.Count == 0)
+                    Cancelled?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }
