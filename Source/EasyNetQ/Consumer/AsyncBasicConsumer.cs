@@ -12,6 +12,7 @@ namespace EasyNetQ.Consumer
     {
         private readonly ILog logger = LogProvider.For<AsyncBasicConsumer>();
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private readonly CountdownEvent inProcessMessages = new CountdownEvent(0);
 
         private readonly IQueue queue;
         private readonly IEventBus eventBus;
@@ -33,6 +34,16 @@ namespace EasyNetQ.Consumer
         }
 
         public IQueue Queue => queue;
+
+        /// <inheritdoc />
+        public override async Task OnCancel(params string[] consumerTags)
+        {
+            await base.OnCancel(consumerTags).ConfigureAwait(false);
+            logger.InfoFormat(
+                "Consumer with consumerTags {consumerTags} has cancelled",
+                string.Join(", ", consumerTags)
+            );
+        }
 
         public override async Task HandleBasicDeliver(
             string consumerTag,
@@ -56,34 +67,39 @@ namespace EasyNetQ.Consumer
                 );
             }
 
-            var messageBody = body.ToArray();
-            var messageReceivedInfo = new MessageReceivedInfo(
-                consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
-            );
-            var messageProperties = new MessageProperties(properties);
-            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
 
-            var context = new ConsumerExecutionContext(messageHandler, messageReceivedInfo, messageProperties, messageBody);
-            var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(context, cts.Token).ConfigureAwait(false);
-            var ackResult = ackStrategy(Model, deliveryTag);
-            eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
-        }
+            inProcessMessages.AddCount();
+            try
+            {
+                var messageBody = body.ToArray();
+                var messageReceivedInfo = new MessageReceivedInfo(
+                    consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
+                );
+                var messageProperties = new MessageProperties(properties);
+                eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
 
-        /// <inheritdoc />
-        public override async Task OnCancel(params string[] consumerTags)
-        {
-            await base.OnCancel(consumerTags).ConfigureAwait(false);
-            logger.InfoFormat(
-                "Consumer with consumerTags {consumerTags} has cancelled",
-                string.Join(", ", consumerTags)
-            );
+                var context = new ConsumerExecutionContext(
+                    messageHandler, messageReceivedInfo, messageProperties, messageBody
+                );
+                var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(context, cts.Token)
+                    .ConfigureAwait(false);
+                var ackResult = ackStrategy(Model, deliveryTag);
+                eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
+            }
+            finally
+            {
+                inProcessMessages.Signal();
+            }
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            cts.Dispose();
+            cts.Cancel();
+            inProcessMessages.Wait();
             eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
+            cts.Dispose();
+            inProcessMessages.Dispose();
         }
     }
 }

@@ -34,8 +34,7 @@ namespace EasyNetQ.Consumer
         private readonly ConsumerConfiguration configuration;
         private readonly IPersistentConnection connection;
 
-        private readonly Dictionary<IQueue, AsyncBasicConsumer>
-            consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
+        private readonly Dictionary<IQueue, AsyncBasicConsumer> consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
 
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
@@ -62,24 +61,6 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
         }
 
-        /// <inheritdoc />
-        public void StopConsuming()
-        {
-            if (disposed)
-                throw new ObjectDisposedException(nameof(InternalConsumer));
-
-            using var _ = mutex.Acquire();
-            foreach (var consumer in consumers.Select(x => x.Value))
-            {
-                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                consumer.Dispose();
-            }
-
-            consumers.Clear();
-        }
-
-        /// <inheritdoc />
-        public event EventHandler<EventArgs> Cancelled;
 
         /// <inheritdoc />
         public InternalConsumerStatus StartConsuming(bool firstStart)
@@ -162,6 +143,25 @@ namespace EasyNetQ.Consumer
 
             return new InternalConsumerStatus(activeQueues, failedQueues);
         }
+
+        /// <inheritdoc />
+        public void StopConsuming()
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(InternalConsumer));
+
+            using var _ = mutex.Acquire();
+            foreach (var consumer in consumers.Select(x => x.Value))
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                consumer.Dispose();
+            }
+
+            consumers.Clear();
+        }
+
+        /// <inheritdoc />
+        public event EventHandler<EventArgs> Cancelled;
 
         /// <inheritdoc />
         public void Dispose()
