@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using FluentAssertions;
 using NSubstitute;
@@ -19,10 +20,10 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [Fact]
         public void Should_re_create_internal_consumer()
         {
-            internalConsumerFactory.Received().CreateConsumer();
+            internalConsumerFactory.Received().CreateConsumer(Arg.Any<ConsumerConfiguration>());
             createConsumerCalled.Should().Be(1);
             internalConsumers.Count.Should().Be(1);
-            internalConsumers[0].Received(2).StartConsuming(queue, onMessage, configuration);
+            internalConsumers[0].Received(2).StartConsuming();
         }
     }
 }

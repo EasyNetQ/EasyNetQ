@@ -38,7 +38,6 @@ namespace EasyNetQ
                 .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
                 .Register(new AdvancedBusEventHandlers())
                 .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
-                .Register<IConsumerDispatcherFactory, ConsumerDispatcherFactory>()
                 .Register<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
                 .Register<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
                 .Register<IErrorMessageSerializer, DefaultErrorMessageSerializer>()

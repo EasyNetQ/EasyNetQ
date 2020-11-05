@@ -31,47 +31,12 @@ namespace EasyNetQ
         IConventions Conventions { get; }
 
         /// <summary>
-        /// Consume a stream of messages
-        /// </summary>
-        /// <param name="queueConsumerPairs">Multiple queue - consumer pairs</param>
-        /// <param name="configure">
-        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
-        /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IReadOnlyCollection<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure);
-
-        /// <summary>
-        /// Consume a stream of messages asynchronously
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="queue">The queue to take messages from</param>
-        /// <param name="onMessage">The message handler</param>
-        /// <param name="configure">
-        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
-        /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume<T>(IQueue queue, IMessageHandler<T> onMessage, Action<IConsumerConfiguration> configure);
-
-        /// <summary>
         /// Consume a stream of messages. Dispatch them to the given handlers
         /// </summary>
-        /// <param name="queue">The queue to take messages from</param>
-        /// <param name="addHandlers">A function to add handlers to the consumer</param>
         /// <param name="configure">
         /// Fluent configuration e.g. x => x.WithPriority(10)</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure);
-
-        /// <summary>
-        /// Consume raw bytes from the queue.
-        /// </summary>
-        /// <param name="queue">The queue to subscribe to</param>
-        /// <param name="onMessage">
-        /// The message handler. Takes the message body, message properties and some information about the
-        /// receive context. Returns a Task.
-        /// </param>
-        /// <param name="configure">
-        /// Fluent configuration e.g. x => x.WithPriority(10)</param>
-        /// <returns>A disposable to cancel the consumer</returns>
-        IDisposable Consume(IQueue queue, MessageHandler onMessage, Action<IConsumerConfiguration> configure);
+        IDisposable Consume(Action<IConsumeConfiguration> configure);
 
         /// <summary>
         /// Publish a message as a .NET type when the type is only known at runtime.

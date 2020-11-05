@@ -33,5 +33,34 @@ namespace EasyNetQ.Topology
 
         /// <inheritdoc />
         public IDictionary<string, object> Arguments { get; }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsDurable.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsExclusive.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsAutoDelete.GetHashCode();
+                hashCode = (hashCode * 397) ^ Arguments.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj) || obj is Queue other && Equals(other);
+        }
+
+        private bool Equals(Queue other)
+        {
+            return Name == other.Name
+                   && IsDurable == other.IsDurable
+                   && IsExclusive == other.IsExclusive
+                   && IsAutoDelete == other.IsAutoDelete
+                   && Equals(Arguments, other.Arguments);
+        }
     }
 }

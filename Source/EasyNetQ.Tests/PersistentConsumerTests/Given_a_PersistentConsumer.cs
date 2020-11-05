@@ -15,7 +15,6 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
     public abstract class Given_a_PersistentConsumer
     {
         protected const string queueName = "my_queue";
-        protected ConsumerConfiguration configuration;
         protected IConsumer consumer;
         protected int createConsumerCalled;
         protected IEventBus eventBus;
@@ -39,18 +38,22 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
 
-            internalConsumerFactory.CreateConsumer().Returns(x =>
+            internalConsumerFactory.CreateConsumer(Arg.Any<ConsumerConfiguration>()).Returns(x =>
             {
                 var internalConsumer = Substitute.For<IInternalConsumer>();
                 internalConsumers.Add(internalConsumer);
                 createConsumerCalled++;
                 return internalConsumer;
             });
-            configuration = new ConsumerConfiguration(0);
-            consumer = new PersistentConsumer(
-                queue,
-                onMessage,
-                configuration,
+            consumer = new Consumer.Consumer(
+                new ConsumerConfiguration(
+                    0,
+                    new Dictionary<IQueue, PerQueueConsumerConfiguration>
+                    {
+                        {queue, new PerQueueConsumerConfiguration("", false, null, onMessage)}
+                    }
+                ),
+                persistentConnection,
                 internalConsumerFactory,
                 eventBus
             );

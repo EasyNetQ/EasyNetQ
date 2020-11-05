@@ -105,91 +105,54 @@ namespace EasyNetQ
         #region Consume
 
         /// <inheritdoc />
-        public IDisposable Consume(IReadOnlyCollection<QueueConsumerPair> queueConsumerPairs, Action<IConsumerConfiguration> configure)
+        public IDisposable Consume(Action<IConsumeConfiguration> configure)
         {
-            Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
             Preconditions.CheckNotNull(configure, "configure");
 
-            if (disposed)
-                throw new EasyNetQException("This bus has been disposed");
+            var consumeConfiguration = new ConsumeConfiguration(configuration.PrefetchCount);
+            configure(consumeConfiguration);
 
-            var queueOnMessages = queueConsumerPairs.Select(x =>
-            {
-                var onMessage = x.OnMessage;
-                if (onMessage == null)
-                {
-                    var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(x.Queue);
-                    x.AddHandlers(handlerCollection);
-
-                    onMessage = (b, p, i, c) =>
-                    {
-                        var deserializedMessage = messageSerializationStrategy.DeserializeMessage(p, b);
-                        var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
-                        return handler(deserializedMessage, i, c);
-                    };
-                }
-
-                return Tuple.Create(x.Queue, onMessage);
-            }).ToList();
-
-            var consumerConfiguration = new ConsumerConfiguration(configuration.PrefetchCount);
-            configure(consumerConfiguration);
-            var consumer = consumerFactory.CreateConsumer(queueOnMessages, consumerConfiguration);
-            consumer.StartConsuming();
-            return consumer;
-        }
-
-        /// <inheritdoc />
-        public IDisposable Consume<T>(
-            IQueue queue, IMessageHandler<T> onMessage, Action<IConsumerConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
-
-            return Consume(queue, x => x.Add(onMessage), configure);
-        }
-
-        /// <inheritdoc />
-        public IDisposable Consume(
-            IQueue queue, Action<IHandlerRegistration> addHandlers, Action<IConsumerConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(addHandlers, "addHandlers");
-            Preconditions.CheckNotNull(configure, "configure");
-
-            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(queue);
-            addHandlers(handlerCollection);
-
-            return Consume(queue, (body, properties, messageReceivedInfo, cancellationToken) =>
-            {
-                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(properties, body);
-                var handler = handlerCollection.GetHandler(deserializedMessage.MessageType);
-                return handler(deserializedMessage, messageReceivedInfo, cancellationToken);
-            }, configure);
-        }
-
-        /// <inheritdoc />
-        public virtual IDisposable Consume(
-            IQueue queue, MessageHandler onMessage, Action<IConsumerConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
-
-            if (disposed)
-                throw new EasyNetQException("This bus has been disposed");
-
-            var consumerConfiguration = new ConsumerConfiguration(configuration.PrefetchCount);
-            configure(consumerConfiguration);
-            var consumer = consumerFactory.CreateConsumer(queue, (body, properties, receivedInfo, cancellationToken) =>
-            {
-                var rawMessage = produceConsumeInterceptor.OnConsume(new ConsumedMessage(receivedInfo, properties, body));
-                return onMessage(rawMessage.Body, rawMessage.Properties, receivedInfo, cancellationToken);
-            }, consumerConfiguration);
+            var consumerConfiguration = new ConsumerConfiguration(
+                consumeConfiguration.PrefetchCount,
+                consumeConfiguration.PerQueueConsumeConfigurations.ToDictionary(
+                    x => x.Item1,
+                    x => new PerQueueConsumerConfiguration(
+                        x.Item3.ConsumerTag,
+                        x.Item3.IsExclusive,
+                        x.Item3.Arguments,
+                        (body, properties, receivedInfo, cancellationToken) =>
+                        {
+                            var rawMessage = produceConsumeInterceptor.OnConsume(
+                                new ConsumedMessage(receivedInfo, properties, body)
+                            );
+                            return x.Item2(
+                                rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
+                            );
+                        }
+                    )
+                ).Union(
+                    consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
+                        x => x.Item1,
+                        x => new PerQueueConsumerConfiguration(
+                            x.Item3.ConsumerTag,
+                            x.Item3.IsExclusive,
+                            x.Item3.Arguments,
+                            (body, properties, receivedInfo, cancellationToken) =>
+                            {
+                                var rawMessage = produceConsumeInterceptor.OnConsume(
+                                    new ConsumedMessage(receivedInfo, properties, body)
+                                );
+                                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
+                                    rawMessage.Properties, rawMessage.Body
+                                );
+                                var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
+                                return handler(deserializedMessage, receivedInfo, cancellationToken);
+                            }
+                        )
+                    )
+                ).ToDictionary(x => x.Key, x => x.Value)
+            );
+            var consumer = consumerFactory.CreateConsumer(consumerConfiguration);
             consumer.StartConsuming();
             return consumer;
         }
