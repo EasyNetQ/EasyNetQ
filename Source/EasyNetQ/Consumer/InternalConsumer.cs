@@ -214,15 +214,20 @@ namespace EasyNetQ.Consumer
 
         private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
         {
-            using var _ = await mutex.AcquireAsync().ConfigureAwait(false);
+            var raiseCancelledEvent = false;
 
-            if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
+            using (await mutex.AcquireAsync().ConfigureAwait(false))
             {
-                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                consumer.Dispose();
-                if (consumers.Count == 0)
-                    Cancelled?.Invoke(this, EventArgs.Empty);
+                if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
+                {
+                    consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                    consumer.Dispose();
+                    raiseCancelledEvent = consumers.Count == 0;
+                }
             }
+
+            if (raiseCancelledEvent)
+                Cancelled?.Invoke(this, EventArgs.Empty);
         }
     }
 }

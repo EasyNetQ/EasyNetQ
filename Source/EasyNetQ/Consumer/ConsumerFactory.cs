@@ -1,7 +1,7 @@
-﻿using EasyNetQ.Events;
-using EasyNetQ.Internals;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
+using EasyNetQ.Events;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer
 {
@@ -13,9 +13,8 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class ConsumerFactory : IConsumerFactory
     {
-        private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new ConcurrentDictionary<Guid, IConsumer>();
-
         private readonly IPersistentConnection connection;
+        private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new ConcurrentDictionary<Guid, IConsumer>();
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IDisposable unsubscribeFromStoppedConsumerEvent;
@@ -55,8 +54,8 @@ namespace EasyNetQ.Consumer
         public void Dispose()
         {
             unsubscribeFromStoppedConsumerEvent.Dispose();
-            internalConsumerFactory.Dispose();
             consumers.ClearAndDispose();
+            internalConsumerFactory.Dispose();
         }
     }
 }

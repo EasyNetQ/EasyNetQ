@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
-using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -17,7 +16,7 @@ namespace EasyNetQ.Tests.Mocking
         private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
         private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
         private readonly List<string> consumerQueueNames = new List<string>();
-        private readonly List<IBasicConsumer> consumers = new List<IBasicConsumer>();
+        private readonly List<AsyncDefaultBasicConsumer> consumers = new List<AsyncDefaultBasicConsumer>();
 
         public MockBuilder() : this(register => { })
         {
@@ -51,9 +50,9 @@ namespace EasyNetQ.Tests.Mocking
                 channel.BasicConsume(null, false, null, true, false, null, null)
                     .ReturnsForAnyArgs(consumeInvocation =>
                     {
-                        var queueName = (string)consumeInvocation[0];
-                        var consumerTag = (string)consumeInvocation[2];
-                        var consumer = (IBasicConsumer)consumeInvocation[6];
+                        var queueName = (string) consumeInvocation[0];
+                        var consumerTag = (string) consumeInvocation[2];
+                        var consumer = (AsyncDefaultBasicConsumer) consumeInvocation[6];
 
                         ConsumerQueueNames.Add(queueName);
                         consumer.HandleBasicConsumeOk(consumerTag);
@@ -63,7 +62,7 @@ namespace EasyNetQ.Tests.Mocking
                 channel.QueueDeclare(null, true, false, false, null)
                     .ReturnsForAnyArgs(queueDeclareInvocation =>
                     {
-                        var queueName = (string)queueDeclareInvocation[0];
+                        var queueName = (string) queueDeclareInvocation[0];
 
                         return new QueueDeclareOk(queueName, 0, 0);
                     });
@@ -96,7 +95,7 @@ namespace EasyNetQ.Tests.Mocking
 
         public List<IModel> Channels => channels;
 
-        public List<IBasicConsumer> Consumers => consumers;
+        public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
         public IBus Bus => bus;
 

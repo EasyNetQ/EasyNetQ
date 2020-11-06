@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
@@ -10,14 +11,15 @@ namespace EasyNetQ.Consumer
 {
     internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     {
-        private readonly ILog logger = LogProvider.For<AsyncBasicConsumer>();
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private readonly CountdownEvent inProcessMessages = new CountdownEvent(0);
-
-        private readonly IQueue queue;
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
+        private readonly ILog logger = LogProvider.For<AsyncBasicConsumer>();
         private readonly MessageHandler messageHandler;
+        private readonly AsyncCountdownEvent onTheFlyMessages = new AsyncCountdownEvent();
+
+        private readonly IQueue queue;
+        private volatile bool disposed;
 
         public AsyncBasicConsumer(
             IModel model,
@@ -34,6 +36,20 @@ namespace EasyNetQ.Consumer
         }
 
         public IQueue Queue => queue;
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+
+            disposed = true;
+            cts.Cancel();
+            onTheFlyMessages.Wait();
+            cts.Dispose();
+            onTheFlyMessages.Dispose();
+            eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
+        }
 
         /// <inheritdoc />
         public override async Task OnCancel(params string[] consumerTags)
@@ -67,8 +83,7 @@ namespace EasyNetQ.Consumer
                 );
             }
 
-
-            inProcessMessages.AddCount();
+            onTheFlyMessages.Increment();
             try
             {
                 var messageBody = body.ToArray();
@@ -88,18 +103,8 @@ namespace EasyNetQ.Consumer
             }
             finally
             {
-                inProcessMessages.Signal();
+                onTheFlyMessages.Decrement();
             }
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            cts.Cancel();
-            inProcessMessages.Wait();
-            eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
-            cts.Dispose();
-            inProcessMessages.Dispose();
         }
     }
 }

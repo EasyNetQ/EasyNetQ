@@ -9,6 +9,10 @@ namespace EasyNetQ.Tests
 {
     public class ModelCleanupTests
     {
+        private readonly IBus bus;
+        private readonly MockBuilder mockBuilder;
+        private readonly TimeSpan waitTime;
+
         public ModelCleanupTests()
         {
             mockBuilder = new MockBuilder();
@@ -16,16 +20,10 @@ namespace EasyNetQ.Tests
             waitTime = TimeSpan.FromSeconds(10);
         }
 
-        private readonly IBus bus;
-        private readonly MockBuilder mockBuilder;
-        private readonly TimeSpan waitTime;
-
         private AutoResetEvent WaitForConsumerModelDisposedMessage()
         {
             var are = new AutoResetEvent(false);
-
             mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
-
             return are;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EasyNetQ.Topology
 {
@@ -8,7 +9,8 @@ namespace EasyNetQ.Topology
         /// <summary>
         ///     Creates Queue
         /// </summary>
-        public Queue(string name, bool isDurable = true, bool isExclusive = false, bool isAutoDelete = false, IDictionary<string, object> arguments = null)
+        public Queue(string name, bool isDurable = true, bool isExclusive = false, bool isAutoDelete = false,
+            IDictionary<string, object> arguments = null)
         {
             Preconditions.CheckNotBlank(name, "name");
 
@@ -60,7 +62,7 @@ namespace EasyNetQ.Topology
                    && IsDurable == other.IsDurable
                    && IsExclusive == other.IsExclusive
                    && IsAutoDelete == other.IsAutoDelete
-                   && Equals(Arguments, other.Arguments);
+                   && Arguments.SequenceEqual(other.Arguments);
         }
     }
 }
