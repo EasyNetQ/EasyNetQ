@@ -147,7 +147,7 @@ namespace EasyNetQ
                 var delayParameter = Expression.Parameter(typeof(TimeSpan), "delay");
                 var configureParameter = Expression.Parameter(typeof(Action<IFuturePublishConfiguration>), "configure");
                 var cancellationTokenParameter = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
-                var genericPublishMethodCallExpression = Expression.Call(
+                var genericFuturePublishMethodCallExpression = Expression.Call(
                     schedulerParameter,
                     genericFuturePublishMethodInfo,
                     Expression.Convert(messageParameter, t),
@@ -156,7 +156,7 @@ namespace EasyNetQ
                     cancellationTokenParameter
                 );
                 var lambda = Expression.Lambda<NonGenericFuturePublishDelegate>(
-                    genericPublishMethodCallExpression,
+                    genericFuturePublishMethodCallExpression,
                     schedulerParameter,
                     messageParameter,
                     messageTypeParameter,
