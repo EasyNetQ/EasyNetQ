@@ -3,8 +3,6 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
