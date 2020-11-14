@@ -114,6 +114,15 @@ namespace EasyNetQ.Tests.ConnectionString
         }
 
         [Fact]
+        public void Should_parse_global_mandatoryPublish()
+        {
+            const string connectionStringWithMandatoryPublish = "host=localhost;mandatoryPublish=true";
+            var connectionConfiguration = connectionStringParser.Parse(connectionStringWithMandatoryPublish);
+
+            connectionConfiguration.PersistentMessages.Should().BeTrue();
+        }
+
+        [Fact]
         public void Should_parse_global_timeout()
         {
             const string connectionStringWithTimeout = "host=localhost;timeout=13";
