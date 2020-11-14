@@ -32,6 +32,7 @@ namespace EasyNetQ
             PublisherConfirms = false;
             PersistentMessages = true;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
+            MandatoryPublish = false;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
