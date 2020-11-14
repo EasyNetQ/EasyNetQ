@@ -27,28 +27,34 @@ Goals:
 1. To make working with RabbitMQ on .NET as easy as possible.
 
 To connect to a RabbitMQ broker...
-
+```c#
     var bus = RabbitHutch.CreateBus("host=localhost");
-
+```
 To publish a message...
-
-    bus.Publish(message);
-
+```c#
+    await bus.PubSub.PublishAsync(message);
+```
+To publish a message with 5s delay...
+```c#
+    await bus.Scheduler.FuturePublishAsync(message, TimeSpan.FromSeconds(5));
+```
 To subscribe to a message...
-
-	bus.Subscribe<MyMessage>("my_subscription_id", msg => Console.WriteLine(msg.Text));
-
+```c#
+    await bus.PubSub.SubscribeAsync<MyMessage>(
+        "my_subscription_id", msg => Console.WriteLine(msg.Text)
+    );
+```
 Remote procedure call...
-
+```c#
     var request = new TestRequestMessage {Text = "Hello from the client! "};
-    bus.Request<TestRequestMessage, TestResponseMessage>(request, response =>
-        Console.WriteLine("Got response: '{0}'", response.Text));
-
+    await bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(request);
+```
 RPC server...
-
-    bus.Respond<TestRequestMessage, TestResponseMessage>(request =>
-		new TestResponseMessage{ Text = request.Text + " all done!" });
-
+```c#
+    await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage>(request =>
+        new TestResponseMessage{ Text = request.Text + " all done!" }
+    );
+```
 
 ## Management API
 
