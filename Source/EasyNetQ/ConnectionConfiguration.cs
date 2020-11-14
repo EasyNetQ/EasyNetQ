@@ -108,7 +108,7 @@ namespace EasyNetQ
         public bool PublisherConfirms { get; set; }
 
         /// <summary>
-        ///     Enables persistent messages. (default is true)
+        ///     Enables persistent messages (default is true)
         /// </summary>
         public bool PersistentMessages { get; set; }
 
@@ -138,7 +138,7 @@ namespace EasyNetQ
         public TimeSpan ConnectIntervalAttempt { get; set; }
 
         /// <summary>
-        ///     Enables mandatory flag for publish(default is false)
+        ///     Enables mandatory flag for publish (default is false)
         /// </summary>
         public bool MandatoryPublish { get; set; }
     }
