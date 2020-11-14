@@ -66,11 +66,11 @@ namespace EasyNetQ
             {
                 var requestMethodInfo = typeof(IRpc).GetMethod("RequestAsync");
                 if (requestMethodInfo == null)
-                    throw new Exception("RequestAsync is not found");
+                    throw new MissingMethodException(nameof(IRpc), "RequestAsync");
 
                 var toTaskOfObjectMethodInfo = typeof(NonGenericRpcExtensions).GetMethod(nameof(ToTaskOfObject), BindingFlags.NonPublic | BindingFlags.Static);
                 if (toTaskOfObjectMethodInfo == null)
-                    throw new Exception("ToTaskOfObject is not found");
+                    throw new MissingMethodException(nameof(NonGenericRpcExtensions), nameof(ToTaskOfObject));
 
                 var genericRequestPublishMethodInfo = requestMethodInfo.MakeGenericMethod(t.Item1, t.Item2);
                 var genericToTaskOfObjectMethodInfo = toTaskOfObjectMethodInfo.MakeGenericMethod(t.Item2);

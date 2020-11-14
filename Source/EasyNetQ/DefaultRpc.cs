@@ -95,7 +95,7 @@ namespace EasyNetQ
             var expiration = requestConfiguration.Expiration;
             var priority = requestConfiguration.Priority;
             await RequestPublishAsync(
-                request, routingKey, queueName, correlationId, expiration, priority, cts.Token
+                request, routingKey, queueName, correlationId, expiration, priority, configuration.MandatoryPublish, cts.Token
             ).ConfigureAwait(false);
             tcs.AttachCancellation(cts.Token);
             return await tcs.Task.ConfigureAwait(false);
@@ -173,9 +173,7 @@ namespace EasyNetQ
             responseActions.TryAdd(correlationId, responseAction);
         }
 
-        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
-            CancellationToken cancellationToken
-        )
+        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(CancellationToken cancellationToken)
         {
             var responseType = typeof(TResponse);
             var requestType = typeof(TRequest);
@@ -223,6 +221,7 @@ namespace EasyNetQ
             string correlationId,
             TimeSpan expiration,
             byte? priority,
+            bool mandatory,
             CancellationToken cancellationToken
         )
         {
@@ -245,7 +244,7 @@ namespace EasyNetQ
                 properties.Priority = priority.Value;
 
             var requestMessage = new Message<TRequest>(request, properties);
-            await advancedBus.PublishAsync(exchange, routingKey, false, requestMessage, cancellationToken)
+            await advancedBus.PublishAsync(exchange, routingKey, mandatory, requestMessage, cancellationToken)
                 .ConfigureAwait(false);
         }
 

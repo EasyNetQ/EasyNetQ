@@ -135,6 +135,11 @@ namespace EasyNetQ
         ///     Interval between reconnection attempts. (default is 5s)
         /// </summary>
         public TimeSpan ConnectIntervalAttempt { get; set; }
+
+        /// <summary>
+        ///     Enables mandatory flag for publish(default is false)
+        /// </summary>
+        public bool MandatoryPublish { get; set; }
     }
 
     /// <summary>

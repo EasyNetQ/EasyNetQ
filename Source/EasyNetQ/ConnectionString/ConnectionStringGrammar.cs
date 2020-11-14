@@ -48,7 +48,8 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
             BuildKeyValueParser("product", Text, c => c.Product),
             BuildKeyValueParser("platform", Text, c => c.Platform),
-            BuildKeyValueParser("name", Text, c => c.Name)
+            BuildKeyValueParser("name", Text, c => c.Name),
+            BuildKeyValueParser("mandatoryPublish", Bool, c => c.MandatoryPublish)
         }.Aggregate((a, b) => a.Or(b));
 
         internal static readonly Parser<UpdateConfiguration> AmqpAlone =
