@@ -81,7 +81,7 @@ namespace EasyNetQ
             {
                 var publishMethodInfo = typeof(IPubSub).GetMethod("PublishAsync");
                 if (publishMethodInfo == null)
-                    throw new Exception("PublishAsync is not found");
+                    throw new MissingMethodException(nameof(IPubSub), "PublishAsync");
 
                 var genericPublishMethodInfo = publishMethodInfo.MakeGenericMethod(t);
                 var pubSubParameter = Expression.Parameter(typeof(IPubSub), "pubSub");

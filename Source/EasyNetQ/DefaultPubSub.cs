@@ -70,7 +70,7 @@ namespace EasyNetQ
                 messageType, ExchangeType.Topic, cts.Token
             ).ConfigureAwait(false);
             await advancedBus.PublishAsync(
-                exchange, publishConfiguration.Topic, false, advancedMessage, cts.Token
+                exchange, publishConfiguration.Topic, configuration.MandatoryPublish, advancedMessage, cts.Token
             ).ConfigureAwait(false);
         }
 

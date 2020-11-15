@@ -102,7 +102,7 @@ namespace EasyNetQ
 
             var advancedMessage = new Message<T>(message, properties);
             await advancedBus.PublishAsync(
-                futureExchange, topic, false, advancedMessage, cts.Token
+                futureExchange, topic, configuration.MandatoryPublish, advancedMessage, cts.Token
             ).ConfigureAwait(false);
         }
     }

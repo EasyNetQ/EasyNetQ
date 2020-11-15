@@ -65,7 +65,7 @@ namespace EasyNetQ
             {
                 var sendMethodInfo = typeof(ISendReceive).GetMethod("SendAsync");
                 if (sendMethodInfo == null)
-                    throw new Exception("SendAsync is not found");
+                    throw new MissingMethodException(nameof(ISendReceive), "SendAsync");
 
                 var genericSendMethodInfo = sendMethodInfo.MakeGenericMethod(t);
                 var sendReceiveParameter = Expression.Parameter(typeof(ISendReceive), "sendReceive");

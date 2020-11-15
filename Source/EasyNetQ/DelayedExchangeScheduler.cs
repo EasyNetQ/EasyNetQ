@@ -79,7 +79,7 @@ namespace EasyNetQ
             properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
             await advancedBus.PublishAsync(
-                futureExchange, topic, false, new Message<T>(message, properties).WithDelay(delay), cts.Token
+                futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties).WithDelay(delay), cts.Token
             ).ConfigureAwait(false);
         }
     }

@@ -56,7 +56,7 @@ namespace EasyNetQ
             properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
             await advancedBus.PublishAsync(
-                Exchange.GetDefault(), queue, false, new Message<T>(message, properties), cts.Token
+                Exchange.GetDefault(), queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
             ).ConfigureAwait(false);
         }
 
