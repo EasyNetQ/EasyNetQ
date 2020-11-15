@@ -138,7 +138,7 @@ namespace EasyNetQ
             {
                 var futurePublishMethodInfo = typeof(IScheduler).GetMethod("FuturePublishAsync");
                 if (futurePublishMethodInfo == null)
-                    throw new Exception("FuturePublishAsync is not found");
+                    throw new MissingMethodException(nameof(IScheduler), "FuturePublishAsync");
 
                 var genericFuturePublishMethodInfo = futurePublishMethodInfo.MakeGenericMethod(t);
                 var schedulerParameter = Expression.Parameter(typeof(IScheduler), "scheduler");
