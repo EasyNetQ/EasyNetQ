@@ -34,7 +34,7 @@ namespace EasyNetQ.DI
 
         public TService Resolve<TService>()
         {
-            return (TService) container.GetInstance(typeof(TService));
+            return (TService)container.GetInstance(typeof(TService));
         }
 
         private static LightInject.ILifetime ToLifetime(Lifetime lifetime)
