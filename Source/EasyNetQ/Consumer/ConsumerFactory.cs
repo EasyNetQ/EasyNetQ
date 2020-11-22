@@ -18,6 +18,7 @@ namespace EasyNetQ.Consumer
 
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
+        private readonly IDisposable eventSubscription;
 
         /// <summary>
         ///     Creates ConsumerFactory
@@ -31,14 +32,15 @@ namespace EasyNetQ.Consumer
             IEventBus eventBus
         )
         {
-            Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(internalConsumerFactory, nameof(internalConsumerFactory));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
             this.connection = connection;
             this.internalConsumerFactory = internalConsumerFactory;
             this.eventBus = eventBus;
 
-            eventBus.Subscribe<StoppedConsumingEvent>(@event => consumers.Remove(@event.Consumer));
+            eventSubscription = eventBus.Subscribe<StoppedConsumingEvent>(@event => consumers.Remove(@event.Consumer));
         }
 
         /// <inheritdoc />
@@ -72,10 +74,10 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public void Dispose()
         {
+            eventSubscription.Dispose();
             foreach (var consumer in consumers)
                 consumer.Dispose();
-
-            internalConsumerFactory.Dispose();
+            consumers.Clear();
         }
 
         /// <summary>

@@ -52,8 +52,6 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public void Dispose()
         {
-            consumerDispatcherFactory.Dispose();
-            handlerRunner.Dispose();
         }
     }
 }

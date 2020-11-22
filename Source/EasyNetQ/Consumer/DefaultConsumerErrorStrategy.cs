@@ -33,7 +33,6 @@ namespace EasyNetQ.Consumer
         private readonly ConnectionConfiguration configuration;
 
         private bool disposed;
-        private bool disposing;
 
         public DefaultConsumerErrorStrategy(
             IPersistentConnection connection,
@@ -63,7 +62,7 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(context, "context");
             Preconditions.CheckNotNull(exception, "exception");
 
-            if (disposed || disposing)
+            if (disposed)
             {
                 logger.ErrorFormat(
                     "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeued",
@@ -133,11 +132,6 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public virtual void Dispose()
         {
-            if (disposed) return;
-            disposing = true;
-
-            connection.Dispose();
-
             disposed = true;
         }
 

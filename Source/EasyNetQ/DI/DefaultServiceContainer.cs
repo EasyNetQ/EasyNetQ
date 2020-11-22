@@ -2,7 +2,7 @@
 
 namespace EasyNetQ.DI
 {
-    public class DefaultServiceContainer : IServiceRegister
+    public class DefaultServiceContainer : IServiceRegister, IDisposable
     {
         private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer();
 
@@ -34,7 +34,7 @@ namespace EasyNetQ.DI
 
         public TService Resolve<TService>()
         {
-            return (TService)container.GetInstance(typeof(TService));
+            return (TService) container.GetInstance(typeof(TService));
         }
 
         private static LightInject.ILifetime ToLifetime(Lifetime lifetime)
@@ -61,7 +61,7 @@ namespace EasyNetQ.DI
 
             public TService Resolve<TService>() where TService : class
             {
-                return (TService)serviceFactory.GetInstance(typeof(TService));
+                return (TService) serviceFactory.GetInstance(typeof(TService));
             }
 
             public IServiceResolverScope CreateScope()
@@ -69,5 +69,7 @@ namespace EasyNetQ.DI
                 return new ServiceResolverScope(this);
             }
         }
+
+        public void Dispose() => container.Dispose();
     }
 }

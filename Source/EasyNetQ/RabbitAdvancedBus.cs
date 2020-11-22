@@ -27,6 +27,7 @@ namespace EasyNetQ
         private readonly ILog logger = LogProvider.For<RabbitAdvancedBus>();
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IPullingConsumerFactory pullingConsumerFactory;
+        private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
         private bool disposed;
@@ -51,17 +52,17 @@ namespace EasyNetQ
             AdvancedBusEventHandlers advancedBusEventHandlers
         )
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
-            Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
-            Preconditions.CheckNotNull(container, "container");
-            Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
-            Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(pullingConsumerFactory, "pullingConsumerFactory");
-            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(consumerFactory, nameof(consumerFactory));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+            Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
+            Preconditions.CheckNotNull(container, nameof(container));
+            Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+            Preconditions.CheckNotNull(produceConsumeInterceptor, nameof(produceConsumeInterceptor));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
+            Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
 
             this.connection = connection;
             this.consumerFactory = consumerFactory;
@@ -74,6 +75,7 @@ namespace EasyNetQ
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
             this.pullingConsumerFactory = pullingConsumerFactory;
+            this.advancedBusEventHandlers = advancedBusEventHandlers;
             this.Conventions = conventions;
 
             if (advancedBusEventHandlers.Connected != null)
@@ -646,13 +648,23 @@ namespace EasyNetQ
         {
             if (disposed) return;
 
-            foreach(var eventSubscription in eventSubscriptions)
+            foreach (var eventSubscription in eventSubscriptions)
                 eventSubscription.Dispose();
 
-            consumerFactory.Dispose();
-            clientCommandDispatcher.Dispose();
-            confirmationListener.Dispose();
-            connection.Dispose();
+            if (advancedBusEventHandlers.Connected != null)
+                Connected -= advancedBusEventHandlers.Connected;
+
+            if (advancedBusEventHandlers.Disconnected != null)
+                Disconnected -= advancedBusEventHandlers.Disconnected;
+
+            if (advancedBusEventHandlers.Blocked != null)
+                Blocked -= advancedBusEventHandlers.Blocked;
+
+            if (advancedBusEventHandlers.Unblocked != null)
+                Unblocked -= advancedBusEventHandlers.Unblocked;
+
+            if (advancedBusEventHandlers.MessageReturned != null)
+                MessageReturned -= advancedBusEventHandlers.MessageReturned;
 
             disposed = true;
         }

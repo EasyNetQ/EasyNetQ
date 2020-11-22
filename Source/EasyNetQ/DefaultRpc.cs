@@ -121,8 +121,7 @@ namespace EasyNetQ
         public void Dispose()
         {
             eventSubscription.Dispose();
-            foreach (var responseSubscription in responseSubscriptions.Values)
-                responseSubscription.Unsubscribe();
+            responseSubscriptions.ClearAndDispose(x => x.Unsubscribe());
         }
 
         private void OnConnectionRecovered(ConnectionRecoveredEvent @event)

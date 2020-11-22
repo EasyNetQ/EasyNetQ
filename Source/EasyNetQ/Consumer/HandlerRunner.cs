@@ -103,7 +103,6 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public void Dispose()
         {
-            consumerErrorStrategy.Dispose();
         }
     }
 }
