@@ -38,9 +38,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
 
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive))
             {
-                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }
@@ -65,12 +65,12 @@ namespace EasyNetQ.IntegrationTests.PubSub
                 )
             )
             {
-                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
                 await Task.WhenAll(
                     firstConsumerMessagesSink.WaitAllReceivedAsync(cts.Token),
                     secondConsumerMessagesSink.WaitAllReceivedAsync(cts.Token)
-                ).ConfigureAwait(false);
+                );
 
                 firstConsumerMessagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
                 secondConsumerMessagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
@@ -90,9 +90,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
-                await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
                 messagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
             }
         }
@@ -107,10 +107,10 @@ namespace EasyNetQ.IntegrationTests.PubSub
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
             {
                 var message = new Message(0);
-                await bus.PubSub.PublishAsync(message, cts.Token).ConfigureAwait(false);
-                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token).ConfigureAwait(false);
-                await bus.PubSub.PublishAsync(message, cts.Token).ConfigureAwait(false);
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishAsync(message, cts.Token);
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
+                await bus.PubSub.PublishAsync(message, cts.Token);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
             }
         }
     }

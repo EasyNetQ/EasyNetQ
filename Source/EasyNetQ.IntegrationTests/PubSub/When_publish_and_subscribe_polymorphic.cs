@@ -52,13 +52,12 @@ namespace EasyNetQ.IntegrationTests.PubSub
                 }
             }, cts.Token))
             {
-                await bus.PubSub.PublishBatchAsync(bunnies.Concat(rabbits), cts.Token)
-                    .ConfigureAwait(false);
+                await bus.PubSub.PublishBatchAsync(bunnies.Concat(rabbits), cts.Token);
 
                 await Task.WhenAll(
                     bunniesSink.WaitAllReceivedAsync(cts.Token),
                     rabbitsSink.WaitAllReceivedAsync(cts.Token)
-                ).ConfigureAwait(false);
+                );
 
                 bunniesSink.ReceivedMessages.Should().Equal(bunnies);
                 rabbitsSink.ReceivedMessages.Should().Equal(rabbits);

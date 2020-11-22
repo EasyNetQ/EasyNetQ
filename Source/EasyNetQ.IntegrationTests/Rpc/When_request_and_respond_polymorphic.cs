@@ -38,12 +38,12 @@ namespace EasyNetQ.IntegrationTests.Rpc
             {
                 var bunnyResponse = await bus.Rpc.RequestAsync<Request, Response>(
                     new BunnyRequest(42), cts.Token
-                ).ConfigureAwait(false);
+                );
                 bunnyResponse.Should().Be(new BunnyResponse(42));
 
                 var rabbitResponse = await bus.Rpc.RequestAsync<Request, Response>(
                     new RabbitRequest(42), cts.Token
-                ).ConfigureAwait(false);
+                );
                 rabbitResponse.Should().Be(new RabbitResponse(42));
             }
         }

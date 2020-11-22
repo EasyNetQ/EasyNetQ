@@ -41,7 +41,7 @@ namespace EasyNetQ.IntegrationTests.Utils
                 )
             )
             {
-                await allMessagedReceived.Task.ConfigureAwait(false);
+                await allMessagedReceived.Task;
             }
         }
 

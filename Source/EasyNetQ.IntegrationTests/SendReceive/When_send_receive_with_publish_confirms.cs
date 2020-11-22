@@ -36,9 +36,9 @@ namespace EasyNetQ.IntegrationTests.SendReceive
                 await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token)
             )
             {
-                await bus.SendReceive.SendBatchAsync(queue, messages, cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendBatchAsync(queue, messages, cts.Token);
 
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }

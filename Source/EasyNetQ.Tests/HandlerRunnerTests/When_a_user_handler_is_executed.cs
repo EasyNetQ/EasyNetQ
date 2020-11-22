@@ -25,12 +25,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             var context = new ConsumerExecutionContext(
                 async (body, properties, info, cancellation) =>
                 {
-                    await Task.Run(() =>
-                    {
-                        deliveredBody = body;
-                        deliveredProperties = properties;
-                        deliveredInfo = info;
-                    }).ConfigureAwait(false);
+                    deliveredBody = body;
+                    deliveredProperties = properties;
+                    deliveredInfo = info;
                     return AckStrategies.Ack;
                 },
                 messageInfo,
@@ -41,7 +38,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
                 .ContinueWith(async x =>
                 {
-                    var ackStrategy = await x.ConfigureAwait(false);
+                    var ackStrategy = await x;
                     return ackStrategy(channel, 42);
                 }, TaskContinuationOptions.ExecuteSynchronously)
                 .Unwrap();

@@ -15,14 +15,14 @@ namespace EasyNetQ.IntegrationTests.Utils
             var wasClosed = false;
             do
             {
-                var connections = await client.GetConnectionsAsync(cancellationToken).ConfigureAwait(false);
+                var connections = await client.GetConnectionsAsync(cancellationToken);
                 foreach (var connection in connections)
                 {
-                    await client.CloseConnectionAsync(connection, cancellationToken).ConfigureAwait(false);
+                    await client.CloseConnectionAsync(connection, cancellationToken);
                     wasClosed = true;
                 }
 
-                await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(500, cancellationToken);
             } while (!wasClosed);
         }
     }

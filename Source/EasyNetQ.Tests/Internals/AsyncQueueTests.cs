@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.Internals
         public async Task Should_be_empty_after_dequeue()
         {
             using var queue = new AsyncQueue<int>(new[] {42});
-            var element = await queue.DequeueAsync(CancellationToken.None).ConfigureAwait(false);
+            var element = await queue.DequeueAsync(CancellationToken.None);
             element.Should().Be(42);
             queue.Count.Should().Be(0);
         }
@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.Internals
             using var dequeueCts = new CancellationTokenSource();
             var dequeueTask = queue.DequeueAsync(dequeueCts.Token);
             var _ = Task.Run(dequeueCts.Cancel, CancellationToken.None);
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => dequeueTask).ConfigureAwait(false);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => dequeueTask);
         }
 
         [Fact]
@@ -46,9 +46,9 @@ namespace EasyNetQ.Tests.Internals
             queue.Enqueue(1);
             queue.Enqueue(2);
             queue.Enqueue(3);
-            (await firstTask.ConfigureAwait(false)).Should().Be(1);
-            (await secondTask.ConfigureAwait(false)).Should().Be(2);
-            (await thirdTask.ConfigureAwait(false)).Should().Be(3);
+            (await firstTask).Should().Be(1);
+            (await secondTask).Should().Be(2);
+            (await thirdTask).Should().Be(3);
             queue.Count.Should().Be(0);
         }
     }
