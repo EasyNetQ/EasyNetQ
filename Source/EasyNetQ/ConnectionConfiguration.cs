@@ -80,6 +80,7 @@ namespace EasyNetQ
         /// <summary>
         ///     The connection string used for the connection.
         /// </summary>
+        [Obsolete("Will be removed in next major version")]
         public Uri AmqpConnectionString { get; set; }
 
         /// <summary>

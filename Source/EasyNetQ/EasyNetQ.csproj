@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Title>EasyNetQ</Title>
-    <Description>EasyNetQ</Description>
+    <Description>A nice .NET API for RabbitMQ</Description>
     <PackageTags>RabbitMQ;Messaging;AMQP;C#</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
     <LangVersion>latest</LangVersion>
