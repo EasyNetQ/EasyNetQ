@@ -30,21 +30,21 @@ namespace EasyNetQ.IntegrationTests
         public async Task InitializeAsync()
         {
             using var cts = new CancellationTokenSource(InitializationTimeout);
-            dockerEngineOsPlatform = await dockerProxy.GetDockerEngineOsAsync(cts.Token).ConfigureAwait(false);
+            dockerEngineOsPlatform = await dockerProxy.GetDockerEngineOsAsync(cts.Token);
             dockerNetworkName = dockerEngineOsPlatform == OSPlatform.Windows ? null : "bridgeWhaleNet";
-            await DisposeAsync(cts.Token).ConfigureAwait(false);
-            await CreateNetworkAsync(cts.Token).ConfigureAwait(false);
-            var rabbitMQDockerImage = await PullImageAsync(cts.Token).ConfigureAwait(false);
-            var containerId = await RunNewContainerAsync(rabbitMQDockerImage, cts.Token).ConfigureAwait(false);
+            await DisposeAsync(cts.Token);
+            await CreateNetworkAsync(cts.Token);
+            var rabbitMQDockerImage = await PullImageAsync(cts.Token);
+            var containerId = await RunNewContainerAsync(rabbitMQDockerImage, cts.Token);
             if (dockerEngineOsPlatform == OSPlatform.Windows)
-                Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token).ConfigureAwait(false);
+                Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token);
             ManagementClient = new ManagementClient(Host, Configuration.RabbitMqUser, Configuration.RabbitMqPassword);
             await WaitForRabbitMqReadyAsync(cts.Token);
         }
 
         public async Task DisposeAsync()
         {
-            await DisposeAsync(default).ConfigureAwait(false);
+            await DisposeAsync(default);
         }
 
         public void Dispose()
@@ -54,26 +54,23 @@ namespace EasyNetQ.IntegrationTests
 
         private async Task DisposeAsync(CancellationToken cancellationToken)
         {
-            await dockerProxy.StopContainerAsync(Configuration.RabbitMqHostName, cancellationToken)
-                .ConfigureAwait(false);
-            await dockerProxy.RemoveContainerAsync(Configuration.RabbitMqHostName, cancellationToken)
-                .ConfigureAwait(false);
+            await dockerProxy.StopContainerAsync(Configuration.RabbitMqHostName, cancellationToken);
+            await dockerProxy.RemoveContainerAsync(Configuration.RabbitMqHostName, cancellationToken);
             if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
-                await dockerProxy.DeleteNetworkAsync(dockerNetworkName, cancellationToken).ConfigureAwait(false);
+                await dockerProxy.DeleteNetworkAsync(dockerNetworkName, cancellationToken);
         }
 
         private async Task CreateNetworkAsync(CancellationToken cancellationToken)
         {
             if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
-                await dockerProxy.CreateNetworkAsync(dockerNetworkName, cancellationToken).ConfigureAwait(false);
+                await dockerProxy.CreateNetworkAsync(dockerNetworkName, cancellationToken);
         }
 
         private async Task<string> PullImageAsync(CancellationToken cancellationToken)
         {
             var rabbitMQDockerImageName = Configuration.RabbitMQDockerImageName(dockerEngineOsPlatform);
             var rabbitMQDockerImageTag = Configuration.RabbitMQDockerImageTag(dockerEngineOsPlatform);
-            await dockerProxy.PullImageAsync(rabbitMQDockerImageName, rabbitMQDockerImageTag, cancellationToken)
-                .ConfigureAwait(false);
+            await dockerProxy.PullImageAsync(rabbitMQDockerImageName, rabbitMQDockerImageTag, cancellationToken);
             return $"{rabbitMQDockerImageName}:{rabbitMQDockerImageTag}";
         }
 
@@ -93,9 +90,8 @@ namespace EasyNetQ.IntegrationTests
                 .CreateContainerAsync(
                     rabbitMQDockerImage, Configuration.RabbitMqHostName, portMappings, dockerNetworkName, envVars,
                     cancellationToken
-                )
-                .ConfigureAwait(false);
-            await dockerProxy.StartContainerAsync(containerId, cancellationToken).ConfigureAwait(false);
+                );
+            await dockerProxy.StartContainerAsync(containerId, cancellationToken);
             return containerId;
         }
 
@@ -104,9 +100,9 @@ namespace EasyNetQ.IntegrationTests
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (await IsRabbitMqReadyAsync(cancellationToken).ConfigureAwait(false))
+                if (await IsRabbitMqReadyAsync(cancellationToken))
                     return;
-                await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(500, cancellationToken);
             }
         }
 
@@ -114,8 +110,7 @@ namespace EasyNetQ.IntegrationTests
         {
             try
             {
-                return await ManagementClient.IsAliveAsync(Configuration.RabbitMqVirtualHost, cancellationToken)
-                    .ConfigureAwait(false);
+                return await ManagementClient.IsAliveAsync(Configuration.RabbitMqVirtualHost, cancellationToken);
             }
             catch (OperationCanceledException)
             {

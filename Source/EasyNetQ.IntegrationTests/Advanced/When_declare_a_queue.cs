@@ -29,7 +29,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             {
                 await bus.Advanced.QueueDeclareAsync(
                     Guid.NewGuid().ToString("N"), c => c.WithQueueMode(queueMode), cts.Token
-                ).ConfigureAwait(false);
+                );
             }
 
             var queuesTypes = new [] {QueueType.Classic, QueueType.Quorum};
@@ -37,7 +37,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             {
                 await bus.Advanced.QueueDeclareAsync(
                     Guid.NewGuid().ToString("N"), c => c.WithQueueType(queueType), cts.Token
-                ).ConfigureAwait(false);
+                );
             }
         }
     }

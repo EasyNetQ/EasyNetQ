@@ -3,7 +3,6 @@
 using FluentAssertions;
 using NSubstitute;
 using System.Collections.Generic;
-using System.Linq;
 using EasyNetQ.Consumer;
 using Xunit;
 

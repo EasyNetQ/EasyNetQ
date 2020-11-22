@@ -38,9 +38,9 @@ namespace EasyNetQ.IntegrationTests.SendReceive
                 await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token)
             )
             {
-                await bus.SendReceive.SendBatchAsync(queue, messages, cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendBatchAsync(queue, messages, cts.Token);
 
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
                 messagesSink.ReceivedMessages.Should().Equal(messages);
             }
         }
@@ -55,10 +55,10 @@ namespace EasyNetQ.IntegrationTests.SendReceive
             using (await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token))
             {
                 var message = new Message(0);
-                await bus.SendReceive.SendAsync(queue, message, cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendAsync(queue, message, cts.Token);
                 await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
-                await bus.SendReceive.SendAsync(queue, message, cts.Token).ConfigureAwait(false);
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await bus.SendReceive.SendAsync(queue, message, cts.Token);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
             }
         }
     }

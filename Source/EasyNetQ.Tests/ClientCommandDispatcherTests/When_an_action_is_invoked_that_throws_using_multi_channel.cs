@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         {
             await Assert.ThrowsAsync<CrazyTestOnlyException>(
                 () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException(), ChannelDispatchOptions.Default)
-            ).ConfigureAwait(false);
+            );
         }
 
         [Fact]
@@ -44,9 +44,9 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         {
             await Assert.ThrowsAsync<Exception>(
                 () => dispatcher.InvokeAsync<int>(x => throw new Exception(), ChannelDispatchOptions.Default)
-            ).ConfigureAwait(false);
+            );
 
-            var result = await dispatcher.InvokeAsync(x => 42, ChannelDispatchOptions.Default).ConfigureAwait(false);
+            var result = await dispatcher.InvokeAsync(x => 42, ChannelDispatchOptions.Default);
             result.Should().Be(42);
         }
 

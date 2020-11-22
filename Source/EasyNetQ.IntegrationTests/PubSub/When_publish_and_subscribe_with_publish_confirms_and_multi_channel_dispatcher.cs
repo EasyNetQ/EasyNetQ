@@ -39,9 +39,9 @@ namespace EasyNetQ.IntegrationTests.PubSub
 
             using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, timeoutCts.Token))
             {
-                await bus.PubSub.PublishBatchInParallelAsync(messages, timeoutCts.Token).ConfigureAwait(false);
+                await bus.PubSub.PublishBatchInParallelAsync(messages, timeoutCts.Token);
 
-                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(timeoutCts.Token);
                 messagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
             }
         }
