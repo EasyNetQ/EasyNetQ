@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests
 {
     public class When_subscribe_is_called : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
@@ -33,16 +33,15 @@ namespace EasyNetQ.Tests
                     ConsumerTagConvention = () => consumerTag
                 };
 
-            mockBuilder = new MockBuilder(x => x
-                .Register<IConventions>(conventions)
-                );
+            mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
 
             subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { });
         }
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            subscriptionResult.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
@@ -57,11 +56,12 @@ namespace EasyNetQ.Tests
         public void Should_declare_the_queue()
         {
             mockBuilder.Channels[0].Received().QueueDeclare(
-                    Arg.Is(queueName),
-                    Arg.Is(true),  // durable
-                    Arg.Is(false), // exclusive
-                    Arg.Is(false), // autoDelete
-                    Arg.Any<IDictionary<string, object>>());
+                Arg.Is(queueName),
+                Arg.Is(true), // durable
+                Arg.Is(false), // exclusive
+                Arg.Is(false), // autoDelete
+                Arg.Any<IDictionary<string, object>>()
+            );
         }
 
         [Fact]
@@ -72,7 +72,8 @@ namespace EasyNetQ.Tests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null));
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
 
         [Fact]
@@ -82,7 +83,8 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is(typeName),
                 Arg.Is("#"),
-                Arg.Is((IDictionary<string, object>)null));
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
 
         [Fact]
@@ -142,69 +144,55 @@ namespace EasyNetQ.Tests
             int? maxLength,
             int? maxLengthBytes)
         {
-            var mockBuilder = new MockBuilder();
-            using (mockBuilder.Bus)
-            {
-                // Configure subscription
-                mockBuilder.PubSub.Subscribe<MyMessage>(
-                    "x",
-                    m => { },
-                    c =>
-                    {
-                        c.WithAutoDelete(autoDelete)
-                            .WithPriority(priority)
-                            .WithPrefetchCount(prefetchCount)
-                            .AsExclusive(isExclusive)
-                            .WithDurable(durable)
-                            .WithQueueName(queueName);
+            using var mockBuilder = new MockBuilder();
 
-                        if (topic != null)
-                        {
-                            c.WithTopic(topic);
-                        }
-                        if (maxPriority.HasValue)
-                        {
-                            c.WithMaxPriority(maxPriority.Value);
-                        }
-                        if (expires.HasValue)
-                        {
-                            c.WithExpires(expires.Value);
-                        }
-                        if (maxLength.HasValue)
-                        {
-                            c.WithMaxLength(maxLength.Value);
-                        }
-                        if (maxLengthBytes.HasValue)
-                        {
-                            c.WithMaxLengthBytes(maxLengthBytes.Value);
-                        }
-                    }
-                );
-            }
+            // Configure subscription
+            using var _ = mockBuilder.PubSub.Subscribe<MyMessage>(
+                "x",
+                m => { },
+                c =>
+                {
+                    c.WithAutoDelete(autoDelete)
+                        .WithPriority(priority)
+                        .WithPrefetchCount(prefetchCount)
+                        .AsExclusive(isExclusive)
+                        .WithDurable(durable)
+                        .WithQueueName(queueName);
+
+                    if (topic != null) c.WithTopic(topic);
+                    if (maxPriority.HasValue) c.WithMaxPriority(maxPriority.Value);
+                    if (expires.HasValue) c.WithExpires(expires.Value);
+                    if (maxLength.HasValue) c.WithMaxLength(maxLength.Value);
+                    if (maxLengthBytes.HasValue) c.WithMaxLengthBytes(maxLengthBytes.Value);
+                }
+            );
+
 
             // Assert that queue got declared correctly
             mockBuilder.Channels[0].Received().QueueDeclare(
-                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
-                    Arg.Is(durable),
-                    Arg.Is(false), // IsExclusive is set on the Consume call
-                    Arg.Is(autoDelete),
-                    Arg.Is<IDictionary<string, object>>(
-                        x =>
-                        (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
-                        (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
-                        (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
-                        (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"]))
-                    );
+                Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
+                Arg.Is(durable),
+                Arg.Is(false), // IsExclusive is set on the Consume call
+                Arg.Is(autoDelete),
+                Arg.Is<IDictionary<string, object>>(
+                    x =>
+                        (!expires.HasValue || expires.Value == (int) x["x-expires"]) &&
+                        (!maxPriority.HasValue || maxPriority.Value == (int) x["x-max-priority"]) &&
+                        (!maxLength.HasValue || maxLength.Value == (int) x["x-max-length"]) &&
+                        (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int) x["x-max-length-bytes"])
+                )
+            );
 
             // Assert that consumer was created correctly
             mockBuilder.Channels[1].Received().BasicConsume(
-                    Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
-                    Arg.Is(false),
-                    Arg.Any<string>(),
-                    Arg.Is(true),
-                    Arg.Is(isExclusive),
-                    Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
-                    Arg.Any<IBasicConsumer>());
+                Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
+                Arg.Is(false),
+                Arg.Any<string>(),
+                Arg.Is(true),
+                Arg.Is(isExclusive),
+                Arg.Is<IDictionary<string, object>>(x => priority == (int) x["x-priority"]),
+                Arg.Any<IBasicConsumer>()
+            );
 
             // Assert that QoS got configured correctly
             mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);
@@ -214,13 +202,14 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
-                Arg.Is((IDictionary<string, object>)null));
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
     }
 
     public class When_a_message_is_delivered : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
@@ -271,10 +260,7 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         [Fact]
         public void Should_build_bus_successfully()
@@ -298,8 +284,8 @@ namespace EasyNetQ.Tests
 
     public class When_the_handler_throws_an_exception : IDisposable
     {
-        private MockBuilder mockBuilder;
-        private IConsumerErrorStrategy consumerErrorStrategy;
+        private readonly MockBuilder mockBuilder;
+        private readonly IConsumerErrorStrategy consumerErrorStrategy;
 
         private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
         private const string subscriptionId = "the_subscription_id";
@@ -361,10 +347,7 @@ namespace EasyNetQ.Tests
             autoResetEvent.WaitOne(1000);
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         [Fact]
         public void Should_ack()
@@ -396,7 +379,7 @@ namespace EasyNetQ.Tests
 
     public class When_a_subscription_is_cancelled_by_the_user : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private const string subscriptionId = "the_subscription_id";
         private const string consumerTag = "the_consumer_tag";
 
@@ -417,7 +400,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]

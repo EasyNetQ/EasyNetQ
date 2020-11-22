@@ -34,10 +34,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             autoSubscriber.Subscribe(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) });
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         [Fact]
         public void Should_have_declared_the_queues()

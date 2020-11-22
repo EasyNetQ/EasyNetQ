@@ -219,12 +219,9 @@ namespace EasyNetQ.Tests
             mockBuilder.Rpc.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_correctly_bind_using_new_conventions()

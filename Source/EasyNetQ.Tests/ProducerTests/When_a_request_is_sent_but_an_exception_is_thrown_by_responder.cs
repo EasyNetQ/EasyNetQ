@@ -28,10 +28,7 @@ namespace EasyNetQ.Tests.ProducerTests
             requestMessage = new TestRequestMessage();
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         [Fact]
         public async Task Should_throw_an_EasyNetQResponderException()

@@ -29,9 +29,9 @@ namespace EasyNetQ
         private readonly IPullingConsumerFactory pullingConsumerFactory;
         private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
-
-        private bool disposed;
         private readonly IDisposable[] eventSubscriptions;
+
+        private volatile bool disposed;
 
         /// <summary>
         ///     Creates RabbitAdvancedBus
@@ -648,6 +648,8 @@ namespace EasyNetQ
         {
             if (disposed) return;
 
+            disposed = true;
+
             foreach (var eventSubscription in eventSubscriptions)
                 eventSubscription.Dispose();
 
@@ -665,8 +667,6 @@ namespace EasyNetQ
 
             if (advancedBusEventHandlers.MessageReturned != null)
                 MessageReturned -= advancedBusEventHandlers.MessageReturned;
-
-            disposed = true;
         }
 
         private void OnConnectionCreated(ConnectionCreatedEvent @event)

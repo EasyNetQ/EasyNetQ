@@ -47,10 +47,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             if (!countdownEvent.Wait(5000)) throw new TimeoutException();
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         private readonly MockBuilder mockBuilder;
 

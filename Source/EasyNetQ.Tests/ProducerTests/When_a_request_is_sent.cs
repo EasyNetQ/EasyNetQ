@@ -38,10 +38,7 @@ namespace EasyNetQ.Tests.ProducerTests
             responseMessage = task.GetAwaiter().GetResult();
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         private readonly MockBuilder mockBuilder;
         private readonly TestResponseMessage responseMessage;

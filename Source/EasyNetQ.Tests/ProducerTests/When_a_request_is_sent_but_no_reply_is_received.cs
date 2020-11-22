@@ -16,10 +16,7 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder("host=localhost;timeout=1");
         }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+        public void Dispose() => mockBuilder.Dispose();
 
         [Fact]
         public Task Should_throw_a_cancelled_exception()
