@@ -14,6 +14,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
     public class When_autosubscribing_async : IDisposable
     {
         private readonly MockBuilder mockBuilder;
+        private readonly IDisposable subscription;
 
         private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageA, EasyNetQ.Tests_my_app:9a0467719db423b16b7e5c35d25b877c";
@@ -26,14 +27,17 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         public When_autosubscribing_async()
         {
-            //mockBuilder = new MockBuilder();
             mockBuilder = new MockBuilder();
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
-            autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
+            subscription = autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
         }
 
-        public void Dispose() => mockBuilder.Dispose();
+        public void Dispose()
+        {
+            subscription.Dispose();
+            mockBuilder.Dispose();
+        }
 
         [Fact]
         public void Should_have_declared_the_queues()

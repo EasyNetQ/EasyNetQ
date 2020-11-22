@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             var countdownEvent = new CountdownEvent(3);
 
-            mockBuilder.Bus.Advanced.Consume(
+            consumer = mockBuilder.Bus.Advanced.Consume(
                 queue,
                 x => x.Add<MyMessage>((message, info) =>
                     {
@@ -47,13 +47,18 @@ namespace EasyNetQ.Tests.ConsumeTests
             if (!countdownEvent.Wait(5000)) throw new TimeoutException();
         }
 
-        public void Dispose() => mockBuilder.Dispose();
+        public void Dispose()
+        {
+            consumer.Dispose();
+            mockBuilder.Dispose();
+        }
 
         private readonly MockBuilder mockBuilder;
 
         private MyMessage myMessageResult;
         private MyOtherMessage myOtherMessageResult;
         private IAnimal animalResult;
+        private readonly IDisposable consumer;
 
         private void Deliver<T>(T message) where T : class
         {

@@ -37,8 +37,8 @@ namespace EasyNetQ.Tests.ProducerTests
             {
                 var waiter = new CountdownEvent(2);
 
-                mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
-                mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+                using var _ = mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => waiter.Signal());
+                using var __ = mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(x => waiter.Signal());
 
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
                 if (!waiter.Wait(5000))
