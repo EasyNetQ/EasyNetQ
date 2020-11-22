@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var correlationId = Guid.NewGuid().ToString();
             mockBuilder = new MockBuilder(
                 c => c.Register<ICorrelationIdGenerationStrategy>(
-                    _ => new StaticCorrelationIdGenerationStrategy(correlationId)
+                    x => new StaticCorrelationIdGenerationStrategy(correlationId)
                 )
             );
 

@@ -216,12 +216,17 @@ namespace EasyNetQ.Tests
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-            mockBuilder.Rpc.Respond<TestMessage, TestMessage>(t => new TestMessage());
+            responder = mockBuilder.Rpc.Respond<TestMessage, TestMessage>(t => new TestMessage());
         }
 
-        public void Dispose() => mockBuilder.Dispose();
+        public void Dispose()
+        {
+            responder.Dispose();
+            mockBuilder.Dispose();
+        }
 
         private readonly MockBuilder mockBuilder;
+        private readonly IDisposable responder;
 
         [Fact]
         public void Should_correctly_bind_using_new_conventions()
