@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.Internals
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
                 () => mutex.AcquireAsync(cts.Token)
-            ).ConfigureAwait(false);
+            );
         }
 
         [Fact]
@@ -27,13 +27,13 @@ namespace EasyNetQ.Tests.Internals
             using var mutex = new AsyncLock();
             using var cts = new CancellationTokenSource();
 
-            using var releaser = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
+            using var releaser = await mutex.AcquireAsync(cts.Token);
 
             cts.CancelAfter(50);
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
                 () => mutex.AcquireAsync(cts.Token)
-            ).ConfigureAwait(false);
+            );
         }
     }
 }

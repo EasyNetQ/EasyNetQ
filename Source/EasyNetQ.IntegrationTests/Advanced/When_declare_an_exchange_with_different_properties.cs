@@ -24,11 +24,11 @@ namespace EasyNetQ.IntegrationTests.Advanced
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            await bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
+            await bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Topic, cancellationToken: cts.Token);
             await Assert.ThrowsAsync<OperationInterruptedException>(
                 () => bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Direct, cancellationToken: cts.Token)
-            ).ConfigureAwait(false);
-            await bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
+            );
+            await bus.Advanced.ExchangeDeclareAsync("a", ExchangeType.Topic, cancellationToken: cts.Token);
         }
     }
 }

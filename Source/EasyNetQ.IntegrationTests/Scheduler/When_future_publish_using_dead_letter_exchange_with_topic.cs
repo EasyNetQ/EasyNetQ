@@ -41,12 +41,12 @@ namespace EasyNetQ.IntegrationTests.Scheduler
                 await Task.WhenAll(
                     bus.Scheduler.FuturePublishBatchAsync(firstTopicMessages, TimeSpan.FromSeconds(5), "first", cts.Token),
                     bus.Scheduler.FuturePublishBatchAsync(secondTopicMessages, TimeSpan.FromSeconds(5), "second", cts.Token)
-                ).ConfigureAwait(false);
+                );
 
                 await Task.WhenAll(
                     firstTopicMessagesSink.WaitAllReceivedAsync(cts.Token),
                     secondTopicMessagesSink.WaitAllReceivedAsync(cts.Token)
-                ).ConfigureAwait(false);
+                );
 
                 firstTopicMessagesSink.ReceivedMessages.Should().Equal(firstTopicMessages);
                 secondTopicMessagesSink.ReceivedMessages.Should().Equal(secondTopicMessages);

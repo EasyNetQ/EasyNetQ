@@ -38,7 +38,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             {
                 await Assert.ThrowsAsync<EasyNetQResponderException>(
                     () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
-                ).ConfigureAwait(false);
+                );
             }
         }
 
@@ -50,7 +50,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
             {
                 var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
-                    .ConfigureAwait(false);
+                    ;
                 response.Should().Be(new Response(42));
             }
         }
@@ -62,20 +62,20 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             using (await bus.Rpc.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id)), cts.Token))
             {
-                await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token).ConfigureAwait(false);
+                await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
 
-                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token).ConfigureAwait(false);
+                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
 
                 try
                 {
-                    await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token).ConfigureAwait(false);
+                    await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
                 }
                 catch (Exception)
                 {
                     // The crunch to deal with the race when Rpc has not handled reconnection yet
                 }
 
-                await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token).ConfigureAwait(false);
+                await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
             }
         }
     }
