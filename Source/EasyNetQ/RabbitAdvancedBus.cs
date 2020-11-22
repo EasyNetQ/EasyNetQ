@@ -78,20 +78,11 @@ namespace EasyNetQ
             this.advancedBusEventHandlers = advancedBusEventHandlers;
             this.Conventions = conventions;
 
-            if (advancedBusEventHandlers.Connected != null)
-                Connected += advancedBusEventHandlers.Connected;
-
-            if (advancedBusEventHandlers.Disconnected != null)
-                Disconnected += advancedBusEventHandlers.Disconnected;
-
-            if (advancedBusEventHandlers.Blocked != null)
-                Blocked += advancedBusEventHandlers.Blocked;
-
-            if (advancedBusEventHandlers.Unblocked != null)
-                Unblocked += advancedBusEventHandlers.Unblocked;
-
-            if (advancedBusEventHandlers.MessageReturned != null)
-                MessageReturned += advancedBusEventHandlers.MessageReturned;
+            Connected += advancedBusEventHandlers.Connected;
+            Disconnected += advancedBusEventHandlers.Disconnected;
+            Blocked += advancedBusEventHandlers.Blocked;
+            Unblocked += advancedBusEventHandlers.Unblocked;
+            MessageReturned += advancedBusEventHandlers.MessageReturned;
 
             eventSubscriptions = new[]
             {
@@ -653,20 +644,11 @@ namespace EasyNetQ
             foreach (var eventSubscription in eventSubscriptions)
                 eventSubscription.Dispose();
 
-            if (advancedBusEventHandlers.Connected != null)
-                Connected -= advancedBusEventHandlers.Connected;
-
-            if (advancedBusEventHandlers.Disconnected != null)
-                Disconnected -= advancedBusEventHandlers.Disconnected;
-
-            if (advancedBusEventHandlers.Blocked != null)
-                Blocked -= advancedBusEventHandlers.Blocked;
-
-            if (advancedBusEventHandlers.Unblocked != null)
-                Unblocked -= advancedBusEventHandlers.Unblocked;
-
-            if (advancedBusEventHandlers.MessageReturned != null)
-                MessageReturned -= advancedBusEventHandlers.MessageReturned;
+            Connected -= advancedBusEventHandlers.Connected;
+            Disconnected -= advancedBusEventHandlers.Disconnected;
+            Blocked -= advancedBusEventHandlers.Blocked;
+            Unblocked -= advancedBusEventHandlers.Unblocked;
+            MessageReturned -= advancedBusEventHandlers.MessageReturned;
         }
 
         private void OnConnectionCreated(ConnectionCreatedEvent @event)
