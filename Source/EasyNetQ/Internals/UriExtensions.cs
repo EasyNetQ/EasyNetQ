@@ -31,7 +31,7 @@ namespace EasyNetQ.Internals
             {
                 var keyValueParts = keyValue.Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                 if (keyValueParts.Length == 2)
-                    query.Add(keyValueParts[0], keyValueParts[1]);
+                    query.Add(Uri.UnescapeDataString(keyValueParts[0]), Uri.UnescapeDataString(keyValueParts[1]));
             }
             return query;
         }
