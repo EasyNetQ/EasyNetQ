@@ -12,8 +12,9 @@ namespace EasyNetQ.Tests.ConsumeTests
 {
     public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private ITestMessageInterface receivedMessage;
+        private readonly IDisposable consumer;
 
         public When_a_polymorphic_message_is_delivered_to_the_consumer()
         {
@@ -22,11 +23,11 @@ namespace EasyNetQ.Tests.ConsumeTests
             var queue = new Queue("test_queue", false);
 
             var are = new AutoResetEvent(false);
-            mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, info) => Task.Factory.StartNew(() =>
-                {
-                    receivedMessage = message.Body;
-                    are.Set();
-                }));
+            consumer = mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, info) => Task.Factory.StartNew(() =>
+            {
+                receivedMessage = message.Body;
+                are.Set();
+            }));
 
             var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
             var body = new JsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
@@ -43,7 +44,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "routing_key",
                 properties,
                 body
-                );
+            );
 
             if (!are.WaitOne(5000))
             {
@@ -53,7 +54,8 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            consumer.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]

@@ -17,6 +17,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private readonly IConventions conventions;
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly ISerializer serializer;
+        private readonly IDisposable responder;
 
         public When_a_responder_is_cancelled()
         {
@@ -26,7 +27,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
             serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
-            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m =>
+            responder = mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(m =>
             {
                 var tcs = new TaskCompletionSource<RpcResponse>();
                 tcs.SetCanceled();
@@ -38,7 +39,8 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            responder.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]

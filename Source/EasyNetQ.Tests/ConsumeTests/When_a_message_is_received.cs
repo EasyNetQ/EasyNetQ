@@ -17,12 +17,13 @@ namespace EasyNetQ.Tests.ConsumeTests
         private readonly MockBuilder mockBuilder;
         private MyMessage deliveredMyMessage;
         private MyOtherMessage deliveredMyOtherMessage;
+        private readonly IDisposable receiver;
 
         public When_a_message_is_received()
         {
             mockBuilder = new MockBuilder();
 
-            mockBuilder.SendReceive.Receive("the_queue", x => x
+            receiver = mockBuilder.SendReceive.Receive("the_queue", x => x
                 .Add<MyMessage>(message => deliveredMyMessage = message)
                 .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
@@ -33,7 +34,8 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            receiver.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
