@@ -44,6 +44,7 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("password", Text, c => c.Password),
             BuildKeyValueParser("prefetchCount", UShortNumber, c => c.PrefetchCount),
             BuildKeyValueParser("timeout", TimeSpanSeconds, c => c.Timeout),
+            BuildKeyValueParser("connectIntervalAttempt", TimeSpanSeconds, c => c.ConnectIntervalAttempt),
             BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
             BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
             BuildKeyValueParser("product", Text, c => c.Product),
