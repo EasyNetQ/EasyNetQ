@@ -26,7 +26,9 @@ namespace EasyNetQ
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
             // default service registration
             serviceRegister
-                .Register<IConnectionStringParser, ConnectionStringParser>()
+                .Register<IConnectionStringParser>(
+                    x => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
+                )
                 .Register<ISerializer>(_ => new JsonSerializer())
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
@@ -43,11 +45,7 @@ namespace EasyNetQ
                 .Register<IHandlerRunner, HandlerRunner>()
                 .Register<IInternalConsumerFactory, InternalConsumerFactory>()
                 .Register<IConsumerFactory, ConsumerFactory>()
-                .Register(c =>
-                {
-                    var connectionConfiguration = c.Resolve<ConnectionConfiguration>();
-                    return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
-                })
+                .Register(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
                 .Register<IClientCommandDispatcher, SingleChannelClientCommandDispatcher>()
                 .Register<IPersistentConnection, PersistentConnection>()
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
