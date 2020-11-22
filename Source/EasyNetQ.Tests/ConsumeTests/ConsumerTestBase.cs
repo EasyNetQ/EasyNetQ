@@ -25,6 +25,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         // populated when a message is delivered
         protected IBasicProperties OriginalProperties;
         protected byte[] OriginalBody;
+        private IDisposable consumer;
         protected const ulong DeliverTag = 10101;
 
         public ConsumerTestBase()
@@ -45,7 +46,11 @@ namespace EasyNetQ.Tests.ConsumeTests
             AdditionalSetUp();
         }
 
-        public void Dispose() => MockBuilder.Dispose();
+        public void Dispose()
+        {
+            consumer?.Dispose();
+            MockBuilder.Dispose();
+        }
 
         protected abstract void AdditionalSetUp();
 
@@ -53,7 +58,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);
-            MockBuilder.Bus.Advanced.Consume(queue, (body, properties, messageInfo) =>
+            consumer = MockBuilder.Bus.Advanced.Consume(queue, (body, properties, messageInfo) =>
             {
                 return Task.Run(() =>
                 {
