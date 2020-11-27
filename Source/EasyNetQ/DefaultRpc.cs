@@ -180,37 +180,36 @@ namespace EasyNetQ
             if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
                 return responseSubscription.QueueName;
 
-            using (await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
-            {
-                if (responseSubscriptions.TryGetValue(rpcKey, out responseSubscription))
-                    return responseSubscription.QueueName;
+            using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
-                var queue = await advancedBus.QueueDeclareAsync(
-                    conventions.RpcReturnQueueNamingConvention(responseType),
-                    c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
+            if (responseSubscriptions.TryGetValue(rpcKey, out responseSubscription))
+                return responseSubscription.QueueName;
+
+            var queue = await advancedBus.QueueDeclareAsync(
+                conventions.RpcReturnQueueNamingConvention(responseType),
+                c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
+            if (exchangeName != Exchange.GetDefault().Name)
+            {
+                var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
+                    exchangeName,
+                    ExchangeType.Direct,
                     cancellationToken
                 ).ConfigureAwait(false);
-
-                var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
-                if (exchangeName != Exchange.GetDefault().Name)
-                {
-                    var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
-                        exchangeName,
-                        ExchangeType.Direct,
-                        cancellationToken
-                    ).ConfigureAwait(false);
-                    await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
-                }
-
-                var subscription = advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) =>
-                {
-                    if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
-                        responseAction.OnSuccess(message);
-                });
-
-                responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
-                return queue.Name;
+                await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
             }
+
+            var subscription = advancedBus.Consume<TResponse>(queue, (message, messageReceivedInfo) =>
+            {
+                if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
+                    responseAction.OnSuccess(message);
+            });
+
+            responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
+            return queue.Name;
         }
 
         protected virtual async Task RequestPublishAsync<TRequest>(

@@ -26,7 +26,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            using (await bus.Rpc.RespondAsync<Request, Response>(x =>
+            using var _ = await bus.Rpc.RespondAsync<Request, Response>(x =>
             {
                 return x switch
                 {
@@ -34,18 +34,17 @@ namespace EasyNetQ.IntegrationTests.Rpc
                     RabbitRequest r => new RabbitResponse(r.Id),
                     _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
                 };
-            }, cts.Token))
-            {
-                var bunnyResponse = await bus.Rpc.RequestAsync<Request, Response>(
-                    new BunnyRequest(42), cts.Token
-                );
-                bunnyResponse.Should().Be(new BunnyResponse(42));
+            }, cts.Token);
 
-                var rabbitResponse = await bus.Rpc.RequestAsync<Request, Response>(
-                    new RabbitRequest(42), cts.Token
-                );
-                rabbitResponse.Should().Be(new RabbitResponse(42));
-            }
+            var bunnyResponse = await bus.Rpc.RequestAsync<Request, Response>(
+                new BunnyRequest(42), cts.Token
+            );
+            bunnyResponse.Should().Be(new BunnyResponse(42));
+
+            var rabbitResponse = await bus.Rpc.RequestAsync<Request, Response>(
+                new RabbitRequest(42), cts.Token
+            );
+            rabbitResponse.Should().Be(new RabbitResponse(42));
         }
     }
 }

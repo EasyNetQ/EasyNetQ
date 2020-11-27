@@ -30,16 +30,14 @@ namespace EasyNetQ.IntegrationTests.Rpc
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            using (
+            using var _ =
                 await bus.Rpc.RespondAsync<Request, Response>(
                     x => Task.FromException<Response>(new RequestFailedException()), cts.Token
-                )
-            )
-            {
-                await Assert.ThrowsAsync<EasyNetQResponderException>(
-                    () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
                 );
-            }
+
+            await Assert.ThrowsAsync<EasyNetQResponderException>(
+                () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
+            );
         }
 
         [Fact]
@@ -47,11 +45,10 @@ namespace EasyNetQ.IntegrationTests.Rpc
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
-            {
-                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
-                response.Should().Be(new Response(42));
-            }
+            using var _ = await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token);
+
+            var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
+            response.Should().Be(new Response(42));
         }
 
         [Fact]
@@ -59,23 +56,21 @@ namespace EasyNetQ.IntegrationTests.Rpc
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-            using (await bus.Rpc.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id)), cts.Token))
+            using var _ = await bus.Rpc.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id)), cts.Token);
+
+            await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
+            await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
+
+            try
             {
                 await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
-
-                await rmqFixture.ManagementClient.KillAllConnectionsAsync(cts.Token);
-
-                try
-                {
-                    await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
-                }
-                catch (Exception)
-                {
-                    // The crunch to deal with the race when Rpc has not handled reconnection yet
-                }
-
-                await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
             }
+            catch (Exception)
+            {
+                // The crunch to deal with the race when Rpc has not handled reconnection yet
+            }
+
+            await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
         }
     }
 }

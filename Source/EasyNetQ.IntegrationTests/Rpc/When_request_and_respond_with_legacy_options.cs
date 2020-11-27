@@ -29,17 +29,14 @@ namespace EasyNetQ.IntegrationTests.Rpc
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            using (
-                await bus.Rpc.RespondAsync<Request, Response>(x =>
-                        Task.FromException<Response>(new RequestFailedException("Oops")), cts.Token
-                )
-            )
-            {
-                var exception = await Assert.ThrowsAsync<EasyNetQResponderException>(
-                    () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
-                );
-                exception.Message.Should().Be("Oops");
-            }
+            using var _ = await bus.Rpc.RespondAsync<Request, Response>(x =>
+                    Task.FromException<Response>(new RequestFailedException("Oops")), cts.Token
+            );
+
+            var exception = await Assert.ThrowsAsync<EasyNetQResponderException>(
+                () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
+            );
+            exception.Message.Should().Be("Oops");
         }
 
         [Fact]
