@@ -2,10 +2,14 @@
 
 namespace EasyNetQ.DI
 {
+    /// <inheritdoc />
     public class DefaultServiceContainer : IServiceRegister
     {
-        private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer();
+        private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer(c => c.EnablePropertyInjection = false);
 
+        /// <summary>
+        ///     Creates DefaultServiceContainer
+        /// </summary>
         public DefaultServiceContainer()
         {
             container.Register<IServiceResolver>(x => new LightInjectResolver(x), new LightInject.PerRequestLifeTime());
@@ -28,13 +32,17 @@ namespace EasyNetQ.DI
         /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
-            container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
+            container.Register(x => factory((IServiceResolver) x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
             return this;
         }
 
+        /// <summary>
+        ///     Resolves instance of service
+        /// </summary>
+        /// <typeparam name="TService">Type of service to resolve</typeparam>
         public TService Resolve<TService>()
         {
-            return (TService)container.GetInstance(typeof(TService));
+            return (TService) container.GetInstance(typeof(TService));
         }
 
         private static LightInject.ILifetime ToLifetime(Lifetime lifetime)
@@ -61,7 +69,7 @@ namespace EasyNetQ.DI
 
             public TService Resolve<TService>() where TService : class
             {
-                return (TService)serviceFactory.GetInstance(typeof(TService));
+                return (TService) serviceFactory.GetInstance(typeof(TService));
             }
 
             public IServiceResolverScope CreateScope()

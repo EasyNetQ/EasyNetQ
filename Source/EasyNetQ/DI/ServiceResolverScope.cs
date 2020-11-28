@@ -5,6 +5,9 @@
     {
         private readonly IServiceResolver resolver;
 
+        /// <summary>
+        ///     Create ServiceResolverScope
+        /// </summary>
         public ServiceResolverScope(IServiceResolver resolver)
         {
             this.resolver = resolver;
