@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
@@ -29,13 +30,15 @@ namespace EasyNetQ.Consumer
 
     public class BasicConsumer : IBasicConsumer, IDisposable
     {
+        private readonly AsyncCountdownEvent messagesInProgress = new AsyncCountdownEvent();
+        private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly Action<BasicConsumer> cancelled;
         private readonly IConsumerDispatcher consumerDispatcher;
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
         private readonly ILog logger = LogProvider.For<BasicConsumer>();
 
-        private bool disposed;
+        private volatile bool disposed;
 
         public BasicConsumer(
             Action<BasicConsumer> cancelled,
@@ -79,21 +82,12 @@ namespace EasyNetQ.Consumer
             ReadOnlyMemory<byte> body
         )
         {
+            if (cts.IsCancellationRequested)
+                return;
+
             if (logger.IsDebugEnabled())
             {
                 logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
-            }
-
-            if (disposed)
-            {
-                // this message's consumer has stopped, so just return
-                logger.InfoFormat(
-                    "Consumer with consumerTag {consumerTag} on queue {queue} has stopped running. Ignoring message",
-                    ConsumerTag,
-                    Queue.Name
-                );
-
-                return;
             }
 
             var bodyBytes = body.ToArray();
@@ -102,15 +96,31 @@ namespace EasyNetQ.Consumer
             var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messageProperties, bodyBytes);
 
             eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, bodyBytes));
-            handlerRunner.InvokeUserMessageHandlerAsync(context)
+
+            messagesInProgress.Increment();
+            handlerRunner.InvokeUserMessageHandlerAsync(context, cts.Token)
                 .ContinueWith(async x =>
                     {
                         var ackStrategy = await x.ConfigureAwait(false);
-                        consumerDispatcher.QueueAction(() =>
+                        try
                         {
-                            var ackResult = ackStrategy(Model, deliveryTag);
-                            eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, bodyBytes, ackResult));
-                        });
+                            consumerDispatcher.QueueAction(() =>
+                            {
+                                try
+                                {
+                                    var ackResult = ackStrategy(Model, deliveryTag);
+                                    eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, bodyBytes, ackResult));
+                                }
+                                finally
+                                {
+                                    messagesInProgress.Decrement();
+                                }
+                            });
+                        }
+                        catch (Exception exception)
+                        {
+                            logger.Error("Failed to queue");
+                        }
                     },
                     TaskContinuationOptions.ExecuteSynchronously
                 );
@@ -166,7 +176,13 @@ namespace EasyNetQ.Consumer
             if (disposed) return;
             disposed = true;
 
+            cts.Cancel();
+            messagesInProgress.Wait();
+
             eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTag));
+
+            cts.Dispose();
+            messagesInProgress.Dispose();
         }
     }
 

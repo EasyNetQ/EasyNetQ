@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ.Events;
+﻿using EasyNetQ.Events;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Consumer
@@ -14,7 +11,7 @@ namespace EasyNetQ.Consumer
         private readonly MessageHandler onMessage;
         private readonly IQueue queue;
 
-        private bool disposed;
+        private volatile bool disposed;
 
         private IInternalConsumer internalConsumer;
 

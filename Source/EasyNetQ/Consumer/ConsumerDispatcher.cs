@@ -8,10 +8,13 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class ConsumerDispatcher : IConsumerDispatcher
     {
+        private readonly AutoResetEvent dispatcherThreadStoppedEvent = new AutoResetEvent(false);
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly BlockingCollection<Action> durableActions = new BlockingCollection<Action>();
         private readonly ILog logger = LogProvider.For<ConsumerDispatcher>();
         private readonly BlockingCollection<Action> transientActions = new BlockingCollection<Action>();
+
+        private volatile bool disposed;
 
         /// <summary>
         ///     Creates ConsumerDispatcher
@@ -45,10 +48,15 @@ namespace EasyNetQ.Consumer
                         {
                             action();
                         }
+                        catch (OperationCanceledException)
+                        {
+                        }
                         catch (Exception exception)
                         {
                             logger.ErrorException(string.Empty, exception);
                         }
+
+                    dispatcherThreadStoppedEvent.Set();
 
                     logger.Debug("EasyNetQ consumer dispatch thread finished");
                 }) {Name = "EasyNetQ consumer dispatch thread", IsBackground = true};
@@ -88,9 +96,19 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public void Dispose()
         {
+            if (disposed)
+                return;
+
+            disposed = true;
+
+            cancellation.Cancel();
+
             durableActions.CompleteAdding();
             transientActions.CompleteAdding();
-            cancellation.Cancel();
+            dispatcherThreadStoppedEvent.WaitOne();
+
+            cancellation.Dispose();
+            dispatcherThreadStoppedEvent.Dispose();
         }
     }
 }
