@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>EasyNetQ.Hosepipe.Tests</Description>
     <LangVersion>latest</LangVersion>
-    <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0;net461</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -33,7 +33,7 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' " />
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0' " />
   <ItemGroup>
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

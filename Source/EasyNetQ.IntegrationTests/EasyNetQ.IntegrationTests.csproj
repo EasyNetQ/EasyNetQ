@@ -3,7 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
   <PropertyGroup>
     <Description>EasyNetQ.IntegrationTests</Description>
-    <TargetFrameworks>netcoreapp3.1;</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0;</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
