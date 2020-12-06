@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
-using EasyNetQ.Tests;
 using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests
@@ -18,7 +17,7 @@ namespace EasyNetQ.Hosepipe.Tests
         /// <summary>
         /// Create a RabbitMQ queue 'Hosepipe_test_queue' before attempting this test.
         /// </summary>
-        [Fact][Explicit("Needs a RabbitMQ server on localhost")]
+        [Fact][Traits.Explicit("Needs a RabbitMQ server on localhost")]
         public void Should_be_able_to_inset_messages_onto_a_queue()
         {
             var messages = new[]
