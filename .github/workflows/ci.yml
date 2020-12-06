@@ -42,10 +42,20 @@ jobs:
     - name: Build
       run: msbuild ${{ github.workspace }}/Source/EasyNetQ.sln -property:Configuration=Release
 
-    - name: Unit Tests
+    - name: Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
         dotnet test --configuration Release --no-build --framework netcoreapp3.0
+
+    - name: DI.Tests
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.DI.Tests
+        dotnet test --configuration Release --no-build --framework netcoreapp3.0
+
+    - name: Hosepipe.Tests
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.Hosepipe.Tests
+        dotnet test --configuration Release --no-build --filter "(Category!=Explicit)" --framework netcoreapp3.0
 
     - name: Integration Tests
       run: |

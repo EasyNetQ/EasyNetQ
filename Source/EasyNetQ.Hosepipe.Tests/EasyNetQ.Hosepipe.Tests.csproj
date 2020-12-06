@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     <ProjectReference Include="..\EasyNetQ.Hosepipe\EasyNetQ.Hosepipe.csproj" />
-    <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />

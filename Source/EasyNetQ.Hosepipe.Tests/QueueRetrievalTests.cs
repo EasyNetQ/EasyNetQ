@@ -3,7 +3,6 @@
 using System;
 using System.Threading;
 using EasyNetQ.Consumer;
-using EasyNetQ.Tests;
 using Xunit;
 
 namespace EasyNetQ.Hosepipe.Tests

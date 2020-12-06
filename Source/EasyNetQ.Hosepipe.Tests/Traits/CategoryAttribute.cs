@@ -10,7 +10,7 @@ namespace EasyNetQ.Hosepipe.Tests.Traits
     /// From xUnit sample about Trait extensibility:
     /// https://github.com/xunit/samples.xunit/blob/master/TraitExtensibility/CategoryAttribute.cs
     /// </remarks>
-    [TraitDiscoverer("EasyNetQ.Hosepipe.Tests.CategoryDiscoverer", "EasyNetQ.Hosepipe.Tests")]
+    [TraitDiscoverer("EasyNetQ.Hosepipe.Tests.Traits.CategoryDiscoverer", "EasyNetQ.Hosepipe.Tests")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public class CategoryAttribute : Attribute, ITraitAttribute
     {
