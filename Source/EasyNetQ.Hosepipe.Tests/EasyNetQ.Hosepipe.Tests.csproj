@@ -15,7 +15,6 @@
     <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
@@ -33,9 +32,6 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' " />
   <ItemGroup>
