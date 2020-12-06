@@ -78,12 +78,6 @@ namespace EasyNetQ
         public ushort PrefetchCount { get; set; }
 
         /// <summary>
-        ///     The connection string used for the connection.
-        /// </summary>
-        [Obsolete("Will be removed in next major version")]
-        public Uri AmqpConnectionString { get; set; }
-
-        /// <summary>
         ///     Client properties to be sent to the broker
         /// </summary>
         public IDictionary<string, object> ClientProperties { get; }
