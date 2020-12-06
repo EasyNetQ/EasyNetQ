@@ -44,3 +44,8 @@ jobs:
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
         dotnet test --configuration Release --no-build --framework netcoreapp3.0
+
+    - name: Integration Tests 
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
+        dotnet test --configuration Release --no-build --framework netcoreapp3.0
