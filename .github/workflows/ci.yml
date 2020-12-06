@@ -41,4 +41,4 @@ jobs:
       run: msbuild ${{ github.workspace }}/Source/EasyNetQ.sln -property:Configuration=Release
 
     - name: Unit Tests 
-      run: dotnet test ${{ github.workspace }}/Source/EasyNetQ.Tests/EasyNetQ.Tests.csproj --configuration Release --no-restore --no-build --filter "(Category!=Explicit)
+      run: dotnet test ${{ github.workspace }}/Source/EasyNetQ.Tests/EasyNetQ.Tests.csproj --configuration Release --no-restore --no-build
