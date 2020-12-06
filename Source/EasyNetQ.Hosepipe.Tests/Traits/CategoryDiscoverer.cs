@@ -2,7 +2,7 @@
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Hosepipe.Tests.Traits
 {
     /// <summary>
     /// Adapted from xUnit sample on Trait extensibility

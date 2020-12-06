@@ -70,7 +70,7 @@
 </ItemGroup>
 
 <Exec WorkingDirectory="%(TestProjects.RootDir)\%(TestProjects.Directory)"
-      Command='dotnet test --configuration $(Configuration) --no-build --filter "(Category!=Explicit) &#038; (Category!=Integration)"'
+      Command='dotnet test --configuration $(Configuration) --no-build --filter "(Category!=Explicit)"'
       ContinueOnError="ErrorAndContinue" />
 </Target>
 

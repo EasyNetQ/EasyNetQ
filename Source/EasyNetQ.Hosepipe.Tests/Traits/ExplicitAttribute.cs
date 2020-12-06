@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Tests
+﻿namespace EasyNetQ.Hosepipe.Tests.Traits
 {
     /// <summary>
     /// Category specifying that a test has to be explicitly named before it

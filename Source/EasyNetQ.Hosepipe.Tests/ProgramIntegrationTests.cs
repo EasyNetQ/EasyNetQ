@@ -1,11 +1,10 @@
-﻿using EasyNetQ.Tests;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 
 namespace EasyNetQ.Hosepipe.Tests
 {
-    [Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]
+    [Traits.Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]
     public class ProgramIntegrationTests
     {
         private const string outputPath = @"C:\Temp\MessageOutput";
