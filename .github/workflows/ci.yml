@@ -15,6 +15,7 @@ jobs:
 
     name: Test
     runs-on: ubuntu-20.04
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v2
       
@@ -35,7 +36,7 @@ jobs:
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
 
     - name: Build
-      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-restore
+      run: msbuild ${{ github.workspace }}/Source/EasyNetQ.sln -property:Configuration=Release
 
     - name: Unit Tests 
       run: dotnet test ${{ github.workspace }}/Source/EasyNetQ.Tests/EasyNetQ.Tests.csproj --configuration Release --no-restore --no-build --filter "(Category!=Explicit)
