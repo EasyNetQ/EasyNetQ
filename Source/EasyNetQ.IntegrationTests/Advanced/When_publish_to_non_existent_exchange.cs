@@ -25,15 +25,15 @@ namespace EasyNetQ.IntegrationTests.Advanced
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            await bus.Advanced.ExchangeDeclareAsync("existent", ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
+            await bus.Advanced.ExchangeDeclareAsync("existent", ExchangeType.Topic, cancellationToken: cts.Token);
             await Assert.ThrowsAsync<AlreadyClosedException>(() =>
                 bus.Advanced.PublishAsync(
                     new Exchange("non-existent"), "#", false, new MessageProperties(), Array.Empty<byte>(), cts.Token
                 )
-            ).ConfigureAwait(false);
+            );
             await bus.Advanced.PublishAsync(
                 new Exchange("existent"), "#", false, new MessageProperties(), Array.Empty<byte>(), cts.Token
-            ).ConfigureAwait(false);
+            );
         }
     }
 }

@@ -47,10 +47,10 @@ namespace EasyNetQ.IntegrationTests.PubSub
 
             await bus.PubSub.PublishBatchAsync(
                 lowPriorityMessages, x => x.WithPriority(LowPriority), cts.Token
-            ).ConfigureAwait(false);
+            );
             await bus.PubSub.PublishBatchAsync(
                 highPriorityMessages, x => x.WithPriority(HighPriority), cts.Token
-            ).ConfigureAwait(false);
+            );
 
             using (
                 await bus.PubSub.SubscribeAsync<Message>(
@@ -58,7 +58,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
                 )
             )
             {
-                await messagesSink.WaitAllReceivedAsync(cts.Token).ConfigureAwait(false);
+                await messagesSink.WaitAllReceivedAsync(cts.Token);
 
                 messagesSink.ReceivedMessages.Should().Equal(highPriorityMessages.Concat(lowPriorityMessages));
             }

@@ -28,7 +28,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
 
             await bus.Advanced.ExchangeDeclareAsync(
                 Guid.NewGuid().ToString("N"), c => c.WithType(ExchangeType.Topic), cts.Token
-            ).ConfigureAwait(false);
+            );
 
             mre.Wait(cts.Token);
         }

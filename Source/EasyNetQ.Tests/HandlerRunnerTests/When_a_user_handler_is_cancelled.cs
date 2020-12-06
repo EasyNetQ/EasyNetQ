@@ -1,12 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
 using NSubstitute;
 using RabbitMQ.Client;
 using System;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
 using Xunit;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
@@ -45,7 +43,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
                 .ContinueWith(async x =>
                 {
-                    var ackStrategy = await x.ConfigureAwait(false);
+                    var ackStrategy = await x;
                     return ackStrategy(channel, 42);
                 }, TaskContinuationOptions.ExecuteSynchronously)
                 .Unwrap();

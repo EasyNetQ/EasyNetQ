@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.Internals
              var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
              tcs.AttachCancellation(cts.Token);
              cts.Cancel();
-             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => tcs.Task).ConfigureAwait(false);
+             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => tcs.Task);
         }
     }
 }

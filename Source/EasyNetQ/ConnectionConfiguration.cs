@@ -32,6 +32,7 @@ namespace EasyNetQ
             PublisherConfirms = false;
             PersistentMessages = true;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
+            MandatoryPublish = false;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
@@ -79,6 +80,7 @@ namespace EasyNetQ
         /// <summary>
         ///     The connection string used for the connection.
         /// </summary>
+        [Obsolete("Will be removed in next major version")]
         public Uri AmqpConnectionString { get; set; }
 
         /// <summary>
@@ -107,7 +109,7 @@ namespace EasyNetQ
         public bool PublisherConfirms { get; set; }
 
         /// <summary>
-        ///     Enables persistent messages. (default is true)
+        ///     Enables persistent messages (default is true)
         /// </summary>
         public bool PersistentMessages { get; set; }
 
@@ -135,6 +137,11 @@ namespace EasyNetQ
         ///     Interval between reconnection attempts. (default is 5s)
         /// </summary>
         public TimeSpan ConnectIntervalAttempt { get; set; }
+
+        /// <summary>
+        ///     Enables mandatory flag for publish (default is false)
+        /// </summary>
+        public bool MandatoryPublish { get; set; }
     }
 
     /// <summary>

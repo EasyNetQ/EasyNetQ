@@ -37,7 +37,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             {
                 var exception = await Assert.ThrowsAsync<EasyNetQResponderException>(
                     () => bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
-                ).ConfigureAwait(false);
+                );
                 exception.Message.Should().Be("Oops");
             }
         }
@@ -49,8 +49,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
             {
-                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token)
-                    .ConfigureAwait(false);
+                var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
                 response.Should().Be(new Response(42));
             }
         }

@@ -368,7 +368,7 @@ namespace EasyNetQ
                     isDurable,
                     isExclusive,
                     isAutoDelete,
-                    arguments.Stringify()
+                    arguments?.Stringify()
                 );
             }
 
@@ -454,7 +454,7 @@ namespace EasyNetQ
                     type,
                     isDurable,
                     isAutoDelete,
-                    arguments.Stringify()
+                    arguments?.Stringify()
                 );
             }
 
@@ -499,7 +499,7 @@ namespace EasyNetQ
                     queue.Name,
                     exchange.Name,
                     routingKey,
-                    arguments.Stringify()
+                    arguments?.Stringify()
                 );
             }
 
@@ -527,7 +527,7 @@ namespace EasyNetQ
                     destination.Name,
                     source.Name,
                     routingKey,
-                    arguments.Stringify()
+                    arguments?.Stringify()
                 );
             }
 

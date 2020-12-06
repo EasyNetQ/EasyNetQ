@@ -33,10 +33,10 @@ namespace EasyNetQ.Tests.ProducerTests
             eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, true));
             await Assert.ThrowsAsync<PublishNackedException>(
                 () => confirmation1.WaitAsync()
-            ).ConfigureAwait(false);
+            );
             await Assert.ThrowsAsync<PublishNackedException>(
                 () => confirmation2.WaitAsync()
-            ).ConfigureAwait(false);
+            );
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests.ProducerTests
             eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, false));
             await Assert.ThrowsAsync<PublishNackedException>(
                 () => confirmation.WaitAsync()
-            ).ConfigureAwait(false);
+            );
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests.ProducerTests
             model.NextPublishSeqNo.Returns(DeliveryTag);
             var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-            await confirmation.WaitAsync().ConfigureAwait(false);
+            await confirmation.WaitAsync();
         }
 
         [Fact]
@@ -66,8 +66,8 @@ namespace EasyNetQ.Tests.ProducerTests
             var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
             var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, true));
-            await confirmation1.WaitAsync().ConfigureAwait(false);
-            await confirmation2.WaitAsync().ConfigureAwait(false);
+            await confirmation1.WaitAsync();
+            await confirmation2.WaitAsync();
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests.ProducerTests
             using var cts = new CancellationTokenSource(1000);
             await Assert.ThrowsAsync<TaskCanceledException>(
                 () => confirmation.WaitAsync(cts.Token)
-            ).ConfigureAwait(false);
+            );
         }
 
         [Fact]
@@ -89,11 +89,11 @@ namespace EasyNetQ.Tests.ProducerTests
             eventBus.Publish(new ChannelRecoveredEvent(model));
             await Assert.ThrowsAsync<PublishInterruptedException>(
                 () => confirmation1.WaitAsync()
-            ).ConfigureAwait(false);
+            );
 
             var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
             eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-            await confirmation2.WaitAsync().ConfigureAwait(false);
+            await confirmation2.WaitAsync();
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests.ProducerTests
             );
             await Assert.ThrowsAsync<PublishReturnedException>(
                 () => confirmation1.WaitAsync()
-            ).ConfigureAwait(false);
+            );
         }
     }
 }

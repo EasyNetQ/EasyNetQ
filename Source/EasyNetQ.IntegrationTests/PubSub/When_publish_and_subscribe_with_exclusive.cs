@@ -44,7 +44,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
             )
             {
                 // To ensure that ^ subscriber started successfully
-                await Task.Delay(TimeSpan.FromSeconds(1), cts.Token).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(1), cts.Token);
 
                 using (
                     await bus.PubSub.SubscribeAsync<Message>(
@@ -55,12 +55,12 @@ namespace EasyNetQ.IntegrationTests.PubSub
                     )
                 )
                 {
-                    await bus.PubSub.PublishBatchAsync(messages, cts.Token).ConfigureAwait(false);
+                    await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
                     await Task.WhenAll(
                         firstConsumerMessagesSink.WaitAllReceivedAsync(cts.Token),
                         secondConsumerMessagesSink.WaitAllReceivedAsync(cts.Token)
-                    ).ConfigureAwait(false);
+                    );
 
                     firstConsumerMessagesSink.ReceivedMessages.Should().Equal(messages);
                     secondConsumerMessagesSink.ReceivedMessages.Should().Equal();
