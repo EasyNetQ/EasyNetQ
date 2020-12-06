@@ -13,25 +13,29 @@ on:
 jobs:
   build:
 
-    name: Test on .NET Core ${{ matrix.dotnet }}
-    strategy:
-      matrix:
-        dotnet:
-          - 3.1.404
-    runs-on: ubuntu-latest
+    name: Test
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        dotnet-version: 3.1.404
  
+    - name: Setup Mono
+      run: |
+        apt install gnupg ca-certificates
+        apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+        echo "deb https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+        apt update
+        apt install mono-devel
+
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
-      
+
     - name: Build
       run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-restore
-      
+
     - name: Unit Tests 
       run: dotnet test ${{ github.workspace }}/Source/EasyNetQ.Tests/EasyNetQ.Tests.csproj --configuration Release --no-restore --no-build --filter "(Category!=Explicit)
