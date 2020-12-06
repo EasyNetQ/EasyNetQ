@@ -30,12 +30,9 @@ namespace EasyNetQ.ConnectionString
 
         internal static readonly Parser<IList<HostConfiguration>> Hosts = Host.ListDelimitedBy(',').Select(hosts => hosts.ToList());
 
-        internal static readonly Parser<Uri> Amqp = Parse.CharExcept(';').Many().Text().Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).Select(_ => new Uri(_));
-
         internal static readonly Parser<UpdateConfiguration> Part = new List<Parser<UpdateConfiguration>>
         {
             // add new connection string parts here
-            BuildKeyValueParser("amqp", Amqp, c => c.AmqpConnectionString),
             BuildKeyValueParser("host", Hosts, c => c.Hosts),
             BuildKeyValueParser("port", UShortNumber, c => c.Port),
             BuildKeyValueParser("virtualHost", Text, c => c.VirtualHost),
@@ -53,15 +50,7 @@ namespace EasyNetQ.ConnectionString
             BuildKeyValueParser("mandatoryPublish", Bool, c => c.MandatoryPublish)
         }.Aggregate((a, b) => a.Or(b));
 
-        internal static readonly Parser<UpdateConfiguration> AmqpAlone =
-            Amqp.Select(_ => (Func<ConnectionConfiguration, ConnectionConfiguration>)(configuration
-                =>
-            {
-                configuration.AmqpConnectionString = _;
-                return configuration;
-            }));
-
-        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';').Or(AmqpAlone.Once());
+        internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';');
 
         public static IEnumerable<UpdateConfiguration> ParseConnectionString(string connectionString)
         {

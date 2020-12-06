@@ -12,27 +12,6 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 
-            if (
-                configuration.AmqpConnectionString != null &&
-                configuration.Hosts.All(h => h.Host != configuration.AmqpConnectionString.Host)
-            )
-            {
-                if (configuration.Port == ConnectionConfiguration.DefaultPort)
-                {
-                    if (configuration.AmqpConnectionString.Port > 0)
-                        configuration.Port = (ushort) configuration.AmqpConnectionString.Port;
-                    else if (
-                        configuration.AmqpConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase)
-                    )
-                        configuration.Port = ConnectionConfiguration.DefaultAmqpsPort;
-                }
-
-                if (configuration.AmqpConnectionString.Segments.Length > 1)
-                    configuration.VirtualHost = configuration.AmqpConnectionString.Segments.Last();
-
-                configuration.Hosts.Add(new HostConfiguration {Host = configuration.AmqpConnectionString.Host});
-            }
-
             if (configuration.Hosts.Count == 0)
                 throw new EasyNetQException(
                     "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""
