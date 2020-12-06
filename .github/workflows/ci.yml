@@ -12,7 +12,6 @@ on:
 
 jobs:
   build:
-
     name: Test
     runs-on: ubuntu-18.04
     timeout-minutes: 15
@@ -25,7 +24,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.404
- 
+
     - name: Setup Mono
       run: |
         sudo apt install gnupg ca-certificates
@@ -34,18 +33,21 @@ jobs:
         sudo apt update
         sudo apt install mono-devel
 
+    - name: Patch docker connection string
+      run: sed -i -e 's/http:\/\/127.0.0.1:2375/unix:\/var\/run\/docker.sock/g' ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests/settings.json
+
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
 
     - name: Build
       run: msbuild ${{ github.workspace }}/Source/EasyNetQ.sln -property:Configuration=Release
 
-    - name: Unit Tests 
+    - name: Unit Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
         dotnet test --configuration Release --no-build --framework netcoreapp3.0
 
-    - name: Integration Tests 
+    - name: Integration Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
         dotnet test --configuration Release --no-build --framework netcoreapp3.0
