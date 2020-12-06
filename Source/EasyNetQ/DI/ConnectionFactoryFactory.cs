@@ -23,10 +23,6 @@ namespace EasyNetQ.DI
                 NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
                 ContinuationTimeout = configuration.Timeout
             };
-
-            if (configuration.AmqpConnectionString != null)
-                connectionFactory.Uri = configuration.AmqpConnectionString;
-
             return connectionFactory;
         }
     }
