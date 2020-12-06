@@ -41,10 +41,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe", "EasyNe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.Tests", "EasyNetQ.Hosepipe.Tests\EasyNetQ.Hosepipe.Tests.csproj", "{DA597678-7873-4156-8112-8C70B164381A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests.Tasks", "EasyNetQ.Tests.Tasks\EasyNetQ.Tests.Tasks.csproj", "{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Tests.Common", "EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj", "{5D708FE2-F12B-4337-96BF-A9F79897A928}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Microsoft", "EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj", "{132E7958-BC4E-42D3-86F2-6BF98E4FB6B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.IntegrationTests", "EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj", "{FA531CDD-54D1-4AB8-A3D8-691AF0947435}"
@@ -99,14 +95,6 @@ Global
 		{DA597678-7873-4156-8112-8C70B164381A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA597678-7873-4156-8112-8C70B164381A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5CF1B2C-E390-4BFF-BB1A-0F171DB0D6BD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D708FE2-F12B-4337-96BF-A9F79897A928}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D708FE2-F12B-4337-96BF-A9F79897A928}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D708FE2-F12B-4337-96BF-A9F79897A928}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D708FE2-F12B-4337-96BF-A9F79897A928}.Release|Any CPU.Build.0 = Release|Any CPU
 		{132E7958-BC4E-42D3-86F2-6BF98E4FB6B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{132E7958-BC4E-42D3-86F2-6BF98E4FB6B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{132E7958-BC4E-42D3-86F2-6BF98E4FB6B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
