@@ -10,7 +10,7 @@ namespace EasyNetQ.Hosepipe.Tests
 {
     public class QueueRetrievalTests
     {
-        [Fact][Explicit("Requires a RabbitMQ server on localhost")]
+        [Fact][Traits.Explicit("Requires a RabbitMQ server on localhost")]
         public void TryGetMessagesFromQueue()
         {
             const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
@@ -31,7 +31,7 @@ namespace EasyNetQ.Hosepipe.Tests
             }
         }
 
-        [Fact][Explicit("Requires a RabbitMQ server on localhost")]
+        [Fact][Traits.Explicit("Requires a RabbitMQ server on localhost")]
         public void PublishSomeMessages()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
@@ -44,7 +44,7 @@ namespace EasyNetQ.Hosepipe.Tests
             bus.Dispose();
         }
 
-        [Fact][Explicit("Requires a RabbitMQ server on localhost")]
+        [Fact][Traits.Explicit("Requires a RabbitMQ server on localhost")]
         public void ConsumeMessages()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
