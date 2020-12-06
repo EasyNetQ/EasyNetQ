@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+	  - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build:
+
+    name: Test on .NET Core ${{ matrix.dotnet }}
+    strategy:
+      matrix:
+        dotnet:
+          - 3.1.404
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+ 
+    - name: Install dependencies
+      run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+      
+    - name: Build
+      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-restore
+      
+    - name: Unit Tests 
+      run: dotnet test ${{ github.workspace }}/Source/EasyNetQ.Tests/EasyNetQ.Tests.csproj --configuration Release --no-restore --no-build --filter "(Category!=Explicit)
