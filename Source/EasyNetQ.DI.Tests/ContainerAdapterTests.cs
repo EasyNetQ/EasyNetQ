@@ -5,6 +5,7 @@ using Autofac;
 using Castle.Windsor;
 using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.LightInject;
+using EasyNetQ.DI.Microsoft;
 using EasyNetQ.DI.Ninject;
 using EasyNetQ.DI.SimpleInjector;
 using EasyNetQ.DI.StructureMap;
@@ -16,11 +17,7 @@ using LightInjectContainer = LightInject.ServiceContainer;
 using NinjectContainer = Ninject.StandardKernel;
 using SimpleInjectorContainer = SimpleInjector.Container;
 using StructureMapContainer = StructureMap.Container;
-#if !NETFX
-using EasyNetQ.DI.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
-
-#endif
 
 namespace EasyNetQ.DI.Tests
 {
@@ -181,7 +178,6 @@ namespace EasyNetQ.DI.Tests
                 })
             };
 
-#if !NETFX
             yield return new object[]
             {
                 (ResolverFactory)(c =>
@@ -192,7 +188,6 @@ namespace EasyNetQ.DI.Tests
                     return serviceProvider.GetService<IServiceResolver>();
                 })
             };
-#endif
         }
 
         public interface IService
