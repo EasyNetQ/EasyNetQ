@@ -15,23 +15,18 @@ jobs:
     name: Test
     runs-on: ubuntu-18.04
     timeout-minutes: 15
+    strategy:
+      matrix:
+        dotnet: ['3.1.x']
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
-    - name: Setup .NET Core
+    - name: Setup .NET Core ${{ matrix.dotnet }}
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.404
-
-    - name: Setup Mono
-      run: |
-        sudo apt install gnupg ca-certificates
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-        echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-        sudo apt update
-        sudo apt install mono-devel
+        dotnet-version: ${{ matrix.dotnet }}
 
     - name: Patch docker connection string
       run: sed -i -e 's/http:\/\/127.0.0.1:2375/unix:\/var\/run\/docker.sock/g' ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests/settings.json
@@ -40,24 +35,24 @@ jobs:
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
 
     - name: Build
-      run: msbuild ${{ github.workspace }}/Source/EasyNetQ.sln -property:Configuration=Release
+      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
 
     - name: Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
-        dotnet test --configuration Release --no-build --framework netcoreapp3.0
+        dotnet test --configuration Release --no-build
 
     - name: DI.Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.DI.Tests
-        dotnet test --configuration Release --no-build --framework netcoreapp3.0
+        dotnet test --configuration Release --no-build
 
     - name: Hosepipe.Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Hosepipe.Tests
-        dotnet test --configuration Release --no-build --filter "(Category!=Explicit)" --framework netcoreapp3.0
+        dotnet test --configuration Release --no-build --filter "(Category!=Explicit)"
 
     - name: Integration Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
-        dotnet test --configuration Release --no-build --framework netcoreapp3.0
+        dotnet test --configuration Release --no-build

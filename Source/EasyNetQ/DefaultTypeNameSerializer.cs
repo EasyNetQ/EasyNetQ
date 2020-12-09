@@ -113,32 +113,7 @@ namespace EasyNetQ
 
             if (assemblyName != null)
             {
-#if NETFX
-                // look, I don't like using obsolete methods as much as you do but this is the only way
-                // Assembly.Load won't check the GAC for a partial name
-#pragma warning disable 618,612
-                var assembly = Assembly.LoadWithPartialName(assemblyName);
-#pragma warning restore 618,612
-#else
                 var assembly = Assembly.Load(new AssemblyName(assemblyName));
-#endif
-
-#if NETFX
-                if (assembly == null)
-                {
-                    // will find assemblies loaded with Assembly.LoadFile outside of the main directory
-                    var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-                    foreach (var a in loadedAssemblies)
-                    {
-                        // check for both full name or partial name match
-                        if (a.FullName == assemblyName || a.GetName().Name == assemblyName)
-                        {
-                            assembly = a;
-                            break;
-                        }
-                    }
-                }
-#endif
                 if (assembly == null)
                 {
                     throw new EasyNetQException($"Could not load assembly '{assemblyName}'");

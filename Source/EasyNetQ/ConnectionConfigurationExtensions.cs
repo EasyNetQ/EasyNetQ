@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace EasyNetQ
@@ -21,11 +20,8 @@ namespace EasyNetQ
                 if (hostConfiguration.Port == 0)
                     hostConfiguration.Port = configuration.Port;
 
-#if !NETFX
             var version = typeof(ConnectionConfigurationExtensions).GetTypeInfo().Assembly.GetName().Version.ToString();
-#else
-            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-#endif
+
             var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
             var applicationName = "unknown";
