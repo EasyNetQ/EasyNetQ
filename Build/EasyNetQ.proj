@@ -36,13 +36,7 @@
 
     <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets"/>
 
-    <Target Name="Default" DependsOnTargets="Version; Build; Test; Package" />
-
-    <Target Name="Version">
-        <FileUpdate Files="$(Source)\Version.cs"
-            Regex="AssemblyVersion\(&quot;(\d+)\.(\d+)\.(\d+)\.(\d+)&quot;\)"
-            ReplacementText="AssemblyVersion(&quot;$1.$2.$3.$(BuildNumber)&quot;)" />
-    </Target>
+    <Target Name="Default" DependsOnTargets="Build; Test; Package" />
 
     <ItemGroup>
         <ProjectToBuild Include="$(Source)\EasyNetQ.sln">
@@ -51,12 +45,12 @@
     </ItemGroup>
 
     <!-- Restore all packages in solution -->
-    <Target Name="Restore" DependsOnTargets="Version">
+    <Target Name="Restore">
         <Exec WorkingDirectory="$(Source)" Command="dotnet restore %(ProjectToBuild.FullName)" />
     </Target>
 
     <!-- MSBuild only occurs after restore and version. -->
-    <Target Name="Build" DependsOnTargets="Version; Restore">
+    <Target Name="Build" DependsOnTargets="Restore">
         <MSBuild Projects="@(ProjectToBuild)" Targets="Rebuild"/>
     </Target>
     <!-- Test all projects against their targeted frameworks. Only tests that
