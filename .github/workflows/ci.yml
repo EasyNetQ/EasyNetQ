@@ -80,4 +80,4 @@ jobs:
       - name: Pack
         run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols
       - name: Publish
-        run: dotnet nuget publish ../Packages/*.* --source https://nuget.pkg.github.com/EasyNetQ/index.json --api-key=${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push ../Packages/*.* --source https://nuget.pkg.github.com/EasyNetQ/index.json --api-key=${{ secrets.GITHUB_TOKEN }}

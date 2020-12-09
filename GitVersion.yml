@@ -1,0 +1,17 @@
+assembly-versioning-scheme: MajorMinorPatch	
+assembly-file-versioning-scheme: MajorMinorPatchTag
+mode: ContinuousDelivery	
+branches:	
+  master:	
+    mode: ContinuousDelivery
+    track-merge-target: false
+    increment: Patch
+    prevent-increment-of-merged-branch-version: true
+  develop:
+    mode: ContinuousDeployment
+    tag: alpha
+    increment: Major
+    track-merge-target: true
+ignore:	
+  sha: []
+ 
