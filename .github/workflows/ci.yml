@@ -40,12 +40,12 @@ jobs:
     - name: Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
-        dotnet test --configuration Release --no-build --framework
+        dotnet test --configuration Release --no-build
 
     - name: DI.Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.DI.Tests
-        dotnet test --configuration Release --no-build --framework
+        dotnet test --configuration Release --no-build
 
     - name: Hosepipe.Tests
       run: |
@@ -55,4 +55,4 @@ jobs:
     - name: Integration Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
-        dotnet test --configuration Release --no-build --framework
+        dotnet test --configuration Release --no-build
