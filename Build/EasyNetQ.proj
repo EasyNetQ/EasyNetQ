@@ -38,12 +38,6 @@
 
     <Target Name="Default" DependsOnTargets="Version; Build; Test; Package" />
 
-    <Target Name="Version">
-        <FileUpdate Files="$(Source)\Version.cs"
-            Regex="AssemblyVersion\(&quot;(\d+)\.(\d+)\.(\d+)\.(\d+)&quot;\)"
-            ReplacementText="AssemblyVersion(&quot;$1.$2.$3.$(BuildNumber)&quot;)" />
-    </Target>
-
     <ItemGroup>
         <ProjectToBuild Include="$(Source)\EasyNetQ.sln">
             <Properties>Configuration=$(Configuration)</Properties>
@@ -51,7 +45,7 @@
     </ItemGroup>
 
     <!-- Restore all packages in solution -->
-    <Target Name="Restore" DependsOnTargets="Version">
+    <Target Name="Restore">
         <Exec WorkingDirectory="$(Source)" Command="dotnet restore %(ProjectToBuild.FullName)" />
     </Target>
 
