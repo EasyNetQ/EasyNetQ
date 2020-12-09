@@ -178,7 +178,6 @@ namespace EasyNetQ.DI.Tests
                 })
             };
 
-#if !NETFX
             yield return new object[]
             {
                 (ResolverFactory)(c =>
@@ -189,7 +188,6 @@ namespace EasyNetQ.DI.Tests
                     return serviceProvider.GetService<IServiceResolver>();
                 })
             };
-#endif
         }
 
         public interface IService
