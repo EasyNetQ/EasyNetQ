@@ -1,8 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
+    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
+    <PackageProduct>EasyNetQ</PackageProduct>
+    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
     <Description>An adaptor to allow EasyNetQ to use Castle.Windsor as its internal IoC container</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
+    <PackageIcon>EasyNetQ.png</PackageIcon>
+    <PackageLicenseFile>licence.txt</PackageLicenseFile>
     <PackageTags>Windsor;RabbitMQ;Messaging;AMQP;C#</PackageTags>
     <LangVersion>latest</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,7 +15,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <AssemblyOriginatorKeyFile>../../Assets/EasyNetQ.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Assets\EasyNetQ.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
@@ -25,6 +29,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath=""/>
+    <None Include="..\..\licence.txt" Pack="true" PackagePath=""/>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
 </Project>
