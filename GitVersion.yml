@@ -1,17 +1,31 @@
-assembly-versioning-scheme: MajorMinorPatch	
+assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatchTag
-mode: ContinuousDelivery	
-branches:	
-  master:	
+mode: ContinuousDelivery
+branches:
+  master:
     mode: ContinuousDelivery
-    track-merge-target: false
     increment: Patch
     prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    tracks-release-branches: false
+    is-release-branch: false
   develop:
     mode: ContinuousDeployment
     tag: alpha
     increment: Major
+    prevent-increment-of-merged-branch-version: false
     track-merge-target: true
-ignore:	
+    tracks-release-branches: true
+    is-release-branch: false
+  pull-request:
+    regex: ^(pull|pull\-requests|pr)[/-]
+    mode: ContinuousDelivery
+    tag: pr
+    increment: Inherit
+    prevent-increment-of-merged-branch-version: false
+    tag-number-pattern: '[/-](?<number>\d+)[-/]'
+    track-merge-target: false
+    tracks-release-branches: false
+    is-release-branch: false
+ignore:
   sha: []
- 

@@ -63,7 +63,6 @@ jobs:
     name: Publish to GitHub
     runs-on: ubuntu-18.04
     needs: test
-    if: github.ref != 'ref/head/master' && github.ref != 'ref/head/develop'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -78,6 +77,6 @@ jobs:
       - name: Build
         run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
       - name: Pack
-        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols
+        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols --output ${{ github.workspace }}/Packages
       - name: Publish
-        run: dotnet nuget push ../Packages/*.* --source https://nuget.pkg.github.com/EasyNetQ/index.json --api-key=${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push ${{ github.workspace }}/Packages/*.* --source https://nuget.pkg.github.com/EasyNetQ/index.json --api-key=${{ secrets.GITHUB_TOKEN }}
