@@ -213,7 +213,7 @@ namespace EasyNetQ.Tests
             );
 
             // Assert that QoS got configured correctly
-            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);
+            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, true);
 
             // Assert that binding got configured correctly
             mockBuilder.Channels[0].Received().QueueBind(
