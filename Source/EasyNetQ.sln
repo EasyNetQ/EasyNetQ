@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.props = build.props
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
-		NuGet.Config = NuGet.Config
 		..\README.md = ..\README.md
 		Version.cs = Version.cs
 		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
