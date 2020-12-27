@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/github/EasyNetQ/easynetq?svg=true)](https://ci.appveyor.com/project/EasyNetQ/easynetq)
+[![Build status](https://github.com/EasyNetQ/EasyNetQ/workflows/CI/badge.svg)](https://github.com/EasyNetQ/EasyNetQ/actions?query=workflow%3ACI)
 
 [![NuGet Status](https://img.shields.io/nuget/v/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
 [![Nuget Status](https://img.shields.io/nuget/vpre/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
