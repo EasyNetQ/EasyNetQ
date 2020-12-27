@@ -5,13 +5,14 @@ on:
     branches:
       - master
       - develop
+    tags: [ '[0-9].[0-9].[0-9]' ]
   pull_request:
     branches:
       - master
       - develop
 
 jobs:
-  build:
+  test:
     name: Test
     runs-on: ubuntu-18.04
     timeout-minutes: 15
@@ -19,7 +20,8 @@ jobs:
       matrix:
         dotnet: ['3.1.x']
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
@@ -56,3 +58,26 @@ jobs:
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
         dotnet test --configuration Release --no-build
+
+  publish-to-nuget:
+    name: Publish to NuGet
+    runs-on: ubuntu-18.04
+    needs: test
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup .NET Core ${{ matrix.dotnet }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+      - name: Install dependencies
+        run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+      - name: Build
+        run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
+      - name: Pack
+        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols --output ${{ github.workspace }}/Packages
+      - name: Publish
+        run: dotnet nuget push ${{ github.workspace }}/Packages/*.* --api-key=${{ secrets.NUGET_TOKEN }}
