@@ -20,9 +20,6 @@
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.4.0)" />
     <PackageReference Include="GitVersionTask" Version="5.0.1">
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
-    <PackageReference Include="GitVersionTask" Version="5.5.1">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1">
       <PrivateAssets>all</PrivateAssets>
     </DotNetCliToolReference>
@@ -36,5 +33,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
 </Project>
