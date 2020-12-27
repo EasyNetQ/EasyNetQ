@@ -2,7 +2,6 @@
 using EasyNetQ.Topology;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer
@@ -15,7 +14,7 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Unique consumer id
         /// </summary>
-        public Guid Id { get; }
+        Guid Id { get; }
 
         /// <summary>
         ///     Starts the consumer
@@ -145,9 +144,10 @@ namespace EasyNetQ.Consumer
             eventBus.Publish(new StoppedConsumingEvent(this));
         }
 
-        private void InternalConsumerOnCancelled(object sender, EventArgs e)
+        private void InternalConsumerOnCancelled(object sender, InternalConsumerCancelledEventArgs e)
         {
-            Dispose();
+            if (e.Active.Count == 0)
+                Dispose();
         }
 
         private void OnConnectionDisconnected(ConnectionDisconnectedEvent _)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -35,6 +36,29 @@ namespace EasyNetQ.Consumer
     }
 
     /// <summary>
+    ///     Represents an internal consumer's cancelled event
+    /// </summary>
+    public class InternalConsumerCancelledEventArgs : EventArgs
+    {
+        /// <inheritdoc />
+        public InternalConsumerCancelledEventArgs(IQueue cancelled, IReadOnlyCollection<IQueue> active)
+        {
+            Cancelled = cancelled;
+            Active = active;
+        }
+
+        /// <summary>
+        ///     Queue for which consume is cancelled
+        /// </summary>
+        public IQueue Cancelled { get; }
+
+        /// <summary>
+        ///     Queues for which consume is active
+        /// </summary>
+        public IReadOnlyCollection<IQueue> Active { get; }
+    }
+
+    /// <summary>
     ///     Consumer which starts/stops raw consumers
     /// </summary>
     public interface IInternalConsumer : IDisposable
@@ -50,24 +74,22 @@ namespace EasyNetQ.Consumer
         void StopConsuming();
 
         /// <summary>
-        ///     Raised when consumer is completely cancelled
+        ///     Raised when consumer is cancelled
         /// </summary>
-        event EventHandler<EventArgs> Cancelled;
+        event EventHandler<InternalConsumerCancelledEventArgs> Cancelled;
     }
 
     /// <inheritdoc />
     public class InternalConsumer : IInternalConsumer
     {
-        private readonly ConsumerConfiguration configuration;
-        private readonly IPersistentConnection connection;
-
-        private readonly Dictionary<IQueue, AsyncBasicConsumer>
-            consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
-
-        private readonly IEventBus eventBus;
-        private readonly IHandlerRunner handlerRunner;
+        private readonly Dictionary<IQueue, AsyncBasicConsumer> consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
         private readonly ILog logger = LogProvider.For<InternalConsumer>();
         private readonly AsyncLock mutex = new AsyncLock();
+
+        private readonly ConsumerConfiguration configuration;
+        private readonly IPersistentConnection connection;
+        private readonly IEventBus eventBus;
+        private readonly IHandlerRunner handlerRunner;
 
         private volatile bool disposed;
         private volatile IModel model;
@@ -192,7 +214,7 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public event EventHandler<EventArgs> Cancelled;
+        public event EventHandler<InternalConsumerCancelledEventArgs> Cancelled;
 
         /// <inheritdoc />
         public void Dispose()
@@ -214,20 +236,23 @@ namespace EasyNetQ.Consumer
 
         private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
         {
-            var raiseCancelledEvent = false;
-
+            IQueue cancelled;
+            IReadOnlyCollection<IQueue> active;
             using (await mutex.AcquireAsync().ConfigureAwait(false))
             {
                 if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
                 {
                     consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                     consumer.Dispose();
-                    raiseCancelledEvent = consumers.Count == 0;
+                    cancelled = consumer.Queue;
+                    active = consumers.Select(x => x.Key).ToList();
+                }
+                else
+                {
+                    return;
                 }
             }
-
-            if (raiseCancelledEvent)
-                Cancelled?.Invoke(this, EventArgs.Empty);
+            Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
         }
     }
 }
