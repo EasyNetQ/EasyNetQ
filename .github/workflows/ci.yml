@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - develop
-    tags: [ '[0-9].[0-9]+.[0-9]+' ]
+    tags: [ '[0-9].[0-9].[0-9]' ]
   pull_request:
     branches:
       - master
@@ -59,10 +59,11 @@ jobs:
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
         dotnet test --configuration Release --no-build
 
-  publish-to-github:
-    name: Publish to GitHub
+  publish-to-nuget:
+    name: Publish to NuGet
     runs-on: ubuntu-18.04
     needs: test
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -79,4 +80,4 @@ jobs:
       - name: Pack
         run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols --output ${{ github.workspace }}/Packages
       - name: Publish
-        run: dotnet nuget push ${{ github.workspace }}/Packages/*.* --source https://nuget.pkg.github.com/EasyNetQ/index.json --api-key=${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push ${{ github.workspace }}/Packages/*.* --api-key=${{ secrets.NUGET_TOKEN }}
