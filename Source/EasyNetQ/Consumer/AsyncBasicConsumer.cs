@@ -38,20 +38,6 @@ namespace EasyNetQ.Consumer
         public IQueue Queue => queue;
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-            if (disposed)
-                return;
-
-            disposed = true;
-            cts.Cancel();
-            onTheFlyMessages.Wait();
-            cts.Dispose();
-            onTheFlyMessages.Dispose();
-            eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
-        }
-
-        /// <inheritdoc />
         public override async Task OnCancel(params string[] consumerTags)
         {
             await base.OnCancel(consumerTags).ConfigureAwait(false);
@@ -105,6 +91,20 @@ namespace EasyNetQ.Consumer
             {
                 onTheFlyMessages.Decrement();
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+
+            disposed = true;
+            cts.Cancel();
+            onTheFlyMessages.Wait();
+            cts.Dispose();
+            onTheFlyMessages.Dispose();
+            eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
         }
     }
 }

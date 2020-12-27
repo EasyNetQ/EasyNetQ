@@ -3,7 +3,7 @@
 namespace EasyNetQ.DI
 {
     /// <inheritdoc />
-    public class DefaultServiceContainer : IServiceRegister
+    public class DefaultServiceContainer : IServiceRegister, IDisposable
     {
         private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer(c => c.EnablePropertyInjection = false);
 
@@ -44,6 +44,9 @@ namespace EasyNetQ.DI
         {
             return (TService) container.GetInstance(typeof(TService));
         }
+
+        /// <inheritdoc />
+        public void Dispose() => container.Dispose();
 
         private static LightInject.ILifetime ToLifetime(Lifetime lifetime)
         {

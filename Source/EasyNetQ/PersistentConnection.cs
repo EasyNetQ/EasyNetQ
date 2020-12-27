@@ -83,8 +83,8 @@ namespace EasyNetQ
         {
             if (disposed) return;
 
-            initializedConnection?.Dispose();
             disposed = true;
+            initializedConnection?.Dispose();
         }
 
         private IAutorecoveringConnection Connect()

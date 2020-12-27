@@ -7,7 +7,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Mocking
 {
-    public class MockBuilder
+    public class MockBuilder : IDisposable
     {
         private readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IBus bus;
@@ -75,10 +75,6 @@ namespace EasyNetQ.Tests.Mocking
                 registerServices(x);
                 x.Register(connectionFactory);
             });
-
-            bus.Should().NotBeNull();
-            bus.Advanced.Should().NotBeNull();
-            bus.Advanced.Container.Should().NotBeNull();
         }
 
         public IPubSub PubSub => bus.PubSub;
@@ -108,5 +104,7 @@ namespace EasyNetQ.Tests.Mocking
         public IPersistentConnection PersistentConnection => ServiceProvider.Resolve<IPersistentConnection>();
 
         public List<string> ConsumerQueueNames => consumerQueueNames;
+
+        public void Dispose() => bus.Dispose();
     }
 }

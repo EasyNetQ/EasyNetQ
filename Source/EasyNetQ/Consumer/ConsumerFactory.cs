@@ -47,7 +47,9 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public IConsumer CreateConsumer(ConsumerConfiguration configuration)
         {
-            return new Consumer(configuration, connection, internalConsumerFactory, eventBus);
+            var consumer = new Consumer(configuration, connection, internalConsumerFactory, eventBus);
+            consumers.TryAdd(consumer.Id, consumer);
+            return consumer;
         }
 
         /// <inheritdoc />
@@ -55,7 +57,6 @@ namespace EasyNetQ.Consumer
         {
             unsubscribeFromStoppedConsumerEvent.Dispose();
             consumers.ClearAndDispose();
-            internalConsumerFactory.Dispose();
         }
     }
 }
