@@ -7,7 +7,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public class When_disposed : Given_a_PersistentConsumer
     {
-        protected override void AdditionalSetup()
+        public When_disposed()
         {
             consumer.StartConsuming();
             consumer.Dispose();

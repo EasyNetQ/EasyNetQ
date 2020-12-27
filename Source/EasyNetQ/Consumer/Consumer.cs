@@ -84,12 +84,10 @@ namespace EasyNetQ.Consumer
         /// </summary>
         public Consumer(
             ConsumerConfiguration configuration,
-            IPersistentConnection connection,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )
         {
-            Preconditions.CheckNotNull(connection, nameof(connection));
             Preconditions.CheckNotNull(internalConsumerFactory, nameof(internalConsumerFactory));
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
             Preconditions.CheckNotNull(configuration, nameof(configuration));

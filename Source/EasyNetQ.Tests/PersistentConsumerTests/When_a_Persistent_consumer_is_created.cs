@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public class When_a_Persistent_consumer_starts_consuming : Given_a_PersistentConsumer
     {
-        protected override void AdditionalSetup()
+        public When_a_Persistent_consumer_starts_consuming()
         {
             consumer.StartConsuming();
         }
@@ -23,8 +23,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [Fact]
         public void Should_create_internal_consumer()
         {
-            internalConsumerFactory.Received().CreateConsumer(Arg.Any<ConsumerConfiguration>());
-            createConsumerCalled.Should().Be(1);
+            internalConsumerFactory.Received(1).CreateConsumer(Arg.Any<ConsumerConfiguration>());
         }
     }
 }
