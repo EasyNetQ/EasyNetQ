@@ -7,16 +7,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
 		..\.gitignore = ..\.gitignore
-		..\appveyor.yml = ..\appveyor.yml
-		..\build.bat = ..\build.bat
 		build.props = build.props
-		build.targets = build.targets
-		..\Build\EasyNetQ.proj = ..\Build\EasyNetQ.proj
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
-		NuGet.Config = NuGet.Config
 		..\README.md = ..\README.md
 		Version.cs = Version.cs
+		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ", "EasyNetQ\EasyNetQ.csproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
