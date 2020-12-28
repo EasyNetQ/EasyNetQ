@@ -35,7 +35,7 @@ namespace EasyNetQ.Interception
 
             var receivedInfo = message.ReceivedInfo;
             var properties = message.Properties;
-            var body = message.Body;
+            var body = message.Body.ToArray(); // TODO Do not copy here
             return new ConsumedMessage(
                 receivedInfo, properties, tripleDesDecryptor.TransformFinalBlock(body, 0, body.Length)
             );

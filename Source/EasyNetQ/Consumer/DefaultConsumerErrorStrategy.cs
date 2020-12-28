@@ -75,7 +75,7 @@ namespace EasyNetQ.Consumer
                 "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
                 context.ReceivedInfo,
                 context.Properties,
-                Convert.ToBase64String(context.Body)
+                Convert.ToBase64String(context.Body.ToArray())
             );
 
             try
@@ -160,7 +160,7 @@ namespace EasyNetQ.Consumer
 
         private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
-            var messageAsString = errorMessageSerializer.Serialize(context.Body);
+            var messageAsString = errorMessageSerializer.Serialize(context.Body.ToArray());
             var error = new Error
             {
                 RoutingKey = context.ReceivedInfo.RoutingKey,

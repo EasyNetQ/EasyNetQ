@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Text;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     JsonSerializer based on Newtonsoft.Json
+    /// </summary>
     public class JsonSerializer : ISerializer
     {
         private static readonly Encoding Encoding = new UTF8Encoding(false);
@@ -17,10 +21,14 @@ namespace EasyNetQ
 
         private readonly Newtonsoft.Json.JsonSerializer jsonSerializer;
 
+        /// <inheritdoc />
         public JsonSerializer() : this(DefaultSerializerSettings)
         {
         }
 
+        /// <summary>
+        ///     Creates JsonSerializer
+        /// </summary>
         public JsonSerializer(Newtonsoft.Json.JsonSerializerSettings serializerSettings)
         {
             jsonSerializer = Newtonsoft.Json.JsonSerializer.Create(serializerSettings);
@@ -36,6 +44,7 @@ namespace EasyNetQ
             using (var jsonWriter = new Newtonsoft.Json.JsonTextWriter(streamWriter))
             {
                 jsonWriter.Formatting = jsonSerializer.Formatting;
+                jsonWriter.ArrayPool = JsonSerializerArrayPool<char>.Instance;
                 jsonSerializer.Serialize(jsonWriter, message, messageType);
             }
 
@@ -43,15 +52,23 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public object BytesToMessage(Type messageType, byte[] bytes)
+        public object BytesToMessage(Type messageType, ReadOnlyMemory<byte> bytes)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
-            Preconditions.CheckNotNull(bytes, "bytes");
 
-            using var memoryStream = new MemoryStream(bytes, false);
+            using var memoryStream = new MemoryStream(bytes.ToArray(), false); // TODO Do not copy here
             using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
-            using var reader = new Newtonsoft.Json.JsonTextReader(streamReader);
+            using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) {ArrayPool = JsonSerializerArrayPool<char>.Instance};
             return jsonSerializer.Deserialize(reader, messageType);
+        }
+
+        private class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
+        {
+            public static JsonSerializerArrayPool<T> Instance { get; } = new JsonSerializerArrayPool<T>();
+
+            public T[] Rent(int minimumLength) => ArrayPool<T>.Shared.Rent(minimumLength);
+
+            public void Return(T[] array) => ArrayPool<T>.Shared.Return(array);
         }
     }
 }

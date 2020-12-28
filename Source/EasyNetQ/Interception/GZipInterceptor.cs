@@ -26,7 +26,7 @@ namespace EasyNetQ.Interception
             var properties = message.Properties;
             var body = message.Body;
             using var output = new MemoryStream();
-            using (var compressedStream = new MemoryStream(body))
+            using (var compressedStream = new MemoryStream(body.ToArray())) // TODO Do not copy here
             using (var decompressingStream = new GZipStream(compressedStream, CompressionMode.Decompress))
                 decompressingStream.CopyTo(output);
             return new ConsumedMessage(receivedInfo, properties, output.ToArray());

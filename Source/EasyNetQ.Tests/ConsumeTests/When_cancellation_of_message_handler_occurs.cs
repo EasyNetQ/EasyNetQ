@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using EasyNetQ.Consumer;
 using NSubstitute;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
                                                         args.ReceivedInfo.DeliveryTag == DeliverTag &&
                                                         args.ReceivedInfo.Exchange == "the_exchange" &&
-                                                        args.Body.SequenceEqual(OriginalBody)));
+                                                        args.Body.ToArray().SequenceEqual(OriginalBody)));
         }
 
         [Fact]

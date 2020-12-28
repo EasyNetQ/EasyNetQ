@@ -334,11 +334,11 @@ namespace EasyNetQ
                     queue.Name
                 ),
                 new MessageProperties(basicGetResult.BasicProperties),
-                basicGetResult.Body.ToArray()
+                basicGetResult.Body
             );
             var interceptedMessage = interceptor.OnConsume(message);
             return PullResult.Available(
-                messagesCount, interceptedMessage.ReceivedInfo, interceptedMessage.Properties, interceptedMessage.Body
+                messagesCount, interceptedMessage.ReceivedInfo, interceptedMessage.Properties, interceptedMessage.Body.ToArray()
             );
         }
 

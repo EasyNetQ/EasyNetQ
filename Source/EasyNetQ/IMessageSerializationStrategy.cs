@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace EasyNetQ
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
         /// <returns></returns>
-        IMessage DeserializeMessage(MessageProperties properties, byte[] body);
+        IMessage DeserializeMessage(MessageProperties properties, ReadOnlyMemory<byte> body);
     }
 
     /// <summary>
