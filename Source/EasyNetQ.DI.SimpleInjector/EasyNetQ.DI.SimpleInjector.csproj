@@ -30,7 +30,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SimpleInjector" Version="4.6.2" />
+    <PackageReference Include="SimpleInjector" Version="4.10.2" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
