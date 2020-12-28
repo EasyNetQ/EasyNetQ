@@ -11,14 +11,15 @@ namespace EasyNetQ.Consumer
 {
     internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     {
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private readonly IEventBus eventBus;
-        private readonly IHandlerRunner handlerRunner;
         private readonly ILog logger = LogProvider.For<AsyncBasicConsumer>();
-        private readonly MessageHandler messageHandler;
+        private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly AsyncCountdownEvent onTheFlyMessages = new AsyncCountdownEvent();
 
+        private readonly IEventBus eventBus;
+        private readonly IHandlerRunner handlerRunner;
+        private readonly MessageHandler messageHandler;
         private readonly IQueue queue;
+
         private volatile bool disposed;
 
         public AsyncBasicConsumer(
