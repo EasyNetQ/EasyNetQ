@@ -12,7 +12,7 @@ namespace EasyNetQ.Interception
         public ProducedMessage OnProduce(ProducedMessage message)
         {
             var properties = message.Properties;
-            var body = message.Body;
+            var body = message.Body.ToArray(); // TODO Do not copy here
             using var output = new MemoryStream();
             using (var compressingStream = new GZipStream(output, CompressionMode.Compress))
                 compressingStream.Write(body, 0, body.Length);

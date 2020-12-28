@@ -306,7 +306,7 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body,
+            ReadOnlyMemory<byte> body,
             CancellationToken cancellationToken
         )
         {
@@ -361,8 +361,9 @@ namespace EasyNetQ
                 }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
             }
 
-            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties,
-                rawMessage.Body));
+            eventBus.Publish(
+                new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body)
+            );
 
             if (logger.IsDebugEnabled())
             {

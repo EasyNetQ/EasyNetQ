@@ -10,6 +10,9 @@ namespace EasyNetQ.Interception
         private readonly byte[] iv;
         private readonly byte[] key;
 
+        /// <summary>
+        ///     Creates TripleDESInterceptor
+        /// </summary>
         public TripleDESInterceptor(byte[] key, byte[] iv)
         {
             this.iv = iv;
@@ -20,7 +23,7 @@ namespace EasyNetQ.Interception
         public ProducedMessage OnProduce(ProducedMessage message)
         {
             var properties = message.Properties;
-            var body = message.Body;
+            var body = message.Body.ToArray(); // TODO Do not copy here
             using var tripleDes = TripleDES.Create();
             using var tripleDesEncryptor = tripleDes.CreateEncryptor(key, iv);
             var encryptedBody = tripleDesEncryptor.TransformFinalBlock(body, 0, body.Length);
