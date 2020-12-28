@@ -43,17 +43,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Fact]
-        public void Should_nack_with_requeue_if_has_been_disposed()
-        {
-            var consumerErrorStrategy = CreateConsumerErrorStrategy(Substitute.For<IPersistentConnection>());
-            consumerErrorStrategy.Dispose();
-
-            var ackStrategy = consumerErrorStrategy.HandleConsumerError(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"));
-
-            Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
-        }
-
-        [Fact]
         public void Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
         {
             var persistedConnectionMock = Substitute.For<IPersistentConnection>();

@@ -6,13 +6,18 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using FluentAssertions;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
     public class When_a_consumer_has_multiple_handlers : IDisposable
     {
+        private readonly MockBuilder mockBuilder;
+        private IAnimal animalResult;
+
+        private MyMessage myMessageResult;
+        private MyOtherMessage myOtherMessageResult;
+
         public When_a_consumer_has_multiple_handlers()
         {
             mockBuilder = new MockBuilder();
@@ -40,8 +45,8 @@ namespace EasyNetQ.Tests.ConsumeTests
                     })
             );
 
-            Deliver(new MyMessage { Text = "Hello Polymorphs!" });
-            Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
+            Deliver(new MyMessage {Text = "Hello Polymorphs!"});
+            Deliver(new MyOtherMessage {Text = "Hello Isomorphs!"});
             Deliver(new Dog());
 
             if (!countdownEvent.Wait(5000)) throw new TimeoutException();
@@ -51,12 +56,6 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             mockBuilder.Bus.Dispose();
         }
-
-        private readonly MockBuilder mockBuilder;
-
-        private MyMessage myMessageResult;
-        private MyOtherMessage myOtherMessageResult;
-        private IAnimal animalResult;
 
         private void Deliver<T>(T message) where T : class
         {
@@ -74,7 +73,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "routing_key",
                 properties,
                 body
-            );
+            ).GetAwaiter().GetResult();
         }
 
         [Fact]

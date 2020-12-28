@@ -1,64 +1,52 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
-using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public abstract class Given_a_PersistentConsumer
     {
-        protected const string queueName = "my_queue";
-        protected ConsumerConfiguration configuration;
-        protected IConsumer consumer;
-        protected int createConsumerCalled;
-        protected IEventBus eventBus;
-        protected IInternalConsumerFactory internalConsumerFactory;
-        protected List<IInternalConsumer> internalConsumers;
-        protected MockBuilder mockBuilder;
-        protected MessageHandler onMessage;
-        protected IPersistentConnection persistentConnection;
-        protected IQueue queue;
+        private const string queueName = "my_queue";
 
-        public Given_a_PersistentConsumer()
+        protected readonly IConsumer consumer;
+        protected readonly IEventBus eventBus;
+        protected readonly IInternalConsumerFactory internalConsumerFactory;
+        protected readonly List<IInternalConsumer> internalConsumers;
+
+        protected Given_a_PersistentConsumer()
         {
             eventBus = new EventBus();
             internalConsumers = new List<IInternalConsumer>();
 
-            createConsumerCalled = 0;
-            mockBuilder = new MockBuilder();
-
-            queue = new Queue(queueName, false);
-            onMessage = (body, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack);
+            IQueue queue = new Queue(queueName, false);
+            MessageHandler handler = (body, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack);
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
-
-            internalConsumerFactory.CreateConsumer().Returns(x =>
+            internalConsumerFactory.CreateConsumer(Arg.Any<ConsumerConfiguration>()).Returns(x =>
             {
                 var internalConsumer = Substitute.For<IInternalConsumer>();
                 internalConsumers.Add(internalConsumer);
-                createConsumerCalled++;
+                internalConsumer.StartConsuming(Arg.Any<bool>())
+                    .Returns(new InternalConsumerStatus(new[] {queue}, Array.Empty<IQueue>()));
                 return internalConsumer;
             });
-            configuration = new ConsumerConfiguration(0);
-            consumer = new PersistentConsumer(
-                queue,
-                onMessage,
-                configuration,
+            consumer = new Consumer.Consumer(
+                new ConsumerConfiguration(
+                    0,
+                    new Dictionary<IQueue, PerQueueConsumerConfiguration>
+                    {
+                        {queue, new PerQueueConsumerConfiguration("", false, null, handler)}
+                    }
+                ),
                 internalConsumerFactory,
                 eventBus
             );
-
-            AdditionalSetup();
         }
-
-        protected abstract void AdditionalSetup();
     }
 }
 

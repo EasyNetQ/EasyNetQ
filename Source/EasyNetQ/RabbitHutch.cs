@@ -146,7 +146,7 @@ namespace EasyNetQ
         {
             var container = new DefaultServiceContainer();
             RegisterBus(container, connectionConfigurationFactory, registerServices);
-            return container.Resolve<IBus>();
+            return new BusWithCustomDisposer(container.Resolve<IBus>(), container.Dispose);
         }
 
         /// <summary>
@@ -177,6 +177,26 @@ namespace EasyNetQ
 
             serviceRegister.RegisterDefaultServices();
             registerServices(serviceRegister);
+        }
+
+        private class BusWithCustomDisposer : IBus
+        {
+            private readonly IBus bus;
+            private readonly Action disposer;
+
+            public BusWithCustomDisposer(IBus bus, Action disposer)
+            {
+                this.bus = bus;
+                this.disposer = disposer;
+            }
+
+            public void Dispose() => disposer();
+
+            public IPubSub PubSub => bus.PubSub;
+            public IRpc Rpc => bus.Rpc;
+            public ISendReceive SendReceive => bus.SendReceive;
+            public IScheduler Scheduler => bus.Scheduler;
+            public IAdvancedBus Advanced => bus.Advanced;
         }
     }
 }

@@ -131,10 +131,11 @@ namespace EasyNetQ
 
             var consumerCancellation = advancedBus.Consume<T>(
                 queue,
-                (message, messageReceivedInfo) => onMessage(message.Body, default),
-                x => x.WithPriority(subscriptionConfiguration.Priority)
-                    .WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
+                (message, _, cancellation) => onMessage(message.Body, cancellation),
+                c => c.WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
+                    .WithPriority(subscriptionConfiguration.Priority)
                     .WithExclusive(subscriptionConfiguration.IsExclusive)
+                    .WithConsumerTag(conventions.ConsumerTagConvention())
             );
 
             return new SubscriptionResult(exchange, queue, consumerCancellation);

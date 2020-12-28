@@ -29,22 +29,6 @@ namespace EasyNetQ
         );
 
         /// <summary>
-        /// Receive a message from the specified queue
-        /// </summary>
-        /// <typeparam name="T">The type of message to receive</typeparam>
-        /// <param name="queue">The queue to receive from</param>
-        /// <param name="onMessage">The asynchronous function that handles the message</param>
-        /// <param name="configure">Action to configure consumer with</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-        AwaitableDisposable<IDisposable> ReceiveAsync<T>(
-            string queue,
-            Func<T, CancellationToken, Task> onMessage,
-            Action<IConsumerConfiguration> configure,
-            CancellationToken cancellationToken = default
-        );
-
-        /// <summary>
         /// Receive a message from the specified queue. Dispatch them to the given handlers
         /// </summary>
         /// <param name="queue">The queue to take messages from</param>
@@ -55,7 +39,7 @@ namespace EasyNetQ
         AwaitableDisposable<IDisposable> ReceiveAsync(
             string queue,
             Action<IReceiveRegistration> addHandlers,
-            Action<IConsumerConfiguration> configure,
+            Action<IReceiveConfiguration> configure,
             CancellationToken cancellationToken = default
         );
     }
