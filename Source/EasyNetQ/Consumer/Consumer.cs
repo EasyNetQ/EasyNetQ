@@ -2,6 +2,7 @@
 using EasyNetQ.Topology;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer
@@ -48,20 +49,45 @@ namespace EasyNetQ.Consumer
         ///     Tag of the consumer
         /// </summary>
         public string ConsumerTag { get; }
+
+        /// <summary>
+        ///     Indicates whether consumer is exclusive
+        /// </summary>
         public bool IsExclusive { get; }
+
+        /// <summary>
+        ///     Customer arguments
+        /// </summary>
         public IDictionary<string, object> Arguments { get; }
+
+        /// <summary>
+        ///     Handler for messages which are received by consumer
+        /// </summary>
         public MessageHandler Handler { get; }
     }
 
+    /// <summary>
+    ///     Configuration of the consumer
+    /// </summary>
     public class ConsumerConfiguration
     {
+        /// <summary>
+        ///     Creates ConsumerConfiguration
+        /// </summary>
         public ConsumerConfiguration(ushort prefetchCount, IReadOnlyDictionary<IQueue, PerQueueConsumerConfiguration> perQueueConfigurations)
         {
             PrefetchCount = prefetchCount;
             PerQueueConfigurations = perQueueConfigurations;
         }
 
+        /// <summary>
+        ///     PrefetchCount for the consumer
+        /// </summary>
         public ushort PrefetchCount { get; }
+
+        /// <summary>
+        ///     Configurations of the consumer for queues
+        /// </summary>
         public IReadOnlyDictionary<IQueue, PerQueueConsumerConfiguration> PerQueueConfigurations { get; }
     }
 
@@ -137,7 +163,9 @@ namespace EasyNetQ.Consumer
 
             foreach (var disposable in disposables)
                 disposable.Dispose();
-            consumer?.Dispose();
+
+            var consumerToDispose = Interlocked.Exchange(ref consumer, null);
+            consumerToDispose?.Dispose();
 
             eventBus.Publish(new StoppedConsumingEvent(this));
         }
