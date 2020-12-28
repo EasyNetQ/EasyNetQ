@@ -17,7 +17,7 @@ namespace EasyNetQ.Consumer
         /// matching handler is found, or false if it should return a noop handler.
         /// Default is true.
         /// </summary>
-        bool ThrowOnNoMatchingHandler { get; set; }
+        bool ThrowOnNoMatchingHandler { set; }
     }
 
     /// <inheritdoc />

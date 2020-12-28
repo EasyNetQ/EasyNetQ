@@ -32,9 +32,11 @@ namespace EasyNetQ.Consumer
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly ConnectionConfiguration configuration;
 
-        private bool disposed;
-        private bool disposing;
+        private volatile bool disposed;
 
+        /// <summary>
+        ///     Creates DefaultConsumerErrorStrategy
+        /// </summary>
         public DefaultConsumerErrorStrategy(
             IPersistentConnection connection,
             ISerializer serializer,
@@ -44,10 +46,12 @@ namespace EasyNetQ.Consumer
             ConnectionConfiguration configuration
         )
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(serializer, "serializer");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(serializer, nameof(serializer));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
+            Preconditions.CheckNotNull(errorMessageSerializer, nameof(errorMessageSerializer));
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             this.connection = connection;
             this.serializer = serializer;
@@ -63,15 +67,8 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(context, "context");
             Preconditions.CheckNotNull(exception, "exception");
 
-            if (disposed || disposing)
-            {
-                logger.ErrorFormat(
-                    "ErrorStrategy was already disposed, when attempting to handle consumer error. Error message will not be published and message with receivedInfo={receivedInfo} will be requeued",
-                    context.ReceivedInfo
-                );
-
-                return AckStrategies.NackWithRequeue;
-            }
+            if (disposed)
+                throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
 
             logger.Error(
                 exception,
@@ -134,10 +131,6 @@ namespace EasyNetQ.Consumer
         public virtual void Dispose()
         {
             if (disposed) return;
-            disposing = true;
-
-            connection.Dispose();
-
             disposed = true;
         }
 

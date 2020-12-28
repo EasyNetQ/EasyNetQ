@@ -12,6 +12,29 @@ namespace EasyNetQ
     public static class SendReceiveExtensions
     {
         /// <summary>
+        /// Receive a message from the specified queue
+        /// </summary>
+        /// <typeparam name="T">The type of message to receive</typeparam>
+        /// <param name="sendReceive">The sendReceive instance</param>
+        /// <param name="queue">The queue to receive from</param>
+        /// <param name="onMessage">The asynchronous function that handles the message</param>
+        /// <param name="configure">Action to configure consumer with</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
+        public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+            this ISendReceive sendReceive,
+            string queue,
+            Func<T, CancellationToken, Task> onMessage,
+            Action<IReceiveConfiguration> configure,
+            CancellationToken cancellationToken
+        )
+        {
+            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+
+            return sendReceive.ReceiveAsync(queue, c => c.Add(onMessage), configure, cancellationToken);
+        }
+
+        /// <summary>
         /// Send a message directly to a queue
         /// </summary>
         /// <typeparam name="T">The type of message to send</typeparam>
@@ -117,7 +140,7 @@ namespace EasyNetQ
             this ISendReceive sendReceive,
             string queue,
             Action<T> onMessage,
-            Action<IConsumerConfiguration> configure,
+            Action<IReceiveConfiguration> configure,
             CancellationToken cancellationToken = default
         )
         {
@@ -219,7 +242,7 @@ namespace EasyNetQ
             this ISendReceive sendReceive,
             string queue,
             Action<T> onMessage,
-            Action<IConsumerConfiguration> configure,
+            Action<IReceiveConfiguration> configure,
             CancellationToken cancellationToken = default
         )
         {
@@ -275,7 +298,7 @@ namespace EasyNetQ
             this ISendReceive sendReceive,
             string queue,
             Func<T, CancellationToken, Task> onMessage,
-            Action<IConsumerConfiguration> configure,
+            Action<IReceiveConfiguration> configure,
             CancellationToken cancellationToken = default
         )
         {
@@ -327,7 +350,7 @@ namespace EasyNetQ
             this ISendReceive sendReceive,
             string queue,
             Action<IReceiveRegistration> addHandlers,
-            Action<IConsumerConfiguration> configure,
+            Action<IReceiveConfiguration> configure,
             CancellationToken cancellationToken = default
         )
         {

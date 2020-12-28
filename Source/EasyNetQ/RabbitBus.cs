@@ -50,7 +50,6 @@ namespace EasyNetQ
         /// <inheritdoc />
         public virtual void Dispose()
         {
-            Advanced.Dispose();
         }
     }
 }

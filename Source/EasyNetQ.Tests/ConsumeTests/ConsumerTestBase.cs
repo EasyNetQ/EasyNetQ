@@ -1,47 +1,38 @@
+using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NSubstitute;
 using RabbitMQ.Client;
-using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
     public abstract class ConsumerTestBase : IDisposable
     {
-        protected readonly MockBuilder MockBuilder;
-        protected readonly IConsumerErrorStrategy ConsumerErrorStrategy;
         protected const string ConsumerTag = "the_consumer_tag";
-        protected byte[] DeliveredMessageBody;
-        protected MessageProperties DeliveredMessageProperties;
-        protected MessageReceivedInfo DeliveredMessageInfo;
-        protected bool ConsumerWasInvoked;
+        protected const ulong DeliverTag = 10101;
         protected readonly CancellationTokenSource Cancellation;
+        protected readonly IConsumerErrorStrategy ConsumerErrorStrategy;
+        protected readonly MockBuilder MockBuilder;
+        protected bool ConsumerWasInvoked;
+        protected byte[] DeliveredMessageBody;
+        protected MessageReceivedInfo DeliveredMessageInfo;
+        protected MessageProperties DeliveredMessageProperties;
+        protected byte[] OriginalBody;
 
         // populated when a message is delivered
         protected IBasicProperties OriginalProperties;
-        protected byte[] OriginalBody;
-        protected const ulong DeliverTag = 10101;
 
         public ConsumerTestBase()
         {
             Cancellation = new CancellationTokenSource();
 
             ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-
-            IConventions conventions = new Conventions(new DefaultTypeNameSerializer())
-                {
-                    ConsumerTagConvention = () => ConsumerTag
-                };
-            MockBuilder = new MockBuilder(x => x
-                    .Register(conventions)
-                    .Register(ConsumerErrorStrategy)
-                );
-
+            MockBuilder = new MockBuilder(x => x.Register(ConsumerErrorStrategy));
             AdditionalSetUp();
         }
 
@@ -56,28 +47,32 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);
-            MockBuilder.Bus.Advanced.Consume(queue, (body, properties, messageInfo) =>
-            {
-                return Task.Run(() =>
+            MockBuilder.Bus.Advanced.Consume(
+                queue,
+                (body, properties, messageInfo) =>
                 {
-                    DeliveredMessageBody = body;
-                    DeliveredMessageProperties = properties;
-                    DeliveredMessageInfo = messageInfo;
+                    return Task.Run(() =>
+                    {
+                        DeliveredMessageBody = body;
+                        DeliveredMessageProperties = properties;
+                        DeliveredMessageInfo = messageInfo;
 
-                    var ackStrategy = handler(body, properties, messageInfo);
-                    ConsumerWasInvoked = true;
-                    return ackStrategy;
-                }, Cancellation.Token);
-            });
+                        var ackStrategy = handler(body, properties, messageInfo);
+                        ConsumerWasInvoked = true;
+                        return ackStrategy;
+                    }, Cancellation.Token);
+                },
+                c => c.WithConsumerTag(ConsumerTag)
+            );
         }
 
         protected void DeliverMessage()
         {
             OriginalProperties = new BasicProperties
-                {
-                    Type = "the_message_type",
-                    CorrelationId = "the_correlation_id",
-                };
+            {
+                Type = "the_message_type",
+                CorrelationId = "the_correlation_id",
+            };
             OriginalBody = Encoding.UTF8.GetBytes("Hello World");
 
             var waiter = new CountdownEvent(2);

@@ -155,11 +155,11 @@ namespace EasyNetQ.Producer
                     break;
                 case ConfirmationType.Nack:
                     confirmationTcs.TrySetException(
-                        new PublishNackedException($"Broker has signalled that publish {sequenceNumber} was unsuccessful")
+                        new PublishNackedException($"Broker has signalled that publish {sequenceNumber} is nacked")
                     );
                     break;
                 case ConfirmationType.Ack:
-                    confirmationTcs.TrySetResult(null);;
+                    confirmationTcs.TrySetResult(null);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);

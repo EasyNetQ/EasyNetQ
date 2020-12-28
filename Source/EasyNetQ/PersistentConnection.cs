@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
@@ -57,6 +58,9 @@ namespace EasyNetQ
         /// <inheritdoc />
         public IModel CreateModel()
         {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(PersistentConnection));
+
             var connection = initializedConnection;
             if (connection == null)
                 lock (mutex)
@@ -83,8 +87,17 @@ namespace EasyNetQ
         {
             if (disposed) return;
 
-            initializedConnection?.Dispose();
             disposed = true;
+
+            var connection = Interlocked.Exchange(ref initializedConnection, null);
+            if (connection != null)
+            {
+                connection.RecoverySucceeded -= OnConnectionRecovered;
+                connection.ConnectionUnblocked -= OnConnectionUnblocked;
+                connection.ConnectionBlocked -= OnConnectionBlocked;
+                connection.ConnectionShutdown -= OnConnectionShutdown;
+                connection.Dispose();
+            }
         }
 
         private IAutorecoveringConnection Connect()

@@ -38,6 +38,17 @@ namespace EasyNetQ.Internals
             return releaser;
         }
 
+        /// <summary>
+        /// Acquires a lock
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>Releaser, which should be disposed to release a lock</returns>
+        public IDisposable Acquire(CancellationToken cancellationToken = default)
+        {
+            semaphore.Wait(cancellationToken);
+            return releaser;
+        }
+
         private sealed class Releaser : IDisposable
         {
             private readonly SemaphoreSlim semaphore;
