@@ -21,7 +21,9 @@ namespace EasyNetQ.DI
                 AuthMechanisms = configuration.AuthMechanisms,
                 ClientProvidedName = configuration.Name,
                 NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
-                ContinuationTimeout = configuration.Timeout
+                ContinuationTimeout = configuration.Timeout,
+                DispatchConsumersAsync = true,
+                ConsumerDispatchConcurrency = configuration.PrefetchCount
             };
             return connectionFactory;
         }

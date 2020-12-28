@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using FluentAssertions;
 using NSubstitute;
@@ -10,7 +11,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 {
     public class When_the_connection_is_broken : Given_a_PersistentConsumer
     {
-        protected override void AdditionalSetup()
+        public When_the_connection_is_broken()
         {
             consumer.StartConsuming();
             eventBus.Publish(new ConnectionRecoveredEvent(new AmqpTcpEndpoint()));
@@ -19,10 +20,9 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         [Fact]
         public void Should_re_create_internal_consumer()
         {
-            internalConsumerFactory.Received().CreateConsumer();
-            createConsumerCalled.Should().Be(1);
+            internalConsumerFactory.Received(1).CreateConsumer(Arg.Any<ConsumerConfiguration>());
             internalConsumers.Count.Should().Be(1);
-            internalConsumers[0].Received(2).StartConsuming(queue, onMessage, configuration);
+            internalConsumers[0].Received(2).StartConsuming(Arg.Any<bool>());
         }
     }
 }

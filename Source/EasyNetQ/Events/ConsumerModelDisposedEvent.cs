@@ -1,12 +1,14 @@
-﻿namespace EasyNetQ.Events
+﻿using System.Collections.Generic;
+
+namespace EasyNetQ.Events
 {
     public class ConsumerModelDisposedEvent
     {
-        public string ConsumerTag { get; }
+        public IReadOnlyCollection<string> ConsumerTags { get; }
 
-        public ConsumerModelDisposedEvent(string consumerTag)
+        public ConsumerModelDisposedEvent(string[] consumerTags)
         {
-            ConsumerTag = consumerTag;
+            ConsumerTags = consumerTags;
         }
     }
 }

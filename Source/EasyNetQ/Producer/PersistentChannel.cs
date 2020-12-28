@@ -24,6 +24,7 @@ namespace EasyNetQ.Producer
         private readonly PersistentChannelOptions options;
 
         private volatile IModel initializedChannel;
+        private volatile bool disposed;
 
         /// <summary>
         ///     Creates PersistentChannel
@@ -48,8 +49,11 @@ namespace EasyNetQ.Producer
         {
             Preconditions.CheckNotNull(channelAction, "channelAction");
 
+            if (disposed)
+                throw new ObjectDisposedException(nameof(PersistentChannel));
+
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposeCts.Token);
-            using var releaser = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
+            using var _ = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
 
             var retryTimeoutMs = MinRetryTimeoutMs;
 
@@ -80,6 +84,10 @@ namespace EasyNetQ.Producer
         /// <inheritdoc />
         public void Dispose()
         {
+            if (disposed)
+                return;
+
+            disposed = true;
             disposeCts.Cancel();
             mutex.Dispose();
             CloseChannel();
