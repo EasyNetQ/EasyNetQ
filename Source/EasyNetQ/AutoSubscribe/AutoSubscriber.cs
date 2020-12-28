@@ -47,7 +47,7 @@ namespace EasyNetQ.AutoSubscribe
         /// the values may be overriden for particular consumer
         /// methods by using an <see cref="SubscriptionConfigurationAttribute"/>.
         /// </summary>
-        public Action<ISubscriptionConfiguration> ConfigureSubscriptionConfiguration { protected get; set; }
+        public Action<ISubscriptionConfiguration, AutoSubscriberConsumerInfo> ConfigureSubscriptionConfiguration { protected get; set; }
 
         public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
         {
@@ -58,7 +58,7 @@ namespace EasyNetQ.AutoSubscribe
             SubscriptionIdPrefix = subscriptionIdPrefix;
             AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
-            ConfigureSubscriptionConfiguration = subscriptionConfiguration => { };
+            ConfigureSubscriptionConfiguration = (subscriptionConfiguration, consumerInfo) => { };
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace EasyNetQ.AutoSubscribe
         {
             return sc =>
                 {
-                    ConfigureSubscriptionConfiguration(sc);
+                    ConfigureSubscriptionConfiguration(sc, subscriptionInfo);
                     TopicInfo(subscriptionInfo)(sc);
                     AutoSubscriberConsumerInfo(subscriptionInfo)(sc);
                 };
