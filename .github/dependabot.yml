@@ -1,0 +1,28 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/Source"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: Autofac
+    versions:
+    - ">= 6.a"
+    - "< 7"
+  - dependency-name: Castle.Windsor
+    versions:
+    - "> 5.0.0"
+    - "< 6"
+  - dependency-name: LightInject
+    versions:
+    - ">= 6.a"
+    - "< 7"
+  - dependency-name: Microsoft.Extensions.Configuration
+    versions:
+    - ">= 5.a"
+    - "< 6"
+  - dependency-name: SimpleInjector
+    versions:
+    - ">= 5.a"
+    - "< 6"
