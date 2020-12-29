@@ -73,10 +73,9 @@ namespace EasyNetQ.Consumer
 
             logger.Error(
                 exception,
-                "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
+                "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}",
                 context.ReceivedInfo,
-                context.Properties,
-                Convert.ToBase64String(context.Body.ToArray())
+                context.Properties
             );
 
             try
@@ -86,12 +85,13 @@ namespace EasyNetQ.Consumer
 
                 var errorExchange = DeclareErrorExchangeWithQueue(model, context);
 
-                using var messageBody = CreateErrorMessage(context, exception);
+                using var message = CreateErrorMessage(context, exception);
+
                 var properties = model.CreateBasicProperties();
                 properties.Persistent = true;
                 properties.Type = typeNameSerializer.Serialize(typeof(Error));
 
-                model.BasicPublish(errorExchange, context.ReceivedInfo.RoutingKey, properties, messageBody.Memory);
+                model.BasicPublish(errorExchange, context.ReceivedInfo.RoutingKey, properties, message.Memory);
 
                 if (!configuration.PublisherConfirms) return AckStrategies.Ack;
 
