@@ -66,7 +66,7 @@ namespace EasyNetQ.Internals
             if (value < 0)
                 throw new IndexOutOfRangeException("underflow");
 
-            length = (int)value;
+            length = (int) value;
             if (rentBuffer.Length < length)
                 ReallocateBuffer(length);
 
@@ -90,7 +90,7 @@ namespace EasyNetQ.Internals
             if (newPosition > int.MaxValue || newPosition < 0)
                 throw new ArgumentOutOfRangeException(nameof(offset));
 
-            position = (int)newPosition;
+            position = (int) newPosition;
             return position;
         }
 
@@ -108,9 +108,7 @@ namespace EasyNetQ.Internals
             return byteRead;
         }
 
-        /// <summary>write data to stream</summary>
-        /// <remarks>if stream data length is over int.MaxValue, this method throws IndexOutOfRangeException</remarks>
-        /// <exception cref="System.InvalidOperationException">if stream is readonly</exception>
+        /// <inheritdoc />
         public override void Write(byte[] buffer, int offset, int count)
         {
             var endOffset = position + count;
@@ -134,6 +132,7 @@ namespace EasyNetQ.Internals
                 ArrayPool<byte>.Shared.Return(rentBuffer);
                 rentBuffer = null;
             }
+
             length = 0;
             position = 0;
         }

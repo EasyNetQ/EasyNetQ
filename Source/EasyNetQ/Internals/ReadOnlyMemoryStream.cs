@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals
 {
@@ -44,7 +42,7 @@ namespace EasyNetQ.Internals
                 if (value < 0 || value > int.MaxValue)
                     throw new ArgumentOutOfRangeException(nameof(value));
 
-                position = (int)value;
+                position = (int) value;
             }
         }
 
@@ -62,7 +60,7 @@ namespace EasyNetQ.Internals
             if (newPosition > int.MaxValue || newPosition < 0)
                 throw new ArgumentOutOfRangeException(nameof(offset));
 
-            position = (int)newPosition;
+            position = (int) newPosition;
             return position;
         }
 
@@ -95,10 +93,9 @@ namespace EasyNetQ.Internals
         }
 
         /// <inheritdoc />
-        public override void Flush() { }
-
-        /// <inheritdoc />
-        public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+        public override void Flush()
+        {
+        }
 
         /// <inheritdoc />
         public override void SetLength(long value) => throw new NotSupportedException();
