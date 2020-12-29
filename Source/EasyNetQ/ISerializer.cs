@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 
 namespace EasyNetQ
 {
@@ -10,7 +11,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Serializes message to bytes
         /// </summary>
-        byte[] MessageToBytes(Type messageType, object message);
+        IMemoryOwner<byte> MessageToBytes(Type messageType, object message);
 
         /// <summary>
         ///     Deserializes message from bytes

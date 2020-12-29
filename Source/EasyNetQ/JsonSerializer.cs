@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.IO;
 using System.Text;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
@@ -35,20 +36,22 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public byte[] MessageToBytes(Type messageType, object message)
+        public IMemoryOwner<byte> MessageToBytes(Type messageType, object message)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
 
-            using var memoryStream = new MemoryStream(DefaultBufferSize);
-            using (var streamWriter = new StreamWriter(memoryStream, Encoding, DefaultBufferSize, true))
-            using (var jsonWriter = new Newtonsoft.Json.JsonTextWriter(streamWriter))
-            {
-                jsonWriter.Formatting = jsonSerializer.Formatting;
-                jsonWriter.ArrayPool = JsonSerializerArrayPool<char>.Instance;
-                jsonSerializer.Serialize(jsonWriter, message, messageType);
-            }
+            var stream = new ArrayPooledMemoryStream();
 
-            return memoryStream.ToArray();
+            using var streamWriter = new StreamWriter(stream, Encoding, DefaultBufferSize, true);
+            using var jsonWriter = new Newtonsoft.Json.JsonTextWriter(streamWriter)
+            {
+                Formatting = jsonSerializer.Formatting,
+                ArrayPool = JsonSerializerArrayPool<char>.Instance
+            };
+
+            jsonSerializer.Serialize(jsonWriter, message, messageType);
+
+            return stream;
         }
 
         /// <inheritdoc />
@@ -56,7 +59,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(messageType, "messageType");
 
-            using var memoryStream = new MemoryStream(bytes.ToArray(), false); // TODO Do not copy here
+            using var memoryStream = new ReadOnlyMemoryStream(bytes);
             using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
             using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) {ArrayPool = JsonSerializerArrayPool<char>.Instance};
             return jsonSerializer.Deserialize(reader, messageType);

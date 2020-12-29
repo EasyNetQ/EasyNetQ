@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
@@ -85,12 +86,12 @@ namespace EasyNetQ.Consumer
 
                 var errorExchange = DeclareErrorExchangeWithQueue(model, context);
 
-                var messageBody = CreateErrorMessage(context, exception);
+                using var messageBody = CreateErrorMessage(context, exception);
                 var properties = model.CreateBasicProperties();
                 properties.Persistent = true;
                 properties.Type = typeNameSerializer.Serialize(typeof(Error));
 
-                model.BasicPublish(errorExchange, context.ReceivedInfo.RoutingKey, properties, messageBody);
+                model.BasicPublish(errorExchange, context.ReceivedInfo.RoutingKey, properties, messageBody.Memory);
 
                 if (!configuration.PublisherConfirms) return AckStrategies.Ack;
 
@@ -158,7 +159,7 @@ namespace EasyNetQ.Consumer
             return errorExchangeName;
         }
 
-        private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
+        private IMemoryOwner<byte> CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
         {
             var messageAsString = errorMessageSerializer.Serialize(context.Body.ToArray());
             var error = new Error
@@ -191,7 +192,6 @@ namespace EasyNetQ.Consumer
                     kvp => kvp.Key,
                     kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value);
             }
-
             return serializer.MessageToBytes(typeof(Error), error);
         }
     }

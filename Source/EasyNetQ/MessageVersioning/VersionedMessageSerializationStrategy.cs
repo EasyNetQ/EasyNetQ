@@ -27,9 +27,7 @@ namespace EasyNetQ.MessageVersioning
             var messageProperties = message.Properties;
             messageTypeProperties.AppendTo(messageProperties);
             if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-            {
                 messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
-            }
             return new SerializedMessage(messageProperties, messageBody);
         }
 

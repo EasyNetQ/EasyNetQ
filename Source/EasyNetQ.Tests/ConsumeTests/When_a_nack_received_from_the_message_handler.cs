@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_dispose_of_the_consumer_error_strategy_when_the_bus_is_disposed()
         {
-            MockBuilder.Bus.Dispose();
+            MockBuilder.Dispose();
 
             ConsumerErrorStrategy.Received().Dispose();
         }

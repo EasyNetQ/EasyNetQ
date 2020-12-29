@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            MockBuilder.Bus.Dispose();
+            MockBuilder.Dispose();
         }
 
         protected abstract void AdditionalSetUp();

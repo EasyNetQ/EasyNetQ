@@ -54,12 +54,12 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         private void Deliver<T>(T message) where T : class
         {
-            var body = new JsonSerializer().MessageToBytes(typeof(T), message);
+            using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(T), message);
             var properties = new BasicProperties
             {
                 Type = new DefaultTypeNameSerializer().Serialize(typeof(T))
@@ -72,12 +72,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "exchange",
                 "routing_key",
                 properties,
-                body
+                serializedMessage.Memory
             ).GetAwaiter().GetResult();
         }
 
         [Fact]
-        public void Should_deliver_a_ploymorphic_message()
+        public void Should_deliver_a_polymorphic_message()
         {
             animalResult.Should().NotBeNull();
             animalResult.Should().BeOfType<Dog>();

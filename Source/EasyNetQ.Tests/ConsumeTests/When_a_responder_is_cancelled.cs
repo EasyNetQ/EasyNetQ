@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 ReplyTo = conventions.RpcReturnQueueNamingConvention(typeof(RpcResponse))
             };
 
-            var body = serializer.MessageToBytes(typeof(RpcRequest), request);
+            var serializedMessage = serializer.MessageToBytes(typeof(RpcRequest), request);
 
             var waiter = new CountdownEvent(2);
             mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x =>
@@ -79,7 +79,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 "the_exchange",
                 "the_routing_key",
                 properties,
-                body
+                serializedMessage.Memory
             );
 
             if (!waiter.Wait(5000))
