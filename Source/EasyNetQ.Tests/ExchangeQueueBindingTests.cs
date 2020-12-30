@@ -330,7 +330,7 @@ namespace EasyNetQ.Tests
             binding.RoutingKey.Should().Be("my_routing_key");
             binding.Source.Name.Should().Be("my_exchange");
             binding.Destination.Should().BeAssignableTo<Queue>();
-            ((Queue)binding.Destination).Name.Should().Be("my_queue");
+            binding.Destination.Name.Should().Be("my_queue");
         }
 
         [Fact]
@@ -375,7 +375,7 @@ namespace EasyNetQ.Tests
             binding.Source.Name.Should().Be("my_exchange");
             binding.Arguments["header1"].Should().Be("value1");
             binding.Destination.Should().BeAssignableTo<Queue>();
-            ((Queue)binding.Destination).Name.Should().Be("my_queue");
+            binding.Destination.Name.Should().Be("my_queue");
         }
 
         [Fact]
