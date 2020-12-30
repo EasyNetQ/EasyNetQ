@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests
         public void Should_serialize_hashset_of_string_type()
         {
             var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
-            typeName.Should().Be("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Collections");
+            typeName.Should().Be("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Private.CoreLib");
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_deserialize_hashset_of_string_type()
         {
-            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Collections");
+            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Private.CoreLib");
             type.Should().Be(typeof(HashSet<string>));
         }
 
