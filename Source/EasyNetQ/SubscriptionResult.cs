@@ -5,11 +5,11 @@ namespace EasyNetQ
 {
     public sealed class SubscriptionResult : ISubscriptionResult
     {
-        public IExchange Exchange { get; }
-        public IQueue Queue { get; }
+        public Exchange Exchange { get; }
+        public Queue Queue { get; }
         public IDisposable ConsumerCancellation { get; }
 
-        public SubscriptionResult(IExchange exchange, IQueue queue, IDisposable consumerCancellation)
+        public SubscriptionResult(Exchange exchange, Queue queue, IDisposable consumerCancellation)
         {
             Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckNotNull(queue, "queue");

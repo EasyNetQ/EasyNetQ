@@ -13,12 +13,12 @@ namespace EasyNetQ
         /// <summary>
         /// The <see cref="IExchange"/> to which <see cref="Queue"/> is bound.
         /// </summary>
-        IExchange Exchange { get; }
+        Exchange Exchange { get; }
 
         /// <summary>
         /// The <see cref="IQueue"/> that the underlying <see cref="IConsumer"/> is consuming.
         /// </summary>
-        IQueue Queue { get; }
+        Queue Queue { get; }
 
         /// <summary>
         /// The <see cref="IConsumer"/> cancellation, which can be disposed to cancel the subscription.

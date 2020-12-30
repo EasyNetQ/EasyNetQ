@@ -61,7 +61,7 @@ namespace EasyNetQ
             properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
             await advancedBus.PublishAsync(
-                Exchange.GetDefault(), queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
+                Exchange.Default, queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
             ).ConfigureAwait(false);
         }
 
@@ -133,7 +133,7 @@ namespace EasyNetQ
 
             public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
             {
-                handlerRegistration.Add<T>((message, info, c) => onMessage(message.Body, c));
+                handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body, c));
                 return this;
             }
         }

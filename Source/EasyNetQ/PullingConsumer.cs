@@ -289,7 +289,7 @@ namespace EasyNetQ
         private readonly IPersistentChannel channel;
         private readonly IProduceConsumeInterceptor interceptor;
         private readonly PullingConsumerOptions options;
-        private readonly IQueue queue;
+        private readonly Queue queue;
 
         /// <summary>
         ///     Creates PullingConsumer
@@ -300,7 +300,7 @@ namespace EasyNetQ
         /// <param name="interceptor">The produce-consumer interceptor</param>
         public PullingConsumer(
             PullingConsumerOptions options,
-            IQueue queue,
+            Queue queue,
             IPersistentChannel channel,
             IProduceConsumeInterceptor interceptor
         )
