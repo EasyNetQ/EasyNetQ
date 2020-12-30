@@ -82,7 +82,7 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class InternalConsumer : IInternalConsumer
     {
-        private readonly Dictionary<Queue, AsyncBasicConsumer> consumers = new Dictionary<Queue, AsyncBasicConsumer>();
+        private readonly Dictionary<string, AsyncBasicConsumer> consumers = new Dictionary<string, AsyncBasicConsumer>();
         private readonly ILog logger = LogProvider.For<InternalConsumer>();
         private readonly AsyncLock mutex = new AsyncLock();
 
@@ -148,7 +148,7 @@ namespace EasyNetQ.Consumer
                 if (queue.IsExclusive && !firstStart)
                     continue;
 
-                if (consumers.ContainsKey(queue))
+                if (consumers.ContainsKey(queue.Name))
                     continue;
 
                 try
@@ -170,7 +170,7 @@ namespace EasyNetQ.Consumer
                         perQueueConfiguration.Arguments, // arguments
                         consumer // consumer
                     );
-                    consumers.Add(queue, consumer);
+                    consumers.Add(queue.Name, consumer);
 
                     logger.InfoFormat(
                         "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
@@ -240,12 +240,12 @@ namespace EasyNetQ.Consumer
             IReadOnlyCollection<Queue> active;
             using (await mutex.AcquireAsync().ConfigureAwait(false))
             {
-                if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
+                if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue.Name))
                 {
                     consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                     consumer.Dispose();
                     cancelled = consumer.Queue;
-                    active = consumers.Select(x => x.Key).ToList();
+                    active = consumers.Select(x => x.Value.Queue).ToList();
                 }
                 else
                 {
