@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace EasyNetQ.Topology
 {
@@ -30,7 +30,7 @@ namespace EasyNetQ.Topology
             Type = type;
             IsDurable = durable;
             IsAutoDelete = autoDelete;
-            Arguments = new Dictionary<string, object>(arguments ?? new Dictionary<string, object>());
+            Arguments = arguments == null ? null : new ReadOnlyDictionary<string, object>(arguments);
         }
 
         /// <summary>
@@ -58,6 +58,18 @@ namespace EasyNetQ.Topology
         /// </summary>
         public IReadOnlyDictionary<string, object> Arguments { get; }
 
+        /// <summary>
+        ///     Checks exchanges for equality
+        /// </summary>
+        public bool Equals(Exchange other)
+        {
+            return Name == other.Name
+                   && Type == other.Type
+                   && IsDurable == other.IsDurable
+                   && IsAutoDelete == other.IsAutoDelete
+                   && Equals(Arguments, other.Arguments);
+        }
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
@@ -69,21 +81,12 @@ namespace EasyNetQ.Topology
         {
             unchecked
             {
-                var hashCode = Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ Type.GetHashCode();
+                var hashCode = (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Type != null ? Type.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ IsDurable.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsAutoDelete.GetHashCode();
                 return hashCode;
             }
-        }
-
-        public bool Equals(Exchange other)
-        {
-            return Name == other.Name
-                   && Type == other.Type
-                   && IsDurable == other.IsDurable
-                   && IsAutoDelete == other.IsAutoDelete
-                   && Arguments.SequenceEqual(other.Arguments);
         }
     }
 }

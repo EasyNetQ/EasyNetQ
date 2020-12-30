@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace EasyNetQ.Topology
 {
@@ -26,7 +25,7 @@ namespace EasyNetQ.Topology
             IsDurable = isDurable;
             IsExclusive = isExclusive;
             IsAutoDelete = isAutoDelete;
-            Arguments = new ReadOnlyDictionary<string, object>(arguments ?? new Dictionary<string, object>());
+            Arguments = arguments == null ? null : new ReadOnlyDictionary<string, object>(arguments);
         }
 
         /// <summary>
@@ -54,6 +53,18 @@ namespace EasyNetQ.Topology
         /// </summary>
         public IReadOnlyDictionary<string, object> Arguments { get; }
 
+        /// <summary>
+        ///     Checks queues for equality
+        /// </summary>
+        public bool Equals(Queue other)
+        {
+            return Name == other.Name
+                   && IsDurable == other.IsDurable
+                   && IsExclusive == other.IsExclusive
+                   && IsAutoDelete == other.IsAutoDelete
+                   && Equals(Arguments, other.Arguments);
+        }
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
@@ -65,21 +76,12 @@ namespace EasyNetQ.Topology
         {
             unchecked
             {
-                var hashCode = Name.GetHashCode();
+                var hashCode = (Name != null ? Name.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ IsDurable.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsExclusive.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsAutoDelete.GetHashCode();
                 return hashCode;
             }
-        }
-
-        public bool Equals(Queue other)
-        {
-            return string.Equals(Name, other.Name)
-                   && IsDurable == other.IsDurable
-                   && IsExclusive == other.IsExclusive
-                   && IsAutoDelete == other.IsAutoDelete
-                   && Arguments.SequenceEqual(other.Arguments);
         }
     }
 }
