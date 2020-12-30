@@ -18,7 +18,7 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Creates InternalConsumerStatus
         /// </summary>
-        public InternalConsumerStatus(IReadOnlyCollection<IQueue> succeed, IReadOnlyCollection<IQueue> failed)
+        public InternalConsumerStatus(IReadOnlyCollection<Queue> succeed, IReadOnlyCollection<Queue> failed)
         {
             Succeed = succeed;
             Failed = failed;
@@ -27,12 +27,12 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Queues which for which consume is succeed
         /// </summary>
-        public IReadOnlyCollection<IQueue> Succeed { get; }
+        public IReadOnlyCollection<Queue> Succeed { get; }
 
         /// <summary>
         ///     Queues which for which consume is failed
         /// </summary>
-        public IReadOnlyCollection<IQueue> Failed { get; }
+        public IReadOnlyCollection<Queue> Failed { get; }
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ namespace EasyNetQ.Consumer
     public class InternalConsumerCancelledEventArgs : EventArgs
     {
         /// <inheritdoc />
-        public InternalConsumerCancelledEventArgs(IQueue cancelled, IReadOnlyCollection<IQueue> active)
+        public InternalConsumerCancelledEventArgs(Queue cancelled, IReadOnlyCollection<Queue> active)
         {
             Cancelled = cancelled;
             Active = active;
@@ -50,12 +50,12 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Queue for which consume is cancelled
         /// </summary>
-        public IQueue Cancelled { get; }
+        public Queue Cancelled { get; }
 
         /// <summary>
         ///     Queues for which consume is active
         /// </summary>
-        public IReadOnlyCollection<IQueue> Active { get; }
+        public IReadOnlyCollection<Queue> Active { get; }
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class InternalConsumer : IInternalConsumer
     {
-        private readonly Dictionary<IQueue, AsyncBasicConsumer> consumers = new Dictionary<IQueue, AsyncBasicConsumer>();
+        private readonly Dictionary<string, AsyncBasicConsumer> consumers = new Dictionary<string, AsyncBasicConsumer>();
         private readonly ILog logger = LogProvider.For<InternalConsumer>();
         private readonly AsyncLock mutex = new AsyncLock();
 
@@ -133,12 +133,12 @@ namespace EasyNetQ.Consumer
                 catch (Exception exception)
                 {
                     logger.Error(exception, "Failed to create model");
-                    return new InternalConsumerStatus(Array.Empty<IQueue>(), Array.Empty<IQueue>());
+                    return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>());
                 }
             }
 
-            var activeQueues = new HashSet<IQueue>();
-            var failedQueues = new HashSet<IQueue>();
+            var activeQueues = new HashSet<Queue>();
+            var failedQueues = new HashSet<Queue>();
 
             foreach (var kvp in configuration.PerQueueConfigurations)
             {
@@ -148,7 +148,7 @@ namespace EasyNetQ.Consumer
                 if (queue.IsExclusive && !firstStart)
                     continue;
 
-                if (consumers.ContainsKey(queue))
+                if (consumers.ContainsKey(queue.Name))
                     continue;
 
                 try
@@ -170,7 +170,7 @@ namespace EasyNetQ.Consumer
                         perQueueConfiguration.Arguments, // arguments
                         consumer // consumer
                     );
-                    consumers.Add(queue, consumer);
+                    consumers.Add(queue.Name, consumer);
 
                     logger.InfoFormat(
                         "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
@@ -236,16 +236,16 @@ namespace EasyNetQ.Consumer
 
         private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
         {
-            IQueue cancelled;
-            IReadOnlyCollection<IQueue> active;
+            Queue cancelled;
+            IReadOnlyCollection<Queue> active;
             using (await mutex.AcquireAsync().ConfigureAwait(false))
             {
-                if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue))
+                if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue.Name))
                 {
                     consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                     consumer.Dispose();
                     cancelled = consumer.Queue;
-                    active = consumers.Select(x => x.Key).ToList();
+                    active = consumers.Select(x => x.Value.Queue).ToList();
                 }
                 else
                 {

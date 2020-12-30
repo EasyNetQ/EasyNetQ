@@ -75,7 +75,7 @@ namespace EasyNetQ.AutoSubscribe
 
             foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
             {
-                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
+                var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                     .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
@@ -84,7 +84,7 @@ namespace EasyNetQ.AutoSubscribe
 
             foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
             {
-                var awaitableSubscriptionResult = (AwaitableDisposable<ISubscriptionResult>)AutoSubscribeConsumerMethodInfo
+                var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
                     .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                     .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
@@ -128,7 +128,7 @@ namespace EasyNetQ.AutoSubscribe
             return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
         }
 
-        private AwaitableDisposable<ISubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMesage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+        private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMesage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
             where TMesage : class
             where TConsumerAsync : class, IConsumeAsync<TMesage>
         {
@@ -144,7 +144,7 @@ namespace EasyNetQ.AutoSubscribe
             );
         }
 
-        private AwaitableDisposable<ISubscriptionResult> AutoSubscribeConsumerAsync<TMesage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+        private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMesage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
             where TMesage : class
             where TConsumer : class, IConsume<TMesage>
         {

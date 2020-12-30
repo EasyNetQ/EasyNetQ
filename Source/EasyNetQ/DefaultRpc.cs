@@ -193,7 +193,7 @@ namespace EasyNetQ
                 ).ConfigureAwait(false);
 
                 var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
-                if (exchangeName != Exchange.GetDefault().Name)
+                if (exchangeName != Exchange.Default.Name)
                 {
                     var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
                         exchangeName,
@@ -298,8 +298,8 @@ namespace EasyNetQ
         {
             //TODO Cache declaration of exchange
             var exchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
-            var exchange = exchangeName == Exchange.GetDefault().Name
-                ? Exchange.GetDefault()
+            var exchange = exchangeName == Exchange.Default.Name
+                ? Exchange.Default
                 : await advancedBus.ExchangeDeclareAsync(
                     exchangeName,
                     ExchangeType.Direct,

@@ -14,7 +14,7 @@ namespace EasyNetQ
         /// <param name="alternateExchange">The alternate exchange to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IExchangeDeclareConfiguration WithAlternateExchange(
-            this IExchangeDeclareConfiguration configuration, IExchange alternateExchange
+            this IExchangeDeclareConfiguration configuration, Exchange alternateExchange
         )
         {
             Preconditions.CheckNotNull(configuration, "configuration");

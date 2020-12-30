@@ -18,13 +18,13 @@ namespace EasyNetQ.Consumer
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
         private readonly MessageHandler messageHandler;
-        private readonly IQueue queue;
+        private readonly Queue queue;
 
         private volatile bool disposed;
 
         public AsyncBasicConsumer(
             IModel model,
-            IQueue queue,
+            Queue queue,
             IEventBus eventBus,
             IHandlerRunner handlerRunner,
             MessageHandler messageHandler
@@ -36,7 +36,7 @@ namespace EasyNetQ.Consumer
             this.messageHandler = messageHandler;
         }
 
-        public IQueue Queue => queue;
+        public Queue Queue => queue;
 
         /// <inheritdoc />
         public override async Task OnCancel(params string[] consumerTags)
