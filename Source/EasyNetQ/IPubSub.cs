@@ -47,10 +47,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
+        AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
             string subscriptionId,
             Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,

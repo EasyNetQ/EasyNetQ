@@ -56,7 +56,7 @@ namespace EasyNetQ
         /// <param name="message">The message to publish</param>
         /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync(
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             IMessage message,
@@ -81,7 +81,7 @@ namespace EasyNetQ
         /// <param name="message">The message to publish</param>
         /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync<T>(
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             IMessage<T> message,
@@ -106,7 +106,7 @@ namespace EasyNetQ
         /// <param name="body">The message body</param>
         /// <param name="cancellationToken">The cancellation token</param>
         Task PublishAsync(
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
@@ -121,7 +121,7 @@ namespace EasyNetQ
         /// <param name="configure">Delegate to configure queue declaration</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(
+        Task<Queue> QueueDeclareAsync(
             string name,
             Action<IQueueDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
@@ -134,7 +134,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The queue</returns>
-        Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken = default);
+        Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
@@ -150,14 +150,14 @@ namespace EasyNetQ
         /// <param name="ifUnused">Only delete if unused</param>
         /// <param name="ifEmpty">Only delete if empty</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task QueueDeleteAsync(IQueue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default);
+        Task QueueDeleteAsync(Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Purges a queue
         /// </summary>
         /// <param name="queue">The queue to purge</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task QueuePurgeAsync(IQueue queue, CancellationToken cancellationToken = default);
+        Task QueuePurgeAsync(Queue queue, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
@@ -173,7 +173,7 @@ namespace EasyNetQ
         /// <param name="configure">Delegate to configure exchange declaration</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The exchange</returns>
-        Task<IExchange> ExchangeDeclareAsync(
+        Task<Exchange> ExchangeDeclareAsync(
             string name,
             Action<IExchangeDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
@@ -185,7 +185,7 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to delete</param>
         /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task ExchangeDeleteAsync(IExchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default);
+        Task ExchangeDeleteAsync(Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Bind an exchange to a queue. Does nothing if the binding already exists.
@@ -196,7 +196,7 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
+        Task<Binding<Queue>> BindAsync(Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -207,14 +207,21 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
+        Task<Binding<Exchange>> BindAsync(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a binding
         /// </summary>
         /// <param name="binding">the binding to delete</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task UnbindAsync(IBinding binding, CancellationToken cancellationToken = default);
+        Task UnbindAsync(Binding<Queue> binding, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Delete a binding
+        /// </summary>
+        /// <param name="binding">the binding to delete</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        Task UnbindAsync(Binding<Exchange> binding, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets stats for the given queue
@@ -222,7 +229,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The stats of the queue</returns>
-        Task<QueueStats> GetQueueStatsAsync(IQueue queue, CancellationToken cancellationToken = default);
+        Task<QueueStats> GetQueueStatsAsync(Queue queue, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Creates a new pulling consumer
@@ -230,7 +237,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="autoAck"></param>
         /// <returns></returns>
-        IPullingConsumer<PullResult> CreatePullingConsumer(IQueue queue, bool autoAck = true);
+        IPullingConsumer<PullResult> CreatePullingConsumer(Queue queue, bool autoAck = true);
 
         /// <summary>
         ///     Creates a new pulling consumer
@@ -238,7 +245,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue</param>
         /// <param name="autoAck"></param>
         /// <returns></returns>
-        IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true);
+        IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(Queue queue, bool autoAck = true);
 
         /// <summary>
         /// Event fires when the bus has connected to a RabbitMQ broker.

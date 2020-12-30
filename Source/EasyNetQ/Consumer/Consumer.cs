@@ -74,7 +74,7 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Creates ConsumerConfiguration
         /// </summary>
-        public ConsumerConfiguration(ushort prefetchCount, IReadOnlyDictionary<IQueue, PerQueueConsumerConfiguration> perQueueConfigurations)
+        public ConsumerConfiguration(ushort prefetchCount, IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations)
         {
             PrefetchCount = prefetchCount;
             PerQueueConfigurations = perQueueConfigurations;
@@ -88,7 +88,7 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Configurations of the consumer for queues
         /// </summary>
-        public IReadOnlyDictionary<IQueue, PerQueueConsumerConfiguration> PerQueueConfigurations { get; }
+        public IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> PerQueueConfigurations { get; }
     }
 
     /// <inheritdoc />

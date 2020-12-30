@@ -111,10 +111,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
+        public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Action<T> onMessage,
@@ -151,10 +151,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
+        public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Action<T> onMessage,
@@ -192,10 +192,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
+        public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Func<T, Task> onMessage,
@@ -206,7 +206,7 @@ namespace EasyNetQ
 
             return pubSub.SubscribeAsync<T>(
                 subscriptionId,
-                (m, c) => onMessage(m),
+                (m, _) => onMessage(m),
                 c => { },
                 cancellationToken
             );
@@ -229,10 +229,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static ISubscriptionResult Subscribe<T>(
+        public static SubscriptionResult Subscribe<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Action<T> onMessage,
@@ -269,10 +269,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static ISubscriptionResult Subscribe<T>(
+        public static SubscriptionResult Subscribe<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Action<T> onMessage,
@@ -310,10 +310,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static ISubscriptionResult Subscribe<T>(
+        public static SubscriptionResult Subscribe<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Func<T, Task> onMessage,
@@ -351,10 +351,10 @@ namespace EasyNetQ
         /// </param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>
-        /// An <see cref="ISubscriptionResult"/>
-        /// Call Dispose on it or on its <see cref="ISubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
+        /// An <see cref="SubscriptionResult"/>
+        /// Call Dispose on it to cancel the subscription.
         /// </returns>
-        public static ISubscriptionResult Subscribe<T>(
+        public static SubscriptionResult Subscribe<T>(
             this IPubSub pubSub,
             string subscriptionId,
             Func<T, CancellationToken, Task> onMessage,

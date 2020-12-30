@@ -8,7 +8,7 @@ namespace EasyNetQ.Consumer
         private readonly ConcurrentDictionary<string, IHandlerCollection> handlerCollections = new ConcurrentDictionary<string, IHandlerCollection>();
 
         /// <inheritdoc />
-        public IHandlerCollection CreateHandlerCollection(IQueue queue)
+        public IHandlerCollection CreateHandlerCollection(Queue queue)
         {
             return handlerCollections.GetOrAdd(queue.Name, _ => new HandlerCollection());
         }
