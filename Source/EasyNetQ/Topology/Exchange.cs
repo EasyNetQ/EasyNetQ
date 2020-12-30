@@ -44,7 +44,7 @@ namespace EasyNetQ.Topology
         public string Type { get; }
 
         /// <summary>
-        ///     If set the exchange remains active when a server restarts
+        ///     If set the exchange remains when a server restarts
         /// </summary>
         public bool IsDurable { get; }
 
