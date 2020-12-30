@@ -622,7 +622,7 @@ namespace EasyNetQ
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueUnbind(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, null),
+                x => x.QueueUnbind(binding.To.Name, binding.From.Name, binding.RoutingKey, null),
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -630,8 +630,8 @@ namespace EasyNetQ
             {
                 logger.DebugFormat(
                     "Unbound queue {queue} from exchange {exchange} with routing key {routingKey}",
-                    binding.Destination.Name,
-                    binding.Source.Name,
+                    binding.To.Name,
+                    binding.From.Name,
                     binding.RoutingKey
                 );
             }
@@ -646,7 +646,7 @@ namespace EasyNetQ
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
-                x => x.ExchangeUnbind(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, null),
+                x => x.ExchangeUnbind(binding.To.Name, binding.From.Name, binding.RoutingKey, null),
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -654,8 +654,8 @@ namespace EasyNetQ
             {
                 logger.DebugFormat(
                     "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey}",
-                    binding.Destination.Name,
-                    binding.Source.Name,
+                    binding.To.Name,
+                    binding.From.Name,
                     binding.RoutingKey
                 );
             }
