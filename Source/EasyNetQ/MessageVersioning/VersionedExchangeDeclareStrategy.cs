@@ -50,7 +50,7 @@ namespace EasyNetQ.MessageVersioning
                     await advancedBus.BindAsync(sourceExchange, destinationExchange.Value, "#", cancellationToken).ConfigureAwait(false);
                 destinationExchange = sourceExchange;
             }
-            return destinationExchange.Value;
+            return destinationExchange ?? throw new ArgumentOutOfRangeException(nameof(messageVersions));
         }
 
         private readonly struct ExchangeKey
