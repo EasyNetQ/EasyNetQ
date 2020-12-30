@@ -160,7 +160,7 @@ namespace EasyNetQ.Producer
         {
             var returnedMessageEvent = new ReturnedMessageEvent(
                 (IModel) sender,
-                args.Body.ToArray(),
+                args.Body,
                 new MessageProperties(args.BasicProperties),
                 new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)
             );

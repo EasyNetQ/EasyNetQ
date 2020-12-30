@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Events
 {
@@ -14,7 +15,7 @@ namespace EasyNetQ.Events
         /// <param name="body">The message body</param>
         /// <param name="properties">The message properties</param>
         /// <param name="info">The returned message info</param>
-        public ReturnedMessageEvent(IModel channel, byte[] body, MessageProperties properties, MessageReturnedInfo info)
+        public ReturnedMessageEvent(IModel channel, ReadOnlyMemory<byte> body, MessageProperties properties, MessageReturnedInfo info)
         {
             Channel = channel;
             Body = body;
@@ -30,7 +31,7 @@ namespace EasyNetQ.Events
         /// <summary>
         ///     Message body
         /// </summary>
-        public byte[] Body { get; }
+        public ReadOnlyMemory<byte> Body { get; }
 
         /// <summary>
         ///     Message properties
