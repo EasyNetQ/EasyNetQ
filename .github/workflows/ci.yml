@@ -18,7 +18,8 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        dotnet: ['3.1.x']
+        dotnet: ['5.0.x']
+      fail-fast: true
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -72,7 +73,7 @@ jobs:
       - name: Setup .NET Core ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '5.0.x'
       - name: Install dependencies
         run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
       - name: Build
