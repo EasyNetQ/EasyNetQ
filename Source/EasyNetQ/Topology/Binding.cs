@@ -27,7 +27,7 @@ namespace EasyNetQ.Topology
         public Exchange Source { get; }
 
         /// <summary>
-        ///     Destination exchange
+        ///     Destination bindable instance
         /// </summary>
         public TDestination Destination { get; }
 
