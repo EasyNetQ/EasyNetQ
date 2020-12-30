@@ -7,7 +7,7 @@ namespace EasyNetQ.Tests
 {
     public static class PublishExchangeDeclareStrategyExtensions
     {
-        public static IExchange DeclareExchange(
+        public static Exchange DeclareExchange(
             this IExchangeDeclareStrategy strategy,
             string exchangeName,
             string exchangeType,
@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
                 .GetResult();
         }
 
-        public static IExchange DeclareExchange(
+        public static Exchange DeclareExchange(
             this IExchangeDeclareStrategy strategy,
             Type messageType,
             string exchangeType,

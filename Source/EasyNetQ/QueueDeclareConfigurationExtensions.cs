@@ -79,7 +79,7 @@ namespace EasyNetQ
         /// <param name="configuration">The configuration instance</param>
         /// <param name="deadLetterExchange">The deadLetterExchange to set</param>
         /// <returns>IQueueDeclareConfiguration</returns>
-        public static IQueueDeclareConfiguration WithDeadLetterExchange(this IQueueDeclareConfiguration configuration, IExchange deadLetterExchange)
+        public static IQueueDeclareConfiguration WithDeadLetterExchange(this IQueueDeclareConfiguration configuration, Exchange deadLetterExchange)
         {
             Preconditions.CheckNotNull(configuration, "configuration");
 

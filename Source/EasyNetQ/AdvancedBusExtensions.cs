@@ -22,7 +22,7 @@ namespace EasyNetQ
         /// <param name="handler">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume<T>(
-            this IAdvancedBus bus, IQueue queue, Action<IMessage<T>, MessageReceivedInfo> handler
+            this IAdvancedBus bus, Queue queue, Action<IMessage<T>, MessageReceivedInfo> handler
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -42,7 +42,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume<T>(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Action<IMessage<T>, MessageReceivedInfo> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -62,7 +62,7 @@ namespace EasyNetQ
         /// <param name="handler">The message handler</param>
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume<T>(
-            this IAdvancedBus bus, IQueue queue, Func<IMessage<T>, MessageReceivedInfo, Task> handler
+            this IAdvancedBus bus, Queue queue, Func<IMessage<T>, MessageReceivedInfo, Task> handler
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -83,7 +83,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume<T>(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<IMessage<T>, MessageReceivedInfo, Task> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -106,7 +106,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume<T>(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -133,7 +133,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume<T>(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             IMessageHandler<T> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -170,7 +170,7 @@ namespace EasyNetQ
         /// <param name="queue">The queue to take messages from</param>
         /// <param name="addHandlers">A function to add handlers to the consumer</param>
         /// <returns>A disposable to cancel the consumer</returns>
-        public static IDisposable Consume(this IAdvancedBus bus, IQueue queue, Action<IHandlerRegistration> addHandlers)
+        public static IDisposable Consume(this IAdvancedBus bus, Queue queue, Action<IHandlerRegistration> addHandlers)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -189,7 +189,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Action<IHandlerRegistration> addHandlers,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -230,7 +230,7 @@ namespace EasyNetQ
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
-            this IAdvancedBus bus, IQueue queue, Action<byte[], MessageProperties, MessageReceivedInfo> handler
+            this IAdvancedBus bus, Queue queue, Action<byte[], MessageProperties, MessageReceivedInfo> handler
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -253,7 +253,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Action<byte[], MessageProperties, MessageReceivedInfo> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -277,7 +277,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> handler
         )
         {
@@ -298,7 +298,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
         )
         {
@@ -322,7 +322,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -347,7 +347,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -372,7 +372,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -402,7 +402,7 @@ namespace EasyNetQ
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
             this IAdvancedBus bus,
-            IQueue queue,
+            Queue queue,
             MessageHandler handler,
             Action<ISimpleConsumeConfiguration> configure
         )
@@ -451,7 +451,7 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         public static void Publish(
             this IAdvancedBus bus,
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
@@ -485,7 +485,7 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         public static void Publish<T>(
             this IAdvancedBus bus,
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             IMessage<T> message,
@@ -507,7 +507,7 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The stats of the queue</returns>
         public static QueueStats GetQueueStats(
-            this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default
+            this IAdvancedBus bus, Queue queue, CancellationToken cancellationToken = default
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -525,7 +525,7 @@ namespace EasyNetQ
         /// <param name="bus">The bus instance</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The queue</returns>
-        public static IQueue QueueDeclare(this IAdvancedBus bus, CancellationToken cancellationToken = default)
+        public static Queue QueueDeclare(this IAdvancedBus bus, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -544,7 +544,7 @@ namespace EasyNetQ
         /// <returns>
         /// The queue
         /// </returns>
-        public static IQueue QueueDeclare(
+        public static Queue QueueDeclare(
             this IAdvancedBus bus,
             string name,
             Action<IQueueDeclareConfiguration> configure,
@@ -567,7 +567,7 @@ namespace EasyNetQ
         /// <returns>
         /// The queue
         /// </returns>
-        public static Task<IQueue> QueueDeclareAsync(
+        public static Task<Queue> QueueDeclareAsync(
             this IAdvancedBus bus,
             string name,
             CancellationToken cancellationToken = default
@@ -590,7 +590,7 @@ namespace EasyNetQ
         /// <returns>
         /// The queue
         /// </returns>
-        public static Task<IQueue> QueueDeclareAsync(
+        public static Task<Queue> QueueDeclareAsync(
             this IAdvancedBus bus,
             string name,
             bool durable,
@@ -622,7 +622,7 @@ namespace EasyNetQ
         /// <returns>
         /// The queue
         /// </returns>
-        public static IQueue QueueDeclare(
+        public static Queue QueueDeclare(
             this IAdvancedBus bus,
             string name,
             bool durable,
@@ -647,7 +647,7 @@ namespace EasyNetQ
         /// <returns>
         /// The queue
         /// </returns>
-        public static IQueue QueueDeclare(
+        public static Queue QueueDeclare(
             this IAdvancedBus bus,
             string name,
             CancellationToken cancellationToken = default
@@ -688,10 +688,10 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static Task<IBinding> BindAsync(
+        public static Task<Binding<Queue>> BindAsync(
             this IAdvancedBus bus,
-            IExchange source,
-            IQueue queue,
+            Exchange source,
+            Queue queue,
             string routingKey,
             CancellationToken cancellationToken
         )
@@ -710,10 +710,10 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static Task<IBinding> BindAsync(
+        public static Task<Binding<Exchange>> BindAsync(
             this IAdvancedBus bus,
-            IExchange source,
-            IExchange destination,
+            Exchange source,
+            Exchange destination,
             string routingKey,
             CancellationToken cancellationToken
         )
@@ -732,7 +732,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static IBinding Bind(this IAdvancedBus bus, IExchange source, IExchange destination, string routingKey, CancellationToken cancellationToken = default)
+        public static Binding<Exchange> Bind(this IAdvancedBus bus, Exchange source, Exchange destination, string routingKey, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -751,10 +751,10 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static IBinding Bind(
+        public static Binding<Exchange> Bind(
             this IAdvancedBus bus,
-            IExchange source,
-            IExchange destination,
+            Exchange source,
+            Exchange destination,
             string routingKey,
             IDictionary<string, object> headers,
             CancellationToken cancellationToken = default
@@ -776,7 +776,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static IBinding Bind(this IAdvancedBus bus, IExchange exchange, IQueue queue, string routingKey, CancellationToken cancellationToken = default)
+        public static Binding<Queue> Bind(this IAdvancedBus bus, Exchange exchange, Queue queue, string routingKey, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -795,10 +795,10 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static IBinding Bind(
+        public static Binding<Queue> Bind(
             this IAdvancedBus bus,
-            IExchange exchange,
-            IQueue queue,
+            Exchange exchange,
+            Queue queue,
             string routingKey,
             IDictionary<string, object> headers,
             CancellationToken cancellationToken = default
@@ -821,7 +821,7 @@ namespace EasyNetQ
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The exchange</returns>
-        public static Task<IExchange> ExchangeDeclareAsync(
+        public static Task<Exchange> ExchangeDeclareAsync(
             this IAdvancedBus bus,
             string name,
             string type,
@@ -864,7 +864,7 @@ namespace EasyNetQ
         /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The exchange</returns>
-        public static IExchange ExchangeDeclare(
+        public static Exchange ExchangeDeclare(
             this IAdvancedBus bus,
             string name,
             string type,
@@ -888,7 +888,7 @@ namespace EasyNetQ
         /// <param name="configure">The configuration of exchange</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The exchange</returns>
-        public static IExchange ExchangeDeclare(
+        public static Exchange ExchangeDeclare(
             this IAdvancedBus bus,
             string name,
             Action<IExchangeDeclareConfiguration> configure,
@@ -908,7 +908,22 @@ namespace EasyNetQ
         /// <param name="bus">The bus instance</param>
         /// <param name="binding">the binding to delete</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void Unbind(this IAdvancedBus bus, IBinding binding, CancellationToken cancellationToken = default)
+        public static void Unbind(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
+        {
+            Preconditions.CheckNotNull(bus, "bus");
+
+            bus.UnbindAsync(binding, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Delete a binding
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="binding">the binding to delete</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        public static void Unbind(this IAdvancedBus bus, Binding<Exchange> binding, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -925,7 +940,7 @@ namespace EasyNetQ
         /// <param name="ifUnused">Only delete if unused</param>
         /// <param name="ifEmpty">Only delete if empty</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void QueueDelete(this IAdvancedBus bus, IQueue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
+        public static void QueueDelete(this IAdvancedBus bus, Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -940,7 +955,7 @@ namespace EasyNetQ
         /// <param name="bus">The bus instance</param>
         /// <param name="queue">The queue to purge</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void QueuePurge(this IAdvancedBus bus, IQueue queue, CancellationToken cancellationToken = default)
+        public static void QueuePurge(this IAdvancedBus bus, Queue queue, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -956,7 +971,7 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to delete</param>
         /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void ExchangeDelete(this IAdvancedBus bus, IExchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default)
+        public static void ExchangeDelete(this IAdvancedBus bus, Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 

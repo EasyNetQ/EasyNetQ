@@ -155,10 +155,8 @@ namespace EasyNetQ
         #endregion
 
         /// <inheritdoc />
-        public async Task<QueueStats> GetQueueStatsAsync(IQueue queue, CancellationToken cancellationToken)
+        public async Task<QueueStats> GetQueueStatsAsync(Queue queue, CancellationToken cancellationToken)
         {
-            Preconditions.CheckNotNull(queue, "queue");
-
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             var declareResult = await clientCommandDispatcher.InvokeAsync(
@@ -179,14 +177,14 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<PullResult> CreatePullingConsumer(IQueue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult> CreatePullingConsumer(Queue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer(queue, options);
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(IQueue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(Queue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer<T>(queue, options);
@@ -269,7 +267,7 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public virtual Task PublishAsync(
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             IMessage message,
@@ -287,14 +285,13 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public virtual Task PublishAsync<T>(
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             IMessage<T> message,
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
@@ -305,7 +302,7 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public virtual async Task PublishAsync(
-            IExchange exchange,
+            Exchange exchange,
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
@@ -313,7 +310,6 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(messageProperties, "messageProperties");
             Preconditions.CheckNotNull(body, "body");
@@ -384,7 +380,7 @@ namespace EasyNetQ
         #region Exchage, Queue, Binding
 
         /// <inheritdoc />
-        public Task<IQueue> QueueDeclareAsync(CancellationToken cancellationToken)
+        public Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken)
         {
             return QueueDeclareAsync(
                 string.Empty,
@@ -411,7 +407,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public async Task<IQueue> QueueDeclareAsync(
+        public async Task<Queue> QueueDeclareAsync(
             string name,
             Action<IQueueDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
@@ -449,11 +445,10 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public virtual async Task QueueDeleteAsync(IQueue queue, bool ifUnused = false, bool ifEmpty = false,
-            CancellationToken cancellationToken = default)
+        public virtual async Task QueueDeleteAsync(
+            Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default
+        )
         {
-            Preconditions.CheckNotNull(queue, "queue");
-
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
@@ -467,10 +462,8 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public virtual async Task QueuePurgeAsync(IQueue queue, CancellationToken cancellationToken)
+        public virtual async Task QueuePurgeAsync(Queue queue, CancellationToken cancellationToken)
         {
-            Preconditions.CheckNotNull(queue, "queue");
-
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(x => x.QueuePurge(queue.Name), cts.Token).ConfigureAwait(false);
@@ -499,7 +492,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public async Task<IExchange> ExchangeDeclareAsync(
+        public async Task<Exchange> ExchangeDeclareAsync(
             string name,
             Action<IExchangeDeclareConfiguration> configure,
             CancellationToken cancellationToken = default
@@ -536,11 +529,10 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public virtual async Task ExchangeDeleteAsync(IExchange exchange, bool ifUnused = false,
-            CancellationToken cancellationToken = default)
+        public virtual async Task ExchangeDeleteAsync(
+            Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default
+        )
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
-
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
@@ -554,18 +546,16 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public async Task<IBinding> BindAsync(IExchange exchange, IQueue queue, string routingKey,
-            IDictionary<string, object> arguments, CancellationToken cancellationToken)
+        public async Task<Binding<Queue>> BindAsync(
+            Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken
+        )
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(queue, "queue");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments),
-                cts.Token
+                x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments), cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -579,15 +569,14 @@ namespace EasyNetQ
                 );
             }
 
-            return new Binding(queue, exchange, routingKey, arguments);
+            return new Binding<Queue>(exchange, queue, routingKey, arguments);
         }
 
         /// <inheritdoc />
-        public async Task<IBinding> BindAsync(IExchange source, IExchange destination, string routingKey,
-            IDictionary<string, object> arguments, CancellationToken cancellationToken)
+        public async Task<Binding<Exchange>> BindAsync(
+            Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken
+        )
         {
-            Preconditions.CheckNotNull(source, "source");
-            Preconditions.CheckNotNull(destination, "destination");
             Preconditions.CheckShortString(routingKey, "routingKey");
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
@@ -608,49 +597,52 @@ namespace EasyNetQ
                 );
             }
 
-            return new Binding(destination, source, routingKey, arguments);
+            return new Binding<Exchange>(source, destination, routingKey, arguments);
         }
 
         /// <inheritdoc />
-        public virtual async Task UnbindAsync(IBinding binding, CancellationToken cancellationToken)
+        public virtual async Task UnbindAsync(Binding<Queue> binding, CancellationToken cancellationToken)
         {
-            Preconditions.CheckNotNull(binding, "binding");
-
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            if (binding.Bindable is IQueue queue)
-            {
-                await clientCommandDispatcher.InvokeAsync(
-                    x => x.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null),
-                    cts.Token
-                ).ConfigureAwait(false);
+            await clientCommandDispatcher.InvokeAsync(
+                x => x.QueueUnbind(
+                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
+                ),
+                cts.Token
+            ).ConfigureAwait(false);
 
-                if (logger.IsDebugEnabled())
-                {
-                    logger.DebugFormat(
-                        "Unbound queue {queue} from exchange {exchange} with routing key {routingKey}",
-                        queue.Name,
-                        binding.Exchange.Name,
-                        binding.RoutingKey
-                    );
-                }
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Unbound queue {queue} from exchange {exchange} with routing key {routingKey}",
+                    binding.Destination.Name,
+                    binding.Source.Name,
+                    binding.RoutingKey
+                );
             }
-            else if (binding.Bindable is IExchange destination)
-            {
-                await clientCommandDispatcher.InvokeAsync(
-                    x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, null),
-                    cts.Token
-                ).ConfigureAwait(false);
+        }
 
-                if (logger.IsDebugEnabled())
-                {
-                    logger.DebugFormat(
-                        "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey}",
-                        destination.Name,
-                        binding.Exchange.Name,
-                        binding.RoutingKey
-                    );
-                }
+        /// <inheritdoc />
+        public virtual async Task UnbindAsync(Binding<Exchange> binding, CancellationToken cancellationToken)
+        {
+            using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+            await clientCommandDispatcher.InvokeAsync(
+                x => x.ExchangeUnbind(
+                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
+                ),
+                cts.Token
+            ).ConfigureAwait(false);
+
+            if (logger.IsDebugEnabled())
+            {
+                logger.DebugFormat(
+                    "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey}",
+                    binding.Destination.Name,
+                    binding.Source.Name,
+                    binding.RoutingKey
+                );
             }
         }
 

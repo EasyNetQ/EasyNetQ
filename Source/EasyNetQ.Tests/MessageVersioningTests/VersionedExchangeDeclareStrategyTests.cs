@@ -3,9 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EasyNetQ.Internals;
 using EasyNetQ.MessageVersioning;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using FluentAssertions;
 using NSubstitute;
@@ -15,16 +13,6 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 {
     public class VersionedExchangeDeclareStrategyTests
     {
-        private class ExchangeStub : IExchange
-        {
-            public ExchangeStub BoundTo { get; set; }
-            public string Name { get; set; }
-            public string Type { get; }
-            public bool IsDurable { get; }
-            public bool IsAutoDelete { get; }
-            public IDictionary<string, object> Arguments { get; }
-        }
-
         [Fact]
         public void Should_declare_exchange_again_if_first_attempt_failed()
         {
@@ -32,7 +20,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchangeName = "exchangeName";
 
             var advancedBus = Substitute.For<IAdvancedBus>();
-            IExchange exchange = new Exchange(exchangeName);
+            var exchange = new Exchange(exchangeName);
 
             advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(
                 x => Task.FromException(new Exception()),
@@ -56,7 +44,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
             advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
-            declaredExchange.Should().BeSameAs(exchange);
+            declaredExchange.Should().BeEquivalentTo(exchange);
             exchangeDeclareCount.Should().Be(1);
         }
 
@@ -65,23 +53,26 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         [Fact]
         public void When_declaring_exchanges_for_unversioned_message_one_exchange_created()
         {
-            var exchanges = new List<ExchangeStub>();
+            var exchanges = new List<Exchange>();
+            var boundExchanges = new Dictionary<Exchange, Exchange>();
             var advancedBus = Substitute.For<IAdvancedBus>();
             advancedBus.ExchangeDeclareAsync(null, null)
                 .ReturnsForAnyArgs(mi =>
                 {
-                    var exchange = new ExchangeStub { Name = (string)mi[0] };
+                    var exchange = new Exchange((string) mi[0]);
                     exchanges.Add(exchange);
-                    return Task.FromResult<IExchange>(exchange);
+                    return Task.FromResult(exchange);
                 });
 
-            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
+            advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Exchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
                 .Returns(mi =>
                 {
-                    var source = (ExchangeStub)mi[0];
-                    var destination = (ExchangeStub)mi[1];
-                    source.BoundTo = destination;
-                    return Task.FromResult(Substitute.For<IBinding>());
+                    var source = (Exchange) mi[0];
+                    var destination = (Exchange) mi[1];
+                    var routingKey = (string) mi[2];
+                    var arguments = (IDictionary<string, object>) mi[3];
+                    boundExchanges.Add(source, destination);
+                    return Task.FromResult(new Binding<Exchange>(source, destination, routingKey, arguments));
                 });
 
             var conventions = Substitute.For<IConventions>();
@@ -93,30 +84,32 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             Assert.True(exchanges.Count == 1); //, "Single exchange should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name); //, "Exchange should have used naming convection to name the exchange" );
-            Assert.Null(exchanges[0].BoundTo); // "Unversioned message should not create any exchange to exchange bindings" );
+            Assert.Empty(boundExchanges); // "Unversioned message should not create any exchange to exchange bindings" );
         }
 
         [Fact]
         public void When_declaring_exchanges_for_versioned_message_exchange_per_version_created_and_bound_to_superceding_version()
         {
-            var exchanges = new List<ExchangeStub>();
-
+            var exchanges = new List<Exchange>();
+            var boundExchanges = new Dictionary<Exchange, Exchange>();
             var advancedBus = Substitute.For<IAdvancedBus>();
             advancedBus.ExchangeDeclareAsync(null, null)
                 .ReturnsForAnyArgs(mi =>
                 {
-                    var exchange = new ExchangeStub { Name = (string)mi[0] };
+                    var exchange = new Exchange((string) mi[0]);
                     exchanges.Add(exchange);
-                    return Task.FromResult<IExchange>(exchange);
+                    return Task.FromResult(exchange);
                 });
 
-            advancedBus.BindAsync(Arg.Any<IExchange>(), Arg.Any<IExchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
+            advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Exchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
                 .Returns(mi =>
                 {
-                    var source = (ExchangeStub)mi[0];
-                    var destination = (ExchangeStub)mi[1];
-                    source.BoundTo = destination;
-                    return Task.FromResult(Substitute.For<IBinding>());
+                    var source = (Exchange) mi[0];
+                    var destination = (Exchange) mi[1];
+                    var routingKey = (string) mi[2];
+                    var arguments = (IDictionary<string, object>) mi[3];
+                    boundExchanges.Add(source, destination);
+                    return Task.FromResult(new Binding<Exchange>(source, destination, routingKey, arguments));
                 });
 
             var conventions = Substitute.For<IConventions>();
@@ -129,8 +122,11 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             Assert.Equal(2, exchanges.Count); //, "Two exchanges should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name); //, "Superseded message exchange should been created first" );
             Assert.Equal("MyMessageV2", exchanges[1].Name); //, "Superseding message exchange should been created second" );
-            Assert.Equal(exchanges[0], exchanges[1].BoundTo); //, "Superseding message exchange should route message to superseded exchange" );
-            Assert.Null(exchanges[0].BoundTo); //, "Superseded message exchange should route messages anywhere" );
+
+            boundExchanges.Should().BeEquivalentTo(new Dictionary<Exchange, Exchange>
+            {
+                {exchanges[1], exchanges[0]}
+            });
         }
     }
 }

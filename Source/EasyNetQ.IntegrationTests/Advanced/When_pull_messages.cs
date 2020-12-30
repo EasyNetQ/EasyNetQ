@@ -31,7 +31,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Guid.NewGuid().ToString("N"), cts.Token
             );
             await bus.Advanced.PublishAsync(
-                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -59,7 +59,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Guid.NewGuid().ToString("N"), cts.Token
             );
             await bus.Advanced.PublishAsync(
-                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -87,7 +87,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Guid.NewGuid().ToString("N"), cts.Token
             );
             await bus.Advanced.PublishAsync(
-                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -115,7 +115,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Guid.NewGuid().ToString("N"), cts.Token
             );
             await bus.Advanced.PublishAsync(
-                Exchange.GetDefault(), queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
             var consumer = bus.Advanced.CreatePullingConsumer(queue);
