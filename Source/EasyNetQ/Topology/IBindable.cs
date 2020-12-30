@@ -1,12 +1,12 @@
 namespace EasyNetQ.Topology
 {
     /// <summary>
-    ///     Bindable stuff
+    ///     Bindable entity
     /// </summary>
     public interface IBindable
     {
         /// <summary>
-        ///     Name of bindable
+        ///     Name of bindable entity
         /// </summary>
         string Name { get; }
     }
