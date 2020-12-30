@@ -6,7 +6,7 @@ namespace EasyNetQ.Topology
     /// <summary>
     ///     Binding between exchange and exchange
     /// </summary>
-    public readonly struct Binding<TBindable> where TBindable : IBindable
+    public readonly struct Binding<TBindable> where TBindable : struct, IBindable
     {
         /// <summary>
         ///     Creates Binding
