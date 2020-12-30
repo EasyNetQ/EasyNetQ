@@ -25,7 +25,7 @@ namespace EasyNetQ.Topology
             IsDurable = isDurable;
             IsExclusive = isExclusive;
             IsAutoDelete = isAutoDelete;
-            Arguments = arguments == null ? null : new ReadOnlyDictionary<string, object>(arguments);
+            Arguments = arguments;
         }
 
         /// <summary>
@@ -51,6 +51,6 @@ namespace EasyNetQ.Topology
         /// <summary>
         ///     The queue arguments
         /// </summary>
-        public IReadOnlyDictionary<string, object> Arguments { get; }
+        public IDictionary<string, object> Arguments { get; }
     }
 }

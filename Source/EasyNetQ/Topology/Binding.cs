@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 namespace EasyNetQ.Topology
 {
     /// <summary>
-    ///     Binding between exchange and exchange
+    ///     Binding between exchange and bindable entity
     /// </summary>
     public readonly struct Binding<TBindable> where TBindable : struct, IBindable
     {
@@ -18,7 +18,7 @@ namespace EasyNetQ.Topology
             Source = source;
             Destination = destination;
             RoutingKey = routingKey;
-            Arguments = arguments == null ? null : new ReadOnlyDictionary<string, object>(arguments);
+            Arguments = arguments;
         }
 
         /// <summary>
@@ -39,6 +39,6 @@ namespace EasyNetQ.Topology
         /// <summary>
         ///     The binging arguments
         /// </summary>
-        public IReadOnlyDictionary<string, object> Arguments { get; }
+        public IDictionary<string, object> Arguments { get; }
     }
 }

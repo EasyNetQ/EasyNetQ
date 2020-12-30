@@ -607,7 +607,7 @@ namespace EasyNetQ
 
             await clientCommandDispatcher.InvokeAsync(
                 x => x.QueueUnbind(
-                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments?.ToDictionary(e => e.Key, e => e.Value)
+                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
                 ),
                 cts.Token
             ).ConfigureAwait(false);
@@ -630,7 +630,7 @@ namespace EasyNetQ
 
             await clientCommandDispatcher.InvokeAsync(
                 x => x.ExchangeUnbind(
-                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments?.ToDictionary(e => e.Key, e => e.Value)
+                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
                 ),
                 cts.Token
             ).ConfigureAwait(false);

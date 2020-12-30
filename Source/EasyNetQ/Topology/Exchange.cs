@@ -30,7 +30,7 @@ namespace EasyNetQ.Topology
             Type = type;
             IsDurable = durable;
             IsAutoDelete = autoDelete;
-            Arguments = arguments == null ? null : new ReadOnlyDictionary<string, object>(arguments);
+            Arguments = arguments;
         }
 
         /// <summary>
@@ -56,6 +56,6 @@ namespace EasyNetQ.Topology
         /// <summary>
         /// The exchange arguments.
         /// </summary>
-        public IReadOnlyDictionary<string, object> Arguments { get; }
+        public IDictionary<string, object> Arguments { get; }
     }
 }
