@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         dotnet: ['5.0.x']
-      fail-fast: false
+      fail-fast: true
     steps:
     - name: Checkout
       uses: actions/checkout@v2
