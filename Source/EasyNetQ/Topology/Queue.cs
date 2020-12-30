@@ -52,36 +52,5 @@ namespace EasyNetQ.Topology
         ///     The queue arguments
         /// </summary>
         public IReadOnlyDictionary<string, object> Arguments { get; }
-
-        /// <summary>
-        ///     Checks queues for equality
-        /// </summary>
-        public bool Equals(Queue other)
-        {
-            return Name == other.Name
-                   && IsDurable == other.IsDurable
-                   && IsExclusive == other.IsExclusive
-                   && IsAutoDelete == other.IsAutoDelete
-                   && Equals(Arguments, other.Arguments);
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            return obj is Queue other && Equals(other);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ IsDurable.GetHashCode();
-                hashCode = (hashCode * 397) ^ IsExclusive.GetHashCode();
-                hashCode = (hashCode * 397) ^ IsAutoDelete.GetHashCode();
-                return hashCode;
-            }
-        }
     }
 }

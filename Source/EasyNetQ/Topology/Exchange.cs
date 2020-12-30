@@ -57,36 +57,5 @@ namespace EasyNetQ.Topology
         /// The exchange arguments.
         /// </summary>
         public IReadOnlyDictionary<string, object> Arguments { get; }
-
-        /// <summary>
-        ///     Checks exchanges for equality
-        /// </summary>
-        public bool Equals(Exchange other)
-        {
-            return Name == other.Name
-                   && Type == other.Type
-                   && IsDurable == other.IsDurable
-                   && IsAutoDelete == other.IsAutoDelete
-                   && Equals(Arguments, other.Arguments);
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            return obj is Exchange other && Equals(other);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Type != null ? Type.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ IsDurable.GetHashCode();
-                hashCode = (hashCode * 397) ^ IsAutoDelete.GetHashCode();
-                return hashCode;
-            }
-        }
     }
 }
