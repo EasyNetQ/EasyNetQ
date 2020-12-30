@@ -34,7 +34,7 @@ namespace EasyNetQ.Topology
         public string Name { get; }
 
         /// <summary>
-        ///     If set the queue remains active when a server restarts
+        ///     If set the queue remains when a server restarts
         /// </summary>
         public bool IsDurable { get; }
 
