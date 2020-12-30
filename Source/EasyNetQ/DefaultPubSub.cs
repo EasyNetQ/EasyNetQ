@@ -75,7 +75,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public virtual AwaitableDisposable<ISubscriptionResult> SubscribeAsync<T>(
+        public virtual AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
             string subscriptionId,
             Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,
@@ -89,7 +89,7 @@ namespace EasyNetQ
             return SubscribeAsyncInternal(subscriptionId, onMessage, configure, cancellationToken).ToAwaitableDisposable();
         }
 
-        private async Task<ISubscriptionResult> SubscribeAsyncInternal<T>(
+        private async Task<SubscriptionResult> SubscribeAsyncInternal<T>(
             string subscriptionId,
             Func<T, CancellationToken, Task> onMessage,
             Action<ISubscriptionConfiguration> configure,

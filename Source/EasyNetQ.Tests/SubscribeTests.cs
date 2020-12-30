@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
         private const string consumerTag = "the_consumer_tag";
         private MockBuilder mockBuilder;
 
-        private ISubscriptionResult subscriptionResult;
+        private SubscriptionResult subscriptionResult;
 
         public When_subscribe_is_called()
         {
@@ -118,7 +118,6 @@ namespace EasyNetQ.Tests
             Assert.NotNull(subscriptionResult);
             Assert.NotNull(subscriptionResult.Exchange);
             Assert.NotNull(subscriptionResult.Queue);
-            Assert.NotNull(subscriptionResult.ConsumerCancellation);
             Assert.True(subscriptionResult.Exchange.Name == typeName);
             Assert.True(subscriptionResult.Queue.Name == queueName);
         }
