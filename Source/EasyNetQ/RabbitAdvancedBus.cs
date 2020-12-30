@@ -606,7 +606,9 @@ namespace EasyNetQ
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueUnbind(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, null),
+                x => x.QueueUnbind(
+                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments?.ToDictionary(e => e.Key, e => e.Value)
+                ),
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -619,7 +621,6 @@ namespace EasyNetQ
                     binding.RoutingKey
                 );
             }
-
         }
 
         /// <inheritdoc />
@@ -628,7 +629,9 @@ namespace EasyNetQ
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
             await clientCommandDispatcher.InvokeAsync(
-                x => x.ExchangeUnbind(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, null),
+                x => x.ExchangeUnbind(
+                    binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments?.ToDictionary(e => e.Key, e => e.Value)
+                ),
                 cts.Token
             ).ConfigureAwait(false);
 
