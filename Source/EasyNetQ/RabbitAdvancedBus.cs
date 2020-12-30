@@ -555,7 +555,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public async Task<ExchangeToQueueBinding> BindAsync(
+        public async Task<Binding<Queue>> BindAsync(
             Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken
         )
         {
@@ -581,11 +581,11 @@ namespace EasyNetQ
                 );
             }
 
-            return new ExchangeToQueueBinding(exchange, queue, routingKey, arguments);
+            return new Binding<Queue>(exchange, queue, routingKey, arguments);
         }
 
         /// <inheritdoc />
-        public async Task<ExchangeToExchangeBinding> BindAsync(
+        public async Task<Binding<Exchange>> BindAsync(
             Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken
         )
         {
@@ -611,11 +611,11 @@ namespace EasyNetQ
                 );
             }
 
-            return new ExchangeToExchangeBinding(source, destination, routingKey, arguments);
+            return new Binding<Exchange>(source, destination, routingKey, arguments);
         }
 
         /// <inheritdoc />
-        public virtual async Task UnbindAsync(ExchangeToQueueBinding binding, CancellationToken cancellationToken)
+        public virtual async Task UnbindAsync(Binding<Queue> binding, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(binding, "binding");
 
@@ -639,7 +639,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public virtual async Task UnbindAsync(ExchangeToExchangeBinding binding, CancellationToken cancellationToken)
+        public virtual async Task UnbindAsync(Binding<Exchange> binding, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(binding, "binding");
 

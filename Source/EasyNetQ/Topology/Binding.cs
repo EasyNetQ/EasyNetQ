@@ -6,12 +6,12 @@ namespace EasyNetQ.Topology
     /// <summary>
     ///     Binding between exchange and exchange
     /// </summary>
-    public readonly struct ExchangeToExchangeBinding
+    public readonly struct Binding<TDestination> where TDestination : IBindable
     {
         /// <summary>
         ///     Creates Binding
         /// </summary>
-        public ExchangeToExchangeBinding(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments = null)
+        public Binding(Exchange source, TDestination destination, string routingKey, IDictionary<string, object> arguments = null)
         {
             Preconditions.CheckNotNull(routingKey, "routingKey");
 
@@ -29,7 +29,7 @@ namespace EasyNetQ.Topology
         /// <summary>
         ///     Destination exchange
         /// </summary>
-        public Exchange Destination { get; }
+        public TDestination Destination { get; }
 
         /// <summary>
         ///     The binding routing key

@@ -688,7 +688,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static Task<ExchangeToQueueBinding> BindAsync(
+        public static Task<Binding<Queue>> BindAsync(
             this IAdvancedBus bus,
             Exchange source,
             Queue queue,
@@ -710,7 +710,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static Task<ExchangeToExchangeBinding> BindAsync(
+        public static Task<Binding<Exchange>> BindAsync(
             this IAdvancedBus bus,
             Exchange source,
             Exchange destination,
@@ -732,7 +732,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static ExchangeToExchangeBinding Bind(this IAdvancedBus bus, Exchange source, Exchange destination, string routingKey, CancellationToken cancellationToken = default)
+        public static Binding<Exchange> Bind(this IAdvancedBus bus, Exchange source, Exchange destination, string routingKey, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -751,7 +751,7 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static ExchangeToExchangeBinding Bind(
+        public static Binding<Exchange> Bind(
             this IAdvancedBus bus,
             Exchange source,
             Exchange destination,
@@ -776,7 +776,7 @@ namespace EasyNetQ
         /// <param name="routingKey">The routing key</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static ExchangeToQueueBinding Bind(this IAdvancedBus bus, Exchange exchange, Queue queue, string routingKey, CancellationToken cancellationToken = default)
+        public static Binding<Queue> Bind(this IAdvancedBus bus, Exchange exchange, Queue queue, string routingKey, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -795,7 +795,7 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        public static ExchangeToQueueBinding Bind(
+        public static Binding<Queue> Bind(
             this IAdvancedBus bus,
             Exchange exchange,
             Queue queue,
@@ -908,7 +908,7 @@ namespace EasyNetQ
         /// <param name="bus">The bus instance</param>
         /// <param name="binding">the binding to delete</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void Unbind(this IAdvancedBus bus, ExchangeToQueueBinding binding, CancellationToken cancellationToken = default)
+        public static void Unbind(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 
@@ -923,7 +923,7 @@ namespace EasyNetQ
         /// <param name="bus">The bus instance</param>
         /// <param name="binding">the binding to delete</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        public static void Unbind(this IAdvancedBus bus, ExchangeToExchangeBinding binding, CancellationToken cancellationToken = default)
+        public static void Unbind(this IAdvancedBus bus, Binding<Exchange> binding, CancellationToken cancellationToken = default)
         {
             Preconditions.CheckNotNull(bus, "bus");
 

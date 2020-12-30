@@ -196,7 +196,7 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<ExchangeToQueueBinding> BindAsync(Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
+        Task<Binding<Queue>> BindAsync(Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -207,22 +207,21 @@ namespace EasyNetQ
         /// <param name="headers">The headers</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<ExchangeToExchangeBinding> BindAsync(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
+        Task<Binding<Exchange>> BindAsync(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a binding
         /// </summary>
         /// <param name="binding">the binding to delete</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task UnbindAsync(ExchangeToQueueBinding binding, CancellationToken cancellationToken = default);
+        Task UnbindAsync(Binding<Queue> binding, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a binding
         /// </summary>
         /// <param name="binding">the binding to delete</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task UnbindAsync(ExchangeToExchangeBinding binding, CancellationToken cancellationToken = default);
-
+        Task UnbindAsync(Binding<Exchange> binding, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets stats for the given queue

@@ -321,7 +321,7 @@ namespace EasyNetQ.Tests
 
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private ExchangeToQueueBinding binding;
+        private Binding<Queue> binding;
 
         [Fact]
         public void Should_create_a_binding_instance()
@@ -365,7 +365,7 @@ namespace EasyNetQ.Tests
 
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private ExchangeToQueueBinding binding;
+        private Binding<Queue> binding;
 
         [Fact]
         public void Should_create_a_binding_instance()
@@ -411,7 +411,7 @@ namespace EasyNetQ.Tests
 
         private MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private readonly ExchangeToQueueBinding binding;
+        private readonly Binding<Queue> binding;
 
         [Fact]
         public void Should_unbind_the_exchange()

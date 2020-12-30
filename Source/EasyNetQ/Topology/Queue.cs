@@ -6,7 +6,7 @@ namespace EasyNetQ.Topology
     /// <summary>
     ///     Represents an AMQP queue
     /// </summary>
-    public readonly struct Queue
+    public readonly struct Queue : IBindable
     {
         /// <summary>
         ///     Creates Queue

@@ -72,7 +72,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                     var routingKey = (string) mi[2];
                     var arguments = (IDictionary<string, object>) mi[3];
                     boundExchanges.Add(source, destination);
-                    return Task.FromResult(new ExchangeToExchangeBinding(source, destination, routingKey, arguments));
+                    return Task.FromResult(new Binding<Exchange>(source, destination, routingKey, arguments));
                 });
 
             var conventions = Substitute.For<IConventions>();
@@ -109,7 +109,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                     var routingKey = (string) mi[2];
                     var arguments = (IDictionary<string, object>) mi[3];
                     boundExchanges.Add(source, destination);
-                    return Task.FromResult(new ExchangeToExchangeBinding(source, destination, routingKey, arguments));
+                    return Task.FromResult(new Binding<Exchange>(source, destination, routingKey, arguments));
                 });
 
             var conventions = Substitute.For<IConventions>();

@@ -6,7 +6,7 @@ namespace EasyNetQ.Topology
     /// <summary>
     ///     Represents an AMQP exchange
     /// </summary>
-    public readonly struct Exchange
+    public readonly struct Exchange : IBindable
     {
         /// <summary>
         ///     Returns the default exchange
