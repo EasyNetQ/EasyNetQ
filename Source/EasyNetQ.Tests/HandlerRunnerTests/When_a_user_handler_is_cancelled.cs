@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
 using NSubstitute;
@@ -12,9 +12,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
     public class When_a_user_handler_is_cancelled
     {
         private readonly MessageProperties messageProperties = new MessageProperties
-            {
-                CorrelationId = "correlation_id"
-            };
+        {
+            CorrelationId = "correlation_id"
+        };
         private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 42, false, "exchange", "routingKey", "queue");
         private readonly byte[] messageBody = new byte[0];
 

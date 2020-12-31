@@ -22,7 +22,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((Request) obj);
+            return Equals((Request)obj);
         }
 
         public override int GetHashCode()
@@ -64,7 +64,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((Response) obj);
+            return Equals((Response)obj);
         }
 
         public override int GetHashCode()

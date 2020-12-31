@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Sprache
+namespace EasyNetQ.Sprache
 {
     internal delegate IResult<T> Parser<out T>(Input input);
 

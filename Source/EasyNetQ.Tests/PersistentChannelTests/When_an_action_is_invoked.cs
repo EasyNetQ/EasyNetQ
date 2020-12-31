@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using System;
 using EasyNetQ.Events;
@@ -9,7 +9,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    public class When_an_action_is_invoked: IDisposable
+    public class When_an_action_is_invoked : IDisposable
     {
         public When_an_action_is_invoked()
         {

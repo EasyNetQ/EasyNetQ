@@ -11,7 +11,7 @@ namespace EasyNetQ.Tests.Internals
         [Fact]
         public void Should_write_bytes()
         {
-            var data = new byte[] {1, 2, 3, 4};
+            var data = new byte[] { 1, 2, 3, 4 };
             using var stream = new ArrayPooledMemoryStream();
 
             Assert.True(stream.CanWrite);
@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.Internals
         [Fact]
         public void Should_write_span()
         {
-            var data = new byte[] {1, 2, 3, 4}.AsSpan();
+            var data = new byte[] { 1, 2, 3, 4 }.AsSpan();
             using var stream = new ArrayPooledMemoryStream();
 
             Assert.True(stream.CanWrite);
@@ -57,7 +57,7 @@ namespace EasyNetQ.Tests.Internals
         [Fact]
         public void Should_write_bytes_to_middle()
         {
-            var data = new byte[] {1, 2, 3, 4, 5, 6, 7, 8};
+            var data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
             using var stream = new ArrayPooledMemoryStream();
             stream.Write(data, 0, data.Length);
             stream.Seek(4, SeekOrigin.Begin);
@@ -69,7 +69,7 @@ namespace EasyNetQ.Tests.Internals
         [Fact]
         public void Should_write_span_to_middle()
         {
-            var data = new byte[] {1, 2, 3, 4, 5, 6, 7, 8};
+            var data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
             using var stream = new ArrayPooledMemoryStream();
             stream.Write(data.AsSpan());
             stream.Seek(4, SeekOrigin.Begin);
@@ -81,7 +81,7 @@ namespace EasyNetQ.Tests.Internals
         [Fact]
         public void Should_set_length()
         {
-            var data = new byte[] {1, 2, 3, 4};
+            var data = new byte[] { 1, 2, 3, 4 };
             using var stream = new ArrayPooledMemoryStream();
             stream.Write(data, 0, data.Length);
             stream.SetLength(128 * 1024);

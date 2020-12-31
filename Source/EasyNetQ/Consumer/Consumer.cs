@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Events;
+using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using System;
 using System.Collections.Generic;

@@ -37,7 +37,7 @@ namespace EasyNetQ.Producer
         {
             channelsPoolPerOptions.ClearAndDispose(x =>
             {
-                while(x.TryDequeue(out var channel))
+                while (x.TryDequeue(out var channel))
                     channel.Dispose();
                 x.Dispose();
             });

@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.DI
+namespace EasyNetQ.DI
 {
     /// <summary>
     /// Represents the lifetime of a container registration

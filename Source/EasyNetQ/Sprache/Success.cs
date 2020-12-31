@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Sprache
+namespace EasyNetQ.Sprache
 {
     internal sealed class Success<T> : ISuccess<T>
     {

@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ
+namespace EasyNetQ
 {
     /// <summary>
     ///     Represents various properties of a received message

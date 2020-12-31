@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.DI
+namespace EasyNetQ.DI
 {
     /// <summary>
     /// Provides service instances and creates separate scopes

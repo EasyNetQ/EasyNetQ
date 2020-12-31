@@ -57,7 +57,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public async Task Should_be_able_to_future_publish_polymorphic()
         {
-            var message = (IAnimal) new Dog();
+            var message = (IAnimal)new Dog();
             var messageType = typeof(IAnimal);
 
             await scheduler.FuturePublishAsync(message, messageType, delay, configure);

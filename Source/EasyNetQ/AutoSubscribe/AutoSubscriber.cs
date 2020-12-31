@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Internals;
+using EasyNetQ.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -214,7 +214,7 @@ namespace EasyNetQ.AutoSubscribe
                     if (configSettings.PrefetchCount > 0)
                         configuration.WithPrefetchCount(configSettings.PrefetchCount);
 
-                    if (configSettings.Expires > 0 )
+                    if (configSettings.Expires > 0)
                         configuration.WithExpires(configSettings.Expires);
 
                     configuration

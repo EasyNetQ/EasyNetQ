@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,11 +35,11 @@ namespace EasyNetQ.IntegrationTests
             dockerHttpApiUri = settings["dockerHttpApiUri"];
             rabbitMqHostName = settings["rabbitMQHostName"];
             rabbitMqVirtualHostName = settings["rabbitMQVirtualHost"];
-            rabbitMqVirtualHost = new Vhost {Name = rabbitMqVirtualHostName, Tracing = false};
+            rabbitMqVirtualHost = new Vhost { Name = rabbitMqVirtualHostName, Tracing = false };
             rabbitMqUser = settings["rabbitMQUser"];
             rabbitMqPassword = settings["rabbitMQPassword"];
             osSpecificSettings = OperatingSystems
-                .Select(x => new {Os = x, ConfigSection = settings.GetSection(x.ToString().ToLowerInvariant())})
+                .Select(x => new { Os = x, ConfigSection = settings.GetSection(x.ToString().ToLowerInvariant()) })
                 .ToDictionary(x => x.Os, x => x.ConfigSection);
         }
 

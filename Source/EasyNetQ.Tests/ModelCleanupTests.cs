@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -65,7 +65,7 @@ namespace EasyNetQ.Tests
             var waiter = new CountdownEvent(1);
             mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
 
-            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage) null);
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage)null);
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 

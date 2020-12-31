@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +21,10 @@ namespace EasyNetQ.Tests.ProducerTests
             mockBuilder = new MockBuilder();
 
             var message = new MyImplementation
-                {
-                    Text = "Hello Polymorphs!",
-                    NotInInterface = "Hi"
-                };
+            {
+                Text = "Hello Polymorphs!",
+                NotInInterface = "Hi"
+            };
 
             mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
         }

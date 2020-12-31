@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Collections.Generic;
@@ -70,7 +70,7 @@ namespace EasyNetQ.Tests
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>) null)
+                Arg.Is((IDictionary<string, object>)null)
             );
         }
 
@@ -81,7 +81,7 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is(typeName),
                 Arg.Is("#"),
-                Arg.Is((IDictionary<string, object>) null)
+                Arg.Is((IDictionary<string, object>)null)
             );
         }
 
@@ -125,7 +125,7 @@ namespace EasyNetQ.Tests
 
     public class When_subscribe_with_configuration_is_called
     {
-        [InlineData("ttt", true, 99, 999, 10, true, (byte) 11, false, "qqq", 1001, 10001)]
+        [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
         [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
         [Theory]
         public void Queue_should_be_declared_with_correct_options(
@@ -193,10 +193,10 @@ namespace EasyNetQ.Tests
                 Arg.Is(autoDelete),
                 Arg.Is<IDictionary<string, object>>(
                     x =>
-                        (!expires.HasValue || expires.Value == (int) x["x-expires"]) &&
-                        (!maxPriority.HasValue || maxPriority.Value == (int) x["x-max-priority"]) &&
-                        (!maxLength.HasValue || maxLength.Value == (int) x["x-max-length"]) &&
-                        (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int) x["x-max-length-bytes"])
+                        (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
+                        (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
+                        (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
+                        (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
                 )
             );
 
@@ -207,7 +207,7 @@ namespace EasyNetQ.Tests
                 Arg.Any<string>(),
                 Arg.Is(true),
                 Arg.Is(isExclusive),
-                Arg.Is<IDictionary<string, object>>(x => priority == (int) x["x-priority"]),
+                Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
                 Arg.Any<IBasicConsumer>()
             );
 
@@ -219,7 +219,7 @@ namespace EasyNetQ.Tests
                 Arg.Is(queueName),
                 Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
-                Arg.Is((IDictionary<string, object>) null));
+                Arg.Is((IDictionary<string, object>)null));
         }
     }
 
@@ -249,7 +249,7 @@ namespace EasyNetQ.Tests
             mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
 
             const string text = "Hello there, I am the text!";
-            originalMessage = new MyMessage {Text = text};
+            originalMessage = new MyMessage { Text = text };
 
             using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
@@ -323,8 +323,8 @@ namespace EasyNetQ.Tests
             consumerErrorStrategy.HandleConsumerError(default, null)
                 .ReturnsForAnyArgs(i =>
                 {
-                    basicDeliverEventArgs = (ConsumerExecutionContext) i[0];
-                    raisedException = (Exception) i[1];
+                    basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
+                    raisedException = (Exception)i[1];
                     return AckStrategies.Ack;
                 });
 
@@ -336,7 +336,7 @@ namespace EasyNetQ.Tests
             mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => throw originalException);
 
             const string text = "Hello there, I am the text!";
-            originalMessage = new MyMessage {Text = text};
+            originalMessage = new MyMessage { Text = text };
 
             using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 

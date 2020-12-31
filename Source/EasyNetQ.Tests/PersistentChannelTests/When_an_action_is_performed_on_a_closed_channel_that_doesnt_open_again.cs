@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Threading;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests
 {
-    public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again: IDisposable
+    public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again : IDisposable
     {
         public When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again()
         {
