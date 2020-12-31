@@ -27,7 +27,7 @@ namespace EasyNetQ
     /// <summary>
     ///     Represents a serialized message
     /// </summary>
-    public readonly struct SerializedMessage: IDisposable
+    public readonly struct SerializedMessage : IDisposable
     {
         private readonly IDisposable owner;
 

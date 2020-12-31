@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Hosepipe.Tests
+namespace EasyNetQ.Hosepipe.Tests
 {
     public static class Helper
     {

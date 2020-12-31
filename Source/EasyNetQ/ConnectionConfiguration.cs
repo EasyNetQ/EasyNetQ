@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 
@@ -39,7 +39,7 @@ namespace EasyNetQ
             // set to 50 based on this blog post:
             // http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
             PrefetchCount = 50;
-            AuthMechanisms = new List<IAuthMechanismFactory> {new PlainMechanismFactory()};
+            AuthMechanisms = new List<IAuthMechanismFactory> { new PlainMechanismFactory() };
 
             Hosts = new List<HostConfiguration>();
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.IO;
 using System.Text;
@@ -61,7 +61,7 @@ namespace EasyNetQ
 
             using var memoryStream = new ReadOnlyMemoryStream(bytes);
             using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
-            using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) {ArrayPool = JsonSerializerArrayPool<char>.Instance};
+            using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) { ArrayPool = JsonSerializerArrayPool<char>.Instance };
             return jsonSerializer.Deserialize(reader, messageType);
         }
 

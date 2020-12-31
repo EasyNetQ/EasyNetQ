@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using LightInject;
 
 namespace EasyNetQ.DI.LightInject

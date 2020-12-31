@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Events

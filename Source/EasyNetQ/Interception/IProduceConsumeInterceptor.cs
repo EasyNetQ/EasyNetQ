@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Interception
+namespace EasyNetQ.Interception
 {
     /// <summary>
     ///     Allow to execute arbitrary code before publish or consume

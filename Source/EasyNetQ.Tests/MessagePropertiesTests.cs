@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 using FluentAssertions;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +50,7 @@ namespace EasyNetQ.Tests
                               { "AString", "ThisIsAString" },
                               { "AnInt", 123 }
                           }
-                };
+            };
 
             var destinationProperties = (MessageProperties)properties.Clone();
 
@@ -76,22 +76,22 @@ namespace EasyNetQ.Tests
                 };
 
             var properties = new MessageProperties
-                {
-                    AppId = "app_id",
-                    ClusterId = "cluster_id",
-                    ContentEncoding = "content_encoding",
-                    ContentType = "content_type",
-                    //CorrelationId = "correlation_id",
-                    DeliveryMode = 10,
-                    Expiration = "expiration",
-                    Headers = headers,
-                    MessageId = "message_id",
-                    Priority = 3,
-                    ReplyTo = "reply_to",
-                    Timestamp = 123456,
-                    Type = "type",
-                    UserId = "userid",
-                };
+            {
+                AppId = "app_id",
+                ClusterId = "cluster_id",
+                ContentEncoding = "content_encoding",
+                ContentType = "content_type",
+                //CorrelationId = "correlation_id",
+                DeliveryMode = 10,
+                Expiration = "expiration",
+                Headers = headers,
+                MessageId = "message_id",
+                Priority = 3,
+                ReplyTo = "reply_to",
+                Timestamp = 123456,
+                Type = "type",
+                UserId = "userid",
+            };
 
             properties.ToString().Should().Be(expectedDebugProperties);
         }

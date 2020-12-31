@@ -23,14 +23,14 @@ namespace EasyNetQ.Tests.ConnectionString
         {
             object[] Spec(string uri, ConnectionConfiguration configuration)
             {
-                return new[] {new AmqpSpecification(uri, configuration)};
+                return new[] { new AmqpSpecification(uri, configuration) };
             }
 
             yield return Spec(
                 "amqp://user:pass@host:10000/vhost",
                 new ConnectionConfiguration
                 {
-                    Hosts = new[] {new HostConfiguration {Host = "host", Port = 10000}},
+                    Hosts = new[] { new HostConfiguration { Host = "host", Port = 10000 } },
                     VirtualHost = "vhost",
                     UserName = "user",
                     Password = "pass"
@@ -40,14 +40,14 @@ namespace EasyNetQ.Tests.ConnectionString
                 "amqp://",
                 new ConnectionConfiguration
                 {
-                    Hosts = new[] {new HostConfiguration {Host = "localhost", Port = 5672}},
+                    Hosts = new[] { new HostConfiguration { Host = "localhost", Port = 5672 } },
                 }
             );
             yield return Spec(
                 "amqp://host",
                 new ConnectionConfiguration
                 {
-                    Hosts = new[] {new HostConfiguration {Host = "host", Port = 5672}},
+                    Hosts = new[] { new HostConfiguration { Host = "host", Port = 5672 } },
                 }
             );
             yield return Spec(
@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests.ConnectionString
                 ),
                 new ConnectionConfiguration
                 {
-                    Hosts = new[] {new HostConfiguration {Host = "localhost", Port = 5672}},
+                    Hosts = new[] { new HostConfiguration { Host = "localhost", Port = 5672 } },
                     PersistentMessages = false,
                     PrefetchCount = 2,
                     Timeout = TimeSpan.FromSeconds(1),

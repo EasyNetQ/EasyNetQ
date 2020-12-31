@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.ConnectionString
+namespace EasyNetQ.ConnectionString
 {
     /// <summary>
     ///     Allows to create ConnectionConfiguration from string

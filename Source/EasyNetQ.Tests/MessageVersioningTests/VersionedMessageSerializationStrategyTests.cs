@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using EasyNetQ.MessageVersioning;
 using NSubstitute;
@@ -129,9 +129,9 @@ namespace EasyNetQ.Tests.MessageVersioningTests
                 };
 
             var message = new Message<MyMessageV2>(new MyMessageV2())
-                {
-                    Properties = { CorrelationId = correlationId }
-                };
+            {
+                Properties = { CorrelationId = correlationId }
+            };
             var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, "SomeOtherCorrelationId");
 
             var serializedMessage = serializationStrategy.SerializeMessage(message);

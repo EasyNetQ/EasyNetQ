@@ -62,7 +62,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public async Task Should_be_able_to_publish_polymorphic()
         {
-            var request = (IAnimal) new Dog();
+            var request = (IAnimal)new Dog();
             var requestType = typeof(IAnimal);
             var responseType = typeof(IAnimal);
             rpc.RequestAsync<IAnimal, IAnimal>(Arg.Any<IAnimal>(), configure).Returns(request);

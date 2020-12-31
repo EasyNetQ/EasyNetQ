@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ
+namespace EasyNetQ
 {
     /// <summary>
     ///     A strategy of generation a correlation identifier

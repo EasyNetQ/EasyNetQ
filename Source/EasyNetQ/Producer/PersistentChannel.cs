@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
@@ -148,18 +148,18 @@ namespace EasyNetQ.Producer
 
         private void OnChannelRecovered(object sender, EventArgs e)
         {
-            eventBus.Publish(new ChannelRecoveredEvent((IModel) sender));
+            eventBus.Publish(new ChannelRecoveredEvent((IModel)sender));
         }
 
         private void OnChannelShutdown(object sender, ShutdownEventArgs e)
         {
-            eventBus.Publish(new ChannelShutdownEvent((IModel) sender));
+            eventBus.Publish(new ChannelShutdownEvent((IModel)sender));
         }
 
         private void OnReturn(object sender, BasicReturnEventArgs args)
         {
             var returnedMessageEvent = new ReturnedMessageEvent(
-                (IModel) sender,
+                (IModel)sender,
                 args.Body,
                 new MessageProperties(args.BasicProperties),
                 new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)
@@ -169,12 +169,12 @@ namespace EasyNetQ.Producer
 
         private void OnAck(object sender, BasicAckEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Ack((IModel) sender, args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Ack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
         private void OnNack(object sender, BasicNackEventArgs args)
         {
-            eventBus.Publish(MessageConfirmationEvent.Nack((IModel) sender, args.DeliveryTag, args.Multiple));
+            eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
         }
 
         private static ExceptionVerdict GetExceptionVerdict(Exception exception)

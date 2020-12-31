@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.DI
+namespace EasyNetQ.DI
 {
     /// <inheritdoc />
     public class ServiceResolverScope : IServiceResolverScope

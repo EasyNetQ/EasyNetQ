@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using FluentAssertions;
@@ -31,9 +31,9 @@ namespace EasyNetQ.Tests.ConsumeTests
             var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
             var serializedMessage = new JsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
             var properties = new BasicProperties
-                {
-                    Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
-                };
+            {
+                Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
+            };
 
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer_tag",
