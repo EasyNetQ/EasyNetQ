@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Ninject;
 
 namespace EasyNetQ.DI.Ninject

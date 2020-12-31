@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests
 {
     internal class StaticCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
     {

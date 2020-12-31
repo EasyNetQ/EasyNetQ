@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Logging.LogProviders;
+using EasyNetQ.Logging.LogProviders;
 using System;
 using System.Collections.Generic;
 

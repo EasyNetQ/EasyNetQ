@@ -1,4 +1,4 @@
-﻿using RabbitMQ.Client;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,19 +35,19 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
 
-            if (basicProperties.IsContentTypePresent())         ContentType         = basicProperties.ContentType;
-            if (basicProperties.IsContentEncodingPresent())     ContentEncoding     = basicProperties.ContentEncoding;
-            if (basicProperties.IsDeliveryModePresent())        DeliveryMode        = basicProperties.DeliveryMode;
-            if (basicProperties.IsPriorityPresent())            Priority            = basicProperties.Priority;
-            if (basicProperties.IsCorrelationIdPresent())       CorrelationId       = basicProperties.CorrelationId;
-            if (basicProperties.IsReplyToPresent())             ReplyTo             = basicProperties.ReplyTo;
-            if (basicProperties.IsExpirationPresent())          Expiration          = basicProperties.Expiration;
-            if (basicProperties.IsMessageIdPresent())           MessageId           = basicProperties.MessageId;
-            if (basicProperties.IsTimestampPresent())           Timestamp           = basicProperties.Timestamp.UnixTime;
-            if (basicProperties.IsTypePresent())                Type                = basicProperties.Type;
-            if (basicProperties.IsUserIdPresent())              UserId              = basicProperties.UserId;
-            if (basicProperties.IsAppIdPresent())               AppId               = basicProperties.AppId;
-            if (basicProperties.IsClusterIdPresent())           ClusterId           = basicProperties.ClusterId;
+            if (basicProperties.IsContentTypePresent()) ContentType = basicProperties.ContentType;
+            if (basicProperties.IsContentEncodingPresent()) ContentEncoding = basicProperties.ContentEncoding;
+            if (basicProperties.IsDeliveryModePresent()) DeliveryMode = basicProperties.DeliveryMode;
+            if (basicProperties.IsPriorityPresent()) Priority = basicProperties.Priority;
+            if (basicProperties.IsCorrelationIdPresent()) CorrelationId = basicProperties.CorrelationId;
+            if (basicProperties.IsReplyToPresent()) ReplyTo = basicProperties.ReplyTo;
+            if (basicProperties.IsExpirationPresent()) Expiration = basicProperties.Expiration;
+            if (basicProperties.IsMessageIdPresent()) MessageId = basicProperties.MessageId;
+            if (basicProperties.IsTimestampPresent()) Timestamp = basicProperties.Timestamp.UnixTime;
+            if (basicProperties.IsTypePresent()) Type = basicProperties.Type;
+            if (basicProperties.IsUserIdPresent()) UserId = basicProperties.UserId;
+            if (basicProperties.IsAppIdPresent()) AppId = basicProperties.AppId;
+            if (basicProperties.IsClusterIdPresent()) ClusterId = basicProperties.ClusterId;
 
             if (basicProperties.IsHeadersPresent())
                 Headers = basicProperties.Headers == null || basicProperties.Headers.Count == 0
@@ -62,19 +62,19 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(basicProperties, "basicProperties");
 
-            if (contentTypePresent)      basicProperties.ContentType      =  contentType;
-            if (contentEncodingPresent)  basicProperties.ContentEncoding  =  contentEncoding;
-            if (deliveryModePresent)     basicProperties.DeliveryMode     =  deliveryMode;
-            if (priorityPresent)         basicProperties.Priority         =  priority;
-            if (correlationIdPresent)    basicProperties.CorrelationId    =  correlationId;
-            if (replyToPresent)          basicProperties.ReplyTo          =  replyTo;
-            if (expirationPresent)       basicProperties.Expiration       =  expiration;
-            if (messageIdPresent)        basicProperties.MessageId        =  messageId;
-            if (timestampPresent)        basicProperties.Timestamp        =  new AmqpTimestamp(timestamp);
-            if (typePresent)             basicProperties.Type             =  type;
-            if (userIdPresent)           basicProperties.UserId           =  userId;
-            if (appIdPresent)            basicProperties.AppId            =  appId;
-            if (clusterIdPresent)        basicProperties.ClusterId        =  clusterId;
+            if (contentTypePresent) basicProperties.ContentType = contentType;
+            if (contentEncodingPresent) basicProperties.ContentEncoding = contentEncoding;
+            if (deliveryModePresent) basicProperties.DeliveryMode = deliveryMode;
+            if (priorityPresent) basicProperties.Priority = priority;
+            if (correlationIdPresent) basicProperties.CorrelationId = correlationId;
+            if (replyToPresent) basicProperties.ReplyTo = replyTo;
+            if (expirationPresent) basicProperties.Expiration = expiration;
+            if (messageIdPresent) basicProperties.MessageId = messageId;
+            if (timestampPresent) basicProperties.Timestamp = new AmqpTimestamp(timestamp);
+            if (typePresent) basicProperties.Type = type;
+            if (userIdPresent) basicProperties.UserId = userId;
+            if (appIdPresent) basicProperties.AppId = appId;
+            if (clusterIdPresent) basicProperties.ClusterId = clusterId;
 
             if (headers != null && headers.Count > 0)
                 basicProperties.Headers = new Dictionary<string, object>(headers);
@@ -85,19 +85,19 @@ namespace EasyNetQ
         {
             var copy = new MessageProperties();
 
-            if (contentTypePresent)     copy.ContentType     = contentType;
+            if (contentTypePresent) copy.ContentType = contentType;
             if (contentEncodingPresent) copy.ContentEncoding = contentEncoding;
-            if (deliveryModePresent)    copy.DeliveryMode    = deliveryMode;
-            if (priorityPresent)        copy.Priority        = priority;
-            if (correlationIdPresent)   copy.CorrelationId   = correlationId;
-            if (replyToPresent)         copy.ReplyTo         = replyTo;
-            if (expirationPresent)      copy.Expiration      = expiration;
-            if (messageIdPresent)       copy.MessageId       = messageId;
-            if (timestampPresent)       copy.Timestamp       = timestamp;
-            if (typePresent)            copy.Type            = type;
-            if (userIdPresent)          copy.UserId          = userId;
-            if (appIdPresent)           copy.AppId           = appId;
-            if (clusterIdPresent)       copy.ClusterId       = clusterId;
+            if (deliveryModePresent) copy.DeliveryMode = deliveryMode;
+            if (priorityPresent) copy.Priority = priority;
+            if (correlationIdPresent) copy.CorrelationId = correlationId;
+            if (replyToPresent) copy.ReplyTo = replyTo;
+            if (expirationPresent) copy.Expiration = expiration;
+            if (messageIdPresent) copy.MessageId = messageId;
+            if (timestampPresent) copy.Timestamp = timestamp;
+            if (typePresent) copy.Type = type;
+            if (userIdPresent) copy.UserId = userId;
+            if (appIdPresent) copy.AppId = appId;
+            if (clusterIdPresent) copy.ClusterId = clusterId;
 
             if (headers != null && headers.Count > 0)
                 copy.headers = new Dictionary<string, object>(headers);

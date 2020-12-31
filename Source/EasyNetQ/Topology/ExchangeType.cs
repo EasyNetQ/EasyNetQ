@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Topology
+namespace EasyNetQ.Topology
 {
     public static class ExchangeType
     {

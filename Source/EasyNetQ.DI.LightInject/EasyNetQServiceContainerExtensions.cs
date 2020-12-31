@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EasyNetQ;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;

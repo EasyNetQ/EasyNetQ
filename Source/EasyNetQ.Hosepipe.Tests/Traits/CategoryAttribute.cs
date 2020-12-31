@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Xunit.Sdk;
 
 namespace EasyNetQ.Hosepipe.Tests.Traits

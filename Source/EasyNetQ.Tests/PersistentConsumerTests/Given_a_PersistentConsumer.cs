@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                 var internalConsumer = Substitute.For<IInternalConsumer>();
                 internalConsumers.Add(internalConsumer);
                 internalConsumer.StartConsuming(Arg.Any<bool>())
-                    .Returns(new InternalConsumerStatus(new[] {queue}, Array.Empty<Queue>()));
+                    .Returns(new InternalConsumerStatus(new[] { queue }, Array.Empty<Queue>()));
                 return internalConsumer;
             });
             consumer = new Consumer.Consumer(

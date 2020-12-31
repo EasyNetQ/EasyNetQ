@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
     <PackageProduct>EasyNetQ</PackageProduct>

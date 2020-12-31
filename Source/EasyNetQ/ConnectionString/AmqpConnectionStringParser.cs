@@ -13,7 +13,7 @@ namespace EasyNetQ.ConnectionString
     /// <inheritdoc />
     public class AmqpConnectionStringParser : IConnectionStringParser
     {
-        private static readonly IReadOnlyCollection<string> SupportedSchemes = new[] {"amqp", "amqps"};
+        private static readonly IReadOnlyCollection<string> SupportedSchemes = new[] { "amqp", "amqps" };
 
         private static readonly List<UpdateConfiguration> Parsers = new List<UpdateConfiguration>
         {
@@ -41,8 +41,8 @@ namespace EasyNetQ.ConnectionString
             {
                 Host = string.IsNullOrEmpty(uri.Host) ? "localhost" : uri.Host,
                 Port = uri.Port == -1
-                    ? (ushort) (secured ? ConnectionConfiguration.DefaultAmqpsPort : ConnectionConfiguration.DefaultPort)
-                    : (ushort) uri.Port,
+                    ? (ushort)(secured ? ConnectionConfiguration.DefaultAmqpsPort : ConnectionConfiguration.DefaultPort)
+                    : (ushort)uri.Port,
             };
             if (secured)
             {
@@ -118,7 +118,7 @@ namespace EasyNetQ.ConnectionString
             Preconditions.CheckNotNull(property, "getter", "Member is not a property.");
             Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
 
-            return (Action<TContaining, TProperty>) property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+            return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
         }
     }
 }

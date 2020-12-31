@@ -46,7 +46,7 @@ namespace EasyNetQ.Internals
                 if (value < 0 || value > int.MaxValue)
                     throw new ArgumentOutOfRangeException(nameof(value));
 
-                position = (int) value;
+                position = (int)value;
             }
         }
 
@@ -66,7 +66,7 @@ namespace EasyNetQ.Internals
             if (value < 0)
                 throw new IndexOutOfRangeException("underflow");
 
-            length = (int) value;
+            length = (int)value;
             if (rentBuffer.Length < length)
                 ReallocateBuffer(length);
 
@@ -90,7 +90,7 @@ namespace EasyNetQ.Internals
             if (newPosition > int.MaxValue || newPosition < 0)
                 throw new ArgumentOutOfRangeException(nameof(offset));
 
-            position = (int) newPosition;
+            position = (int)newPosition;
             return position;
         }
 

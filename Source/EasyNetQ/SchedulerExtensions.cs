@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +27,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(scheduler, "scheduler");
 
-            return scheduler.FuturePublishAsync(message, delay, c => {}, cancellationToken);
+            return scheduler.FuturePublishAsync(message, delay, c => { }, cancellationToken);
         }
 
         /// <summary>

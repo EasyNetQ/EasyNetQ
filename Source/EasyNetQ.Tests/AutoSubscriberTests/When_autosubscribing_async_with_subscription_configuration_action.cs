@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Internals;
 using FluentAssertions;
@@ -23,13 +23,13 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             bus.PubSub.Returns(pubSub);
 
             var autoSubscriber = new AutoSubscriber(bus, "my_app")
-                {
-                        ConfigureSubscriptionConfiguration =
+            {
+                ConfigureSubscriptionConfiguration =
                                 c => c.WithAutoDelete()
                                     .WithExpires(10)
                                     .WithPrefetchCount(10)
                                     .WithPriority(10)
-                };
+            };
 
             pubSub.SubscribeAsync(
                     Arg.Is("MyActionTest"),

@@ -35,7 +35,7 @@ namespace EasyNetQ.IntegrationTests.Utils
         {
             await using (
                 cancellationToken.Register(
-                    x => ((TaskCompletionSource<object>) x)?.TrySetCanceled(),
+                    x => ((TaskCompletionSource<object>)x)?.TrySetCanceled(),
                     allMessagedReceived,
                     false
                 )

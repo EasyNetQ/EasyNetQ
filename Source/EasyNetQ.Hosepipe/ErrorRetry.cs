@@ -25,7 +25,7 @@ namespace EasyNetQ.Hosepipe
 
             foreach (var rawErrorMessage in rawErrorMessages)
             {
-                var error = (Error) serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
+                var error = (Error)serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
                 var properties = model.CreateBasicProperties();
                 error.BasicProperties.CopyTo(properties);
                 var body = errorMessageSerializer.Deserialize(error.Message);

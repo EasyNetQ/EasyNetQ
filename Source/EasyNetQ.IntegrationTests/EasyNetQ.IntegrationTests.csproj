@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
     <Description>EasyNetQ.IntegrationTests</Description>
     <TargetFramework>netcoreapp5.0</TargetFramework>

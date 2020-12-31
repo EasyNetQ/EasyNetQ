@@ -64,13 +64,13 @@ namespace EasyNetQ.ConnectionString
         )
         {
             return from key in Parse.CaseInsensitiveString(keyName).Token()
-                from separator in Parse.Char('=')
-                from value in valueParser
-                select (Func<ConnectionConfiguration, ConnectionConfiguration>)(c =>
-                {
-                    CreateSetter(getter)(c, value);
-                    return c;
-                });
+                   from separator in Parse.Char('=')
+                   from value in valueParser
+                   select (Func<ConnectionConfiguration, ConnectionConfiguration>)(c =>
+                   {
+                       CreateSetter(getter)(c, value);
+                       return c;
+                   });
         }
 
         private static Action<ConnectionConfiguration, T> CreateSetter<T>(Expression<Func<ConnectionConfiguration, T>> getter)

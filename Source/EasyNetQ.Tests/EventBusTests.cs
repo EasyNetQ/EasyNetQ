@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Collections.Generic;
@@ -24,9 +24,9 @@ namespace EasyNetQ.Tests
             eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
 
             var publishedEvent = new Event1
-                {
-                    Text = "Hello World"
-                };
+            {
+                Text = "Hello World"
+            };
 
             eventBus.Publish(publishedEvent);
 

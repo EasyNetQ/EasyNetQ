@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Interception
+namespace EasyNetQ.Interception
 {
     /// <summary>
     ///     An empty interceptor

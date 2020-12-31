@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -153,7 +153,7 @@ namespace EasyNetQ.Internals
             state.CancellationTokenRegistration = cancellationToken.Register(
                 s =>
                 {
-                    var t = (TcsWithCancellationToken<T>) s;
+                    var t = (TcsWithCancellationToken<T>)s;
                     t.Tcs.TrySetCanceled(t.CancellationToken);
                 },
                 state,
@@ -162,7 +162,7 @@ namespace EasyNetQ.Internals
             taskCompletionSource.Task.ContinueWith(
                 (_, s) =>
                 {
-                    var r = (TcsWithCancellationToken<T>) s;
+                    var r = (TcsWithCancellationToken<T>)s;
                     r.CancellationTokenRegistration.Dispose();
                 },
                 state,

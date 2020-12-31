@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -30,7 +30,7 @@ namespace EasyNetQ.Producer
         /// </summary>
         /// <param name="name">The channel name</param>
         /// <param name="publisherConfirms">True if publisher confirms are enabled</param>
-        public ChannelDispatchOptions(string name, bool publisherConfirms=false)
+        public ChannelDispatchOptions(string name, bool publisherConfirms = false)
         {
             Name = name;
             PublisherConfirms = publisherConfirms;

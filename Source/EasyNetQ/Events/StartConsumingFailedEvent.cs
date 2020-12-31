@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Consumer;
+using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Events

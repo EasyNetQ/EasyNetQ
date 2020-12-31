@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Hosepipe.Tests.Traits
+namespace EasyNetQ.Hosepipe.Tests.Traits
 {
     /// <summary>
     /// Possible test categories

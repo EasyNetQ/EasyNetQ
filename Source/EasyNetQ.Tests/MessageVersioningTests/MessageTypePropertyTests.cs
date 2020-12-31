@@ -53,7 +53,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             property.AppendTo(properties);
 
-            Assert.Equal(properties.Type,  typeNameSerialiser.Serialize(typeof(MyMessageV2)));
+            Assert.Equal(properties.Type, typeNameSerialiser.Serialize(typeof(MyMessageV2)));
             Assert.Equal(properties.Headers[AlternativeMessageTypesHeaderKey], typeNameSerialiser.Serialize(typeof(MyMessage)));
         }
 
@@ -127,7 +127,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         {
             var typeNameSerialiser = new DefaultTypeNameSerializer();
             var v2 = typeNameSerialiser.Serialize(typeof(MyMessageV2));
-            var vUnknown1 = v2.Replace("MyMessageV2", "MyUnknownMessage" );
+            var vUnknown1 = v2.Replace("MyMessageV2", "MyUnknownMessage");
             var vUnknown2 = v2.Replace("MyMessageV2", "MyUnknownMessageV2");
             var vUnknown3 = v2.Replace("MyMessageV2", "MyUnknownMessageV3");
             var alternativeTypes = string.Concat(vUnknown2, ";", vUnknown1);

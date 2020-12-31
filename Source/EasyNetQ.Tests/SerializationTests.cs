@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
@@ -129,7 +129,7 @@ namespace EasyNetQ.Tests
             messageReturnedEventArgs.MessageBody.ToArray().Should().Equal(@event.Body.ToArray());
             messageReturnedEventArgs.MessageProperties.Should().Be(@event.Properties);
             messageReturnedEventArgs.MessageReturnedInfo.Should().Be(@event.Info);
-         }
+        }
 
         [Fact]
         public void AdvancedBusEventHandlers_Unblocked_handler_is_called()

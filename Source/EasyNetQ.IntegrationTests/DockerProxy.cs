@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -102,7 +102,7 @@ namespace EasyNetQ.IntegrationTests
         public async Task RemoveContainerAsync(string name, CancellationToken token = default)
         {
             var ids = await FindContainerIdsAsync(name);
-            var containerRemoveParameters = new ContainerRemoveParameters {Force = true, RemoveVolumes = true};
+            var containerRemoveParameters = new ContainerRemoveParameters { Force = true, RemoveVolumes = true };
             var removeTasks =
                 ids.Select(x => client.Containers.RemoveContainerAsync(x, containerRemoveParameters, token));
             await Task.WhenAll(removeTasks);
@@ -119,19 +119,19 @@ namespace EasyNetQ.IntegrationTests
             IDictionary<string, ISet<string>> portMappings)
         {
             return portMappings
-                .Select(x => new {ContainerPort = x.Key, HostPorts = HostPorts(x.Value)})
-                .ToDictionary(x => x.ContainerPort, x => (IList<PortBinding>) x.HostPorts);
+                .Select(x => new { ContainerPort = x.Key, HostPorts = HostPorts(x.Value) })
+                .ToDictionary(x => x.ContainerPort, x => (IList<PortBinding>)x.HostPorts);
         }
 
         private static List<PortBinding> HostPorts(IEnumerable<string> hostPorts)
         {
-            return hostPorts.Select(x => new PortBinding {HostPort = x}).ToList();
+            return hostPorts.Select(x => new PortBinding { HostPort = x }).ToList();
         }
 
         public async Task<IEnumerable<string>> FindContainerIdsAsync(string name)
         {
             var containers = await client.Containers
-                .ListContainersAsync(new ContainersListParameters {All = true, Filters = ListFilters(name)})
+                .ListContainersAsync(new ContainersListParameters { All = true, Filters = ListFilters(name) })
                 ;
             return containers.Select(x => x.ID);
         }
@@ -139,7 +139,7 @@ namespace EasyNetQ.IntegrationTests
         private async Task<IEnumerable<string>> FindNetworkIdsAsync(string name)
         {
             var networks = await client.Networks
-                .ListNetworksAsync(new NetworksListParameters {Filters = ListFilters(name)});
+                .ListNetworksAsync(new NetworksListParameters { Filters = ListFilters(name) });
             return networks.Select(x => x.ID);
         }
 

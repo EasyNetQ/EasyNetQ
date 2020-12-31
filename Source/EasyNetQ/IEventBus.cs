@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EasyNetQ.Logging;
@@ -37,7 +37,7 @@ namespace EasyNetQ
             if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
 
-            ((Handlers<TEvent>) handlers).Handle(@event);
+            ((Handlers<TEvent>)handlers).Handle(@event);
         }
 
         /// <inheritdoc />

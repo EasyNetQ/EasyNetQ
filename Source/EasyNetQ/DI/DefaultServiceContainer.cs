@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EasyNetQ.DI
 {
@@ -32,7 +32,7 @@ namespace EasyNetQ.DI
         /// <inheritdoc />
         public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
         {
-            container.Register(x => factory((IServiceResolver) x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
+            container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
             return this;
         }
 
@@ -42,7 +42,7 @@ namespace EasyNetQ.DI
         /// <typeparam name="TService">Type of service to resolve</typeparam>
         public TService Resolve<TService>()
         {
-            return (TService) container.GetInstance(typeof(TService));
+            return (TService)container.GetInstance(typeof(TService));
         }
 
         /// <inheritdoc />
