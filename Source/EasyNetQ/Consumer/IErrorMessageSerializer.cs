@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer
 {
     public interface IErrorMessageSerializer
     {

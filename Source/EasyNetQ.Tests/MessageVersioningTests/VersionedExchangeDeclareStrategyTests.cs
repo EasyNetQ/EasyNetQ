@@ -59,7 +59,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             advancedBus.ExchangeDeclareAsync(null, null)
                 .ReturnsForAnyArgs(mi =>
                 {
-                    var exchange = new Exchange((string) mi[0]);
+                    var exchange = new Exchange((string)mi[0]);
                     exchanges.Add(exchange);
                     return Task.FromResult(exchange);
                 });
@@ -67,10 +67,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Exchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
                 .Returns(mi =>
                 {
-                    var source = (Exchange) mi[0];
-                    var destination = (Exchange) mi[1];
-                    var routingKey = (string) mi[2];
-                    var arguments = (IDictionary<string, object>) mi[3];
+                    var source = (Exchange)mi[0];
+                    var destination = (Exchange)mi[1];
+                    var routingKey = (string)mi[2];
+                    var arguments = (IDictionary<string, object>)mi[3];
                     boundExchanges.Add(source, destination);
                     return Task.FromResult(new Binding<Exchange>(source, destination, routingKey, arguments));
                 });
@@ -96,7 +96,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             advancedBus.ExchangeDeclareAsync(null, null)
                 .ReturnsForAnyArgs(mi =>
                 {
-                    var exchange = new Exchange((string) mi[0]);
+                    var exchange = new Exchange((string)mi[0]);
                     exchanges.Add(exchange);
                     return Task.FromResult(exchange);
                 });
@@ -104,10 +104,10 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             advancedBus.BindAsync(Arg.Any<Exchange>(), Arg.Any<Exchange>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
                 .Returns(mi =>
                 {
-                    var source = (Exchange) mi[0];
-                    var destination = (Exchange) mi[1];
-                    var routingKey = (string) mi[2];
-                    var arguments = (IDictionary<string, object>) mi[3];
+                    var source = (Exchange)mi[0];
+                    var destination = (Exchange)mi[1];
+                    var routingKey = (string)mi[2];
+                    var arguments = (IDictionary<string, object>)mi[3];
                     boundExchanges.Add(source, destination);
                     return Task.FromResult(new Binding<Exchange>(source, destination, routingKey, arguments));
                 });

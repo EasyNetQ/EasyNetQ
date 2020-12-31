@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
 using FluentAssertions;
@@ -48,9 +48,9 @@ namespace EasyNetQ.Tests.Mocking
                 channel.BasicConsume(null, false, null, true, false, null, null)
                     .ReturnsForAnyArgs(consumeInvocation =>
                     {
-                        var queueName = (string) consumeInvocation[0];
-                        var consumerTag = (string) consumeInvocation[2];
-                        var consumer = (AsyncDefaultBasicConsumer) consumeInvocation[6];
+                        var queueName = (string)consumeInvocation[0];
+                        var consumerTag = (string)consumeInvocation[2];
+                        var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
 
                         ConsumerQueueNames.Add(queueName);
                         consumer.HandleBasicConsumeOk(consumerTag);
@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests.Mocking
                 channel.QueueDeclare(null, true, false, false, null)
                     .ReturnsForAnyArgs(queueDeclareInvocation =>
                     {
-                        var queueName = (string) queueDeclareInvocation[0];
+                        var queueName = (string)queueDeclareInvocation[0];
                         return new QueueDeclareOk(queueName, 0, 0);
                     });
 

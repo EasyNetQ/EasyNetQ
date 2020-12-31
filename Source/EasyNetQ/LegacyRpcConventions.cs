@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Topology;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ
 {

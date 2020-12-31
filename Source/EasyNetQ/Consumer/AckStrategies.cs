@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Events;
+using EasyNetQ.Events;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Consumer

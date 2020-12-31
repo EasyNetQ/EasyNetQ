@@ -187,5 +187,5 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public ConsumerTagConvention ConsumerTagConvention { get; set; }
-	}
+    }
 }

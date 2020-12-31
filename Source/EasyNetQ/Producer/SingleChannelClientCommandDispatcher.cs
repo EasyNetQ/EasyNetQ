@@ -1,4 +1,4 @@
-﻿using RabbitMQ.Client;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;

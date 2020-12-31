@@ -435,7 +435,7 @@ namespace EasyNetQ
                 return PullResult<T>.Available(
                     pullResult.MessagesCount,
                     pullResult.ReceivedInfo,
-                    new Message<T>((T) message.GetBody(), message.Properties)
+                    new Message<T>((T)message.GetBody(), message.Properties)
                 );
 
             throw new EasyNetQException(

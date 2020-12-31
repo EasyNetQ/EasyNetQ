@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public async Task Should_be_able_to_publish_polymorphic()
         {
-            var message = (IAnimal) new Dog();
+            var message = (IAnimal)new Dog();
             var messageType = typeof(IAnimal);
 
             await pubSub.PublishAsync(message, messageType, configure);

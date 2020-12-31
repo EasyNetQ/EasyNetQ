@@ -13,7 +13,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Lint & Test
     runs-on: ubuntu-18.04
     timeout-minutes: 15
     strategy:
@@ -30,6 +30,11 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ matrix.dotnet }}
+
+    - name: Install & run dotnet-format
+      run: |
+        dotnet tool install -g dotnet-format --version 5.0.163101 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json
+        dotnet format ./Source/EasyNetQ.sln --check
 
     - name: Patch docker connection string
       run: sed -i -e 's/http:\/\/127.0.0.1:2375/unix:\/var\/run\/docker.sock/g' ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests/settings.json

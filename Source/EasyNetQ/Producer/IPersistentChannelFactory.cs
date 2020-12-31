@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Producer
+namespace EasyNetQ.Producer
 {
     /// <summary>
     ///     An options for PersistentChannel

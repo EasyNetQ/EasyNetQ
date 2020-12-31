@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.Sprache
+namespace EasyNetQ.Sprache
 {
     internal interface ISuccess<out T> : IResult<T>
     {

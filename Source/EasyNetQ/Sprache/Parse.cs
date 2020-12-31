@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -247,9 +247,9 @@ namespace EasyNetQ.Sprache
             Preconditions.CheckNotNull(parser, "parser");
 
             return from leading in WhiteSpace.Many()
-                from item in parser
-                from trailing in WhiteSpace.Many()
-                select item;
+                   from item in parser
+                   from trailing in WhiteSpace.Many()
+                   select item;
         }
 
         /// <summary>

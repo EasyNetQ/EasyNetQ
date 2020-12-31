@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Exceptions;
@@ -24,7 +24,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            var queuesModes = new [] {QueueMode.Default, QueueMode.Lazy};
+            var queuesModes = new[] { QueueMode.Default, QueueMode.Lazy };
             foreach (var queueMode in queuesModes)
             {
                 await bus.Advanced.QueueDeclareAsync(
@@ -32,7 +32,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 );
             }
 
-            var queuesTypes = new [] {QueueType.Classic, QueueType.Quorum};
+            var queuesTypes = new[] { QueueType.Classic, QueueType.Quorum };
             foreach (var queueType in queuesTypes)
             {
                 await bus.Advanced.QueueDeclareAsync(

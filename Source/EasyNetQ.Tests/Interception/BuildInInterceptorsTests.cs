@@ -1,4 +1,4 @@
-﻿using EasyNetQ.Interception;
+using EasyNetQ.Interception;
 using NSubstitute;
 using System;
 using System.Text;

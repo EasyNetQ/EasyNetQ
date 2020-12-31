@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests.Internals
         [Fact]
         public async Task Should_be_empty_after_dequeue()
         {
-            using var queue = new AsyncQueue<int>(new[] {42});
+            using var queue = new AsyncQueue<int>(new[] { 42 });
             var element = await queue.DequeueAsync(CancellationToken.None);
             element.Should().Be(42);
             queue.Count.Should().Be(0);
