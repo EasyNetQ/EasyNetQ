@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ
 {
     /// <summary>
@@ -11,7 +13,7 @@ namespace EasyNetQ
         /// <param name="receivedInfo">The received info</param>
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
-        public ConsumedMessage(MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body)
+        public ConsumedMessage(MessageReceivedInfo receivedInfo, MessageProperties properties, ReadOnlyMemory<byte> body)
         {
             ReceivedInfo = receivedInfo;
             Properties = properties;
@@ -31,6 +33,6 @@ namespace EasyNetQ
         /// <summary>
         ///     The message body
         /// </summary>
-        public byte[] Body { get; }
+        public ReadOnlyMemory<byte> Body { get; }
     }
 }

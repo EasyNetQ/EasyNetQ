@@ -126,7 +126,7 @@ namespace EasyNetQ.Tests
             eventBus.Publish(@event);
             messageReturnedCalled.Should().BeTrue();
             messageReturnedEventArgs.Should().NotBeNull();
-            messageReturnedEventArgs.MessageBody.Should().Equal(@event.Body);
+            messageReturnedEventArgs.MessageBody.ToArray().Should().Equal(@event.Body.ToArray());
             messageReturnedEventArgs.MessageProperties.Should().Be(@event.Properties);
             messageReturnedEventArgs.MessageReturnedInfo.Should().Be(@event.Info);
          }

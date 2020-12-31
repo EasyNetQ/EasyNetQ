@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests.Interception
             var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
             var message = interceptor.OnProduce(outgoingMessage);
             var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
-            Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body);
+            Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body.ToArray());
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests.Interception
             var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
             var message = interceptor.OnProduce(outgoingMessage);
             var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
-            Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body);
+            Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body.ToArray());
         }
 
         [Fact]

@@ -230,7 +230,7 @@ namespace EasyNetQ
         /// </param>
         /// <returns>A disposable to cancel the consumer</returns>
         public static IDisposable Consume(
-            this IAdvancedBus bus, Queue queue, Action<byte[], MessageProperties, MessageReceivedInfo> handler
+            this IAdvancedBus bus, Queue queue, Action<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo> handler
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -254,13 +254,13 @@ namespace EasyNetQ
         public static IDisposable Consume(
             this IAdvancedBus bus,
             Queue queue,
-            Action<byte[], MessageProperties, MessageReceivedInfo> handler,
+            Action<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
 
-            var handlerAsync = TaskHelpers.FromAction<byte[], MessageProperties, MessageReceivedInfo>((m, p, i, c) => handler(m, p, i));
+            var handlerAsync = TaskHelpers.FromAction<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo>((m, p, i, c) => handler(m, p, i));
 
             return bus.Consume(queue, handlerAsync, configure);
         }
@@ -278,7 +278,7 @@ namespace EasyNetQ
         public static IDisposable Consume(
             this IAdvancedBus bus,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> handler
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task> handler
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -299,7 +299,7 @@ namespace EasyNetQ
         public static IDisposable Consume(
             this IAdvancedBus bus,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
         )
         {
             Preconditions.CheckNotNull(bus, "bus");
@@ -323,7 +323,7 @@ namespace EasyNetQ
         public static IDisposable Consume(
             this IAdvancedBus bus,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task> handler,
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
         {
@@ -348,7 +348,7 @@ namespace EasyNetQ
         public static IDisposable Consume(
             this IAdvancedBus bus,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler,
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
         {
@@ -373,7 +373,7 @@ namespace EasyNetQ
         public static IDisposable Consume(
             this IAdvancedBus bus,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
             Action<ISimpleConsumeConfiguration> configure
         )
         {
@@ -455,7 +455,7 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body,
+            ReadOnlyMemory<byte> body,
             CancellationToken cancellationToken = default
         )
         {

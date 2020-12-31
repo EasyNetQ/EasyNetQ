@@ -1,3 +1,6 @@
+using System;
+using System.Buffers;
+
 namespace EasyNetQ
 {
     /// <summary>
@@ -18,23 +21,24 @@ namespace EasyNetQ
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
         /// <returns></returns>
-        IMessage DeserializeMessage(MessageProperties properties, byte[] body);
+        IMessage DeserializeMessage(MessageProperties properties, ReadOnlyMemory<byte> body);
     }
 
     /// <summary>
     ///     Represents a serialized message
     /// </summary>
-    public readonly struct SerializedMessage
+    public readonly struct SerializedMessage: IDisposable
     {
+        private readonly IDisposable owner;
+
         /// <summary>
         ///     Creates SerializedMessage
-        /// </summary>
-        /// <param name="properties">The properties</param>
-        /// <param name="body">The body</param>
-        public SerializedMessage(MessageProperties properties, byte[] body)
+        /// </summary>s
+        public SerializedMessage(MessageProperties properties, IMemoryOwner<byte> body)
         {
             Properties = properties;
-            Body = body;
+            Body = body.Memory;
+            owner = body;
         }
 
         /// <summary>
@@ -45,6 +49,9 @@ namespace EasyNetQ
         /// <summary>
         ///     Message body
         /// </summary>
-        public byte[] Body { get; }
+        public ReadOnlyMemory<byte> Body { get; }
+
+        /// <inheritdoc />
+        public void Dispose() => owner?.Dispose();
     }
 }

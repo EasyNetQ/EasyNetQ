@@ -33,9 +33,7 @@ namespace EasyNetQ.Tests.Mocking
         public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
             for (var i = 0; i < 10; i++)
-            {
                 channelPool.Push(Substitute.For<IModel, IRecoverable>());
-            }
 
             connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
             connection.IsOpen.Returns(true);
@@ -63,7 +61,6 @@ namespace EasyNetQ.Tests.Mocking
                     .ReturnsForAnyArgs(queueDeclareInvocation =>
                     {
                         var queueName = (string) queueDeclareInvocation[0];
-
                         return new QueueDeclareOk(queueName, 0, 0);
                     });
 

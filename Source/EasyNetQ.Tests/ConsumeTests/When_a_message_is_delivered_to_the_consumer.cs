@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public void Should_deliver_the_message_body()
         {
-            DeliveredMessageBody.Should().BeEquivalentTo(OriginalBody);
+            DeliveredMessageBody.ToArray().Should().BeEquivalentTo(OriginalBody);
         }
 
         [Fact]

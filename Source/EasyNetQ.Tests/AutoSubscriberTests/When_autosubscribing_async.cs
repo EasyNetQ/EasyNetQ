@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
