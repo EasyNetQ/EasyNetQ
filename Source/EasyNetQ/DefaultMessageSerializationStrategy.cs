@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ
 {
     /// <inheritdoc />
@@ -39,7 +41,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IMessage DeserializeMessage(MessageProperties properties, byte[] body)
+        public IMessage DeserializeMessage(MessageProperties properties, ReadOnlyMemory<byte> body)
         {
             var messageType = typeNameSerializer.DeSerialize(properties.Type);
             var messageBody = serializer.BytesToMessage(messageType, body);

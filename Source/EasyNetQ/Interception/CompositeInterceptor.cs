@@ -9,14 +9,14 @@ namespace EasyNetQ.Interception
         private readonly List<IProduceConsumeInterceptor> interceptors = new List<IProduceConsumeInterceptor>();
 
         /// <inheritdoc />
-        public ProducedMessage OnProduce(ProducedMessage message)
+        public ProducedMessage OnProduce(in ProducedMessage message)
         {
             return interceptors.AsEnumerable()
                                .Aggregate(message, (x, y) => y.OnProduce(x));
         }
 
         /// <inheritdoc />
-        public ConsumedMessage OnConsume(ConsumedMessage message)
+        public ConsumedMessage OnConsume(in ConsumedMessage message)
         {
             return interceptors.AsEnumerable()
                                .Reverse()

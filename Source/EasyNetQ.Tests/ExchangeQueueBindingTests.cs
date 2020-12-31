@@ -19,8 +19,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            advancedBus = mockBuilder.Bus.Advanced;
-            queue = advancedBus.QueueDeclare(
+            queue = mockBuilder.Bus.Advanced.QueueDeclare(
                 "my_queue",
                 c => c.AsDurable(false)
                     .AsExclusive(true)
@@ -33,11 +32,10 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         private readonly MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
         private readonly Queue queue;
 
         [Fact]
@@ -68,7 +66,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            advancedBus = mockBuilder.Bus.Advanced;
+            var advancedBus = mockBuilder.Bus.Advanced;
             queue = advancedBus.QueueDeclare(
                 "my_queue",
                 c => c.AsDurable(false)
@@ -84,11 +82,10 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
+        private readonly MockBuilder mockBuilder;
         private Queue queue;
 
         [Fact]
@@ -121,8 +118,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            advancedBus = mockBuilder.Bus.Advanced;
-            queue = advancedBus.QueueDeclare(
+            queue = mockBuilder.Bus.Advanced.QueueDeclare(
                 "my_queue",
                 c => c.AsDurable(false)
                     .AsExclusive(true)
@@ -137,12 +133,11 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
-        private Queue queue;
+        private readonly MockBuilder mockBuilder;
+        private readonly Queue queue;
 
         [Fact]
         public void Should_declare_the_queue()
@@ -173,19 +168,17 @@ namespace EasyNetQ.Tests
         public When_a_queue_is_deleted()
         {
             mockBuilder = new MockBuilder();
-            advancedBus = mockBuilder.Bus.Advanced;
 
             var queue = new Queue("my_queue", false);
-            advancedBus.QueueDelete(queue);
+            mockBuilder.Bus.Advanced.QueueDelete(queue);
         }
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_delete_the_queue()
@@ -199,12 +192,11 @@ namespace EasyNetQ.Tests
         public When_an_exchange_is_declared()
         {
             mockBuilder = new MockBuilder();
-            advancedBus = mockBuilder.Bus.Advanced;
 
             mockBuilder.NextModel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
                 .Do(x => { arguments = x[4] as IDictionary; });
 
-            exchange = advancedBus.ExchangeDeclare(
+            exchange = mockBuilder.Bus.Advanced.ExchangeDeclare(
                 "my_exchange",
                 c => c.WithType(ExchangeType.Direct)
                     .AsDurable(false)
@@ -215,12 +207,11 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
-        private Exchange exchange;
+        private readonly MockBuilder mockBuilder;
+        private readonly Exchange exchange;
         private IDictionary arguments;
 
         [Fact]
@@ -254,18 +245,16 @@ namespace EasyNetQ.Tests
         public When_an_exchange_is_declared_passively()
         {
             mockBuilder = new MockBuilder();
-            advancedBus = mockBuilder.Bus.Advanced;
 
-            advancedBus.ExchangeDeclarePassive("my_exchange");
+            mockBuilder.Bus.Advanced.ExchangeDeclarePassive("my_exchange");
         }
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_passively_declare_exchange()
@@ -280,19 +269,17 @@ namespace EasyNetQ.Tests
         public When_an_exchange_is_deleted()
         {
             mockBuilder = new MockBuilder();
-            advancedBus = mockBuilder.Bus.Advanced;
 
             var exchange = new Exchange("my_exchange");
-            advancedBus.ExchangeDelete(exchange);
+            mockBuilder.Bus.Advanced.ExchangeDelete(exchange);
         }
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
-        private IAdvancedBus advancedBus;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_delete_the_queue()
@@ -316,12 +303,12 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private Binding<Queue> binding;
+        private readonly Binding<Queue> binding;
 
         [Fact]
         public void Should_create_a_binding_instance()
@@ -360,12 +347,12 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
-        private Binding<Queue> binding;
+        private readonly Binding<Queue> binding;
 
         [Fact]
         public void Should_create_a_binding_instance()
@@ -406,10 +393,10 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
         private IAdvancedBus advancedBus;
         private readonly Binding<Queue> binding;
 

@@ -18,10 +18,10 @@ namespace EasyNetQ.Tests.ProducerTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_throw_an_EasyNetQException()

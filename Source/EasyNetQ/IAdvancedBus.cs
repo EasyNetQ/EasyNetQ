@@ -110,7 +110,7 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body,
+            ReadOnlyMemory<byte> body,
             CancellationToken cancellationToken = default
         );
 

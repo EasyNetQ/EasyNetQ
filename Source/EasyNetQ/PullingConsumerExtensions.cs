@@ -9,7 +9,7 @@ namespace EasyNetQ
     /// <summary>
     ///     The result of a pull batch operation
     /// </summary>
-    public readonly struct PullBatchResult<TPullResult> where TPullResult : IPullResult
+    public readonly struct PullBatchResult<TPullResult> : IDisposable where TPullResult : IPullResult
     {
         /// <summary>
         ///     Creates PullBatchResult
@@ -38,6 +38,13 @@ namespace EasyNetQ
 
                 return Messages.Max(x => x.ReceivedInfo.DeliveryTag);
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            foreach (var message in Messages)
+                message.Dispose();
         }
     }
 

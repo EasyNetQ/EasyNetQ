@@ -49,7 +49,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             }
         }
 
-        private byte[] deliveredBody;
+        private ReadOnlyMemory<byte> deliveredBody;
         private MessageProperties deliveredProperties;
         private MessageReceivedInfo deliveredInfo;
 
@@ -72,7 +72,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         [Fact]
         public void Should_deliver_body()
         {
-            deliveredBody.Should().BeSameAs(messageBody);
+            deliveredBody.ToArray().Should().BeEquivalentTo(messageBody);
         }
 
         [Fact]

@@ -161,7 +161,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         private readonly MockBuilder mockBuilder;
@@ -221,10 +221,10 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         [Fact]
         public void Should_correctly_bind_using_new_conventions()

@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ
+﻿using System;
+
+namespace EasyNetQ
 {
     /// <summary>
     ///     Represents a publishing message
@@ -10,7 +12,7 @@
         /// </summary>
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
-        public ProducedMessage(MessageProperties properties, byte[] body)
+        public ProducedMessage(MessageProperties properties, ReadOnlyMemory<byte> body)
         {
             Properties = properties;
             Body = body;
@@ -24,6 +26,6 @@
         /// <summary>
         ///     Message body
         /// </summary>
-        public byte[] Body { get; }
+        public ReadOnlyMemory<byte> Body { get; }
     }
 }
