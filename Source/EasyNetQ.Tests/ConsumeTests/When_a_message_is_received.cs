@@ -33,7 +33,7 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]

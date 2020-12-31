@@ -12,8 +12,6 @@ namespace EasyNetQ.Internals
     /// </summary>
     public static class Timers
     {
-        private static readonly ILog logger = LogProvider.GetLogger(typeof(Timers));
-
         /// <summary>
         ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
         ///     the same compatibility as public APIs. It may be changed or removed without notice in
@@ -32,7 +30,7 @@ namespace EasyNetQ.Internals
                 }
                 catch (Exception exception)
                 {
-                    logger.Error(exception, string.Empty);
+                    LogProvider.GetLogger(typeof(Timers)).Error(exception, string.Empty);
                 }
                 finally
                 {

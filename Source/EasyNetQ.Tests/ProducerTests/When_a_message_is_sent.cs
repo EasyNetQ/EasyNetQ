@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]

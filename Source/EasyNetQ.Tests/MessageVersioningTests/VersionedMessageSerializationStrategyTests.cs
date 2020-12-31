@@ -3,6 +3,7 @@
 using EasyNetQ.MessageVersioning;
 using NSubstitute;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
@@ -256,7 +257,9 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             }
 
             var serializer = Substitute.For<ISerializer>();
-            serializer.MessageToBytes(typeof(T), message.GetBody()).Returns(messageBody);
+            var serializedMessage = Substitute.For<IMemoryOwner<byte>>();
+            serializedMessage.Memory.Returns(messageBody);
+            serializer.MessageToBytes(typeof(T), message.GetBody()).Returns(serializedMessage);
 
             return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
         }

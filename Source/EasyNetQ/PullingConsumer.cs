@@ -11,7 +11,7 @@ namespace EasyNetQ
     /// <summary>
     ///     Represents a result of a pull
     /// </summary>
-    public interface IPullResult
+    public interface IPullResult : IDisposable
     {
         /// <summary>
         ///     True if a message is available
@@ -38,27 +38,37 @@ namespace EasyNetQ
     {
         private readonly MessageReceivedInfo receivedInfo;
         private readonly MessageProperties properties;
-        private readonly byte[] body;
+        private readonly ReadOnlyMemory<byte> body;
         private readonly ulong messagesCount;
+        private readonly IDisposable disposable;
 
         /// <summary>
         ///     Represents a result when no message is available
         /// </summary>
-        public static PullResult NotAvailable { get; } = new PullResult(false, 0, null, null, null);
+        public static PullResult NotAvailable { get; } = new PullResult(false, 0, null, null, null, null);
 
         /// <summary>
         ///     Represents a result when a message is available
         /// </summary>
         /// <returns></returns>
         public static PullResult Available(
-            ulong messagesCount, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
+            ulong messagesCount,
+            MessageReceivedInfo receivedInfo,
+            MessageProperties properties,
+            ReadOnlyMemory<byte> body,
+            IDisposable disposable
         )
         {
-            return new PullResult(true, messagesCount, receivedInfo, properties, body);
+            return new PullResult(true, messagesCount, receivedInfo, properties, body, disposable);
         }
 
         private PullResult(
-            bool isAvailable, ulong messagesCount, MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body
+            bool isAvailable,
+            ulong messagesCount,
+            MessageReceivedInfo receivedInfo,
+            MessageProperties properties,
+            ReadOnlyMemory<byte> body,
+            IDisposable disposable
         )
         {
             IsAvailable = isAvailable;
@@ -66,6 +76,7 @@ namespace EasyNetQ
             this.receivedInfo = receivedInfo;
             this.properties = properties;
             this.body = body;
+            this.disposable = disposable;
         }
 
         /// <summary>
@@ -122,7 +133,7 @@ namespace EasyNetQ
         ///     Returns body info if the message is available
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public byte[] Body
+        public ReadOnlyMemory<byte> Body
         {
             get
             {
@@ -131,6 +142,12 @@ namespace EasyNetQ
 
                 return body;
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            disposable?.Dispose();
         }
     }
 
@@ -220,6 +237,11 @@ namespace EasyNetQ
 
                 return message;
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
         }
     }
 
@@ -334,11 +356,15 @@ namespace EasyNetQ
                     queue.Name
                 ),
                 new MessageProperties(basicGetResult.BasicProperties),
-                basicGetResult.Body.ToArray()
+                basicGetResult.Body
             );
             var interceptedMessage = interceptor.OnConsume(message);
             return PullResult.Available(
-                messagesCount, interceptedMessage.ReceivedInfo, interceptedMessage.Properties, interceptedMessage.Body
+                messagesCount,
+                interceptedMessage.ReceivedInfo,
+                interceptedMessage.Properties,
+                interceptedMessage.Body,
+                null
             );
         }
 
@@ -399,7 +425,10 @@ namespace EasyNetQ
         {
             var pullResult = await consumer.PullAsync(cancellationToken).ConfigureAwait(false);
             if (!pullResult.IsAvailable)
+            {
+                pullResult.Dispose();
                 return PullResult<T>.NotAvailable;
+            }
 
             var message = messageSerializationStrategy.DeserializeMessage(pullResult.Properties, pullResult.Body);
             if (typeof(T).IsAssignableFrom(message.MessageType))

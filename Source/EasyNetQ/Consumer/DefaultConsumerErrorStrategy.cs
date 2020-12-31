@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
@@ -70,12 +71,16 @@ namespace EasyNetQ.Consumer
             if (disposed)
                 throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
 
+            var receivedInfo = context.ReceivedInfo;
+            var properties = context.Properties;
+            var body = context.Body.ToArray();
+
             logger.Error(
                 exception,
                 "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
-                context.ReceivedInfo,
-                context.Properties,
-                Convert.ToBase64String(context.Body)
+                receivedInfo,
+                properties,
+                Convert.ToBase64String(body)
             );
 
             try
@@ -83,14 +88,15 @@ namespace EasyNetQ.Consumer
                 using var model = connection.CreateModel();
                 if (configuration.PublisherConfirms) model.ConfirmSelect();
 
-                var errorExchange = DeclareErrorExchangeWithQueue(model, context);
+                var errorExchange = DeclareErrorExchangeWithQueue(model, receivedInfo);
 
-                var messageBody = CreateErrorMessage(context, exception);
-                var properties = model.CreateBasicProperties();
-                properties.Persistent = true;
-                properties.Type = typeNameSerializer.Serialize(typeof(Error));
+                using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
-                model.BasicPublish(errorExchange, context.ReceivedInfo.RoutingKey, properties, messageBody);
+                var errorProperties = model.CreateBasicProperties();
+                errorProperties.Persistent = true;
+                errorProperties.Type = typeNameSerializer.Serialize(typeof(Error));
+
+                model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
 
                 if (!configuration.PublisherConfirms) return AckStrategies.Ack;
 
@@ -141,11 +147,11 @@ namespace EasyNetQ.Consumer
             model.QueueBind(queueName, exchangeName, routingKey);
         }
 
-        private string DeclareErrorExchangeWithQueue(IModel model, ConsumerExecutionContext context)
+        private string DeclareErrorExchangeWithQueue(IModel model, MessageReceivedInfo receivedInfo)
         {
-            var errorExchangeName = conventions.ErrorExchangeNamingConvention(context.ReceivedInfo);
-            var errorQueueName = conventions.ErrorQueueNamingConvention(context.ReceivedInfo);
-            var routingKey = context.ReceivedInfo.RoutingKey;
+            var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
+            var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
+            var routingKey = receivedInfo.RoutingKey;
 
             var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
@@ -158,27 +164,29 @@ namespace EasyNetQ.Consumer
             return errorExchangeName;
         }
 
-        private byte[] CreateErrorMessage(ConsumerExecutionContext context, Exception exception)
+        private IMemoryOwner<byte> CreateErrorMessage(
+            MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body, Exception exception
+        )
         {
-            var messageAsString = errorMessageSerializer.Serialize(context.Body);
+            var messageAsString = errorMessageSerializer.Serialize(body);
             var error = new Error
             {
-                RoutingKey = context.ReceivedInfo.RoutingKey,
-                Exchange = context.ReceivedInfo.Exchange,
-                Queue = context.ReceivedInfo.Queue,
+                RoutingKey = receivedInfo.RoutingKey,
+                Exchange = receivedInfo.Exchange,
+                Queue = receivedInfo.Queue,
                 Exception = exception.ToString(),
                 Message = messageAsString,
                 DateTime = DateTime.UtcNow
             };
 
-            if (context.Properties.Headers == null)
+            if (properties.Headers == null)
             {
-                error.BasicProperties = context.Properties;
+                error.BasicProperties = properties;
             }
             else
             {
                 // we'll need to clone context.Properties as we are mutating the headers dictionary
-                error.BasicProperties = (MessageProperties)context.Properties.Clone();
+                error.BasicProperties = (MessageProperties) properties.Clone();
 
                 // the RabbitMQClient implicitly converts strings to byte[] on sending, but reads them back as byte[]
                 // we're making the assumption here that any byte[] values in the headers are strings
@@ -187,11 +195,11 @@ namespace EasyNetQ.Consumer
 
                 //see http://hg.rabbitmq.com/rabbitmq-dotnet-client/file/tip/projects/client/RabbitMQ.Client/src/client/impl/WireFormatting.cs
 
-                error.BasicProperties.Headers = context.Properties.Headers.ToDictionary(
+                error.BasicProperties.Headers = properties.Headers.ToDictionary(
                     kvp => kvp.Key,
-                    kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value);
+                    kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value
+                );
             }
-
             return serializer.MessageToBytes(typeof(Error), error);
         }
     }

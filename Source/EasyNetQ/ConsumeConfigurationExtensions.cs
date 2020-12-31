@@ -62,7 +62,7 @@ namespace EasyNetQ
         public static IConsumeConfiguration ForQueue(
             this IConsumeConfiguration configuration,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
         )
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
@@ -72,7 +72,7 @@ namespace EasyNetQ
         public static IConsumeConfiguration ForQueue(
             this IConsumeConfiguration configuration,
             Queue queue,
-            Func<byte[], MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
             Action<IPerQueueConsumeConfiguration> configure
         )
         {

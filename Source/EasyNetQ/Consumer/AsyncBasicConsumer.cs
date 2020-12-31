@@ -73,7 +73,7 @@ namespace EasyNetQ.Consumer
             onTheFlyMessages.Increment();
             try
             {
-                var messageBody = body.ToArray();
+                var messageBody = body;
                 var messageReceivedInfo = new MessageReceivedInfo(
                     consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
                 );

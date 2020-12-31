@@ -266,7 +266,7 @@ namespace EasyNetQ
         #region Publish
 
         /// <inheritdoc />
-        public virtual Task PublishAsync(
+        public virtual async Task PublishAsync(
             Exchange exchange,
             string routingKey,
             bool mandatory,
@@ -278,13 +278,14 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
-            var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body,
-                cancellationToken);
+            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            await PublishAsync(
+                exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+            ).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public virtual Task PublishAsync<T>(
+        public virtual async Task PublishAsync<T>(
             Exchange exchange,
             string routingKey,
             bool mandatory,
@@ -295,9 +296,10 @@ namespace EasyNetQ
             Preconditions.CheckShortString(routingKey, "routingKey");
             Preconditions.CheckNotNull(message, "message");
 
-            var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-            return PublishAsync(exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body,
-                cancellationToken);
+            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            await PublishAsync(
+                exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+            ).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -306,7 +308,7 @@ namespace EasyNetQ
             string routingKey,
             bool mandatory,
             MessageProperties messageProperties,
-            byte[] body,
+            ReadOnlyMemory<byte> body,
             CancellationToken cancellationToken
         )
         {
@@ -361,8 +363,9 @@ namespace EasyNetQ
                 }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
             }
 
-            eventBus.Publish(new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties,
-                rawMessage.Body));
+            eventBus.Publish(
+                new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body)
+            );
 
             if (logger.IsDebugEnabled())
             {

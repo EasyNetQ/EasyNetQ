@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         protected readonly IConsumerErrorStrategy ConsumerErrorStrategy;
         protected readonly MockBuilder MockBuilder;
         protected bool ConsumerWasInvoked;
-        protected byte[] DeliveredMessageBody;
+        protected ReadOnlyMemory<byte> DeliveredMessageBody;
         protected MessageReceivedInfo DeliveredMessageInfo;
         protected MessageProperties DeliveredMessageProperties;
         protected byte[] OriginalBody;
@@ -38,12 +38,12 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         public void Dispose()
         {
-            MockBuilder.Bus.Dispose();
+            MockBuilder.Dispose();
         }
 
         protected abstract void AdditionalSetUp();
 
-        protected void StartConsumer(Func<byte[], MessageProperties, MessageReceivedInfo, AckStrategy> handler)
+        protected void StartConsumer(Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, AckStrategy> handler)
         {
             ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);

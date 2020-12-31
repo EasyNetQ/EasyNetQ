@@ -1,4 +1,6 @@
-﻿namespace EasyNetQ.Events
+﻿using System;
+
+namespace EasyNetQ.Events
 {
     /// <summary>
     ///     This event is raised after a message is published
@@ -12,7 +14,7 @@
         /// <param name="routingKey">The routing key</param>
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
-        public PublishedMessageEvent(string exchangeName, string routingKey, MessageProperties properties, byte[] body)
+        public PublishedMessageEvent(string exchangeName, string routingKey, MessageProperties properties, ReadOnlyMemory<byte> body)
         {
             ExchangeName = exchangeName;
             RoutingKey = routingKey;
@@ -38,6 +40,6 @@
         /// <summary>
         ///     The message body
         /// </summary>
-        public byte[] Body { get; }
+        public ReadOnlyMemory<byte> Body { get; }
     }
 }

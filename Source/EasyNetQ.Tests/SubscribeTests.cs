@@ -19,9 +19,9 @@ namespace EasyNetQ.Tests
         private const string subscriptionId = "the_subscription_id";
         private const string queueName = typeName + "_" + subscriptionId;
         private const string consumerTag = "the_consumer_tag";
-        private MockBuilder mockBuilder;
 
-        private SubscriptionResult subscriptionResult;
+        private readonly MockBuilder mockBuilder;
+        private readonly SubscriptionResult subscriptionResult;
 
         public When_subscribe_is_called()
         {
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
@@ -231,9 +231,8 @@ namespace EasyNetQ.Tests
         private const string consumerTag = "the_consumer_tag";
         private const ulong deliveryTag = 123;
         private MyMessage deliveredMessage;
-        private MockBuilder mockBuilder;
-
-        private MyMessage originalMessage;
+        private readonly MockBuilder mockBuilder;
+        private readonly MyMessage originalMessage;
 
         public When_a_message_is_delivered()
         {
@@ -252,7 +251,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage {Text = text};
 
-            var body = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+            using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -266,7 +265,8 @@ namespace EasyNetQ.Tests
                     Type = typeName,
                     CorrelationId = correlationId
                 },
-                body);
+                serializedMessage.Memory
+            );
 
             // wait for the subscription thread to handle the message ...
             autoResetEvent.WaitOne(1000);
@@ -274,7 +274,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
@@ -308,8 +308,8 @@ namespace EasyNetQ.Tests
 
         private readonly MyMessage originalMessage;
         private ConsumerExecutionContext basicDeliverEventArgs;
-        private IConsumerErrorStrategy consumerErrorStrategy;
-        private MockBuilder mockBuilder;
+        private readonly IConsumerErrorStrategy consumerErrorStrategy;
+        private readonly MockBuilder mockBuilder;
         private Exception raisedException;
 
         public When_the_handler_throws_an_exception()
@@ -338,7 +338,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage {Text = text};
 
-            var body = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+            using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -352,7 +352,7 @@ namespace EasyNetQ.Tests
                     Type = typeName,
                     CorrelationId = correlationId
                 },
-                body
+                serializedMessage.Memory
             );
 
             // wait for the subscription thread to handle the message ...
@@ -363,7 +363,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]
@@ -418,7 +418,7 @@ namespace EasyNetQ.Tests
 
         public void Dispose()
         {
-            mockBuilder.Bus.Dispose();
+            mockBuilder.Dispose();
         }
 
         [Fact]

@@ -34,10 +34,10 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
-            var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+            using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeTrue();
                 await consumer.AckAsync(
                     pullResult.ReceivedInfo.DeliveryTag, cts.Token
@@ -45,7 +45,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeFalse();
             }
         }
@@ -62,10 +62,10 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
-            var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+            using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeTrue();
                 await consumer.RejectAsync(
                     pullResult.ReceivedInfo.DeliveryTag, false, cts.Token
@@ -73,7 +73,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeFalse();
             }
         }
@@ -90,10 +90,10 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
-            var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+            using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeTrue();
                 await consumer.RejectAsync(
                     pullResult.ReceivedInfo.DeliveryTag, true, cts.Token
@@ -101,7 +101,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeTrue();
             }
         }
@@ -118,15 +118,15 @@ namespace EasyNetQ.IntegrationTests.Advanced
                 Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
             );
 
-            var consumer = bus.Advanced.CreatePullingConsumer(queue);
+            using var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeTrue();
             }
 
             {
-                var pullResult = await consumer.PullAsync(cts.Token);
+                using var pullResult = await consumer.PullAsync(cts.Token);
                 pullResult.IsAvailable.Should().BeFalse();
             }
         }
