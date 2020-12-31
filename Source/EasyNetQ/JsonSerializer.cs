@@ -55,7 +55,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public object BytesToMessage(Type messageType, ReadOnlyMemory<byte> bytes)
+        public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
         {
             Preconditions.CheckNotNull(messageType, "messageType");
 

@@ -20,7 +20,7 @@ namespace EasyNetQ.Interception
         }
 
         /// <inheritdoc />
-        public ProducedMessage OnProduce(ProducedMessage message)
+        public ProducedMessage OnProduce(in ProducedMessage message)
         {
             var properties = message.Properties;
             var body = message.Body.ToArray(); // TODO Do not copy here
@@ -31,7 +31,7 @@ namespace EasyNetQ.Interception
         }
 
         /// <inheritdoc />
-        public ConsumedMessage OnConsume(ConsumedMessage message)
+        public ConsumedMessage OnConsume(in ConsumedMessage message)
         {
             using var tripleDes = TripleDES.Create();
             using var tripleDesDecryptor = tripleDes.CreateDecryptor(key, iv);

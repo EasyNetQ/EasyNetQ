@@ -16,6 +16,6 @@ namespace EasyNetQ
         /// <summary>
         ///     Deserializes message from bytes
         /// </summary>
-        object BytesToMessage(Type messageType, ReadOnlyMemory<byte> bytes);
+        object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes);
     }
 }

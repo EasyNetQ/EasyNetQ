@@ -9,7 +9,7 @@ namespace EasyNetQ.Interception
     public class GZipInterceptor : IProduceConsumeInterceptor
     {
         /// <inheritdoc />
-        public ProducedMessage OnProduce(ProducedMessage message)
+        public ProducedMessage OnProduce(in ProducedMessage message)
         {
             var properties = message.Properties;
             var body = message.Body.ToArray(); // TODO Do not copy here
@@ -20,7 +20,7 @@ namespace EasyNetQ.Interception
         }
 
         /// <inheritdoc />
-        public ConsumedMessage OnConsume(ConsumedMessage message)
+        public ConsumedMessage OnConsume(in ConsumedMessage message)
         {
             var receivedInfo = message.ReceivedInfo;
             var properties = message.Properties;

@@ -6,9 +6,9 @@
     public class DefaultInterceptor : IProduceConsumeInterceptor
     {
         /// <inheritdoc />
-        public ProducedMessage OnProduce(ProducedMessage message) => message;
+        public ProducedMessage OnProduce(in ProducedMessage message) => message;
 
         /// <inheritdoc />
-        public ConsumedMessage OnConsume(ConsumedMessage message) => message;
+        public ConsumedMessage OnConsume(in ConsumedMessage message) => message;
     }
 }
