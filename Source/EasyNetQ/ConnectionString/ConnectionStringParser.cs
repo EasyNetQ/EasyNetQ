@@ -15,7 +15,6 @@ namespace EasyNetQ.ConnectionString
                 var configuration = updater.Aggregate(
                     new ConnectionConfiguration(), (current, updateFunction) => updateFunction(current)
                 );
-                configuration.SetDefaultProperties();
                 return configuration;
             }
             catch (ParseException parseException)
