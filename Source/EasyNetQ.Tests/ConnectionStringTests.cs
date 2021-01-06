@@ -75,16 +75,6 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_fail_if_host_is_not_present()
-        {
-            Assert.Throws<EasyNetQException>(() =>
-            {
-                new ConnectionStringParser().Parse(
-                "virtualHost=Copa;username=Copa;password=abc_xyz;port=12345;requestedHeartbeat=3");
-            });
-        }
-
-        [Fact]
         public void Should_parse_port()
         {
             connectionString.Port.Should().Be(12345);
