@@ -12,10 +12,9 @@ namespace EasyNetQ.ConnectionString
             try
             {
                 var updater = ConnectionStringGrammar.ParseConnectionString(connectionString);
-                var configuration = updater.Aggregate(
+                return updater.Aggregate(
                     new ConnectionConfiguration(), (current, updateFunction) => updateFunction(current)
                 );
-                return configuration;
             }
             catch (ParseException parseException)
             {
