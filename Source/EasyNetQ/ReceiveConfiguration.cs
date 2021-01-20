@@ -87,6 +87,13 @@ namespace EasyNetQ
         /// <param name="queueMode">Desired queue mode.</param>
         /// <returns>Returns a reference to itself</returns>
         IReceiveConfiguration WithQueueMode(string queueMode = QueueMode.Default);
+
+        /// <summary>
+        /// Configure the queue as single active consumer. Single active consumer allows to have only one consumer at a time consuming from a queue and to fail over to another registered consumer in case the active one is cancelled or dies.
+        /// </summary>
+        /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
+        /// <returns>Returns a reference to itself</returns>
+        IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
     }
 
     internal class ReceiveConfiguration : IReceiveConfiguration
@@ -101,6 +108,7 @@ namespace EasyNetQ
         public int? MaxLength { get; private set; }
         public int? MaxLengthBytes { get; private set; }
         public string QueueMode { get; private set; }
+        public bool SingleActiveConsumer { get; private set; }
 
         public ReceiveConfiguration(ushort defaultPrefetchCount)
         {
@@ -109,6 +117,7 @@ namespace EasyNetQ
             PrefetchCount = defaultPrefetchCount;
             IsExclusive = false;
             Durable = true;
+            SingleActiveConsumer = false;
         }
 
         public IReceiveConfiguration WithAutoDelete(bool autoDelete = true)
@@ -169,6 +178,12 @@ namespace EasyNetQ
         public IReceiveConfiguration WithQueueMode(string queueMode)
         {
             QueueMode = queueMode;
+            return this;
+        }
+
+        public IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
+        {
+            SingleActiveConsumer = singleActiveConsumer;
             return this;
         }
     }
