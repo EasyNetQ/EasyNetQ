@@ -108,6 +108,8 @@ namespace EasyNetQ
                         c.WithMaxLengthBytes(receiveConfiguration.MaxLengthBytes.Value);
                     if (!string.IsNullOrEmpty(receiveConfiguration.QueueMode))
                         c.WithQueueMode(receiveConfiguration.QueueMode);
+                    if (receiveConfiguration.SingleActiveConsumer)
+                        c.WithSingleActiveConsumer();
                 },
                 cts.Token
             ).ConfigureAwait(false);
