@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ
 {
@@ -59,6 +60,13 @@ namespace EasyNetQ
         ISubscriptionConfiguration WithExpires(int expires);
 
         /// <summary>
+        /// Configures the 'Time To Live' (TTL) on the messages in the Queue
+        /// </summary>
+        /// <param name="messageTtl">Message Ttl</param>
+        /// <returns>Returns a reference to itself</returns>
+        ISubscriptionConfiguration WithMessageTtl(TimeSpan messageTtl);
+
+        /// <summary>
         /// Configures the consumer's to be exclusive
         /// </summary>
         /// <param name="isExclusive">Consumer's exclusive flag</param>
@@ -110,6 +118,7 @@ namespace EasyNetQ
         public int Priority { get; private set; }
         public ushort PrefetchCount { get; private set; }
         public int? Expires { get; private set; }
+        public TimeSpan? MessageTtl { get; private set; }
         public bool IsExclusive { get; private set; }
         public byte? MaxPriority { get; private set; }
         public bool Durable { get; private set; }
@@ -162,6 +171,12 @@ namespace EasyNetQ
         public ISubscriptionConfiguration WithExpires(int expires)
         {
             Expires = expires;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithMessageTtl(TimeSpan messageTtl)
+        {
+            MessageTtl = messageTtl;
             return this;
         }
 
