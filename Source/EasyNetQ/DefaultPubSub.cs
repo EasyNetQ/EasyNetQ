@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -112,6 +112,8 @@ namespace EasyNetQ
                     c.AsAutoDelete(subscriptionConfiguration.AutoDelete);
                     if (subscriptionConfiguration.Expires.HasValue)
                         c.WithExpires(TimeSpan.FromMilliseconds(subscriptionConfiguration.Expires.Value));
+                    if (subscriptionConfiguration.MessageTtl.HasValue)
+                        c.WithMessageTtl(subscriptionConfiguration.MessageTtl.Value);
                     if (subscriptionConfiguration.MaxPriority.HasValue)
                         c.WithMaxPriority(subscriptionConfiguration.MaxPriority.Value);
                     if (subscriptionConfiguration.MaxLength.HasValue)
