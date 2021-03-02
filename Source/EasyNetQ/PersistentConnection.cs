@@ -22,6 +22,8 @@ namespace EasyNetQ
         /// </summary>
         /// <returns>New channel</returns>
         IModel CreateModel();
+
+        void Connect();
     }
 
     /// <inheritdoc />
@@ -54,18 +56,29 @@ namespace EasyNetQ
             this.eventBus = eventBus;
         }
 
-        /// <inheritdoc />
-        public IModel CreateModel()
+        public void Connect()
         {
+            initializedConnection = Initialize();
+        }
+
+        private IAutorecoveringConnection Initialize()
+        {
+
             var connection = initializedConnection;
             if (connection == null)
                 lock (mutex)
-                    connection = initializedConnection ??= Connect();
+                    connection = initializedConnection ??= ConnectInternal();
+            return connection;
+        }
 
-            if (!connection.IsOpen)
+        /// <inheritdoc />
+        public IModel CreateModel()
+        {
+            initializedConnection = Initialize();
+            if (!initializedConnection.IsOpen)
                 throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
 
-            return connection.CreateModel();
+            return initializedConnection.CreateModel();
         }
 
         /// <inheritdoc />
@@ -87,7 +100,7 @@ namespace EasyNetQ
             disposed = true;
         }
 
-        private IAutorecoveringConnection Connect()
+        private IAutorecoveringConnection ConnectInternal()
         {
             var endpoints = configuration.Hosts.Select(x =>
             {
