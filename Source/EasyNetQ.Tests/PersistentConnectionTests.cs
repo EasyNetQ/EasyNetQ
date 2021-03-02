@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests
             connection.CreateModel();
 
             connection.IsConnected.Should().BeTrue();
-            mockBuilder.ConnectionFactory.Received(1).CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
+            mockBuilder.ConnectionFactory.Received(2).CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
         }
     }
 }
