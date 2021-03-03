@@ -167,19 +167,20 @@ namespace EasyNetQ.AutoSubscribe
             return sc =>
                 {
                     ConfigureSubscriptionConfiguration(sc);
-                    TopicInfo(subscriptionInfo)(sc);
+                    TopicAttributeInfo(subscriptionInfo)(sc);
                     AutoSubscriberConsumerInfo(subscriptionInfo)(sc);
                 };
         }
 
-        private static Action<ISubscriptionConfiguration> TopicInfo(AutoSubscriberConsumerInfo subscriptionInfo)
+        private static Action<ISubscriptionConfiguration> TopicAttributeInfo(AutoSubscriberConsumerInfo subscriptionInfo)
         {
             var topics = GetTopAttributeValues(subscriptionInfo);
             if (topics.Length != 0)
             {
                 return GenerateConfigurationFromTopics(topics);
             }
-            return configuration => configuration.WithTopic("#");
+
+            return configuration => configuration.WithTopic(string.Empty);
         }
 
         private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(string[] topics)
