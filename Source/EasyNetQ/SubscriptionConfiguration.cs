@@ -130,7 +130,8 @@ namespace EasyNetQ
 
         public ISubscriptionConfiguration WithTopic(string topic)
         {
-            Topics.Add(topic);
+            if (!string.IsNullOrWhiteSpace(topic))
+                Topics.Add(topic);
             return this;
         }
 
