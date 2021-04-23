@@ -86,11 +86,15 @@ namespace EasyNetQ.Consumer
                 }
                 catch (OperationCanceledException)
                 {
-                    return consumerErrorStrategy.HandleConsumerCancelled(context);
+                    return await consumerErrorStrategy.HandleConsumerCancelledAsync(
+                        context, cancellationToken
+                    ).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
-                    return consumerErrorStrategy.HandleConsumerError(context, exception);
+                    return await consumerErrorStrategy.HandleConsumerErrorAsync(
+                        context, exception, cancellationToken
+                    ).ConfigureAwait(false);
                 }
             }
             catch (Exception exception)
