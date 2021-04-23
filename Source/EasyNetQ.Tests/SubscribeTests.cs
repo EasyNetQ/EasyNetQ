@@ -9,6 +9,7 @@ using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -115,9 +116,6 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_return_non_null_and_with_expected_values_result()
         {
-            Assert.NotNull(subscriptionResult);
-            Assert.NotNull(subscriptionResult.Exchange);
-            Assert.NotNull(subscriptionResult.Queue);
             Assert.True(subscriptionResult.Exchange.Name == typeName);
             Assert.True(subscriptionResult.Queue.Name == queueName);
         }
@@ -320,12 +318,12 @@ namespace EasyNetQ.Tests
             };
 
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(default, null)
+            consumerErrorStrategy.HandleConsumerErrorAsync(default, null)
                 .ReturnsForAnyArgs(i =>
                 {
                     basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
                     raisedException = (Exception)i[1];
-                    return AckStrategies.Ack;
+                    return Task.FromResult(AckStrategies.Ack);
                 });
 
             mockBuilder = new MockBuilder(x => x
@@ -376,7 +374,7 @@ namespace EasyNetQ.Tests
         public void Should_invoke_the_consumer_error_strategy()
         {
             consumerErrorStrategy.Received()
-                .HandleConsumerError(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>());
+                .HandleConsumerErrorAsync(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
