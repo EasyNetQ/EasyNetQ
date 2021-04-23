@@ -3,6 +3,7 @@ using System.Text;
 using EasyNetQ.Consumer;
 using NSubstitute;
 using RabbitMQ.Client;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -10,7 +11,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     public class DefaultConsumerErrorStrategyTests
     {
         [Fact]
-        public void Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
+        public async Task Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
         {
             var persistedConnectionMock = Substitute.For<IPersistentConnection>();
             var modelMock = Substitute.For<IModel>();
@@ -18,7 +19,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             persistedConnectionMock.CreateModel().Returns(modelMock);
             var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
-            var ackStrategy = consumerErrorStrategy.HandleConsumerError(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"));
+            var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
 
             Assert.Equal(AckStrategies.Ack, ackStrategy);
             modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
@@ -26,7 +27,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Fact]
-        public void
+        public async Task
             Should_enable_publisher_confirm_when_configured_and_return_nack_with_requeue_when_no_confirm_received()
         {
             var persistedConnectionMock = Substitute.For<IPersistentConnection>();
@@ -35,7 +36,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             persistedConnectionMock.CreateModel().Returns(modelMock);
             var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
-            var ackStrategy = consumerErrorStrategy.HandleConsumerError(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"));
+            var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
 
             Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
             modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
@@ -43,7 +44,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Fact]
-        public void Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
+        public async Task Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
         {
             var persistedConnectionMock = Substitute.For<IPersistentConnection>();
             var modelMock = Substitute.For<IModel>();
@@ -51,7 +52,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             persistedConnectionMock.CreateModel().Returns(modelMock);
             var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
-            var ackStrategy = consumerErrorStrategy.HandleConsumerError(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"));
+            var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
 
             Assert.Equal(AckStrategies.Ack, ackStrategy);
             modelMock.DidNotReceive().WaitForConfirms(Arg.Any<TimeSpan>());

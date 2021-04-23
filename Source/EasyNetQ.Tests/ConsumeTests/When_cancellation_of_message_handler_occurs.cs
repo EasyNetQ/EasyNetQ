@@ -4,6 +4,8 @@ using System;
 using EasyNetQ.Consumer;
 using NSubstitute;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -12,8 +14,8 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerCancelled(default)
-                                 .ReturnsForAnyArgs(AckStrategies.Ack);
+            ConsumerErrorStrategy.HandleConsumerCancelledAsync(default)
+                                 .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
             StartConsumer((body, properties, info) =>
                 {
@@ -25,13 +27,14 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Fact]
-        public void Should_invoke_the_cancellation_strategy()
+        public async Task Should_invoke_the_cancellation_strategy()
         {
-            ConsumerErrorStrategy.Received().HandleConsumerCancelled(
+            await ConsumerErrorStrategy.Received().HandleConsumerCancelledAsync(
                Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
                                                         args.ReceivedInfo.DeliveryTag == DeliverTag &&
                                                         args.ReceivedInfo.Exchange == "the_exchange" &&
-                                                        args.Body.ToArray().SequenceEqual(OriginalBody)));
+                                                        args.Body.ToArray().SequenceEqual(OriginalBody)),
+               Arg.Any<CancellationToken>());
         }
 
         [Fact]

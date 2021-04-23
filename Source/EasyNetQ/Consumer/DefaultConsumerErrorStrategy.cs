@@ -7,6 +7,8 @@ using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
@@ -63,7 +65,7 @@ namespace EasyNetQ.Consumer
         }
 
         /// <inheritdoc />
-        public virtual AckStrategy HandleConsumerError(ConsumerExecutionContext context, Exception exception)
+        public virtual Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken)
         {
             Preconditions.CheckNotNull(context, "context");
             Preconditions.CheckNotNull(exception, "exception");
@@ -98,9 +100,9 @@ namespace EasyNetQ.Consumer
 
                 model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
 
-                if (!configuration.PublisherConfirms) return AckStrategies.Ack;
+                if (!configuration.PublisherConfirms) return Task.FromResult(AckStrategies.Ack);
 
-                return model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
+                return Task.FromResult(model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue);
             }
             catch (BrokerUnreachableException unreachableException)
             {
@@ -124,13 +126,13 @@ namespace EasyNetQ.Consumer
                 logger.Error(unexpectedException, "Failed to publish error message");
             }
 
-            return AckStrategies.NackWithRequeue;
+            return Task.FromResult(AckStrategies.NackWithRequeue);
         }
 
         /// <inheritdoc />
-        public virtual AckStrategy HandleConsumerCancelled(ConsumerExecutionContext context)
+        public virtual Task<AckStrategy> HandleConsumerCancelledAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
         {
-            return AckStrategies.NackWithRequeue;
+            return Task.FromResult(AckStrategies.NackWithRequeue);
         }
 
         /// <inheritdoc />

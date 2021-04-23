@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_cancelled()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerCancelled(default).ReturnsForAnyArgs(AckStrategies.Ack);
+            consumerErrorStrategy.HandleConsumerCancelledAsync(default).ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
@@ -34,7 +34,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                async (body, properties, info, cancellation) => throw new OperationCanceledException(),
+                (body, properties, info, cancellation) => Task.FromException<AckStrategy>(new OperationCanceledException()),
                 messageInfo,
                 messageProperties,
                 messageBody
@@ -55,9 +55,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         }
 
         [Fact]
-        public void Should_handle_consumer_cancelled()
+        public async Task Should_handle_consumer_cancelled()
         {
-            consumerErrorStrategy.Received().HandleConsumerCancelled(context);
+            await consumerErrorStrategy.Received().HandleConsumerCancelledAsync(context);
         }
 
         [Fact]
