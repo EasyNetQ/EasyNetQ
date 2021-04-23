@@ -4,6 +4,8 @@ using EasyNetQ.Consumer;
 using NSubstitute;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -14,8 +16,8 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         protected override void AdditionalSetUp()
         {
-            ConsumerErrorStrategy.HandleConsumerError(default, null)
-                     .ReturnsForAnyArgs(AckStrategies.Ack);
+            ConsumerErrorStrategy.HandleConsumerErrorAsync(default, null)
+                     .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
             exception = new Exception("I've had a bad day :(");
             StartConsumer((body, properties, info) => throw exception);
@@ -23,14 +25,15 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         [Fact]
-        public void Should_invoke_the_error_strategy()
+        public async Task Should_invoke_the_error_strategy()
         {
-            ConsumerErrorStrategy.Received().HandleConsumerError(
+            await ConsumerErrorStrategy.Received().HandleConsumerErrorAsync(
                 Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
                                                            args.ReceivedInfo.DeliveryTag == DeliverTag &&
                                                            args.ReceivedInfo.Exchange == "the_exchange" &&
                                                            args.Body.ToArray().SequenceEqual(OriginalBody)),
-                Arg.Is<Exception>(e => e == exception)
+                Arg.Is<Exception>(e => e == exception),
+                Arg.Any<CancellationToken>()
             );
         }
 

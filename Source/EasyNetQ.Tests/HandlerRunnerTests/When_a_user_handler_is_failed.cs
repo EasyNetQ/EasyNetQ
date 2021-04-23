@@ -4,6 +4,7 @@ using EasyNetQ.Consumer;
 using NSubstitute;
 using RabbitMQ.Client;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -25,7 +26,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         public When_a_user_handler_is_failed()
         {
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerError(default, null).ReturnsForAnyArgs(AckStrategies.Ack);
+            consumerErrorStrategy.HandleConsumerErrorAsync(default, null).ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
             var handlerRunner = new HandlerRunner(consumerErrorStrategy);
 
@@ -34,7 +35,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                async (body, properties, info, cancellation) => throw new Exception(),
+                (body, properties, info, cancellation) => Task.FromException<AckStrategy>(new Exception()),
                 messageInfo,
                 messageProperties,
                 messageBody
@@ -55,9 +56,9 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         }
 
         [Fact]
-        public void Should_handle_consumer_error()
+        public async Task Should_handle_consumer_error()
         {
-            consumerErrorStrategy.Received().HandleConsumerError(context, Arg.Any<Exception>());
+            await consumerErrorStrategy.Received().HandleConsumerErrorAsync(context, Arg.Any<Exception>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
