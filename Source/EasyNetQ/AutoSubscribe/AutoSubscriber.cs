@@ -27,6 +27,12 @@ namespace EasyNetQ.AutoSubscribe
         public string SubscriptionIdPrefix { get; }
 
         /// <summary>
+        /// Used when no topic is set.
+        /// By default topic uses broadcast sign
+        /// </summary>
+        public static string DefaultTopicName { get; set; } = "#";
+
+        /// <summary>
         /// Responsible for consuming a message with the relevant message consumer.
         /// </summary>
         public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; }
@@ -175,12 +181,11 @@ namespace EasyNetQ.AutoSubscribe
         private static Action<ISubscriptionConfiguration> TopicAttributeInfo(AutoSubscriberConsumerInfo subscriptionInfo)
         {
             var topics = GetTopAttributeValues(subscriptionInfo);
-            if (topics.Length != 0)
-            {
-                return GenerateConfigurationFromTopics(topics);
-            }
 
-            return configuration => configuration.WithTopic(string.Empty);
+            if (topics.Length != 0)
+                return GenerateConfigurationFromTopics(topics);
+
+            return configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
         }
 
         private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(string[] topics)
