@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using EasyNetQ.Events;
@@ -35,6 +36,7 @@ namespace EasyNetQ
         private readonly ILog logger = LogProvider.For<PersistentConnection>();
         private volatile IAutorecoveringConnection initializedConnection;
         private volatile bool disposed;
+        private volatile List<IModel> models = new List<IModel>();
 
         /// <summary>
         ///     Creates PersistentConnection
@@ -69,7 +71,7 @@ namespace EasyNetQ
             if (!connection.IsOpen)
                 throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
 
-            return connection.CreateModel();
+            return GetModel(connection);
         }
 
         /// <inheritdoc />
@@ -97,6 +99,30 @@ namespace EasyNetQ
                 connection.ConnectionBlocked -= OnConnectionBlocked;
                 connection.ConnectionShutdown -= OnConnectionShutdown;
                 connection.Dispose();
+            }
+        }
+
+        private IModel GetModel(IAutorecoveringConnection connection)
+        {
+            lock (mutex)
+            {
+                if (connection.ChannelMax == 0)
+                {
+                    // unlimited channels available: no need to manage channels
+                    return connection.CreateModel();
+                }
+                else if (models.Count < connection.ChannelMax)
+                {
+                    var model = connection.CreateModel();
+                    model.ModelShutdown += (sender, args) => models.Remove(model);
+                    models.Add(model);
+
+                    return model;
+                }
+                else
+                {
+                    return models.Last();
+                }
             }
         }
 

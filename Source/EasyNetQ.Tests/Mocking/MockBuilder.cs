@@ -32,13 +32,19 @@ namespace EasyNetQ.Tests.Mocking
 
         public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
         {
-            for (var i = 0; i < 10; i++)
-                channelPool.Push(Substitute.For<IModel, IRecoverable>());
+            for (var i = 0; i < 10; i++) {
+                var model = Substitute.For<IModel, IRecoverable>();
+                model.ChannelNumber.Returns(i);                 
+                model.When(_ => _.Close()).Do(_ => {
+                    var eventArgs = new ShutdownEventArgs(ShutdownInitiator.Application, 0, "Shutdown by close function");
+                    model.ModelShutdown += Raise.EventWith(new object(), eventArgs);
+                });
+                channelPool.Push(model);                 
+            }
 
             connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
             connection.IsOpen.Returns(true);
             connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
-
             connection.CreateModel().Returns(i =>
             {
                 var channel = channelPool.Pop();
