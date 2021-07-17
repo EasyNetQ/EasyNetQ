@@ -30,7 +30,7 @@ namespace EasyNetQ.Producer
         /// </summary>
         /// <param name="options">The channel options</param>
         /// <returns>New PersistentChannel</returns>
-        IPersistentChannel CreatePersistentChannel(PersistentChannelOptions options);
+        IPersistentChannel CreatePersistentChannel(in PersistentChannelOptions options);
     }
 
     /// <inheritdoc />
@@ -54,7 +54,7 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public IPersistentChannel CreatePersistentChannel(PersistentChannelOptions options)
+        public IPersistentChannel CreatePersistentChannel(in PersistentChannelOptions options)
         {
             return new PersistentChannel(options, connection, eventBus);
         }

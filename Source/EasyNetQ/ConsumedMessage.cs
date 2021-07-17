@@ -13,7 +13,7 @@ namespace EasyNetQ
         /// <param name="receivedInfo">The received info</param>
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
-        public ConsumedMessage(MessageReceivedInfo receivedInfo, MessageProperties properties, ReadOnlyMemory<byte> body)
+        public ConsumedMessage(MessageReceivedInfo receivedInfo, MessageProperties properties, in ReadOnlyMemory<byte> body)
         {
             ReceivedInfo = receivedInfo;
             Properties = properties;

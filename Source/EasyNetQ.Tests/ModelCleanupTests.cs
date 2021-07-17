@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests
         private AutoResetEvent WaitForConsumerModelDisposedMessage()
         {
             var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+            mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
             return are;
         }
 
@@ -41,8 +41,8 @@ namespace EasyNetQ.Tests
         {
             var waiter = new CountdownEvent(2);
 
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(_ => waiter.Signal());
-            mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
+            mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
 
             bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             if (!waiter.Wait(5000))
@@ -63,9 +63,9 @@ namespace EasyNetQ.Tests
         public void Should_cleanup_respond_model()
         {
             var waiter = new CountdownEvent(1);
-            mockBuilder.EventBus.Subscribe<StartConsumingSucceededEvent>(_ => waiter.Signal());
+            mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
 
-            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(x => (TestResponseMessage)null);
+            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null);
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 

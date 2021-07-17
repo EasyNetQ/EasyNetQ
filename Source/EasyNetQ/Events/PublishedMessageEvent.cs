@@ -1,22 +1,23 @@
 using System;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ.Events
 {
     /// <summary>
     ///     This event is raised after a message is published
     /// </summary>
-    public class PublishedMessageEvent
+    public readonly struct PublishedMessageEvent
     {
         /// <summary>
         ///     Creates PublishedMessageEvent
         /// </summary>
-        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="exchange">The exchange</param>
         /// <param name="routingKey">The routing key</param>
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
-        public PublishedMessageEvent(string exchangeName, string routingKey, MessageProperties properties, ReadOnlyMemory<byte> body)
+        public PublishedMessageEvent(in Exchange exchange, string routingKey, MessageProperties properties, in ReadOnlyMemory<byte> body)
         {
-            ExchangeName = exchangeName;
+            Exchange = exchange;
             RoutingKey = routingKey;
             Properties = properties;
             Body = body;
@@ -25,7 +26,7 @@ namespace EasyNetQ.Events
         /// <summary>
         ///     The exchange name
         /// </summary>
-        public string ExchangeName { get; }
+        public Exchange Exchange { get; }
 
         /// <summary>
         ///     The routing key

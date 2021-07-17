@@ -13,7 +13,7 @@ namespace EasyNetQ
         /// <summary>
         /// The <see cref="IConsumer"/> cancellation, which can be disposed to cancel the subscription.
         /// </summary>
-        public SubscriptionResult(Exchange exchange, Queue queue, IDisposable consumerCancellation)
+        public SubscriptionResult(in Exchange exchange, in Queue queue, IDisposable consumerCancellation)
         {
             Preconditions.CheckNotNull(consumerCancellation, "consumerCancellation");
 

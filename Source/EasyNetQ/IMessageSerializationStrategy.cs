@@ -21,7 +21,7 @@ namespace EasyNetQ
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
         /// <returns></returns>
-        IMessage DeserializeMessage(MessageProperties properties, ReadOnlyMemory<byte> body);
+        IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body);
     }
 
     /// <summary>

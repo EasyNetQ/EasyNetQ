@@ -5,7 +5,7 @@ namespace EasyNetQ.Events
     /// <summary>
     ///     This event is raised after a successful connection to the endpoint
     /// </summary>
-    public class ConnectionDisconnectedEvent
+    public readonly struct ConnectionDisconnectedEvent
     {
         /// <summary>
         ///     The endpoint a connection is disconnected from

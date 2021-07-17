@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             var body = Encoding.UTF8.GetBytes(message);
 
             var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<AckEvent>(x => autoResetEvent.Set());
+            mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
             mockBuilder.Consumers[0].HandleBasicDeliver(
                 "consumer tag",
                 0,

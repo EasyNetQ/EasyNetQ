@@ -10,7 +10,7 @@ namespace EasyNetQ.Topology
         /// <summary>
         ///     Creates Binding
         /// </summary>
-        public Binding(Exchange source, TBindable destination, string routingKey, IDictionary<string, object> arguments = null)
+        public Binding(in Exchange source, in TBindable destination, string routingKey, IDictionary<string, object> arguments = null)
         {
             Preconditions.CheckNotNull(routingKey, "routingKey");
 

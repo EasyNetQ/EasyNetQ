@@ -103,7 +103,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(configure, "configure");
 
             var consumeConfiguration = new ConsumeConfiguration(
-                configuration.PrefetchCount, handlerCollectionFactory.CreateHandlerCollection
+                configuration.PrefetchCount, handlerCollectionFactory
             );
             configure(consumeConfiguration);
 
@@ -177,14 +177,14 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<PullResult> CreatePullingConsumer(Queue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult> CreatePullingConsumer(in Queue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer(queue, options);
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(Queue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(in Queue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer<T>(queue, options);
@@ -231,34 +231,34 @@ namespace EasyNetQ
             MessageReturned -= advancedBusEventHandlers.MessageReturned;
         }
 
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        private void OnConnectionCreated(in ConnectionCreatedEvent @event)
         {
             Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
         }
 
-        private void OnConnectionRecovered(ConnectionRecoveredEvent @event)
+        private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
         {
             Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
         }
 
-        private void OnConnectionDisconnected(ConnectionDisconnectedEvent @event)
+        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
         {
             Disconnected?.Invoke(
                 this, new DisconnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port, @event.Reason)
             );
         }
 
-        private void OnConnectionBlocked(ConnectionBlockedEvent @event)
+        private void OnConnectionBlocked(in ConnectionBlockedEvent @event)
         {
             Blocked?.Invoke(this, new BlockedEventArgs(@event.Reason));
         }
 
-        private void OnConnectionUnblocked(ConnectionUnblockedEvent @event)
+        private void OnConnectionUnblocked(in ConnectionUnblockedEvent @event)
         {
             Unblocked?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnMessageReturned(ReturnedMessageEvent @event)
+        private void OnMessageReturned(in ReturnedMessageEvent @event)
         {
             MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
         }
@@ -364,7 +364,7 @@ namespace EasyNetQ
             }
 
             eventBus.Publish(
-                new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body)
+                new PublishedMessageEvent(exchange, routingKey, rawMessage.Properties, rawMessage.Body)
             );
 
             if (logger.IsDebugEnabled())

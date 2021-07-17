@@ -34,7 +34,7 @@ namespace EasyNetQ.Consumer
             MessageHandler handler,
             MessageReceivedInfo receivedInfo,
             MessageProperties properties,
-            ReadOnlyMemory<byte> body
+            in ReadOnlyMemory<byte> body
         )
         {
             Preconditions.CheckNotNull(handler, nameof(handler));

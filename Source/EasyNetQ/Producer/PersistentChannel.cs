@@ -32,7 +32,7 @@ namespace EasyNetQ.Producer
         /// <param name="options">The channel options</param>
         /// <param name="connection">The connection</param>
         /// <param name="eventBus">The event bus</param>
-        public PersistentChannel(PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
+        public PersistentChannel(in PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
         {
             Preconditions.CheckNotNull(connection, "connection");
             Preconditions.CheckNotNull(eventBus, "eventBus");

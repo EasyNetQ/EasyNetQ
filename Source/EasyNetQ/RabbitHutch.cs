@@ -179,7 +179,7 @@ namespace EasyNetQ
             registerServices(serviceRegister);
         }
 
-        private class BusWithCustomDisposer : IBus
+        private sealed class BusWithCustomDisposer : IBus
         {
             private readonly IBus bus;
             private readonly Action disposer;

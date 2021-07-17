@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             );
 
             var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+            mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
 
             mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
 

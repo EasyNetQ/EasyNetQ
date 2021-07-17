@@ -41,7 +41,7 @@ namespace EasyNetQ.Consumer
     public class InternalConsumerCancelledEventArgs : EventArgs
     {
         /// <inheritdoc />
-        public InternalConsumerCancelledEventArgs(Queue cancelled, IReadOnlyCollection<Queue> active)
+        public InternalConsumerCancelledEventArgs(in Queue cancelled, IReadOnlyCollection<Queue> active)
         {
             Cancelled = cancelled;
             Active = active;

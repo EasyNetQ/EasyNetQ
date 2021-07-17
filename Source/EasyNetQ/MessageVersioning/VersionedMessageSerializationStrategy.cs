@@ -12,7 +12,9 @@ namespace EasyNetQ.MessageVersioning
         /// <summary>
         ///     Creates VersionedMessageSerializationStrategy
         /// </summary>
-        public VersionedMessageSerializationStrategy(ITypeNameSerializer typeNameSerializer, ISerializer serializer, ICorrelationIdGenerationStrategy correlationIdGenerator)
+        public VersionedMessageSerializationStrategy(
+            ITypeNameSerializer typeNameSerializer, ISerializer serializer, ICorrelationIdGenerationStrategy correlationIdGenerator
+        )
         {
             this.typeNameSerializer = typeNameSerializer;
             this.serializer = serializer;
@@ -32,7 +34,7 @@ namespace EasyNetQ.MessageVersioning
         }
 
         /// <inheritdoc />
-        public IMessage DeserializeMessage(MessageProperties properties, ReadOnlyMemory<byte> body)
+        public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
         {
             var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
             var messageType = messageTypeProperty.GetMessageType();

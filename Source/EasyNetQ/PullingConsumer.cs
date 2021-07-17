@@ -55,7 +55,7 @@ namespace EasyNetQ
             ulong messagesCount,
             MessageReceivedInfo receivedInfo,
             MessageProperties properties,
-            ReadOnlyMemory<byte> body,
+            in ReadOnlyMemory<byte> body,
             IDisposable disposable
         )
         {
@@ -67,7 +67,7 @@ namespace EasyNetQ
             ulong messagesCount,
             MessageReceivedInfo receivedInfo,
             MessageProperties properties,
-            ReadOnlyMemory<byte> body,
+            in ReadOnlyMemory<byte> body,
             IDisposable disposable
         )
         {
@@ -321,8 +321,8 @@ namespace EasyNetQ
         /// <param name="channel">The channel</param>
         /// <param name="interceptor">The produce-consumer interceptor</param>
         public PullingConsumer(
-            PullingConsumerOptions options,
-            Queue queue,
+            in PullingConsumerOptions options,
+            in Queue queue,
             IPersistentChannel channel,
             IProduceConsumeInterceptor interceptor
         )

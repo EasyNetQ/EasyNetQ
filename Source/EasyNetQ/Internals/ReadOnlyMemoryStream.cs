@@ -16,7 +16,7 @@ namespace EasyNetQ.Internals
         private int position;
 
         /// <inheritdoc />
-        public ReadOnlyMemoryStream(ReadOnlyMemory<byte> content)
+        public ReadOnlyMemoryStream(in ReadOnlyMemory<byte> content)
         {
             this.content = content;
         }

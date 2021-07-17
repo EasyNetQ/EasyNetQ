@@ -176,12 +176,12 @@ namespace EasyNetQ.Consumer
                 Dispose();
         }
 
-        private void OnConnectionDisconnected(ConnectionDisconnectedEvent _)
+        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent _)
         {
             consumer?.StopConsuming();
         }
 
-        private void OnConnectionRecovered(ConnectionRecoveredEvent _)
+        private void OnConnectionRecovered(in ConnectionRecoveredEvent _)
         {
             var consumerToRestart = consumer;
             if (consumerToRestart == null)

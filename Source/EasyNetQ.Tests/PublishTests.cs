@@ -38,7 +38,7 @@ namespace EasyNetQ.Tests
         private void WaitForMessageToPublish()
         {
             var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => autoResetEvent.Set());
+            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
             autoResetEvent.WaitOne(1000);
         }
 
@@ -101,7 +101,7 @@ namespace EasyNetQ.Tests
         private void WaitForMessageToPublish()
         {
             var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x => autoResetEvent.Set());
+            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
             autoResetEvent.WaitOne(1000);
         }
 
