@@ -193,10 +193,10 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to bind</param>
         /// <param name="queue">The queue to bind</param>
         /// <param name="routingKey">The routing key</param>
-        /// <param name="headers">The headers</param>
+        /// <param name="arguments">The arguments</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<Binding<Queue>> BindAsync(Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
+        Task<Binding<Queue>> BindAsync(Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -204,10 +204,10 @@ namespace EasyNetQ
         /// <param name="source">The source exchange</param>
         /// <param name="destination">The destination exchange</param>
         /// <param name="routingKey">The routing key</param>
-        /// <param name="headers">The headers</param>
+        /// <param name="arguments">The arguments</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<Binding<Exchange>> BindAsync(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> headers, CancellationToken cancellationToken = default);
+        Task<Binding<Exchange>> BindAsync(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a binding
