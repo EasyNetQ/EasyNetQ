@@ -18,6 +18,7 @@ namespace EasyNetQ.Tests.FluentConfiguration
             Assert.Null(configuration.MaxLength);
             Assert.Null(configuration.MaxLengthBytes);
             Assert.Null(configuration.QueueMode);
+            Assert.Null(configuration.QueueType);
         }
     }
 }
