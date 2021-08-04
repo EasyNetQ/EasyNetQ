@@ -120,6 +120,8 @@ namespace EasyNetQ
                         c.WithMaxLengthBytes(subscriptionConfiguration.MaxLengthBytes.Value);
                     if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueMode))
                         c.WithQueueMode(subscriptionConfiguration.QueueMode);
+                    if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueType))
+                        c.WithQueueType(subscriptionConfiguration.QueueType);
                 },
                 cts.Token
             ).ConfigureAwait(false);

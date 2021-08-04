@@ -101,6 +101,13 @@ namespace EasyNetQ
         /// <param name="queueMode">Desired queue mode.</param>
         /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default);
+
+        /// <summary>
+        /// Sets the queue type. Valid types are "classic" and "quorum". Works with RabbitMQ version 3.8+.
+        /// </summary>
+        /// <param name="queueType">Desired queue type.</param>
+        /// <returns>Returns a reference to itself</returns>
+        ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic);
     }
 
     internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -117,6 +124,7 @@ namespace EasyNetQ
         public int? MaxLength { get; private set; }
         public int? MaxLengthBytes { get; private set; }
         public string QueueMode { get; private set; }
+        public string QueueType { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -198,6 +206,11 @@ namespace EasyNetQ
         public ISubscriptionConfiguration WithQueueMode(string queueMode)
         {
             QueueMode = queueMode;
+            return this;
+        }
+        public ISubscriptionConfiguration WithQueueType(string queueType)
+        {
+            QueueType = queueType;
             return this;
         }
     }
