@@ -20,5 +20,27 @@ namespace EasyNetQ.Tests.FluentConfiguration
             Assert.Null(configuration.QueueMode);
             Assert.Null(configuration.QueueType);
         }
+
+        [Fact]
+        public void WithQueueType_default_is_classic()
+        {
+            var configuration = new SubscriptionConfiguration(99);
+
+            configuration.WithQueueType();
+
+            Assert.Equal(QueueType.Classic, configuration.QueueType);
+        }
+
+        [Theory]
+        [InlineData(QueueType.Classic)]
+        [InlineData(QueueType.Quorum)]
+        public void WithQueueType_sets_correct_queueType(string queueType)
+        {
+            var configuration = new SubscriptionConfiguration(99);
+
+            configuration.WithQueueType(queueType);
+
+            Assert.Equal(queueType, configuration.QueueType);
+        }
     }
 }
