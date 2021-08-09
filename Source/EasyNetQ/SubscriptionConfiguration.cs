@@ -203,12 +203,13 @@ namespace EasyNetQ
             return this;
         }
 
-        public ISubscriptionConfiguration WithQueueMode(string queueMode)
+        public ISubscriptionConfiguration WithQueueMode(string queueMode = EasyNetQ.QueueMode.Default)
         {
             QueueMode = queueMode;
             return this;
         }
-        public ISubscriptionConfiguration WithQueueType(string queueType)
+
+        public ISubscriptionConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
         {
             QueueType = queueType;
             return this;
