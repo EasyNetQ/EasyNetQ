@@ -61,14 +61,14 @@ namespace EasyNetQ.ConnectionString
                 if (userPass.Length > 2)
                     throw new ArgumentException($"Bad user info in AMQP URI: {userInfo}");
 
-                configuration.UserName = Uri.EscapeUriString(userPass[0]);
-                if (userPass.Length == 2) configuration.Password = Uri.EscapeUriString(userPass[1]);
+                configuration.UserName = Uri.UnescapeDataString(userPass[0]);
+                if (userPass.Length == 2) configuration.Password = Uri.UnescapeDataString(userPass[1]);
             }
 
             if (uri.Segments.Length > 2)
                 throw new ArgumentException($"Multiple segments in path of AMQP URI: {string.Join(", ", uri.Segments)}");
 
-            if (uri.Segments.Length == 2) configuration.VirtualHost = Uri.EscapeUriString(uri.Segments[1]);
+            if (uri.Segments.Length == 2) configuration.VirtualHost = Uri.UnescapeDataString(uri.Segments[1]);
 
             var query = uri.ParseQuery();
             return Parsers.Aggregate(configuration, (current, parser) => parser(current, query));

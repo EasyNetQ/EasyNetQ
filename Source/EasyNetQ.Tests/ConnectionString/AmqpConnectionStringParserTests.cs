@@ -25,7 +25,17 @@ namespace EasyNetQ.Tests.ConnectionString
             {
                 return new[] { new AmqpSpecification(uri, configuration) };
             }
-
+            yield return Spec(
+               "amqp://user%2f:P%40ssword@host:10000/v%2fhost?name=unit%2ftest",
+               new ConnectionConfiguration
+               {
+                   Hosts = new[] { new HostConfiguration { Host = "host", Port = 10000 } },
+                   VirtualHost = "v/host",
+                   UserName = "user/",
+                   Password = "P@ssword",
+                   Name = "unit/test",
+               }
+           );
             yield return Spec(
                 "amqp://user:pass@host:10000/vhost",
                 new ConnectionConfiguration
