@@ -15,5 +15,7 @@ namespace EasyNetQ
         public string QueueName { get; }
 
         public string ExchangeName { get; set; }
+
+        public string QueueType { get; set; }
     }
 }
