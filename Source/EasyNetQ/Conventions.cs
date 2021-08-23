@@ -19,6 +19,11 @@ namespace EasyNetQ
     public delegate string QueueNameConvention(Type messageType, string subscriberId);
 
     /// <summary>
+    ///     Convention for queue type
+    /// </summary>
+    public delegate string QueueTypeConvention(Type messageType);
+
+    /// <summary>
     ///     Convention for error queue routing key naming
     /// </summary>
     public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
@@ -67,6 +72,11 @@ namespace EasyNetQ
         ///     Convention for queue naming
         /// </summary>
         QueueNameConvention QueueNamingConvention { get; }
+
+        /// <summary>
+        ///     Convention for queue type
+        /// </summary>
+        QueueTypeConvention QueueTypeConvention { get; }
 
         /// <summary>
         ///     Convention for RPC routing key naming
@@ -123,6 +133,15 @@ namespace EasyNetQ
                     : attr.ExchangeName;
             };
 
+            QueueTypeConvention = type =>
+            {
+                var attr = GetQueueAttribute(type);
+
+                return string.IsNullOrEmpty(attr.QueueType)
+                    ? null
+                    : attr.QueueType;
+            };
+
             TopicNamingConvention = type => "";
 
             QueueNamingConvention = (type, subscriptionId) =>
@@ -166,6 +185,9 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public QueueNameConvention QueueNamingConvention { get; set; }
+
+        /// <inheritdoc />
+        public QueueTypeConvention QueueTypeConvention { get; set; }
 
         /// <inheritdoc />
         public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }

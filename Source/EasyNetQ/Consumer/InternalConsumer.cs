@@ -128,7 +128,7 @@ namespace EasyNetQ.Consumer
                 try
                 {
                     model = connection.CreateModel();
-                    model.BasicQos(0, configuration.PrefetchCount, true);
+                    model.BasicQos(0, configuration.PrefetchCount, false);
                 }
                 catch (Exception exception)
                 {
