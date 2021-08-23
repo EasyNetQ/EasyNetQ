@@ -25,7 +25,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
             bus.Dispose();
         }
 
-        private const int MessagesCount = 1;
+        private const int MessagesCount = 10;
 
         private readonly IBus bus;
 
