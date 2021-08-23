@@ -95,6 +95,15 @@ namespace EasyNetQ.Tests
         }
 
         [Theory]
+        [InlineData(typeof(QuorumQueueTestMessage))]
+        [InlineData(typeof(IQuorumQueueTestMessage))]
+        public void The_queue_type_convention_should_use_attribute_QueueType(Type messageType)
+        {
+            var result = conventions.QueueTypeConvention(messageType);
+            result.Should().Be(QueueType.Quorum);
+        }
+
+        [Theory]
         [InlineData(typeof(AnnotatedTestMessage))]
         [InlineData(typeof(IAnnotatedTestMessage))]
         public void The_queue_naming_convention_should_use_attribute_queueName_then_an_underscore_then_the_subscription_id(Type messageType)
