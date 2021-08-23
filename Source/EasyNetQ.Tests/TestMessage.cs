@@ -4,6 +4,16 @@ namespace EasyNetQ.Tests
     {
     }
 
+    [Queue("MyQueue", QueueType = QueueType.Quorum)]
+    public class QuorumQueueTestMessage
+    {
+    }
+
+    [Queue("MyQueue", QueueType = QueueType.Quorum)]
+    public interface IQuorumQueueTestMessage
+    {
+    }
+
     [Queue("MyQueue", ExchangeName = "MyExchange")]
     public class AnnotatedTestMessage
     {

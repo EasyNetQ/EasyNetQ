@@ -90,7 +90,7 @@ namespace EasyNetQ.Tests
         public void Should_set_configured_prefetch_count()
         {
             var connectionConfiguration = new ConnectionConfiguration();
-            mockBuilder.Channels[1].Received().BasicQos(0, connectionConfiguration.PrefetchCount, true);
+            mockBuilder.Channels[1].Received().BasicQos(0, connectionConfiguration.PrefetchCount, false);
         }
 
         [Fact]
@@ -210,7 +210,7 @@ namespace EasyNetQ.Tests
             );
 
             // Assert that QoS got configured correctly
-            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, true);
+            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);
 
             // Assert that binding got configured correctly
             mockBuilder.Channels[0].Received().QueueBind(

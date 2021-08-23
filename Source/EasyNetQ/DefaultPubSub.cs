@@ -103,6 +103,10 @@ namespace EasyNetQ
 
             var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
+            var queueType = conventions.QueueTypeConvention(typeof(T));
+
+            if (!string.IsNullOrEmpty(queueType))
+                subscriptionConfiguration.WithQueueType(queueType);
 
             var queue = await advancedBus.QueueDeclareAsync(
                 queueName,
