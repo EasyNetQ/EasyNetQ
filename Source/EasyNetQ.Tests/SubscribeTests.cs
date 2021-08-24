@@ -187,7 +187,7 @@ namespace EasyNetQ.Tests
             mockBuilder.Channels[0].Received().QueueDeclare(
                 Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                 Arg.Is(durable),
-                Arg.Is(false), // IsExclusive is set on the Consume call
+                Arg.Is(isExclusive),
                 Arg.Is(autoDelete),
                 Arg.Is<IDictionary<string, object>>(
                     x =>
