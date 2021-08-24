@@ -108,6 +108,7 @@ namespace EasyNetQ
                 queueName,
                 c =>
                 {
+                    c.AsExclusive(subscriptionConfiguration.IsExclusive);
                     c.AsDurable(subscriptionConfiguration.Durable);
                     c.AsAutoDelete(subscriptionConfiguration.AutoDelete);
                     if (subscriptionConfiguration.Expires.HasValue)
@@ -126,7 +127,16 @@ namespace EasyNetQ
                 cts.Token
             ).ConfigureAwait(false);
 
-            var exchange = await advancedBus.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, cancellationToken: cts.Token).ConfigureAwait(false);
+            var exchange = await advancedBus.ExchangeDeclareAsync(
+                exchangeName,
+                c =>
+                {
+                    c.WithType(subscriptionConfiguration.ExchangeType);
+                    if (!string.IsNullOrEmpty(subscriptionConfiguration.AlternateExchange))
+                        c.WithAlternateExchange(new Exchange(subscriptionConfiguration.AlternateExchange));
+                },
+                cts.Token
+            ).ConfigureAwait(false);
 
             foreach (var topic in subscriptionConfiguration.Topics.DefaultIfEmpty("#"))
                 await advancedBus.BindAsync(exchange, queue, topic, cts.Token).ConfigureAwait(false);

@@ -12,7 +12,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="configuration">The configuration instance</param>
         /// <param name="alternateExchange">The alternate exchange to set</param>
-        /// <returns>IQueueDeclareConfiguration</returns>
+        /// <returns>IExchangeDeclareConfiguration</returns>
         public static IExchangeDeclareConfiguration WithAlternateExchange(
             this IExchangeDeclareConfiguration configuration, Exchange alternateExchange
         )
