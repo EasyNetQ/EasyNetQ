@@ -1,3 +1,4 @@
+using EasyNetQ.Topology;
 using System.Collections.Generic;
 
 namespace EasyNetQ
@@ -108,6 +109,20 @@ namespace EasyNetQ
         /// <param name="queueType">Desired queue type.</param>
         /// <returns>Returns a reference to itself</returns>
         ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic);
+
+        /// <summary>
+        /// Sets type of the exchange used for subscription.
+        /// </summary>
+        /// <param name="exchangeType">The type to set</param>
+        /// <returns>Returns a reference to itself</returns>
+        ISubscriptionConfiguration WithExchangeType(string exchangeType);
+
+        /// <summary>
+        /// Sets alternate exchange of the exchange used for subscription.
+        /// </summary>
+        /// <param name="alternateExchange">The alternate exchange to set</param>
+        /// <returns>Returns a reference to itself</returns>
+        ISubscriptionConfiguration WithAlternateExchange(string alternateExchange);
     }
 
     internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -125,6 +140,8 @@ namespace EasyNetQ
         public int? MaxLengthBytes { get; private set; }
         public string QueueMode { get; private set; }
         public string QueueType { get; private set; }
+        public string ExchangeType { get; private set; } = Topology.ExchangeType.Topic;
+        public string AlternateExchange { get; private set; }
 
         public SubscriptionConfiguration(ushort defaultPrefetchCount)
         {
@@ -212,6 +229,18 @@ namespace EasyNetQ
         public ISubscriptionConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
         {
             QueueType = queueType;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithExchangeType(string exchangeType)
+        {
+            ExchangeType = exchangeType;
+            return this;
+        }
+
+        public ISubscriptionConfiguration WithAlternateExchange(string alternateExchange)
+        {
+            AlternateExchange = alternateExchange;
             return this;
         }
     }
