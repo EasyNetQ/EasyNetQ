@@ -26,7 +26,7 @@ namespace EasyNetQ.AutoSubscribe
 
         public static IDisposable Subscribe(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)
         {
-            Preconditions.CheckNotNull(autoSubscriber, "autoSubscriber");
+            Preconditions.CheckNotNull(autoSubscriber, nameof(autoSubscriber));
 
             return autoSubscriber.SubscribeAsync(assemblies, cancellationToken)
                 .GetAwaiter()
@@ -35,7 +35,7 @@ namespace EasyNetQ.AutoSubscribe
 
         public static IDisposable Subscribe(this AutoSubscriber autoSubscriber, Type[] consumerTypes, CancellationToken cancellationToken = default)
         {
-            Preconditions.CheckNotNull(autoSubscriber, "autoSubscriber");
+            Preconditions.CheckNotNull(autoSubscriber, nameof(autoSubscriber));
 
             return autoSubscriber.SubscribeAsync(consumerTypes, cancellationToken)
                 .GetAwaiter()

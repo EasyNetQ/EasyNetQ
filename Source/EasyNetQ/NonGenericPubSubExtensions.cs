@@ -27,7 +27,7 @@ namespace EasyNetQ
         /// <returns></returns>
         public static Task PublishAsync(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
         {
-            Preconditions.CheckNotNull(pubSub, "pubSub");
+            Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
             return pubSub.PublishAsync(message, messageType, c => { }, cancellationToken);
         }
@@ -51,8 +51,8 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(pubSub, "pubSub");
-            Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+            Preconditions.CheckNotNull(topic, nameof(topic));
 
             return pubSub.PublishAsync(message, messageType, c => c.WithTopic(topic), cancellationToken);
         }
@@ -75,7 +75,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(pubSub, "pubSub");
+            Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
             var publishDelegate = PublishDelegates.GetOrAdd(messageType, t =>
             {
@@ -118,7 +118,7 @@ namespace EasyNetQ
         /// <param name="cancellationToken">The cancellation token</param>
         public static void Publish(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
         {
-            Preconditions.CheckNotNull(pubSub, "pubSub");
+            Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
             pubSub.Publish(message, messageType, c => { }, cancellationToken);
         }
@@ -141,7 +141,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(pubSub, "pubSub");
+            Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
             pubSub.PublishAsync(message, messageType, configure, cancellationToken)
                 .GetAwaiter()
@@ -164,7 +164,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(pubSub, "pubSub");
+            Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
             pubSub.Publish(message, messageType, c => c.WithTopic(topic), cancellationToken);
         }

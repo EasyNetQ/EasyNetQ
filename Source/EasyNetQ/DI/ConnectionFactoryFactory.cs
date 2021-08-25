@@ -6,7 +6,7 @@ namespace EasyNetQ.DI
     {
         public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration configuration)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             var connectionFactory = new ConnectionFactory
             {

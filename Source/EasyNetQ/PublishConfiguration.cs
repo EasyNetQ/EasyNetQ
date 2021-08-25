@@ -34,7 +34,7 @@ namespace EasyNetQ
     {
         public PublishConfiguration(string defaultTopic)
         {
-            Preconditions.CheckNotNull(defaultTopic, "defaultTopic");
+            Preconditions.CheckNotNull(defaultTopic, nameof(defaultTopic));
 
             Topic = defaultTopic;
         }
@@ -47,7 +47,7 @@ namespace EasyNetQ
 
         public IPublishConfiguration WithTopic(string topic)
         {
-            Preconditions.CheckNotNull(topic, "topic");
+            Preconditions.CheckNotNull(topic, nameof(topic));
 
             Topic = topic;
             return this;

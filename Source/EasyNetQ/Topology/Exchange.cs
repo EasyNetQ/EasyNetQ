@@ -23,7 +23,7 @@ namespace EasyNetQ.Topology
             IDictionary<string, object> arguments = null
         )
         {
-            Preconditions.CheckNotNull(name, "name");
+            Preconditions.CheckNotNull(name, nameof(name));
 
             Name = name;
             Type = type;

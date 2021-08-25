@@ -122,7 +122,7 @@ namespace EasyNetQ
         /// </summary>
         public Conventions(ITypeNameSerializer typeNameSerializer)
         {
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
 
             ExchangeNamingConvention = type =>
             {

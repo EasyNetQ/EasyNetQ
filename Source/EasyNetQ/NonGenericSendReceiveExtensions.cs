@@ -34,7 +34,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+            Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
 
             return sendReceive.SendAsync(queue, message, messageType, c => { }, cancellationToken);
         }
@@ -59,7 +59,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+            Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
 
             var sendDelegate = SendDelegates.GetOrAdd(messageType, t =>
             {
@@ -112,7 +112,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+            Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
 
             sendReceive.Send(queue, message, messageType, c => { }, cancellationToken);
         }
@@ -137,7 +137,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(sendReceive, "sendReceive");
+            Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
 
             sendReceive.SendAsync(queue, message, messageType, configure, cancellationToken)
                 .GetAwaiter()

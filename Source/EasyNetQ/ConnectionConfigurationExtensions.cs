@@ -9,7 +9,7 @@ namespace EasyNetQ
     {
         public static void SetDefaultProperties(this ConnectionConfiguration configuration)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             if (configuration.Hosts.Count == 0)
                 throw new EasyNetQException(

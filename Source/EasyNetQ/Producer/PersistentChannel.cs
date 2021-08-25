@@ -34,8 +34,8 @@ namespace EasyNetQ.Producer
         /// <param name="eventBus">The event bus</param>
         public PersistentChannel(PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
             this.connection = connection;
             this.eventBus = eventBus;
@@ -47,7 +47,7 @@ namespace EasyNetQ.Producer
             Func<IModel, T> channelAction, CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(channelAction, "channelAction");
+            Preconditions.CheckNotNull(channelAction, nameof(channelAction));
 
             if (disposed)
                 throw new ObjectDisposedException(nameof(PersistentChannel));

@@ -30,10 +30,10 @@ namespace EasyNetQ
             IMessageDeliveryModeStrategy messageDeliveryModeStrategy
         )
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
 
             this.configuration = configuration;
             this.advancedBus = advancedBus;
@@ -49,8 +49,8 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(message, nameof(message));
+            Preconditions.CheckNotNull(configure, nameof(configure));
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 

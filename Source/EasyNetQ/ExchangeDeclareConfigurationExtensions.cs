@@ -17,7 +17,7 @@ namespace EasyNetQ
             this IExchangeDeclareConfiguration configuration, Exchange alternateExchange
         )
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("alternate-exchange", alternateExchange.Name);
         }
