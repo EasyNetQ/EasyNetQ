@@ -1,35 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Title>EasyNetQ</Title>
     <Description>A nice .NET API for RabbitMQ</Description>
-    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
-    <PackageProduct>EasyNetQ</PackageProduct>
-    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
-    <PackageTags>RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <PackageIcon>EasyNetQ.png</PackageIcon>
-    <PackageLicenseFile>licence.txt</PackageLicenseFile>
-    <LangVersion>latest</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);LIBLOG_PUBLIC;LIBLOG_PORTABLE</DefineConstants>
-    <LangVersion>latest</LangVersion>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <AssemblyOriginatorKeyFile>..\..\Assets\EasyNetQ.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LightInject.Source" Version="6.4.0">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="2.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
@@ -37,9 +14,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
-    <None Include="..\..\licence.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
