@@ -67,8 +67,8 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public virtual Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken)
         {
-            Preconditions.CheckNotNull(context, "context");
-            Preconditions.CheckNotNull(exception, "exception");
+            Preconditions.CheckNotNull(context, nameof(context));
+            Preconditions.CheckNotNull(exception, nameof(exception));
 
             if (disposed)
                 throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));

@@ -18,7 +18,7 @@ namespace EasyNetQ
         /// <returns>'this' for fluent configuration</returns>
         public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Func<T, Task> onMessage)
         {
-            Preconditions.CheckNotNull(receiveRegistration, "receiveRegistration");
+            Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
 
             return receiveRegistration.Add<T>((m, c) => onMessage(m));
         }
@@ -32,7 +32,7 @@ namespace EasyNetQ
         /// <returns>'this' for fluent configuration</returns>
         public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Action<T> onMessage)
         {
-            Preconditions.CheckNotNull(receiveRegistration, "receiveRegistration");
+            Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
 
             var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
             return receiveRegistration.Add(onMessageAsync);

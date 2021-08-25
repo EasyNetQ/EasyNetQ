@@ -52,17 +52,17 @@ namespace EasyNetQ
             AdvancedBusEventHandlers advancedBusEventHandlers
         )
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(consumerFactory, "consumerFactory");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
-            Preconditions.CheckNotNull(handlerCollectionFactory, "handlerCollectionFactory");
-            Preconditions.CheckNotNull(container, "container");
-            Preconditions.CheckNotNull(messageSerializationStrategy, "messageSerializationStrategy");
-            Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(produceConsumeInterceptor, "produceConsumeInterceptor");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(pullingConsumerFactory, "pullingConsumerFactory");
-            Preconditions.CheckNotNull(advancedBusEventHandlers, "advancedBusEventHandlers");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(consumerFactory, nameof(consumerFactory));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+            Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
+            Preconditions.CheckNotNull(container, nameof(container));
+            Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+            Preconditions.CheckNotNull(produceConsumeInterceptor, nameof(produceConsumeInterceptor));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
+            Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
 
             this.connection = connection;
             this.consumerFactory = consumerFactory;
@@ -100,7 +100,7 @@ namespace EasyNetQ
         /// <inheritdoc />
         public IDisposable Consume(Action<IConsumeConfiguration> configure)
         {
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(configure, nameof(configure));
 
             var consumeConfiguration = new ConsumeConfiguration(
                 configuration.PrefetchCount, handlerCollectionFactory.CreateHandlerCollection
@@ -274,9 +274,9 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(exchange, nameof(exchange));
+            Preconditions.CheckShortString(routingKey, nameof(routingKey));
+            Preconditions.CheckNotNull(message, nameof(message));
 
             using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
             await PublishAsync(
@@ -294,7 +294,7 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(message, nameof(message));
 
             using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
             await PublishAsync(
@@ -312,9 +312,9 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(messageProperties, "messageProperties");
-            Preconditions.CheckNotNull(body, "body");
+            Preconditions.CheckShortString(routingKey, nameof(routingKey));
+            Preconditions.CheckNotNull(messageProperties, nameof(messageProperties));
+            Preconditions.CheckNotNull(body, nameof(body));
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -395,7 +395,7 @@ namespace EasyNetQ
         /// <inheritdoc />
         public async Task QueueDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
         {
-            Preconditions.CheckNotNull(name, "name");
+            Preconditions.CheckNotNull(name, nameof(name));
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -416,8 +416,8 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(name, "name");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(name, nameof(name));
+            Preconditions.CheckNotNull(configure, nameof(configure));
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 

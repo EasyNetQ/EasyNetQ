@@ -57,7 +57,7 @@ namespace EasyNetQ.AutoSubscribe
 
         public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
         {
-            Preconditions.CheckNotNull(bus, "bus");
+            Preconditions.CheckNotNull(bus, nameof(bus));
             Preconditions.CheckNotBlank(subscriptionIdPrefix, "subscriptionIdPrefix", "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
 
             Bus = bus;

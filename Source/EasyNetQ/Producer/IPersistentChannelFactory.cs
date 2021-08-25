@@ -46,8 +46,8 @@ namespace EasyNetQ.Producer
         /// <param name="eventBus">The event bus</param>
         public PersistentChannelFactory(IPersistentConnection connection, IEventBus eventBus)
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
             this.connection = connection;
             this.eventBus = eventBus;

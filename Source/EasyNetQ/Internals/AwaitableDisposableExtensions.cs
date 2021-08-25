@@ -19,7 +19,7 @@ namespace EasyNetQ.Internals
         /// </summary>
         public static AwaitableDisposable<T> ToAwaitableDisposable<T>(this Task<T> source) where T : IDisposable
         {
-            Preconditions.CheckNotNull(source, "source");
+            Preconditions.CheckNotNull(source, nameof(source));
 
             return new AwaitableDisposable<T>(source);
         }

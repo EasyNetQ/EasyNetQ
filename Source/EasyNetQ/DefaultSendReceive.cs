@@ -47,8 +47,8 @@ namespace EasyNetQ
             string queue, T message, Action<ISendConfiguration> configure, CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(message, "message");
+            Preconditions.CheckNotNull(queue, nameof(queue));
+            Preconditions.CheckNotNull(message, nameof(message));
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -73,9 +73,9 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(addHandlers, "addHandlers");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(queue, nameof(queue));
+            Preconditions.CheckNotNull(addHandlers, nameof(addHandlers));
+            Preconditions.CheckNotNull(configure, nameof(configure));
 
             return ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken).ToAwaitableDisposable();
         }

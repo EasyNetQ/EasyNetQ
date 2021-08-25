@@ -65,7 +65,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         ) where TPullResult : IPullResult
         {
-            Preconditions.CheckNotNull(consumer, "consumer");
+            Preconditions.CheckNotNull(consumer, nameof(consumer));
 
             return consumer.AckAsync(deliveryTag, false, cancellationToken);
         }
@@ -84,7 +84,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         ) where TPullResult : IPullResult
         {
-            Preconditions.CheckNotNull(consumer, "consumer");
+            Preconditions.CheckNotNull(consumer, nameof(consumer));
 
             return consumer.RejectAsync(deliveryTag, false, requeue, cancellationToken);
         }
@@ -100,7 +100,7 @@ namespace EasyNetQ
             this IPullingConsumer<TPullResult> consumer, int batchSize, CancellationToken cancellationToken = default
         ) where TPullResult : IPullResult
         {
-            Preconditions.CheckNotNull(consumer, "consumer");
+            Preconditions.CheckNotNull(consumer, nameof(consumer));
 
             var messages = new List<TPullResult>(batchSize);
             for (var i = 0; i < batchSize; ++i)
@@ -127,7 +127,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         ) where TPullResult : IPullResult
         {
-            Preconditions.CheckNotNull(consumer, "consumer");
+            Preconditions.CheckNotNull(consumer, nameof(consumer));
 
             return consumer.AckAsync(deliveryTag, true, cancellationToken);
         }
@@ -146,7 +146,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         ) where TPullResult : IPullResult
         {
-            Preconditions.CheckNotNull(consumer, "consumer");
+            Preconditions.CheckNotNull(consumer, nameof(consumer));
 
             return consumer.RejectAsync(deliveryTag, true, requeue, cancellationToken);
         }

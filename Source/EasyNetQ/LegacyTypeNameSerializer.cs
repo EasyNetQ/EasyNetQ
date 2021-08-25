@@ -39,7 +39,7 @@ namespace EasyNetQ
         /// <inheritdoc />
         public string Serialize(Type type)
         {
-            Preconditions.CheckNotNull(type, "type");
+            Preconditions.CheckNotNull(type, nameof(type));
 
             return serializedTypes.GetOrAdd(type, t =>
             {

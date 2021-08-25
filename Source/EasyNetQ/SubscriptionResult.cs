@@ -15,7 +15,7 @@ namespace EasyNetQ
         /// </summary>
         public SubscriptionResult(Exchange exchange, Queue queue, IDisposable consumerCancellation)
         {
-            Preconditions.CheckNotNull(consumerCancellation, "consumerCancellation");
+            Preconditions.CheckNotNull(consumerCancellation, nameof(consumerCancellation));
 
             Exchange = exchange;
             Queue = queue;

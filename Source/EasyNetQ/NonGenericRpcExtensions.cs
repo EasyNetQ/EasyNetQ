@@ -34,7 +34,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RequestAsync(request, requestType, responseType, c => { }, cancellationToken);
         }
@@ -60,7 +60,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             var requestDelegate = RequestDelegates.GetOrAdd(Tuple.Create(requestType, responseType), t =>
             {
@@ -118,7 +118,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RequestAsync(request, requestType, responseType, cancellationToken)
                 .GetAwaiter()
@@ -146,7 +146,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RequestAsync(request, requestType, responseType, configure, cancellationToken)
                 .GetAwaiter()
