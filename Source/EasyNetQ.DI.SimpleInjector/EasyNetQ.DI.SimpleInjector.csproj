@@ -1,22 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
-    <PackageProduct>EasyNetQ</PackageProduct>
-    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
     <Description>An adaptor to allow EasyNetQ to use SimpleInjector as its internal IoC container</Description>
-    <PackageIcon>EasyNetQ.png</PackageIcon>
-    <PackageLicenseFile>licence.txt</PackageLicenseFile>
-    <PackageTags>SimpleInjector;RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <LangVersion>latest</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <AssemblyOriginatorKeyFile>..\..\Assets\EasyNetQ.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageTags>SimpleInjector;$(PackageTags)</PackageTags>
   </PropertyGroup>
   <ItemGroup>
   </ItemGroup>
@@ -24,15 +10,6 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="2.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="SimpleInjector" Version="4.6.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
-    <None Include="..\..\licence.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
