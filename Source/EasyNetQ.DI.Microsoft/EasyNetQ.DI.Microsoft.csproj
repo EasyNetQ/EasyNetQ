@@ -1,36 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
-    <PackageProduct>EasyNetQ</PackageProduct>
-    <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>An adaptor to allow EasyNetQ to use Microsoft.Extensions.DependencyInjection as its internal IoC container</Description>
-    <PackageIcon>EasyNetQ.png</PackageIcon>
-    <PackageLicenseFile>licence.txt</PackageLicenseFile>
-    <PackageTags>DependencyInjection;RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <LangVersion>latest</LangVersion>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <AssemblyOriginatorKeyFile>..\..\Assets\EasyNetQ.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>DependencyInjection;$(PackageTags)</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="2.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
-    <None Include="..\..\licence.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>

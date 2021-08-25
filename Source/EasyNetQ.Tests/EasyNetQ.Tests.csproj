@@ -1,11 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Tests.props"/>
+
   <PropertyGroup>
-    <Description>EasyNetQ.Tests</Description>
-    <LangVersion>latest</LangVersion>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
-    <AssemblyOriginatorKeyFile>../../Assets/EasyNetQ.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <TargetFramework>net5</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
@@ -18,12 +15,5 @@
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 </Project>
