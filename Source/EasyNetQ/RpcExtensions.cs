@@ -25,7 +25,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken)
                 .GetAwaiter()
@@ -47,7 +47,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RequestAsync<TRequest, TResponse>(request, c => { }, cancellationToken);
         }
@@ -71,7 +71,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RequestAsync<TRequest, TResponse>(request, configure, cancellationToken)
                 .GetAwaiter()
@@ -92,7 +92,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, c) => responder(m));
             return rpc.RespondAsync<TRequest, TResponse>(asyncResponder, c => { }, cancellationToken);
@@ -112,7 +112,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RespondAsync<TRequest, TResponse>((r, c) => responder(r), c => { }, cancellationToken);
         }
@@ -131,7 +131,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.Respond(responder, c => { }, cancellationToken);
         }
@@ -150,7 +150,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, c) => responder(m));
 
@@ -173,7 +173,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.Respond<TRequest, TResponse>((r, c) => responder(r), configure, cancellationToken);
         }
@@ -194,7 +194,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(rpc, "rpc");
+            Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             return rpc.RespondAsync(responder, configure, cancellationToken)
                 .GetAwaiter()

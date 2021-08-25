@@ -21,7 +21,7 @@ namespace EasyNetQ.Consumer
             this IHandlerRegistration handlerRegistration, Action<IMessage<T>, MessageReceivedInfo> handler
         )
         {
-            Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
+            Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
             var asyncHandler = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => handler(m, i));
             return handlerRegistration.Add(asyncHandler);
@@ -38,7 +38,7 @@ namespace EasyNetQ.Consumer
             this IHandlerRegistration handlerRegistration, Func<IMessage<T>, MessageReceivedInfo, Task> handler
         )
         {
-            Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
+            Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
             return handlerRegistration.Add<T>((m, i, c) => handler(m, i));
         }
@@ -55,7 +55,7 @@ namespace EasyNetQ.Consumer
             Func<IMessage<T>, MessageReceivedInfo, Task<AckStrategy>> handler
         )
         {
-            Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
+            Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
             return handlerRegistration.Add<T>((m, i, c) => handler(m, i));
         }
@@ -72,7 +72,7 @@ namespace EasyNetQ.Consumer
             Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler
         )
         {
-            Preconditions.CheckNotNull(handlerRegistration, "handlerRegistration");
+            Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
             return handlerRegistration.Add<T>(async (m, i, c) =>
             {

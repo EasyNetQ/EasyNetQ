@@ -38,7 +38,7 @@ namespace EasyNetQ
         /// <inheritdoc />
         public IMemoryOwner<byte> MessageToBytes(Type messageType, object message)
         {
-            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckNotNull(messageType, nameof(messageType));
 
             var stream = new ArrayPooledMemoryStream();
 
@@ -57,7 +57,7 @@ namespace EasyNetQ
         /// <inheritdoc />
         public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
         {
-            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckNotNull(messageType, nameof(messageType));
 
             using var memoryStream = new ReadOnlyMemoryStream(bytes);
             using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);

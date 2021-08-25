@@ -16,8 +16,8 @@ namespace EasyNetQ.MultipleExchange
 
         public MultipleExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
         {
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
 
             this.conventions = conventions;
             this.advancedBus = advancedBus;

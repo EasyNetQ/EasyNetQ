@@ -32,7 +32,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(scheduler, "scheduler");
+            Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
             return scheduler.FuturePublishAsync(message, messageType, delay, c => { }, cancellationToken);
         }
@@ -55,7 +55,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(scheduler, "scheduler");
+            Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
             scheduler.FuturePublishAsync(message, messageType, delay, c => c.WithTopic(topic), cancellationToken)
                 .GetAwaiter()
@@ -78,7 +78,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(scheduler, "scheduler");
+            Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
             scheduler.FuturePublishAsync(message, messageType, delay, cancellationToken)
                 .GetAwaiter()
@@ -105,7 +105,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(scheduler, "scheduler");
+            Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
             scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken)
                 .GetAwaiter()
@@ -132,7 +132,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(scheduler, "scheduler");
+            Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
             var futurePublishDelegate = FuturePublishDelegates.GetOrAdd(messageType, t =>
             {

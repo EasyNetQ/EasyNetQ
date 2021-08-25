@@ -13,14 +13,14 @@ namespace EasyNetQ
     public class MessageProperties : ICloneable
     {
         /// <summary>
-        ///     Creates empty MessageProperties
+        ///     Creates empty <see cref="MessageProperties"/>
         /// </summary>
         public MessageProperties()
         {
         }
 
         /// <summary>
-        ///     Creates MessageProperties from IBasicProperties
+        ///     Creates <see cref="MessageProperties"/> from <see cref="IBasicProperties"/>
         /// </summary>
         public MessageProperties(IBasicProperties basicProperties)
             : this()
@@ -29,11 +29,11 @@ namespace EasyNetQ
         }
 
         /// <summary>
-        ///     Copies IBasicProperties to MessageProperties
+        ///     Copies <see cref="IBasicProperties"/> to <see cref="MessageProperties"/>
         /// </summary>
         public void CopyFrom(IBasicProperties basicProperties)
         {
-            Preconditions.CheckNotNull(basicProperties, "basicProperties");
+            Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
 
             if (basicProperties.IsContentTypePresent()) ContentType = basicProperties.ContentType;
             if (basicProperties.IsContentEncodingPresent()) ContentEncoding = basicProperties.ContentEncoding;
@@ -50,17 +50,17 @@ namespace EasyNetQ
             if (basicProperties.IsClusterIdPresent()) ClusterId = basicProperties.ClusterId;
 
             if (basicProperties.IsHeadersPresent())
-                Headers = basicProperties.Headers == null || basicProperties.Headers.Count == 0
-                    ? null
-                    : new Dictionary<string, object>(basicProperties.Headers);
+                Headers = basicProperties.Headers?.Count > 0
+                    ? new Dictionary<string, object>(basicProperties.Headers)
+                    : null;
         }
 
         /// <summary>
-        ///     Copies MessageProperties to IBasicProperties
+        ///     Copies <see cref="MessageProperties"/> to <see cref="IBasicProperties"/>
         /// </summary>
         public void CopyTo(IBasicProperties basicProperties)
         {
-            Preconditions.CheckNotNull(basicProperties, "basicProperties");
+            Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
 
             if (contentTypePresent) basicProperties.ContentType = contentType;
             if (contentEncodingPresent) basicProperties.ContentEncoding = contentEncoding;
@@ -76,7 +76,7 @@ namespace EasyNetQ
             if (appIdPresent) basicProperties.AppId = appId;
             if (clusterIdPresent) basicProperties.ClusterId = clusterId;
 
-            if (headers != null && headers.Count > 0)
+            if (headers?.Count > 0)
                 basicProperties.Headers = new Dictionary<string, object>(headers);
         }
 
@@ -99,7 +99,7 @@ namespace EasyNetQ
             if (appIdPresent) copy.AppId = appId;
             if (clusterIdPresent) copy.ClusterId = clusterId;
 
-            if (headers != null && headers.Count > 0)
+            if (headers?.Count > 0)
                 copy.headers = new Dictionary<string, object>(headers);
 
             return copy;
@@ -126,7 +126,7 @@ namespace EasyNetQ
         public string ContentType
         {
             get => contentType;
-            set { contentType = CheckShortString(value, "ContentType"); contentTypePresent = true; }
+            set { contentType = CheckShortString(value, nameof(ContentType)); contentTypePresent = true; }
         }
 
         private string contentEncoding;
@@ -137,7 +137,7 @@ namespace EasyNetQ
         public string ContentEncoding
         {
             get => contentEncoding;
-            set { contentEncoding = CheckShortString(value, "ContentEncoding"); contentEncodingPresent = true; }
+            set { contentEncoding = CheckShortString(value, nameof(ContentEncoding)); contentEncodingPresent = true; }
         }
 
         private IDictionary<string, object> headers;
@@ -181,7 +181,7 @@ namespace EasyNetQ
         public string CorrelationId
         {
             get => correlationId;
-            set { correlationId = CheckShortString(value, "CorrelationId"); correlationIdPresent = true; }
+            set { correlationId = CheckShortString(value, nameof(CorrelationId)); correlationIdPresent = true; }
         }
 
         private string replyTo;
@@ -192,7 +192,7 @@ namespace EasyNetQ
         public string ReplyTo
         {
             get => replyTo;
-            set { replyTo = CheckShortString(value, "ReplyTo"); replyToPresent = true; }
+            set { replyTo = CheckShortString(value, nameof(ReplyTo)); replyToPresent = true; }
         }
 
         private string expiration;
@@ -203,7 +203,7 @@ namespace EasyNetQ
         public string Expiration
         {
             get => expiration;
-            set { expiration = CheckShortString(value, "Expiration"); expirationPresent = true; }
+            set { expiration = CheckShortString(value, nameof(Expiration)); expirationPresent = true; }
         }
 
         private string messageId;
@@ -214,7 +214,7 @@ namespace EasyNetQ
         public string MessageId
         {
             get => messageId;
-            set { messageId = CheckShortString(value, "MessageId"); messageIdPresent = true; }
+            set { messageId = CheckShortString(value, nameof(MessageId)); messageIdPresent = true; }
         }
 
         private long timestamp;
@@ -236,7 +236,7 @@ namespace EasyNetQ
         public string Type
         {
             get => type;
-            set { type = CheckShortString(value, "Type"); typePresent = true; }
+            set { type = CheckShortString(value, nameof(Type)); typePresent = true; }
         }
 
         private string userId;
@@ -247,7 +247,7 @@ namespace EasyNetQ
         public string UserId
         {
             get => userId;
-            set { userId = CheckShortString(value, "UserId"); userIdPresent = true; }
+            set { userId = CheckShortString(value, nameof(UserId)); userIdPresent = true; }
         }
 
         private string appId;
@@ -258,7 +258,7 @@ namespace EasyNetQ
         public string AppId
         {
             get => appId;
-            set { appId = CheckShortString(value, "AppId"); appIdPresent = true; }
+            set { appId = CheckShortString(value, nameof(AppId)); appIdPresent = true; }
         }
 
         private string clusterId;
@@ -269,76 +269,76 @@ namespace EasyNetQ
         public string ClusterId
         {
             get => clusterId;
-            set { clusterId = CheckShortString(value, "ClusterId"); clusterIdPresent = true; }
+            set { clusterId = CheckShortString(value, nameof(ClusterId)); clusterIdPresent = true; }
         }
 
         /// <summary>
-        ///     True if ContentType is present
+        ///     True if <see cref="ContentType"/> is present
         /// </summary>
         public bool ContentTypePresent => contentTypePresent;
 
         /// <summary>
-        ///     True if ContentEncoding is present
+        ///     True if <see cref="ContentEncoding"/> is present
         /// </summary>
         public bool ContentEncodingPresent => contentEncodingPresent;
 
         /// <summary>
-        ///     True if Headers is present
+        ///     True if <see cref="Headers"/> is present
         /// </summary>
-        public bool HeadersPresent => headers != null && headers.Count > 0;
+        public bool HeadersPresent => headers?.Count > 0;
 
         /// <summary>
-        ///     True if DeliveryMode is present
+        ///     True if <see cref="DeliveryMode"/> is present
         /// </summary>
         public bool DeliveryModePresent => deliveryModePresent;
 
         /// <summary>
-        ///     True if Priority is present
+        ///     True if <see cref="Priority"/> is present
         /// </summary>
         public bool PriorityPresent => priorityPresent;
 
         /// <summary>
-        ///     True if CorrelationId is present
+        ///     True if <see cref="CorrelationId"/> is present
         /// </summary>
         public bool CorrelationIdPresent => correlationIdPresent;
 
         /// <summary>
-        ///     True if ReplyTo is present
+        ///     True if <see cref="ReplyTo"/> is present
         /// </summary>
         public bool ReplyToPresent => replyToPresent;
 
         /// <summary>
-        ///     True if Expiration is present
+        ///     True if <see cref="Expiration"/> is present
         /// </summary>
         public bool ExpirationPresent => expirationPresent;
 
         /// <summary>
-        ///     True if MessageId is present
+        ///     True if <see cref="MessageId"/> is present
         /// </summary>
         public bool MessageIdPresent => messageIdPresent;
 
         /// <summary>
-        ///     True if Timestamp is present
+        ///     True if <see cref="Timestamp"/> is present
         /// </summary>
         public bool TimestampPresent => timestampPresent;
 
         /// <summary>
-        ///     True if Type is present
+        ///     True if <see cref="Type"/> is present
         /// </summary>
         public bool TypePresent => typePresent;
 
         /// <summary>
-        ///     True if UserId is present
+        ///     True if <see cref="UserId"/> is present
         /// </summary>
         public bool UserIdPresent => userIdPresent;
 
         /// <summary>
-        ///     True if AppId is present
+        ///     True if <see cref="AppId"/> is present
         /// </summary>
         public bool AppIdPresent => appIdPresent;
 
         /// <summary>
-        ///     True if ClusterId is present
+        ///     True if <see cref="ClusterId"/> is present
         /// </summary>
         public bool ClusterIdPresent => clusterIdPresent;
 

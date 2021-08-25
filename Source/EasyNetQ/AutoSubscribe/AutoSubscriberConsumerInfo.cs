@@ -12,9 +12,9 @@ namespace EasyNetQ.AutoSubscribe
 
         public AutoSubscriberConsumerInfo(Type concreteType, Type interfaceType, Type messageType)
         {
-            Preconditions.CheckNotNull(concreteType, "concreteType");
-            Preconditions.CheckNotNull(interfaceType, "interfaceType");
-            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckNotNull(concreteType, nameof(concreteType));
+            Preconditions.CheckNotNull(interfaceType, nameof(interfaceType));
+            Preconditions.CheckNotNull(messageType, nameof(messageType));
 
             ConcreteType = concreteType;
             MessageType = messageType;

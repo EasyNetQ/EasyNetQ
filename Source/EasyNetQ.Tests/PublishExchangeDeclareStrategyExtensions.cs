@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(strategy, "strategy");
+            Preconditions.CheckNotNull(strategy, nameof(strategy));
 
             return strategy.DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken)
                 .GetAwaiter()
@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(strategy, "strategy");
+            Preconditions.CheckNotNull(strategy, nameof(strategy));
 
             return strategy.DeclareExchangeAsync(messageType, exchangeType, cancellationToken)
                 .GetAwaiter()

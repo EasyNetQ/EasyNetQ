@@ -16,7 +16,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithMaxPriority(this IQueueDeclareConfiguration configuration, int maxPriority)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-max-priority", maxPriority);
         }
@@ -29,7 +29,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithMaxLength(this IQueueDeclareConfiguration configuration, int maxLength)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-max-length", maxLength);
         }
@@ -42,7 +42,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithMaxLengthBytes(this IQueueDeclareConfiguration configuration, int maxLengthBytes)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-max-length-bytes", maxLengthBytes);
         }
@@ -55,7 +55,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithExpires(this IQueueDeclareConfiguration configuration, TimeSpan expires)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-expires", (int)expires.TotalMilliseconds);
         }
@@ -68,7 +68,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithMessageTtl(this IQueueDeclareConfiguration configuration, TimeSpan messageTtl)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-message-ttl", (int)messageTtl.TotalMilliseconds);
         }
@@ -81,7 +81,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithDeadLetterExchange(this IQueueDeclareConfiguration configuration, Exchange deadLetterExchange)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-dead-letter-exchange", deadLetterExchange.Name);
         }
@@ -94,7 +94,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithDeadLetterRoutingKey(this IQueueDeclareConfiguration configuration, string deadLetterRoutingKey)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-dead-letter-routing-key", deadLetterRoutingKey);
         }
@@ -107,7 +107,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithQueueMode(this IQueueDeclareConfiguration configuration, string queueMode = QueueMode.Default)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-queue-mode", queueMode);
         }
@@ -120,7 +120,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithQueueType(this IQueueDeclareConfiguration configuration, string queueType = QueueType.Classic)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-queue-type", queueType);
         }
@@ -132,7 +132,7 @@ namespace EasyNetQ
         /// <returns>IQueueDeclareConfiguration</returns>
         public static IQueueDeclareConfiguration WithSingleActiveConsumer(this IQueueDeclareConfiguration configuration)
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
 
             return configuration.WithArgument("x-single-active-consumer", true);
         }

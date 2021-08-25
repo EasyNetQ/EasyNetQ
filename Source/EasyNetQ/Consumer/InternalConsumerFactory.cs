@@ -18,8 +18,8 @@ namespace EasyNetQ.Consumer
             IPersistentConnection connection, IHandlerRunner handlerRunner, IEventBus eventBus
         )
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
 
             this.connection = connection;
             this.handlerRunner = handlerRunner;

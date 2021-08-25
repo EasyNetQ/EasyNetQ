@@ -20,7 +20,7 @@ namespace EasyNetQ.Consumer
 
         public HandlerRunner(IConsumerErrorStrategy consumerErrorStrategy)
         {
-            Preconditions.CheckNotNull(consumerErrorStrategy, "consumerErrorStrategy");
+            Preconditions.CheckNotNull(consumerErrorStrategy, nameof(consumerErrorStrategy));
 
             this.consumerErrorStrategy = consumerErrorStrategy;
         }
