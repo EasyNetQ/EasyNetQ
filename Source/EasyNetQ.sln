@@ -7,11 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
 		..\.gitignore = ..\.gitignore
+		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
+		Directory.Build.props = Directory.Build.props
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
 		..\README.md = ..\README.md
+		Tests.props = Tests.props
 		Version.cs = Version.cs
-		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ", "EasyNetQ\EasyNetQ.csproj", "{ED270A39-D32C-438A-BF4F-AA0E66C7879C}"
@@ -38,7 +40,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Hosepipe.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Microsoft", "EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj", "{132E7958-BC4E-42D3-86F2-6BF98E4FB6B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.IntegrationTests", "EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj", "{FA531CDD-54D1-4AB8-A3D8-691AF0947435}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.IntegrationTests", "EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj", "{FA531CDD-54D1-4AB8-A3D8-691AF0947435}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,8 +103,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3DE3E7F-B61C-4398-AA54-A0DDE3BD850E}
