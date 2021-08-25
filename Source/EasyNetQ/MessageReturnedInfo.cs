@@ -12,9 +12,9 @@ namespace EasyNetQ
             string returnReason
         )
         {
-            Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(routingKey, "routingKey");
-            Preconditions.CheckNotNull(returnReason, "returnReason");
+            Preconditions.CheckNotNull(exchange, nameof(exchange));
+            Preconditions.CheckNotNull(routingKey, nameof(routingKey));
+            Preconditions.CheckNotNull(returnReason, nameof(returnReason));
 
             Exchange = exchange;
             RoutingKey = routingKey;

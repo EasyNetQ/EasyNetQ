@@ -107,7 +107,7 @@ namespace EasyNetQ.ConnectionString
         /// <returns></returns>
         private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
         {
-            Preconditions.CheckNotNull(getter, "getter");
+            Preconditions.CheckNotNull(getter, nameof(getter));
 
             var memberEx = getter.Body as MemberExpression;
 

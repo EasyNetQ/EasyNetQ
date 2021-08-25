@@ -48,7 +48,7 @@ namespace EasyNetQ.Producer
             Func<IModel, T> channelAction, ChannelDispatchOptions options, CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(channelAction, "channelAction");
+            Preconditions.CheckNotNull(channelAction, nameof(channelAction));
 
             // TODO channelsPoolFactory could be called multiple time, fix it
             var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);

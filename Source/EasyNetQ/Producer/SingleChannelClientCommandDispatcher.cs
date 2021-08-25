@@ -21,7 +21,7 @@ namespace EasyNetQ.Producer
         /// <param name="channelFactory">The channel factory</param>
         public SingleChannelClientCommandDispatcher(IPersistentChannelFactory channelFactory)
         {
-            Preconditions.CheckNotNull(channelFactory, "channelFactory");
+            Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
 
             channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
             createChannelFactory = o => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms));
@@ -32,7 +32,7 @@ namespace EasyNetQ.Producer
             Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(channelAction, "channelAction");
+            Preconditions.CheckNotNull(channelAction, nameof(channelAction));
 
             // TODO createChannelFactory could be called multiple time, fix it
             var channel = channelPerOptions.GetOrAdd(channelOptions, createChannelFactory);

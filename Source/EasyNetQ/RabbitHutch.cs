@@ -47,7 +47,7 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
         {
-            Preconditions.CheckNotNull(connectionString, "connectionString");
+            Preconditions.CheckNotNull(connectionString, nameof(connectionString));
 
             return CreateBus(x => x.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
         }
@@ -89,10 +89,10 @@ namespace EasyNetQ
             TimeSpan requestedHeartbeat,
             Action<IServiceRegister> registerServices)
         {
-            Preconditions.CheckNotNull(hostName, "hostName");
-            Preconditions.CheckNotNull(virtualHost, "virtualHost");
-            Preconditions.CheckNotNull(username, "username");
-            Preconditions.CheckNotNull(password, "password");
+            Preconditions.CheckNotNull(hostName, nameof(hostName));
+            Preconditions.CheckNotNull(virtualHost, nameof(virtualHost));
+            Preconditions.CheckNotNull(username, nameof(username));
+            Preconditions.CheckNotNull(password, nameof(password));
 
             var connectionConfiguration = new ConnectionConfiguration
             {
@@ -124,7 +124,7 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
 
             return CreateBus(_ => connectionConfiguration, registerServices);
         }
@@ -164,9 +164,9 @@ namespace EasyNetQ
                                        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
                                        Action<IServiceRegister> registerServices)
         {
-            Preconditions.CheckNotNull(serviceRegister, "serviceRegister");
-            Preconditions.CheckNotNull(connectionConfigurationFactory, "connectionConfiguration");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
+            Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
+            Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
+            Preconditions.CheckNotNull(registerServices, nameof(registerServices));
 
             serviceRegister.Register(c =>
             {

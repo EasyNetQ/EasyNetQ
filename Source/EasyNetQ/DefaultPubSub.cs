@@ -33,11 +33,11 @@ namespace EasyNetQ
             IAdvancedBus advancedBus
         )
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
 
             this.configuration = configuration;
             this.conventions = conventions;
@@ -49,8 +49,8 @@ namespace EasyNetQ
         /// <inheritdoc />
         public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
         {
-            Preconditions.CheckNotNull(message, "message");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(message, nameof(message));
+            Preconditions.CheckNotNull(configure, nameof(configure));
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -82,9 +82,9 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(subscriptionId, "subscriptionId");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(subscriptionId, nameof(subscriptionId));
+            Preconditions.CheckNotNull(onMessage, nameof(onMessage));
+            Preconditions.CheckNotNull(configure, nameof(configure));
 
             return SubscribeAsyncInternal(subscriptionId, onMessage, configure, cancellationToken).ToAwaitableDisposable();
         }

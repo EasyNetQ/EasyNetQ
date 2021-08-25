@@ -14,14 +14,14 @@ namespace EasyNetQ
 
         public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration)
         {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
+            Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
             this.connectionConfiguration = connectionConfiguration;
         }
 
         /// <inheritdoc />
         public byte GetDeliveryMode(Type messageType)
         {
-            Preconditions.CheckNotNull(messageType, "messageType");
+            Preconditions.CheckNotNull(messageType, nameof(messageType));
             var deliveryModeAttribute = messageType.GetAttribute<DeliveryModeAttribute>();
             if (deliveryModeAttribute == null)
                 return GetDeliveryModeInternal(connectionConfiguration.PersistentMessages);

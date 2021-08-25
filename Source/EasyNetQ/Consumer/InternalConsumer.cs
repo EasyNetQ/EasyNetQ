@@ -104,9 +104,9 @@ namespace EasyNetQ.Consumer
             IEventBus eventBus
         )
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
             this.configuration = configuration;
             this.connection = connection;

@@ -24,7 +24,7 @@ namespace EasyNetQ.Consumer
         /// <inheritdoc />
         public IHandlerRegistration Add<T>(IMessageHandler<T> handler)
         {
-            Preconditions.CheckNotNull(handler, "handler");
+            Preconditions.CheckNotNull(handler, nameof(handler));
 
             if (handlers.ContainsKey(typeof(T)))
             {

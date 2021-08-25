@@ -47,14 +47,14 @@ namespace EasyNetQ
             ICorrelationIdGenerationStrategy correlationIdGenerationStrategy
         )
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(advancedBus, "advancedBus");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(exchangeDeclareStrategy, "publishExchangeDeclareStrategy");
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, "messageDeliveryModeStrategy");
-            Preconditions.CheckNotNull(typeNameSerializer, "typeNameSerializer");
-            Preconditions.CheckNotNull(correlationIdGenerationStrategy, "correlationIdGenerationStrategy");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+            Preconditions.CheckNotNull(conventions, nameof(conventions));
+            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
+            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
+            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
+            Preconditions.CheckNotNull(correlationIdGenerationStrategy, nameof(correlationIdGenerationStrategy));
 
             this.configuration = configuration;
             this.advancedBus = advancedBus;
@@ -74,7 +74,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(request, "request");
+            Preconditions.CheckNotNull(request, nameof(request));
 
             var requestType = typeof(TRequest);
             var requestConfiguration = new RequestConfiguration(
@@ -108,8 +108,8 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(responder, "responder");
-            Preconditions.CheckNotNull(configure, "configure");
+            Preconditions.CheckNotNull(responder, nameof(responder));
+            Preconditions.CheckNotNull(configure, nameof(configure));
             // We're explicitly validating TResponse here because the type won't be used directly.
             // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");

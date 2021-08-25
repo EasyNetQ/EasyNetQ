@@ -46,9 +46,9 @@ namespace EasyNetQ
             ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
         )
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
-            Preconditions.CheckNotNull(connectionFactory, "connectionFactory");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+            Preconditions.CheckNotNull(connectionFactory, nameof(connectionFactory));
+            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
             this.configuration = configuration;
             this.connectionFactory = connectionFactory;

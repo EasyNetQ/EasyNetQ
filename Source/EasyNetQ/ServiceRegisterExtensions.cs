@@ -20,7 +20,7 @@ namespace EasyNetQ
         /// <param name="serviceRegister">The register</param>
         public static void RegisterDefaultServices(this IServiceRegister serviceRegister)
         {
-            Preconditions.CheckNotNull(serviceRegister, "container");
+            Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
 
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
             // default service registration

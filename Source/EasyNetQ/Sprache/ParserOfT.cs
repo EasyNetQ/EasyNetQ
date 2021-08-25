@@ -6,16 +6,16 @@ namespace EasyNetQ.Sprache
     {
         public static IResult<T> TryParse<T>(this Parser<T> parser, string input)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(input, "input");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(input, nameof(input));
 
             return parser(new Input(input));
         }
 
         public static T Parse<T>(this Parser<T> parser, string input)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(input, "input");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(input, nameof(input));
 
             var result = parser.TryParse(input);
 

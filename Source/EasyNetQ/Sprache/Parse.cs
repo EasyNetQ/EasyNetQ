@@ -33,8 +33,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<char> Char(Predicate<char> predicate, string description)
         {
-            Preconditions.CheckNotNull(predicate, "predicate");
-            Preconditions.CheckNotNull(description, "description");
+            Preconditions.CheckNotNull(predicate, nameof(predicate));
+            Preconditions.CheckNotNull(description, nameof(description));
 
             return i =>
             {
@@ -102,7 +102,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<IEnumerable<char>> String(string s)
         {
-            Preconditions.CheckNotNull(s, "s");
+            Preconditions.CheckNotNull(s, nameof(s));
 
             return s
                 .Select(Char)
@@ -118,7 +118,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<IEnumerable<char>> CaseInsensitiveString(string s)
         {
-            Preconditions.CheckNotNull(s, "s");
+            Preconditions.CheckNotNull(s, nameof(s));
 
             return s
                 .Select(CharCaseInsensitive)
@@ -137,8 +137,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<U> Then<T, U>(this Parser<T> first, Func<T, Parser<U>> second)
         {
-            Preconditions.CheckNotNull(first, "first");
-            Preconditions.CheckNotNull(second, "second");
+            Preconditions.CheckNotNull(first, nameof(first));
+            Preconditions.CheckNotNull(second, nameof(second));
 
             return i => first(i).IfSuccess(s => second(s.Result)(s.Remainder));
         }
@@ -152,7 +152,7 @@ namespace EasyNetQ.Sprache
         /// <remarks>Implemented imperatively to decrease stack usage.</remarks>
         public static Parser<IEnumerable<T>> Many<T>(this Parser<T> parser)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
 
             return i =>
             {
@@ -183,7 +183,7 @@ namespace EasyNetQ.Sprache
         /// <remarks>Implemented imperatively to decrease stack usage.</remarks>
         public static Parser<IEnumerable<T>> XMany<T>(this Parser<T> parser)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
 
             return parser.Many().Then(m => parser.Once().XOr(Return(m)));
         }
@@ -196,7 +196,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<IEnumerable<T>> AtLeastOnce<T>(this Parser<T> parser)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
 
             return parser.Once().Then(t1 => parser.Many().Select(ts => t1.Concat(ts)));
         }
@@ -209,7 +209,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> End<T>(this Parser<T> parser)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
 
             return i => parser(i).IfSuccess(s =>
                 s.Remainder.AtEnd
@@ -230,8 +230,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<U> Select<T, U>(this Parser<T> parser, Func<T, U> convert)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(convert, "convert");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(convert, nameof(convert));
 
             return parser.Then(t => Return(convert(t)));
         }
@@ -244,7 +244,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> Token<T>(this Parser<T> parser)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
 
             return from leading in WhiteSpace.Many()
                    from item in parser
@@ -260,7 +260,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> Ref<T>(Func<Parser<T>> reference)
         {
-            Preconditions.CheckNotNull(reference, "reference");
+            Preconditions.CheckNotNull(reference, nameof(reference));
 
             Parser<T> p = null;
 
@@ -300,8 +300,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> Or<T>(this Parser<T> first, Parser<T> second)
         {
-            Preconditions.CheckNotNull(first, "first");
-            Preconditions.CheckNotNull(second, "second");
+            Preconditions.CheckNotNull(first, nameof(first));
+            Preconditions.CheckNotNull(second, nameof(second));
 
             return i =>
             {
@@ -329,8 +329,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> Named<T>(this Parser<T> parser, string name)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(name, "name");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(name, nameof(name));
 
             return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] { name }) : f);
         }
@@ -345,8 +345,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> XOr<T>(this Parser<T> first, Parser<T> second)
         {
-            Preconditions.CheckNotNull(first, "first");
-            Preconditions.CheckNotNull(second, "second");
+            Preconditions.CheckNotNull(first, nameof(first));
+            Preconditions.CheckNotNull(second, nameof(second));
 
             return i =>
             {
@@ -378,7 +378,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<IEnumerable<T>> Once<T>(this Parser<T> parser)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
 
             return parser.Select(r => (IEnumerable<T>)new[] { r });
         }
@@ -392,8 +392,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<IEnumerable<T>> Concat<T>(this Parser<IEnumerable<T>> first, Parser<IEnumerable<T>> second)
         {
-            Preconditions.CheckNotNull(first, "first");
-            Preconditions.CheckNotNull(second, "second");
+            Preconditions.CheckNotNull(first, nameof(first));
+            Preconditions.CheckNotNull(second, nameof(second));
 
             return first.Then(f => second.Select(s => f.Concat(s)));
         }
@@ -419,7 +419,7 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<U> Return<T, U>(this Parser<T> parser, U value)
         {
-            Preconditions.CheckNotNull(parser, "parser");
+            Preconditions.CheckNotNull(parser, nameof(parser));
             return parser.Select(t => value);
         }
 
@@ -433,8 +433,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> Except<T, U>(this Parser<T> parser, Parser<U> except)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(except, "except");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(except, nameof(except));
 
             // Could be more like: except.Then(s => s.Fail("..")).XOr(parser)
             return i =>
@@ -469,8 +469,8 @@ namespace EasyNetQ.Sprache
         /// <returns></returns>
         public static Parser<T> Where<T>(this Parser<T> parser, Func<T, bool> predicate)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(predicate, "predicate");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(predicate, nameof(predicate));
 
             return i => parser(i).IfSuccess(s =>
                 predicate(s.Result)
@@ -495,9 +495,9 @@ namespace EasyNetQ.Sprache
             Func<T, Parser<U>> selector,
             Func<T, U, V> projector)
         {
-            Preconditions.CheckNotNull(parser, "parser");
-            Preconditions.CheckNotNull(selector, "selector");
-            Preconditions.CheckNotNull(projector, "projector");
+            Preconditions.CheckNotNull(parser, nameof(parser));
+            Preconditions.CheckNotNull(selector, nameof(selector));
+            Preconditions.CheckNotNull(projector, nameof(projector));
 
             return parser.Then(t => selector(t).Select(u => projector(t, u)));
         }
@@ -516,9 +516,9 @@ namespace EasyNetQ.Sprache
             Parser<T> operand,
             Func<TOp, T, T, T> apply)
         {
-            Preconditions.CheckNotNull(op, "op");
-            Preconditions.CheckNotNull(operand, "operand");
-            Preconditions.CheckNotNull(apply, "apply");
+            Preconditions.CheckNotNull(op, nameof(op));
+            Preconditions.CheckNotNull(operand, nameof(operand));
+            Preconditions.CheckNotNull(apply, nameof(apply));
             return operand.Then(first => ChainOperatorRest(first, op, operand, apply));
         }
 
@@ -528,9 +528,9 @@ namespace EasyNetQ.Sprache
             Parser<T> operand,
             Func<TOp, T, T, T> apply)
         {
-            Preconditions.CheckNotNull(op, "op");
-            Preconditions.CheckNotNull(operand, "operand");
-            Preconditions.CheckNotNull(apply, "apply");
+            Preconditions.CheckNotNull(op, nameof(op));
+            Preconditions.CheckNotNull(operand, nameof(operand));
+            Preconditions.CheckNotNull(apply, nameof(apply));
             return op.Then(opvalue =>
                     operand.Then(operandValue =>
                         ChainOperatorRest(apply(opvalue, firstOperand, operandValue), op, operand, apply)))
@@ -551,9 +551,9 @@ namespace EasyNetQ.Sprache
             Parser<T> operand,
             Func<TOp, T, T, T> apply)
         {
-            Preconditions.CheckNotNull(op, "op");
-            Preconditions.CheckNotNull(operand, "operand");
-            Preconditions.CheckNotNull(apply, "apply");
+            Preconditions.CheckNotNull(op, nameof(op));
+            Preconditions.CheckNotNull(operand, nameof(operand));
+            Preconditions.CheckNotNull(apply, nameof(apply));
             return operand.Then(first => ChainRightOperatorRest(first, op, operand, apply));
         }
 
@@ -563,9 +563,9 @@ namespace EasyNetQ.Sprache
             Parser<T> operand,
             Func<TOp, T, T, T> apply)
         {
-            Preconditions.CheckNotNull(op, "op");
-            Preconditions.CheckNotNull(operand, "operand");
-            Preconditions.CheckNotNull(apply, "apply");
+            Preconditions.CheckNotNull(op, nameof(op));
+            Preconditions.CheckNotNull(operand, nameof(operand));
+            Preconditions.CheckNotNull(apply, nameof(apply));
             return op.Then(opvalue =>
                     operand.Then(operandValue =>
                         ChainRightOperatorRest(operandValue, op, operand, apply)).Then(r =>
