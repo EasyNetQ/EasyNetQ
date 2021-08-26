@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ
+namespace EasyNetQ.Serialization.NewtonsoftJson
 {
     /// <summary>
     ///     JsonSerializer based on Newtonsoft.Json

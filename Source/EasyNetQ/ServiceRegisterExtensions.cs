@@ -28,7 +28,7 @@ namespace EasyNetQ
                 .Register<IConnectionStringParser>(
                     x => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
                 )
-                .Register<ISerializer>(_ => new JsonSerializer())
+                .Register<ISerializer, DefaultSerializer>()
                 .Register<IConventions, Conventions>()
                 .Register<IEventBus, EventBus>()
                 .Register<ITypeNameSerializer, DefaultTypeNameSerializer>()

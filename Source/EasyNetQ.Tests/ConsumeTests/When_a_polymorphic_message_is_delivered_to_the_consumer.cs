@@ -1,8 +1,8 @@
 // ReSharper disable InconsistentNaming
+using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using FluentAssertions;
-using RabbitMQ.Client.Framing;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

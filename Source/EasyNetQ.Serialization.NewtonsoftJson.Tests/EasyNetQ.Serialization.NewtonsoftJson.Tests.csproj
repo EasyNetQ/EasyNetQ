@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <Import Project="../Tests.props" />  
+  
+  <PropertyGroup>
+    <TargetFramework>net5</TargetFramework>
+  </PropertyGroup>  
+  
+  <ItemGroup>
+    <Compile Include="..\EasyNetQ.Tests\BasicProperties.cs" Link="BasicProperties.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,15 +1,19 @@
+using EasyNetQ.Tests;
 using FluentAssertions;
 using RabbitMQ.Client;
 // ReSharper disable InconsistentNaming
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Serialization.NewtonsoftJson.Tests
 {
     public class JsonSerializerTests
     {
+        public class MyMessage
+        {
+            public string Text { get; set; }
+        }
+
         private readonly ISerializer serializer;
 
         public JsonSerializerTests()

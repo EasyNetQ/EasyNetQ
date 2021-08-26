@@ -11,6 +11,7 @@ using NSubstitute;
 using RabbitMQ.Client;
 using System.Threading.Tasks;
 using Xunit;
+using EasyNetQ.Serialization.NewtonsoftJson;
 
 namespace EasyNetQ.Tests
 {
