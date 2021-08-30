@@ -11,13 +11,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Remove="Usage.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Usage.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
-    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
 </Project>
