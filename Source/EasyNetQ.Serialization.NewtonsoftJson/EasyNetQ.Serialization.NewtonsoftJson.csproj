@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\EasyNetQ\Internals\ReadOnlyMemoryStream.cs" Link="ReadOnlyMemoryStream.cs" />
     <Compile Include="..\EasyNetQ\Preconditions.cs" Link="Preconditions.cs" />
   </ItemGroup>
 
@@ -15,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.Abstractions\EasyNetQ.Abstractions.csproj" />
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
 
