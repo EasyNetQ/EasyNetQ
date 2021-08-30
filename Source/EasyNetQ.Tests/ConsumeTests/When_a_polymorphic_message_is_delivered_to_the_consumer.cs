@@ -1,7 +1,8 @@
+extern alias EasyNewtonsoftJson;
 // ReSharper disable InconsistentNaming
-using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using EasyNewtonsoftJson::EasyNetQ.Serialization.NewtonsoftJson;
 using FluentAssertions;
 using System;
 using System.Threading;

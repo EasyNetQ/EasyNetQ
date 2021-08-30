@@ -1,13 +1,14 @@
+extern alias EasyNewtonsoftJson;
 // ReSharper disable InconsistentNaming;
 
+using EasyNetQ.Consumer;
+using EasyNetQ.Tests.Mocking;
+using EasyNewtonsoftJson::EasyNetQ.Serialization.NewtonsoftJson;
+using NSubstitute;
+using RabbitMQ.Client;
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
-using EasyNetQ.Serialization.NewtonsoftJson;
-using EasyNetQ.Tests.Mocking;
-using NSubstitute;
-using RabbitMQ.Client;
 using Xunit;
 
 namespace EasyNetQ.Tests
