@@ -1,0 +1,24 @@
+namespace Castle.Windsor
+{
+    public static class EasyNetQWindsorContainerExtensions
+    {
+        public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, string connectionString) { }
+        public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+    }
+}
+namespace EasyNetQ.DI.Windsor
+{
+    public class WindsorAdapter : EasyNetQ.DI.IServiceRegister
+    {
+        public WindsorAdapter(Castle.Windsor.IWindsorContainer container) { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+    }
+}

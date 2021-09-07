@@ -1,0 +1,24 @@
+namespace EasyNetQ.DI.StructureMap
+{
+    public class StructureMapAdapter : EasyNetQ.DI.IServiceRegister
+    {
+        public StructureMapAdapter(StructureMap.IRegistry registry) { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+    }
+}
+namespace StructureMap
+{
+    public static class EasyNetQRegistryExtensions
+    {
+        public static StructureMap.IRegistry RegisterEasyNetQ(this StructureMap.IRegistry registry, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static StructureMap.IRegistry RegisterEasyNetQ(this StructureMap.IRegistry registry, string connectionString) { }
+        public static StructureMap.IRegistry RegisterEasyNetQ(this StructureMap.IRegistry registry, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static StructureMap.IRegistry RegisterEasyNetQ(this StructureMap.IRegistry registry, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+    }
+}

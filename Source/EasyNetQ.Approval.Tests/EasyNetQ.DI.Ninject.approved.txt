@@ -1,0 +1,24 @@
+namespace EasyNetQ.DI.Ninject
+{
+    public class NinjectAdapter : EasyNetQ.DI.IServiceRegister
+    {
+        public NinjectAdapter(Ninject.IKernel kernel) { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+    }
+}
+namespace Ninject
+{
+    public static class EasyNetQKernelExtensions
+    {
+        public static Ninject.IKernel RegisterEasyNetQ(this Ninject.IKernel kernel, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static Ninject.IKernel RegisterEasyNetQ(this Ninject.IKernel kernel, string connectionString) { }
+        public static Ninject.IKernel RegisterEasyNetQ(this Ninject.IKernel kernel, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static Ninject.IKernel RegisterEasyNetQ(this Ninject.IKernel kernel, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+    }
+}
