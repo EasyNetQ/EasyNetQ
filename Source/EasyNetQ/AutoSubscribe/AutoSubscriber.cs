@@ -134,31 +134,31 @@ namespace EasyNetQ.AutoSubscribe
             return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
         }
 
-        private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMesage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
-            where TMesage : class
-            where TConsumerAsync : class, IConsumeAsync<TMesage>
+        private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+            where TMessage : class
+            where TConsumerAsync : class, IConsumeAsync<TMessage>
         {
             var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
             var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
             var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
-            return Bus.PubSub.SubscribeAsync<TMesage>(
+            return Bus.PubSub.SubscribeAsync<TMessage>(
                 subscriptionId,
-                (m, c) => AutoSubscriberMessageDispatcher.DispatchAsync<TMesage, TConsumerAsync>(m, c),
+                (m, c) => AutoSubscriberMessageDispatcher.DispatchAsync<TMessage, TConsumerAsync>(m, c),
                 configureSubscriptionAction,
                 cancellationToken
             );
         }
 
-        private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMesage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
-            where TMesage : class
-            where TConsumer : class, IConsume<TMesage>
+        private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+            where TMessage : class
+            where TConsumer : class, IConsume<TMessage>
         {
             var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
             var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
             var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
-            var asyncDispatcher = TaskHelpers.FromAction<TMesage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMesage, TConsumer>(m, c));
+            var asyncDispatcher = TaskHelpers.FromAction<TMessage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMessage, TConsumer>(m, c));
 
             return Bus.PubSub.SubscribeAsync(
                 subscriptionId,
