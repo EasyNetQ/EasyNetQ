@@ -42,6 +42,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Microsoft", "Ea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.IntegrationTests", "EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj", "{FA531CDD-54D1-4AB8-A3D8-691AF0947435}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Approval.Tests", "EasyNetQ.Approval.Tests\EasyNetQ.Approval.Tests.csproj", "{1F989E41-364C-45BB-B9DB-9A14E8641E1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,10 @@ Global
 		{FA531CDD-54D1-4AB8-A3D8-691AF0947435}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA531CDD-54D1-4AB8-A3D8-691AF0947435}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA531CDD-54D1-4AB8-A3D8-691AF0947435}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F989E41-364C-45BB-B9DB-9A14E8641E1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F989E41-364C-45BB-B9DB-9A14E8641E1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F989E41-364C-45BB-B9DB-9A14E8641E1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F989E41-364C-45BB-B9DB-9A14E8641E1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
