@@ -1,0 +1,24 @@
+namespace EasyNetQ.DI.Microsoft
+{
+    public class ServiceCollectionAdapter : EasyNetQ.DI.IServiceRegister
+    {
+        public ServiceCollectionAdapter(Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection) { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+    }
+}
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class EasyNetQServiceCollectionExtensions
+    {
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection, string connectionString) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+    }
+}

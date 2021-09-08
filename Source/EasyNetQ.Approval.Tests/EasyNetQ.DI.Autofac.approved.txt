@@ -1,0 +1,24 @@
+namespace Autofac
+{
+    public static class EasyNetQContainerBuilderExtensions
+    {
+        public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, string connectionString) { }
+        public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+    }
+}
+namespace EasyNetQ.DI.Autofac
+{
+    public class AutofacAdapter : EasyNetQ.DI.IServiceRegister
+    {
+        public AutofacAdapter(Autofac.ContainerBuilder containerBuilder) { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+    }
+}
