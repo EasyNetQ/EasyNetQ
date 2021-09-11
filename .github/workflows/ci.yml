@@ -64,6 +64,11 @@ jobs:
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
         dotnet test --configuration Release --no-build
+            
+    - name: Approval Tests
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.ApprovalTests
+        dotnet test --configuration Release --no-build
 
   publish-to-nuget:
     name: Publish to NuGet
