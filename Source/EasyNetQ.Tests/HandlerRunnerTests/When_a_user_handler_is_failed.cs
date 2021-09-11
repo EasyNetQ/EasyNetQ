@@ -12,11 +12,11 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
 {
     public class When_a_user_handler_is_failed
     {
-        private readonly MessageProperties messageProperties = new MessageProperties
+        private readonly MessageProperties messageProperties = new()
         {
             CorrelationId = "correlation_id"
         };
-        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 123, false, "exchange", "routingKey", "queue");
+        private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 123, false, "exchange", "routingKey", "queue");
         private readonly byte[] messageBody = new byte[0];
 
         private readonly IConsumerErrorStrategy consumerErrorStrategy;

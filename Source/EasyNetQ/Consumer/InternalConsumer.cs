@@ -82,9 +82,9 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class InternalConsumer : IInternalConsumer
     {
-        private readonly Dictionary<string, AsyncBasicConsumer> consumers = new Dictionary<string, AsyncBasicConsumer>();
+        private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
         private readonly ILog logger = LogProvider.For<InternalConsumer>();
-        private readonly AsyncLock mutex = new AsyncLock();
+        private readonly AsyncLock mutex = new();
 
         private readonly ConsumerConfiguration configuration;
         private readonly IPersistentConnection connection;

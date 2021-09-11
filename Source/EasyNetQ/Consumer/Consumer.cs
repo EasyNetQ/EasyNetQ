@@ -100,7 +100,7 @@ namespace EasyNetQ.Consumer
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IDisposable[] disposables;
-        private readonly object mutex = new object();
+        private readonly object mutex = new();
 
         private volatile IInternalConsumer consumer;
         private volatile bool disposed;

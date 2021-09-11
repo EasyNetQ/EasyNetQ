@@ -13,7 +13,7 @@ namespace EasyNetQ
     /// </summary>
     public static class NonGenericPubSubExtensions
     {
-        private static readonly ConcurrentDictionary<Type, NonGenericPublishDelegate> PublishDelegates = new ConcurrentDictionary<Type, NonGenericPublishDelegate>();
+        private static readonly ConcurrentDictionary<Type, NonGenericPublishDelegate> PublishDelegates = new();
 
         /// <summary>
         /// Publishes a message with a topic.

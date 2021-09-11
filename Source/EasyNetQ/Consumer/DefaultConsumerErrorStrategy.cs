@@ -29,7 +29,7 @@ namespace EasyNetQ.Consumer
         private readonly IPersistentConnection connection;
         private readonly IConventions conventions;
         private readonly IErrorMessageSerializer errorMessageSerializer;
-        private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new ConcurrentDictionary<string, object>();
+        private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new();
         private readonly ILog logger = LogProvider.For<DefaultConsumerErrorStrategy>();
         private readonly ISerializer serializer;
         private readonly ITypeNameSerializer typeNameSerializer;
