@@ -8,7 +8,7 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
-    public class DefaultJsonSerializer : ISerializer
+    public sealed class DefaultJsonSerializer : ISerializer
     {
         private static readonly Encoding Encoding = new UTF8Encoding(false);
 
