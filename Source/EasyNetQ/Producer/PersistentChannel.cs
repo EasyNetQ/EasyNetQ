@@ -18,9 +18,9 @@ namespace EasyNetQ.Producer
         private const int MaxRetryTimeoutMs = 5000;
         private readonly IPersistentConnection connection;
 
-        private readonly CancellationTokenSource disposeCts = new CancellationTokenSource();
+        private readonly CancellationTokenSource disposeCts = new();
         private readonly IEventBus eventBus;
-        private readonly AsyncLock mutex = new AsyncLock();
+        private readonly AsyncLock mutex = new();
         private readonly PersistentChannelOptions options;
 
         private volatile IModel initializedChannel;
@@ -205,10 +205,10 @@ namespace EasyNetQ.Producer
 
         private readonly struct ExceptionVerdict
         {
-            public static ExceptionVerdict Suppress { get; } = new ExceptionVerdict(false, false);
-            public static ExceptionVerdict SuppressAndCloseChannel { get; } = new ExceptionVerdict(false, true);
-            public static ExceptionVerdict Throw { get; } = new ExceptionVerdict(true, false);
-            public static ExceptionVerdict ThrowAndCloseChannel { get; } = new ExceptionVerdict(true, true);
+            public static ExceptionVerdict Suppress { get; } = new(false, false);
+            public static ExceptionVerdict SuppressAndCloseChannel { get; } = new(false, true);
+            public static ExceptionVerdict Throw { get; } = new(true, false);
+            public static ExceptionVerdict ThrowAndCloseChannel { get; } = new(true, true);
 
             private ExceptionVerdict(bool rethrow, bool closeChannel)
             {

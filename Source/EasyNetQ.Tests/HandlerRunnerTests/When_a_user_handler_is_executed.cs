@@ -53,12 +53,12 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         private MessageProperties deliveredProperties;
         private MessageReceivedInfo deliveredInfo;
 
-        private readonly MessageProperties messageProperties = new MessageProperties
+        private readonly MessageProperties messageProperties = new()
         {
             CorrelationId = "correlation_id"
         };
 
-        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 42, false, "exchange", "routingKey", "queue");
+        private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 42, false, "exchange", "routingKey", "queue");
         private readonly byte[] messageBody = new byte[0];
 
         private readonly IModel channel;

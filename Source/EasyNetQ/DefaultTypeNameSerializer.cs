@@ -10,8 +10,8 @@ namespace EasyNetQ
     /// <inheritdoc />
     public class DefaultTypeNameSerializer : ITypeNameSerializer
     {
-        private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();
-        private readonly ConcurrentDictionary<string, Type> deSerializedTypes = new ConcurrentDictionary<string, Type>();
+        private readonly ConcurrentDictionary<Type, string> serializedTypes = new();
+        private readonly ConcurrentDictionary<string, Type> deSerializedTypes = new();
 
         /// <inheritdoc />
         public string Serialize(Type type)

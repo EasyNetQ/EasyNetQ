@@ -11,12 +11,12 @@ namespace EasyNetQ.Tests.Mocking
     {
         private readonly IBasicProperties basicProperties = new BasicProperties();
         private readonly IBus bus;
-        private readonly Stack<IModel> channelPool = new Stack<IModel>();
-        private readonly List<IModel> channels = new List<IModel>();
+        private readonly Stack<IModel> channelPool = new();
+        private readonly List<IModel> channels = new();
         private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
         private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
-        private readonly List<string> consumerQueueNames = new List<string>();
-        private readonly List<AsyncDefaultBasicConsumer> consumers = new List<AsyncDefaultBasicConsumer>();
+        private readonly List<string> consumerQueueNames = new();
+        private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
         public MockBuilder() : this(register => { })
         {

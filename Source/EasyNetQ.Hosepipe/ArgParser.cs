@@ -6,7 +6,7 @@ namespace EasyNetQ.Hosepipe
 {
     public class ArgParser
     {
-        private readonly Regex argRegex = new Regex(@"([a-z]{1,2})\:(.*)");
+        private readonly Regex argRegex = new(@"([a-z]{1,2})\:(.*)");
 
         public Arguments Parse(string[] args)
         {

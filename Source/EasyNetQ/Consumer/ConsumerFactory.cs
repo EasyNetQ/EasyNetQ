@@ -13,7 +13,7 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class ConsumerFactory : IConsumerFactory
     {
-        private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new ConcurrentDictionary<Guid, IConsumer>();
+        private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new();
         private readonly IEventBus eventBus;
         private readonly IInternalConsumerFactory internalConsumerFactory;
         private readonly IDisposable unsubscribeFromStoppedConsumerEvent;

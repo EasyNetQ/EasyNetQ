@@ -8,10 +8,10 @@ namespace EasyNetQ.IntegrationTests.Utils
 {
     public class MessagesSink
     {
-        private readonly TaskCompletionSource<object> allMessagedReceived = new TaskCompletionSource<object>();
-        private readonly object locker = new object();
+        private readonly TaskCompletionSource<object> allMessagedReceived = new();
+        private readonly object locker = new();
         private readonly int maxCount;
-        private readonly List<Message> receivedMessages = new List<Message>();
+        private readonly List<Message> receivedMessages = new();
 
         public MessagesSink(int maxCount)
         {

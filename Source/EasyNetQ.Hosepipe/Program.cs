@@ -18,7 +18,7 @@ namespace EasyNetQ.Hosepipe
         private readonly IErrorRetry errorRetry;
         private readonly IConventions conventions;
 
-        private static readonly StringBuilder Results = new StringBuilder();
+        private static readonly StringBuilder Results = new();
         private static bool succeeded = true;
         private static readonly Func<string, Action> Message = m => () =>
         {

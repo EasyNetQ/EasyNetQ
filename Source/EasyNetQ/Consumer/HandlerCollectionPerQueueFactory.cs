@@ -5,7 +5,7 @@ namespace EasyNetQ.Consumer
 {
     public class HandlerCollectionPerQueueFactory : IHandlerCollectionFactory
     {
-        private readonly ConcurrentDictionary<string, IHandlerCollection> handlerCollections = new ConcurrentDictionary<string, IHandlerCollection>();
+        private readonly ConcurrentDictionary<string, IHandlerCollection> handlerCollections = new();
 
         /// <inheritdoc />
         public IHandlerCollection CreateHandlerCollection(Queue queue)

@@ -14,8 +14,7 @@ namespace EasyNetQ
     /// </summary>
     public static class NonGenericRpcExtensions
     {
-        private static readonly ConcurrentDictionary<Tuple<Type, Type>, NonGenericRequestDelegate> RequestDelegates
-            = new ConcurrentDictionary<Tuple<Type, Type>, NonGenericRequestDelegate>();
+        private static readonly ConcurrentDictionary<Tuple<Type, Type>, NonGenericRequestDelegate> RequestDelegates = new();
 
         /// <summary>
         ///     Makes an RPC style request

@@ -13,8 +13,7 @@ namespace EasyNetQ
     /// </summary>
     public static class NonGenericSchedulerExtensions
     {
-        private static readonly ConcurrentDictionary<Type, NonGenericFuturePublishDelegate> FuturePublishDelegates
-            = new ConcurrentDictionary<Type, NonGenericFuturePublishDelegate>();
+        private static readonly ConcurrentDictionary<Type, NonGenericFuturePublishDelegate> FuturePublishDelegates = new();
 
         /// <summary>
         /// Schedule a message to be published at some time in the future
