@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using RabbitMQ.Client;
 // ReSharper disable InconsistentNaming
 using System.Collections.Generic;
