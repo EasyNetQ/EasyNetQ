@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace EasyNetQ.Interception
@@ -6,7 +6,7 @@ namespace EasyNetQ.Interception
     /// <inheritdoc />
     public class CompositeInterceptor : IProduceConsumeInterceptor
     {
-        private readonly List<IProduceConsumeInterceptor> interceptors = new List<IProduceConsumeInterceptor>();
+        private readonly List<IProduceConsumeInterceptor> interceptors = new();
 
         /// <inheritdoc />
         public ProducedMessage OnProduce(in ProducedMessage message)

@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests.ConnectionString
 {
     public class AmqpConnectionStringParserTests
     {
-        private readonly AmqpConnectionStringParser connectionStringParser = new AmqpConnectionStringParser();
+        private readonly AmqpConnectionStringParser connectionStringParser = new();
 
         [Theory]
         [MemberData(nameof(AppendixAExamples))]

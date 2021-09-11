@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Threading;
@@ -13,7 +13,7 @@ namespace EasyNetQ
     /// </summary>
     public static class NonGenericPubSubExtensions
     {
-        private static readonly ConcurrentDictionary<Type, NonGenericPublishDelegate> PublishDelegates = new ConcurrentDictionary<Type, NonGenericPublishDelegate>();
+        private static readonly ConcurrentDictionary<Type, NonGenericPublishDelegate> PublishDelegates = new();
 
         /// <summary>
         /// Publishes a message with a topic.

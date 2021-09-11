@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
         private class ServiceRegisterStub : IServiceRegister
         {
-            private readonly Dictionary<Type, Type> services = new Dictionary<Type, Type>();
+            private readonly Dictionary<Type, Type> services = new();
 
             public void AssertServiceRegistered<TService, TImplementation>()
             {

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
 
@@ -156,6 +156,6 @@ namespace EasyNetQ
         /// <summary>
         ///     TSL configuration of the host
         /// </summary>
-        public SslOption Ssl { get; } = new SslOption();
+        public SslOption Ssl { get; } = new();
     }
 }

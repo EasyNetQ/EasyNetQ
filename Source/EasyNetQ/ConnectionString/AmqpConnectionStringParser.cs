@@ -15,7 +15,7 @@ namespace EasyNetQ.ConnectionString
     {
         private static readonly IReadOnlyCollection<string> SupportedSchemes = new[] { "amqp", "amqps" };
 
-        private static readonly List<UpdateConfiguration> Parsers = new List<UpdateConfiguration>
+        private static readonly List<UpdateConfiguration> Parsers = new()
         {
             BuildKeyValueParser("requestedHeartbeat", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.RequestedHeartbeat),
             BuildKeyValueParser("prefetchCount", ushort.Parse, c => c.PrefetchCount),

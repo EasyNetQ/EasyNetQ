@@ -28,7 +28,7 @@ namespace EasyNetQ
     /// <inheritdoc />
     public class PersistentConnection : IPersistentConnection
     {
-        private readonly object mutex = new object();
+        private readonly object mutex = new();
         private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;

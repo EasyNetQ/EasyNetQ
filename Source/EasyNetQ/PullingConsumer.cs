@@ -45,7 +45,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Represents a result when no message is available
         /// </summary>
-        public static PullResult NotAvailable { get; } = new PullResult(false, 0, null, null, null, null);
+        public static PullResult NotAvailable { get; } = new(false, 0, null, null, null, null);
 
         /// <summary>
         ///     Represents a result when a message is available
@@ -163,7 +163,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Represents a result when no message is available
         /// </summary>
-        public static PullResult<T> NotAvailable { get; } = new PullResult<T>(false, 0, null, null);
+        public static PullResult<T> NotAvailable { get; } = new(false, 0, null, null);
 
         /// <summary>
         ///     Represents a result when a message is available

@@ -1,4 +1,4 @@
-using EasyNetQ.Logging.LogProviders;
+﻿using EasyNetQ.Logging.LogProviders;
 using System;
 using System.Collections.Generic;
 
@@ -6,10 +6,10 @@ namespace EasyNetQ.Logging
 {
     public class ConsoleLogProvider : ILogProvider
     {
-        private static readonly object SyncRoot = new object();
+        private static readonly object SyncRoot = new();
 
-        private static readonly Dictionary<LogLevel, ConsoleColor> Colors = new Dictionary<LogLevel, ConsoleColor>
-            {
+        private static readonly Dictionary<LogLevel, ConsoleColor> Colors = new()
+        {
                 { LogLevel.Fatal, ConsoleColor.Red },
                 { LogLevel.Error, ConsoleColor.Yellow },
                 { LogLevel.Warn, ConsoleColor.Magenta },
@@ -18,7 +18,7 @@ namespace EasyNetQ.Logging
                 { LogLevel.Trace, ConsoleColor.DarkGray },
             };
 
-        public static ConsoleLogProvider Instance = new ConsoleLogProvider();
+        public static ConsoleLogProvider Instance = new();
 
         private ConsoleLogProvider()
         {

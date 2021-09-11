@@ -27,13 +27,11 @@ namespace EasyNetQ
 
         protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
-        private readonly ConcurrentDictionary<string, ResponseAction> responseActions =
-            new ConcurrentDictionary<string, ResponseAction>();
+        private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new();
 
-        private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions =
-            new ConcurrentDictionary<RpcKey, ResponseSubscription>();
+        private readonly ConcurrentDictionary<RpcKey, ResponseSubscription> responseSubscriptions = new();
 
-        private readonly AsyncLock responseSubscriptionsLock = new AsyncLock();
+        private readonly AsyncLock responseSubscriptionsLock = new();
         private readonly ITypeNameSerializer typeNameSerializer;
 
         public DefaultRpc(

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 
 namespace EasyNetQ
@@ -9,7 +9,7 @@ namespace EasyNetQ
     /// </summary>
     public static class MessageFactory
     {
-        private static readonly ConcurrentDictionary<Type, Type> genericMessageTypesMap = new ConcurrentDictionary<Type, Type>();
+        private static readonly ConcurrentDictionary<Type, Type> genericMessageTypesMap = new();
 
         public static IMessage CreateInstance(Type messageType, object body)
         {

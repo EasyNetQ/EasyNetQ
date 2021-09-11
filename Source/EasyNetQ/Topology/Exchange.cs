@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EasyNetQ.Topology
 {
@@ -10,7 +10,7 @@ namespace EasyNetQ.Topology
         /// <summary>
         ///     Returns the default exchange
         /// </summary>
-        public static Exchange Default { get; } = new Exchange("");
+        public static Exchange Default { get; } = new("");
 
         /// <summary>
         ///     Creates Exchange

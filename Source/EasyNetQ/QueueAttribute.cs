@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 
 namespace EasyNetQ
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
     public class QueueAttribute : Attribute
     {
-        internal static readonly QueueAttribute Default = new QueueAttribute(null);
+        internal static readonly QueueAttribute Default = new(null);
 
         public QueueAttribute(string queueName)
         {

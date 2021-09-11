@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Threading;
@@ -14,8 +14,7 @@ namespace EasyNetQ
     /// </summary>
     public static class NonGenericSendReceiveExtensions
     {
-        private static readonly ConcurrentDictionary<Type, NonGenericSendDelegate> SendDelegates
-            = new ConcurrentDictionary<Type, NonGenericSendDelegate>();
+        private static readonly ConcurrentDictionary<Type, NonGenericSendDelegate> SendDelegates = new();
 
 
         /// <summary>

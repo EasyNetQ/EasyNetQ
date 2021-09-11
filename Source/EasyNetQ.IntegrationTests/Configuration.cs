@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace EasyNetQ.IntegrationTests
             OSPlatform.OSX
         };
 
-        private static readonly Lazy<Configuration> LazyInstance = new Lazy<Configuration>(() => new Configuration());
+        private static readonly Lazy<Configuration> LazyInstance = new(() => new Configuration());
         private readonly string dockerHttpApiUri;
         private readonly Dictionary<OSPlatform, IConfigurationSection> osSpecificSettings;
         private readonly string rabbitMqHostName;
