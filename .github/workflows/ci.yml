@@ -33,7 +33,7 @@ jobs:
 
     - name: Install & run dotnet-format
       run: |
-        dotnet tool install -g dotnet-format --version 5.0.163101 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json
+        dotnet tool install -g dotnet-format
         dotnet format ./Source/EasyNetQ.sln --check
 
     - name: Patch docker connection string
