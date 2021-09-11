@@ -2,12 +2,13 @@ using System;
 using System.Buffers;
 using System.IO;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
-    public class JsonSerializer : ISerializer
+    public class DefaultJsonSerializer : ISerializer
     {
         private static readonly Encoding Encoding = new UTF8Encoding(false);
 
@@ -21,18 +22,25 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates JsonSerializer
         /// </summary>
-        public JsonSerializer()
+        public DefaultJsonSerializer()
         {
-            var jsonSerializerSettingsType = FindType("Newtonsoft.Json.JsonSerializerSettings", "Newtonsoft.Json");
-            var typeNameHandlingType = FindType("Newtonsoft.Json.TypeNameHandling", "Newtonsoft.Json");
-            var jsonSerializerType = FindType("Newtonsoft.Json.JsonSerializer", "Newtonsoft.Json");
-            var jsonTextWriterType = FindType("Newtonsoft.Json.JsonTextWriter", "Newtonsoft.Json");
-            var jsonTextReaderType = FindType("Newtonsoft.Json.JsonTextReader", "Newtonsoft.Json");
+            var jsonSerializerType = TryGetType("Newtonsoft.Json.JsonSerializer", "Newtonsoft.Json");
+            if (jsonSerializerType == null)
+            {
+                throw new InvalidOperationException(
+                    "Newtonsoft.Json is not found. Please reference it or add one of EasyNetQ.Serialization.* packages"
+                );
+            }
+
+            var jsonSerializerSettingsType = GetType("Newtonsoft.Json.JsonSerializerSettings", "Newtonsoft.Json");
+            var typeNameHandlingType = GetType("Newtonsoft.Json.TypeNameHandling", "Newtonsoft.Json");
+            var jsonTextWriterType = GetType("Newtonsoft.Json.JsonTextWriter", "Newtonsoft.Json");
+            var jsonTextReaderType = GetType("Newtonsoft.Json.JsonTextReader", "Newtonsoft.Json");
 
             var jsonSerializerSettings = Activator.CreateInstance(jsonSerializerSettingsType);
-            jsonSerializerSettingsType.GetProperty("TypeNameHandling")!
+            GetProperty(jsonSerializerSettingsType, "TypeNameHandling")
                 .SetValue(jsonSerializerSettings, Enum.Parse(typeNameHandlingType, "Auto", false));
-            jsonSerializer = jsonSerializerType.GetMethod("Create", new[] { jsonSerializerSettingsType })!
+            jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] { jsonSerializerSettingsType })
                 .Invoke(null, new[] { jsonSerializerSettings });
 
             {
@@ -46,17 +54,17 @@ namespace EasyNetQ
                         Expression.Assign(
                             jsonTextWriterParameter,
                             Expression.New(
-                                jsonTextWriterType!.GetConstructor(new[] { typeof(StreamWriter) })!,
+                                GetConstructor(jsonTextWriterType, new[] { typeof(StreamWriter) }),
                                 streamWriterParameter
                             )
                         ),
                         Expression.Assign(
                             Expression.MakeMemberAccess(
-                                jsonTextWriterParameter, jsonTextWriterType.GetProperty("Formatting")!
+                                jsonTextWriterParameter, GetProperty(jsonTextWriterType, "Formatting")
                             ),
                             Expression.MakeMemberAccess(
                                 Expression.Convert(jsonSerializerParameter, jsonSerializerType),
-                                jsonSerializerType.GetProperty("Formatting")!
+                                GetProperty(jsonSerializerType, "Formatting")
                             )
                         ),
                         jsonTextWriterParameter
@@ -75,7 +83,11 @@ namespace EasyNetQ
                 var serializeLambda = Expression.Lambda<Action<object, object, object, Type>>(
                     Expression.Call(
                         Expression.Convert(jsonSerializerParameter, jsonSerializerType),
-                        jsonSerializerType.GetMethod("Serialize", new[] { jsonTextWriterType, typeof(object), typeof(Type) })!,
+                        GetMethod(
+                            jsonSerializerType,
+                            "Serialize",
+                            new[] { jsonTextWriterType, typeof(object), typeof(Type) }
+                        )!,
                         Expression.Convert(jsonTextWriterParameter, jsonTextWriterType),
                         messageParameter,
                         messageTypeParameter
@@ -92,8 +104,7 @@ namespace EasyNetQ
                 var streamReaderParameter = Expression.Parameter(typeof(StreamReader), "streamReader");
                 var createJsonReaderLambda = Expression.Lambda<Func<StreamReader, IDisposable>>(
                     Expression.New(
-                        jsonTextReaderType.GetConstructor(new[] { typeof(StreamReader) })!,
-                        streamReaderParameter
+                        GetConstructor(jsonTextReaderType, new[] { typeof(StreamReader) }), streamReaderParameter
                     ),
                     streamReaderParameter
                 );
@@ -107,8 +118,8 @@ namespace EasyNetQ
                 var serializeLambda = Expression.Lambda<Func<object, object, Type, object>>(
                     Expression.Call(
                         Expression.Convert(jsonSerializerParameter, jsonSerializerType),
-                        jsonSerializerType.GetMethod("Deserialize", new[] { jsonTextReaderType, typeof(Type) })!,
-                        Expression.Convert(jsonTextReaderParameter, jsonTextReaderType!),
+                        GetMethod(jsonSerializerType, "Deserialize", new[] { jsonTextReaderType, typeof(Type) }),
+                        Expression.Convert(jsonTextReaderParameter, jsonTextReaderType),
                         messageTypeParameter
                     ),
                     jsonSerializerParameter,
@@ -143,9 +154,33 @@ namespace EasyNetQ
             return deserialize(jsonSerializer, reader, messageType);
         }
 
-        private static Type FindType(string typeName, string assemblyName)
+        private static Type GetType(string typeName, string assemblyName)
+        {
+            return TryGetType(typeName, assemblyName)
+                   ?? throw new InvalidOperationException($"Type {typeName} has not been found in {assemblyName}");
+        }
+
+        private static Type TryGetType(string typeName, string assemblyName)
         {
             return Type.GetType($"{typeName}, {assemblyName}") ?? Type.GetType(typeName);
+        }
+
+        private static MethodInfo GetMethod(Type type, string name, Type[] types)
+        {
+            return type.GetMethod(name, types)
+                   ?? throw new InvalidOperationException($"Type {type} has no method {name} with parameters {types}");
+        }
+
+        private static PropertyInfo GetProperty(Type type, string name)
+        {
+            return type.GetProperty(name)
+                   ?? throw new InvalidOperationException($"Type {type} has no property {name}");
+        }
+
+        private static ConstructorInfo GetConstructor(Type type, Type[] types)
+        {
+            return type.GetConstructor(types)
+                   ?? throw new InvalidOperationException($"Type {type} has no constructor with parameters {types}");
         }
     }
 }

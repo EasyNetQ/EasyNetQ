@@ -28,7 +28,7 @@ namespace EasyNetQ.Tests
 
             errorStrategy = new DefaultConsumerErrorStrategy(
                 connection,
-                new JsonSerializer(),
+                new DefaultJsonSerializer(),
                 customConventions,
                 new DefaultTypeNameSerializer(),
                 new DefaultErrorMessageSerializer(),
