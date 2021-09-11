@@ -1,9 +1,7 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using RabbitMQ.Client;
 // ReSharper disable InconsistentNaming
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace EasyNetQ.Tests
