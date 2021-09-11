@@ -13,8 +13,8 @@ namespace EasyNetQ.Internals
     /// </summary>
     public sealed class AsyncCache<TKey, TValue> : IDisposable
     {
-        private readonly AsyncLock mutex = new AsyncLock();
-        private readonly ConcurrentDictionary<TKey, Task<TValue>> storage = new ConcurrentDictionary<TKey, Task<TValue>>();
+        private readonly AsyncLock mutex = new();
+        private readonly ConcurrentDictionary<TKey, Task<TValue>> storage = new();
         private readonly Func<TKey, CancellationToken, Task<TValue>> valueFactory;
 
         /// <summary>

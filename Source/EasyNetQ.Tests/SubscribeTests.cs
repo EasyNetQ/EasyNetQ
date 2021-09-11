@@ -302,7 +302,7 @@ namespace EasyNetQ.Tests
         private const string correlationId = "the_correlation_id";
         private const string consumerTag = "the_consumer_tag";
         private const ulong deliveryTag = 123;
-        private readonly Exception originalException = new Exception("Some exception message");
+        private readonly Exception originalException = new("Some exception message");
 
         private readonly MyMessage originalMessage;
         private ConsumerExecutionContext basicDeliverEventArgs;

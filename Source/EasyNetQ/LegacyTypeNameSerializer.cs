@@ -7,7 +7,7 @@ namespace EasyNetQ
     /// <inheritdoc />
     public class LegacyTypeNameSerializer : ITypeNameSerializer
     {
-        private readonly ConcurrentDictionary<string, Type> deserializedTypes = new ConcurrentDictionary<string, Type>();
+        private readonly ConcurrentDictionary<string, Type> deserializedTypes = new();
 
         /// <inheritdoc />
         public Type DeSerialize(string typeName)
@@ -34,7 +34,7 @@ namespace EasyNetQ
             });
         }
 
-        private readonly ConcurrentDictionary<Type, string> serializedTypes = new ConcurrentDictionary<Type, string>();
+        private readonly ConcurrentDictionary<Type, string> serializedTypes = new();
 
         /// <inheritdoc />
         public string Serialize(Type type)

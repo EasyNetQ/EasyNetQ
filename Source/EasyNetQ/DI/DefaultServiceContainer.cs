@@ -5,7 +5,7 @@ namespace EasyNetQ.DI
     /// <inheritdoc />
     public class DefaultServiceContainer : IServiceRegister, IDisposable
     {
-        private readonly LightInject.ServiceContainer container = new LightInject.ServiceContainer(c => c.EnablePropertyInjection = false);
+        private readonly LightInject.ServiceContainer container = new(c => c.EnablePropertyInjection = false);
 
         /// <summary>
         ///     Creates DefaultServiceContainer

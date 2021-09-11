@@ -12,8 +12,8 @@ namespace EasyNetQ.Internals
     /// </summary>
     public sealed class AsyncCountdownEvent : IDisposable
     {
-        private readonly object mutex = new object();
-        private readonly Queue<TaskCompletionSource<bool>> waiters = new Queue<TaskCompletionSource<bool>>();
+        private readonly object mutex = new();
+        private readonly Queue<TaskCompletionSource<bool>> waiters = new();
         private long count;
 
         /// <inheritdoc />

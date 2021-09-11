@@ -7,7 +7,7 @@ namespace EasyNetQ.Hosepipe
 {
     public class FileMessageWriter : IMessageWriter
     {
-        private static readonly Regex InvalidCharRegex = new Regex(@"[\\\/:\*\?\""\<\>|]", RegexOptions.Compiled);
+        private static readonly Regex InvalidCharRegex = new(@"[\\\/:\*\?\""\<\>|]", RegexOptions.Compiled);
 
         public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
         {

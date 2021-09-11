@@ -29,7 +29,7 @@ namespace EasyNetQ
     /// <inheritdoc />
     public sealed class EventBus : IEventBus
     {
-        private readonly ConcurrentDictionary<Type, object> subscriptions = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, object> subscriptions = new();
 
         /// <inheritdoc />
         public void Publish<TEvent>(TEvent @event)
@@ -51,8 +51,8 @@ namespace EasyNetQ
         private sealed class Handlers<TEvent>
         {
             private readonly ILog log = LogProvider.For<Handlers<TEvent>>();
-            private readonly object mutex = new object();
-            private volatile List<Action<TEvent>> handlers = new List<Action<TEvent>>();
+            private readonly object mutex = new();
+            private volatile List<Action<TEvent>> handlers = new();
 
             public void Add(Action<TEvent> handler)
             {

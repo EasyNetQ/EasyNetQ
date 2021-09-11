@@ -14,8 +14,7 @@ namespace EasyNetQ
     /// </summary>
     public static class NonGenericSendReceiveExtensions
     {
-        private static readonly ConcurrentDictionary<Type, NonGenericSendDelegate> SendDelegates
-            = new ConcurrentDictionary<Type, NonGenericSendDelegate>();
+        private static readonly ConcurrentDictionary<Type, NonGenericSendDelegate> SendDelegates = new();
 
 
         /// <summary>

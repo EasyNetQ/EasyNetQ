@@ -13,7 +13,7 @@ namespace EasyNetQ
     {
         private static readonly Encoding Encoding = new UTF8Encoding(false);
         private static readonly Newtonsoft.Json.JsonSerializerSettings DefaultSerializerSettings =
-            new Newtonsoft.Json.JsonSerializerSettings
+            new()
             {
                 TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto
             };
@@ -67,7 +67,7 @@ namespace EasyNetQ
 
         private class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
         {
-            public static JsonSerializerArrayPool<T> Instance { get; } = new JsonSerializerArrayPool<T>();
+            public static JsonSerializerArrayPool<T> Instance { get; } = new();
 
             public T[] Rent(int minimumLength) => ArrayPool<T>.Shared.Rent(minimumLength);
 

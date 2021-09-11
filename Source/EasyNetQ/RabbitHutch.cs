@@ -98,7 +98,7 @@ namespace EasyNetQ
             {
                 Hosts = new List<HostConfiguration>
                     {
-                        new HostConfiguration { Host = hostName, Port = hostPort }
+                        new() { Host = hostName, Port = hostPort }
                     },
                 Port = hostPort,
                 VirtualHost = virtualHost,

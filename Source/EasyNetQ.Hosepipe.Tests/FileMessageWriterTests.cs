@@ -34,9 +34,9 @@ namespace EasyNetQ.Hosepipe.Tests
             var writer = new FileMessageWriter();
             var messages = new List<HosepipeMessage>
             {
-                new HosepipeMessage("This is message one", properties, info),
-                new HosepipeMessage("This is message two", properties, info),
-                new HosepipeMessage("This is message three", properties, info)
+                new("This is message one", properties, info),
+                new("This is message two", properties, info),
+                new("This is message three", properties, info)
             };
 
             var parameters = new QueueParameters

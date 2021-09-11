@@ -13,9 +13,9 @@ namespace EasyNetQ.Internals
     /// </summary>
     public sealed class AsyncQueue<T> : IDisposable
     {
-        private readonly Queue<T> elements = new Queue<T>();
-        private readonly object mutex = new object();
-        private readonly Queue<TaskCompletionSource<T>> waiters = new Queue<TaskCompletionSource<T>>();
+        private readonly Queue<T> elements = new();
+        private readonly object mutex = new();
+        private readonly Queue<TaskCompletionSource<T>> waiters = new();
 
         /// <summary>
         ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to

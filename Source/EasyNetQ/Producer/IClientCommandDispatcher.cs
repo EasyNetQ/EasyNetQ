@@ -13,17 +13,17 @@ namespace EasyNetQ.Producer
         /// <summary>
         ///     Default options: mostly for topology operations
         /// </summary>
-        public static readonly ChannelDispatchOptions Default = new ChannelDispatchOptions("Default");
+        public static readonly ChannelDispatchOptions Default = new("Default");
 
         /// <summary>
         ///     Options for publish without confirms
         /// </summary>
-        public static readonly ChannelDispatchOptions Publish = new ChannelDispatchOptions("Publish");
+        public static readonly ChannelDispatchOptions Publish = new("Publish");
 
         /// <summary>
         ///     Options for publish confirms
         /// </summary>
-        public static readonly ChannelDispatchOptions PublishWithConfirms = new ChannelDispatchOptions("PublishWithConfirms", true);
+        public static readonly ChannelDispatchOptions PublishWithConfirms = new("PublishWithConfirms", true);
 
         /// <summary>
         /// Creates ChannelDispatchOptions
