@@ -42,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.DI.Microsoft", "Ea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.IntegrationTests", "EasyNetQ.IntegrationTests\EasyNetQ.IntegrationTests.csproj", "{FA531CDD-54D1-4AB8-A3D8-691AF0947435}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Approval.Tests", "EasyNetQ.Approval.Tests\EasyNetQ.Approval.Tests.csproj", "{1F989E41-364C-45BB-B9DB-9A14E8641E1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.ApprovalTests", "EasyNetQ.ApprovalTests\EasyNetQ.ApprovalTests.csproj", "{1F989E41-364C-45BB-B9DB-9A14E8641E1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

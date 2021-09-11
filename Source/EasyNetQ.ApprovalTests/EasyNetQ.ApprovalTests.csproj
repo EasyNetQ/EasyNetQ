@@ -3,6 +3,7 @@
   
   <PropertyGroup>
     <TargetFramework>net5</TargetFramework>
+    <RootNamespace>EasyNetQ.Approval.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
