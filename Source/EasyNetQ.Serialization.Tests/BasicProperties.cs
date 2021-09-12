@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Impl;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Serialization.Tests
 {
     public sealed class BasicProperties : IBasicProperties
     {
