@@ -21,6 +21,11 @@ namespace EasyNetQ
         bool IsConnected { get; }
 
         /// <summary>
+        /// Establish a connection.
+        /// </summary>
+        void Connect();
+
+        /// <summary>
         /// The IoC container that EasyNetQ uses to resolve its services.
         /// </summary>
         IServiceResolver Container { get; }

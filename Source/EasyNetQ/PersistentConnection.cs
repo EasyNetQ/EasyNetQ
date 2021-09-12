@@ -19,6 +19,11 @@ namespace EasyNetQ
         bool IsConnected { get; }
 
         /// <summary>
+        ///     Establish a connection
+        /// </summary>
+        void Connect();
+
+        /// <summary>
         ///     Creates a new channel
         /// </summary>
         /// <returns>New channel</returns>
@@ -55,6 +60,24 @@ namespace EasyNetQ
             this.eventBus = eventBus;
         }
 
+
+        /// <inheritdoc />
+        public bool IsConnected => initializedConnection is {IsOpen: true};
+
+        /// <inheritdoc />
+        public void Connect()
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(PersistentConnection));
+
+            var connection = initializedConnection;
+            if (connection != null) return;
+
+            lock (mutex)
+                // ReSharper disable once NonAtomicCompoundOperator
+                _ = initializedConnection ??= ConnectInternal();
+        }
+
         /// <inheritdoc />
         public IModel CreateModel()
         {
@@ -64,22 +87,15 @@ namespace EasyNetQ
             var connection = initializedConnection;
             if (connection == null)
                 lock (mutex)
-                    connection = initializedConnection ??= Connect();
+                    // ReSharper disable once NonAtomicCompoundOperator
+                    connection = initializedConnection ??= ConnectInternal();
 
             if (!connection.IsOpen)
-                throw new EasyNetQException("PersistentConnection: Attempt to create a channel while being disconnected.");
+                throw new EasyNetQException(
+                    "PersistentConnection: Attempt to create a channel while being disconnected"
+                );
 
             return connection.CreateModel();
-        }
-
-        /// <inheritdoc />
-        public bool IsConnected
-        {
-            get
-            {
-                var connection = initializedConnection;
-                return connection != null && connection.IsOpen;
-            }
         }
 
         /// <inheritdoc />
@@ -90,17 +106,12 @@ namespace EasyNetQ
             disposed = true;
 
             var connection = Interlocked.Exchange(ref initializedConnection, null);
-            if (connection != null)
-            {
-                connection.RecoverySucceeded -= OnConnectionRecovered;
-                connection.ConnectionUnblocked -= OnConnectionUnblocked;
-                connection.ConnectionBlocked -= OnConnectionBlocked;
-                connection.ConnectionShutdown -= OnConnectionShutdown;
-                connection.Dispose();
-            }
+            if (connection == null) return;
+
+            Disconnect(connection);
         }
 
-        private IAutorecoveringConnection Connect()
+        private IAutorecoveringConnection ConnectInternal()
         {
             var endpoints = configuration.Hosts.Select(x =>
             {
@@ -110,10 +121,9 @@ namespace EasyNetQ
                 else if (configuration.Ssl.Enabled)
                     endpoint.Ssl = configuration.Ssl;
                 return endpoint;
-            }).ToArray();
+            }).ToList();
 
-            var connection = connectionFactory.CreateConnection(endpoints) as IAutorecoveringConnection;
-            if (connection == null)
+            if (connectionFactory.CreateConnection(endpoints) is not IAutorecoveringConnection connection)
                 throw new NotSupportedException("Non-recoverable connection is not supported");
 
             connection.ConnectionShutdown += OnConnectionShutdown;
@@ -132,9 +142,18 @@ namespace EasyNetQ
             return connection;
         }
 
+        private void Disconnect(IAutorecoveringConnection connection)
+        {
+            connection.RecoverySucceeded -= OnConnectionRecovered;
+            connection.ConnectionUnblocked -= OnConnectionUnblocked;
+            connection.ConnectionBlocked -= OnConnectionBlocked;
+            connection.ConnectionShutdown -= OnConnectionShutdown;
+            connection.Dispose();
+        }
+
         private void OnConnectionRecovered(object sender, EventArgs e)
         {
-            var connection = (IConnection)sender;
+            var connection = (IConnection) sender;
             logger.InfoFormat(
                 "Reconnected to broker {host}:{port}",
                 connection.Endpoint.HostName,
@@ -145,7 +164,7 @@ namespace EasyNetQ
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            var connection = (IConnection)sender;
+            var connection = (IConnection) sender;
             logger.InfoFormat(
                 "Disconnected from broker {host}:{port} because of {reason}",
                 connection.Endpoint.HostName,
