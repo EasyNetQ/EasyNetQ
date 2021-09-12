@@ -217,7 +217,7 @@ namespace EasyNetQ.Consumer
                     }
                     catch (AlreadyClosedException)
                     {
-                    }  
+                    }
                 }
                 consumer.Dispose();
             }
@@ -236,7 +236,7 @@ namespace EasyNetQ.Consumer
             disposed = true;
 
             using var _ = mutex.Acquire();
-            
+
             foreach (var consumer in consumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
@@ -248,7 +248,7 @@ namespace EasyNetQ.Consumer
                     }
                     catch (AlreadyClosedException)
                     {
-                    }  
+                    }
                 }
                 consumer.Dispose();
             }
