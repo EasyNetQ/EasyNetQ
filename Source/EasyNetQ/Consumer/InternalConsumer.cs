@@ -7,6 +7,7 @@ using EasyNetQ.Logging;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer
 {
@@ -204,9 +205,20 @@ namespace EasyNetQ.Consumer
                 throw new ObjectDisposedException(nameof(InternalConsumer));
 
             using var _ = mutex.Acquire();
+
             foreach (var consumer in consumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                foreach (var consumerTag in consumer.ConsumerTags)
+                {
+                    try
+                    {
+                        model?.BasicCancelNoWait(consumerTag);
+                    }
+                    catch (AlreadyClosedException)
+                    {
+                    }
+                }
                 consumer.Dispose();
             }
 
@@ -224,9 +236,20 @@ namespace EasyNetQ.Consumer
             disposed = true;
 
             using var _ = mutex.Acquire();
+
             foreach (var consumer in consumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                foreach (var consumerTag in consumer.ConsumerTags)
+                {
+                    try
+                    {
+                        model?.BasicCancelNoWait(consumerTag);
+                    }
+                    catch (AlreadyClosedException)
+                    {
+                    }
+                }
                 consumer.Dispose();
             }
 
