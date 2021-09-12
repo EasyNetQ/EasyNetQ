@@ -189,6 +189,7 @@ namespace EasyNetQ.Producer
                         AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowAndCloseChannel,
                         AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowAndCloseChannel,
                         AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowAndCloseChannel,
+                        AmqpErrorCodes.InternalErrors => ExceptionVerdict.SuppressAndCloseChannel,
                         _ => ExceptionVerdict.Throw
                     };
                 case NotSupportedException e:
@@ -196,7 +197,7 @@ namespace EasyNetQ.Producer
                     return isRequestPipeliningForbiddenException
                         ? ExceptionVerdict.SuppressAndCloseChannel
                         : ExceptionVerdict.Throw;
-                case EasyNetQException _:
+                case EasyNetQException:
                     return ExceptionVerdict.Suppress;
                 default:
                     return ExceptionVerdict.Throw;

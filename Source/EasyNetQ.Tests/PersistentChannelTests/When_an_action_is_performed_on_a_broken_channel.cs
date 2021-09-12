@@ -12,12 +12,20 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 {
     public class When_an_action_is_performed_and_channel_reopens
     {
-        public static IEnumerable<object[]> PipeliningForbiddenTestCases =>
+        public static IEnumerable<object[]> CloseAndRetryTestCases =>
             new List<object[]>
             {
                 new object[]
                 {
                     new NotSupportedException("Pipelining of requests forbidden")
+                },
+                new object[]
+                {
+                    new AlreadyClosedException(
+                        new ShutdownEventArgs(
+                            ShutdownInitiator.Library, AmqpErrorCodes.InternalErrors, "Unexpected Exception"
+                        )
+                    )
                 }
             };
 
@@ -55,15 +63,15 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             };
 
         [Theory]
-        [MemberData(nameof(PipeliningForbiddenTestCases))]
+        [MemberData(nameof(CloseAndRetryTestCases))]
         public void Should_succeed_after_channel_recreation(Exception exception)
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var brokenChannel = Substitute.For<IModel, IRecoverable>();
             brokenChannel.When(x => x.ExchangeDeclare("MyExchange", "direct"))
-                .Do(x => throw exception);
+                .Do(_ => throw exception);
             var channel = Substitute.For<IModel, IRecoverable>();
-            persistentConnection.CreateModel().Returns(x => brokenChannel, x => channel);
+            persistentConnection.CreateModel().Returns(_ => brokenChannel, _ => channel);
 
             using var persistentChannel = new PersistentChannel(
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
@@ -85,7 +93,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var brokenChannel = Substitute.For<IModel, IRecoverable>();
             brokenChannel.When(x => x.ExchangeDeclare("MyExchange", "direct"))
-                .Do(x => throw exception);
+                .Do(_ => throw exception);
 
             persistentConnection.CreateModel().Returns(x => brokenChannel);
 
