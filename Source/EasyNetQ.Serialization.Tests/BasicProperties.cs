@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Serialization.Tests
@@ -247,25 +246,5 @@ namespace EasyNetQ.Serialization.Tests
         public BasicProperties() { }
         public ushort ProtocolClassId => 60;
         public string ProtocolClassName => "basic";
-
-        public void AppendPropertyDebugStringTo(StringBuilder sb)
-        {
-            sb.Append("(");
-            sb.Append("content-type="); sb.Append(_contentType_present ? (_contentType == null ? "(null)" : _contentType.ToString()) : "_"); sb.Append(", ");
-            sb.Append("content-encoding="); sb.Append(_contentEncoding_present ? (_contentEncoding == null ? "(null)" : _contentEncoding.ToString()) : "_"); sb.Append(", ");
-            sb.Append("headers="); sb.Append(_headers_present ? (_headers == null ? "(null)" : _headers.ToString()) : "_"); sb.Append(", ");
-            sb.Append("delivery-mode="); sb.Append(_deliveryMode_present ? _deliveryMode.ToString() : "_"); sb.Append(", ");
-            sb.Append("priority="); sb.Append(_priority_present ? _priority.ToString() : "_"); sb.Append(", ");
-            sb.Append("correlation-id="); sb.Append(_correlationId_present ? (_correlationId == null ? "(null)" : _correlationId.ToString()) : "_"); sb.Append(", ");
-            sb.Append("reply-to="); sb.Append(_replyTo_present ? (_replyTo == null ? "(null)" : _replyTo.ToString()) : "_"); sb.Append(", ");
-            sb.Append("expiration="); sb.Append(_expiration_present ? (_expiration == null ? "(null)" : _expiration.ToString()) : "_"); sb.Append(", ");
-            sb.Append("message-id="); sb.Append(_messageId_present ? (_messageId == null ? "(null)" : _messageId.ToString()) : "_"); sb.Append(", ");
-            sb.Append("timestamp="); sb.Append(_timestamp_present ? _timestamp.ToString() : "_"); sb.Append(", ");
-            sb.Append("type="); sb.Append(_type_present ? (_type == null ? "(null)" : _type.ToString()) : "_"); sb.Append(", ");
-            sb.Append("user-id="); sb.Append(_userId_present ? (_userId == null ? "(null)" : _userId.ToString()) : "_"); sb.Append(", ");
-            sb.Append("app-id="); sb.Append(_appId_present ? (_appId == null ? "(null)" : _appId.ToString()) : "_"); sb.Append(", ");
-            sb.Append("cluster-id="); sb.Append(_clusterId_present ? (_clusterId == null ? "(null)" : _clusterId.ToString()) : "_");
-            sb.Append(")");
-        }
     }
 }
