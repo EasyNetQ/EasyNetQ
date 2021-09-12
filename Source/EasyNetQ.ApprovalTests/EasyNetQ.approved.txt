@@ -485,8 +485,7 @@ namespace EasyNetQ
     }
     public class JsonSerializer : EasyNetQ.ISerializer
     {
-        public JsonSerializer() { }
-        public JsonSerializer(Newtonsoft.Json.JsonSerializerSettings serializerSettings) { }
+        public JsonSerializer(object serializerSettings = null) { }
         public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }

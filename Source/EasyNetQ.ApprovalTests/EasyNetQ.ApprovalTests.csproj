@@ -19,5 +19,9 @@
     <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="EasyNetQ.received.txt" />
+  </ItemGroup>
   
 </Project>

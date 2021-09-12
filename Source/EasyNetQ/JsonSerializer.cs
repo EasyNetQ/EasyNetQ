@@ -51,8 +51,8 @@ namespace EasyNetQ
                 throw new InvalidOperationException("Incorrect settings type");
             }
 
-            jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] {serializerSettingsType})
-                .Invoke(null, new[] {serializerSettings});
+            jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] { serializerSettingsType })
+                .Invoke(null, new[] { serializerSettings });
 
             {
                 var streamWriterParameter = Expression.Parameter(typeof(StreamWriter), "streamWriter");
@@ -61,11 +61,11 @@ namespace EasyNetQ
                 var createJsonWriterLambda = Expression.Lambda<Func<StreamWriter, object, IDisposable>>(
                     Expression.Block(
                         textWriterType,
-                        new[] {jsonTextWriterParameter},
+                        new[] { jsonTextWriterParameter },
                         Expression.Assign(
                             jsonTextWriterParameter,
                             Expression.New(
-                                GetConstructor(textWriterType, new[] {typeof(StreamWriter)}),
+                                GetConstructor(textWriterType, new[] { typeof(StreamWriter) }),
                                 streamWriterParameter
                             )
                         ),
@@ -97,7 +97,7 @@ namespace EasyNetQ
                         GetMethod(
                             jsonSerializerType,
                             "Serialize",
-                            new[] {textWriterType, typeof(object), typeof(Type)}
+                            new[] { textWriterType, typeof(object), typeof(Type) }
                         )!,
                         Expression.Convert(jsonTextWriterParameter, textWriterType),
                         messageParameter,
@@ -115,7 +115,7 @@ namespace EasyNetQ
                 var streamReaderParameter = Expression.Parameter(typeof(StreamReader), "streamReader");
                 var createJsonReaderLambda = Expression.Lambda<Func<StreamReader, IDisposable>>(
                     Expression.New(
-                        GetConstructor(textReaderType, new[] {typeof(StreamReader)}), streamReaderParameter
+                        GetConstructor(textReaderType, new[] { typeof(StreamReader) }), streamReaderParameter
                     ),
                     streamReaderParameter
                 );
@@ -129,7 +129,7 @@ namespace EasyNetQ
                 var serializeLambda = Expression.Lambda<Func<object, object, Type, object>>(
                     Expression.Call(
                         Expression.Convert(jsonSerializerParameter, jsonSerializerType),
-                        GetMethod(jsonSerializerType, "Deserialize", new[] {textReaderType, typeof(Type)}),
+                        GetMethod(jsonSerializerType, "Deserialize", new[] { textReaderType, typeof(Type) }),
                         Expression.Convert(jsonTextReaderParameter, textReaderType),
                         messageTypeParameter
                     ),
