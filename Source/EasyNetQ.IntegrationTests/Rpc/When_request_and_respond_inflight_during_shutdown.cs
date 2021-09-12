@@ -36,7 +36,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             requestArrived.Wait(cts.Token);
             Task.Run(() => responder.Dispose(), cts.Token);
 
-            await Assert.ThrowsAsync<OperationCanceledException>(async () => await requestTask);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await requestTask);
             cts.IsCancellationRequested.ShouldBeTrue();
         }
 
