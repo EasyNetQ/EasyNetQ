@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
             connection.IsConnected.Should().BeFalse();
             mockBuilder.ConnectionFactory.Received().CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
         }
-        
+
         [Fact]
         public void Should_connect()
         {

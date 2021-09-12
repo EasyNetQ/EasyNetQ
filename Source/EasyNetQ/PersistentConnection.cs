@@ -62,7 +62,7 @@ namespace EasyNetQ
 
 
         /// <inheritdoc />
-        public bool IsConnected => initializedConnection is {IsOpen: true};
+        public bool IsConnected => initializedConnection is { IsOpen: true };
 
         /// <inheritdoc />
         public void Connect()
@@ -153,7 +153,7 @@ namespace EasyNetQ
 
         private void OnConnectionRecovered(object sender, EventArgs e)
         {
-            var connection = (IConnection) sender;
+            var connection = (IConnection)sender;
             logger.InfoFormat(
                 "Reconnected to broker {host}:{port}",
                 connection.Endpoint.HostName,
@@ -164,7 +164,7 @@ namespace EasyNetQ
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            var connection = (IConnection) sender;
+            var connection = (IConnection)sender;
             logger.InfoFormat(
                 "Disconnected from broker {host}:{port} because of {reason}",
                 connection.Endpoint.HostName,
