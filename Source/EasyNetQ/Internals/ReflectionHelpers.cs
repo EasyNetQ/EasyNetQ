@@ -35,7 +35,7 @@ namespace EasyNetQ.Internals
             {
                 return attributes.Cast<TAttribute>();
             }
-            return new TAttribute[0];
+            return Array.Empty<TAttribute>();
         }
 
         /// <summary>
