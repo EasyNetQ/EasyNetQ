@@ -7,5 +7,6 @@ namespace EasyNetQ.Producer
         public const ushort NotFound = 404;
         public const ushort ResourceLocked = 405;
         public const ushort PreconditionFailed = 406;
+        public const ushort InternalErrors = 541;
     }
 }
