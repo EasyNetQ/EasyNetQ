@@ -1,31 +1,27 @@
 // ReSharper disable InconsistentNaming
 using System.Collections.Generic;
+using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Tests;
 using FluentAssertions;
 using RabbitMQ.Client;
 using Xunit;
 
-namespace EasyNetQ.Serialization.NewtonsoftJson.Tests
+namespace EasyNetQ.Serialization.Tests
 {
-    public class NewtonsoftJsonSerializerTests
+    public class SerializerTests
     {
-        private readonly ISerializer serializer;
-
-        public NewtonsoftJsonSerializerTests()
-        {
-            serializer = new NewtonsoftJsonSerializer();
-        }
-
-        [Fact]
-        public void Should_be_able_to_serialize_and_deserialize_a_default_message()
+        [Theory]
+        [MemberData(nameof(GetSerializers))]
+        public void Should_be_able_to_serialize_and_deserialize_a_default_message(ISerializer serializer)
         {
             using var serializedMessage = serializer.MessageToBytes(typeof(Message), default(Message));
             var deserializedMessage = (Message)serializer.BytesToMessage(typeof(Message), serializedMessage.Memory);
             deserializedMessage.Should().BeNull();
         }
 
-        [Fact]
-        public void Should_be_able_to_serialize_and_deserialize_a_message()
+        [Theory]
+        [MemberData(nameof(GetSerializers))]
+        public void Should_be_able_to_serialize_and_deserialize_a_message(ISerializer serializer)
         {
             var message = new Message { Text = "Hello World" };
 
@@ -35,8 +31,9 @@ namespace EasyNetQ.Serialization.NewtonsoftJson.Tests
             message.Text.Should().Be(deserializedMessage.Text);
         }
 
-        [Fact]
-        public void Should_be_able_to_serialize_basic_properties()
+        [Theory]
+        [MemberData(nameof(GetSerializers))]
+        public void Should_be_able_to_serialize_basic_properties(ISerializer serializer)
         {
             var originalProperties = new BasicProperties
             {
@@ -72,6 +69,31 @@ namespace EasyNetQ.Serialization.NewtonsoftJson.Tests
             originalProperties.Should().BeEquivalentTo(newProperties);
         }
 
+        [Theory]
+        [MemberData(nameof(GetSerializers))]
+        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties(ISerializer serializer)
+        {
+            using var serializedMessage = serializer.MessageToBytes(typeof(PolyMessage), new PolyMessage { AorB = new B() });
+            var result = (PolyMessage)serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory);
+            Assert.IsType<B>(result.AorB);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetSerializers))]
+        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties_when_using_TypeNameSerializer(ISerializer serializer)
+        {
+            using var serializedMessage = serializer.MessageToBytes(typeof(PolyMessage), new PolyMessage { AorB = new B() });
+            var result = (PolyMessage)serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory);
+            Assert.IsType<B>(result.AorB);
+        }
+
+        public static IEnumerable<object[]> GetSerializers()
+        {
+            yield return new object[] { new NewtonsoftJsonSerializer() };
+            yield return new object[] { new JsonSerializer() };
+        }
+
+
         private class A { }
         private class B : A { }
         private class PolyMessage
@@ -81,22 +103,6 @@ namespace EasyNetQ.Serialization.NewtonsoftJson.Tests
         private class Message
         {
             public string Text { get; set; }
-        }
-
-        [Fact]
-        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties()
-        {
-            using var serializedMessage = serializer.MessageToBytes(typeof(PolyMessage), new PolyMessage { AorB = new B() });
-            var result = (PolyMessage)serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory);
-            Assert.IsType<B>(result.AorB);
-        }
-
-        [Fact]
-        public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties_when_using_TypeNameSerializer()
-        {
-            using var serializedMessage = serializer.MessageToBytes(typeof(PolyMessage), new PolyMessage { AorB = new B() });
-            var result = (PolyMessage)serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory);
-            Assert.IsType<B>(result.AorB);
         }
     }
 }
