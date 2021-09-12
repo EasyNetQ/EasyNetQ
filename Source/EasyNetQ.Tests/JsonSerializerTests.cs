@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests
 
         public JsonSerializerTests()
         {
-            serializer = new DefaultJsonSerializer();
+            serializer = new JsonSerializer();
         }
 
         [Fact]

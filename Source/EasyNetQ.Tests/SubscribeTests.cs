@@ -249,7 +249,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            using var serializedMessage = new DefaultJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+            using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -336,7 +336,7 @@ namespace EasyNetQ.Tests
             const string text = "Hello there, I am the text!";
             originalMessage = new MyMessage { Text = text };
 
-            using var serializedMessage = new DefaultJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+            using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
             // deliver a message
             mockBuilder.Consumers[0].HandleBasicDeliver(

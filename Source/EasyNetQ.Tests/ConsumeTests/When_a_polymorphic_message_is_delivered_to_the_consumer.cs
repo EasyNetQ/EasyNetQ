@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 }));
 
             var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
-            var serializedMessage = new DefaultJsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
+            var serializedMessage = new JsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
             var properties = new BasicProperties
             {
                 Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
