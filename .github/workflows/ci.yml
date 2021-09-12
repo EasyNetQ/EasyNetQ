@@ -55,6 +55,11 @@ jobs:
         cd ${{ github.workspace }}/Source/EasyNetQ.DI.Tests
         dotnet test --configuration Release --no-build
 
+    - name: Serialization.Tests
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.Serialization.Tests
+        dotnet test --configuration Release --no-build
+
     - name: Hosepipe.Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Hosepipe.Tests
