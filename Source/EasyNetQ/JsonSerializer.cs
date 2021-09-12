@@ -8,6 +8,9 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ
 {
+    /// <summary>
+    ///     JsonSerializer based on Newtonsoft.Json which uses it dynamically
+    /// </summary>
     public class JsonSerializer : ISerializer
     {
         private static readonly Encoding Encoding = new UTF8Encoding(false);
@@ -22,7 +25,7 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates JsonSerializer
         /// </summary>
-        public JsonSerializer()
+        public JsonSerializer(object serializerSettings = null)
         {
             var jsonSerializerType = TryGetType("Newtonsoft.Json.JsonSerializer", "Newtonsoft.Json");
             if (jsonSerializerType == null)
@@ -32,35 +35,43 @@ namespace EasyNetQ
                 );
             }
 
-            var jsonSerializerSettingsType = GetType("Newtonsoft.Json.JsonSerializerSettings", "Newtonsoft.Json");
+            var serializerSettingsType = GetType("Newtonsoft.Json.JsonSerializerSettings", "Newtonsoft.Json");
             var typeNameHandlingType = GetType("Newtonsoft.Json.TypeNameHandling", "Newtonsoft.Json");
-            var jsonTextWriterType = GetType("Newtonsoft.Json.JsonTextWriter", "Newtonsoft.Json");
-            var jsonTextReaderType = GetType("Newtonsoft.Json.JsonTextReader", "Newtonsoft.Json");
+            var textWriterType = GetType("Newtonsoft.Json.JsonTextWriter", "Newtonsoft.Json");
+            var textReaderType = GetType("Newtonsoft.Json.JsonTextReader", "Newtonsoft.Json");
 
-            var jsonSerializerSettings = Activator.CreateInstance(jsonSerializerSettingsType);
-            GetProperty(jsonSerializerSettingsType, "TypeNameHandling")
-                .SetValue(jsonSerializerSettings, Enum.Parse(typeNameHandlingType, "Auto", false));
-            jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] { jsonSerializerSettingsType })
-                .Invoke(null, new[] { jsonSerializerSettings });
+            if (serializerSettings == null)
+            {
+                serializerSettings = Activator.CreateInstance(serializerSettingsType);
+                GetProperty(serializerSettingsType, "TypeNameHandling")
+                    .SetValue(serializerSettings, Enum.Parse(typeNameHandlingType, "Auto", false));
+            }
+            else if (!serializerSettingsType.IsInstanceOfType(serializerSettings))
+            {
+                throw new InvalidOperationException("Incorrect settings type");
+            }
+
+            jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] {serializerSettingsType})
+                .Invoke(null, new[] {serializerSettings});
 
             {
                 var streamWriterParameter = Expression.Parameter(typeof(StreamWriter), "streamWriter");
                 var jsonSerializerParameter = Expression.Parameter(typeof(object), "jsonSerializer");
-                var jsonTextWriterParameter = Expression.Parameter(jsonTextWriterType, "jsonTextWriter");
+                var jsonTextWriterParameter = Expression.Parameter(textWriterType, "jsonTextWriter");
                 var createJsonWriterLambda = Expression.Lambda<Func<StreamWriter, object, IDisposable>>(
                     Expression.Block(
-                        jsonTextWriterType,
-                        new[] { jsonTextWriterParameter },
+                        textWriterType,
+                        new[] {jsonTextWriterParameter},
                         Expression.Assign(
                             jsonTextWriterParameter,
                             Expression.New(
-                                GetConstructor(jsonTextWriterType, new[] { typeof(StreamWriter) }),
+                                GetConstructor(textWriterType, new[] {typeof(StreamWriter)}),
                                 streamWriterParameter
                             )
                         ),
                         Expression.Assign(
                             Expression.MakeMemberAccess(
-                                jsonTextWriterParameter, GetProperty(jsonTextWriterType, "Formatting")
+                                jsonTextWriterParameter, GetProperty(textWriterType, "Formatting")
                             ),
                             Expression.MakeMemberAccess(
                                 Expression.Convert(jsonSerializerParameter, jsonSerializerType),
@@ -86,9 +97,9 @@ namespace EasyNetQ
                         GetMethod(
                             jsonSerializerType,
                             "Serialize",
-                            new[] { jsonTextWriterType, typeof(object), typeof(Type) }
+                            new[] {textWriterType, typeof(object), typeof(Type)}
                         )!,
-                        Expression.Convert(jsonTextWriterParameter, jsonTextWriterType),
+                        Expression.Convert(jsonTextWriterParameter, textWriterType),
                         messageParameter,
                         messageTypeParameter
                     ),
@@ -104,7 +115,7 @@ namespace EasyNetQ
                 var streamReaderParameter = Expression.Parameter(typeof(StreamReader), "streamReader");
                 var createJsonReaderLambda = Expression.Lambda<Func<StreamReader, IDisposable>>(
                     Expression.New(
-                        GetConstructor(jsonTextReaderType, new[] { typeof(StreamReader) }), streamReaderParameter
+                        GetConstructor(textReaderType, new[] {typeof(StreamReader)}), streamReaderParameter
                     ),
                     streamReaderParameter
                 );
@@ -118,8 +129,8 @@ namespace EasyNetQ
                 var serializeLambda = Expression.Lambda<Func<object, object, Type, object>>(
                     Expression.Call(
                         Expression.Convert(jsonSerializerParameter, jsonSerializerType),
-                        GetMethod(jsonSerializerType, "Deserialize", new[] { jsonTextReaderType, typeof(Type) }),
-                        Expression.Convert(jsonTextReaderParameter, jsonTextReaderType),
+                        GetMethod(jsonSerializerType, "Deserialize", new[] {textReaderType, typeof(Type)}),
+                        Expression.Convert(jsonTextReaderParameter, textReaderType),
                         messageTypeParameter
                     ),
                     jsonSerializerParameter,
