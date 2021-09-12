@@ -108,7 +108,7 @@ namespace EasyNetQ
             var connection = Interlocked.Exchange(ref initializedConnection, null);
             if (connection == null) return;
 
-            Disconnect(connection);
+            DisconnectInternal(connection);
         }
 
         private IAutorecoveringConnection ConnectInternal()
@@ -142,7 +142,7 @@ namespace EasyNetQ
             return connection;
         }
 
-        private void Disconnect(IAutorecoveringConnection connection)
+        private void DisconnectInternal(IAutorecoveringConnection connection)
         {
             connection.RecoverySucceeded -= OnConnectionRecovered;
             connection.ConnectionUnblocked -= OnConnectionUnblocked;

@@ -554,7 +554,10 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task<Binding<Queue>> BindAsync(
-            Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> arguments,
+            Exchange exchange,
+            Queue queue,
+            string routingKey,
+            IDictionary<string, object> arguments,
             CancellationToken cancellationToken
         )
         {
@@ -582,7 +585,10 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task<Binding<Exchange>> BindAsync(
-            Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments,
+            Exchange source,
+            Exchange destination,
+            string routingKey,
+            IDictionary<string, object> arguments,
             CancellationToken cancellationToken
         )
         {
