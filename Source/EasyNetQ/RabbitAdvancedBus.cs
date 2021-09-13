@@ -95,6 +95,13 @@ namespace EasyNetQ
             };
         }
 
+
+        /// <inheritdoc />
+        public bool IsConnected => connection.IsConnected;
+
+        /// <inheritdoc />
+        public void Connect() => connection.Connect();
+
         #region Consume
 
         /// <inheritdoc />
@@ -204,9 +211,6 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public event EventHandler<MessageReturnedEventArgs> MessageReturned;
-
-        /// <inheritdoc />
-        public bool IsConnected => connection.IsConnected;
 
         /// <inheritdoc />
         public IServiceResolver Container { get; }
@@ -550,7 +554,11 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task<Binding<Queue>> BindAsync(
-            Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken
+            Exchange exchange,
+            Queue queue,
+            string routingKey,
+            IDictionary<string, object> arguments,
+            CancellationToken cancellationToken
         )
         {
             Preconditions.CheckShortString(routingKey, "routingKey");
@@ -577,7 +585,11 @@ namespace EasyNetQ
 
         /// <inheritdoc />
         public async Task<Binding<Exchange>> BindAsync(
-            Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken
+            Exchange source,
+            Exchange destination,
+            string routingKey,
+            IDictionary<string, object> arguments,
+            CancellationToken cancellationToken
         )
         {
             Preconditions.CheckShortString(routingKey, "routingKey");

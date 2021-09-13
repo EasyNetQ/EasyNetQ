@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Topology;
 
@@ -19,6 +18,11 @@ namespace EasyNetQ
         /// True if the bus is connected, False if it is not.
         /// </summary>
         bool IsConnected { get; }
+
+        /// <summary>
+        /// Establish a connection.
+        /// </summary>
+        void Connect();
 
         /// <summary>
         /// The IoC container that EasyNetQ uses to resolve its services.
