@@ -3,10 +3,14 @@ using Ninject;
 
 namespace EasyNetQ.DI.Ninject
 {
+    /// <inheritdoc />
     public class NinjectAdapter : IServiceRegister
     {
         private readonly IKernel kernel;
 
+        /// <summary>
+        ///     Creates an adapter on top of IKernel
+        /// </summary>
         public NinjectAdapter(IKernel kernel)
         {
             this.kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));

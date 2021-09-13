@@ -4,10 +4,14 @@ using StructureMap.Pipeline;
 
 namespace EasyNetQ.DI.StructureMap
 {
+    /// <inheritdoc />
     public class StructureMapAdapter : IServiceRegister
     {
         private readonly IRegistry registry;
 
+        /// <summary>
+        ///     Creates an adapter on top of IRegistry
+        /// </summary>
         public StructureMapAdapter(IRegistry registry)
         {
             this.registry = registry ?? throw new ArgumentNullException(nameof(registry));

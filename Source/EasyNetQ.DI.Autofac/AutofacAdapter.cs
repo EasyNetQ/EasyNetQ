@@ -3,10 +3,14 @@ using Autofac;
 
 namespace EasyNetQ.DI.Autofac
 {
+    /// <inheritdoc />
     public class AutofacAdapter : IServiceRegister
     {
         private readonly ContainerBuilder containerBuilder;
 
+        /// <summary>
+        ///     Creates an adapter on top of ContainerBuilder
+        /// </summary>
         public AutofacAdapter(ContainerBuilder containerBuilder)
         {
             this.containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
