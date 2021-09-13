@@ -70,12 +70,7 @@ namespace EasyNetQ
             if (disposed)
                 throw new ObjectDisposedException(nameof(PersistentConnection));
 
-            var connection = initializedConnection;
-            if (connection != null) return;
-
-            lock (mutex)
-                // ReSharper disable once NonAtomicCompoundOperator
-                _ = initializedConnection ??= ConnectInternal();
+            InitializeConnection();
         }
 
         /// <inheritdoc />
@@ -84,11 +79,7 @@ namespace EasyNetQ
             if (disposed)
                 throw new ObjectDisposedException(nameof(PersistentConnection));
 
-            var connection = initializedConnection;
-            if (connection == null)
-                lock (mutex)
-                    // ReSharper disable once NonAtomicCompoundOperator
-                    connection = initializedConnection ??= ConnectInternal();
+            var connection = InitializeConnection();
 
             if (!connection.IsOpen)
                 throw new EasyNetQException(
@@ -105,13 +96,32 @@ namespace EasyNetQ
 
             disposed = true;
 
-            var connection = Interlocked.Exchange(ref initializedConnection, null);
-            if (connection == null) return;
-
-            DisconnectInternal(connection);
+            DisposeConnection();
         }
 
-        private IAutorecoveringConnection ConnectInternal()
+        private IAutorecoveringConnection InitializeConnection()
+        {
+            var connection = initializedConnection;
+            if (connection != null) return connection;
+
+            lock (mutex)
+            {
+                connection = initializedConnection;
+                if (connection != null) return connection;
+
+                connection = initializedConnection = CreateConnection();
+            }
+
+            logger.InfoFormat(
+                "Connected to broker {broker}, port {port}",
+                connection.Endpoint.HostName,
+                connection.Endpoint.Port
+            );
+            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint));
+            return connection;
+        }
+
+        private IAutorecoveringConnection CreateConnection()
         {
             var endpoints = configuration.Hosts.Select(x =>
             {
@@ -131,19 +141,14 @@ namespace EasyNetQ
             connection.ConnectionUnblocked += OnConnectionUnblocked;
             connection.RecoverySucceeded += OnConnectionRecovered;
 
-            logger.InfoFormat(
-                "Connected to broker {broker}, port {port}",
-                connection.Endpoint.HostName,
-                connection.Endpoint.Port
-            );
-
-            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint));
-
             return connection;
         }
 
-        private void DisconnectInternal(IAutorecoveringConnection connection)
+        private void DisposeConnection()
         {
+            var connection = Interlocked.Exchange(ref initializedConnection, null);
+            if (connection == null) return;
+
             connection.RecoverySucceeded -= OnConnectionRecovered;
             connection.ConnectionUnblocked -= OnConnectionUnblocked;
             connection.ConnectionBlocked -= OnConnectionBlocked;

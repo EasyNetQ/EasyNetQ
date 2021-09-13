@@ -3,6 +3,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public class HandlerCollectionPerQueueFactory : IHandlerCollectionFactory
     {
         private readonly ConcurrentDictionary<string, IHandlerCollection> handlerCollections = new();
