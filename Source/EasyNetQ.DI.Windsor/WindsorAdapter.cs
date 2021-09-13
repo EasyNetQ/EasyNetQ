@@ -6,10 +6,14 @@ using Castle.Windsor;
 
 namespace EasyNetQ.DI.Windsor
 {
+    /// <inheritdoc />
     public class WindsorAdapter : IServiceRegister
     {
         private readonly IWindsorContainer container;
 
+        /// <summary>
+        ///     Created an adapter on top of IWindsorContainer
+        /// </summary>
         public WindsorAdapter(IWindsorContainer container)
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
@@ -77,15 +81,12 @@ namespace EasyNetQ.DI.Windsor
 
         private LifestyleType GetLifestyleType(Lifetime lifetime)
         {
-            switch (lifetime)
+            return lifetime switch
             {
-                case Lifetime.Transient:
-                    return LifestyleType.Transient;
-                case Lifetime.Singleton:
-                    return LifestyleType.Singleton;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
+                Lifetime.Transient => LifestyleType.Transient,
+                Lifetime.Singleton => LifestyleType.Singleton,
+                _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
+            };
         }
     }
 }

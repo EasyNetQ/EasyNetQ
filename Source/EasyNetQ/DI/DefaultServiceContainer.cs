@@ -2,7 +2,7 @@ using System;
 
 namespace EasyNetQ.DI
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="EasyNetQ.DI.IServiceRegister" />
     public class DefaultServiceContainer : IServiceRegister, IDisposable
     {
         private readonly LightInject.ServiceContainer container = new(c => c.EnablePropertyInjection = false);
@@ -50,15 +50,12 @@ namespace EasyNetQ.DI
 
         private static LightInject.ILifetime ToLifetime(Lifetime lifetime)
         {
-            switch (lifetime)
+            return lifetime switch
             {
-                case Lifetime.Transient:
-                    return new LightInject.PerRequestLifeTime();
-                case Lifetime.Singleton:
-                    return new LightInject.PerContainerLifetime();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-            }
+                Lifetime.Transient => new LightInject.PerRequestLifeTime(),
+                Lifetime.Singleton => new LightInject.PerContainerLifetime(),
+                _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
+            };
         }
 
         private class LightInjectResolver : IServiceResolver
