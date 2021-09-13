@@ -1,9 +1,9 @@
+using System;
 using PublicApiGenerator;
 using Shouldly;
-using System;
 using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Approval.Tests
 {
     public class ApprovalTests
     {
