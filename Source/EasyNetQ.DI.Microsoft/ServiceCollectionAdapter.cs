@@ -3,10 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.DI.Microsoft
 {
+    /// <inheritdoc />
     public class ServiceCollectionAdapter : IServiceRegister
     {
         private readonly IServiceCollection serviceCollection;
 
+        /// <summary>
+        ///     Creates an adapter on top of IServiceCollection
+        /// </summary>
         public ServiceCollectionAdapter(IServiceCollection serviceCollection)
         {
             this.serviceCollection = serviceCollection;

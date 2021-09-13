@@ -3,10 +3,14 @@ using SimpleInjector;
 
 namespace EasyNetQ.DI.SimpleInjector
 {
+    /// <inheritdoc cref="EasyNetQ.DI.IServiceRegister" />
     public class SimpleInjectorAdapter : IServiceRegister, IServiceResolver
     {
         private readonly Container container;
 
+        /// <summary>
+        ///     Creates an adapter on top of Container
+        /// </summary>
         public SimpleInjectorAdapter(Container container)
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
