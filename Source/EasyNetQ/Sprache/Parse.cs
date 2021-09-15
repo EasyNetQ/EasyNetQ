@@ -274,7 +274,7 @@ namespace EasyNetQ.Sprache
 
                 i.Memos[p] = new Failure<T>(i,
                     () => "Left recursion in the grammar.",
-                    () => new string[0]);
+                    () => Array.Empty<string>());
                 var result = p(i);
                 i.Memos[p] = result;
                 return result;
@@ -477,7 +477,7 @@ namespace EasyNetQ.Sprache
                     ? (IResult<T>)s
                     : new Failure<T>(i,
                         () => string.Format("Unexpected {0}.", s.Result),
-                        () => new string[0]));
+                        () => Array.Empty<string>()));
         }
 
         /// <summary>
