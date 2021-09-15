@@ -14,4 +14,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.Abstractions\EasyNetQ.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

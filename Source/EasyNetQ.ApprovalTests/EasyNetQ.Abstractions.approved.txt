@@ -1,0 +1,33 @@
+namespace EasyNetQ.DI
+{
+    public interface IServiceRegister
+    {
+        EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
+            where TService :  class;
+        EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class;
+        EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService;
+    }
+    public interface IServiceResolver
+    {
+        EasyNetQ.DI.IServiceResolverScope CreateScope();
+        TService Resolve<TService>()
+            where TService :  class;
+    }
+    public interface IServiceResolverScope : EasyNetQ.DI.IServiceResolver, System.IDisposable { }
+    public enum Lifetime
+    {
+        Transient = 0,
+        Singleton = 1,
+    }
+}
+namespace EasyNetQ
+{
+    public interface ISerializer
+    {
+        object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes);
+        System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message);
+    }
+}

@@ -450,11 +450,6 @@ namespace EasyNetQ
         EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync(string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task SendAsync<T>(string queue, T message, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
     }
-    public interface ISerializer
-    {
-        object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes);
-        System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message);
-    }
     public interface ISimpleConsumeConfiguration
     {
         EasyNetQ.ISimpleConsumeConfiguration WithArgument(string name, object value);
@@ -1174,28 +1169,6 @@ namespace EasyNetQ.DI
             where TService :  class
             where TImplementation :  class, TService { }
         public TService Resolve<TService>() { }
-    }
-    public interface IServiceRegister
-    {
-        EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class;
-        EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class;
-        EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService;
-    }
-    public interface IServiceResolver
-    {
-        EasyNetQ.DI.IServiceResolverScope CreateScope();
-        TService Resolve<TService>()
-            where TService :  class;
-    }
-    public interface IServiceResolverScope : EasyNetQ.DI.IServiceResolver, System.IDisposable { }
-    public enum Lifetime
-    {
-        Transient = 0,
-        Singleton = 1,
     }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {

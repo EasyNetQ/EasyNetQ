@@ -8,6 +8,7 @@ namespace EasyNetQ.Approval.Tests
     public class ApprovalTests
     {
         [Theory]
+        [InlineData(typeof(ISerializer))]
         [InlineData(typeof(RabbitBus))]
         [InlineData(typeof(DI.Autofac.AutofacAdapter))]
         [InlineData(typeof(DI.LightInject.LightInjectAdapter))]
