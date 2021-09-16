@@ -159,9 +159,9 @@ namespace EasyNetQ.Tests
             typeNameSerializer = new DefaultTypeNameSerializer();
             var customConventions = new Conventions(typeNameSerializer)
             {
-                ExchangeNamingConvention = x => "CustomExchangeNamingConvention",
-                QueueNamingConvention = (x, y) => "CustomQueueNamingConvention",
-                TopicNamingConvention = x => "CustomTopicNamingConvention"
+                ExchangeNamingConvention = _ => "CustomExchangeNamingConvention",
+                QueueNamingConvention = (_, _) => "CustomQueueNamingConvention",
+                TopicNamingConvention = _ => "CustomTopicNamingConvention"
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
@@ -219,13 +219,13 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
-                RpcRequestExchangeNamingConvention = messageType => "CustomRpcExchangeName",
-                RpcRoutingKeyNamingConvention = messageType => "CustomRpcRoutingKeyName"
+                RpcRequestExchangeNamingConvention = _ => "CustomRpcExchangeName",
+                RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName"
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-            mockBuilder.Rpc.Respond<TestMessage, TestMessage>(t => new TestMessage());
+            mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
         }
 
         public void Dispose()

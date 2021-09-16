@@ -28,7 +28,7 @@ namespace Autofac
                 throw new ArgumentNullException(nameof(containerBuilder));
             }
 
-            return containerBuilder.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
+            return containerBuilder.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
         }
 
         public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, string connectionString, Action<IServiceRegister> registerServices)

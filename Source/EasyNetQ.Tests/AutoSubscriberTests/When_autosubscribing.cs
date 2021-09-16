@@ -60,7 +60,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_bound_to_queues()
         {
             Action<int, string, string> assertConsumerStarted =
-                (channelIndex, queueName, topicName) =>
+                (_, queueName, topicName) =>
                     mockBuilder.Channels[0].Received().QueueBind(
                         Arg.Is(queueName),
                         Arg.Any<string>(),

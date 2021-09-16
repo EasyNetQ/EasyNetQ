@@ -26,7 +26,7 @@ namespace EasyNetQ
             // default service registration
             serviceRegister
                 .Register<IConnectionStringParser>(
-                    x => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
+                    _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
                 )
                 .Register<ISerializer>(_ => new JsonSerializer())
                 .Register<IConventions, Conventions>()

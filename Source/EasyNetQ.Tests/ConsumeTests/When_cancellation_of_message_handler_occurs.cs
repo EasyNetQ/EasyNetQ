@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             ConsumerErrorStrategy.HandleConsumerCancelledAsync(default)
                                  .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
-            StartConsumer((body, properties, info) =>
+            StartConsumer((_, _, _) =>
                 {
                     Cancellation.Cancel();
                     Cancellation.Token.ThrowIfCancellationRequested();

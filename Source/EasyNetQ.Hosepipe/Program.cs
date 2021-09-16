@@ -111,7 +111,7 @@ namespace EasyNetQ.Hosepipe
                 arguments.At(0, "?", PrintUsage);
 
                 // print usage if there are no arguments
-                arguments.At(0, a => { }).FailWith(PrintUsage);
+                arguments.At(0, _ => { }).FailWith(PrintUsage);
             }
             catch (EasyNetQHosepipeException easyNetQHosepipeException)
             {

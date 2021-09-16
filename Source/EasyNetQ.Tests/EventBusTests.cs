@@ -77,7 +77,7 @@ namespace EasyNetQ.Tests
             eventBus.Subscribe<Event1>(@event =>
                 {
                     eventFromSubscription = @event;
-                    eventBus.Subscribe<Event1>(x => { });
+                    eventBus.Subscribe<Event1>(_ => { });
                 });
 
             var publishedEvent1 = new Event1

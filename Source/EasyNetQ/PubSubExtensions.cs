@@ -24,7 +24,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            return pubSub.PublishAsync(message, c => { }, cancellationToken);
+            return pubSub.PublishAsync(message, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            pubSub.Publish(message, c => { }, cancellationToken);
+            pubSub.Publish(message, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace EasyNetQ
             return pubSub.SubscribeAsync(
                 subscriptionId,
                 onMessage,
-                c => { },
+                _ => { },
                 cancellationToken
             );
         }
@@ -164,7 +164,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
+            var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
             return pubSub.SubscribeAsync(
                 subscriptionId,
@@ -207,7 +207,7 @@ namespace EasyNetQ
             return pubSub.SubscribeAsync<T>(
                 subscriptionId,
                 (m, _) => onMessage(m),
-                c => { },
+                _ => { },
                 cancellationToken
             );
         }
@@ -244,7 +244,7 @@ namespace EasyNetQ
             return pubSub.Subscribe(
                 subscriptionId,
                 onMessage,
-                c => { },
+                _ => { },
                 cancellationToken
             );
         }
@@ -282,7 +282,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
+            var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
             return pubSub.Subscribe(
                 subscriptionId,
@@ -324,8 +324,8 @@ namespace EasyNetQ
 
             return pubSub.Subscribe<T>(
                 subscriptionId,
-                (m, c) => onMessage(m),
-                c => { },
+                (m, _) => onMessage(m),
+                _ => { },
                 cancellationToken
             );
         }

@@ -25,8 +25,8 @@ namespace EasyNetQ.Tests.ProducerTests
             var exchange = new Exchange(exchangeName);
 
             advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(
-                x => Task.FromException(new Exception()),
-                x =>
+                _ => Task.FromException(new Exception()),
+                _ =>
                 {
                     exchangeDeclareCount++;
                     return Task.FromResult(exchange);
@@ -54,7 +54,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var advancedBus = Substitute.For<IAdvancedBus>();
             var exchange = new Exchange(exchangeName);
             advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>())
-                .Returns(x =>
+                .Returns(_ =>
                 {
                     exchangeDeclareCount++;
                     return Task.FromResult(exchange);
@@ -75,7 +75,7 @@ namespace EasyNetQ.Tests.ProducerTests
             var exchangeDeclareCount = 0;
             var advancedBus = Substitute.For<IAdvancedBus>();
             var exchange = new Exchange(exchangeName);
-            advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(x =>
+            advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(_ =>
             {
                 exchangeDeclareCount++;
                 return Task.FromResult(exchange);

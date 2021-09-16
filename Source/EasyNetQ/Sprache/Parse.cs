@@ -9,7 +9,7 @@ namespace EasyNetQ.Sprache
     /// </summary>
     internal static class Parse
     {
-        public static readonly Parser<char> AnyChar = Char(c => true, "any character");
+        public static readonly Parser<char> AnyChar = Char(_ => true, "any character");
         public static readonly Parser<char> WhiteSpace = Char(char.IsWhiteSpace, "whitespace");
         public static readonly Parser<char> Digit = Char(char.IsDigit, "digit");
         public static readonly Parser<char> Letter = Char(char.IsLetter, "letter");
@@ -22,7 +22,7 @@ namespace EasyNetQ.Sprache
 
         public static readonly Parser<string> Decimal =
             from integral in Number
-            from fraction in Char('.').Then(point => Number.Select(n => "." + n)).XOr(Return(""))
+            from fraction in Char('.').Then(_ => Number.Select(n => "." + n)).XOr(Return(""))
             select integral + fraction;
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace EasyNetQ.Sprache
 
                 var fs = (ISuccess<T>)fr;
                 if (fs.Remainder == i)
-                    return second(i).IfFailure(sf => fs);
+                    return second(i).IfFailure(_ => fs);
 
                 return fs;
             };
@@ -364,7 +364,7 @@ namespace EasyNetQ.Sprache
 
                 var fs = (ISuccess<T>)fr;
                 if (fs.Remainder == i)
-                    return second(i).IfFailure(sf => fs);
+                    return second(i).IfFailure(_ => fs);
 
                 return fs;
             };
@@ -420,7 +420,7 @@ namespace EasyNetQ.Sprache
         public static Parser<U> Return<T, U>(this Parser<T> parser, U value)
         {
             Preconditions.CheckNotNull(parser, nameof(parser));
-            return parser.Select(t => value);
+            return parser.Select(_ => value);
         }
 
         /// <summary>

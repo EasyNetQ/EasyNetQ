@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
 {
     public class NonGenericSendReceiveExtensionsTests
     {
-        private readonly Action<ISendConfiguration> configure = c => { };
+        private readonly Action<ISendConfiguration> configure = _ => { };
         private readonly ISendReceive sendReceive;
         private const string Queue = "queue";
 

@@ -22,10 +22,10 @@ namespace EasyNetQ.Tests.ConsumeTests
             var queue = new Queue("my_queue", false);
 
             var cancelSubscription = mockBuilder.Bus.Advanced
-                .Consume(queue, (bytes, properties, arg3) => Task.Run(() => { }));
+                .Consume(queue, (_, _, _) => Task.Run(() => { }));
 
             var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(_ => are.Set());
 
             cancelSubscription.Dispose();
 

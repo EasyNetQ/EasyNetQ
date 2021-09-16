@@ -27,7 +27,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, handler, c => { });
+            return bus.Consume(queue, handler, _ => { });
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            var handlerAsync = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => handler(m, i));
+            var handlerAsync = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, _) => handler(m, i));
             return bus.Consume(queue, handlerAsync, configure);
         }
 
@@ -67,7 +67,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, handler, c => { });
+            return bus.Consume(queue, handler, _ => { });
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume<T>(queue, (m, i, c) => handler(m, i), configure);
+            return bus.Consume<T>(queue, (m, i, _) => handler(m, i), configure);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, addHandlers, c => { });
+            return bus.Consume(queue, addHandlers, _ => { });
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, handler, c => { });
+            return bus.Consume(queue, handler, _ => { });
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            var handlerAsync = TaskHelpers.FromAction<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo>((m, p, i, c) => handler(m, p, i));
+            var handlerAsync = TaskHelpers.FromAction<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo>((m, p, i, _) => handler(m, p, i));
 
             return bus.Consume(queue, handlerAsync, configure);
         }
@@ -283,7 +283,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, handler, c => { });
+            return bus.Consume(queue, handler, _ => { });
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, handler, c => { });
+            return bus.Consume(queue, handler, _ => { });
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, (m, p, i, c) => handler(m, p, i), configure);
+            return bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.Consume(queue, (m, p, i, c) => handler(m, p, i), configure);
+            return bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
         }
 
         /// <summary>
@@ -575,7 +575,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(bus, nameof(bus));
 
-            return bus.QueueDeclareAsync(name, c => { }, cancellationToken);
+            return bus.QueueDeclareAsync(name, _ => { }, cancellationToken);
         }
 
         /// <summary>

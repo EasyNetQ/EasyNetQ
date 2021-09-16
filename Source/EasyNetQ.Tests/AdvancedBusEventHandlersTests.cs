@@ -16,23 +16,23 @@ namespace EasyNetQ.Tests
         public AdvancedBusEventHandlersTests()
         {
             var advancedBusEventHandlers = new AdvancedBusEventHandlers(
-                (s, e) =>
+                (_, e) =>
                 {
                     connectedCalled = true;
                     connectedEventArgs = e;
                 },
-                (s, e) =>
+                (_, e) =>
                 {
                     disconnectedCalled = true;
                     disconnectedEventArgs = e;
                 },
-                (s, e) =>
+                (_, e) =>
                 {
                     blockedCalled = true;
                     blockedEventArgs = e;
                 },
-                (s, e) => unBlockedCalled = true,
-                (s, e) =>
+                (_, _) => unBlockedCalled = true,
+                (_, e) =>
                 {
                     messageReturnedCalled = true;
                     messageReturnedEventArgs = e;

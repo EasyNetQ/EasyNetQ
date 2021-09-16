@@ -48,7 +48,7 @@ namespace EasyNetQ.IntegrationTests
                 FromImage = image,
                 Tag = tag
             };
-            var progress = new Progress<JSONMessage>(jsonMessage => { });
+            var progress = new Progress<JSONMessage>(_ => { });
             await client.Images.CreateImageAsync(createParameters, null, progress, token);
         }
 
@@ -67,7 +67,7 @@ namespace EasyNetQ.IntegrationTests
                     PortBindings = PortBindings(portMappings),
                     NetworkMode = networkName
                 },
-                ExposedPorts = portMappings.ToDictionary(x => x.Key, x => new EmptyStruct())
+                ExposedPorts = portMappings.ToDictionary(x => x.Key, _ => new EmptyStruct())
             };
             var response = await client.Containers.CreateContainerAsync(createParameters, token);
             return response.ID;

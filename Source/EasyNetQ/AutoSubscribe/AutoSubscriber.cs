@@ -64,7 +64,7 @@ namespace EasyNetQ.AutoSubscribe
             SubscriptionIdPrefix = subscriptionIdPrefix;
             AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
             GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
-            ConfigureSubscriptionConfiguration = subscriptionConfiguration => { };
+            ConfigureSubscriptionConfiguration = _ => { };
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace EasyNetQ.AutoSubscribe
             var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
             if (configSettings == null)
             {
-                return subscriptionConfiguration => { };
+                return _ => { };
             }
             return configuration =>
                 {
