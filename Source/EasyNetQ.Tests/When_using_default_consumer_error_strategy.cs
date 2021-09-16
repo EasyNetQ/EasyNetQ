@@ -17,7 +17,7 @@ namespace EasyNetQ.Tests
         {
             var customConventions = new Conventions(new DefaultTypeNameSerializer())
             {
-                ErrorQueueNamingConvention = info => "CustomEasyNetQErrorQueueName",
+                ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
                 ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
             };
 
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests
             var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
             consumerExecutionContext = new ConsumerExecutionContext(
-                (bytes, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack),
+                (_, _, _, _) => Task.FromResult(AckStrategies.Ack),
                 new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {

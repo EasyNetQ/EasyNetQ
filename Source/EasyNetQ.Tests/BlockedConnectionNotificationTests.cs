@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests
             using var _ = mockBuilder.PersistentConnection.CreateModel();
 
             var blocked = false;
-            mockBuilder.Bus.Advanced.Blocked += (s, e) => blocked = true;
+            mockBuilder.Bus.Advanced.Blocked += (_, _) => blocked = true;
             mockBuilder.Connection.ConnectionBlocked += Raise.EventWith(new ConnectionBlockedEventArgs("some reason"));
 
             Assert.True(blocked);
@@ -45,7 +45,7 @@ namespace EasyNetQ.Tests
             using var _ = mockBuilder.PersistentConnection.CreateModel();
 
             var blocked = true;
-            mockBuilder.Bus.Advanced.Unblocked += (s, e) => blocked = false;
+            mockBuilder.Bus.Advanced.Unblocked += (_, _) => blocked = false;
             mockBuilder.Connection.ConnectionUnblocked += Raise.EventWith(EventArgs.Empty);
             Assert.False(blocked);
         }

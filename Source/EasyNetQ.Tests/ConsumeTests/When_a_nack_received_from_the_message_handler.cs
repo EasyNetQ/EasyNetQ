@@ -10,7 +10,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => AckStrategies.NackWithRequeue);
+            StartConsumer((_, _, _) => AckStrategies.NackWithRequeue);
             DeliverMessage();
         }
 

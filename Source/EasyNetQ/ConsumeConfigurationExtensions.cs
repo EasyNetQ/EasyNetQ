@@ -56,7 +56,7 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
-            return configuration.ForQueue(queue, handler, c => { });
+            return configuration.ForQueue(queue, handler, _ => { });
         }
 
         public static IConsumeConfiguration ForQueue(
@@ -66,7 +66,7 @@ namespace EasyNetQ
         )
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
-            return configuration.ForQueue(queue, handler, c => { });
+            return configuration.ForQueue(queue, handler, _ => { });
         }
 
         public static IConsumeConfiguration ForQueue(
@@ -96,7 +96,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-            return configuration.ForQueue(queue, handler, c => { });
+            return configuration.ForQueue(queue, handler, _ => { });
         }
 
         public static IConsumeConfiguration ForQueue<T>(
@@ -119,7 +119,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-            return configuration.ForQueue(queue, handler, c => { });
+            return configuration.ForQueue(queue, handler, _ => { });
         }
 
         public static IConsumeConfiguration ForQueue<T>(
@@ -142,7 +142,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-            return configuration.ForQueue(queue, handler, c => { });
+            return configuration.ForQueue(queue, handler, _ => { });
         }
 
         public static IConsumeConfiguration ForQueue<T>(

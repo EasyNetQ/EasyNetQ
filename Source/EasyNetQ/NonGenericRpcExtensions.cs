@@ -35,7 +35,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            return rpc.RequestAsync(request, requestType, responseType, c => { }, cancellationToken);
+            return rpc.RequestAsync(request, requestType, responseType, _ => { }, cancellationToken);
         }
 
         /// <summary>

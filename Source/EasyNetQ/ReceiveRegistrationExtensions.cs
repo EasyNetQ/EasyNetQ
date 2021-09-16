@@ -20,7 +20,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
 
-            return receiveRegistration.Add<T>((m, c) => onMessage(m));
+            return receiveRegistration.Add<T>((m, _) => onMessage(m));
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
 
-            var onMessageAsync = TaskHelpers.FromAction<T>((m, c) => onMessage(m));
+            var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
             return receiveRegistration.Add(onMessageAsync);
         }
     }

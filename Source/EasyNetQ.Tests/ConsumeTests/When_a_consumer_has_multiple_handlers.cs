@@ -28,17 +28,17 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             mockBuilder.Bus.Advanced.Consume(
                 queue,
-                x => x.Add<MyMessage>((message, info) =>
+                x => x.Add<MyMessage>((message, _) =>
                     {
                         myMessageResult = message.Body;
                         countdownEvent.Signal();
                     })
-                    .Add<MyOtherMessage>((message, info) =>
+                    .Add<MyOtherMessage>((message, _) =>
                     {
                         myOtherMessageResult = message.Body;
                         countdownEvent.Signal();
                     })
-                    .Add<IAnimal>((message, info) =>
+                    .Add<IAnimal>((message, _) =>
                     {
                         animalResult = message.Body;
                         countdownEvent.Signal();

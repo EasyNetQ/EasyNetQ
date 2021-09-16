@@ -32,7 +32,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             using (
                 await bus.Rpc.RespondAsync<Request, Response>(
-                    x => Task.FromException<Response>(new RequestFailedException()), cts.Token
+                    _ => Task.FromException<Response>(new RequestFailedException()), cts.Token
                 )
             )
             {

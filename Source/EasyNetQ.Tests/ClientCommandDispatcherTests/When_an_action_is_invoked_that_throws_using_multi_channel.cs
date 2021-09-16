@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public async Task Should_raise_the_exception_on_the_calling_thread()
         {
             await Assert.ThrowsAsync<CrazyTestOnlyException>(
-                () => dispatcher.InvokeAsync<int>(x => throw new CrazyTestOnlyException(), ChannelDispatchOptions.Default)
+                () => dispatcher.InvokeAsync<int>(_ => throw new CrazyTestOnlyException(), ChannelDispatchOptions.Default)
             );
         }
 
@@ -43,10 +43,10 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         public async Task Should_call_action_when_previous_throwed_an_exception()
         {
             await Assert.ThrowsAsync<Exception>(
-                () => dispatcher.InvokeAsync<int>(x => throw new Exception(), ChannelDispatchOptions.Default)
+                () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), ChannelDispatchOptions.Default)
             );
 
-            var result = await dispatcher.InvokeAsync(x => 42, ChannelDispatchOptions.Default);
+            var result = await dispatcher.InvokeAsync(_ => 42, ChannelDispatchOptions.Default);
             result.Should().Be(42);
         }
 

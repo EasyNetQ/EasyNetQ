@@ -17,11 +17,11 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             handlerCollection = new HandlerCollection();
 
-            handlerCollection.Add<MyMessage>((message, info) =>
+            handlerCollection.Add<MyMessage>((_, _) =>
                 {
                     myMessageHandlerExecuted = true;
                 });
-            handlerCollection.Add<IAnimal>((message, info) =>
+            handlerCollection.Add<IAnimal>((_, _) =>
                 {
                     animalHandlerExecuted = true;
                 });
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             Assert.Throws<EasyNetQException>(() =>
             {
-                handlerCollection.Add<MyMessage>((message, info) => { });
+                handlerCollection.Add<MyMessage>((_, _) => { });
             });
         }
     }
