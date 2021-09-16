@@ -24,10 +24,10 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             internalConsumers = new List<IInternalConsumer>();
 
             Queue queue = new Queue(queueName, false);
-            MessageHandler handler = (body, properties, info, cancellation) => Task.FromResult(AckStrategies.Ack);
+            MessageHandler handler = (_, _, _, _) => Task.FromResult(AckStrategies.Ack);
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
-            internalConsumerFactory.CreateConsumer(Arg.Any<ConsumerConfiguration>()).Returns(x =>
+            internalConsumerFactory.CreateConsumer(Arg.Any<ConsumerConfiguration>()).Returns(_ =>
             {
                 var internalConsumer = Substitute.For<IInternalConsumer>();
                 internalConsumers.Add(internalConsumer);

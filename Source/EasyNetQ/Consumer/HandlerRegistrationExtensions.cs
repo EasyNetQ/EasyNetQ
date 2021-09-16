@@ -23,7 +23,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
-            var asyncHandler = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, c) => handler(m, i));
+            var asyncHandler = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, _) => handler(m, i));
             return handlerRegistration.Add(asyncHandler);
         }
 
@@ -40,7 +40,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
-            return handlerRegistration.Add<T>((m, i, c) => handler(m, i));
+            return handlerRegistration.Add<T>((m, i, _) => handler(m, i));
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace EasyNetQ.Consumer
         {
             Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
 
-            return handlerRegistration.Add<T>((m, i, c) => handler(m, i));
+            return handlerRegistration.Add<T>((m, i, _) => handler(m, i));
         }
 
         /// <summary>

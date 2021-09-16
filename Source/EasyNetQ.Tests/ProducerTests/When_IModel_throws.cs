@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.ProducerTests
 
             mockBuilder.NextModel
                 .WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
-                .Do(x =>
+                .Do(_ =>
                 {
                     var args = new ShutdownEventArgs(ShutdownInitiator.Peer, 320,
                         "CONNECTION_FORCED - Closed via management plugin");

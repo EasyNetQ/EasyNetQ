@@ -33,7 +33,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
-            return scheduler.FuturePublishAsync(message, messageType, delay, c => { }, cancellationToken);
+            return scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
         }
 
         /// <summary>

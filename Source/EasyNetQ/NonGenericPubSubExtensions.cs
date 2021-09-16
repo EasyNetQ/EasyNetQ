@@ -29,7 +29,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            return pubSub.PublishAsync(message, messageType, c => { }, cancellationToken);
+            return pubSub.PublishAsync(message, messageType, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            pubSub.Publish(message, messageType, c => { }, cancellationToken);
+            pubSub.Publish(message, messageType, _ => { }, cancellationToken);
         }
 
         /// <summary>

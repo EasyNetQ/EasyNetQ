@@ -24,7 +24,7 @@ namespace EasyNetQ.IntegrationTests.Advanced
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
             var mre = new ManualResetEventSlim(false);
-            bus.Advanced.Connected += (sender, args) => mre.Set();
+            bus.Advanced.Connected += (_, _) => mre.Set();
 
             await bus.Advanced.ExchangeDeclareAsync(
                 Guid.NewGuid().ToString("N"), c => c.WithType(ExchangeType.Topic), cts.Token

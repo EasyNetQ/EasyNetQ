@@ -25,7 +25,7 @@ namespace EasyNetQ.Approval.Tests
                 ExcludeAttributes = new[] { "System.Diagnostics.DebuggerDisplayAttribute" },
             });
 
-            publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, __, fileType, fileExtension) => $"{type.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
+            publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
         }
     }
 }
