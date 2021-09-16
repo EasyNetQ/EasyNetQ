@@ -142,7 +142,7 @@ namespace EasyNetQ
                     : attr.QueueType;
             };
 
-            TopicNamingConvention = type => "";
+            TopicNamingConvention = _ => "";
 
             QueueNamingConvention = (type, subscriptionId) =>
                 {
@@ -163,11 +163,11 @@ namespace EasyNetQ
                 };
             RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
-            ErrorQueueNamingConvention = receivedInfo => "EasyNetQ_Default_Error_Queue";
+            ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
             ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
-            RpcRequestExchangeNamingConvention = type => "easy_net_q_rpc";
-            RpcResponseExchangeNamingConvention = type => "easy_net_q_rpc";
-            RpcReturnQueueNamingConvention = type => "easynetq.response." + Guid.NewGuid();
+            RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
+            RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
+            RpcReturnQueueNamingConvention = _ => "easynetq.response." + Guid.NewGuid();
 
             ConsumerTagConvention = () => Guid.NewGuid().ToString();
         }

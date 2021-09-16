@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
 {
     public class NonGenericPubSubExtensionsTests
     {
-        private readonly Action<IPublishConfiguration> configure = c => { };
+        private readonly Action<IPublishConfiguration> configure = _ => { };
         private readonly IPubSub pubSub;
 
         public NonGenericPubSubExtensionsTests()

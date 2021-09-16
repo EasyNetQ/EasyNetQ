@@ -22,7 +22,7 @@ namespace EasyNetQ.Tests.ConsumeTests
             var queue = new Queue("test_queue", false);
 
             var are = new AutoResetEvent(false);
-            mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, info) => Task.Factory.StartNew(() =>
+            mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => Task.Factory.StartNew(() =>
                 {
                     receivedMessage = message.Body;
                     are.Set();

@@ -18,7 +18,7 @@ namespace EasyNetQ.Tests.Mocking
         private readonly List<string> consumerQueueNames = new();
         private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
-        public MockBuilder() : this(register => { })
+        public MockBuilder() : this(_ => { })
         {
         }
 
@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests.Mocking
         {
         }
 
-        public MockBuilder(string connectionString) : this(connectionString, register => { })
+        public MockBuilder(string connectionString) : this(connectionString, _ => { })
         {
         }
 
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests.Mocking
             connection.IsOpen.Returns(true);
             connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
 
-            connection.CreateModel().Returns(i =>
+            connection.CreateModel().Returns(_ =>
             {
                 var channel = channelPool.Pop();
                 channels.Add(channel);

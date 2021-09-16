@@ -69,7 +69,7 @@ namespace EasyNetQ.DI.Tests
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_resolve_service_resolver(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory(c => { });
+            var resolver = resolverFactory(_ => { });
 
             Assert.NotNull(resolver.Resolve<IServiceResolver>());
         }
@@ -78,7 +78,7 @@ namespace EasyNetQ.DI.Tests
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_singleton_factory_called_once(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory(c => c.Register<IService>(x => new Service()));
+            var resolver = resolverFactory(c => c.Register<IService>(_ => new Service()));
 
             var first = resolver.Resolve<IService>();
             var second = resolver.Resolve<IService>();
@@ -90,7 +90,7 @@ namespace EasyNetQ.DI.Tests
         [MemberData(nameof(GetContainerAdapters))]
         public void Should_transient_factory_call_every_time(ResolverFactory resolverFactory)
         {
-            var resolver = resolverFactory(c => c.Register<IService>(x => new Service(), Lifetime.Transient));
+            var resolver = resolverFactory(c => c.Register<IService>(_ => new Service(), Lifetime.Transient));
 
             var first = resolver.Resolve<IService>();
             var second = resolver.Resolve<IService>();

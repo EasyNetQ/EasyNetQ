@@ -203,7 +203,7 @@ namespace EasyNetQ
 
                 var subscription = advancedBus.Consume<TResponse>(
                     queue,
-                    (message, receivedInfo) =>
+                    (message, _) =>
                     {
                         if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
                             responseAction.OnSuccess(message);
