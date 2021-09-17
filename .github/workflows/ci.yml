@@ -36,9 +36,6 @@ jobs:
         dotnet tool install -g dotnet-format
         dotnet format ./Source/EasyNetQ.sln --check
 
-    - name: Patch docker connection string
-      run: sed -i -e 's/http:\/\/127.0.0.1:2375/unix:\/var\/run\/docker.sock/g' ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests/settings.json
-
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
 
