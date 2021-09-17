@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../Tests.props"/>
+  <Import Project="../Tests.props" />
 
   <PropertyGroup>
     <TargetFramework>net5</TargetFramework>
@@ -21,8 +21,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="settings.json" />
-    <Content Include="settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>
