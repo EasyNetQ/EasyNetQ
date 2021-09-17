@@ -23,7 +23,8 @@ namespace EasyNetQ.DI
                 NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
                 ContinuationTimeout = configuration.Timeout,
                 DispatchConsumersAsync = true,
-                ConsumerDispatchConcurrency = configuration.PrefetchCount
+                ConsumerDispatchConcurrency = configuration.PrefetchCount,
+                RequestedChannelMax = configuration.RequestedChannelMax
             };
             return connectionFactory;
         }
