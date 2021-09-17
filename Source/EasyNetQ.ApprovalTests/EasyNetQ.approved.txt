@@ -82,6 +82,7 @@ namespace EasyNetQ
         public ushort PrefetchCount { get; set; }
         public string Product { get; set; }
         public bool PublisherConfirms { get; set; }
+        public ushort RequestedChannelMax { get; set; }
         public System.TimeSpan RequestedHeartbeat { get; set; }
         public RabbitMQ.Client.SslOption Ssl { get; }
         public System.TimeSpan Timeout { get; set; }
