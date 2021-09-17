@@ -33,7 +33,7 @@ namespace EasyNetQ
             PersistentMessages = true;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
             RequestedChannelMax = 2047;
-            MandatoryPublish = false;             
+            MandatoryPublish = false;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
             // setting to zero makes this infinite, but risks an out-of-memory exception.
