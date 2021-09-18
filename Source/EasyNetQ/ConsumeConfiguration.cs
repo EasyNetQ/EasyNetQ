@@ -35,13 +35,13 @@ namespace EasyNetQ
 
     internal class ConsumeConfiguration : IConsumeConfiguration
     {
-        private readonly Func<Queue, IHandlerCollection> createHandlerCollection;
+        private readonly IHandlerCollectionFactory handlerCollectionFactory;
 
         public ConsumeConfiguration(
-            ushort defaultPrefetchCount, Func<Queue, IHandlerCollection> createHandlerCollection
+            ushort defaultPrefetchCount, IHandlerCollectionFactory handlerCollectionFactory
         )
         {
-            this.createHandlerCollection = createHandlerCollection;
+            this.handlerCollectionFactory = handlerCollectionFactory;
             PrefetchCount = defaultPrefetchCount;
             PerQueueConsumeConfigurations = new List<Tuple<Queue, MessageHandler, PerQueueConsumeConfiguration>>();
             PerQueueTypedConsumeConfigurations =
@@ -63,7 +63,7 @@ namespace EasyNetQ
         }
 
         public IConsumeConfiguration ForQueue(
-            Queue queue, MessageHandler handler, Action<IPerQueueConsumeConfiguration> configure
+            in Queue queue, MessageHandler handler, Action<IPerQueueConsumeConfiguration> configure
         )
         {
             var perQueueConsumeConfiguration = new PerQueueConsumeConfiguration();
@@ -73,10 +73,10 @@ namespace EasyNetQ
         }
 
         public IConsumeConfiguration ForQueue(
-            Queue queue, Action<IHandlerRegistration> register, Action<IPerQueueConsumeConfiguration> configure
+            in Queue queue, Action<IHandlerRegistration> register, Action<IPerQueueConsumeConfiguration> configure
         )
         {
-            var handlerCollection = createHandlerCollection(queue);
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(queue);
             register(handlerCollection);
             var perQueueConsumeConfiguration = new PerQueueConsumeConfiguration();
             configure(perQueueConsumeConfiguration);
@@ -135,7 +135,7 @@ namespace EasyNetQ
         /// </summary>
         /// <returns>IConsumeConfiguration</returns>
         IConsumeConfiguration ForQueue(
-            Queue queue, MessageHandler handler, Action<IPerQueueConsumeConfiguration> configure
+            in Queue queue, MessageHandler handler, Action<IPerQueueConsumeConfiguration> configure
         );
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace EasyNetQ
         /// </summary>
         /// <returns>IConsumeConfiguration</returns>
         IConsumeConfiguration ForQueue(
-            Queue queue, Action<IHandlerRegistration> register, Action<IPerQueueConsumeConfiguration> configure
+            in Queue queue, Action<IHandlerRegistration> register, Action<IPerQueueConsumeConfiguration> configure
         );
     }
 

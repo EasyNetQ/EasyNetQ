@@ -8,7 +8,7 @@ namespace EasyNetQ
         public MessageProperties MessageProperties { get; }
         public MessageReturnedInfo MessageReturnedInfo { get; }
 
-        public MessageReturnedEventArgs(ReadOnlyMemory<byte> messageBody, MessageProperties messageProperties, MessageReturnedInfo messageReturnedInfo)
+        public MessageReturnedEventArgs(in ReadOnlyMemory<byte> messageBody, MessageProperties messageProperties, in MessageReturnedInfo messageReturnedInfo)
         {
             Preconditions.CheckNotNull(messageProperties, nameof(messageProperties));
             Preconditions.CheckNotNull(messageReturnedInfo, nameof(messageReturnedInfo));

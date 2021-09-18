@@ -77,8 +77,8 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             var waiter = new CountdownEvent(2);
 
-            MockBuilder.EventBus.Subscribe<DeliveredMessageEvent>(_ => waiter.Signal());
-            MockBuilder.EventBus.Subscribe<AckEvent>(_ => waiter.Signal());
+            MockBuilder.EventBus.Subscribe((in DeliveredMessageEvent _) => waiter.Signal());
+            MockBuilder.EventBus.Subscribe((in AckEvent _) => waiter.Signal());
 
             MockBuilder.Consumers[0].HandleBasicDeliver(
                 ConsumerTag,

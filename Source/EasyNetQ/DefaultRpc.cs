@@ -123,7 +123,7 @@ namespace EasyNetQ
                 responseSubscription.Unsubscribe();
         }
 
-        private void OnConnectionRecovered(ConnectionRecoveredEvent @event)
+        private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
         {
             var responseActionsValues = responseActions.Values;
             var responseSubscriptionsValues = responseSubscriptions.Values;

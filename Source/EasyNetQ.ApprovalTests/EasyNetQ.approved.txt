@@ -91,19 +91,19 @@ namespace EasyNetQ
     }
     public static class ConsumeConfigurationExtensions
     {
-        public static EasyNetQ.IConsumeConfiguration ForQueue(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.IMessageHandler<T> handler) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.IMessageHandler<T> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
-        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, EasyNetQ.Topology.Queue queue, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.IMessageHandler<T> handler) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.IMessageHandler<T> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
+        public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
     }
     public readonly struct ConsumedMessage
     {
-        public ConsumedMessage(EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public ConsumedMessage(EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
@@ -137,7 +137,7 @@ namespace EasyNetQ
     public class DefaultMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public DefaultMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
-        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
     }
     public class DefaultPubSub : EasyNetQ.IPubSub
@@ -239,8 +239,10 @@ namespace EasyNetQ
     public sealed class EventBus : EasyNetQ.IEventBus
     {
         public EventBus() { }
-        public void Publish<TEvent>(TEvent @event) { }
-        public System.IDisposable Subscribe<TEvent>(System.Action<TEvent> handler) { }
+        public void Publish<TEvent>(in TEvent @event)
+            where TEvent :  struct { }
+        public System.IDisposable Subscribe<TEvent>(EasyNetQ.TEventHandler<TEvent> eventHandler)
+            where TEvent :  struct { }
     }
     public static class ExchangeDeclareConfigurationExtensions
     {
@@ -268,8 +270,8 @@ namespace EasyNetQ
         System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange>> BindAsync(EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments, System.Threading.CancellationToken cancellationToken = default);
         void Connect();
         System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure);
-        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(EasyNetQ.Topology.Queue queue, bool autoAck = true);
-        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(EasyNetQ.Topology.Queue queue, bool autoAck = true);
+        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
+        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
         System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(string name, System.Action<EasyNetQ.IExchangeDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeDeleteAsync(EasyNetQ.Topology.Exchange exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default);
@@ -295,8 +297,8 @@ namespace EasyNetQ
     }
     public interface IConsumeConfiguration
     {
-        EasyNetQ.IConsumeConfiguration ForQueue(EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
-        EasyNetQ.IConsumeConfiguration ForQueue(EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> register, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
+        EasyNetQ.IConsumeConfiguration ForQueue(in EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
+        EasyNetQ.IConsumeConfiguration ForQueue(in EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> register, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
         EasyNetQ.IConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
     }
     public interface IConventions
@@ -319,8 +321,10 @@ namespace EasyNetQ
     }
     public interface IEventBus
     {
-        void Publish<TEvent>(TEvent @event);
-        System.IDisposable Subscribe<TEvent>(System.Action<TEvent> handler);
+        void Publish<TEvent>(in TEvent @event)
+            where TEvent :  struct;
+        System.IDisposable Subscribe<TEvent>(EasyNetQ.TEventHandler<TEvent> eventHandler)
+            where TEvent :  struct;
     }
     public interface IExchangeDeclareConfiguration
     {
@@ -346,7 +350,7 @@ namespace EasyNetQ
     }
     public interface IMessageSerializationStrategy
     {
-        EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body);
+        EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body);
         EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message);
     }
     public interface IMessage<out T> : EasyNetQ.IMessage
@@ -384,8 +388,8 @@ namespace EasyNetQ
     }
     public interface IPullingConsumerFactory
     {
-        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(EasyNetQ.Topology.Queue queue, EasyNetQ.PullingConsumerOptions options);
-        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(EasyNetQ.Topology.Queue queue, EasyNetQ.PullingConsumerOptions options);
+        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options);
+        EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options);
     }
     public interface IPullingConsumer<TPullResult> : System.IDisposable
         where TPullResult : EasyNetQ.IPullResult
@@ -567,12 +571,12 @@ namespace EasyNetQ
     }
     public class MessageReturnedEventArgs : System.EventArgs
     {
-        public MessageReturnedEventArgs(System.ReadOnlyMemory<byte> messageBody, EasyNetQ.MessageProperties messageProperties, EasyNetQ.MessageReturnedInfo messageReturnedInfo) { }
+        public MessageReturnedEventArgs(in System.ReadOnlyMemory<byte> messageBody, EasyNetQ.MessageProperties messageProperties, in EasyNetQ.MessageReturnedInfo messageReturnedInfo) { }
         public System.ReadOnlyMemory<byte> MessageBody { get; }
         public EasyNetQ.MessageProperties MessageProperties { get; }
         public EasyNetQ.MessageReturnedInfo MessageReturnedInfo { get; }
     }
-    public class MessageReturnedInfo
+    public readonly struct MessageReturnedInfo
     {
         public MessageReturnedInfo(string exchange, string routingKey, string returnReason) { }
         public string Exchange { get; }
@@ -635,7 +639,7 @@ namespace EasyNetQ
     }
     public readonly struct ProducedMessage
     {
-        public ProducedMessage(EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public ProducedMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
     }
@@ -671,7 +675,7 @@ namespace EasyNetQ
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
         public static EasyNetQ.PullResult NotAvailable { get; }
         public void Dispose() { }
-        public static EasyNetQ.PullResult Available(ulong messagesCount, EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body, System.IDisposable disposable) { }
+        public static EasyNetQ.PullResult Available(ulong messagesCount, EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.IDisposable disposable) { }
     }
     public readonly struct PullResult<T> : EasyNetQ.IPullResult, System.IDisposable
     {
@@ -685,7 +689,7 @@ namespace EasyNetQ
     }
     public class PullingConsumer : EasyNetQ.IPullingConsumer<EasyNetQ.PullResult>, System.IDisposable
     {
-        public PullingConsumer(EasyNetQ.PullingConsumerOptions options, EasyNetQ.Topology.Queue queue, EasyNetQ.Producer.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
+        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Producer.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
         public System.Threading.Tasks.Task AckAsync(ulong deliveryTag, bool multiple, System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<EasyNetQ.PullResult> PullAsync(System.Threading.CancellationToken cancellationToken = default) { }
@@ -707,8 +711,8 @@ namespace EasyNetQ
     public class PullingConsumerFactory : EasyNetQ.IPullingConsumerFactory
     {
         public PullingConsumerFactory(EasyNetQ.Producer.IPersistentChannelFactory channelFactory, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
-        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(EasyNetQ.Topology.Queue queue, EasyNetQ.PullingConsumerOptions options) { }
-        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(EasyNetQ.Topology.Queue queue, EasyNetQ.PullingConsumerOptions options) { }
+        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
+        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
     }
     public readonly struct PullingConsumerOptions
     {
@@ -778,8 +782,8 @@ namespace EasyNetQ
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange>> BindAsync(EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments, System.Threading.CancellationToken cancellationToken) { }
         public void Connect() { }
         public System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure) { }
-        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
-        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
+        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
+        public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
         public virtual void Dispose() { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(string name, System.Action<EasyNetQ.IExchangeDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task ExchangeDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default) { }
@@ -885,11 +889,12 @@ namespace EasyNetQ
     }
     public readonly struct SubscriptionResult : System.IDisposable
     {
-        public SubscriptionResult(EasyNetQ.Topology.Exchange exchange, EasyNetQ.Topology.Queue queue, System.IDisposable consumerCancellation) { }
+        public SubscriptionResult(in EasyNetQ.Topology.Exchange exchange, in EasyNetQ.Topology.Queue queue, System.IDisposable consumerCancellation) { }
         public EasyNetQ.Topology.Exchange Exchange { get; }
         public EasyNetQ.Topology.Queue Queue { get; }
         public void Dispose() { }
     }
+    public delegate void TEventHandler<TEvent>(in TEvent @event);
     public delegate string TopicNameConvention(System.Type messageType);
 }
 namespace EasyNetQ.AutoSubscribe
@@ -1020,7 +1025,7 @@ namespace EasyNetQ.Consumer
     }
     public readonly struct ConsumerExecutionContext
     {
-        public ConsumerExecutionContext(EasyNetQ.Consumer.MessageHandler handler, EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public ConsumerExecutionContext(EasyNetQ.Consumer.MessageHandler handler, EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.Consumer.MessageHandler Handler { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -1056,12 +1061,12 @@ namespace EasyNetQ.Consumer
     public class HandlerCollectionFactory : EasyNetQ.Consumer.IHandlerCollectionFactory
     {
         public HandlerCollectionFactory() { }
-        public EasyNetQ.Consumer.IHandlerCollection CreateHandlerCollection(EasyNetQ.Topology.Queue queue) { }
+        public EasyNetQ.Consumer.IHandlerCollection CreateHandlerCollection(in EasyNetQ.Topology.Queue queue) { }
     }
     public class HandlerCollectionPerQueueFactory : EasyNetQ.Consumer.IHandlerCollectionFactory
     {
         public HandlerCollectionPerQueueFactory() { }
-        public EasyNetQ.Consumer.IHandlerCollection CreateHandlerCollection(EasyNetQ.Topology.Queue queue) { }
+        public EasyNetQ.Consumer.IHandlerCollection CreateHandlerCollection(in EasyNetQ.Topology.Queue queue) { }
     }
     public static class HandlerRegistrationExtensions
     {
@@ -1102,7 +1107,7 @@ namespace EasyNetQ.Consumer
     }
     public interface IHandlerCollectionFactory
     {
-        EasyNetQ.Consumer.IHandlerCollection CreateHandlerCollection(EasyNetQ.Topology.Queue queue);
+        EasyNetQ.Consumer.IHandlerCollection CreateHandlerCollection(in EasyNetQ.Topology.Queue queue);
     }
     public interface IHandlerRegistration
     {
@@ -1135,7 +1140,7 @@ namespace EasyNetQ.Consumer
     }
     public class InternalConsumerCancelledEventArgs : System.EventArgs
     {
-        public InternalConsumerCancelledEventArgs(EasyNetQ.Topology.Queue cancelled, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> active) { }
+        public InternalConsumerCancelledEventArgs(in EasyNetQ.Topology.Queue cancelled, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> active) { }
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Active { get; }
         public EasyNetQ.Topology.Queue Cancelled { get; }
     }
@@ -1209,9 +1214,9 @@ namespace EasyNetQ.DI
 }
 namespace EasyNetQ.Events
 {
-    public class AckEvent
+    public readonly struct AckEvent
     {
-        public AckEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body, EasyNetQ.Events.AckResult ackResult) { }
+        public AckEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, EasyNetQ.Events.AckResult ackResult) { }
         public EasyNetQ.Events.AckResult AckResult { get; }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -1223,56 +1228,52 @@ namespace EasyNetQ.Events
         Nack = 1,
         Exception = 2,
     }
-    public class ChannelRecoveredEvent
+    public readonly struct ChannelRecoveredEvent
     {
         public ChannelRecoveredEvent(RabbitMQ.Client.IModel channel) { }
         public RabbitMQ.Client.IModel Channel { get; }
     }
-    public class ChannelShutdownEvent
+    public readonly struct ChannelShutdownEvent
     {
         public ChannelShutdownEvent(RabbitMQ.Client.IModel channel) { }
         public RabbitMQ.Client.IModel Channel { get; }
     }
-    public class ConnectionBlockedEvent
+    public readonly struct ConnectionBlockedEvent
     {
         public ConnectionBlockedEvent(string reason) { }
         public string Reason { get; }
     }
-    public class ConnectionCreatedEvent
+    public readonly struct ConnectionCreatedEvent
     {
         public ConnectionCreatedEvent(RabbitMQ.Client.AmqpTcpEndpoint endpoint) { }
         public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; }
     }
-    public class ConnectionDisconnectedEvent
+    public readonly struct ConnectionDisconnectedEvent
     {
         public ConnectionDisconnectedEvent(RabbitMQ.Client.AmqpTcpEndpoint endpoint, string reason) { }
         public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; }
         public string Reason { get; }
     }
-    public class ConnectionRecoveredEvent
+    public readonly struct ConnectionRecoveredEvent
     {
         public ConnectionRecoveredEvent(RabbitMQ.Client.AmqpTcpEndpoint endpoint) { }
         public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; }
     }
-    public class ConnectionUnblockedEvent
-    {
-        public ConnectionUnblockedEvent() { }
-    }
-    public class ConsumerModelDisposedEvent
+    public readonly struct ConnectionUnblockedEvent { }
+    public readonly struct ConsumerModelDisposedEvent
     {
         public ConsumerModelDisposedEvent(string[] consumerTags) { }
         public System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags { get; }
     }
-    public class DeliveredMessageEvent
+    public readonly struct DeliveredMessageEvent
     {
-        public DeliveredMessageEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public DeliveredMessageEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
     }
-    public class MessageConfirmationEvent
+    public readonly struct MessageConfirmationEvent
     {
-        public MessageConfirmationEvent() { }
         public RabbitMQ.Client.IModel Channel { get; }
         public ulong DeliveryTag { get; }
         public bool IsNack { get; }
@@ -1280,35 +1281,35 @@ namespace EasyNetQ.Events
         public static EasyNetQ.Events.MessageConfirmationEvent Ack(RabbitMQ.Client.IModel channel, ulong deliveryTag, bool multiple) { }
         public static EasyNetQ.Events.MessageConfirmationEvent Nack(RabbitMQ.Client.IModel channel, ulong deliveryTag, bool multiple) { }
     }
-    public class PublishedMessageEvent
+    public readonly struct PublishedMessageEvent
     {
-        public PublishedMessageEvent(string exchangeName, string routingKey, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public PublishedMessageEvent(in EasyNetQ.Topology.Exchange exchange, string routingKey, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
-        public string ExchangeName { get; }
+        public EasyNetQ.Topology.Exchange Exchange { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public string RoutingKey { get; }
     }
-    public class ReturnedMessageEvent
+    public readonly struct ReturnedMessageEvent
     {
-        public ReturnedMessageEvent(RabbitMQ.Client.IModel channel, System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, EasyNetQ.MessageReturnedInfo info) { }
+        public ReturnedMessageEvent(RabbitMQ.Client.IModel channel, in System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, in EasyNetQ.MessageReturnedInfo info) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public RabbitMQ.Client.IModel Channel { get; }
         public EasyNetQ.MessageReturnedInfo Info { get; }
         public EasyNetQ.MessageProperties Properties { get; }
     }
-    public class StartConsumingFailedEvent
+    public readonly struct StartConsumingFailedEvent
     {
-        public StartConsumingFailedEvent(EasyNetQ.Consumer.IConsumer consumer, EasyNetQ.Topology.Queue queue) { }
+        public StartConsumingFailedEvent(EasyNetQ.Consumer.IConsumer consumer, in EasyNetQ.Topology.Queue queue) { }
         public EasyNetQ.Consumer.IConsumer Consumer { get; }
         public EasyNetQ.Topology.Queue Queue { get; }
     }
-    public class StartConsumingSucceededEvent
+    public readonly struct StartConsumingSucceededEvent
     {
-        public StartConsumingSucceededEvent(EasyNetQ.Consumer.IConsumer consumer, EasyNetQ.Topology.Queue queue) { }
+        public StartConsumingSucceededEvent(EasyNetQ.Consumer.IConsumer consumer, in EasyNetQ.Topology.Queue queue) { }
         public EasyNetQ.Consumer.IConsumer Consumer { get; }
         public EasyNetQ.Topology.Queue Queue { get; }
     }
-    public class StoppedConsumingEvent
+    public readonly struct StoppedConsumingEvent
     {
         public StoppedConsumingEvent(EasyNetQ.Consumer.IConsumer consumer) { }
         public EasyNetQ.Consumer.IConsumer Consumer { get; }
@@ -1451,7 +1452,7 @@ namespace EasyNetQ.Internals
     }
     public sealed class ReadOnlyMemoryStream : System.IO.Stream
     {
-        public ReadOnlyMemoryStream(System.ReadOnlyMemory<byte> content) { }
+        public ReadOnlyMemoryStream(in System.ReadOnlyMemory<byte> content) { }
         public override bool CanRead { get; }
         public override bool CanSeek { get; }
         public override bool CanWrite { get; }
@@ -1629,7 +1630,7 @@ namespace EasyNetQ.MessageVersioning
     public class VersionedMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public VersionedMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
-        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body) { }
+        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
     }
 }
@@ -1674,7 +1675,7 @@ namespace EasyNetQ.Producer
     }
     public interface IPersistentChannelFactory
     {
-        EasyNetQ.Producer.IPersistentChannel CreatePersistentChannel(EasyNetQ.Producer.PersistentChannelOptions options);
+        EasyNetQ.Producer.IPersistentChannel CreatePersistentChannel(in EasyNetQ.Producer.PersistentChannelOptions options);
     }
     public interface IPublishConfirmationListener : System.IDisposable
     {
@@ -1694,14 +1695,14 @@ namespace EasyNetQ.Producer
     }
     public class PersistentChannel : EasyNetQ.Producer.IPersistentChannel, System.IDisposable
     {
-        public PersistentChannel(EasyNetQ.Producer.PersistentChannelOptions options, EasyNetQ.IPersistentConnection connection, EasyNetQ.IEventBus eventBus) { }
+        public PersistentChannel(in EasyNetQ.Producer.PersistentChannelOptions options, EasyNetQ.IPersistentConnection connection, EasyNetQ.IEventBus eventBus) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<T> InvokeChannelActionAsync<T>(System.Func<RabbitMQ.Client.IModel, T> channelAction, System.Threading.CancellationToken cancellationToken) { }
     }
     public class PersistentChannelFactory : EasyNetQ.Producer.IPersistentChannelFactory
     {
         public PersistentChannelFactory(EasyNetQ.IPersistentConnection connection, EasyNetQ.IEventBus eventBus) { }
-        public EasyNetQ.Producer.IPersistentChannel CreatePersistentChannel(EasyNetQ.Producer.PersistentChannelOptions options) { }
+        public EasyNetQ.Producer.IPersistentChannel CreatePersistentChannel(in EasyNetQ.Producer.PersistentChannelOptions options) { }
     }
     public readonly struct PersistentChannelOptions
     {
@@ -1764,7 +1765,7 @@ namespace EasyNetQ.Topology
     public readonly struct Binding<TBindable>
         where TBindable :  struct, EasyNetQ.Topology.IBindable
     {
-        public Binding(EasyNetQ.Topology.Exchange source, TBindable destination, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments = null) { }
+        public Binding(in EasyNetQ.Topology.Exchange source, in TBindable destination, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments = null) { }
         public System.Collections.Generic.IDictionary<string, object> Arguments { get; }
         public TBindable Destination { get; }
         public string RoutingKey { get; }
