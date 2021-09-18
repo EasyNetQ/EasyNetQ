@@ -1,4 +1,4 @@
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
 
 using System;
 using System.Threading;
@@ -25,7 +25,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                 .Consume(queue, (_, _, _) => Task.Run(() => { }));
 
             var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(_ => are.Set());
+            mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
 
             cancelSubscription.Dispose();
 

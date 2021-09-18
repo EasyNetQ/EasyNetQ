@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace EasyNetQ.Events
 {
-    public class ConsumerModelDisposedEvent
+    public readonly struct ConsumerModelDisposedEvent
     {
         public IReadOnlyCollection<string> ConsumerTags { get; }
 
