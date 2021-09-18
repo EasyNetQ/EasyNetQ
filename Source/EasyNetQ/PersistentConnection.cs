@@ -150,6 +150,10 @@ namespace EasyNetQ
             if (connection == null) return;
 
             connection.Dispose();
+            // We previously agreed to dispose firstly and then unsubscribe from events so as not to lose logs.
+            // These works only for connection.RecoverySucceeded -= OnConnectionRecovered;, for other events
+            // it's prohibited to unsubscribe from them after a connection disposal. There are a good news though:
+            // these events handlers (except RecoverySucceeded one) are nullified on AutorecoveringConnection.Dispose.
             connection.RecoverySucceeded -= OnConnectionRecovered;
         }
 
