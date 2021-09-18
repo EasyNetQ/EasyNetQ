@@ -1,15 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Description>An adaptor to allow EasyNetQ to use Newtonsoft.Json serializer</Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>Newtonsoft;$(PackageTags)</PackageTags>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\EasyNetQ\Preconditions.cs" Link="Preconditions.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
 
 </Project>
