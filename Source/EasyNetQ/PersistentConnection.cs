@@ -62,7 +62,7 @@ namespace EasyNetQ
 
 
         /// <inheritdoc />
-        public bool IsConnected => initializedConnection is { IsOpen: true };
+        public bool IsConnected => initializedConnection is {IsOpen: true};
 
         /// <inheritdoc />
         public void Connect()
@@ -148,17 +148,14 @@ namespace EasyNetQ
         {
             var connection = Interlocked.Exchange(ref initializedConnection, null);
             if (connection == null) return;
-
-            connection.RecoverySucceeded -= OnConnectionRecovered;
-            connection.ConnectionUnblocked -= OnConnectionUnblocked;
-            connection.ConnectionBlocked -= OnConnectionBlocked;
-            connection.ConnectionShutdown -= OnConnectionShutdown;
+            
             connection.Dispose();
+            connection.RecoverySucceeded -= OnConnectionRecovered;
         }
 
         private void OnConnectionRecovered(object sender, EventArgs e)
         {
-            var connection = (IConnection)sender;
+            var connection = (IConnection) sender;
             logger.InfoFormat(
                 "Reconnected to broker {host}:{port}",
                 connection.Endpoint.HostName,
@@ -169,7 +166,7 @@ namespace EasyNetQ
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            var connection = (IConnection)sender;
+            var connection = (IConnection) sender;
             logger.InfoFormat(
                 "Disconnected from broker {host}:{port} because of {reason}",
                 connection.Endpoint.HostName,
