@@ -24,7 +24,7 @@ namespace EasyNetQ.Consumer
 
         public AsyncBasicConsumer(
             IModel model,
-            Queue queue,
+            in Queue queue,
             IEventBus eventBus,
             IHandlerRunner handlerRunner,
             MessageHandler messageHandler

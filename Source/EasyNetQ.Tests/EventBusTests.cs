@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests
 {
     public class EventBusTests
     {
-        private IEventBus eventBus;
+        private readonly IEventBus eventBus;
 
         public EventBusTests()
         {
@@ -19,9 +19,9 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_be_able_to_get_subscribed_to_events()
         {
-            Event1 capturedEvent = null;
+            Event1? capturedEvent = null;
 
-            eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
+            eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
 
             var publishedEvent = new Event1
             {
@@ -30,16 +30,15 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(publishedEvent);
 
-            capturedEvent.Should().NotBeNull();
-            capturedEvent.Should().BeSameAs(publishedEvent);
+            capturedEvent.Should().Be(publishedEvent);
         }
 
         [Fact]
         public void Should_not_get_events_not_subscribed_to()
         {
-            Event1 capturedEvent = null;
+            Event1? capturedEvent = null;
 
-            eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
+            eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
 
             var publishedEvent = new Event2
             {
@@ -54,30 +53,31 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_be_able_to_cancel_an_event()
         {
-            var stringsPublished = new List<string>();
+            var published = new List<Event1>();
 
-            var subscription = eventBus.Subscribe<string>(stringsPublished.Add);
+            var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
             subscription.Should().NotBeNull();
 
-            eventBus.Publish("Before cancellation");
+            var publishedEvent = new Event1 { Text = "Before cancellation" };
+            eventBus.Publish(publishedEvent);
 
             subscription.Dispose();
 
-            eventBus.Publish("Hello World");
+            eventBus.Publish(new Event1 { Text = "Hello World" });
 
-            stringsPublished.Count.Should().Be(1);
-            stringsPublished[0].Should().Be("Before cancellation");
+            published.Count.Should().Be(1);
+            published[0].Should().Be(publishedEvent);
         }
 
         [Fact]
         public void Should_handle_resubscription_from_handler()
         {
-            Event1 eventFromSubscription = null;
+            Event1? eventFromSubscription = null;
 
-            eventBus.Subscribe<Event1>(@event =>
+            eventBus.Subscribe((in Event1 @event) =>
                 {
                     eventFromSubscription = @event;
-                    eventBus.Subscribe<Event1>(_ => { });
+                    eventBus.Subscribe((in Event1 _) => { });
                 });
 
             var publishedEvent1 = new Event1
@@ -93,11 +93,11 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_handle_cancelation_from_handler()
         {
-            Event1 eventFromSubscription = null;
+            Event1? eventFromSubscription = null;
 
             IDisposable subscription = null;
 
-            subscription = eventBus.Subscribe<Event1>(@event =>
+            subscription = eventBus.Subscribe((in Event1 @event) =>
             {
                 subscription.Dispose();
                 eventFromSubscription = @event;
@@ -113,12 +113,12 @@ namespace EasyNetQ.Tests
             eventFromSubscription.Should().NotBeNull();
         }
 
-        private class Event1
+        private struct Event1
         {
             public string Text { get; set; }
         }
 
-        private class Event2
+        private struct Event2
         {
             public string Text { get; set; }
         }
