@@ -149,11 +149,8 @@ namespace EasyNetQ
             var connection = Interlocked.Exchange(ref initializedConnection, null);
             if (connection == null) return;
 
-            connection.RecoverySucceeded -= OnConnectionRecovered;
-            connection.ConnectionUnblocked -= OnConnectionUnblocked;
-            connection.ConnectionBlocked -= OnConnectionBlocked;
-            connection.ConnectionShutdown -= OnConnectionShutdown;
             connection.Dispose();
+            connection.RecoverySucceeded -= OnConnectionRecovered;
         }
 
         private void OnConnectionRecovered(object sender, EventArgs e)
