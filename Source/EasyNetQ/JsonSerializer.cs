@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -31,7 +32,7 @@ namespace EasyNetQ
             if (jsonSerializerType == null)
             {
                 throw new InvalidOperationException(
-                    "Newtonsoft.Json is not found. Please reference it or add one of EasyNetQ.Serialization.* packages"
+                    "Newtonsoft.Json assembly is not found. Starting from EasyNetQ v7, an explicit dependency from Newtonsoft.Json was removed. Please reference Newtonsoft.Json package (directly or indirectly) or add one of EasyNetQ.Serialization.* packages instead."
                 );
             }
 
@@ -48,7 +49,7 @@ namespace EasyNetQ
             }
             else if (!serializerSettingsType.IsInstanceOfType(serializerSettings))
             {
-                throw new InvalidOperationException("Incorrect settings type");
+                throw new InvalidOperationException("Incorrect settings type. Settings must be of Newtonsoft.Json.JsonSerializerSettings or derived type.");
             }
 
             jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] { serializerSettingsType })
@@ -179,7 +180,7 @@ namespace EasyNetQ
         private static MethodInfo GetMethod(Type type, string name, Type[] types)
         {
             return type.GetMethod(name, types)
-                   ?? throw new InvalidOperationException($"Type {type} has no method {name} with parameters {types}");
+                   ?? throw new InvalidOperationException($"Type {type} has no method {name}({string.Join(", ", types.Select(t => t.Name))})");
         }
 
         private static PropertyInfo GetProperty(Type type, string name)
@@ -191,7 +192,7 @@ namespace EasyNetQ
         private static ConstructorInfo GetConstructor(Type type, Type[] types)
         {
             return type.GetConstructor(types)
-                   ?? throw new InvalidOperationException($"Type {type} has no constructor with parameters {types}");
+                   ?? throw new InvalidOperationException($"Type {type} has no public constructor with parameters {string.Join(", ", types.Select(t => t.Name))}");
         }
     }
 }

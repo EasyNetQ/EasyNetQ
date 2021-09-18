@@ -34,7 +34,7 @@ namespace EasyNetQ.Serialization.Tests
         [MemberData(nameof(GetSerializers))]
         public void Should_be_able_to_serialize_basic_properties(ISerializer serializer)
         {
-            var originalProperties = new BasicProperties
+            var originalProperties = new EasyNetQ.Tests.BasicProperties
             {
                 AppId = "some app id",
                 ClusterId = "cluster id",
@@ -62,7 +62,7 @@ namespace EasyNetQ.Serialization.Tests
                 typeof(MessageProperties), serializedMessage.Memory
             );
 
-            var newProperties = new BasicProperties();
+            var newProperties = new EasyNetQ.Tests.BasicProperties();
             deserializedMessageBasicProperties.CopyTo(newProperties);
 
             originalProperties.Should().BeEquivalentTo(newProperties);
