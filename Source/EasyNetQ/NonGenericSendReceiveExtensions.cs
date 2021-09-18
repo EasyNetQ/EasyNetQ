@@ -35,7 +35,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
 
-            return sendReceive.SendAsync(queue, message, messageType, c => { }, cancellationToken);
+            return sendReceive.SendAsync(queue, message, messageType, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
 
-            sendReceive.Send(queue, message, messageType, c => { }, cancellationToken);
+            sendReceive.Send(queue, message, messageType, _ => { }, cancellationToken);
         }
 
         /// <summary>

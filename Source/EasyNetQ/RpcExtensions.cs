@@ -49,7 +49,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            return rpc.RequestAsync<TRequest, TResponse>(request, c => { }, cancellationToken);
+            return rpc.RequestAsync<TRequest, TResponse>(request, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -94,8 +94,8 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, c) => responder(m));
-            return rpc.RespondAsync<TRequest, TResponse>(asyncResponder, c => { }, cancellationToken);
+            var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
+            return rpc.RespondAsync<TRequest, TResponse>(asyncResponder, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            return rpc.RespondAsync<TRequest, TResponse>((r, c) => responder(r), c => { }, cancellationToken);
+            return rpc.RespondAsync<TRequest, TResponse>((r, _) => responder(r), _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            return rpc.Respond(responder, c => { }, cancellationToken);
+            return rpc.Respond(responder, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -152,9 +152,9 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, c) => responder(m));
+            var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
 
-            return rpc.Respond(asyncResponder, c => { }, cancellationToken);
+            return rpc.Respond(asyncResponder, _ => { }, cancellationToken);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
-            return rpc.Respond<TRequest, TResponse>((r, c) => responder(r), configure, cancellationToken);
+            return rpc.Respond<TRequest, TResponse>((r, _) => responder(r), configure, cancellationToken);
         }
 
         /// <summary>

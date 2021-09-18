@@ -95,7 +95,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             brokenChannel.When(x => x.ExchangeDeclare("MyExchange", "direct"))
                 .Do(_ => throw exception);
 
-            persistentConnection.CreateModel().Returns(x => brokenChannel);
+            persistentConnection.CreateModel().Returns(_ => brokenChannel);
 
             using var persistentChannel = new PersistentChannel(
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()

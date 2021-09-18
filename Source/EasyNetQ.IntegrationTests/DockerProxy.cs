@@ -14,16 +14,16 @@ namespace EasyNetQ.IntegrationTests
         private readonly DockerClient client;
         private readonly DockerClientConfiguration dockerConfiguration;
 
-        public DockerProxy(Uri uri)
+        public DockerProxy()
         {
-            dockerConfiguration = new DockerClientConfiguration(uri);
+            dockerConfiguration = new DockerClientConfiguration();
             client = dockerConfiguration.CreateClient();
         }
 
         public void Dispose()
         {
-            dockerConfiguration.Dispose();
             client.Dispose();
+            dockerConfiguration.Dispose();
         }
 
         public async Task<OSPlatform> GetDockerEngineOsAsync(CancellationToken token = default)
@@ -48,7 +48,7 @@ namespace EasyNetQ.IntegrationTests
                 FromImage = image,
                 Tag = tag
             };
-            var progress = new Progress<JSONMessage>(jsonMessage => { });
+            var progress = new Progress<JSONMessage>(_ => { });
             await client.Images.CreateImageAsync(createParameters, null, progress, token);
         }
 
@@ -67,7 +67,7 @@ namespace EasyNetQ.IntegrationTests
                     PortBindings = PortBindings(portMappings),
                     NetworkMode = networkName
                 },
-                ExposedPorts = portMappings.ToDictionary(x => x.Key, x => new EmptyStruct())
+                ExposedPorts = portMappings.ToDictionary(x => x.Key, _ => new EmptyStruct())
             };
             var response = await client.Containers.CreateContainerAsync(createParameters, token);
             return response.ID;
@@ -90,7 +90,8 @@ namespace EasyNetQ.IntegrationTests
         {
             var ids = await FindContainerIdsAsync(name);
             var stopTasks = ids.Select(x =>
-                client.Containers.StopContainerAsync(x, new ContainerStopParameters(), token));
+                client.Containers.StopContainerAsync(x, new ContainerStopParameters(), token)
+            );
             await Task.WhenAll(stopTasks);
         }
 
@@ -131,8 +132,7 @@ namespace EasyNetQ.IntegrationTests
         public async Task<IEnumerable<string>> FindContainerIdsAsync(string name)
         {
             var containers = await client.Containers
-                .ListContainersAsync(new ContainersListParameters { All = true, Filters = ListFilters(name) })
-                ;
+                .ListContainersAsync(new ContainersListParameters { All = true, Filters = ListFilters(name) });
             return containers.Select(x => x.ID);
         }
 

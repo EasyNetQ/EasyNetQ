@@ -33,7 +33,7 @@ namespace EasyNetQ.Hosepipe.Tests
             arguments.At(0, a => one = a.Value).FailWith(() => Assert.True(false, "should succeed"));
             arguments.At(1, a => two = a.Value).FailWith(() => Assert.True(false, "should succeed"));
             arguments.At(2, a => three = a.Value).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.At(3, a => Assert.True(false, "Should not be an arg at 3")).FailWith(() => threeFailed = true);
+            arguments.At(3, _ => Assert.True(false, "Should not be an arg at 3")).FailWith(() => threeFailed = true);
 
             one.ShouldEqual(args[0]);
             two.ShouldEqual(args[1]);
@@ -58,7 +58,7 @@ namespace EasyNetQ.Hosepipe.Tests
             arguments.WithKey("z", a => a.Value.ShouldEqual("three")).FailWith(() => Assert.True(false, "should succeed"));
             arguments.WithKey("x", a => a.Value.ShouldEqual("one")).FailWith(() => Assert.True(false, "should succeed"));
             arguments.WithKey("y", a => a.Value.ShouldEqual("two")).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.WithKey("f", a => Assert.True(false)).FailWith(() => fNotFound = true);
+            arguments.WithKey("f", _ => Assert.True(false)).FailWith(() => fNotFound = true);
 
             fNotFound.ShouldBeTrue();
         }

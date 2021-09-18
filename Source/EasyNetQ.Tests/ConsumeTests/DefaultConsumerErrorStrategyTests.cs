@@ -74,7 +74,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         private static ConsumerExecutionContext CreateConsumerExcutionContext(byte[] originalMessageBody)
         {
             return new ConsumerExecutionContext(
-                (bytes, properties, arg3, cancellationToken) => null,
+                (_, _, _, _) => null,
                 new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
                 new MessageProperties
                 {

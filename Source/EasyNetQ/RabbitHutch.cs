@@ -25,7 +25,7 @@ namespace EasyNetQ
         /// </returns>
         public static IBus CreateBus(string connectionString)
         {
-            return CreateBus(connectionString, x => { });
+            return CreateBus(connectionString, _ => { });
         }
 
         /// <summary>

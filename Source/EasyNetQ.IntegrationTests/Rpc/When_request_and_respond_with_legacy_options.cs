@@ -30,7 +30,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             using (
-                await bus.Rpc.RespondAsync<Request, Response>(x =>
+                await bus.Rpc.RespondAsync<Request, Response>(_ =>
                         Task.FromException<Response>(new RequestFailedException("Oops")), cts.Token
                 )
             )

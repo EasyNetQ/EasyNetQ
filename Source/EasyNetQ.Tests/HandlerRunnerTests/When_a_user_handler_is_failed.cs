@@ -35,7 +35,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             context = new ConsumerExecutionContext(
-                (body, properties, info, cancellation) => Task.FromException<AckStrategy>(new Exception()),
+                (_, _, _, _) => Task.FromException<AckStrategy>(new Exception()),
                 messageInfo,
                 messageProperties,
                 messageBody

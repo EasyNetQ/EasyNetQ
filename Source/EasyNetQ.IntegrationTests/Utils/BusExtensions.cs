@@ -23,7 +23,7 @@ namespace EasyNetQ.IntegrationTests.Utils
             this IPubSub pubSub, IEnumerable<T> messages, CancellationToken cancellationToken = default
         )
         {
-            return pubSub.PublishBatchAsync(messages, c => { }, cancellationToken);
+            return pubSub.PublishBatchAsync(messages, _ => { }, cancellationToken);
         }
 
         public static async Task PublishBatchAsync<T>(

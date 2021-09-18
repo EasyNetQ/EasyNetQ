@@ -23,12 +23,12 @@ namespace EasyNetQ.Tests.ConsumeTests
 
             mockBuilder.Bus.Advanced.Consume(
                 queue,
-                (bytes, properties, arg3) => Task.Run(() => { }),
+                (_, _, _) => Task.Run(() => { }),
                 c => c.WithConsumerTag("consumer_tag")
             );
 
             var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
+            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(_ => are.Set());
 
             mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
 

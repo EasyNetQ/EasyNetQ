@@ -28,7 +28,7 @@ namespace LightInject
                 throw new ArgumentNullException(nameof(serviceContainer));
             }
 
-            return serviceContainer.RegisterEasyNetQ(connectionConfigurationFactory, c => { });
+            return serviceContainer.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
         }
 
         public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, string connectionString, Action<IServiceRegister> registerServices)

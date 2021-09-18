@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests
 {
     public class NonGenericSchedulerExtensionsTests
     {
-        private readonly Action<IFuturePublishConfiguration> configure = c => { };
+        private readonly Action<IFuturePublishConfiguration> configure = _ => { };
         private readonly TimeSpan delay = TimeSpan.FromSeconds(42);
         private readonly IScheduler scheduler;
 

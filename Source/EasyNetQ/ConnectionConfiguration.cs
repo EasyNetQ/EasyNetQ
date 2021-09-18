@@ -32,6 +32,7 @@ namespace EasyNetQ
             PublisherConfirms = false;
             PersistentMessages = true;
             ConnectIntervalAttempt = TimeSpan.FromSeconds(5);
+            RequestedChannelMax = 2047;
             MandatoryPublish = false;
 
             // prefetchCount determines how many messages will be allowed in the local in-memory queue
@@ -136,6 +137,11 @@ namespace EasyNetQ
         ///     Enables mandatory flag for publish (default is false)
         /// </summary>
         public bool MandatoryPublish { get; set; }
+
+        /// <summary>
+        ///     Maximum channel number per connection (default is 2047)
+        /// </summary>
+        public ushort RequestedChannelMax { get; set; }
     }
 
     /// <summary>

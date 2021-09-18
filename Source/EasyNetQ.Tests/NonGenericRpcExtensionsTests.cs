@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests
 {
     public class NonGenericRpcExtensionsTests
     {
-        private readonly Action<IRequestConfiguration> configure = c => { };
+        private readonly Action<IRequestConfiguration> configure = _ => { };
         private readonly IRpc rpc;
 
         public NonGenericRpcExtensionsTests()

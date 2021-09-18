@@ -7,7 +7,7 @@ namespace EasyNetQ
         public LegacyRpcConventions(ITypeNameSerializer typeNameSerializer)
             : base(typeNameSerializer)
         {
-            RpcResponseExchangeNamingConvention = type => Exchange.Default.Name;
+            RpcResponseExchangeNamingConvention = _ => Exchange.Default.Name;
         }
     }
 }

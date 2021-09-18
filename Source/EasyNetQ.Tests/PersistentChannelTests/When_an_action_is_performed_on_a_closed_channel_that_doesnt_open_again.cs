@@ -24,7 +24,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             );
             var exception = new OperationInterruptedException(shutdownArgs);
 
-            persistentConnection.When(x => x.CreateModel()).Do(x => throw exception);
+            persistentConnection.When(x => x.CreateModel()).Do(_ => throw exception);
             persistentChannel = new PersistentChannel(new PersistentChannelOptions(), persistentConnection, eventBus);
         }
 

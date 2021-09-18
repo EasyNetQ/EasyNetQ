@@ -12,7 +12,7 @@ namespace EasyNetQ.Tests.ConsumeTests
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((body, properties, info) => AckStrategies.Ack);
+            StartConsumer((_, _, _) => AckStrategies.Ack);
         }
 
         [Fact]

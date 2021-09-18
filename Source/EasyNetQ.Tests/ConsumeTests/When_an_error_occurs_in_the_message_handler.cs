@@ -20,7 +20,7 @@ namespace EasyNetQ.Tests.ConsumeTests
                      .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
             exception = new Exception("I've had a bad day :(");
-            StartConsumer((body, properties, info) => throw exception);
+            StartConsumer((_, _, _) => throw exception);
             DeliverMessage();
         }
 

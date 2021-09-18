@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.Interception
         public void When_using_EnableInterception_extension_method_required_services_are_registered()
         {
             var serviceRegister = Substitute.For<IServiceRegister>();
-            serviceRegister.EnableInterception(x => { });
+            serviceRegister.EnableInterception(_ => { });
             serviceRegister.Received().Register(Arg.Any<CompositeInterceptor>());
         }
 

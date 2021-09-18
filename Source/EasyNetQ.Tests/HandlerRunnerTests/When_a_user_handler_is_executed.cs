@@ -23,7 +23,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumer.Model.Returns(channel);
 
             var context = new ConsumerExecutionContext(
-                (body, properties, info, cancellation) =>
+                (body, properties, info, _) =>
                 {
                     deliveredBody = body;
                     deliveredProperties = properties;

@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             return Assert.ThrowsAsync<TaskCanceledException>(
                 () => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
-                    new TestRequestMessage(), c => { }
+                    new TestRequestMessage(), _ => { }
                 )
             );
         }
