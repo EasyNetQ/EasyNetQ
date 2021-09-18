@@ -5,7 +5,7 @@ namespace EasyNetQ.Consumer
     public class HandlerCollectionFactory : IHandlerCollectionFactory
     {
         /// <inheritdoc />
-        public IHandlerCollection CreateHandlerCollection(Queue queue)
+        public IHandlerCollection CreateHandlerCollection(in Queue queue)
         {
             return new HandlerCollection();
         }
