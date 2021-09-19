@@ -94,7 +94,13 @@ namespace EasyNetQ
             var expiration = requestConfiguration.Expiration;
             var priority = requestConfiguration.Priority;
             await RequestPublishAsync(
-                request, routingKey, queueName, correlationId, expiration, priority, configuration.MandatoryPublish,
+                request,
+                routingKey,
+                queueName,
+                correlationId,
+                expiration,
+                priority,
+                configuration.MandatoryPublish,
                 cts.Token
             ).ConfigureAwait(false);
             tcs.AttachCancellation(cts.Token);
@@ -127,7 +133,7 @@ namespace EasyNetQ
 
         private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
         {
-            if (@event.Type != PersistentConnectionType.Consumer)
+            if (@event.Type != PersistentConnectionType.Producer)
                 return;
 
             var responseActionsValues = responseActions.Values;
