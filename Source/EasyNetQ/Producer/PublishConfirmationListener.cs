@@ -60,7 +60,7 @@ namespace EasyNetQ.Producer
             InterruptAllUnconfirmedRequests(true);
         }
 
-        private void OnMessageConfirmation(MessageConfirmationEvent @event)
+        private void OnMessageConfirmation(in MessageConfirmationEvent @event)
         {
             if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
                 return;
@@ -78,7 +78,7 @@ namespace EasyNetQ.Producer
                 Confirm(confirmation, deliveryTag, type);
         }
 
-        private void OnChannelRecovered(ChannelRecoveredEvent @event)
+        private void OnChannelRecovered(in ChannelRecoveredEvent @event)
         {
             if (@event.Channel.NextPublishSeqNo == 0)
                 return;
@@ -86,7 +86,7 @@ namespace EasyNetQ.Producer
             InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
         }
 
-        private void OnChannelShutdown(ChannelShutdownEvent @event)
+        private void OnChannelShutdown(in ChannelShutdownEvent @event)
         {
             if (@event.Channel.NextPublishSeqNo == 0)
                 return;
@@ -95,7 +95,7 @@ namespace EasyNetQ.Producer
         }
 
 
-        private void OnReturnedMessage(ReturnedMessageEvent @event)
+        private void OnReturnedMessage(in ReturnedMessageEvent @event)
         {
             if (@event.Channel.NextPublishSeqNo == 0)
                 return;

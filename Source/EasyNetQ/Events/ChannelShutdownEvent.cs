@@ -5,7 +5,7 @@ namespace EasyNetQ.Events
     /// <summary>
     ///     This event which is raised after a shutdown of the channel
     /// </summary>
-    public class ChannelShutdownEvent
+    public readonly struct ChannelShutdownEvent
     {
         /// <summary>
         ///     The closed channel

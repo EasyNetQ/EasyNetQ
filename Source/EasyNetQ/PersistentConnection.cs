@@ -149,11 +149,12 @@ namespace EasyNetQ
             var connection = Interlocked.Exchange(ref initializedConnection, null);
             if (connection == null) return;
 
-            connection.RecoverySucceeded -= OnConnectionRecovered;
-            connection.ConnectionUnblocked -= OnConnectionUnblocked;
-            connection.ConnectionBlocked -= OnConnectionBlocked;
-            connection.ConnectionShutdown -= OnConnectionShutdown;
             connection.Dispose();
+            // We previously agreed to dispose firstly and then unsubscribe from events so as not to lose logs.
+            // These works only for connection.RecoverySucceeded -= OnConnectionRecovered;, for other events
+            // it's prohibited to unsubscribe from them after a connection disposal. There are a good news though:
+            // these events handlers (except RecoverySucceeded one) are nullified on AutorecoveringConnection.Dispose.
+            connection.RecoverySucceeded -= OnConnectionRecovered;
         }
 
         private void OnConnectionRecovered(object sender, EventArgs e)

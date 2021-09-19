@@ -8,7 +8,7 @@ namespace EasyNetQ.Events
     /// This is _not_ fired when a connection interruption causes EasyNetQ to re-create
     /// a PersistentConsumer.
     /// </summary>
-    public class StoppedConsumingEvent
+    public readonly struct StoppedConsumingEvent
     {
         /// <summary>
         ///     The stopped consumer

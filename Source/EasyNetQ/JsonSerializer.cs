@@ -32,7 +32,7 @@ namespace EasyNetQ
             if (jsonSerializerType == null)
             {
                 throw new InvalidOperationException(
-                    "Newtonsoft.Json assembly is not found. Please reference Newtonsoft.Json package (directly or indirectly) or add one of EasyNetQ.Serialization.* packages instead."
+                    "Newtonsoft.Json assembly is not found. Starting from EasyNetQ v7, an explicit dependency from Newtonsoft.Json was removed. Please reference Newtonsoft.Json package (directly or indirectly) or add one of EasyNetQ.Serialization.* packages instead."
                 );
             }
 

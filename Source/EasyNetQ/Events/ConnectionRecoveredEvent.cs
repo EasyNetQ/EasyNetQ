@@ -5,7 +5,7 @@ namespace EasyNetQ.Events
     /// <summary>
     ///     This event is raised after a recovery of the connection to the endpoint
     /// </summary>
-    public class ConnectionRecoveredEvent
+    public readonly struct ConnectionRecoveredEvent
     {
         /// <summary>
         ///     The endpoint a connection is connected to

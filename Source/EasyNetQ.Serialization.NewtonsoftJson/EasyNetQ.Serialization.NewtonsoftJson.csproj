@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use Newtonsoft.Json serializer</Description>
@@ -18,6 +18,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ.Abstractions\EasyNetQ.Abstractions.csproj" />
+    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>

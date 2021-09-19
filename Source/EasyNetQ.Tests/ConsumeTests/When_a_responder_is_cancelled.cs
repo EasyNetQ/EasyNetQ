@@ -61,12 +61,12 @@ namespace EasyNetQ.Tests.ConsumeTests
             var serializedMessage = serializer.MessageToBytes(typeof(RpcRequest), request);
 
             var waiter = new CountdownEvent(2);
-            mockBuilder.EventBus.Subscribe<PublishedMessageEvent>(x =>
+            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent x) =>
             {
                 publishedMessage = x;
                 waiter.Signal();
             });
-            mockBuilder.EventBus.Subscribe<AckEvent>(x =>
+            mockBuilder.EventBus.Subscribe((in AckEvent x) =>
             {
                 ackEvent = x;
                 waiter.Signal();

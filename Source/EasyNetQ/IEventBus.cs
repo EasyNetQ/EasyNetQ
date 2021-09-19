@@ -5,6 +5,9 @@ using EasyNetQ.Logging;
 
 namespace EasyNetQ
 {
+    /// <inheritdoc />
+    public delegate void TEventHandler<TEvent>(in TEvent @event) where TEvent : struct;
+
     /// <summary>
     ///     An internal pub-sub bus to distribute events within EasyNetQ
     /// </summary>
@@ -15,15 +18,15 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="event">The event</param>
         /// <typeparam name="TEvent">The event type</typeparam>
-        void Publish<TEvent>(TEvent @event);
+        void Publish<TEvent>(in TEvent @event) where TEvent : struct;
 
         /// <summary>
         ///     Subscribes to the event type
         /// </summary>
-        /// <param name="handler">The event handler</param>
+        /// <param name="eventHandler">The event handler</param>
         /// <typeparam name="TEvent">The event type</typeparam>
         /// <returns>Unsubscription disposable</returns>
-        IDisposable Subscribe<TEvent>(Action<TEvent> handler);
+        IDisposable Subscribe<TEvent>(TEventHandler<TEvent> eventHandler) where TEvent : struct;
     }
 
     /// <inheritdoc />
@@ -32,7 +35,7 @@ namespace EasyNetQ
         private readonly ConcurrentDictionary<Type, object> subscriptions = new();
 
         /// <inheritdoc />
-        public void Publish<TEvent>(TEvent @event)
+        public void Publish<TEvent>(in TEvent @event) where TEvent : struct
         {
             if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
@@ -41,46 +44,46 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
+        public IDisposable Subscribe<TEvent>(TEventHandler<TEvent> eventHandler) where TEvent : struct
         {
             var handlers = (Handlers<TEvent>)subscriptions.GetOrAdd(typeof(TEvent), _ => new Handlers<TEvent>());
-            handlers.Add(handler);
-            return new Subscription<TEvent>(handlers, handler);
+            handlers.Add(eventHandler);
+            return new Subscription<TEvent>(handlers, eventHandler);
         }
 
-        private sealed class Handlers<TEvent>
+        private sealed class Handlers<TEvent> where TEvent : struct
         {
             private readonly ILog log = LogProvider.For<Handlers<TEvent>>();
             private readonly object mutex = new();
-            private volatile List<Action<TEvent>> handlers = new();
+            private volatile List<TEventHandler<TEvent>> handlers = new();
 
-            public void Add(Action<TEvent> handler)
+            public void Add(TEventHandler<TEvent> eventHandler)
             {
                 lock (mutex)
                 {
-                    var newHandlers = new List<Action<TEvent>>(handlers);
-                    newHandlers.Add(handler);
+                    var newHandlers = new List<TEventHandler<TEvent>>(handlers);
+                    newHandlers.Add(eventHandler);
                     handlers = newHandlers;
                 }
             }
 
-            public void Remove(Action<TEvent> handler)
+            public void Remove(TEventHandler<TEvent> eventHandler)
             {
                 lock (mutex)
                 {
-                    var newHandlers = new List<Action<TEvent>>(handlers);
-                    newHandlers.Remove(handler);
+                    var newHandlers = new List<TEventHandler<TEvent>>(handlers);
+                    newHandlers.Remove(eventHandler);
                     handlers = newHandlers;
                 }
             }
 
-            public void Handle(TEvent @event)
+            public void Handle(in TEvent @event)
             {
                 // ReSharper disable once InconsistentlySynchronizedField
                 foreach (var handler in handlers)
                     try
                     {
-                        handler(@event);
+                        handler(in @event);
                     }
                     catch (Exception exception)
                     {
@@ -89,18 +92,18 @@ namespace EasyNetQ
             }
         }
 
-        private sealed class Subscription<TEvent> : IDisposable
+        private sealed class Subscription<TEvent> : IDisposable where TEvent : struct
         {
             private readonly Handlers<TEvent> handlers;
-            private readonly Action<TEvent> handler;
+            private readonly TEventHandler<TEvent> eventHandler;
 
-            public Subscription(Handlers<TEvent> handlers, Action<TEvent> handler)
+            public Subscription(Handlers<TEvent> handlers, TEventHandler<TEvent> eventHandler)
             {
                 this.handlers = handlers;
-                this.handler = handler;
+                this.eventHandler = eventHandler;
             }
 
-            public void Dispose() => handlers.Remove(handler);
+            public void Dispose() => handlers.Remove(eventHandler);
         }
     }
 }

@@ -242,7 +242,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
 
             var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<AckEvent>(_ => autoResetEvent.Set());
+            mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
 
             mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
 
@@ -355,7 +355,7 @@ namespace EasyNetQ.Tests
 
             // wait for the subscription thread to handle the message ...
             var autoResetEvent = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<AckEvent>(_ => autoResetEvent.Set());
+            mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
             autoResetEvent.WaitOne(1000);
         }
 
@@ -409,7 +409,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
             var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
             var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(_ => are.Set());
+            mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
             subscriptionResult.Dispose();
             are.WaitOne(500);
         }
