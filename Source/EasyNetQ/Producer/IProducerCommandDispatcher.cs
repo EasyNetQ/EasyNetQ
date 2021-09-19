@@ -50,7 +50,7 @@ namespace EasyNetQ.Producer
     /// <summary>
     ///     Responsible for invoking client commands.
     /// </summary>
-    public interface IClientCommandDispatcher : IDisposable
+    public interface IProducerCommandDispatcher : IDisposable
     {
         /// <summary>
         /// Invokes a command on top of model

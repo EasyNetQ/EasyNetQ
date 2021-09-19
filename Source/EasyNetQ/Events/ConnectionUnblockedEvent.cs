@@ -1,3 +1,5 @@
+using EasyNetQ.Persistent;
+
 namespace EasyNetQ.Events
 {
     /// <summary>
@@ -5,5 +7,14 @@ namespace EasyNetQ.Events
     /// </summary>
     public readonly struct ConnectionUnblockedEvent
     {
+        /// <summary>
+        ///     The type of the associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
+
+        public ConnectionUnblockedEvent(PersistentConnectionType type)
+        {
+            Type = type;
+        }
     }
 }

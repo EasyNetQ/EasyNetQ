@@ -5,6 +5,7 @@ using EasyNetQ.DI;
 using EasyNetQ.Interception;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 
 namespace EasyNetQ
@@ -44,8 +45,9 @@ namespace EasyNetQ
                 .Register<IInternalConsumerFactory, InternalConsumerFactory>()
                 .Register<IConsumerFactory, ConsumerFactory>()
                 .Register(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
-                .Register<IClientCommandDispatcher, SingleChannelClientCommandDispatcher>()
-                .Register<IPersistentConnection, PersistentConnection>()
+                .Register<IProducerCommandDispatcher, SingleChannelProducerCommandDispatcher>()
+                .Register<IProducerConnection, ProducerConnection>()
+                .Register<IConsumerConnection, ConsumerConnection>()
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
                 .Register<IPublishConfirmationListener, PublishConfirmationListener>()
                 .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
@@ -68,8 +70,10 @@ namespace EasyNetQ
             this IServiceRegister serviceRegister, int channelsCount
         )
         {
-            return serviceRegister.Register<IClientCommandDispatcher>(
-                x => new MultiChannelClientCommandDispatcher(channelsCount, x.Resolve<IPersistentChannelFactory>())
+            return serviceRegister.Register<IProducerCommandDispatcher>(
+                x => new MultiChannelProducerCommandDispatcher(
+                    channelsCount, x.Resolve<IProducerConnection>(), x.Resolve<IPersistentChannelFactory>()
+                )
             );
         }
 

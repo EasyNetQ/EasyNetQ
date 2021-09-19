@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
+using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
@@ -11,7 +12,7 @@ namespace EasyNetQ.Producer
     /// <summary>
     ///     Invokes client commands using multiple channels
     /// </summary>
-    public sealed class MultiChannelClientCommandDispatcher : IClientCommandDispatcher
+    public sealed class MultiChannelProducerCommandDispatcher : IProducerCommandDispatcher
     {
         private readonly ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
         private readonly Func<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
@@ -20,14 +21,15 @@ namespace EasyNetQ.Producer
         /// Creates a dispatcher
         /// </summary>
         /// <param name="channelsCount">The max number of channels</param>
+        /// <param name="connection">The connection</param>
         /// <param name="channelFactory">The channel factory</param>
-        public MultiChannelClientCommandDispatcher(int channelsCount, IPersistentChannelFactory channelFactory)
+        public MultiChannelProducerCommandDispatcher(int channelsCount, IProducerConnection connection, IPersistentChannelFactory channelFactory)
         {
             channelsPoolPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>>();
             channelsPoolFactory = o => new AsyncQueue<IPersistentChannel>(
                 Enumerable.Range(0, channelsCount)
                     .Select(
-                        _ => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms))
+                        _ => channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions(o.PublisherConfirms))
                     )
             );
         }

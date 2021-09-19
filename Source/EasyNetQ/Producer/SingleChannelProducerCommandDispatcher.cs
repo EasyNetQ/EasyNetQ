@@ -4,13 +4,14 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
+using EasyNetQ.Persistent;
 
 namespace EasyNetQ.Producer
 {
     /// <summary>
     ///     Invokes client commands using single channel
     /// </summary>
-    public sealed class SingleChannelClientCommandDispatcher : IClientCommandDispatcher
+    public sealed class SingleChannelProducerCommandDispatcher : IProducerCommandDispatcher
     {
         private readonly ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel> channelPerOptions;
         private readonly Func<ChannelDispatchOptions, IPersistentChannel> createChannelFactory;
@@ -18,13 +19,12 @@ namespace EasyNetQ.Producer
         /// <summary>
         /// Creates a dispatcher
         /// </summary>
-        /// <param name="channelFactory">The channel factory</param>
-        public SingleChannelClientCommandDispatcher(IPersistentChannelFactory channelFactory)
+        public SingleChannelProducerCommandDispatcher(IProducerConnection connection, IPersistentChannelFactory channelFactory)
         {
             Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
 
             channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
-            createChannelFactory = o => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms));
+            createChannelFactory = o => channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions(o.PublisherConfirms));
         }
 
         /// <inheritdoc />

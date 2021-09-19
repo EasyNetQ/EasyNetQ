@@ -8,7 +8,7 @@ namespace EasyNetQ.Producer
     internal static class ClientCommandDispatcherExtensions
     {
         public static Task<T> InvokeAsync<T>(
-            this IClientCommandDispatcher dispatcher,
+            this IProducerCommandDispatcher dispatcher,
             Func<IModel, T> channelAction,
             CancellationToken cancellationToken
         )
@@ -17,7 +17,7 @@ namespace EasyNetQ.Producer
         }
 
         public static Task InvokeAsync(
-            this IClientCommandDispatcher dispatcher,
+            this IProducerCommandDispatcher dispatcher,
             Action<IModel> channelAction,
             ChannelDispatchOptions channelOptions,
             CancellationToken cancellationToken
@@ -31,7 +31,7 @@ namespace EasyNetQ.Producer
         }
 
         public static Task InvokeAsync(
-            this IClientCommandDispatcher dispatcher,
+            this IProducerCommandDispatcher dispatcher,
             Action<IModel> channelAction,
             CancellationToken cancellationToken
         )

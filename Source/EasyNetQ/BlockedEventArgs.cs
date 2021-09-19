@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.Persistent;
 
 namespace EasyNetQ
 {
@@ -10,11 +11,16 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates BlockedEventArgs
         /// </summary>
-        /// <param name="reason">The reason</param>
-        public BlockedEventArgs(string reason)
+        public BlockedEventArgs(PersistentConnectionType type, string reason)
         {
+            Type = type;
             Reason = reason;
         }
+
+        /// <summary>
+        ///     The type of associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
 
         /// <summary>
         ///     The reason of the blocking

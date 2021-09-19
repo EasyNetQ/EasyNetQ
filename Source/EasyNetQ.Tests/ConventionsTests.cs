@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;

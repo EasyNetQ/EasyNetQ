@@ -6,34 +6,13 @@ using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace EasyNetQ
+namespace EasyNetQ.Persistent
 {
-    /// <summary>
-    ///     An abstraction on top of connection which manages its persistence and allows to open channels
-    /// </summary>
-    public interface IPersistentConnection : IDisposable
-    {
-        /// <summary>
-        ///     True if a connection is connected
-        /// </summary>
-        bool IsConnected { get; }
-
-        /// <summary>
-        ///     Establish a connection
-        /// </summary>
-        void Connect();
-
-        /// <summary>
-        ///     Creates a new channel
-        /// </summary>
-        /// <returns>New channel</returns>
-        IModel CreateModel();
-    }
-
     /// <inheritdoc />
     public class PersistentConnection : IPersistentConnection
     {
         private readonly object mutex = new();
+        private readonly PersistentConnectionType type;
         private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;
@@ -44,17 +23,18 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates PersistentConnection
         /// </summary>
-        /// <param name="configuration">The configuration</param>
-        /// <param name="connectionFactory">The connection factory</param>
-        /// <param name="eventBus">The event bus</param>
         public PersistentConnection(
-            ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
+            PersistentConnectionType type,
+            ConnectionConfiguration configuration,
+            IConnectionFactory connectionFactory,
+            IEventBus eventBus
         )
         {
             Preconditions.CheckNotNull(configuration, nameof(configuration));
             Preconditions.CheckNotNull(connectionFactory, nameof(connectionFactory));
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
+            this.type = type;
             this.configuration = configuration;
             this.connectionFactory = connectionFactory;
             this.eventBus = eventBus;
@@ -113,11 +93,12 @@ namespace EasyNetQ
             }
 
             logger.InfoFormat(
-                "Connected to broker {broker}, port {port}",
+                "Connection {type} established to broker {broker}, port {port}",
+                type,
                 connection.Endpoint.HostName,
                 connection.Endpoint.Port
             );
-            eventBus.Publish(new ConnectionCreatedEvent(connection.Endpoint));
+            eventBus.Publish(new ConnectionCreatedEvent(type, connection.Endpoint));
             return connection;
         }
 
@@ -161,35 +142,37 @@ namespace EasyNetQ
         {
             var connection = (IConnection)sender;
             logger.InfoFormat(
-                "Reconnected to broker {host}:{port}",
+                "Connection {type} recovered to broker {host}:{port}",
+                type,
                 connection.Endpoint.HostName,
                 connection.Endpoint.Port
             );
-            eventBus.Publish(new ConnectionRecoveredEvent(connection.Endpoint));
+            eventBus.Publish(new ConnectionRecoveredEvent(type, connection.Endpoint));
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
             var connection = (IConnection)sender;
             logger.InfoFormat(
-                "Disconnected from broker {host}:{port} because of {reason}",
+                "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+                type,
                 connection.Endpoint.HostName,
                 connection.Endpoint.Port,
                 e.ReplyText
             );
-            eventBus.Publish(new ConnectionDisconnectedEvent(connection.Endpoint, e.ReplyText));
+            eventBus.Publish(new ConnectionDisconnectedEvent(type, connection.Endpoint, e.ReplyText));
         }
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            logger.InfoFormat("Connection blocked with reason {reason}", e.Reason);
-            eventBus.Publish(new ConnectionBlockedEvent(e.Reason));
+            logger.InfoFormat("Connection {type} blocked with reason {reason}", type, e.Reason);
+            eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason));
         }
 
         private void OnConnectionUnblocked(object sender, EventArgs e)
         {
-            logger.InfoFormat("Connection unblocked");
-            eventBus.Publish(new ConnectionUnblockedEvent());
+            logger.InfoFormat("Connection {type} unblocked", type);
+            eventBus.Publish(new ConnectionUnblockedEvent(type));
         }
     }
 }

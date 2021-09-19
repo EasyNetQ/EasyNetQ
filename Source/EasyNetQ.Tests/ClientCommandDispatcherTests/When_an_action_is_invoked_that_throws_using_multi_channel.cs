@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
@@ -12,18 +13,19 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
 {
     public class When_an_action_is_invoked_that_throws_using_multi_channel : IDisposable
     {
-        private readonly IClientCommandDispatcher dispatcher;
+        private readonly IProducerCommandDispatcher dispatcher;
 
         public When_an_action_is_invoked_that_throws_using_multi_channel()
         {
             var channelFactory = Substitute.For<IPersistentChannelFactory>();
+            var connection = Substitute.For<IProducerConnection>();
             var channel = Substitute.For<IPersistentChannel>();
 
-            channelFactory.CreatePersistentChannel(new PersistentChannelOptions()).Returns(channel);
+            channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions()).Returns(channel);
             channel.InvokeChannelActionAsync<int>(null)
                 .ReturnsForAnyArgs(x => ((Func<IModel, int>)x[0]).Invoke(null));
 
-            dispatcher = new MultiChannelClientCommandDispatcher(1, channelFactory);
+            dispatcher = new MultiChannelProducerCommandDispatcher(1, connection, channelFactory);
         }
 
         public void Dispose()
