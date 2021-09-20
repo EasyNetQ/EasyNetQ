@@ -131,7 +131,7 @@ namespace EasyNetQ
                             {
                                 return await x.Item2(
                                     rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                                );
+                                ).ConfigureAwait(false);
                             }
                             finally
                             {
@@ -157,7 +157,7 @@ namespace EasyNetQ
                                         rawMessage.Properties, rawMessage.Body
                                     );
                                     var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                    return await handler(deserializedMessage, receivedInfo, cancellationToken);
+                                    return await handler(deserializedMessage, receivedInfo, cancellationToken).ConfigureAwait(false);
                                 }
                                 finally
                                 {
