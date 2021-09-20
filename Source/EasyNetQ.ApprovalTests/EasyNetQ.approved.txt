@@ -624,6 +624,11 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task SendAsync(this EasyNetQ.ISendReceive sendReceive, string queue, object message, System.Type messageType, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task SendAsync(this EasyNetQ.ISendReceive sendReceive, string queue, object message, System.Type messageType, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    public static class OverflowType
+    {
+        public const string Default = "drop-head";
+        public const string RejectPublish = "reject-publish";
+    }
     public static class PerQueueConsumeConfigurationExtensions
     {
         public static EasyNetQ.IPerQueueConsumeConfiguration WithArguments(this EasyNetQ.IPerQueueConsumeConfiguration configuration, System.Collections.Generic.IDictionary<string, object> arguments) { }
@@ -745,6 +750,7 @@ namespace EasyNetQ
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLengthBytes(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLengthBytes) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxPriority(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxPriority) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMessageTtl(this EasyNetQ.IQueueDeclareConfiguration configuration, System.TimeSpan messageTtl) { }
+        public static EasyNetQ.IQueueDeclareConfiguration WithOverflowType(this EasyNetQ.IQueueDeclareConfiguration configuration, string overflowType = "drop-head") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueMode(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueMode = "default") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueType(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueType = "classic") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithSingleActiveConsumer(this EasyNetQ.IQueueDeclareConfiguration configuration) { }
