@@ -48,6 +48,19 @@ namespace EasyNetQ
         }
 
         /// <summary>
+        ///     Sets overflowType to configure overflow behaviour.
+        /// </summary>
+        /// <param name="configuration">The configuration instance</param>
+        /// <param name="overflowType">The overflowType flag to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
+        public static IQueueDeclareConfiguration WithOverflowType(this IQueueDeclareConfiguration configuration, string overflowType = OverflowType.Default)
+        {
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+            return configuration.WithArgument("x-overflow", overflowType);
+        }
+
+        /// <summary>
         ///     Sets expires of the queue. Determines how long a queue can remain unused before it is automatically deleted by the server.
         /// </summary>
         /// <param name="configuration">The configuration instance</param>
