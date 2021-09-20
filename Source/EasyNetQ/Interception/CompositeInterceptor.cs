@@ -16,11 +16,25 @@ namespace EasyNetQ.Interception
         }
 
         /// <inheritdoc />
+        public void OnProduced(in ProducedMessage message)
+        {
+            foreach (var i in interceptors)
+                i.OnProduced(in message);
+        }
+
+        /// <inheritdoc />
         public ConsumedMessage OnConsume(in ConsumedMessage message)
         {
             return interceptors.AsEnumerable()
                                .Reverse()
                                .Aggregate(message, (x, y) => y.OnConsume(x));
+        }
+
+        /// <inheritdoc />
+        public void OnConsumed(in ConsumedMessage message)
+        {
+            foreach (var i in interceptors.AsEnumerable().Reverse())
+                i.OnConsumed(in message);
         }
 
         /// <summary>

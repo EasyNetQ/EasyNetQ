@@ -1322,19 +1322,23 @@ namespace EasyNetQ.Interception
         public CompositeInterceptor() { }
         public void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
         public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public void OnConsumed(in EasyNetQ.ConsumedMessage message) { }
         public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public void OnProduced(in EasyNetQ.ProducedMessage message) { }
     }
     public class DefaultInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
         public DefaultInterceptor() { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public virtual EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public virtual void OnConsumed(in EasyNetQ.ConsumedMessage message) { }
+        public virtual EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public virtual void OnProduced(in EasyNetQ.ProducedMessage message) { }
     }
-    public class GZipInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    public class GZipInterceptor : EasyNetQ.Interception.DefaultInterceptor
     {
         public GZipInterceptor() { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public override EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public override EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
     public interface IInterceptorRegistrator
     {
@@ -1343,7 +1347,9 @@ namespace EasyNetQ.Interception
     public interface IProduceConsumeInterceptor
     {
         EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message);
+        void OnConsumed(in EasyNetQ.ConsumedMessage message);
         EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message);
+        void OnProduced(in EasyNetQ.ProducedMessage message);
     }
     public class InterceptorRegistrator : EasyNetQ.Interception.IInterceptorRegistrator
     {
@@ -1351,11 +1357,11 @@ namespace EasyNetQ.Interception
         public void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
         public EasyNetQ.DI.IServiceRegister Register() { }
     }
-    public class TripleDESInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    public class TripleDESInterceptor : EasyNetQ.Interception.DefaultInterceptor
     {
         public TripleDESInterceptor(byte[] key, byte[] iv) { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public override EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public override EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
 }
 namespace EasyNetQ.Internals

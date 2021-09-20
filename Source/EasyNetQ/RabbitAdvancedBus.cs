@@ -122,14 +122,16 @@ namespace EasyNetQ
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
-                        (body, properties, receivedInfo, cancellationToken) =>
+                        async (body, properties, receivedInfo, cancellationToken) =>
                         {
                             var rawMessage = produceConsumeInterceptor.OnConsume(
                                 new ConsumedMessage(receivedInfo, properties, body)
                             );
-                            return x.Item2(
+                            var ackStrategy = await x.Item2(
                                 rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
                             );
+                            produceConsumeInterceptor.OnConsumed(rawMessage);
+                            return ackStrategy;
                         }
                     )
                 ).Union(
@@ -139,7 +141,7 @@ namespace EasyNetQ
                             x.Item3.ConsumerTag,
                             x.Item3.IsExclusive,
                             x.Item3.Arguments,
-                            (body, properties, receivedInfo, cancellationToken) =>
+                            async (body, properties, receivedInfo, cancellationToken) =>
                             {
                                 var rawMessage = produceConsumeInterceptor.OnConsume(
                                     new ConsumedMessage(receivedInfo, properties, body)
@@ -148,7 +150,9 @@ namespace EasyNetQ
                                     rawMessage.Properties, rawMessage.Body
                                 );
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                return handler(deserializedMessage, receivedInfo, cancellationToken);
+                                var ackStrategy = await handler(deserializedMessage, receivedInfo, cancellationToken);
+                                produceConsumeInterceptor.OnConsumed(rawMessage);
+                                return ackStrategy;
                             }
                         )
                     )
@@ -366,6 +370,8 @@ namespace EasyNetQ
                     model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
                 }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
             }
+
+            produceConsumeInterceptor.OnProduced(rawMessage);
 
             eventBus.Publish(
                 new PublishedMessageEvent(exchange, routingKey, rawMessage.Properties, rawMessage.Body)

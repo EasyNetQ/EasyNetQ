@@ -6,9 +6,15 @@ namespace EasyNetQ.Interception
     public class DefaultInterceptor : IProduceConsumeInterceptor
     {
         /// <inheritdoc />
-        public ProducedMessage OnProduce(in ProducedMessage message) => message;
+        public virtual ProducedMessage OnProduce(in ProducedMessage message) => message;
 
         /// <inheritdoc />
-        public ConsumedMessage OnConsume(in ConsumedMessage message) => message;
+        public virtual ConsumedMessage OnConsume(in ConsumedMessage message) => message;
+
+        /// <inheritdoc />
+        public virtual void OnProduced(in ProducedMessage message) { }
+
+        /// <inheritdoc />
+        public virtual void OnConsumed(in ConsumedMessage message) { }
     }
 }

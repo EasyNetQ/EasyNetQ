@@ -359,6 +359,7 @@ namespace EasyNetQ
                 basicGetResult.Body
             );
             var interceptedMessage = interceptor.OnConsume(message);
+            interceptor.OnConsumed(interceptedMessage);
             return PullResult.Available(
                 messagesCount,
                 interceptedMessage.ReceivedInfo,
