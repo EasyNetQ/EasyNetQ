@@ -127,11 +127,16 @@ namespace EasyNetQ
                             var rawMessage = produceConsumeInterceptor.OnConsume(
                                 new ConsumedMessage(receivedInfo, properties, body)
                             );
-                            var ackStrategy = await x.Item2(
-                                rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                            );
-                            produceConsumeInterceptor.OnConsumed(rawMessage);
-                            return ackStrategy;
+                            try
+                            {
+                                return await x.Item2(
+                                    rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
+                                );
+                            }
+                            finally
+                            {
+                                produceConsumeInterceptor.OnConsumed(rawMessage);
+                            }
                         }
                     )
                 ).Union(
@@ -146,13 +151,18 @@ namespace EasyNetQ
                                 var rawMessage = produceConsumeInterceptor.OnConsume(
                                     new ConsumedMessage(receivedInfo, properties, body)
                                 );
-                                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
-                                    rawMessage.Properties, rawMessage.Body
-                                );
-                                var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                var ackStrategy = await handler(deserializedMessage, receivedInfo, cancellationToken);
-                                produceConsumeInterceptor.OnConsumed(rawMessage);
-                                return ackStrategy;
+                                try
+                                {
+                                    var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
+                                        rawMessage.Properties, rawMessage.Body
+                                    );
+                                    var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
+                                    return await handler(deserializedMessage, receivedInfo, cancellationToken);
+                                }
+                                finally
+                                {
+                                    produceConsumeInterceptor.OnConsumed(rawMessage);
+                                }
                             }
                         )
                     )
