@@ -751,9 +751,16 @@ namespace EasyNetQ
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxPriority(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxPriority) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMessageTtl(this EasyNetQ.IQueueDeclareConfiguration configuration, System.TimeSpan messageTtl) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithOverflowType(this EasyNetQ.IQueueDeclareConfiguration configuration, string overflowType = "drop-head") { }
+        public static EasyNetQ.IQueueDeclareConfiguration WithQueueMasterLocator(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueMasterLocator = "min-masters") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueMode(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueMode = "default") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueType(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueType = "classic") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithSingleActiveConsumer(this EasyNetQ.IQueueDeclareConfiguration configuration) { }
+    }
+    public static class QueueMasterLocatorType
+    {
+        public const string ClientLocal = "client-local";
+        public const string MinMasters = "min-masters";
+        public const string Random = "random";
     }
     public static class QueueMode
     {

@@ -149,5 +149,18 @@ namespace EasyNetQ
 
             return configuration.WithArgument("x-single-active-consumer", true);
         }
+
+        /// <summary>
+        ///     Sets queueMasterLocator. Valid types are min-masters, client-local and random.
+        /// </summary>
+        /// <param name="configuration">The configuration instance</param>
+        /// <param name="queueMasterLocator">The queueMasterLocator to set</param>
+        /// <returns>IQueueDeclareConfiguration</returns>
+        public static IQueueDeclareConfiguration WithQueueMasterLocator(this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocatorType.MinMasters)
+        {
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+            return configuration.WithArgument("x-queue-master-locator", queueMasterLocator);
+        }
     }
 }
