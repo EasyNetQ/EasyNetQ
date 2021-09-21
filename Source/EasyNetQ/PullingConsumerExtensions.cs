@@ -49,7 +49,7 @@ namespace EasyNetQ
     }
 
     /// <summary>
-    ///     Various extensions for IPullingConsumer
+    ///     Various extensions for <see cref="IPullingConsumer"/>
     /// </summary>
     public static class PullingConsumerExtensions
     {
