@@ -6,7 +6,7 @@ using EasyNetQ.Internals;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IRpc
+    ///     Various generic extensions for <see cref="IRpc"/>
     /// </summary>
     public static class RpcExtensions
     {
