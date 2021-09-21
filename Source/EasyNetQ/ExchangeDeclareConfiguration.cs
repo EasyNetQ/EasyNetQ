@@ -14,21 +14,21 @@ namespace EasyNetQ
         /// Sets as durable or not. Durable exchanges remain active when a server restarts.
         /// </summary>
         /// <param name="isDurable">The durable flag to set</param>
-        /// <returns>IQueueDeclareConfiguration</returns>
+        /// <returns>A reference to the same <see cref="IExchangeDeclareConfiguration"/>.</returns>
         IExchangeDeclareConfiguration AsDurable(bool isDurable);
 
         /// <summary>
         /// Sets as autoDelete or not. If set, the exchange is deleted when all queues have finished using it.
         /// </summary>
         /// <param name="isAutoDelete">The autoDelete flag to set</param>
-        /// <returns>IQueueDeclareConfiguration</returns>
+        /// <returns>A reference to the same <see cref="IExchangeDeclareConfiguration"/>.</returns>
         IExchangeDeclareConfiguration AsAutoDelete(bool isAutoDelete);
 
         /// <summary>
         /// Sets type of the exchange.
         /// </summary>
         /// <param name="type">The type to set</param>
-        /// <returns>IQueueDeclareConfiguration</returns>
+        /// <returns>A reference to the same <see cref="IExchangeDeclareConfiguration"/>.</returns>
         IExchangeDeclareConfiguration WithType(string type);
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="name">The argument name to set</param>
         /// <param name="value">The argument value to set</param>
-        /// <returns>IExchangeDeclareConfiguration</returns>
+        /// <returns>A reference to the same <see cref="IExchangeDeclareConfiguration"/>.</returns>
         IExchangeDeclareConfiguration WithArgument(string name, object value);
     }
 

@@ -9,7 +9,7 @@ namespace EasyNetQ
     using NonGenericPublishDelegate = Func<IPubSub, object, Type, Action<IPublishConfiguration>, CancellationToken, Task>;
 
     /// <summary>
-    ///     Various extensions for IPubSub
+    ///     Various non-generic extensions for <see cref="IPubSub"/>
     /// </summary>
     public static class NonGenericPubSubExtensions
     {

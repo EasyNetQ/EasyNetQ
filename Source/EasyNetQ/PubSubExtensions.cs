@@ -6,7 +6,7 @@ using EasyNetQ.Internals;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IPubSub
+    ///     Various generic extensions for <see cref="IPubSub"/>
     /// </summary>
     public static class PubSubExtensions
     {

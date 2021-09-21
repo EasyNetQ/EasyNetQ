@@ -628,6 +628,7 @@ namespace EasyNetQ
     {
         public const string Default = "drop-head";
         public const string RejectPublish = "reject-publish";
+        public const string RejectPublishDlx = "reject-publish-dlx";
     }
     public static class PerQueueConsumeConfigurationExtensions
     {

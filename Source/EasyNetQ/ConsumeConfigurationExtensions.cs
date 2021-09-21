@@ -9,7 +9,7 @@ using EasyNetQ.Topology;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IPerQueueConsumeConfiguration
+    ///     Various extensions for <see cref="IPerQueueConsumeConfiguration"/>
     /// </summary>
     public static class PerQueueConsumeConfigurationExtensions
     {
@@ -45,7 +45,7 @@ namespace EasyNetQ
     }
 
     /// <summary>
-    ///     Various extensions for IConsumeConfiguration
+    ///     Various extensions for <see cref="IConsumeConfiguration"/>
     /// </summary>
     public static class ConsumeConfigurationExtensions
     {
@@ -159,7 +159,7 @@ namespace EasyNetQ
     }
 
     /// <summary>
-    ///     Various extensions for ISimpleConsumeConfiguration
+    ///     Various extensions for <see cref="ISimpleConsumeConfiguration"/>
     /// </summary>
     public static class SimpleConsumeConfigurationExtensions
     {
@@ -168,7 +168,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="configuration">The configuration instance</param>
         /// <param name="priority">The priority to set</param>
-        /// <returns>ISimpleConsumeConfiguration</returns>
+        /// <returns>The same <paramref name="configuration"/></returns>
         public static ISimpleConsumeConfiguration WithPriority(
             this ISimpleConsumeConfiguration configuration, int priority
         )
