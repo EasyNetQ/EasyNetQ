@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IScheduler
+    ///     Various generic extensions for <see cref="IScheduler"/>
     /// </summary>
     public static class SchedulerExtensions
     {

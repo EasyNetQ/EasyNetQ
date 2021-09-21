@@ -10,7 +10,7 @@ namespace EasyNetQ
 
 
     /// <summary>
-    ///     Various extensions for ISendReceive
+    ///     Various non-generic extensions for <see cref="ISendReceive"/>
     /// </summary>
     public static class NonGenericSendReceiveExtensions
     {

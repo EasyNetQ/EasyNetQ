@@ -10,7 +10,7 @@ namespace EasyNetQ
     using NonGenericRequestDelegate = Func<IRpc, object, Type, Type, Action<IRequestConfiguration>, CancellationToken, Task<object>>;
 
     /// <summary>
-    ///     Various extensions for IRpc
+    ///     Various non-generic extensions for <see cref="IRpc"/>
     /// </summary>
     public static class NonGenericRpcExtensions
     {

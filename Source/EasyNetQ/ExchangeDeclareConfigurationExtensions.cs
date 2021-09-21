@@ -3,7 +3,7 @@ using EasyNetQ.Topology;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IExchangeDeclareConfiguration
+    ///     Various extensions for <see cref="IExchangeDeclareConfiguration"/>
     /// </summary>
     public static class ExchangeDeclareConfigurationExtensions
     {
@@ -12,7 +12,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="configuration">The configuration instance</param>
         /// <param name="alternateExchange">The alternate exchange to set</param>
-        /// <returns>IExchangeDeclareConfiguration</returns>
+        /// <returns>The same <paramref name="configuration"/></returns>
         public static IExchangeDeclareConfiguration WithAlternateExchange(
             this IExchangeDeclareConfiguration configuration, Exchange alternateExchange
         )
