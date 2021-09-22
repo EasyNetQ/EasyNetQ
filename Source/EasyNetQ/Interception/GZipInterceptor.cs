@@ -20,7 +20,7 @@ namespace EasyNetQ.Interception
                 using var output = new MemoryStream();
                 using (var compressingStream = new GZipStream(output, CompressionMode.Compress))
                     compressingStream.Write(body, 0, message.Body.Length);
-                return new ProducedMessage(message.Properties, output.ToArray()); // TODO: think of better memory management for interceptors
+                return new ProducedMessage(message.Properties, output.ToArray()); // TODO: think of a better memory management for interceptors
             }
             finally
             {
@@ -32,6 +32,7 @@ namespace EasyNetQ.Interception
         public override ConsumedMessage OnConsume(in ConsumedMessage message)
         {
             var body = ArrayPool<byte>.Shared.Rent(message.Body.Length); // most likely rented array is larger than message.Body
+
             try
             {
                 message.Body.CopyTo(body);
