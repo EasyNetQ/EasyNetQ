@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IAdvancedBus
+    ///     Various extensions for <see cref="IAdvancedBus"/>
     /// </summary>
     public static class AdvancedBusExtensions
     {

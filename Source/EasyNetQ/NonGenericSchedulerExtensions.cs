@@ -9,7 +9,7 @@ namespace EasyNetQ
     using NonGenericFuturePublishDelegate = Func<IScheduler, object, Type, TimeSpan, Action<IFuturePublishConfiguration>, CancellationToken, Task>;
 
     /// <summary>
-    ///     Various extensions for IScheduler
+    ///     Various non-generic extensions for <see cref="IScheduler"/>
     /// </summary>
     public static class NonGenericSchedulerExtensions
     {
