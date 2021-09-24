@@ -89,6 +89,7 @@ namespace EasyNetQ.DI.Microsoft
             {
                 serviceScope = serviceProvider.CreateScope();
             }
+
             public IServiceResolverScope CreateScope()
             {
                 return new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
