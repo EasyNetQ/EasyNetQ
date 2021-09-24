@@ -157,8 +157,12 @@ namespace EasyNetQ
         public MessageProperties CopyHeaders(IDictionary<string, object> from)
         {
             if (from?.Count > 0)
+            {
                 foreach (var pair in from)
+                {
                     Headers[pair.Key] = pair.Value;
+                }
+            }
 
             return this;
         }
