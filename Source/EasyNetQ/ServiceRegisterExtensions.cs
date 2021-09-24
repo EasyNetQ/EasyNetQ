@@ -55,7 +55,7 @@ namespace EasyNetQ
                 .Register<IRpc, DefaultRpc>()
                 .Register<ISendReceive, DefaultSendReceive>()
                 .Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-                .Register<IConsumeScopeProvider, DefaultConsumeScopeProvider>()
+                .Register<IConsumeScopeProvider, NoopConsumeScopeProvider>()
                 .Register<IBus, RabbitBus>();
         }
 

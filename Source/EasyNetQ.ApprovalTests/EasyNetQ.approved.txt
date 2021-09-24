@@ -1226,6 +1226,11 @@ namespace EasyNetQ.DI
         Transient = 0,
         Singleton = 1,
     }
+    public class NoopConsumeScopeProvider : EasyNetQ.DI.IConsumeScopeProvider
+    {
+        public NoopConsumeScopeProvider() { }
+        public System.IDisposable CreateScope() { }
+    }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {
         public ServiceResolverScope(EasyNetQ.DI.IServiceResolver resolver) { }
