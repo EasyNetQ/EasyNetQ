@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
@@ -45,7 +46,7 @@ namespace EasyNetQ
                 .Register<IInternalConsumerFactory, InternalConsumerFactory>()
                 .Register<IConsumerFactory, ConsumerFactory>()
                 .Register(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
-                .Register<IProducerCommandDispatcher, SingleChannelProducerCommandDispatcher>()
+                .Register<IChannelDispatcher, SingleChannelDispatcher>()
                 .Register<IProducerConnection, ProducerConnection>()
                 .Register<IConsumerConnection, ConsumerConnection>()
                 .Register<IPersistentChannelFactory, PersistentChannelFactory>()
@@ -70,9 +71,12 @@ namespace EasyNetQ
             this IServiceRegister serviceRegister, int channelsCount
         )
         {
-            return serviceRegister.Register<IProducerCommandDispatcher>(
-                x => new MultiChannelProducerCommandDispatcher(
-                    channelsCount, x.Resolve<IProducerConnection>(), x.Resolve<IPersistentChannelFactory>()
+            return serviceRegister.Register<IChannelDispatcher>(
+                x => new MultiChannelDispatcher(
+                    channelsCount,
+                    x.Resolve<IProducerConnection>(),
+                    x.Resolve<IConsumerConnection>(),
+                    x.Resolve<IPersistentChannelFactory>()
                 )
             );
         }

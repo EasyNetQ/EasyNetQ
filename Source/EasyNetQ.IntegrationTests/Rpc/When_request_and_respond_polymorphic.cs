@@ -45,7 +45,6 @@ namespace EasyNetQ.IntegrationTests.Rpc
                     new RabbitRequest(42), cts.Token
                 );
                 rabbitResponse.Should().Be(new RabbitResponse(42));
-                await Task.Delay(-1);
             }
         }
     }

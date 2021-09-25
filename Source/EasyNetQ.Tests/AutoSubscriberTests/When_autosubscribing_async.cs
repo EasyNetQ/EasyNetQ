@@ -41,7 +41,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_declared_the_queues()
         {
             void VerifyQueueDeclared(string queueName) =>
-                mockBuilder.Channels[0].Received().QueueDeclare(
+                mockBuilder.Channels[1].Received().QueueDeclare(
                     Arg.Is(queueName),
                     Arg.Is(true),
                     Arg.Is(false),
@@ -58,7 +58,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_bound_to_queues()
         {
             void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
-                mockBuilder.Channels[0].Received().QueueBind(
+                mockBuilder.Channels[1].Received().QueueBind(
                     Arg.Is(queueName),
                     Arg.Any<string>(),
                     Arg.Is(topicName),

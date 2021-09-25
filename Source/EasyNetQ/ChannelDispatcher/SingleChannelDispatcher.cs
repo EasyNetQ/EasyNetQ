@@ -1,17 +1,19 @@
-using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
+using EasyNetQ.Producer;
+using RabbitMQ.Client;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.ChannelDispatcher
 {
     /// <summary>
     ///     Invokes client commands using single channel
     /// </summary>
-    public sealed class SingleChannelProducerCommandDispatcher : IProducerCommandDispatcher
+    public sealed class SingleChannelDispatcher : IChannelDispatcher
     {
         private readonly ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel> channelPerOptions;
         private readonly Func<ChannelDispatchOptions, IPersistentChannel> createChannelFactory;
@@ -19,12 +21,27 @@ namespace EasyNetQ.Producer
         /// <summary>
         /// Creates a dispatcher
         /// </summary>
-        public SingleChannelProducerCommandDispatcher(IProducerConnection connection, IPersistentChannelFactory channelFactory)
+        public SingleChannelDispatcher(IProducerConnection producerConnection, IConsumerConnection consumerConnection, IPersistentChannelFactory channelFactory)
         {
+            Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
+            Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
             Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
 
             channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
-            createChannelFactory = o => channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions(o.PublisherConfirms));
+            createChannelFactory = o =>
+            {
+                var options = new PersistentChannelOptions(o.PublisherConfirms);
+                return o.ConnectionType switch
+                {
+                    PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
+                        producerConnection, options
+                    ),
+                    PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
+                        consumerConnection, options
+                    ),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            };
         }
 
         /// <inheritdoc />

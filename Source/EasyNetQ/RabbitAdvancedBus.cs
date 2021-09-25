@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
@@ -18,7 +19,7 @@ namespace EasyNetQ
     /// <inheritdoc />
     public class RabbitAdvancedBus : IAdvancedBus
     {
-        private readonly IProducerCommandDispatcher producerCommandDispatcher;
+        private readonly IChannelDispatcher channelDispatcher;
         private readonly ConnectionConfiguration configuration;
         private readonly IPublishConfirmationListener confirmationListener;
         private readonly IProducerConnection producerConnection;
@@ -43,7 +44,7 @@ namespace EasyNetQ
             IProducerConnection producerConnection,
             IConsumerConnection consumerConnection,
             IConsumerFactory consumerFactory,
-            IProducerCommandDispatcher producerCommandDispatcher,
+            IChannelDispatcher channelDispatcher,
             IPublishConfirmationListener confirmationListener,
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
@@ -73,7 +74,7 @@ namespace EasyNetQ
             this.producerConnection = producerConnection;
             this.consumerConnection = consumerConnection;
             this.consumerFactory = consumerFactory;
-            this.producerCommandDispatcher = producerCommandDispatcher;
+            this.channelDispatcher = channelDispatcher;
             this.confirmationListener = confirmationListener;
             this.eventBus = eventBus;
             this.handlerCollectionFactory = handlerCollectionFactory;
@@ -197,8 +198,8 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var declareResult = await producerCommandDispatcher.InvokeAsync(
-                x => x.QueueDeclarePassive(queue.Name), cts.Token
+            var declareResult = await channelDispatcher.InvokeAsync(
+                x => x.QueueDeclarePassive(queue.Name), ChannelDispatchOptions.ConsumerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -327,7 +328,7 @@ namespace EasyNetQ
             {
                 while (true)
                 {
-                    var pendingConfirmation = await producerCommandDispatcher.InvokeAsync(model =>
+                    var pendingConfirmation = await channelDispatcher.InvokeAsync(model =>
                     {
                         var confirmation = confirmationListener.CreatePendingConfirmation(model);
                         rawMessage.Properties.SetConfirmationId(confirmation.Id);
@@ -344,7 +345,7 @@ namespace EasyNetQ
                         }
 
                         return confirmation;
-                    }, ChannelDispatchOptions.PublishWithConfirms, cts.Token).ConfigureAwait(false);
+                    }, ChannelDispatchOptions.ProducerPublishWithConfirms, cts.Token).ConfigureAwait(false);
 
                     try
                     {
@@ -358,12 +359,12 @@ namespace EasyNetQ
             }
             else
             {
-                await producerCommandDispatcher.InvokeAsync(model =>
+                await channelDispatcher.InvokeAsync(model =>
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
                     model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
-                }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
+                }, ChannelDispatchOptions.ProducerPublish, cts.Token).ConfigureAwait(false);
             }
 
             eventBus.Publish(
@@ -402,8 +403,8 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
-                x => x.QueueDeclarePassive(name), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.QueueDeclarePassive(name), ChannelDispatchOptions.ConsumerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -431,8 +432,10 @@ namespace EasyNetQ
             var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
             var arguments = queueDeclareConfiguration.Arguments;
 
-            var queueDeclareOk = await producerCommandDispatcher.InvokeAsync(
-                x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments), cts.Token
+            var queueDeclareOk = await channelDispatcher.InvokeAsync(
+                x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -457,8 +460,10 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
-                x => x.QueueDelete(queue.Name, ifUnused, ifEmpty), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.QueueDelete(queue.Name, ifUnused, ifEmpty),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -472,7 +477,11 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(x => x.QueuePurge(queue.Name), cts.Token).ConfigureAwait(false);
+            await channelDispatcher.InvokeAsync(
+                x => x.QueuePurge(queue.Name),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
+            ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
             {
@@ -487,8 +496,8 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
-                x => x.ExchangeDeclarePassive(name), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.ExchangeDeclarePassive(name), ChannelDispatchOptions.ProducerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -515,8 +524,10 @@ namespace EasyNetQ
             var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
             var arguments = exchangeDeclareConfiguration.Arguments;
 
-            await producerCommandDispatcher.InvokeAsync(
-                x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments),
+                ChannelDispatchOptions.ProducerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -541,8 +552,8 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
-                x => x.ExchangeDelete(exchange.Name, ifUnused), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.ExchangeDelete(exchange.Name, ifUnused), ChannelDispatchOptions.ProducerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -564,8 +575,10 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
-                x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -595,8 +608,9 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
+            await channelDispatcher.InvokeAsync(
                 x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments),
+                ChannelDispatchOptions.ProducerTopology,
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -619,10 +633,11 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
+            await channelDispatcher.InvokeAsync(
                 x => x.QueueUnbind(
                     binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
                 ),
+                ChannelDispatchOptions.ConsumerTopology,
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -642,10 +657,11 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await producerCommandDispatcher.InvokeAsync(
+            await channelDispatcher.InvokeAsync(
                 x => x.ExchangeUnbind(
                     binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
                 ),
+                ChannelDispatchOptions.ProducerTopology,
                 cts.Token
             ).ConfigureAwait(false);
 

@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
@@ -46,7 +47,7 @@ namespace EasyNetQ.Tests
                 Substitute.For<IProducerConnection>(),
                 Substitute.For<IConsumerConnection>(),
                 Substitute.For<IConsumerFactory>(),
-                Substitute.For<IProducerCommandDispatcher>(),
+                Substitute.For<IChannelDispatcher>(),
                 Substitute.For<IPublishConfirmationListener>(),
                 eventBus,
                 Substitute.For<IHandlerCollectionFactory>(),
