@@ -1185,7 +1185,7 @@ namespace EasyNetQ.DI
     public class DefaultConsumeScopeProvider : EasyNetQ.DI.IConsumeScopeProvider
     {
         public DefaultConsumeScopeProvider(EasyNetQ.DI.IServiceResolver resolver) { }
-        public System.IDisposable CreateScope() { }
+        public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
     }
     public class DefaultServiceContainer : EasyNetQ.DI.IServiceRegister, System.IDisposable
     {
@@ -1202,7 +1202,7 @@ namespace EasyNetQ.DI
     }
     public interface IConsumeScopeProvider
     {
-        System.IDisposable CreateScope();
+        EasyNetQ.DI.IServiceResolverScope CreateScope();
     }
     public interface IServiceRegister
     {
@@ -1229,7 +1229,7 @@ namespace EasyNetQ.DI
     public class NoopConsumeScopeProvider : EasyNetQ.DI.IConsumeScopeProvider
     {
         public NoopConsumeScopeProvider() { }
-        public System.IDisposable CreateScope() { }
+        public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
     }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {

@@ -10,7 +10,7 @@ namespace EasyNetQ.DI
         /// <summary>
         /// Creates scope
         /// </summary>
-        IDisposable CreateScope();
+        IServiceResolverScope CreateScope();
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ namespace EasyNetQ.DI
         }
 
         /// <inheritdoc />
-        public IDisposable CreateScope() => _resolver.CreateScope();
+        public IServiceResolverScope CreateScope() => _resolver.CreateScope();
     }
 
     /// <summary>
@@ -37,14 +37,21 @@ namespace EasyNetQ.DI
     /// </summary>
     public class NoopConsumeScopeProvider : IConsumeScopeProvider
     {
-        private static readonly IDisposable scope = new NoopDisposable();
+        private static readonly IServiceResolverScope scope = new NoopDisposable();
 
-        private sealed class NoopDisposable : IDisposable
+        private sealed class NoopDisposable : IServiceResolverScope
         {
+            public IServiceResolverScope CreateScope() => this;
+
             public void Dispose() { }
+
+            public TService Resolve<TService>() where TService : class
+            {
+                throw new NotImplementedException($"To resolve services from {nameof(IConsumeScopeProvider)} register {nameof(DefaultConsumeScopeProvider)} or your custom scope provider.");
+            }
         }
 
         /// <inheritdoc />
-        public IDisposable CreateScope() => scope;
+        public IServiceResolverScope CreateScope() => scope;
     }
 }
