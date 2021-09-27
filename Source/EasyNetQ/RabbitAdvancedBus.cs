@@ -30,6 +30,7 @@ namespace EasyNetQ
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IPullingConsumerFactory pullingConsumerFactory;
         private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
+        private readonly IConsumeScopeProvider consumeScopeProvider;
 
         private volatile bool disposed;
 
@@ -49,7 +50,8 @@ namespace EasyNetQ
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
             IPullingConsumerFactory pullingConsumerFactory,
-            AdvancedBusEventHandlers advancedBusEventHandlers
+            AdvancedBusEventHandlers advancedBusEventHandlers,
+            IConsumeScopeProvider consumeScopeProvider
         )
         {
             Preconditions.CheckNotNull(connection, nameof(connection));
@@ -77,6 +79,7 @@ namespace EasyNetQ
             this.pullingConsumerFactory = pullingConsumerFactory;
             this.advancedBusEventHandlers = advancedBusEventHandlers;
             this.Conventions = conventions;
+            this.consumeScopeProvider = consumeScopeProvider;
 
             Connected += advancedBusEventHandlers.Connected;
             Disconnected += advancedBusEventHandlers.Disconnected;
@@ -122,14 +125,15 @@ namespace EasyNetQ
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
-                        (body, properties, receivedInfo, cancellationToken) =>
+                        async (body, properties, receivedInfo, cancellationToken) =>
                         {
                             var rawMessage = produceConsumeInterceptor.OnConsume(
                                 new ConsumedMessage(receivedInfo, properties, body)
                             );
-                            return x.Item2(
+                            using var scope = consumeScopeProvider.CreateScope();
+                            return await x.Item2(
                                 rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                            );
+                            ).ConfigureAwait(false);
                         }
                     )
                 ).Union(
@@ -139,7 +143,7 @@ namespace EasyNetQ
                             x.Item3.ConsumerTag,
                             x.Item3.IsExclusive,
                             x.Item3.Arguments,
-                            (body, properties, receivedInfo, cancellationToken) =>
+                            async (body, properties, receivedInfo, cancellationToken) =>
                             {
                                 var rawMessage = produceConsumeInterceptor.OnConsume(
                                     new ConsumedMessage(receivedInfo, properties, body)
@@ -148,7 +152,8 @@ namespace EasyNetQ
                                     rawMessage.Properties, rawMessage.Body
                                 );
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                return handler(deserializedMessage, receivedInfo, cancellationToken);
+                                using var scope = consumeScopeProvider.CreateScope();
+                                return await handler(deserializedMessage, receivedInfo, cancellationToken).ConfigureAwait(false);
                             }
                         )
                     )

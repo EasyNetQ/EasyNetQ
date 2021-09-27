@@ -16,7 +16,6 @@ namespace EasyNetQ
     {
         private static readonly ConcurrentDictionary<Type, NonGenericSendDelegate> SendDelegates = new();
 
-
         /// <summary>
         /// Send a message directly to a queue
         /// </summary>

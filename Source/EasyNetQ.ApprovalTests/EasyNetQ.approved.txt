@@ -783,7 +783,7 @@ namespace EasyNetQ
     public delegate string QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(EasyNetQ.IPersistentConnection connection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.Producer.IClientCommandDispatcher clientCommandDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.DI.IServiceResolver container, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IConventions conventions, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        public RabbitAdvancedBus(EasyNetQ.IPersistentConnection connection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.Producer.IClientCommandDispatcher clientCommandDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.DI.IServiceResolver container, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IConventions conventions, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers, EasyNetQ.DI.IConsumeScopeProvider consumeScopeProvider) { }
         public EasyNetQ.DI.IServiceResolver Container { get; }
         public EasyNetQ.IConventions Conventions { get; }
         public bool IsConnected { get; }
@@ -1182,6 +1182,11 @@ namespace EasyNetQ.Consumer
 }
 namespace EasyNetQ.DI
 {
+    public class DefaultConsumeScopeProvider : EasyNetQ.DI.IConsumeScopeProvider
+    {
+        public DefaultConsumeScopeProvider(EasyNetQ.DI.IServiceResolver resolver) { }
+        public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
+    }
     public class DefaultServiceContainer : EasyNetQ.DI.IServiceRegister, System.IDisposable
     {
         public DefaultServiceContainer() { }
@@ -1194,6 +1199,10 @@ namespace EasyNetQ.DI
             where TService :  class
             where TImplementation :  class, TService { }
         public TService Resolve<TService>() { }
+    }
+    public interface IConsumeScopeProvider
+    {
+        EasyNetQ.DI.IServiceResolverScope CreateScope();
     }
     public interface IServiceRegister
     {
@@ -1216,6 +1225,11 @@ namespace EasyNetQ.DI
     {
         Transient = 0,
         Singleton = 1,
+    }
+    public class NoopConsumeScopeProvider : EasyNetQ.DI.IConsumeScopeProvider
+    {
+        public NoopConsumeScopeProvider() { }
+        public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
     }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {
