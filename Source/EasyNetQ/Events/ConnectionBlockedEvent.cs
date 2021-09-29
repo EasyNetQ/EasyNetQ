@@ -1,3 +1,5 @@
+using EasyNetQ.Persistent;
+
 namespace EasyNetQ.Events
 {
     /// <summary>
@@ -6,6 +8,11 @@ namespace EasyNetQ.Events
     public readonly struct ConnectionBlockedEvent
     {
         /// <summary>
+        ///     The type of the associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
+
+        /// <summary>
         ///     The reason of a block
         /// </summary>
         public string Reason { get; }
@@ -13,9 +20,9 @@ namespace EasyNetQ.Events
         /// <summary>
         ///     Creates ConnectionBlockedEvent
         /// </summary>
-        /// <param name="reason">The reason</param>
-        public ConnectionBlockedEvent(string reason)
+        public ConnectionBlockedEvent(PersistentConnectionType type, string reason)
         {
+            Type = type;
             Reason = reason;
         }
     }

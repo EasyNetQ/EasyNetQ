@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.DI;
+using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -15,14 +16,14 @@ namespace EasyNetQ
     public interface IAdvancedBus : IDisposable
     {
         /// <summary>
-        /// True if the bus is connected, False if it is not.
+        /// True if a connection of the given type is established. 
         /// </summary>
-        bool IsConnected { get; }
+        bool IsConnected(PersistentConnectionType type);
 
         /// <summary>
-        /// Establish a connection.
+        /// Establish a connection of the given type.
         /// </summary>
-        void Connect();
+        void Connect(PersistentConnectionType type);
 
         /// <summary>
         /// The IoC container that EasyNetQ uses to resolve its services.
@@ -154,7 +155,12 @@ namespace EasyNetQ
         /// <param name="ifUnused">Only delete if unused</param>
         /// <param name="ifEmpty">Only delete if empty</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task QueueDeleteAsync(Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default);
+        Task QueueDeleteAsync(
+            Queue queue,
+            bool ifUnused = false,
+            bool ifEmpty = false,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Purges a queue
@@ -189,7 +195,11 @@ namespace EasyNetQ
         /// <param name="exchange">The exchange to delete</param>
         /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task ExchangeDeleteAsync(Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default);
+        Task ExchangeDeleteAsync(
+            Exchange exchange,
+            bool ifUnused = false,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Bind an exchange to a queue. Does nothing if the binding already exists.
@@ -200,7 +210,13 @@ namespace EasyNetQ
         /// <param name="arguments">The arguments</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<Binding<Queue>> BindAsync(Exchange exchange, Queue queue, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken = default);
+        Task<Binding<Queue>> BindAsync(
+            Exchange exchange,
+            Queue queue,
+            string routingKey,
+            IDictionary<string, object> arguments,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Bind two exchanges. Does nothing if the binding already exists.
@@ -211,7 +227,13 @@ namespace EasyNetQ
         /// <param name="arguments">The arguments</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A binding</returns>
-        Task<Binding<Exchange>> BindAsync(Exchange source, Exchange destination, string routingKey, IDictionary<string, object> arguments, CancellationToken cancellationToken = default);
+        Task<Binding<Exchange>> BindAsync(
+            Exchange source,
+            Exchange destination,
+            string routingKey,
+            IDictionary<string, object> arguments,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Delete a binding
@@ -269,7 +291,7 @@ namespace EasyNetQ
         /// <summary>
         /// Event fires when the bus is unblocked.
         /// </summary>
-        event EventHandler Unblocked;
+        event EventHandler<UnblockedEventArgs> Unblocked;
 
         /// <summary>
         /// Event fires when a mandatory or immediate message is returned as un-routable

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Persistent
 {
     internal static class PersistentChannelExtensions
     {

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
-using FluentAssertions;
+using EasyNetQ.Persistent;
+using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client;
 
@@ -98,7 +99,7 @@ namespace EasyNetQ.Tests.Mocking
 
         public IEventBus EventBus => ServiceProvider.Resolve<IEventBus>();
 
-        public IPersistentConnection PersistentConnection => ServiceProvider.Resolve<IPersistentConnection>();
+        public IProducerConnection ProducerConnection => ServiceProvider.Resolve<IProducerConnection>();
 
         public List<string> ConsumerQueueNames => consumerQueueNames;
 

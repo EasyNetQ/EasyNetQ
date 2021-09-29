@@ -1,4 +1,3 @@
-using EasyNetQ.Topology;
 using System.Collections.Generic;
 
 namespace EasyNetQ

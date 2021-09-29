@@ -7,7 +7,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Persistent
 {
     /// <inheritdoc />
     public class PersistentChannel : IPersistentChannel

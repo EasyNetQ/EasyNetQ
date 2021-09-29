@@ -3,11 +3,8 @@ using System;
 using System.Text;
 using System.Threading;
 using EasyNetQ.Events;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
-using NSubstitute;
-using RabbitMQ.Client.Framing;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests

@@ -1,4 +1,4 @@
-namespace EasyNetQ.Producer
+namespace EasyNetQ.Persistent
 {
     internal static class AmqpErrorCodes
     {

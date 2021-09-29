@@ -1,8 +1,10 @@
 using System;
+using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
@@ -42,9 +44,10 @@ namespace EasyNetQ.Tests
             eventBus = new EventBus();
 
             advancedBus = new RabbitAdvancedBus(
-                Substitute.For<IPersistentConnection>(),
+                Substitute.For<IProducerConnection>(),
+                Substitute.For<IConsumerConnection>(),
                 Substitute.For<IConsumerFactory>(),
-                Substitute.For<IClientCommandDispatcher>(),
+                Substitute.For<IChannelDispatcher>(),
                 Substitute.For<IPublishConfirmationListener>(),
                 eventBus,
                 Substitute.For<IHandlerCollectionFactory>(),
@@ -79,7 +82,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Blocked_handler_is_called()
         {
-            var @event = new ConnectionBlockedEvent("a random reason");
+            var @event = new ConnectionBlockedEvent(PersistentConnectionType.Producer, "a random reason");
 
             eventBus.Publish(@event);
             blockedCalled.Should().BeTrue();
@@ -90,7 +93,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Connected_handler_is_called_when_connection_recovered()
         {
-            eventBus.Publish(new ConnectionRecoveredEvent(new AmqpTcpEndpoint()));
+            eventBus.Publish(new ConnectionRecoveredEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
             connectedCalled.Should().BeTrue();
             connectedEventArgs.Hostname.Should().Be("localhost");
             connectedEventArgs.Port.Should().Be(5672);
@@ -99,7 +102,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Connected_handler_is_called_when_connection_created()
         {
-            eventBus.Publish(new ConnectionCreatedEvent(new AmqpTcpEndpoint()));
+            eventBus.Publish(new ConnectionCreatedEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
             connectedCalled.Should().BeTrue();
             connectedEventArgs.Hostname.Should().Be("localhost");
             connectedEventArgs.Port.Should().Be(5672);
@@ -108,7 +111,9 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Disconnected_handler_is_called()
         {
-            var @event = new ConnectionDisconnectedEvent(new AmqpTcpEndpoint(), "a random reason");
+            var @event = new ConnectionDisconnectedEvent(
+                PersistentConnectionType.Producer, new AmqpTcpEndpoint(), "a random reason"
+            );
             eventBus.Publish(@event);
             disconnectedCalled.Should().BeTrue();
             disconnectedEventArgs.Should().NotBeNull();
@@ -121,7 +126,10 @@ namespace EasyNetQ.Tests
         public void AdvancedBusEventHandlers_MessageReturned_handler_is_called()
         {
             var @event = new ReturnedMessageEvent(
-                null, new byte[0], new MessageProperties(), new MessageReturnedInfo("my.exchange", "routing.key", "reason")
+                null,
+                Array.Empty<byte>(),
+                new MessageProperties(),
+                new MessageReturnedInfo("my.exchange", "routing.key", "reason")
             );
 
             eventBus.Publish(@event);
@@ -135,7 +143,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void AdvancedBusEventHandlers_Unblocked_handler_is_called()
         {
-            eventBus.Publish(new ConnectionUnblockedEvent());
+            eventBus.Publish(new ConnectionUnblockedEvent(PersistentConnectionType.Producer));
             unBlockedCalled.Should().BeTrue();
         }
     }

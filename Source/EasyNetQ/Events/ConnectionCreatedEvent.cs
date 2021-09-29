@@ -1,3 +1,4 @@
+using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Events
@@ -8,6 +9,11 @@ namespace EasyNetQ.Events
     public readonly struct ConnectionCreatedEvent
     {
         /// <summary>
+        ///     The type of the associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
+
+        /// <summary>
         ///     The endpoint a connection is connected to
         /// </summary>
         public AmqpTcpEndpoint Endpoint { get; }
@@ -15,9 +21,9 @@ namespace EasyNetQ.Events
         /// <summary>
         ///     Creates ConnectionCreatedEvent
         /// </summary>
-        /// <param name="endpoint">The endpoint</param>
-        public ConnectionCreatedEvent(AmqpTcpEndpoint endpoint)
+        public ConnectionCreatedEvent(PersistentConnectionType type, AmqpTcpEndpoint endpoint)
         {
+            Type = type;
             Endpoint = endpoint;
         }
     }
