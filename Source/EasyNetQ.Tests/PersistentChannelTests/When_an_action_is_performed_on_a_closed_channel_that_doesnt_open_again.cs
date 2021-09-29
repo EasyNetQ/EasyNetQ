@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Producer;
+using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;

@@ -48,13 +48,13 @@ namespace EasyNetQ.Tests
         {
             // A channel is created for running client originated commands,
             // a second channel is created for the consumer.
-            mockBuilder.Channels.Count.Should().Be(2);
+            mockBuilder.Channels.Count.Should().Be(3);
         }
 
         [Fact]
         public void Should_declare_the_queue()
         {
-            mockBuilder.Channels[0].Received().QueueDeclare(
+            mockBuilder.Channels[1].Received().QueueDeclare(
                 Arg.Is(queueName),
                 Arg.Is(true), // durable
                 Arg.Is(false), // exclusive
@@ -78,7 +78,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_bind_the_queue_and_exchange()
         {
-            mockBuilder.Channels[0].Received().QueueBind(
+            mockBuilder.Channels[1].Received().QueueBind(
                 Arg.Is(queueName),
                 Arg.Is(typeName),
                 Arg.Is("#"),
@@ -90,13 +90,13 @@ namespace EasyNetQ.Tests
         public void Should_set_configured_prefetch_count()
         {
             var connectionConfiguration = new ConnectionConfiguration();
-            mockBuilder.Channels[1].Received().BasicQos(0, connectionConfiguration.PrefetchCount, false);
+            mockBuilder.Channels[2].Received().BasicQos(0, connectionConfiguration.PrefetchCount, false);
         }
 
         [Fact]
         public void Should_start_consuming()
         {
-            mockBuilder.Channels[1].Received().BasicConsume(
+            mockBuilder.Channels[2].Received().BasicConsume(
                 Arg.Is(queueName),
                 Arg.Is(false),
                 Arg.Any<string>(),
@@ -184,7 +184,7 @@ namespace EasyNetQ.Tests
             }
 
             // Assert that queue got declared correctly
-            mockBuilder.Channels[0].Received().QueueDeclare(
+            mockBuilder.Channels[1].Received().QueueDeclare(
                 Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                 Arg.Is(durable),
                 Arg.Is(isExclusive),
@@ -199,7 +199,7 @@ namespace EasyNetQ.Tests
             );
 
             // Assert that consumer was created correctly
-            mockBuilder.Channels[1].Received().BasicConsume(
+            mockBuilder.Channels[2].Received().BasicConsume(
                 Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
                 Arg.Is(false),
                 Arg.Any<string>(),
@@ -210,10 +210,10 @@ namespace EasyNetQ.Tests
             );
 
             // Assert that QoS got configured correctly
-            mockBuilder.Channels[1].Received().BasicQos(0, prefetchCount, false);
+            mockBuilder.Channels[2].Received().BasicQos(0, prefetchCount, false);
 
             // Assert that binding got configured correctly
-            mockBuilder.Channels[0].Received().QueueBind(
+            mockBuilder.Channels[1].Received().QueueBind(
                 Arg.Is(queueName),
                 Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
                 Arg.Is(topic ?? "#"),
@@ -291,7 +291,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_ack_the_message()
         {
-            mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
+            mockBuilder.Channels[2].Received().BasicAck(deliveryTag, false);
         }
     }
 
@@ -367,7 +367,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_ack()
         {
-            mockBuilder.Channels[1].Received().BasicAck(deliveryTag, false);
+            mockBuilder.Channels[2].Received().BasicAck(deliveryTag, false);
         }
 
         [Fact]

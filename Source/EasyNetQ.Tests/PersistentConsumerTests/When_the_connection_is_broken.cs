@@ -2,6 +2,7 @@
 
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
+using EasyNetQ.Persistent;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -14,7 +15,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
         public When_the_connection_is_broken()
         {
             consumer.StartConsuming();
-            eventBus.Publish(new ConnectionRecoveredEvent(new AmqpTcpEndpoint()));
+            eventBus.Publish(new ConnectionRecoveredEvent(PersistentConnectionType.Consumer, new AmqpTcpEndpoint()));
         }
 
         [Fact]

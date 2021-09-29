@@ -69,7 +69,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_declare_the_publish_exchange()
         {
-            mockBuilder.Channels[0].Received().ExchangeDeclare(
+            mockBuilder.Channels[1].Received().ExchangeDeclare(
                 Arg.Is("easy_net_q_rpc"),
                 Arg.Is("direct"),
                 Arg.Is(true),
@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests.ProducerTests
         [Fact]
         public void Should_publish_request_message()
         {
-            mockBuilder.Channels[2].Received().BasicPublish(
+            mockBuilder.Channels[3].Received().BasicPublish(
                 Arg.Is("easy_net_q_rpc"),
                 Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests"),
                 Arg.Is(false),

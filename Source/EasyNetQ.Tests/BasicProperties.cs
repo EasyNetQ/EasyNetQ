@@ -1,6 +1,6 @@
-using RabbitMQ.Client;
 using System.Collections.Generic;
 using System.Text;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests
 {

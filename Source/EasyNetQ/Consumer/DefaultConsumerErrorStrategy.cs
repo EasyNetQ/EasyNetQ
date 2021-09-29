@@ -26,7 +26,7 @@ namespace EasyNetQ.Consumer
     /// </summary>
     public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     {
-        private readonly IPersistentConnection connection;
+        private readonly IConsumerConnection connection;
         private readonly IConventions conventions;
         private readonly IErrorMessageSerializer errorMessageSerializer;
         private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new();
@@ -41,7 +41,7 @@ namespace EasyNetQ.Consumer
         ///     Creates DefaultConsumerErrorStrategy
         /// </summary>
         public DefaultConsumerErrorStrategy(
-            IPersistentConnection connection,
+            IConsumerConnection connection,
             ISerializer serializer,
             IConventions conventions,
             ITypeNameSerializer typeNameSerializer,

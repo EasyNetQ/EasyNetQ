@@ -6,7 +6,6 @@ using FluentAssertions;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
 {
     public class When_autosubscribing : IDisposable
     {
-        private MockBuilder mockBuilder;
+        private readonly MockBuilder mockBuilder;
 
         private const string expectedQueueName1 =
             "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing+MessageA, EasyNetQ.Tests_my_app:d7617d39b90b6b695b90c630539a12e2";
@@ -43,7 +42,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         public void Should_have_declared_the_queues()
         {
             Action<string> assertQueueDeclared = queueName =>
-                mockBuilder.Channels[0].Received().QueueDeclare(
+                mockBuilder.Channels[1].Received().QueueDeclare(
                     Arg.Is(queueName),
                     Arg.Is(true),
                     Arg.Is(false),
@@ -61,7 +60,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
         {
             Action<int, string, string> assertConsumerStarted =
                 (_, queueName, topicName) =>
-                    mockBuilder.Channels[0].Received().QueueBind(
+                    mockBuilder.Channels[1].Received().QueueBind(
                         Arg.Is(queueName),
                         Arg.Any<string>(),
                         Arg.Is(topicName),

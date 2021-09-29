@@ -1,7 +1,6 @@
 // ReSharper disable InconsistentNaming
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using Xunit;
@@ -20,7 +19,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_raise_blocked_event()
         {
-            using var _ = mockBuilder.PersistentConnection.CreateModel();
+            using var _ = mockBuilder.ProducerConnection.CreateModel();
 
             var blocked = false;
             mockBuilder.Bus.Advanced.Blocked += (_, _) => blocked = true;
@@ -42,7 +41,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_raise_unblocked_event()
         {
-            using var _ = mockBuilder.PersistentConnection.CreateModel();
+            using var _ = mockBuilder.ProducerConnection.CreateModel();
 
             var blocked = true;
             mockBuilder.Bus.Advanced.Unblocked += (_, _) => blocked = false;

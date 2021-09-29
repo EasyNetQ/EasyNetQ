@@ -3,33 +3,52 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
+using EasyNetQ.Persistent;
+using EasyNetQ.Producer;
 using RabbitMQ.Client;
 
-namespace EasyNetQ.Producer
+namespace EasyNetQ.ChannelDispatcher
 {
     /// <summary>
     ///     Invokes client commands using multiple channels
     /// </summary>
-    public sealed class MultiChannelClientCommandDispatcher : IClientCommandDispatcher
+    public sealed class MultiChannelDispatcher : IChannelDispatcher
     {
         private readonly ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
         private readonly Func<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
 
         /// <summary>
-        /// Creates a dispatcher
+        ///     Creates a dispatcher
         /// </summary>
-        /// <param name="channelsCount">The max number of channels</param>
-        /// <param name="channelFactory">The channel factory</param>
-        public MultiChannelClientCommandDispatcher(int channelsCount, IPersistentChannelFactory channelFactory)
+        public MultiChannelDispatcher(
+            int channelsCount,
+            IProducerConnection producerConnection,
+            IConsumerConnection consumerConnection,
+            IPersistentChannelFactory channelFactory
+        )
         {
             channelsPoolPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, AsyncQueue<IPersistentChannel>>();
-            channelsPoolFactory = o => new AsyncQueue<IPersistentChannel>(
-                Enumerable.Range(0, channelsCount)
-                    .Select(
-                        _ => channelFactory.CreatePersistentChannel(new PersistentChannelOptions(o.PublisherConfirms))
-                    )
-            );
+            channelsPoolFactory = o =>
+            {
+                var options = new PersistentChannelOptions(o.PublisherConfirms);
+                return new AsyncQueue<IPersistentChannel>(
+                    Enumerable.Range(0, channelsCount)
+                        .Select(
+                            _ => o.ConnectionType switch
+                            {
+                                PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
+                                    producerConnection, options
+                                ),
+                                PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
+                                    consumerConnection, options
+                                ),
+                                _ => throw new ArgumentOutOfRangeException()
+                            }
+                        )
+                );
+            };
         }
 
         /// <inheritdoc />

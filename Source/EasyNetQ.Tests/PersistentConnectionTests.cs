@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -18,7 +19,10 @@ namespace EasyNetQ.Tests
                 .Returns(_ => throw new Exception("Test"));
 
             using var connection = new PersistentConnection(
-                new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus
+                PersistentConnectionType.Producer,
+                new ConnectionConfiguration(),
+                mockBuilder.ConnectionFactory,
+                mockBuilder.EventBus
             );
 
             Assert.Throws<Exception>(() => connection.Connect());
@@ -32,7 +36,10 @@ namespace EasyNetQ.Tests
         {
             var mockBuilder = new MockBuilder();
             using var connection = new PersistentConnection(
-                new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus
+                PersistentConnectionType.Producer,
+                new ConnectionConfiguration(),
+                mockBuilder.ConnectionFactory,
+                mockBuilder.EventBus
             );
 
             connection.Connect();
@@ -49,7 +56,10 @@ namespace EasyNetQ.Tests
                 .Returns(_ => throw new Exception("Test"));
 
             using var connection = new PersistentConnection(
-                new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus
+                PersistentConnectionType.Producer,
+                new ConnectionConfiguration(),
+                mockBuilder.ConnectionFactory,
+                mockBuilder.EventBus
             );
 
             Assert.Throws<Exception>(() => connection.CreateModel());
@@ -63,7 +73,10 @@ namespace EasyNetQ.Tests
         {
             var mockBuilder = new MockBuilder();
             using var connection = new PersistentConnection(
-                new ConnectionConfiguration(), mockBuilder.ConnectionFactory, mockBuilder.EventBus
+                PersistentConnectionType.Producer,
+                new ConnectionConfiguration(),
+                mockBuilder.ConnectionFactory,
+                mockBuilder.EventBus
             );
 
             connection.CreateModel();
