@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using EasyNetQ.Producer;
+using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;

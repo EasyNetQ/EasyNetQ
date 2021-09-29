@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.Persistent;
 
 namespace EasyNetQ
 {
@@ -10,15 +11,20 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates DisconnectedEventArgs
         /// </summary>
-        /// <param name="hostname">The hostname</param>
-        /// <param name="port">The port</param>
-        /// <param name="reason">The reason</param>
-        public DisconnectedEventArgs(string hostname, int port, string reason)
+        public DisconnectedEventArgs(
+            PersistentConnectionType type, string hostname, int port, string reason
+        )
         {
+            Type = type;
             Hostname = hostname;
             Port = port;
             Reason = reason;
         }
+
+        /// <summary>
+        ///     The type of the associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
 
         /// <summary>
         ///     The hostname of the disconnected endpoint

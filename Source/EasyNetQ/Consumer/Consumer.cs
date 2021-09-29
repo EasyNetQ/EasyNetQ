@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.Internals;
+using EasyNetQ.Persistent;
 
 namespace EasyNetQ.Consumer
 {
@@ -74,7 +75,8 @@ namespace EasyNetQ.Consumer
         /// <summary>
         ///     Creates ConsumerConfiguration
         /// </summary>
-        public ConsumerConfiguration(ushort prefetchCount, IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations)
+        public ConsumerConfiguration(ushort prefetchCount,
+            IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations)
         {
             PrefetchCount = prefetchCount;
             PerQueueConfigurations = perQueueConfigurations;
@@ -176,13 +178,19 @@ namespace EasyNetQ.Consumer
                 Dispose();
         }
 
-        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent _)
+        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
         {
+            if (@event.Type != PersistentConnectionType.Consumer)
+                return;
+
             consumer?.StopConsuming();
         }
 
-        private void OnConnectionRecovered(in ConnectionRecoveredEvent _)
+        private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
         {
+            if (@event.Type != PersistentConnectionType.Consumer)
+                return;
+
             var consumerToRestart = consumer;
             if (consumerToRestart == null)
                 return;

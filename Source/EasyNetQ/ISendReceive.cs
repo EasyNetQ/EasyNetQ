@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ

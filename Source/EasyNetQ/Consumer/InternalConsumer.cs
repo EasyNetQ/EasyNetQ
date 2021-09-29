@@ -88,7 +88,7 @@ namespace EasyNetQ.Consumer
         private readonly AsyncLock mutex = new();
 
         private readonly ConsumerConfiguration configuration;
-        private readonly IPersistentConnection connection;
+        private readonly IConsumerConnection connection;
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
 
@@ -100,7 +100,7 @@ namespace EasyNetQ.Consumer
         /// </summary>
         public InternalConsumer(
             ConsumerConfiguration configuration,
-            IPersistentConnection connection,
+            IConsumerConnection connection,
             IHandlerRunner handlerRunner,
             IEventBus eventBus
         )

@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
@@ -238,7 +236,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_correctly_bind_using_new_conventions()
         {
-            mockBuilder.Channels[0].Received().QueueBind(
+            mockBuilder.Channels[1].Received().QueueBind(
                 Arg.Is("CustomRpcRoutingKeyName"),
                 Arg.Is("CustomRpcExchangeName"),
                 Arg.Is("CustomRpcRoutingKeyName"),
@@ -254,7 +252,8 @@ namespace EasyNetQ.Tests
                 Arg.Is("direct"),
                 Arg.Is(true),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null));
+                Arg.Is((IDictionary<string, object>)null)
+            );
         }
     }
 }

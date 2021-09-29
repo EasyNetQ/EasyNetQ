@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Shouldly;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Rpc
@@ -37,7 +37,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             Task.Run(() => responder.Dispose(), cts.Token);
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await requestTask);
-            cts.IsCancellationRequested.ShouldBeTrue();
+            cts.IsCancellationRequested.Should().BeTrue();
         }
 
         public void Dispose() => bus.Dispose();

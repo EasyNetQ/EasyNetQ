@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -93,7 +94,14 @@ namespace EasyNetQ
             var expiration = requestConfiguration.Expiration;
             var priority = requestConfiguration.Priority;
             await RequestPublishAsync(
-                request, routingKey, queueName, correlationId, expiration, priority, configuration.MandatoryPublish, cts.Token
+                request,
+                routingKey,
+                queueName,
+                correlationId,
+                expiration,
+                priority,
+                configuration.MandatoryPublish,
+                cts.Token
             ).ConfigureAwait(false);
             tcs.AttachCancellation(cts.Token);
             return await tcs.Task.ConfigureAwait(false);
@@ -125,6 +133,9 @@ namespace EasyNetQ
 
         private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
         {
+            if (@event.Type != PersistentConnectionType.Producer)
+                return;
+
             var responseActionsValues = responseActions.Values;
             var responseSubscriptionsValues = responseSubscriptions.Values;
 
@@ -154,8 +165,9 @@ namespace EasyNetQ
                         if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
                             isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
                         if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
-                            exceptionMessage =
-                                Encoding.UTF8.GetString((byte[])msg.Properties.Headers[ExceptionMessageKey]);
+                            exceptionMessage = Encoding.UTF8.GetString(
+                                (byte[])msg.Properties.Headers[ExceptionMessageKey]
+                            );
                     }
 
                     if (isFaulted)
@@ -164,14 +176,18 @@ namespace EasyNetQ
                         tcs.TrySetResult(msg.Body);
                 },
                 () => tcs.TrySetException(
-                    new EasyNetQException("Connection lost while request was in-flight. CorrelationId: {0}",
-                        correlationId))
+                    new EasyNetQException(
+                        $"Connection lost while request was in-flight. CorrelationId: {correlationId}"
+                    )
+                )
             );
 
             responseActions.TryAdd(correlationId, responseAction);
         }
 
-        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(CancellationToken cancellationToken)
+        protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
+            CancellationToken cancellationToken
+        )
         {
             var responseType = typeof(TResponse);
             var requestType = typeof(TRequest);

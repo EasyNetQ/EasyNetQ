@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.Persistent;
 
 namespace EasyNetQ
 {
@@ -10,13 +11,17 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates ConnectedEventArgs
         /// </summary>
-        /// <param name="hostname">The hostname</param>
-        /// <param name="port">The port</param>
-        public ConnectedEventArgs(string hostname, int port)
+        public ConnectedEventArgs(PersistentConnectionType type, string hostname, int port)
         {
+            Type = type;
             Hostname = hostname;
             Port = port;
         }
+
+        /// <summary>
+        ///     The type of associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
 
         /// <summary>
         ///     The hostname of the connected endpoint

@@ -13,7 +13,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public async Task Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
         {
-            var persistedConnectionMock = Substitute.For<IPersistentConnection>();
+            var persistedConnectionMock = Substitute.For<IConsumerConnection>();
             var modelMock = Substitute.For<IModel>();
             modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(true);
             persistedConnectionMock.CreateModel().Returns(modelMock);
@@ -30,7 +30,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         public async Task
             Should_enable_publisher_confirm_when_configured_and_return_nack_with_requeue_when_no_confirm_received()
         {
-            var persistedConnectionMock = Substitute.For<IPersistentConnection>();
+            var persistedConnectionMock = Substitute.For<IConsumerConnection>();
             var modelMock = Substitute.For<IModel>();
             modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(false);
             persistedConnectionMock.CreateModel().Returns(modelMock);
@@ -46,7 +46,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         [Fact]
         public async Task Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
         {
-            var persistedConnectionMock = Substitute.For<IPersistentConnection>();
+            var persistedConnectionMock = Substitute.For<IConsumerConnection>();
             var modelMock = Substitute.For<IModel>();
             modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(false);
             persistedConnectionMock.CreateModel().Returns(modelMock);
@@ -59,15 +59,17 @@ namespace EasyNetQ.Tests.ConsumeTests
         }
 
         private static DefaultConsumerErrorStrategy CreateConsumerErrorStrategy(
-            IPersistentConnection persistedConnectionMock, bool configurePublisherConfirm = false)
+            IConsumerConnection connectionMock, bool configurePublisherConfirm = false
+        )
         {
             var consumerErrorStrategy = new DefaultConsumerErrorStrategy(
-                persistedConnectionMock,
+                connectionMock,
                 Substitute.For<ISerializer>(),
                 Substitute.For<IConventions>(),
                 Substitute.For<ITypeNameSerializer>(),
                 Substitute.For<IErrorMessageSerializer>(),
-                new ConnectionConfiguration { PublisherConfirms = configurePublisherConfirm });
+                new ConnectionConfiguration { PublisherConfirms = configurePublisherConfirm }
+            );
             return consumerErrorStrategy;
         }
 

@@ -25,7 +25,7 @@ namespace EasyNetQ
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.Unblocked"/>.
         /// </summary>
-        public EventHandler Unblocked { get; }
+        public EventHandler<UnblockedEventArgs> Unblocked { get; }
 
         /// <summary>
         /// An event handler for <see cref="IAdvancedBus.MessageReturned"/>.
@@ -44,7 +44,7 @@ namespace EasyNetQ
             EventHandler<ConnectedEventArgs> connected = null,
             EventHandler<DisconnectedEventArgs> disconnected = null,
             EventHandler<BlockedEventArgs> blocked = null,
-            EventHandler unblocked = null,
+            EventHandler<UnblockedEventArgs> unblocked = null,
             EventHandler<MessageReturnedEventArgs> messageReturned = null
         )
         {
