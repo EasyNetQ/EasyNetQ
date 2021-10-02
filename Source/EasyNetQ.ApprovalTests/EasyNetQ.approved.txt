@@ -1454,7 +1454,7 @@ namespace EasyNetQ.Internals
         public void Decrement() { }
         public void Dispose() { }
         public void Increment() { }
-        public void Wait() { }
+        public System.Threading.Tasks.Task WaitAsync() { }
     }
     public sealed class AsyncLock : System.IDisposable
     {

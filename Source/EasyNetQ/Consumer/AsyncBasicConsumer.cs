@@ -102,7 +102,7 @@ namespace EasyNetQ.Consumer
 
             disposed = true;
             cts.Cancel();
-            onTheFlyMessages.Wait();
+            onTheFlyMessages.WaitAsync().GetAwaiter().GetResult(); // TODO: can be refactored with IAsyncDisposable
             cts.Dispose();
             onTheFlyMessages.Dispose();
             eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
