@@ -598,6 +598,8 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, string topic, System.Threading.CancellationToken cancellationToken = default) { }
+        public static EasyNetQ.SubscriptionResult Subscribe(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericRpcExtensions
     {
