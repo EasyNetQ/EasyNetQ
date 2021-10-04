@@ -36,7 +36,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
             await Assert.ThrowsAsync<TaskCanceledException>(async () =>
             {
                 using var cts = new CancellationTokenSource(1000);
-                    await persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
+                await persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
             });
         }
 

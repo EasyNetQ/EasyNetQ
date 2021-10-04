@@ -102,7 +102,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
             );
 
-            await Assert.ThrowsAsync(exception.GetType(), () => persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct")) );
+            await Assert.ThrowsAsync(exception.GetType(), () => persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct")));
 
             brokenChannel.Received().ExchangeDeclare("MyExchange", "direct");
             brokenChannel.Received().Close();
