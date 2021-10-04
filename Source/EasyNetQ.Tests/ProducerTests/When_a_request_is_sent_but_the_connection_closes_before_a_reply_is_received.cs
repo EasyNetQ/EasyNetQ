@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -23,14 +24,14 @@ namespace EasyNetQ.Tests.ProducerTests
         private readonly MockBuilder mockBuilder;
 
         [Fact]
-        public void Should_throw_an_EasyNetQException()
+        public Task Should_throw_an_EasyNetQException()
         {
-            Assert.Throws<EasyNetQException>(() =>
+            return Assert.ThrowsAsync<EasyNetQException>(() =>
             {
                 var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
                 mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, null));
                 (mockBuilder.Connection as IAutorecoveringConnection).RecoverySucceeded += Raise.EventWith(null, new EventArgs());
-                task.GetAwaiter().GetResult();
+                return task;
             });
         }
     }
