@@ -10,13 +10,13 @@ using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests
 {
-    public class When_autosubscribing_with_subscription_configuration_action : IDisposable
+    public class When_autosubscribing_with_subscription_configuration_action : IAsyncLifetime
     {
         private IBus bus;
         private Action<ISubscriptionConfiguration> capturedAction;
         private IPubSub pubSub;
 
-        public When_autosubscribing_with_subscription_configuration_action()
+        public Task InitializeAsync()
         {
             pubSub = Substitute.For<IPubSub>();
             bus = Substitute.For<IBus>();
@@ -39,12 +39,13 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                 .Returns(Task.FromResult(new SubscriptionResult()).ToAwaitableDisposable())
                 .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            autoSubscriber.SubscribeAsync(new[] { typeof(MyConsumerWithAction) }).GetAwaiter().GetResult();
+            return autoSubscriber.SubscribeAsync(new[] { typeof(MyConsumerWithAction) });
         }
 
-        public void Dispose()
+        public Task DisposeAsync()
         {
             bus.Dispose();
+            return Task.CompletedTask;
         }
 
         [Fact]
