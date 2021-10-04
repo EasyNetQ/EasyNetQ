@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Tests.props" />
-  
+
   <PropertyGroup>
     <TargetFramework>net5</TargetFramework>
     <RootNamespace>EasyNetQ.Approval.Tests</RootNamespace>

@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading.Tasks;
-using EasyNetQ.Internals;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;

@@ -2,20 +2,29 @@ using System;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public interface IInternalConsumerFactory : IDisposable
     {
+        /// <summary>
+        ///     Creates consumer based on configuration 
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
         IInternalConsumer CreateConsumer(ConsumerConfiguration configuration);
     }
 
     /// <inheritdoc />
     public class InternalConsumerFactory : IInternalConsumerFactory
     {
-        private readonly IPersistentConnection connection;
+        private readonly IConsumerConnection connection;
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
 
+        /// <summary>
+        ///     Creates InternalConsumerFactory
+        /// </summary>
         public InternalConsumerFactory(
-            IPersistentConnection connection, IHandlerRunner handlerRunner, IEventBus eventBus
+            IConsumerConnection connection, IHandlerRunner handlerRunner, IEventBus eventBus
         )
         {
             Preconditions.CheckNotNull(connection, nameof(connection));

@@ -101,13 +101,22 @@ namespace EasyNetQ
             var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount);
             configure(subscriptionConfiguration);
 
-            var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
             var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
-            var queueType = conventions.QueueTypeConvention(typeof(T));
+            var exchange = await advancedBus.ExchangeDeclareAsync(
+                exchangeName,
+                c =>
+                {
+                    c.WithType(subscriptionConfiguration.ExchangeType);
+                    if (!string.IsNullOrEmpty(subscriptionConfiguration.AlternateExchange))
+                        c.WithAlternateExchange(new Exchange(subscriptionConfiguration.AlternateExchange));
+                },
+                cts.Token
+            ).ConfigureAwait(false);
 
+            var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
+            var queueType = conventions.QueueTypeConvention(typeof(T));
             if (!string.IsNullOrEmpty(queueType))
                 subscriptionConfiguration.WithQueueType(queueType);
-
             var queue = await advancedBus.QueueDeclareAsync(
                 queueName,
                 c =>
@@ -127,17 +136,6 @@ namespace EasyNetQ
                         c.WithQueueMode(subscriptionConfiguration.QueueMode);
                     if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueType))
                         c.WithQueueType(subscriptionConfiguration.QueueType);
-                },
-                cts.Token
-            ).ConfigureAwait(false);
-
-            var exchange = await advancedBus.ExchangeDeclareAsync(
-                exchangeName,
-                c =>
-                {
-                    c.WithType(subscriptionConfiguration.ExchangeType);
-                    if (!string.IsNullOrEmpty(subscriptionConfiguration.AlternateExchange))
-                        c.WithAlternateExchange(new Exchange(subscriptionConfiguration.AlternateExchange));
                 },
                 cts.Token
             ).ConfigureAwait(false);

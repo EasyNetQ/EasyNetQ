@@ -364,12 +364,9 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            return pubSub.SubscribeAsync(
-                subscriptionId,
-                onMessage,
-                configure,
-                cancellationToken
-            ).GetAwaiter().GetResult();
+            return pubSub.SubscribeAsync(subscriptionId, onMessage, configure, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
         }
     }
 }
