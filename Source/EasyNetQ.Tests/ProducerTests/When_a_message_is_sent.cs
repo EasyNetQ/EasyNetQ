@@ -16,7 +16,7 @@ namespace EasyNetQ.Tests.ProducerTests
         {
             mockBuilder = new MockBuilder();
 
-            mockBuilder.SendReceive.Send(queueName, new MyMessage { Text = "Hello World" });
+            mockBuilder.SendReceive.SendAsync(queueName, new MyMessage { Text = "Hello World" }).GetAwaiter().GetResult();
         }
 
         public void Dispose()

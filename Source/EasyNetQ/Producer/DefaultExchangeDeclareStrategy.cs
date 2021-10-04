@@ -22,13 +22,13 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public Task<Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
+        public Task<Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken = default)
         {
             return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
+        public Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken = default)
         {
             var exchangeName = conventions.ExchangeNamingConvention(messageType);
             return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);

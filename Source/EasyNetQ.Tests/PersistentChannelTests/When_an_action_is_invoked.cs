@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
             );
 
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+            persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct")).GetAwaiter().GetResult();
         }
 
         private readonly IPersistentChannel persistentChannel;

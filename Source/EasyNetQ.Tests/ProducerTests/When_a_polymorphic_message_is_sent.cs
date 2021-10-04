@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests.ProducerTests
                 NotInInterface = "Hi"
             };
 
-            mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
+            mockBuilder.PubSub.PublishAsync<IMyMessageInterface>(message).GetAwaiter().GetResult();
         }
 
         public void Dispose()

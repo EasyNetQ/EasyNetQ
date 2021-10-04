@@ -26,7 +26,7 @@ namespace EasyNetQ.Tests
             );
 
             var message = new MyMessage { Text = "Hiya!" };
-            mockBuilder.PubSub.Publish(message);
+            mockBuilder.PubSub.PublishAsync(message).GetAwaiter().GetResult();
             WaitForMessageToPublish();
         }
 
@@ -89,7 +89,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
 
             var message = new MyMessage { Text = "Hiya!" };
-            mockBuilder.PubSub.Publish(message, c => c.WithTopic("X.A"));
+            mockBuilder.PubSub.PublishAsync(message, c => c.WithTopic("X.A")).GetAwaiter().GetResult();
             WaitForMessageToPublish();
         }
 

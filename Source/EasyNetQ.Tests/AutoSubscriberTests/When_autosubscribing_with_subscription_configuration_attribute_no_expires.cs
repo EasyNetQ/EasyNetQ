@@ -31,7 +31,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
                 .Returns(Task.FromResult(new SubscriptionResult()).ToAwaitableDisposable())
                 .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-            autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
+            autoSubscriber.SubscribeAsync(new[] { typeof(MyConsumerWithAttr) }).GetAwaiter().GetResult();
         }
 
         public void Dispose()

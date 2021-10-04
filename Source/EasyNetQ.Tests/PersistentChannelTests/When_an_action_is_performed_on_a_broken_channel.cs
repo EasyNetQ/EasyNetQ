@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -64,7 +65,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
         [Theory]
         [MemberData(nameof(CloseAndRetryTestCases))]
-        public void Should_succeed_after_channel_recreation(Exception exception)
+        public async Task Should_succeed_after_channel_recreation(Exception exception)
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var brokenChannel = Substitute.For<IModel, IRecoverable>();
@@ -77,7 +78,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
             );
 
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+            await persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct"));
 
             brokenChannel.Received().ExchangeDeclare("MyExchange", "direct");
             brokenChannel.Received().Close();
@@ -88,7 +89,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
 
         [Theory]
         [MemberData(nameof(SoftChannelTestCases))]
-        public void Should_throw_exception_and_close_channel(Exception exception)
+        public async Task Should_throw_exception_and_close_channel(Exception exception)
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             var brokenChannel = Substitute.For<IModel, IRecoverable>();
@@ -101,10 +102,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
                 new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
             );
 
-            Assert.Throws(
-                exception.GetType(),
-                () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"))
-            );
+            await Assert.ThrowsAsync(exception.GetType(), () => persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct")) );
 
             brokenChannel.Received().ExchangeDeclare("MyExchange", "direct");
             brokenChannel.Received().Close();

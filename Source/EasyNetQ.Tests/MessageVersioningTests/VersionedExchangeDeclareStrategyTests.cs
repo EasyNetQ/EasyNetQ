@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
     public class VersionedExchangeDeclareStrategyTests
     {
         [Fact]
-        public void Should_declare_exchange_again_if_first_attempt_failed()
+        public async Task Should_declare_exchange_again_if_first_attempt_failed()
         {
             var exchangeDeclareCount = 0;
             var exchangeName = "exchangeName";
@@ -36,14 +36,14 @@ namespace EasyNetQ.Tests.MessageVersioningTests
             var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
             try
             {
-                exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
+                await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
             }
             catch (Exception)
             {
             }
 
-            var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
-            advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
+            var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
+            await advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
             declaredExchange.Should().BeEquivalentTo(exchange);
             exchangeDeclareCount.Should().Be(1);
         }
@@ -51,7 +51,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         // Unversioned message - exchange declared
         // Versioned message - superseded exchange declared, then superseding, then bind
         [Fact]
-        public void When_declaring_exchanges_for_unversioned_message_one_exchange_created()
+        public async Task When_declaring_exchanges_for_unversioned_message_one_exchange_created()
         {
             var exchanges = new List<Exchange>();
             var boundExchanges = new Dictionary<Exchange, Exchange>();
@@ -80,7 +80,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
-            publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
+            await publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic);
 
             Assert.True(exchanges.Count == 1); //, "Single exchange should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name); //, "Exchange should have used naming convection to name the exchange" );
@@ -88,7 +88,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
         }
 
         [Fact]
-        public void When_declaring_exchanges_for_versioned_message_exchange_per_version_created_and_bound_to_superceding_version()
+        public async Task When_declaring_exchanges_for_versioned_message_exchange_per_version_created_and_bound_to_superceding_version()
         {
             var exchanges = new List<Exchange>();
             var boundExchanges = new Dictionary<Exchange, Exchange>();
@@ -117,7 +117,7 @@ namespace EasyNetQ.Tests.MessageVersioningTests
 
             var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
-            publishExchangeStrategy.DeclareExchange(typeof(MyMessageV2), ExchangeType.Topic);
+            await publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessageV2), ExchangeType.Topic);
 
             Assert.Equal(2, exchanges.Count); //, "Two exchanges should have been created" );
             Assert.Equal("MyMessage", exchanges[0].Name); //, "Superseded message exchange should been created first" );

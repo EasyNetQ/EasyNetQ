@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using Xunit;
 
@@ -33,13 +34,13 @@ namespace EasyNetQ.Hosepipe.Tests
 
         [Fact]
         [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-        public void PublishSomeMessages()
+        public async Task PublishSomeMessages()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
 
             for (var i = 0; i < 10; i++)
             {
-                bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+                await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
             }
 
             bus.Dispose();
@@ -47,11 +48,11 @@ namespace EasyNetQ.Hosepipe.Tests
 
         [Fact]
         [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-        public void ConsumeMessages()
+        public async Task ConsumeMessages()
         {
             var bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+            await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
             Thread.Sleep(1000);
 

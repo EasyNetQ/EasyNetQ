@@ -19,9 +19,9 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             mockBuilder = new MockBuilder();
 
-            mockBuilder.SendReceive.Receive("the_queue", x => x
+            mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
                 .Add<MyMessage>(message => deliveredMyMessage = message)
-                .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
+                .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message)).GetAwaiter().GetResult();
 
             DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
             DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");

@@ -163,7 +163,7 @@ namespace EasyNetQ.Tests
             };
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
-            mockBuilder.PubSub.Publish(new TestMessage());
+            mockBuilder.PubSub.PublishAsync(new TestMessage()).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -223,7 +223,7 @@ namespace EasyNetQ.Tests
 
             mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-            mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
+            mockBuilder.Rpc.RespondAsync<TestMessage, TestMessage>(_ => new TestMessage()).GetAwaiter().GetResult();
         }
 
         public void Dispose()

@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
@@ -28,9 +29,9 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_cleanup_publish_model()
+        public async Task Should_cleanup_publish_model()
         {
-            bus.PubSub.Publish(new TestMessage());
+            await bus.PubSub.PublishAsync(new TestMessage());
             mockBuilder.Dispose();
 
             mockBuilder.Channels[0].Received().Dispose();
@@ -60,12 +61,12 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_cleanup_respond_model()
+        public async Task Should_cleanup_respond_model()
         {
             var waiter = new CountdownEvent(1);
             mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
 
-            bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null);
+            await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null);
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
@@ -81,9 +82,9 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_cleanup_subscribe_async_model()
+        public async Task Should_cleanup_subscribe_async_model()
         {
-            bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
+            using var _ = await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             mockBuilder.Dispose();
@@ -96,9 +97,9 @@ namespace EasyNetQ.Tests
         }
 
         [Fact]
-        public void Should_cleanup_subscribe_model()
+        public async Task Should_cleanup_subscribe_model()
         {
-            bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
+            using var _ = await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { });
             var are = WaitForConsumerModelDisposedMessage();
 
             mockBuilder.Dispose();

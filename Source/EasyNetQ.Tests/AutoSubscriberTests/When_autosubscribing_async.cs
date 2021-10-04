@@ -29,7 +29,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests
             mockBuilder = new MockBuilder();
 
             var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
-            autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
+            autoSubscriber.SubscribeAsync(new[] { typeof(MyAsyncConsumer) }).GetAwaiter().GetResult();
         }
 
         public void Dispose()

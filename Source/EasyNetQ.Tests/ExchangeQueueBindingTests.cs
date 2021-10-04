@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            queue = mockBuilder.Bus.Advanced.QueueDeclare(
+            queue = mockBuilder.Bus.Advanced.QueueDeclareAsync(
                 "my_queue",
                 c => c.AsDurable(false)
                     .AsExclusive(true)
@@ -27,7 +27,7 @@ namespace EasyNetQ.Tests
                     .WithMessageTtl(TimeSpan.FromSeconds(1))
                     .WithExpires(TimeSpan.FromSeconds(2))
                     .WithMaxPriority(10)
-            );
+            ).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -67,7 +67,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
 
             var advancedBus = mockBuilder.Bus.Advanced;
-            queue = advancedBus.QueueDeclare(
+            queue = advancedBus.QueueDeclareAsync(
                 "my_queue",
                 c => c.AsDurable(false)
                     .AsExclusive(true)
@@ -77,7 +77,7 @@ namespace EasyNetQ.Tests
                     .WithMaxPriority(10)
                     .WithDeadLetterExchange(new Exchange("my_exchange"))
                     .WithDeadLetterRoutingKey("my_routing_key")
-            );
+            ).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -118,7 +118,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            queue = mockBuilder.Bus.Advanced.QueueDeclare(
+            queue = mockBuilder.Bus.Advanced.QueueDeclareAsync(
                 "my_queue",
                 c => c.AsDurable(false)
                     .AsExclusive(true)
@@ -128,7 +128,7 @@ namespace EasyNetQ.Tests
                     .WithMaxPriority(10)
                     .WithDeadLetterExchange(Exchange.Default)
                     .WithDeadLetterRoutingKey("my_queue2")
-            );
+            ).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -170,7 +170,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
 
             var queue = new Queue("my_queue", false);
-            mockBuilder.Bus.Advanced.QueueDelete(queue);
+            mockBuilder.Bus.Advanced.QueueDeleteAsync(queue).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -196,13 +196,13 @@ namespace EasyNetQ.Tests
             mockBuilder.NextModel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
                 .Do(x => { arguments = x[4] as IDictionary; });
 
-            exchange = mockBuilder.Bus.Advanced.ExchangeDeclare(
+            exchange = mockBuilder.Bus.Advanced.ExchangeDeclareAsync(
                 "my_exchange",
                 c => c.WithType(ExchangeType.Direct)
                     .AsDurable(false)
                     .AsAutoDelete(true)
                     .WithAlternateExchange(new Exchange("my.alternate.exchange"))
-            );
+            ).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -246,7 +246,7 @@ namespace EasyNetQ.Tests
         {
             mockBuilder = new MockBuilder();
 
-            mockBuilder.Bus.Advanced.ExchangeDeclarePassive("my_exchange");
+            mockBuilder.Bus.Advanced.ExchangeDeclarePassiveAsync("my_exchange").GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -271,7 +271,7 @@ namespace EasyNetQ.Tests
             mockBuilder = new MockBuilder();
 
             var exchange = new Exchange("my_exchange");
-            mockBuilder.Bus.Advanced.ExchangeDelete(exchange);
+            mockBuilder.Bus.Advanced.ExchangeDeleteAsync(exchange).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -298,7 +298,7 @@ namespace EasyNetQ.Tests
             var exchange = new Exchange("my_exchange");
             var queue = new Queue("my_queue", false);
 
-            binding = advancedBus.Bind(exchange, queue, "my_routing_key");
+            binding = advancedBus.BindAsync(exchange, queue, "my_routing_key").GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -342,7 +342,7 @@ namespace EasyNetQ.Tests
             var exchange = new Exchange("my_exchange");
             var queue = new Queue("my_queue", false);
 
-            binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
+            binding = advancedBus.BindAsync(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" }).GetAwaiter().GetResult();
         }
 
         public void Dispose()
@@ -387,8 +387,8 @@ namespace EasyNetQ.Tests
 
             var exchange = new Exchange("my_exchange");
             var queue = new Queue("my_queue", false);
-            binding = advancedBus.Bind(exchange, queue, "my_routing_key");
-            advancedBus.Unbind(binding);
+            binding = advancedBus.BindAsync(exchange, queue, "my_routing_key").GetAwaiter().GetResult();
+            advancedBus.UnbindAsync(binding).GetAwaiter().GetResult();
         }
 
         public void Dispose()

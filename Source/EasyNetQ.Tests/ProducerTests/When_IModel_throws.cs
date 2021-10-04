@@ -34,9 +34,9 @@ namespace EasyNetQ.Tests.ProducerTests
         private readonly MockBuilder mockBuilder;
 
         [Fact]
-        public void Should_try_to_reconnect_until_timeout()
+        public async Task Should_try_to_reconnect_until_timeout()
         {
-            Assert.Throws<TaskCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" }));
         }
     }
 }

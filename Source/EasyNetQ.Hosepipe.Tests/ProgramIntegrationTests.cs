@@ -59,25 +59,21 @@ namespace EasyNetQ.Hosepipe.Tests
 
         public void PublishSomeMessages()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
+            using var bus = RabbitHutch.CreateBus("host=localhost");
 
             for (int i = 0; i < 10; i++)
             {
-                bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+                bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) }).GetAwaiter().GetResult();
             }
-
-            bus.Dispose();
         }
 
         public void ConsumeMessages()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
+            using var bus = RabbitHutch.CreateBus("host=localhost");
 
-            bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+            bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text)).GetAwaiter().GetResult();
 
             Thread.Sleep(1000);
-
-            bus.Dispose();
         }
 
         private class TestMessage

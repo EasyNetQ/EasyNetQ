@@ -31,12 +31,12 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         private readonly IPersistentChannel persistentChannel;
 
         [Fact]
-        public void Should_throw_timeout_exception()
+        public async Task Should_throw_timeout_exception()
         {
-            Assert.Throws<TaskCanceledException>(() =>
+            await Assert.ThrowsAsync<TaskCanceledException>(async () =>
             {
                 using var cts = new CancellationTokenSource(1000);
-                persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
+                    await persistentChannel.InvokeChannelActionAsync(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
             });
         }
 
