@@ -60,7 +60,7 @@ namespace EasyNetQ.Internals
         /// <summary>
         ///     Waits until counter is zero
         /// </summary>
-        public Task WaitAsync()
+        public void Wait()
         {
             TaskCompletionSource<bool> waiter = null;
             lock (mutex)
@@ -72,7 +72,7 @@ namespace EasyNetQ.Internals
                 }
             }
 
-            return waiter?.Task ?? Task.CompletedTask;
+            waiter?.Task.GetAwaiter().GetResult();
         }
     }
 }
