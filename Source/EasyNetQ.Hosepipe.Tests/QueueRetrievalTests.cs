@@ -36,27 +36,23 @@ namespace EasyNetQ.Hosepipe.Tests
         [Traits.Explicit("Requires a RabbitMQ server on localhost")]
         public async Task PublishSomeMessages()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
+            using var bus = RabbitHutch.CreateBus("host=localhost");
 
             for (var i = 0; i < 10; i++)
             {
                 await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
             }
-
-            bus.Dispose();
         }
 
         [Fact]
         [Traits.Explicit("Requires a RabbitMQ server on localhost")]
         public async Task ConsumeMessages()
         {
-            var bus = RabbitHutch.CreateBus("host=localhost");
+            using var bus = RabbitHutch.CreateBus("host=localhost");
 
             await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
             Thread.Sleep(1000);
-
-            bus.Dispose();
         }
 
         private class TestMessage
