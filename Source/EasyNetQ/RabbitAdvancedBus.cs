@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -17,10 +19,11 @@ namespace EasyNetQ
     /// <inheritdoc />
     public class RabbitAdvancedBus : IAdvancedBus
     {
-        private readonly IClientCommandDispatcher clientCommandDispatcher;
+        private readonly IChannelDispatcher channelDispatcher;
         private readonly ConnectionConfiguration configuration;
         private readonly IPublishConfirmationListener confirmationListener;
-        private readonly IPersistentConnection connection;
+        private readonly IProducerConnection producerConnection;
+        private readonly IConsumerConnection consumerConnection;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEventBus eventBus;
         private readonly IDisposable[] eventSubscriptions;
@@ -30,6 +33,7 @@ namespace EasyNetQ
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IPullingConsumerFactory pullingConsumerFactory;
         private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
+        private readonly IConsumeScopeProvider consumeScopeProvider;
 
         private volatile bool disposed;
 
@@ -37,9 +41,10 @@ namespace EasyNetQ
         ///     Creates RabbitAdvancedBus
         /// </summary>
         public RabbitAdvancedBus(
-            IPersistentConnection connection,
+            IProducerConnection producerConnection,
+            IConsumerConnection consumerConnection,
             IConsumerFactory consumerFactory,
-            IClientCommandDispatcher clientCommandDispatcher,
+            IChannelDispatcher channelDispatcher,
             IPublishConfirmationListener confirmationListener,
             IEventBus eventBus,
             IHandlerCollectionFactory handlerCollectionFactory,
@@ -49,10 +54,12 @@ namespace EasyNetQ
             IMessageSerializationStrategy messageSerializationStrategy,
             IConventions conventions,
             IPullingConsumerFactory pullingConsumerFactory,
-            AdvancedBusEventHandlers advancedBusEventHandlers
+            AdvancedBusEventHandlers advancedBusEventHandlers,
+            IConsumeScopeProvider consumeScopeProvider
         )
         {
-            Preconditions.CheckNotNull(connection, nameof(connection));
+            Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
+            Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
             Preconditions.CheckNotNull(consumerFactory, nameof(consumerFactory));
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
             Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
@@ -64,9 +71,10 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
             Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
 
-            this.connection = connection;
+            this.producerConnection = producerConnection;
+            this.consumerConnection = consumerConnection;
             this.consumerFactory = consumerFactory;
-            this.clientCommandDispatcher = clientCommandDispatcher;
+            this.channelDispatcher = channelDispatcher;
             this.confirmationListener = confirmationListener;
             this.eventBus = eventBus;
             this.handlerCollectionFactory = handlerCollectionFactory;
@@ -77,6 +85,7 @@ namespace EasyNetQ
             this.pullingConsumerFactory = pullingConsumerFactory;
             this.advancedBusEventHandlers = advancedBusEventHandlers;
             this.Conventions = conventions;
+            this.consumeScopeProvider = consumeScopeProvider;
 
             Connected += advancedBusEventHandlers.Connected;
             Disconnected += advancedBusEventHandlers.Disconnected;
@@ -97,10 +106,31 @@ namespace EasyNetQ
 
 
         /// <inheritdoc />
-        public bool IsConnected => connection.IsConnected;
+        public bool IsConnected(PersistentConnectionType type)
+        {
+            return type switch
+            {
+                PersistentConnectionType.Producer => producerConnection.IsConnected,
+                PersistentConnectionType.Consumer => consumerConnection.IsConnected,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+        }
 
         /// <inheritdoc />
-        public void Connect() => connection.Connect();
+        public void Connect(PersistentConnectionType type)
+        {
+            switch (type)
+            {
+                case PersistentConnectionType.Producer:
+                    producerConnection.Connect();
+                    break;
+                case PersistentConnectionType.Consumer:
+                    consumerConnection.Connect();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
 
         #region Consume
 
@@ -122,14 +152,15 @@ namespace EasyNetQ
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
-                        (body, properties, receivedInfo, cancellationToken) =>
+                        async (body, properties, receivedInfo, cancellationToken) =>
                         {
                             var rawMessage = produceConsumeInterceptor.OnConsume(
                                 new ConsumedMessage(receivedInfo, properties, body)
                             );
-                            return x.Item2(
+                            using var scope = consumeScopeProvider.CreateScope();
+                            return await x.Item2(
                                 rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                            );
+                            ).ConfigureAwait(false);
                         }
                     )
                 ).Union(
@@ -139,7 +170,7 @@ namespace EasyNetQ
                             x.Item3.ConsumerTag,
                             x.Item3.IsExclusive,
                             x.Item3.Arguments,
-                            (body, properties, receivedInfo, cancellationToken) =>
+                            async (body, properties, receivedInfo, cancellationToken) =>
                             {
                                 var rawMessage = produceConsumeInterceptor.OnConsume(
                                     new ConsumedMessage(receivedInfo, properties, body)
@@ -148,7 +179,8 @@ namespace EasyNetQ
                                     rawMessage.Properties, rawMessage.Body
                                 );
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                return handler(deserializedMessage, receivedInfo, cancellationToken);
+                                using var scope = consumeScopeProvider.CreateScope();
+                                return await handler(deserializedMessage, receivedInfo, cancellationToken).ConfigureAwait(false);
                             }
                         )
                     )
@@ -166,8 +198,8 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            var declareResult = await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueDeclarePassive(queue.Name), cts.Token
+            var declareResult = await channelDispatcher.InvokeAsync(
+                x => x.QueueDeclarePassive(queue.Name), ChannelDispatchOptions.ConsumerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -207,7 +239,7 @@ namespace EasyNetQ
         public event EventHandler<BlockedEventArgs> Blocked;
 
         /// <inheritdoc />
-        public event EventHandler Unblocked;
+        public event EventHandler<UnblockedEventArgs> Unblocked;
 
         /// <inheritdoc />
         public event EventHandler<MessageReturnedEventArgs> MessageReturned;
@@ -233,38 +265,6 @@ namespace EasyNetQ
             Blocked -= advancedBusEventHandlers.Blocked;
             Unblocked -= advancedBusEventHandlers.Unblocked;
             MessageReturned -= advancedBusEventHandlers.MessageReturned;
-        }
-
-        private void OnConnectionCreated(in ConnectionCreatedEvent @event)
-        {
-            Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
-        }
-
-        private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
-        {
-            Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
-        }
-
-        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
-        {
-            Disconnected?.Invoke(
-                this, new DisconnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port, @event.Reason)
-            );
-        }
-
-        private void OnConnectionBlocked(in ConnectionBlockedEvent @event)
-        {
-            Blocked?.Invoke(this, new BlockedEventArgs(@event.Reason));
-        }
-
-        private void OnConnectionUnblocked(in ConnectionUnblockedEvent @event)
-        {
-            Unblocked?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnMessageReturned(in ReturnedMessageEvent @event)
-        {
-            MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
         }
 
         #region Publish
@@ -328,7 +328,7 @@ namespace EasyNetQ
             {
                 while (true)
                 {
-                    var pendingConfirmation = await clientCommandDispatcher.InvokeAsync(model =>
+                    var pendingConfirmation = await channelDispatcher.InvokeAsync(model =>
                     {
                         var confirmation = confirmationListener.CreatePendingConfirmation(model);
                         rawMessage.Properties.SetConfirmationId(confirmation.Id);
@@ -345,7 +345,7 @@ namespace EasyNetQ
                         }
 
                         return confirmation;
-                    }, ChannelDispatchOptions.PublishWithConfirms, cts.Token).ConfigureAwait(false);
+                    }, ChannelDispatchOptions.ProducerPublishWithConfirms, cts.Token).ConfigureAwait(false);
 
                     try
                     {
@@ -359,12 +359,12 @@ namespace EasyNetQ
             }
             else
             {
-                await clientCommandDispatcher.InvokeAsync(model =>
+                await channelDispatcher.InvokeAsync(model =>
                 {
                     var properties = model.CreateBasicProperties();
                     rawMessage.Properties.CopyTo(properties);
                     model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
-                }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
+                }, ChannelDispatchOptions.ProducerPublish, cts.Token).ConfigureAwait(false);
             }
 
             eventBus.Publish(
@@ -403,8 +403,8 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueDeclarePassive(name), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.QueueDeclarePassive(name), ChannelDispatchOptions.ConsumerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -432,8 +432,10 @@ namespace EasyNetQ
             var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
             var arguments = queueDeclareConfiguration.Arguments;
 
-            var queueDeclareOk = await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments), cts.Token
+            var queueDeclareOk = await channelDispatcher.InvokeAsync(
+                x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -458,8 +460,10 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueDelete(queue.Name, ifUnused, ifEmpty), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.QueueDelete(queue.Name, ifUnused, ifEmpty),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -473,7 +477,11 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(x => x.QueuePurge(queue.Name), cts.Token).ConfigureAwait(false);
+            await channelDispatcher.InvokeAsync(
+                x => x.QueuePurge(queue.Name),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
+            ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
             {
@@ -488,8 +496,8 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
-                x => x.ExchangeDeclarePassive(name), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.ExchangeDeclarePassive(name), ChannelDispatchOptions.ProducerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -516,8 +524,10 @@ namespace EasyNetQ
             var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
             var arguments = exchangeDeclareConfiguration.Arguments;
 
-            await clientCommandDispatcher.InvokeAsync(
-                x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments),
+                ChannelDispatchOptions.ProducerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -542,8 +552,8 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
-                x => x.ExchangeDelete(exchange.Name, ifUnused), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.ExchangeDelete(exchange.Name, ifUnused), ChannelDispatchOptions.ProducerTopology, cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -565,8 +575,10 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
-                x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments), cts.Token
+            await channelDispatcher.InvokeAsync(
+                x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments),
+                ChannelDispatchOptions.ConsumerTopology,
+                cts.Token
             ).ConfigureAwait(false);
 
             if (logger.IsDebugEnabled())
@@ -596,8 +608,9 @@ namespace EasyNetQ
 
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
+            await channelDispatcher.InvokeAsync(
                 x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments),
+                ChannelDispatchOptions.ProducerTopology,
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -620,10 +633,11 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
+            await channelDispatcher.InvokeAsync(
                 x => x.QueueUnbind(
                     binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
                 ),
+                ChannelDispatchOptions.ConsumerTopology,
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -643,10 +657,11 @@ namespace EasyNetQ
         {
             using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-            await clientCommandDispatcher.InvokeAsync(
+            await channelDispatcher.InvokeAsync(
                 x => x.ExchangeUnbind(
                     binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
                 ),
+                ChannelDispatchOptions.ProducerTopology,
                 cts.Token
             ).ConfigureAwait(false);
 
@@ -662,5 +677,45 @@ namespace EasyNetQ
         }
 
         #endregion
+
+
+        private void OnConnectionCreated(in ConnectionCreatedEvent @event)
+        {
+            Connected?.Invoke(
+                this,
+                new ConnectedEventArgs(@event.Type, @event.Endpoint.HostName, @event.Endpoint.Port)
+            );
+        }
+
+        private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
+        {
+            Connected?.Invoke(
+                this,
+                new ConnectedEventArgs(@event.Type, @event.Endpoint.HostName, @event.Endpoint.Port)
+            );
+        }
+
+        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
+        {
+            Disconnected?.Invoke(
+                this,
+                new DisconnectedEventArgs(@event.Type, @event.Endpoint.HostName, @event.Endpoint.Port, @event.Reason)
+            );
+        }
+
+        private void OnConnectionBlocked(in ConnectionBlockedEvent @event)
+        {
+            Blocked?.Invoke(this, new BlockedEventArgs(@event.Type, @event.Reason));
+        }
+
+        private void OnConnectionUnblocked(in ConnectionUnblockedEvent @event)
+        {
+            Unblocked?.Invoke(this, new UnblockedEventArgs(@event.Type));
+        }
+
+        private void OnMessageReturned(in ReturnedMessageEvent @event)
+        {
+            MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
+        }
     }
 }

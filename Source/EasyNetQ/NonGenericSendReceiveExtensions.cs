@@ -10,12 +10,11 @@ namespace EasyNetQ
 
 
     /// <summary>
-    ///     Various extensions for ISendReceive
+    ///     Various non-generic extensions for <see cref="ISendReceive"/>
     /// </summary>
     public static class NonGenericSendReceiveExtensions
     {
         private static readonly ConcurrentDictionary<Type, NonGenericSendDelegate> SendDelegates = new();
-
 
         /// <summary>
         /// Send a message directly to a queue

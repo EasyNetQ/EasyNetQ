@@ -1,3 +1,4 @@
+using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Events
@@ -7,6 +8,11 @@ namespace EasyNetQ.Events
     /// </summary>
     public readonly struct ConnectionDisconnectedEvent
     {
+        /// <summary>
+        ///     The type of the associated connection
+        /// </summary>
+        public PersistentConnectionType Type { get; }
+
         /// <summary>
         ///     The endpoint a connection is disconnected from
         /// </summary>
@@ -20,10 +26,13 @@ namespace EasyNetQ.Events
         /// <summary>
         ///     Creates ConnectionDisconnectedEvent
         /// </summary>
-        /// <param name="endpoint">The endpoint</param>
-        /// <param name="reason">The reason</param>
-        public ConnectionDisconnectedEvent(AmqpTcpEndpoint endpoint, string reason)
+        public ConnectionDisconnectedEvent(
+            PersistentConnectionType type,
+            AmqpTcpEndpoint endpoint,
+            string reason
+        )
         {
+            Type = type;
             Endpoint = endpoint;
             Reason = reason;
         }

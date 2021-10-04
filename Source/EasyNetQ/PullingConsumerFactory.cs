@@ -1,5 +1,6 @@
+using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
-using EasyNetQ.Producer;
+using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -29,6 +30,7 @@ namespace EasyNetQ
     /// <inheritdoc />
     public class PullingConsumerFactory : IPullingConsumerFactory
     {
+        private readonly IConsumerConnection connection;
         private readonly IPersistentChannelFactory channelFactory;
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
@@ -36,15 +38,14 @@ namespace EasyNetQ
         /// <summary>
         ///     Creates PullingConsumerFactory
         /// </summary>
-        /// <param name="channelFactory">The channel factory</param>
-        /// <param name="produceConsumeInterceptor">The produce-consume interceptor</param>
-        /// <param name="messageSerializationStrategy">The message serialization strategy</param>
         public PullingConsumerFactory(
+            IConsumerConnection connection,
             IPersistentChannelFactory channelFactory,
             IProduceConsumeInterceptor produceConsumeInterceptor,
             IMessageSerializationStrategy messageSerializationStrategy
         )
         {
+            this.connection = connection;
             this.channelFactory = channelFactory;
             this.produceConsumeInterceptor = produceConsumeInterceptor;
             this.messageSerializationStrategy = messageSerializationStrategy;
@@ -53,7 +54,7 @@ namespace EasyNetQ
         /// <inheritdoc />
         public IPullingConsumer<PullResult> CreateConsumer(in Queue queue, in PullingConsumerOptions options)
         {
-            var channel = channelFactory.CreatePersistentChannel(new PersistentChannelOptions());
+            var channel = channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions());
             return new PullingConsumer(options, queue, channel, produceConsumeInterceptor);
         }
 

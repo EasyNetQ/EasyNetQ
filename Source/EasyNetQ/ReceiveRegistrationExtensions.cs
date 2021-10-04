@@ -5,7 +5,7 @@ using EasyNetQ.Internals;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IReceiveRegistration
+    ///     Various extensions for <see cref="IReceiveRegistration"/>
     /// </summary>
     public static class ReceiveRegistrationExtensions
     {
@@ -15,7 +15,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="receiveRegistration">The receive registration</param>
         /// <param name="onMessage">The message handler</param>
-        /// <returns>'this' for fluent configuration</returns>
+        /// <returns>The same <paramref name="receiveRegistration"/> for fluent configuration</returns>
         public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Func<T, Task> onMessage)
         {
             Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
@@ -29,7 +29,7 @@ namespace EasyNetQ
         /// <typeparam name="T">The type of message to receive</typeparam>
         /// <param name="receiveRegistration">The receive registration</param>
         /// <param name="onMessage">The message handler</param>
-        /// <returns>'this' for fluent configuration</returns>
+        /// <returns>The same <paramref name="receiveRegistration"/> for fluent configuration</returns>
         public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Action<T> onMessage)
         {
             Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));

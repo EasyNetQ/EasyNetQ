@@ -1,31 +1,38 @@
 // ReSharper disable InconsistentNaming
 
+using System;
+using EasyNetQ.ChannelDispatcher;
+using EasyNetQ.Consumer;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
-using System;
 using Xunit;
 
-namespace EasyNetQ.Tests.ClientCommandDispatcherTests
+namespace EasyNetQ.Tests.ChannelDispatcherTests
 {
     public class When_an_action_is_invoked_using_single_channel : IDisposable
     {
-        private readonly IClientCommandDispatcher dispatcher;
+        private readonly IChannelDispatcher dispatcher;
         private readonly IPersistentChannelFactory channelFactory;
         private readonly int actionResult;
+
+        private readonly IProducerConnection producerConnection;
 
         public When_an_action_is_invoked_using_single_channel()
         {
             channelFactory = Substitute.For<IPersistentChannelFactory>();
+            producerConnection = Substitute.For<IProducerConnection>();
+            var consumerConnection = Substitute.For<IConsumerConnection>();
             var channel = Substitute.For<IPersistentChannel>();
             var action = Substitute.For<Func<IModel, int>>();
-            channelFactory.CreatePersistentChannel(new PersistentChannelOptions()).Returns(channel);
+            channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
             channel.InvokeChannelActionAsync(action).Returns(42);
 
-            dispatcher = new SingleChannelClientCommandDispatcher(channelFactory);
+            dispatcher = new SingleChannelDispatcher(producerConnection, consumerConnection, channelFactory);
 
-            actionResult = dispatcher.InvokeAsync(action, ChannelDispatchOptions.Default)
+            actionResult = dispatcher.InvokeAsync(action, ChannelDispatchOptions.ProducerTopology)
                 .GetAwaiter()
                 .GetResult();
         }
@@ -38,7 +45,7 @@ namespace EasyNetQ.Tests.ClientCommandDispatcherTests
         [Fact]
         public void Should_create_a_persistent_channel()
         {
-            channelFactory.Received().CreatePersistentChannel(new PersistentChannelOptions());
+            channelFactory.Received().CreatePersistentChannel(producerConnection, new PersistentChannelOptions());
         }
 
         [Fact]

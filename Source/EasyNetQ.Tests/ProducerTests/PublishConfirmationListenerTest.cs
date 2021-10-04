@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client;

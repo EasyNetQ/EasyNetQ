@@ -6,7 +6,7 @@ using EasyNetQ.Internals;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IPubSub
+    ///     Various generic extensions for <see cref="IPubSub"/>
     /// </summary>
     public static class PubSubExtensions
     {
@@ -364,12 +364,9 @@ namespace EasyNetQ
         {
             Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
-            return pubSub.SubscribeAsync(
-                subscriptionId,
-                onMessage,
-                configure,
-                cancellationToken
-            ).GetAwaiter().GetResult();
+            return pubSub.SubscribeAsync(subscriptionId, onMessage, configure, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
         }
     }
 }

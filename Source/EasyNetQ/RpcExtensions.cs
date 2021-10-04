@@ -6,7 +6,7 @@ using EasyNetQ.Internals;
 namespace EasyNetQ
 {
     /// <summary>
-    ///     Various extensions for IRpc
+    ///     Various generic extensions for <see cref="IRpc"/>
     /// </summary>
     public static class RpcExtensions
     {
@@ -95,7 +95,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(rpc, nameof(rpc));
 
             var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
-            return rpc.RespondAsync<TRequest, TResponse>(asyncResponder, _ => { }, cancellationToken);
+            return rpc.RespondAsync(asyncResponder, _ => { }, cancellationToken);
         }
 
         /// <summary>
