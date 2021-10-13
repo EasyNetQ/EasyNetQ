@@ -13,7 +13,6 @@ namespace EasyNetQ.Tests.ProducerTests
     public class When_a_polymorphic_message_is_sent : IDisposable
     {
         private readonly MockBuilder mockBuilder;
-        private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
         private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
 
         public When_a_polymorphic_message_is_sent()
@@ -38,7 +37,7 @@ namespace EasyNetQ.Tests.ProducerTests
         public void Should_name_exchange_after_interface()
         {
             mockBuilder.Channels[0].Received().ExchangeDeclare(
-                Arg.Is(interfaceTypeName),
+                Arg.Is(implementationTypeName),
                 Arg.Is("topic"),
                 Arg.Is(true),
                 Arg.Is(false),
@@ -50,7 +49,7 @@ namespace EasyNetQ.Tests.ProducerTests
         public void Should_publish_to_correct_exchange()
         {
             mockBuilder.Channels[1].Received().BasicPublish(
-                    Arg.Is(interfaceTypeName),
+                    Arg.Is(implementationTypeName),
                     Arg.Is(""),
                     Arg.Is(false),
                     Arg.Is<IBasicProperties>(x => x.Type == implementationTypeName),
