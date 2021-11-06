@@ -149,6 +149,7 @@ namespace EasyNetQ
                 consumeConfiguration.PerQueueConsumeConfigurations.ToDictionary(
                     x => x.Item1,
                     x => new PerQueueConsumerConfiguration(
+                        x.Item3.AutoAck,
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
@@ -167,6 +168,7 @@ namespace EasyNetQ
                     consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
                         x => x.Item1,
                         x => new PerQueueConsumerConfiguration(
+                            x.Item3.AutoAck,
                             x.Item3.ConsumerTag,
                             x.Item3.IsExclusive,
                             x.Item3.Arguments,

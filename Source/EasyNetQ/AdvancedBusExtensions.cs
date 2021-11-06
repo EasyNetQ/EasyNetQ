@@ -421,6 +421,8 @@ namespace EasyNetQ
                     handler,
                     p =>
                     {
+                        if (consumeConfiguration.AutoAck)
+                            p.WithAutoAck();
                         if (consumeConfiguration.ConsumerTag != null)
                             p.WithConsumerTag(consumeConfiguration.ConsumerTag);
                         if (consumeConfiguration.IsExclusive.HasValue)
@@ -982,10 +984,17 @@ namespace EasyNetQ
 
         private class SimpleConsumeConfiguration : ISimpleConsumeConfiguration
         {
+            public bool AutoAck { get; private set; }
             public string ConsumerTag { get; private set; }
             public bool? IsExclusive { get; private set; }
             public ushort? PrefetchCount { get; private set; }
             public IDictionary<string, object> Arguments { get; private set; }
+
+            public ISimpleConsumeConfiguration WithAutoAck()
+            {
+                AutoAck = true;
+                return this;
+            }
 
             public ISimpleConsumeConfiguration WithConsumerTag(string consumerTag)
             {

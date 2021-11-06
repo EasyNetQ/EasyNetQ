@@ -18,7 +18,7 @@ namespace EasyNetQ.Approval.Tests
         [InlineData(typeof(DI.Windsor.WindsorAdapter))]
         public void Public_api_should_not_be_changed_unintentionally(Type type)
         {
-            string publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions
+            var publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions
             {
                 IncludeAssemblyAttributes = false,
                 WhitelistedNamespacePrefixes = new[] { "Microsoft.Extensions.DependencyInjection" },

@@ -157,6 +157,7 @@ namespace EasyNetQ.Consumer
                     var consumer = new AsyncBasicConsumer(
                         model,
                         queue,
+                        perQueueConfiguration.AutoAck,
                         eventBus,
                         handlerRunner,
                         perQueueConfiguration.Handler
@@ -164,7 +165,7 @@ namespace EasyNetQ.Consumer
                     consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
                     model.BasicConsume(
                         queue.Name, // queue
-                        false, // noAck
+                        perQueueConfiguration.AutoAck, // noAck
                         perQueueConfiguration.ConsumerTag, // consumerTag
                         true, // noLocal
                         perQueueConfiguration.IsExclusive, // exclusive

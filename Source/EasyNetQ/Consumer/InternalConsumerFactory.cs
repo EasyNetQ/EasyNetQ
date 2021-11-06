@@ -6,7 +6,7 @@ namespace EasyNetQ.Consumer
     public interface IInternalConsumerFactory : IDisposable
     {
         /// <summary>
-        ///     Creates consumer based on configuration 
+        ///     Creates a consumer based on the configuration 
         /// </summary>
         /// <param name="configuration"></param>
         /// <returns></returns>
