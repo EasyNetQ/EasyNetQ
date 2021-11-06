@@ -23,8 +23,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
             eventBus = new EventBus();
             internalConsumers = new List<IInternalConsumer>();
 
-            Queue queue = new Queue(queueName, false);
-            MessageHandler handler = (_, _, _, _) => Task.FromResult(AckStrategies.Ack);
+            var queue = new Queue(queueName, false);
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
             internalConsumerFactory.CreateConsumer(Arg.Any<ConsumerConfiguration>()).Returns(_ =>
@@ -40,7 +39,12 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                     0,
                     new Dictionary<Queue, PerQueueConsumerConfiguration>
                     {
-                        {queue, new PerQueueConsumerConfiguration("", false, null, handler)}
+                        {
+                            queue,
+                            new PerQueueConsumerConfiguration(
+                                false, "", false, null, (_, _, _, _) => Task.FromResult(AckStrategies.Ack)
+                            )
+                        }
                     }
                 ),
                 internalConsumerFactory,

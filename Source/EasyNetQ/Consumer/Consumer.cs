@@ -34,12 +34,14 @@ namespace EasyNetQ.Consumer
         ///     Creates PerQueueConsumerConfiguration
         /// </summary>
         public PerQueueConsumerConfiguration(
+            bool autoAck,
             string consumerTag,
             bool isExclusive,
             IDictionary<string, object> arguments,
             MessageHandler handler
         )
         {
+            AutoAck = autoAck;
             ConsumerTag = consumerTag;
             IsExclusive = isExclusive;
             Arguments = arguments;
@@ -47,17 +49,22 @@ namespace EasyNetQ.Consumer
         }
 
         /// <summary>
-        ///     Tag of the consumer
+        ///     Indicates whether a consumer auto-acks messages    
+        /// </summary>
+        public bool AutoAck { get; }
+
+        /// <summary>
+        ///     Tag of a consumer
         /// </summary>
         public string ConsumerTag { get; }
 
         /// <summary>
-        ///     Indicates whether consumer is exclusive
+        ///     Indicates whether a consumer is exclusive
         /// </summary>
         public bool IsExclusive { get; }
 
         /// <summary>
-        ///     Customer arguments
+        ///     Custom arguments
         /// </summary>
         public IDictionary<string, object> Arguments { get; }
 

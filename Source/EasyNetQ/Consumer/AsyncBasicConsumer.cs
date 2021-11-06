@@ -19,18 +19,21 @@ namespace EasyNetQ.Consumer
         private readonly IHandlerRunner handlerRunner;
         private readonly MessageHandler messageHandler;
         private readonly Queue queue;
+        private readonly bool autoAck;
 
         private volatile bool disposed;
 
         public AsyncBasicConsumer(
             IModel model,
             in Queue queue,
+            bool autoAck,
             IEventBus eventBus,
             IHandlerRunner handlerRunner,
             MessageHandler messageHandler
         ) : base(model)
         {
             this.queue = queue;
+            this.autoAck = autoAck;
             this.eventBus = eventBus;
             this.handlerRunner = handlerRunner;
             this.messageHandler = messageHandler;
@@ -83,10 +86,15 @@ namespace EasyNetQ.Consumer
                 var context = new ConsumerExecutionContext(
                     messageHandler, messageReceivedInfo, messageProperties, messageBody
                 );
-                var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(context, cts.Token)
-                    .ConfigureAwait(false);
-                var ackResult = ackStrategy(Model, deliveryTag);
-                eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
+                var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(
+                    context, cts.Token
+                ).ConfigureAwait(false);
+
+                if (!autoAck)
+                {
+                    var ackResult = ackStrategy(Model, deliveryTag);
+                    eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
+                }
             }
             finally
             {

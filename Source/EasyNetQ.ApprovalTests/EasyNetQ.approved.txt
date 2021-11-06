@@ -363,6 +363,7 @@ namespace EasyNetQ
     public interface IPerQueueConsumeConfiguration
     {
         EasyNetQ.IPerQueueConsumeConfiguration WithArgument(string name, object value);
+        EasyNetQ.IPerQueueConsumeConfiguration WithAutoAck();
         EasyNetQ.IPerQueueConsumeConfiguration WithConsumerTag(string consumerTag);
         EasyNetQ.IPerQueueConsumeConfiguration WithExclusive(bool isExclusive = true);
     }
@@ -460,6 +461,7 @@ namespace EasyNetQ
     public interface ISimpleConsumeConfiguration
     {
         EasyNetQ.ISimpleConsumeConfiguration WithArgument(string name, object value);
+        EasyNetQ.ISimpleConsumeConfiguration WithAutoAck();
         EasyNetQ.ISimpleConsumeConfiguration WithConsumerTag(string consumerTag);
         EasyNetQ.ISimpleConsumeConfiguration WithExclusive(bool isExclusive = true);
         EasyNetQ.ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
@@ -1203,8 +1205,9 @@ namespace EasyNetQ.Consumer
     public delegate System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> MessageHandler(System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
     public class PerQueueConsumerConfiguration
     {
-        public PerQueueConsumerConfiguration(string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object> arguments, EasyNetQ.Consumer.MessageHandler handler) { }
+        public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object> arguments, EasyNetQ.Consumer.MessageHandler handler) { }
         public System.Collections.Generic.IDictionary<string, object> Arguments { get; }
+        public bool AutoAck { get; }
         public string ConsumerTag { get; }
         public EasyNetQ.Consumer.MessageHandler Handler { get; }
         public bool IsExclusive { get; }
