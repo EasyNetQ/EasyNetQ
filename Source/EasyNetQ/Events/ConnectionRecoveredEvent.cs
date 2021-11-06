@@ -21,8 +21,6 @@ namespace EasyNetQ.Events
         /// <summary>
         ///     Creates ConnectionRecoveredEvent
         /// </summary>
-        /// <param name="persistentConnectionType"></param>
-        /// <param name="endpoint">The endpoint</param>
         public ConnectionRecoveredEvent(PersistentConnectionType type, AmqpTcpEndpoint endpoint)
         {
             Type = type;

@@ -43,7 +43,10 @@ namespace EasyNetQ.Tests.ConsumeTests
 
         protected abstract void AdditionalSetUp();
 
-        protected void StartConsumer(Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, AckStrategy> handler)
+        protected void StartConsumer(
+            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, AckStrategy> handler,
+            bool autoAck = false
+        )
         {
             ConsumerWasInvoked = false;
             var queue = new Queue("my_queue", false);
@@ -62,8 +65,12 @@ namespace EasyNetQ.Tests.ConsumeTests
                         return ackStrategy;
                     }, Cancellation.Token);
                 },
-                c => c.WithConsumerTag(ConsumerTag)
-            );
+                c =>
+                {
+                    if (autoAck)
+                        c.WithAutoAck();
+                    c.WithConsumerTag(ConsumerTag);
+                });
         }
 
         protected void DeliverMessage()
