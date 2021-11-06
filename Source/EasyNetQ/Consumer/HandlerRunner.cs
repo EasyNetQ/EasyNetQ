@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public interface IHandlerRunner : IDisposable
     {
         Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
     }
 
+    /// <inheritdoc />
     public class HandlerRunner : IHandlerRunner
     {
         private readonly ILog logger = LogProvider.For<HandlerRunner>();

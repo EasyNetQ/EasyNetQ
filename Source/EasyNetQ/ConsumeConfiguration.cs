@@ -7,11 +7,14 @@ namespace EasyNetQ
 {
     internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
     {
+        public bool AutoAck { get; private set; }
+
         public string ConsumerTag { get; private set; } = "";
 
         public bool IsExclusive { get; private set; }
 
         public IDictionary<string, object> Arguments { get; private set; }
+
 
         public IPerQueueConsumeConfiguration WithConsumerTag(string consumerTag)
         {
@@ -29,6 +32,12 @@ namespace EasyNetQ
         public IPerQueueConsumeConfiguration WithArgument(string name, object value)
         {
             (Arguments ??= new Dictionary<string, object>())[name] = value;
+            return this;
+        }
+
+        public IPerQueueConsumeConfiguration WithAutoAck()
+        {
+            AutoAck = true;
             return this;
         }
     }
@@ -94,7 +103,13 @@ namespace EasyNetQ
     public interface IPerQueueConsumeConfiguration
     {
         /// <summary>
-        /// Sets consumer tag
+        ///     Automatically acknowledge a message  
+        /// </summary>
+        /// <returns></returns>
+        IPerQueueConsumeConfiguration WithAutoAck();
+
+        /// <summary>
+        ///     Sets consumer tag
         /// </summary>
         /// <param name="consumerTag">The consumerTag to set</param>
         /// <returns>IPerQueueConsumeConfiguration</returns>
@@ -107,7 +122,7 @@ namespace EasyNetQ
         IPerQueueConsumeConfiguration WithExclusive(bool isExclusive = true);
 
         /// <summary>
-        /// Sets a raw argument for consumer declaration
+        ///     Sets a raw argument for consumer declaration
         /// </summary>
         /// <param name="name">The argument name to set</param>
         /// <param name="value">The argument value to set</param>
@@ -155,6 +170,12 @@ namespace EasyNetQ
     /// </summary>
     public interface ISimpleConsumeConfiguration
     {
+        /// <summary>
+        ///     Automatically acknowledge a message  
+        /// </summary>
+        /// <returns></returns>
+        ISimpleConsumeConfiguration WithAutoAck();
+
         /// <summary>
         /// Sets consumer tag
         /// </summary>

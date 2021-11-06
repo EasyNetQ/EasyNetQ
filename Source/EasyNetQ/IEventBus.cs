@@ -25,7 +25,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="eventHandler">The event handler</param>
         /// <typeparam name="TEvent">The event type</typeparam>
-        /// <returns>Unsubscription disposable</returns>
+        /// <returns>Disposable to unsubscribe</returns>
         IDisposable Subscribe<TEvent>(TEventHandler<TEvent> eventHandler) where TEvent : struct;
     }
 

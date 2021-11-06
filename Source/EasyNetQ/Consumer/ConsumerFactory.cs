@@ -5,8 +5,14 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer
 {
+    /// <inheritdoc />
     public interface IConsumerFactory : IDisposable
     {
+        /// <summary>
+        ///     Creates a consumer based on the configuration
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
         IConsumer CreateConsumer(ConsumerConfiguration configuration);
     }
 

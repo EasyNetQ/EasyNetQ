@@ -8,11 +8,11 @@ using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
 {
-    public class When_consume_is_called : ConsumerTestBase
+    public class When_consume_is_called_with_auto_ack : ConsumerTestBase
     {
         protected override void AdditionalSetUp()
         {
-            StartConsumer((_, _, _) => AckStrategies.Ack);
+            StartConsumer((_, _, _) => AckStrategies.Ack, true);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             MockBuilder.Channels[0].Received().BasicConsume(
                Arg.Is("my_queue"),
-               Arg.Is(false),
+               Arg.Is(true),
                Arg.Is(ConsumerTag),
                Arg.Is(true),
                Arg.Is(false),
