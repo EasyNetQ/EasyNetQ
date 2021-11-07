@@ -1,0 +1,41 @@
+namespace EasyNetQ.Logging.Microsoft
+{
+    public interface ILoggerFactory
+    {
+        EasyNetQ.Logging.ILogger Create();
+        EasyNetQ.Logging.ILogger Create<TCategory>();
+    }
+    public class LoggerFactory : EasyNetQ.Logging.Microsoft.ILoggerFactory
+    {
+        public LoggerFactory(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
+        public EasyNetQ.Logging.ILogger Create() { }
+        public EasyNetQ.Logging.ILogger Create<TCategory>() { }
+    }
+    public class MicrosoftLoggerAdapter : EasyNetQ.Logging.ILogger
+    {
+        public MicrosoftLoggerAdapter(Microsoft.Extensions.Logging.ILogger logger) { }
+        public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string> messageFunc, System.Exception exception = null, params object[] formatParameters) { }
+    }
+    public class MicrosoftLoggerAdapterWrapper : EasyNetQ.Logging.ILogger
+    {
+        public MicrosoftLoggerAdapterWrapper(EasyNetQ.Logging.Microsoft.ILoggerFactory loggerFactory) { }
+        public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string> messageFunc, System.Exception exception = null, params object[] formatParameters) { }
+    }
+    public class MicrosoftLoggerAdapterWrapper<TCategory> : EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategory>
+    {
+        public MicrosoftLoggerAdapterWrapper(EasyNetQ.Logging.Microsoft.ILoggerFactory loggerFactory) { }
+        public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string> messageFunc, System.Exception exception = null, params object[] formatParameters) { }
+    }
+    public class MicrosoftLoggerAdapter<TCategory> : EasyNetQ.Logging.Microsoft.MicrosoftLoggerAdapter, EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategory>
+    {
+        public MicrosoftLoggerAdapter(Microsoft.Extensions.Logging.ILogger<TCategory> logger) { }
+    }
+}
+namespace EasyNetQ
+{
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister EnableMicrosoftLogging(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableMicrosoftLogging(this EasyNetQ.DI.IServiceRegister serviceRegister, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
+    }
+}
