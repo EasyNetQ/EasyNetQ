@@ -12,7 +12,7 @@ namespace EasyNetQ.DI.Windsor
         private readonly IWindsorContainer container;
 
         /// <summary>
-        ///     Created an adapter on top of IWindsorContainer
+        ///     Creates an adapter on top of IWindsorContainer
         /// </summary>
         public WindsorAdapter(IWindsorContainer container)
         {
