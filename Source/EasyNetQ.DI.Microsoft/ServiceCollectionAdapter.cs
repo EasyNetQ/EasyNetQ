@@ -25,15 +25,13 @@ namespace EasyNetQ.DI.Microsoft
             {
                 case Lifetime.Transient:
                     serviceCollection.AddTransient<TService, TImplementation>();
-                    break;
+                    return this;
                 case Lifetime.Singleton:
                     serviceCollection.AddSingleton<TService, TImplementation>();
-                    break;
+                    return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
-
-            return this;
         }
 
         /// <inheritdoc />
@@ -50,15 +48,31 @@ namespace EasyNetQ.DI.Microsoft
             {
                 case Lifetime.Transient:
                     serviceCollection.AddTransient(x => factory(x.GetService<IServiceResolver>()));
-                    break;
+                    return this;
                 case Lifetime.Singleton:
                     serviceCollection.AddSingleton(x => factory(x.GetService<IServiceResolver>()));
-                    break;
+                    return this;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
+        }
 
-            return this;
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    serviceCollection.AddTransient(serviceType, implementingType);
+                    return this;
+                case Lifetime.Singleton:
+                    serviceCollection.AddSingleton(serviceType, implementingType);
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
         }
 
         private class ServiceProviderAdapter : IServiceResolver

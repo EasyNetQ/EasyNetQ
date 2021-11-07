@@ -22,13 +22,13 @@ namespace EasyNetQ
         private readonly IChannelDispatcher channelDispatcher;
         private readonly ConnectionConfiguration configuration;
         private readonly IPublishConfirmationListener confirmationListener;
+        private readonly ILogger<RabbitAdvancedBus> logger;
         private readonly IProducerConnection producerConnection;
         private readonly IConsumerConnection consumerConnection;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEventBus eventBus;
         private readonly IDisposable[] eventSubscriptions;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
-        private readonly ILog logger = LogProvider.For<RabbitAdvancedBus>();
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IPullingConsumerFactory pullingConsumerFactory;
@@ -41,6 +41,7 @@ namespace EasyNetQ
         ///     Creates RabbitAdvancedBus
         /// </summary>
         public RabbitAdvancedBus(
+            ILogger<RabbitAdvancedBus> logger,
             IProducerConnection producerConnection,
             IConsumerConnection consumerConnection,
             IConsumerFactory consumerFactory,
@@ -71,6 +72,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
             Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
 
+            this.logger = logger;
             this.producerConnection = producerConnection;
             this.consumerConnection = consumerConnection;
             this.consumerFactory = consumerFactory;

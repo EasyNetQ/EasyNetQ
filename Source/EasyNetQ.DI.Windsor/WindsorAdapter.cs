@@ -59,6 +59,20 @@ namespace EasyNetQ.DI.Windsor
             return this;
         }
 
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            var registration = Component.For(serviceType)
+                .Named(Guid.NewGuid().ToString())
+                .ImplementedBy(implementingType)
+                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .IsDefault();
+            container.Register(registration);
+            return this;
+        }
+
         private class WindsorResolver : IServiceResolver
         {
             private readonly IKernel kernel;

@@ -6,6 +6,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -20,7 +21,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 
         protected Given_a_PersistentConsumer()
         {
-            eventBus = new EventBus();
+            eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
             internalConsumers = new List<IInternalConsumer>();
 
             var queue = new Queue(queueName, false);
@@ -35,6 +36,7 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                 return internalConsumer;
             });
             consumer = new Consumer.Consumer(
+                Substitute.For<ILogger<Consumer.Consumer>>(),
                 new ConsumerConfiguration(
                     0,
                     new Dictionary<Queue, PerQueueConsumerConfiguration>

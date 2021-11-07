@@ -67,6 +67,28 @@ namespace EasyNetQ.DI.Autofac
             }
         }
 
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    containerBuilder.RegisterGeneric(implementingType)
+                        .As(serviceType)
+                        .InstancePerDependency();
+                    return this;
+                case Lifetime.Singleton:
+                    containerBuilder.RegisterGeneric(implementingType)
+                        .As(serviceType)
+                        .SingleInstance();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
         private class AutofacResolver : IServiceResolver
         {
             protected readonly ILifetimeScope Lifetime;
