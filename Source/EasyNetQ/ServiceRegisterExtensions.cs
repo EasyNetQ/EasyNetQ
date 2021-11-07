@@ -183,5 +183,16 @@ namespace EasyNetQ
             registrator.Add(new TripleDESInterceptor(key, iv));
             return registrator;
         }
+
+        /// <summary>
+        ///     Enables console logger
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
+        public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
+        {
+            serviceRegister.Register(typeof(ILogger), typeof(ConsoleLogger));
+            serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
+            return serviceRegister;
+        }
     }
 }

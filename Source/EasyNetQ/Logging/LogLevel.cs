@@ -1,5 +1,8 @@
 namespace EasyNetQ.Logging
 {
+    /// <summary>
+    ///     The log level.
+    /// </summary>
     public enum LogLevel
     {
         /// <summary>
