@@ -1,7 +1,7 @@
 using EasyNetQ.DI;
 using EasyNetQ.Logging;
 using EasyNetQ.Logging.Microsoft;
-using MicrosoftLogging = Microsoft.Extensions.Logging;
+using MS = Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace EasyNetQ
@@ -28,7 +28,7 @@ namespace EasyNetQ
         /// <param name="serviceRegister">The register</param>
         /// <param name="loggerFactory"></param>
         public static IServiceRegister EnableMicrosoftLogging(
-            this IServiceRegister serviceRegister, MicrosoftLogging.ILoggerFactory loggerFactory
+            this IServiceRegister serviceRegister, MS.ILoggerFactory loggerFactory
         )
         {
             return serviceRegister
