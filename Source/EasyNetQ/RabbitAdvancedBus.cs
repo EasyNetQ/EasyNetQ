@@ -10,7 +10,6 @@ using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
-using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -106,30 +105,14 @@ namespace EasyNetQ
 
 
         /// <inheritdoc />
-        public bool IsConnected(PersistentConnectionType type)
-        {
-            return type switch
-            {
-                PersistentConnectionType.Producer => producerConnection.IsConnected,
-                PersistentConnectionType.Consumer => consumerConnection.IsConnected,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
-        }
+        public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
 
         /// <inheritdoc />
-        public void Connect(PersistentConnectionType type)
+        public Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            switch (type)
-            {
-                case PersistentConnectionType.Producer:
-                    producerConnection.Connect();
-                    break;
-                case PersistentConnectionType.Consumer:
-                    consumerConnection.Connect();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            producerConnection.Connect();
+            consumerConnection.Connect();
+            return Task.CompletedTask;
         }
 
         #region Consume
@@ -182,7 +165,8 @@ namespace EasyNetQ
                                 );
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
                                 using var scope = consumeScopeProvider.CreateScope();
-                                return await handler(deserializedMessage, receivedInfo, cancellationToken).ConfigureAwait(false);
+                                return await handler(deserializedMessage, receivedInfo, cancellationToken)
+                                    .ConfigureAwait(false);
                             }
                         )
                     )
