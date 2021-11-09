@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.DI;
-using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ
@@ -18,12 +17,12 @@ namespace EasyNetQ
         /// <summary>
         /// True if a connection of the given type is established. 
         /// </summary>
-        bool IsConnected(PersistentConnectionType type);
+        bool IsConnected { get; }
 
         /// <summary>
         /// Establish a connection of the given type.
         /// </summary>
-        void Connect(PersistentConnectionType type);
+        void Connect();
 
         /// <summary>
         /// The IoC container that EasyNetQ uses to resolve its services.
