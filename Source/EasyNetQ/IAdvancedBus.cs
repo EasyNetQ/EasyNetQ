@@ -22,7 +22,7 @@ namespace EasyNetQ
         /// <summary>
         /// Establish a connection of the given type.
         /// </summary>
-        void Connect();
+        Task ConnectAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// The IoC container that EasyNetQ uses to resolve its services.

@@ -108,10 +108,11 @@ namespace EasyNetQ
         public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
 
         /// <inheritdoc />
-        public void Connect()
+        public Task ConnectAsync(CancellationToken cancellationToken = default)
         {
             producerConnection.Connect();
             consumerConnection.Connect();
+            return Task.CompletedTask;
         }
 
         #region Consume
@@ -164,7 +165,8 @@ namespace EasyNetQ
                                 );
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
                                 using var scope = consumeScopeProvider.CreateScope();
-                                return await handler(deserializedMessage, receivedInfo, cancellationToken).ConfigureAwait(false);
+                                return await handler(deserializedMessage, receivedInfo, cancellationToken)
+                                    .ConfigureAwait(false);
                             }
                         )
                     )

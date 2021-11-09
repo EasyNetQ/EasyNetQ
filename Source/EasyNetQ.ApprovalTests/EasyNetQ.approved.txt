@@ -271,7 +271,7 @@ namespace EasyNetQ
         event System.EventHandler<EasyNetQ.UnblockedEventArgs> Unblocked;
         System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue>> BindAsync(EasyNetQ.Topology.Exchange exchange, EasyNetQ.Topology.Queue queue, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange>> BindAsync(EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments, System.Threading.CancellationToken cancellationToken = default);
-        void Connect();
+        System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default);
         System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure);
         EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
         EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
@@ -787,7 +787,7 @@ namespace EasyNetQ
         public event System.EventHandler<EasyNetQ.UnblockedEventArgs> Unblocked;
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue>> BindAsync(EasyNetQ.Topology.Exchange exchange, EasyNetQ.Topology.Queue queue, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange>> BindAsync(EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Collections.Generic.IDictionary<string, object> arguments, System.Threading.CancellationToken cancellationToken) { }
-        public void Connect() { }
+        public System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
