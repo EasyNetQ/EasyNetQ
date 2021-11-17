@@ -30,7 +30,7 @@ namespace EasyNetQ.Internals
                 }
                 catch (Exception exception)
                 {
-                    logger.Error(exception, string.Empty);
+                    logger.Error(exception, "Error from timer callback");
                 }
                 finally
                 {
