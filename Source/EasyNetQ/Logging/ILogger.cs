@@ -14,7 +14,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function; null to just check if the specified log level is enabled.</param>
         /// <param name="exception">The exception</param>
         /// <param name="formatParameters">The format parameters</param>
-        /// <returns>A boolean.</returns>
+        /// <returns>A boolean value indicating if the provided level is enabled when used with messageFunc=null; otherwise the return value does not matter.</returns>
         bool Log(
             LogLevel logLevel,
             Func<string> messageFunc,
