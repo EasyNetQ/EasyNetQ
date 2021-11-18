@@ -8,7 +8,7 @@ namespace EasyNetQ.Logging
     public interface ILogger
     {
         /// <summary>
-        ///     Log.
+        ///     Logs the specified message with level and arguments.
         /// </summary>
         /// <param name="logLevel">The log level</param>
         /// <param name="messageFunc">The message function</param>
