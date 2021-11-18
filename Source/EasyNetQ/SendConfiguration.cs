@@ -15,7 +15,7 @@ namespace EasyNetQ
         /// <param name="priority">The priority to set</param>
         /// <returns>Returns a reference to itself</returns>
         ISendConfiguration WithPriority(byte priority);
-        
+
         /// <summary>
         /// Sets request headers
         /// </summary>

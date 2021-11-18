@@ -30,7 +30,7 @@ namespace EasyNetQ
         /// <param name="expires">The TTL to set in milliseconds</param>
         /// <returns>Returns a reference to itself</returns>
         IPublishConfiguration WithExpires(int expires);
-        
+
         /// <summary>
         /// Sets request headers
         /// </summary>

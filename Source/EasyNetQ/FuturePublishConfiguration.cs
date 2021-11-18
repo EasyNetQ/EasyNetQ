@@ -22,7 +22,7 @@ namespace EasyNetQ
         /// <param name="topic">The topic to set</param>
         /// <returns>Returns a reference to itself</returns>
         IFuturePublishConfiguration WithTopic(string topic);
-        
+
         /// <summary>
         /// Sets request headers
         /// </summary>
