@@ -338,6 +338,7 @@ namespace EasyNetQ
     }
     public interface IFuturePublishConfiguration
     {
+        EasyNetQ.IFuturePublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
         EasyNetQ.IFuturePublishConfiguration WithPriority(byte priority);
         EasyNetQ.IFuturePublishConfiguration WithTopic(string topic);
     }
@@ -375,6 +376,7 @@ namespace EasyNetQ
     public interface IPublishConfiguration
     {
         EasyNetQ.IPublishConfiguration WithExpires(int expires);
+        EasyNetQ.IPublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
         EasyNetQ.IPublishConfiguration WithPriority(byte priority);
         EasyNetQ.IPublishConfiguration WithTopic(string topic);
     }
@@ -447,6 +449,7 @@ namespace EasyNetQ
     }
     public interface ISendConfiguration
     {
+        EasyNetQ.ISendConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
         EasyNetQ.ISendConfiguration WithPriority(byte priority);
     }
     public interface ISendReceive
@@ -555,7 +558,6 @@ namespace EasyNetQ
         public bool UserIdPresent { get; }
         public object Clone() { }
         public void CopyFrom(RabbitMQ.Client.IBasicProperties basicProperties) { }
-        public EasyNetQ.MessageProperties CopyHeaders(System.Collections.Generic.IDictionary<string, object> from) { }
         public void CopyTo(RabbitMQ.Client.IBasicProperties basicProperties) { }
         public override string ToString() { }
     }
@@ -1525,6 +1527,7 @@ namespace EasyNetQ.Internals
     public static class DictionaryExtensions
     {
         public static string Stringify(this System.Collections.Generic.IDictionary<string, object> source) { }
+        public static void UnionWith(this System.Collections.Generic.IDictionary<string, object> source, System.Collections.Generic.IDictionary<string, object> addendum) { }
     }
     public static class DisposableAction
     {

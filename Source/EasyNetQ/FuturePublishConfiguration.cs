@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace EasyNetQ
 {
     /// <summary>
@@ -11,13 +13,22 @@ namespace EasyNetQ
         ///     Sets a priority of the message
         /// </summary>
         /// <param name="priority">The priority to set</param>
+        /// <returns>Returns a reference to itself</returns>
         IFuturePublishConfiguration WithPriority(byte priority);
 
         /// <summary>
         ///     Sets a topic for the message
         /// </summary>
         /// <param name="topic">The topic to set</param>
+        /// <returns>Returns a reference to itself</returns>
         IFuturePublishConfiguration WithTopic(string topic);
+
+        /// <summary>
+        /// Sets headers
+        /// </summary>
+        /// <param name="headers">Headers to set</param>
+        /// <returns>Returns a reference to itself</returns>
+        IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers);
     }
 
     internal class FuturePublishConfiguration : IFuturePublishConfiguration
@@ -31,6 +42,7 @@ namespace EasyNetQ
 
         public byte? Priority { get; private set; }
         public string Topic { get; private set; }
+        public IDictionary<string, object> Headers { get; private set; }
 
         public IFuturePublishConfiguration WithPriority(byte priority)
         {
@@ -43,6 +55,12 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(topic, nameof(topic));
 
             Topic = topic;
+            return this;
+        }
+
+        public IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers)
+        {
+            Headers = headers;
             return this;
         }
     }
