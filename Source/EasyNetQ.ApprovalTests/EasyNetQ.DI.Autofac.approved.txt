@@ -13,6 +13,7 @@ namespace EasyNetQ.DI.Autofac
     public class AutofacAdapter : EasyNetQ.DI.IServiceRegister
     {
         public AutofacAdapter(Autofac.ContainerBuilder containerBuilder) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
         public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
             where TService :  class { }
         public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)

@@ -1,0 +1,18 @@
+namespace EasyNetQ.Serialization.NewtonsoftJson
+{
+    public sealed class NewtonsoftJsonSerializer : EasyNetQ.ISerializer
+    {
+        public NewtonsoftJsonSerializer() { }
+        public NewtonsoftJsonSerializer(Newtonsoft.Json.JsonSerializerSettings settings) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
+    }
+}
+namespace EasyNetQ
+{
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister EnableNewtonsoftJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableNewtonsoftJson(this EasyNetQ.DI.IServiceRegister serviceRegister, Newtonsoft.Json.JsonSerializerSettings settings) { }
+    }
+}

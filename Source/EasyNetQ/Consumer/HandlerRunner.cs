@@ -17,13 +17,15 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class HandlerRunner : IHandlerRunner
     {
-        private readonly ILog logger = LogProvider.For<HandlerRunner>();
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
+        private readonly ILogger logger;
 
-        public HandlerRunner(IConsumerErrorStrategy consumerErrorStrategy)
+        public HandlerRunner(ILogger<IHandlerRunner> logger, IConsumerErrorStrategy consumerErrorStrategy)
         {
+            Preconditions.CheckNotNull(logger, nameof(logger));
             Preconditions.CheckNotNull(consumerErrorStrategy, nameof(consumerErrorStrategy));
 
+            this.logger = logger;
             this.consumerErrorStrategy = consumerErrorStrategy;
         }
 

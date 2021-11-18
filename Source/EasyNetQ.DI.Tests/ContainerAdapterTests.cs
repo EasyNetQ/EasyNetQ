@@ -10,6 +10,7 @@ using EasyNetQ.DI.Ninject;
 using EasyNetQ.DI.SimpleInjector;
 using EasyNetQ.DI.StructureMap;
 using EasyNetQ.DI.Windsor;
+using EasyNetQ.Logging;
 using LightInject;
 using Ninject;
 using Xunit;
@@ -104,6 +105,39 @@ namespace EasyNetQ.DI.Tests
         {
             var resolver = resolverFactory(c => c.Register<IService, Service>().Register(_ => (IService)new DummyService()));
             Assert.IsType<DummyService>(resolver.Resolve<IService>());
+        }
+
+        [Theory]
+        [MemberData(nameof(GetContainerAdapters))]
+        public void Should_resolve_singleton_generic(ResolverFactory resolverFactory)
+        {
+            var resolver = resolverFactory(c => c.Register(typeof(ILogger<>), typeof(NoopLogger<>)));
+            var intLogger = resolver.Resolve<ILogger<int>>();
+            var floatLogger = resolver.Resolve<ILogger<float>>();
+
+            Assert.IsType<NoopLogger<int>>(intLogger);
+            Assert.IsType<NoopLogger<float>>(floatLogger);
+
+            Assert.Same(intLogger, resolver.Resolve<ILogger<int>>());
+            Assert.Same(floatLogger, resolver.Resolve<ILogger<float>>());
+        }
+
+        [Theory]
+        [MemberData(nameof(GetContainerAdapters))]
+        public void Should_resolve_transient_generic(ResolverFactory resolverFactory)
+        {
+            var resolver = resolverFactory(
+                c => c.Register(typeof(ILogger<>), typeof(NoopLogger<>), Lifetime.Transient)
+            );
+
+            var intLogger = resolver.Resolve<ILogger<int>>();
+            var floatLogger = resolver.Resolve<ILogger<float>>();
+
+            Assert.IsType<NoopLogger<int>>(intLogger);
+            Assert.IsType<NoopLogger<float>>(floatLogger);
+
+            Assert.NotSame(intLogger, resolver.Resolve<ILogger<int>>());
+            Assert.NotSame(floatLogger, resolver.Resolve<ILogger<float>>());
         }
 
         public static IEnumerable<object[]> GetContainerAdapters()

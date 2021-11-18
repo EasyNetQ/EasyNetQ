@@ -32,7 +32,14 @@ namespace EasyNetQ
     /// <inheritdoc />
     public sealed class EventBus : IEventBus
     {
+        private readonly ILogger<EventBus> logger;
         private readonly ConcurrentDictionary<Type, object> subscriptions = new();
+        private readonly object subscriptionLock = new();
+
+        public EventBus(ILogger<EventBus> logger)
+        {
+            this.logger = logger;
+        }
 
         /// <inheritdoc />
         public void Publish<TEvent>(in TEvent @event) where TEvent : struct
@@ -46,16 +53,31 @@ namespace EasyNetQ
         /// <inheritdoc />
         public IDisposable Subscribe<TEvent>(TEventHandler<TEvent> eventHandler) where TEvent : struct
         {
-            var handlers = (Handlers<TEvent>)subscriptions.GetOrAdd(typeof(TEvent), _ => new Handlers<TEvent>());
-            handlers.Add(eventHandler);
-            return new Subscription<TEvent>(handlers, eventHandler);
+            if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
+            {
+                lock (subscriptionLock)
+                {
+                    if (!subscriptions.TryGetValue(typeof(TEvent), out handlers))
+                    {
+                        handlers = subscriptions[typeof(TEvent)] = new Handlers<TEvent>(logger);
+                    }
+                }
+            }
+            var typedHandlers = (Handlers<TEvent>)handlers;
+            typedHandlers.Add(eventHandler);
+            return new Subscription<TEvent>(typedHandlers, eventHandler);
         }
 
         private sealed class Handlers<TEvent> where TEvent : struct
         {
-            private readonly ILog log = LogProvider.For<Handlers<TEvent>>();
+            private readonly ILogger logger;
             private readonly object mutex = new();
             private volatile List<TEventHandler<TEvent>> handlers = new();
+
+            public Handlers(ILogger logger)
+            {
+                this.logger = logger;
+            }
 
             public void Add(TEventHandler<TEvent> eventHandler)
             {
@@ -87,7 +109,7 @@ namespace EasyNetQ
                     }
                     catch (Exception exception)
                     {
-                        log.ErrorException("Failed to handle {event}", exception, @event);
+                        logger.ErrorException("Failed to handle {event}", exception, @event);
                     }
             }
         }

@@ -11,27 +11,29 @@ namespace EasyNetQ.Consumer
 {
     internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     {
-        private readonly ILog logger = LogProvider.For<AsyncBasicConsumer>();
         private readonly CancellationTokenSource cts = new();
         private readonly AsyncCountdownEvent onTheFlyMessages = new();
 
         private readonly IEventBus eventBus;
         private readonly IHandlerRunner handlerRunner;
         private readonly MessageHandler messageHandler;
+        private readonly ILogger logger;
         private readonly Queue queue;
         private readonly bool autoAck;
 
         private volatile bool disposed;
 
         public AsyncBasicConsumer(
+            ILogger logger,
             IModel model,
-            in Queue queue,
+            Queue queue,
             bool autoAck,
             IEventBus eventBus,
             IHandlerRunner handlerRunner,
             MessageHandler messageHandler
         ) : base(model)
         {
+            this.logger = logger;
             this.queue = queue;
             this.autoAck = autoAck;
             this.eventBus = eventBus;
@@ -45,10 +47,14 @@ namespace EasyNetQ.Consumer
         public override async Task OnCancel(params string[] consumerTags)
         {
             await base.OnCancel(consumerTags).ConfigureAwait(false);
-            logger.InfoFormat(
-                "Consumer with consumerTags {consumerTags} has cancelled",
-                string.Join(", ", consumerTags)
-            );
+
+            if (logger.IsInfoEnabled())
+            {
+                logger.InfoFormat(
+                    "Consumer with consumerTags {consumerTags} has cancelled",
+                    string.Join(", ", consumerTags)
+                );
+            }
         }
 
         public override async Task HandleBasicDeliver(

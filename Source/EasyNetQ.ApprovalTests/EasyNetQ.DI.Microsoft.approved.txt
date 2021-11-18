@@ -3,6 +3,7 @@ namespace EasyNetQ.DI.Microsoft
     public class ServiceCollectionAdapter : EasyNetQ.DI.IServiceRegister
     {
         public ServiceCollectionAdapter(Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
         public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
             where TService :  class { }
         public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)

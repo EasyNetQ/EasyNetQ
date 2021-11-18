@@ -26,8 +26,7 @@ namespace EasyNetQ.DI
         /// <typeparam name="TService">The type of the service to be registered</typeparam>
         /// <param name="instance">The instance of the service</param>
         /// <returns>itself for nice fluent composition</returns>
-        IServiceRegister Register<TService>(TService instance)
-            where TService : class;
+        IServiceRegister Register<TService>(TService instance) where TService : class;
 
         /// <summary>
         /// Register a service. Note that the first registration wins. All subsequent registrations
@@ -37,7 +36,18 @@ namespace EasyNetQ.DI
         /// <param name="factory">The instance factory of the service</param>
         /// <param name="lifetime">A lifetime of a container registration</param>
         /// <returns>itself for nice fluent composition</returns>
-        IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton)
-            where TService : class;
+        IServiceRegister Register<TService>(
+            Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton
+        ) where TService : class;
+
+        /// <summary>
+        /// Registers the <paramref name="serviceType"/> with the <paramref name="implementingType"/>.
+        /// Note that the first registration wins. All subsequent registrations will be ignored.
+        /// </summary>
+        /// <param name="serviceType">The service type to register.</param>
+        /// <param name="implementingType">The implementing type.</param>
+        /// <param name="lifetime">A lifetime of a container registration</param>
+        /// <returns>itself for nice fluent composition</returns>
+        IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton);
     }
 }

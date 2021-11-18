@@ -4,6 +4,7 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Interception;
+using EasyNetQ.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
@@ -27,6 +28,8 @@ namespace EasyNetQ
             // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
             // default service registration
             serviceRegister
+                .Register<ILogger, NoopLogger>()
+                .Register(typeof(ILogger<>), typeof(NoopLogger<>))
                 .Register<IConnectionStringParser>(
                     _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
                 )
@@ -179,6 +182,17 @@ namespace EasyNetQ
         {
             registrator.Add(new TripleDESInterceptor(key, iv));
             return registrator;
+        }
+
+        /// <summary>
+        ///     Enables console logger
+        /// </summary>
+        /// <param name="serviceRegister">The register</param>
+        public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
+        {
+            serviceRegister.Register(typeof(ILogger), typeof(ConsoleLogger));
+            serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
+            return serviceRegister;
         }
     }
 }
