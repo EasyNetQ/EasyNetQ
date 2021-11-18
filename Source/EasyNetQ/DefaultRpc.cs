@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading;
@@ -93,6 +94,7 @@ namespace EasyNetQ
             var routingKey = requestConfiguration.QueueName;
             var expiration = requestConfiguration.Expiration;
             var priority = requestConfiguration.Priority;
+            var headers = requestConfiguration.Headers;
             await RequestPublishAsync(
                 request,
                 routingKey,
@@ -101,6 +103,7 @@ namespace EasyNetQ
                 expiration,
                 priority,
                 configuration.MandatoryPublish,
+                headers,
                 cts.Token
             ).ConfigureAwait(false);
             tcs.AttachCancellation(cts.Token);
@@ -239,6 +242,7 @@ namespace EasyNetQ
             TimeSpan expiration,
             byte? priority,
             bool mandatory,
+            IDictionary<string, object> headers,
             CancellationToken cancellationToken
         )
         {
@@ -254,7 +258,8 @@ namespace EasyNetQ
                 ReplyTo = returnQueueName,
                 CorrelationId = correlationId,
                 DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
-            };
+            }.CopyHeaders(headers);
+
             if (expiration != Timeout.InfiniteTimeSpan)
                 properties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             if (priority != null)
