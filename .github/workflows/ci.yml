@@ -34,7 +34,7 @@ jobs:
     - name: Install & run dotnet-format
       run: |
         dotnet tool install -g dotnet-format
-        dotnet format ./Source/EasyNetQ.sln --check
+        dotnet format ./Source/EasyNetQ.sln --verify-no-changes
 
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
