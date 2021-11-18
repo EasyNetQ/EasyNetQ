@@ -76,7 +76,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Debug(this ILogger logger, Func<string> messageFunc)
         {
-            logger.Log(LogLevel.Debug, messageFunc, null, EmptyParams);
+            if (logger.IsDebugEnabled()) logger.Log(LogLevel.Debug, messageFunc, null, EmptyParams);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Error(this ILogger logger, Func<string> messageFunc)
         {
-            logger.Log(LogLevel.Error, messageFunc, null, EmptyParams);
+            if (logger.IsErrorEnabled()) logger.Log(LogLevel.Error, messageFunc, null, EmptyParams);
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Fatal(this ILogger logger, Func<string> messageFunc)
         {
-            logger.Log(LogLevel.Fatal, messageFunc, null, EmptyParams);
+            if (logger.IsFatalEnabled()) logger.Log(LogLevel.Fatal, messageFunc, null, EmptyParams);
         }
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Info(this ILogger logger, Func<string> messageFunc)
         {
-            logger.Log(LogLevel.Info, messageFunc, null, EmptyParams);
+            if (logger.IsInfoEnabled()) logger.Log(LogLevel.Info, messageFunc, null, EmptyParams);
         }
 
         /// <summary>
@@ -359,7 +359,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Trace(this ILogger logger, Func<string> messageFunc)
         {
-            logger.Log(LogLevel.Trace, messageFunc, null, EmptyParams);
+            if (logger.IsTraceEnabled()) logger.Log(LogLevel.Trace, messageFunc, null, EmptyParams);
         }
 
         /// <summary>
@@ -413,8 +413,9 @@ namespace EasyNetQ.Logging
         /// <param name="message">The message.</param>
         /// <param name="exception">The exception.</param>
         /// <param name="args">Optional format parameters for the message.</param>
-        public static void TraceException(this ILogger logger, string message, Exception exception,
-            params object[] args)
+        public static void TraceException(
+            this ILogger logger, string message, Exception exception, params object[] args
+        )
         {
             if (logger.IsTraceEnabled()) logger.Log(LogLevel.Trace, message.AsFunc(), exception, args);
         }
@@ -426,7 +427,7 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Warn(this ILogger logger, Func<string> messageFunc)
         {
-            logger.Log(LogLevel.Warn, messageFunc, null, EmptyParams);
+            if (logger.IsWarnEnabled()) logger.Log(LogLevel.Warn, messageFunc, null, EmptyParams);
         }
 
         /// <summary>
