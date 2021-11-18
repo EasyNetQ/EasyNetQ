@@ -1,3 +1,4 @@
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
@@ -13,8 +14,11 @@ namespace EasyNetQ.Consumer
     {
         /// <inheritdoc />
         public ConsumerConnection(
-            ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
-        ) : base(PersistentConnectionType.Consumer, configuration, connectionFactory, eventBus)
+            ILogger<ConsumerConnection> logger,
+            ConnectionConfiguration configuration,
+            IConnectionFactory connectionFactory,
+            IEventBus eventBus
+        ) : base(PersistentConnectionType.Consumer, logger, configuration, connectionFactory, eventBus)
         {
         }
     }

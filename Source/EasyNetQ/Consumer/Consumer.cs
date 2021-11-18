@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using EasyNetQ.Internals;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.Consumer
@@ -118,11 +119,13 @@ namespace EasyNetQ.Consumer
         ///     Creates Consumer
         /// </summary>
         public Consumer(
+            ILogger<Consumer> logger,
             ConsumerConfiguration configuration,
             IInternalConsumerFactory internalConsumerFactory,
             IEventBus eventBus
         )
         {
+            Preconditions.CheckNotNull(logger, nameof(logger));
             Preconditions.CheckNotNull(internalConsumerFactory, nameof(internalConsumerFactory));
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
             Preconditions.CheckNotNull(configuration, nameof(configuration));
@@ -134,7 +137,7 @@ namespace EasyNetQ.Consumer
             {
                 eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
                 eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
-                Timers.Start(RestartConsumingPeriodically, RestartConsumingPeriod, RestartConsumingPeriod),
+                Timers.Start(RestartConsumingPeriodically, RestartConsumingPeriod, RestartConsumingPeriod, logger)
             };
         }
 

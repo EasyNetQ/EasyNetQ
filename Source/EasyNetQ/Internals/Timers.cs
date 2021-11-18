@@ -18,7 +18,7 @@ namespace EasyNetQ.Internals
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new EasyNetQ release.
         /// </summary>
-        public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period)
+        public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period, ILogger logger)
         {
             var callbackLock = new object();
             var timer = new Timer(_ =>
@@ -30,7 +30,7 @@ namespace EasyNetQ.Internals
                 }
                 catch (Exception exception)
                 {
-                    LogProvider.GetLogger(typeof(Timers)).Error(exception, string.Empty);
+                    logger.Error(exception, "Error from timer callback");
                 }
                 finally
                 {
