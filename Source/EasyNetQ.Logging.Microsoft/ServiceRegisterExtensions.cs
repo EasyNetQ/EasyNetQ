@@ -27,14 +27,12 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="serviceRegister">The register</param>
         /// <param name="loggerFactory"></param>
-        public static IServiceRegister EnableMicrosoftLogging(
-            this IServiceRegister serviceRegister, MS.ILoggerFactory loggerFactory
-        )
+        public static IServiceRegister EnableMicrosoftLogging(this IServiceRegister serviceRegister, MS.ILoggerFactory loggerFactory)
         {
             return serviceRegister
-                .Register<ILoggerFactory>(new LoggerFactory(loggerFactory))
-                .Register(typeof(ILogger), typeof(MicrosoftLoggerAdapterWrapper))
-                .Register(typeof(ILogger<>), typeof(MicrosoftLoggerAdapterWrapper<>));
+                .Register(loggerFactory)
+                .Register(typeof(ILogger), typeof(MicrosoftLoggerAdapter))
+                .Register(typeof(ILogger<>), typeof(MicrosoftLoggerAdapter<>));
         }
     }
 }

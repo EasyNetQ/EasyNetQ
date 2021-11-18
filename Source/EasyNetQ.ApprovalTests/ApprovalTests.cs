@@ -17,6 +17,7 @@ namespace EasyNetQ.Approval.Tests
         [InlineData(typeof(DI.StructureMap.StructureMapAdapter))]
         [InlineData(typeof(DI.Windsor.WindsorAdapter))]
         [InlineData(typeof(Logging.Microsoft.MicrosoftLoggerAdapter))]
+        [InlineData(typeof(Logging.Serilog.SerilogLoggerAdapter))]
         [InlineData(typeof(Serialization.NewtonsoftJson.NewtonsoftJsonSerializer))]
         public void Public_api_should_not_be_changed_unintentionally(Type type)
         {

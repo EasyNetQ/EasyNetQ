@@ -27,14 +27,12 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="serviceRegister">The register</param>
         /// <param name="logger"></param>
-        public static IServiceRegister EnableSerilogLogging(
-            this IServiceRegister serviceRegister, S.ILogger logger
-        )
+        public static IServiceRegister EnableSerilogLogging(this IServiceRegister serviceRegister, S.ILogger logger)
         {
             return serviceRegister
-                .Register<ILoggerFactory>(new LoggerFactory(logger))
-                .Register(typeof(ILogger), typeof(SerilogLoggerAdapterWrapper))
-                .Register(typeof(ILogger<>), typeof(SerilogLoggerAdapterWrapper<>));
+                .Register(logger)
+                .Register(typeof(ILogger), typeof(SerilogLoggerAdapter))
+                .Register(typeof(ILogger<>), typeof(SerilogLoggerAdapter<>));
         }
     }
 }
