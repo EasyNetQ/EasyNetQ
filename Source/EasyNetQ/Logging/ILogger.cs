@@ -3,7 +3,7 @@ using System;
 namespace EasyNetQ.Logging
 {
     /// <summary>
-    /// 
+    /// Log abstraction that EasyNetQ provides to use custom logging frameworks.
     /// </summary>
     public interface ILogger
     {
