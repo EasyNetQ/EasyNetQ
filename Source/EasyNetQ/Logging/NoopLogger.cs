@@ -2,7 +2,9 @@ using System;
 
 namespace EasyNetQ.Logging
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Logger that does nothing.
+    /// </summary>
     public class NoopLogger : ILogger
     {
         /// <inheritdoc />
