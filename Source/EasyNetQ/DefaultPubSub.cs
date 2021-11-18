@@ -63,7 +63,7 @@ namespace EasyNetQ
                 advancedMessageProperties.Priority = publishConfiguration.Priority.Value;
             if (publishConfiguration.Expires != null)
                 advancedMessageProperties.Expiration = publishConfiguration.Expires.ToString();
-            if (publishConfiguration.Headers != null)
+            if (publishConfiguration.Headers?.Count > 0)
                 advancedMessageProperties.Headers.UnionWith(publishConfiguration.Headers);
             advancedMessageProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType);
 

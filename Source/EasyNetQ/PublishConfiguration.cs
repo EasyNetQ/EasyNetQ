@@ -32,7 +32,7 @@ namespace EasyNetQ
         IPublishConfiguration WithExpires(int expires);
 
         /// <summary>
-        /// Sets request headers
+        /// Sets headers
         /// </summary>
         /// <param name="headers">Headers to set</param>
         /// <returns>Returns a reference to itself</returns>

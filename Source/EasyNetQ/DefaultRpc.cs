@@ -264,7 +264,7 @@ namespace EasyNetQ
                 properties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             if (priority != null)
                 properties.Priority = priority.Value;
-            if (headers != null)
+            if (headers?.Count > 0)
                 properties.Headers.UnionWith(headers);
 
             var requestMessage = new Message<TRequest>(request, properties);
