@@ -22,7 +22,7 @@ namespace EasyNetQ
         private readonly IChannelDispatcher channelDispatcher;
         private readonly ConnectionConfiguration configuration;
         private readonly IPublishConfirmationListener confirmationListener;
-        private readonly ILogger<RabbitAdvancedBus> logger;
+        private readonly ILogger logger;
         private readonly IProducerConnection producerConnection;
         private readonly IConsumerConnection consumerConnection;
         private readonly IConsumerFactory consumerFactory;
