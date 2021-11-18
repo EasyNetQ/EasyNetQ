@@ -26,11 +26,11 @@ namespace EasyNetQ.Consumer
     /// </summary>
     public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     {
+        private readonly ILogger<DefaultConsumerErrorStrategy> logger;
         private readonly IConsumerConnection connection;
         private readonly IConventions conventions;
         private readonly IErrorMessageSerializer errorMessageSerializer;
         private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new();
-        private readonly ILog logger = LogProvider.For<DefaultConsumerErrorStrategy>();
         private readonly ISerializer serializer;
         private readonly ITypeNameSerializer typeNameSerializer;
         private readonly ConnectionConfiguration configuration;
@@ -41,6 +41,7 @@ namespace EasyNetQ.Consumer
         ///     Creates DefaultConsumerErrorStrategy
         /// </summary>
         public DefaultConsumerErrorStrategy(
+            ILogger<DefaultConsumerErrorStrategy> logger,
             IConsumerConnection connection,
             ISerializer serializer,
             IConventions conventions,
@@ -56,6 +57,7 @@ namespace EasyNetQ.Consumer
             Preconditions.CheckNotNull(errorMessageSerializer, nameof(errorMessageSerializer));
             Preconditions.CheckNotNull(configuration, nameof(configuration));
 
+            this.logger = logger;
             this.connection = connection;
             this.serializer = serializer;
             this.conventions = conventions;

@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Logging;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -16,7 +17,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
         {
             var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
 
-            var handlerRunner = new HandlerRunner(consumerErrorStrategy);
+            var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);
 
             var consumer = Substitute.For<IBasicConsumer>();
             channel = Substitute.For<IModel, IRecoverable>();

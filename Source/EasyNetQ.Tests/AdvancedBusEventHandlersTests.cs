@@ -4,6 +4,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using FluentAssertions;
@@ -41,9 +42,10 @@ namespace EasyNetQ.Tests
                 }
             );
 
-            eventBus = new EventBus();
+            eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
             advancedBus = new RabbitAdvancedBus(
+                Substitute.For<ILogger<RabbitAdvancedBus>>(),
                 Substitute.For<IProducerConnection>(),
                 Substitute.For<IConsumerConnection>(),
                 Substitute.For<IConsumerFactory>(),

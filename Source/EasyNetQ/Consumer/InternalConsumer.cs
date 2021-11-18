@@ -84,7 +84,6 @@ namespace EasyNetQ.Consumer
     public class InternalConsumer : IInternalConsumer
     {
         private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
-        private readonly ILog logger = LogProvider.For<InternalConsumer>();
         private readonly AsyncLock mutex = new();
 
         private readonly ConsumerConfiguration configuration;
@@ -94,21 +93,26 @@ namespace EasyNetQ.Consumer
 
         private volatile bool disposed;
         private volatile IModel model;
+        private readonly ILogger logger;
 
         /// <summary>
         ///     Creates InternalConsumer
         /// </summary>
         public InternalConsumer(
+            ILogger<InternalConsumer> logger,
             ConsumerConfiguration configuration,
             IConsumerConnection connection,
             IHandlerRunner handlerRunner,
             IEventBus eventBus
         )
         {
+            Preconditions.CheckNotNull(logger, nameof(logger));
+            Preconditions.CheckNotNull(configuration, nameof(configuration));
             Preconditions.CheckNotNull(connection, nameof(connection));
             Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
+            this.logger = logger;
             this.configuration = configuration;
             this.connection = connection;
             this.handlerRunner = handlerRunner;
@@ -155,6 +159,7 @@ namespace EasyNetQ.Consumer
                 try
                 {
                     var consumer = new AsyncBasicConsumer(
+                        logger,
                         model,
                         queue,
                         perQueueConfiguration.AutoAck,

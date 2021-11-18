@@ -1,4 +1,3 @@
-using EasyNetQ.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +8,6 @@ namespace EasyNetQ.Consumer
     /// <inheritdoc />
     public class HandlerCollection : IHandlerCollection
     {
-        private readonly ILog logger = LogProvider.For<HandlerCollection>();
-
         private readonly IDictionary<Type, IMessageHandler> handlers = new Dictionary<Type, IMessageHandler>();
 
         /// <summary>
@@ -60,7 +57,6 @@ namespace EasyNetQ.Consumer
 
             if (ThrowOnNoMatchingHandler)
             {
-                logger.ErrorFormat("No handler found for message type {messageType}", messageType.Name);
                 throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
             }
 

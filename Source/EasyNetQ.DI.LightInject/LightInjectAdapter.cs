@@ -41,6 +41,15 @@ namespace EasyNetQ.DI.LightInject
             return this;
         }
 
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            serviceRegistry.Register(serviceType, implementingType, ToLifetime(lifetime));
+            return this;
+        }
+
         private static ILifetime ToLifetime(Lifetime lifetime)
         {
             return lifetime switch

@@ -12,7 +12,7 @@ namespace EasyNetQ.DI.Windsor
         private readonly IWindsorContainer container;
 
         /// <summary>
-        ///     Created an adapter on top of IWindsorContainer
+        ///     Creates an adapter on top of IWindsorContainer
         /// </summary>
         public WindsorAdapter(IWindsorContainer container)
         {
@@ -55,6 +55,20 @@ namespace EasyNetQ.DI.Windsor
                                         .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
                                         .LifeStyle.Is(GetLifestyleType(lifetime))
                                         .IsDefault();
+            container.Register(registration);
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            var registration = Component.For(serviceType)
+                .Named(Guid.NewGuid().ToString())
+                .ImplementedBy(implementingType)
+                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .IsDefault();
             container.Register(registration);
             return this;
         }

@@ -57,6 +57,24 @@ namespace EasyNetQ.DI.Ninject
             }
         }
 
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    kernel.Rebind(serviceType).To(implementingType).InTransientScope();
+                    return this;
+                case Lifetime.Singleton:
+                    kernel.Rebind(serviceType).To(implementingType).InSingletonScope();
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
         private class NinjectResolver : IServiceResolver
         {
             private readonly IKernel kernel;
