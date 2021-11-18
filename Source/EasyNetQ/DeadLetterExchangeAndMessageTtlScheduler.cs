@@ -92,6 +92,8 @@ namespace EasyNetQ
             var properties = new MessageProperties();
             if (publishConfiguration.Priority != null)
                 properties.Priority = publishConfiguration.Priority.Value;
+            if (publishConfiguration.Headers?.Count > 0)
+                properties.Headers.UnionWith(publishConfiguration.Headers);
             properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
             var advancedMessage = new Message<T>(message, properties);

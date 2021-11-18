@@ -258,12 +258,14 @@ namespace EasyNetQ
                 ReplyTo = returnQueueName,
                 CorrelationId = correlationId,
                 DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
-            }.CopyHeaders(headers);
+            };
 
             if (expiration != Timeout.InfiniteTimeSpan)
                 properties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             if (priority != null)
                 properties.Priority = priority.Value;
+            if (headers?.Count > 0)
+                properties.Headers.UnionWith(headers);
 
             var requestMessage = new Message<TRequest>(request, properties);
             await advancedBus.PublishAsync(exchange, routingKey, mandatory, requestMessage, cancellationToken)
