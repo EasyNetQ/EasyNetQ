@@ -16,7 +16,6 @@ namespace EasyNetQ.Logging
         /// <returns>True if the log level is enabled; false otherwise.</returns>
         public static bool IsDebugEnabled(this ILogger logger)
         {
-            GuardAgainstNullLogger(logger);
             return logger.Log(LogLevel.Debug, null, null, EmptyParams);
         }
 
@@ -27,7 +26,6 @@ namespace EasyNetQ.Logging
         /// <returns>True if the log level is enabled; false otherwise.</returns>
         public static bool IsErrorEnabled(this ILogger logger)
         {
-            GuardAgainstNullLogger(logger);
             return logger.Log(LogLevel.Error, null, null, EmptyParams);
         }
 
@@ -38,7 +36,6 @@ namespace EasyNetQ.Logging
         /// <returns>True if the log level is enabled; false otherwise.</returns>
         public static bool IsFatalEnabled(this ILogger logger)
         {
-            GuardAgainstNullLogger(logger);
             return logger.Log(LogLevel.Fatal, null, null, EmptyParams);
         }
 
@@ -49,7 +46,6 @@ namespace EasyNetQ.Logging
         /// <returns>True if the log level is enabled; false otherwise.</returns>
         public static bool IsInfoEnabled(this ILogger logger)
         {
-            GuardAgainstNullLogger(logger);
             return logger.Log(LogLevel.Info, null, null, EmptyParams);
         }
 
@@ -60,7 +56,6 @@ namespace EasyNetQ.Logging
         /// <returns>True if the log level is enabled; false otherwise.</returns>
         public static bool IsTraceEnabled(this ILogger logger)
         {
-            GuardAgainstNullLogger(logger);
             return logger.Log(LogLevel.Trace, null, null, EmptyParams);
         }
 
@@ -71,7 +66,6 @@ namespace EasyNetQ.Logging
         /// <returns>True if the log level is enabled; false otherwise.</returns>
         public static bool IsWarnEnabled(this ILogger logger)
         {
-            GuardAgainstNullLogger(logger);
             return logger.Log(LogLevel.Warn, null, null, EmptyParams);
         }
 
@@ -82,7 +76,6 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Debug(this ILogger logger, Func<string> messageFunc)
         {
-            GuardAgainstNullLogger(logger);
             logger.Log(LogLevel.Debug, messageFunc, null, EmptyParams);
         }
 
@@ -162,7 +155,6 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Error(this ILogger logger, Func<string> messageFunc)
         {
-            GuardAgainstNullLogger(logger);
             logger.Log(LogLevel.Error, messageFunc, null, EmptyParams);
         }
 
@@ -299,7 +291,6 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Info(this ILogger logger, Func<string> messageFunc)
         {
-            GuardAgainstNullLogger(logger);
             logger.Log(LogLevel.Info, messageFunc, null, EmptyParams);
         }
 
@@ -368,7 +359,6 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Trace(this ILogger logger, Func<string> messageFunc)
         {
-            GuardAgainstNullLogger(logger);
             logger.Log(LogLevel.Trace, messageFunc, null, EmptyParams);
         }
 
@@ -436,7 +426,6 @@ namespace EasyNetQ.Logging
         /// <param name="messageFunc">The message function.</param>
         public static void Warn(this ILogger logger, Func<string> messageFunc)
         {
-            GuardAgainstNullLogger(logger);
             logger.Log(LogLevel.Warn, messageFunc, null, EmptyParams);
         }
 
@@ -496,12 +485,6 @@ namespace EasyNetQ.Logging
         )
         {
             if (logger.IsWarnEnabled()) logger.Log(LogLevel.Warn, message.AsFunc(), exception, args);
-        }
-
-        // ReSharper disable once UnusedParameter.Local
-        private static void GuardAgainstNullLogger(ILogger logger)
-        {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
         }
 
         private static void LogFormat(this ILogger logger, LogLevel logLevel, string message, params object[] args)
