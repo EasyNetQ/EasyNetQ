@@ -23,7 +23,10 @@ namespace EasyNetQ.Logging
         );
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Typed logger that can be used with dependency injection frameworks.
+    /// </summary>
+    /// <typeparam name="TCategoryName">Typically sets the source name of the logs.</typeparam>
     // ReSharper disable once UnusedTypeParameter
     public interface ILogger<out TCategoryName> : ILogger
     {
