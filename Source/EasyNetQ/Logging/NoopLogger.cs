@@ -3,7 +3,7 @@ using System;
 namespace EasyNetQ.Logging
 {
     /// <summary>
-    /// Logger that does nothing.
+    /// Logger that does nothing. It is used by default.
     /// </summary>
     public class NoopLogger : ILogger
     {
@@ -20,7 +20,7 @@ namespace EasyNetQ.Logging
     }
 
     /// <summary>
-    /// Logger that does nothing.
+    /// Logger that does nothing. It is used by default.
     /// </summary>
     public class NoopLogger<TCategoryName> : ILogger<TCategoryName>
     {
