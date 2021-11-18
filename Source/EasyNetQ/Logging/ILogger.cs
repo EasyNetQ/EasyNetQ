@@ -11,7 +11,7 @@ namespace EasyNetQ.Logging
         ///     Logs the specified message with level and arguments.
         /// </summary>
         /// <param name="logLevel">The log level</param>
-        /// <param name="messageFunc">The message function</param>
+        /// <param name="messageFunc">The message function; null to just check if the specified log level is enabled.</param>
         /// <param name="exception">The exception</param>
         /// <param name="formatParameters">The format parameters</param>
         /// <returns>A boolean.</returns>
