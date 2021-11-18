@@ -13,11 +13,11 @@ namespace EasyNetQ.Internals
     /// </summary>
     public static class ReflectionHelpers
     {
-        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>> typesAttributes = new();
+        private static readonly ConcurrentDictionary<Type, Dictionary<Type, Attribute[]>> TypesAttributes = new();
 
         private static Dictionary<Type, Attribute[]> GetOrAddTypeAttributeDictionary(Type type)
         {
-            return typesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
+            return TypesAttributes.GetOrAdd(type, t => t.GetCustomAttributes(true)
                                                     .Cast<Attribute>()
                                                     .GroupBy(attr => attr.GetType())
                                                     .ToDictionary(group => group.Key, group => group.ToArray()));
