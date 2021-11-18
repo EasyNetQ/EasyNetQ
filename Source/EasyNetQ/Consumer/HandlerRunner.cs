@@ -18,7 +18,7 @@ namespace EasyNetQ.Consumer
     public class HandlerRunner : IHandlerRunner
     {
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
-        private readonly ILogger<IHandlerRunner> logger;
+        private readonly ILogger logger;
 
         public HandlerRunner(ILogger<IHandlerRunner> logger, IConsumerErrorStrategy consumerErrorStrategy)
         {
