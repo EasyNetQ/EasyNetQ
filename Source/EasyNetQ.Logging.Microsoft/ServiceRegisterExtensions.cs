@@ -21,18 +21,5 @@ namespace EasyNetQ
                 .Register(typeof(ILogger), typeof(MicrosoftLoggerAdapter))
                 .Register(typeof(ILogger<>), typeof(MicrosoftLoggerAdapter<>));
         }
-
-        /// <summary>
-        ///     Enables microsoft logging using provided Microsoft.Extensions.Logger.ILoggerFactory
-        /// </summary>
-        /// <param name="serviceRegister">The register</param>
-        /// <param name="loggerFactory"></param>
-        public static IServiceRegister EnableMicrosoftLogging(this IServiceRegister serviceRegister, MS.ILoggerFactory loggerFactory)
-        {
-            return serviceRegister
-                .Register(loggerFactory)
-                .Register(typeof(ILogger), typeof(MicrosoftLoggerAdapter))
-                .Register(typeof(ILogger<>), typeof(MicrosoftLoggerAdapter<>));
-        }
     }
 }

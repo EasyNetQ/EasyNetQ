@@ -21,18 +21,5 @@ namespace EasyNetQ
                 .Register(typeof(ILogger), typeof(SerilogLoggerAdapter))
                 .Register(typeof(ILogger<>), typeof(SerilogLoggerAdapter<>));
         }
-
-        /// <summary>
-        ///     Enables serilog logging using provided Serilog.ILogger
-        /// </summary>
-        /// <param name="serviceRegister">The register</param>
-        /// <param name="logger"></param>
-        public static IServiceRegister EnableSerilogLogging(this IServiceRegister serviceRegister, S.ILogger logger)
-        {
-            return serviceRegister
-                .Register(logger)
-                .Register(typeof(ILogger), typeof(SerilogLoggerAdapter))
-                .Register(typeof(ILogger<>), typeof(SerilogLoggerAdapter<>));
-        }
     }
 }
