@@ -13,7 +13,7 @@ namespace EasyNetQ.Persistent
     {
         private readonly object mutex = new();
         private readonly PersistentConnectionType type;
-        private readonly ILogger<IPersistentConnection> logger;
+        private readonly ILogger logger;
         private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;
