@@ -15,6 +15,5 @@ namespace EasyNetQ
     public static class ServiceRegisterExtensions
     {
         public static EasyNetQ.DI.IServiceRegister EnableMicrosoftLogging(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableMicrosoftLogging(this EasyNetQ.DI.IServiceRegister serviceRegister, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
     }
 }
