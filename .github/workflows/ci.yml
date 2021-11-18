@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        dotnet: ['5.0.x']
+        dotnet: ['6.0.x']
       fail-fast: true
     steps:
     - name: Checkout
