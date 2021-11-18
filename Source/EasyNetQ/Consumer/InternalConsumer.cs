@@ -93,7 +93,7 @@ namespace EasyNetQ.Consumer
 
         private volatile bool disposed;
         private volatile IModel model;
-        private readonly ILogger<InternalConsumer> logger;
+        private readonly ILogger logger;
 
         /// <summary>
         ///     Creates InternalConsumer
