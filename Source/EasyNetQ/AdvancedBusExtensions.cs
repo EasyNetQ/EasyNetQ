@@ -783,7 +783,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-              bus.NotNull().ExchangeDeclarePassiveAsync(name, cancellationToken)
+            bus.NotNull().ExchangeDeclarePassiveAsync(name, cancellationToken)
                 .GetAwaiter()
                 .GetResult();
         }
