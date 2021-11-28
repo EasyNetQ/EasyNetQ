@@ -47,24 +47,15 @@ namespace EasyNetQ
             ICorrelationIdGenerationStrategy correlationIdGenerationStrategy
         )
         {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-            Preconditions.CheckNotNull(conventions, nameof(conventions));
-            Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
-            Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-            Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-            Preconditions.CheckNotNull(correlationIdGenerationStrategy, nameof(correlationIdGenerationStrategy));
+            this.configuration = configuration.NotNull();
+            this.advancedBus = advancedBus.NotNull();
+            this.conventions = conventions.NotNull();
+            this.exchangeDeclareStrategy = exchangeDeclareStrategy.NotNull();
+            this.messageDeliveryModeStrategy = messageDeliveryModeStrategy.NotNull();
+            this.typeNameSerializer = typeNameSerializer.NotNull();
+            this.correlationIdGenerationStrategy = correlationIdGenerationStrategy.NotNull();
 
-            this.configuration = configuration;
-            this.advancedBus = advancedBus;
-            this.conventions = conventions;
-            this.exchangeDeclareStrategy = exchangeDeclareStrategy;
-            this.messageDeliveryModeStrategy = messageDeliveryModeStrategy;
-            this.typeNameSerializer = typeNameSerializer;
-            this.correlationIdGenerationStrategy = correlationIdGenerationStrategy;
-
-            eventSubscription = eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered);
+            eventSubscription = eventBus.NotNull().Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered);
         }
 
         /// <inheritdoc />
@@ -74,8 +65,6 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(request, nameof(request));
-
             var requestType = typeof(TRequest);
             var requestConfiguration = new RequestConfiguration(
                 conventions.RpcRoutingKeyNamingConvention(requestType),
@@ -96,7 +85,7 @@ namespace EasyNetQ
             var priority = requestConfiguration.Priority;
             var headers = requestConfiguration.Headers;
             await RequestPublishAsync(
-                request,
+                request.NotNull(),
                 routingKey,
                 queueName,
                 correlationId,
@@ -117,13 +106,11 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(responder, nameof(responder));
-            Preconditions.CheckNotNull(configure, nameof(configure));
             // We're explicitly validating TResponse here because the type won't be used directly.
             // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
             Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
 
-            return RespondAsyncInternal(responder, configure, cancellationToken).ToAwaitableDisposable();
+            return RespondAsyncInternal(responder.NotNull(), configure.NotNull(), cancellationToken).ToAwaitableDisposable();
         }
 
         /// <inheritdoc />

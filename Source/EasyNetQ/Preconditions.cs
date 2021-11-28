@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace EasyNetQ
 {
@@ -35,6 +36,36 @@ namespace EasyNetQ
 
                 throw new ArgumentNullException(name, $"{name} must not be null");
             }
+        }
+
+        /// <summary>
+        /// Ensures that <paramref name="value"/> is not null.
+        /// </summary>
+        /// <typeparam name="T">Type of <paramref name="value"/></typeparam>
+        /// <param name="value">
+        /// The value to check, must not be null.
+        /// </param>
+        /// <param name="name">
+        /// The name of the parameter the value is taken from, must not be
+        /// blank.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="value"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="name"/> is blank.
+        /// </exception>
+        public static T NotNull<T>(this T value, [CallerArgumentExpression("value")] string name = "")
+        {
+            // Avoid boxing here
+            if (value == null)
+            {
+                CheckNotBlank(name, nameof(name), "name must not be blank");
+
+                throw new ArgumentNullException(name, $"{name} must not be null");
+            }
+
+            return value;
         }
 
         /// <summary>
@@ -120,7 +151,7 @@ namespace EasyNetQ
         /// Thrown if <paramref name="value"/> or <paramref name="name"/> are
         /// blank.
         /// </exception>
-        public static void CheckNotBlank(string value, string name)
+        public static string CheckNotBlank(this string value, [CallerArgumentExpression("value")] string name = "")
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -131,6 +162,8 @@ namespace EasyNetQ
             {
                 throw new ArgumentException(string.Format("{0} must not be blank", name), name);
             }
+
+            return value;
         }
 
         /// <summary>
@@ -152,7 +185,7 @@ namespace EasyNetQ
         /// <exception cref="ArgumentException">
         /// Thrown if <paramref name="collection"/> is empty, or <c>null</c>.
         /// </exception>
-        public static void CheckAny<T>(IEnumerable<T> collection, string name, string message)
+        public static IEnumerable<T> CheckAny<T>(this IEnumerable<T> collection, string message, [CallerArgumentExpression("collection")] string name = "")
         {
             if (collection == null || !collection.Any())
             {
@@ -161,6 +194,8 @@ namespace EasyNetQ
 
                 throw new ArgumentException(message, name);
             }
+
+            return collection;
         }
 
         /// <summary>
@@ -181,7 +216,7 @@ namespace EasyNetQ
         /// Thrown if <paramref name="value"/> is <c>false</c>, or if <paramref name="name"/>
         /// or <paramref name="message"/> are blank.
         /// </exception>
-        public static void CheckTrue(bool value, string name, string message)
+        public static bool CheckTrue(this bool value, string message, [CallerArgumentExpression("value")] string name = "")
         {
             if (!value)
             {
@@ -190,6 +225,8 @@ namespace EasyNetQ
 
                 throw new ArgumentException(message, name);
             }
+
+            return value;
         }
 
         /// <summary>
@@ -210,7 +247,7 @@ namespace EasyNetQ
         /// Thrown if <paramref name="value"/> is <c>true</c>, or if <paramref name="name"/>
         /// or <paramref name="message"/> are blank.
         /// </exception>
-        public static void CheckFalse(bool value, string name, string message)
+        public static bool CheckFalse(this bool value, string message, [CallerArgumentExpression("value")] string name = "")
         {
             if (value)
             {
@@ -219,18 +256,21 @@ namespace EasyNetQ
 
                 throw new ArgumentException(message, name);
             }
+
+            return value;
         }
 
-        public static void CheckShortString(string value, string name)
+        public static string CheckShortString(this string value, [CallerArgumentExpression("value")] string name = "")
         {
-            CheckNotNull(value, name);
-            if (value.Length > 255)
+            if (value.NotNull(name).Length > 255)
             {
                 throw new ArgumentException(string.Format("Argument '{0}' must be less than or equal to 255 characters.", name));
             }
+
+            return value;
         }
 
-        public static void CheckTypeMatches(Type expectedType, object value, string name, string message)
+        public static Type CheckTypeMatches(this Type expectedType, object value, string message, [CallerArgumentExpression("value")] string name = "")
         {
             var assignable = expectedType.IsAssignableFrom(value.GetType());
             if (!assignable)
@@ -240,19 +280,21 @@ namespace EasyNetQ
 
                 throw new ArgumentException(message, name);
             }
+
+            return expectedType;
         }
 
-        public static void CheckLess(TimeSpan value, TimeSpan maxValue, string name)
+        public static TimeSpan CheckLess(this TimeSpan value, TimeSpan maxValue, [CallerArgumentExpression("value")] string name = "")
         {
             if (value < maxValue)
-                return;
+                return value;
             throw new ArgumentOutOfRangeException(name, string.Format("Arguments {0} must be less than maxValue", name));
         }
 
-        public static void CheckNull<T>(T value, string name) where T : class
+        public static T CheckNull<T>(this T value, [CallerArgumentExpression("value")] string name = "") where T : class
         {
             if (value == null)
-                return;
+                return value;
             throw new ArgumentException(string.Format("{0} must not be null", name), name);
         }
     }

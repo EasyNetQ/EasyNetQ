@@ -222,9 +222,7 @@ namespace EasyNetQ
             CancellationToken cancellationToken = default
         )
         {
-            Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
-            return sendReceive.Receive(queue, onMessage, _ => { }, cancellationToken);
+            return sendReceive.NotNull().Receive(queue, onMessage, _ => { }, cancellationToken);
         }
 
         /// <summary>

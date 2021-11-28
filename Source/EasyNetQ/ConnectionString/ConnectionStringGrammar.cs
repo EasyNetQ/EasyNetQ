@@ -97,7 +97,7 @@ namespace EasyNetQ.ConnectionString
             var property = memberEx.Member as PropertyInfo;
 
             Preconditions.CheckNotNull(property, "getter", "Member is not a property.");
-            Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
+            Preconditions.CheckTrue(property.CanWrite, "Member is not a writeable property.", "getter");
 
             return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
         }

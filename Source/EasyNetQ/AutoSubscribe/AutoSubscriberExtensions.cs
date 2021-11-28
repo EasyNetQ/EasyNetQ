@@ -19,9 +19,7 @@ namespace EasyNetQ.AutoSubscribe
         /// <param name="cancellationToken">The cancellation token.</param>
         public static Task<IDisposable> SubscribeAsync(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)
         {
-            Preconditions.CheckAny(assemblies, nameof(assemblies), "No assemblies specified.");
-
-            return autoSubscriber.SubscribeAsync(assemblies.SelectMany(a => a.GetTypes()).ToArray(), cancellationToken);
+            return autoSubscriber.SubscribeAsync(assemblies.CheckAny("No assemblies specified.").SelectMany(a => a.GetTypes()).ToArray(), cancellationToken);
         }
 
         public static IDisposable Subscribe(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)

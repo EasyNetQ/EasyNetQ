@@ -266,13 +266,9 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckNotNull(exchange, nameof(exchange));
-            Preconditions.CheckShortString(routingKey, nameof(routingKey));
-            Preconditions.CheckNotNull(message, nameof(message));
-
-            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message.NotNull());
             await PublishAsync(
-                exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+                exchange.NotNull(), routingKey.CheckShortString(), mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
             ).ConfigureAwait(false);
         }
 
@@ -285,12 +281,9 @@ namespace EasyNetQ
             CancellationToken cancellationToken
         )
         {
-            Preconditions.CheckShortString(routingKey, "routingKey");
-            Preconditions.CheckNotNull(message, nameof(message));
-
-            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message.NotNull());
             await PublishAsync(
-                exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+                exchange, routingKey.CheckShortString(), mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
             ).ConfigureAwait(false);
         }
 
