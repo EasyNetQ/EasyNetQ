@@ -58,6 +58,24 @@ namespace EasyNetQ.DI.StructureMap
             }
         }
 
+        /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    registry.For(serviceType, Lifecycles.Transient).Use(implementingType);
+                    return this;
+                case Lifetime.Singleton:
+                    registry.For(serviceType, Lifecycles.Singleton).Use(implementingType);
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
         private class StructureMapResolver : IServiceResolver
         {
             protected readonly IContainer Container;

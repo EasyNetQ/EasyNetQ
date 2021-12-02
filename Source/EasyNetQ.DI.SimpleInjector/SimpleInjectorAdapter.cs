@@ -59,6 +59,24 @@ namespace EasyNetQ.DI.SimpleInjector
         }
 
         /// <inheritdoc />
+        public IServiceRegister Register(
+            Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+        )
+        {
+            switch (lifetime)
+            {
+                case Lifetime.Transient:
+                    container.Register(serviceType, implementingType);
+                    return this;
+                case Lifetime.Singleton:
+                    container.RegisterSingleton(serviceType, implementingType);
+                    return this;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+        }
+
+        /// <inheritdoc />
         public TService Resolve<TService>() where TService : class
         {
             return container.GetInstance<TService>();

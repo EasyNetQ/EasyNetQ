@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Logging;
 using FluentAssertions;
+using NSubstitute;
 using Xunit;
 
 namespace EasyNetQ.Tests
@@ -13,7 +15,7 @@ namespace EasyNetQ.Tests
 
         public EventBusTests()
         {
-            eventBus = new EventBus();
+            eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
         }
 
         [Fact]

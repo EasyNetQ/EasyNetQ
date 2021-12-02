@@ -10,7 +10,6 @@ using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
-using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
@@ -22,13 +21,13 @@ namespace EasyNetQ
         private readonly IChannelDispatcher channelDispatcher;
         private readonly ConnectionConfiguration configuration;
         private readonly IPublishConfirmationListener confirmationListener;
+        private readonly ILogger logger;
         private readonly IProducerConnection producerConnection;
         private readonly IConsumerConnection consumerConnection;
         private readonly IConsumerFactory consumerFactory;
         private readonly IEventBus eventBus;
         private readonly IDisposable[] eventSubscriptions;
         private readonly IHandlerCollectionFactory handlerCollectionFactory;
-        private readonly ILog logger = LogProvider.For<RabbitAdvancedBus>();
         private readonly IMessageSerializationStrategy messageSerializationStrategy;
         private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
         private readonly IPullingConsumerFactory pullingConsumerFactory;
@@ -41,6 +40,7 @@ namespace EasyNetQ
         ///     Creates RabbitAdvancedBus
         /// </summary>
         public RabbitAdvancedBus(
+            ILogger<RabbitAdvancedBus> logger,
             IProducerConnection producerConnection,
             IConsumerConnection consumerConnection,
             IConsumerFactory consumerFactory,
@@ -71,6 +71,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
             Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
 
+            this.logger = logger;
             this.producerConnection = producerConnection;
             this.consumerConnection = consumerConnection;
             this.consumerFactory = consumerFactory;
@@ -106,30 +107,14 @@ namespace EasyNetQ
 
 
         /// <inheritdoc />
-        public bool IsConnected(PersistentConnectionType type)
-        {
-            return type switch
-            {
-                PersistentConnectionType.Producer => producerConnection.IsConnected,
-                PersistentConnectionType.Consumer => consumerConnection.IsConnected,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
-        }
+        public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
 
         /// <inheritdoc />
-        public void Connect(PersistentConnectionType type)
+        public Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            switch (type)
-            {
-                case PersistentConnectionType.Producer:
-                    producerConnection.Connect();
-                    break;
-                case PersistentConnectionType.Consumer:
-                    consumerConnection.Connect();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            producerConnection.Connect();
+            consumerConnection.Connect();
+            return Task.CompletedTask;
         }
 
         #region Consume
@@ -149,6 +134,7 @@ namespace EasyNetQ
                 consumeConfiguration.PerQueueConsumeConfigurations.ToDictionary(
                     x => x.Item1,
                     x => new PerQueueConsumerConfiguration(
+                        x.Item3.AutoAck,
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
@@ -167,6 +153,7 @@ namespace EasyNetQ
                     consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
                         x => x.Item1,
                         x => new PerQueueConsumerConfiguration(
+                            x.Item3.AutoAck,
                             x.Item3.ConsumerTag,
                             x.Item3.IsExclusive,
                             x.Item3.Arguments,
@@ -180,7 +167,8 @@ namespace EasyNetQ
                                 );
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
                                 using var scope = consumeScopeProvider.CreateScope();
-                                return await handler(deserializedMessage, receivedInfo, cancellationToken).ConfigureAwait(false);
+                                return await handler(deserializedMessage, receivedInfo, cancellationToken)
+                                    .ConfigureAwait(false);
                             }
                         )
                     )

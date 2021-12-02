@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.Logging;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -25,10 +26,14 @@ namespace EasyNetQ.Tests
 
             var connectionConfiguration = new ConnectionConfiguration();
             var connection = new ConsumerConnection(
-                connectionConfiguration, mockBuilder.ConnectionFactory, new EventBus()
+                Substitute.For<ILogger<ConsumerConnection>>(),
+                connectionConfiguration,
+                mockBuilder.ConnectionFactory,
+                new EventBus(Substitute.For<ILogger<EventBus>>())
             );
 
             errorStrategy = new DefaultConsumerErrorStrategy(
+                Substitute.For<ILogger<DefaultConsumerErrorStrategy>>(),
                 connection,
                 new JsonSerializer(),
                 customConventions,

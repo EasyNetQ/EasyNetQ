@@ -49,6 +49,11 @@ namespace EasyNetQ.Serialization.Tests
                 services.Add(typeof(TService));
                 return this;
             }
+
+            public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

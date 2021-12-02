@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using NSubstitute;
@@ -15,7 +16,7 @@ namespace EasyNetQ.Tests.ProducerTests
     {
         public PublishConfirmationListenerTest()
         {
-            eventBus = new EventBus();
+            eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
             model = Substitute.For<IModel, IRecoverable>();
             publishConfirmationListener = new PublishConfirmationListener(eventBus);
         }

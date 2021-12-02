@@ -61,7 +61,7 @@ namespace EasyNetQ.Hosepipe.Tests
         {
             using var bus = RabbitHutch.CreateBus("host=localhost");
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) }).GetAwaiter().GetResult();
             }

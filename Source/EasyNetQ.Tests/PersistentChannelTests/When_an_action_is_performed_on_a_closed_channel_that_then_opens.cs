@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -14,7 +15,7 @@ namespace EasyNetQ.Tests.PersistentChannelTests
         {
             var persistentConnection = Substitute.For<IPersistentConnection>();
             channel = Substitute.For<IModel, IRecoverable>();
-            var eventBus = new EventBus();
+            var eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
             var shutdownArgs = new ShutdownEventArgs(
                 ShutdownInitiator.Peer,
