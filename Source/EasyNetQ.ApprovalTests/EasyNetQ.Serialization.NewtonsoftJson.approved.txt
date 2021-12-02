@@ -1,0 +1,52 @@
+namespace EasyNetQ.Internals
+{
+    public sealed class ArrayPooledMemoryStream : System.IO.Stream, System.Buffers.IMemoryOwner<byte>, System.IDisposable
+    {
+        public ArrayPooledMemoryStream() { }
+        public override bool CanRead { get; }
+        public override bool CanSeek { get; }
+        public override bool CanWrite { get; }
+        public override long Length { get; }
+        public System.Memory<byte> Memory { get; }
+        public override long Position { get; set; }
+        protected override void Dispose(bool disposing) { }
+        public override void Flush() { }
+        public override int Read(byte[] buffer, int offset, int count) { }
+        public override long Seek(long offset, System.IO.SeekOrigin origin) { }
+        public override void SetLength(long value) { }
+        public override void Write(byte[] buffer, int offset, int count) { }
+    }
+    public sealed class ReadOnlyMemoryStream : System.IO.Stream
+    {
+        public ReadOnlyMemoryStream(in System.ReadOnlyMemory<byte> content) { }
+        public override bool CanRead { get; }
+        public override bool CanSeek { get; }
+        public override bool CanWrite { get; }
+        public override long Length { get; }
+        public override long Position { get; set; }
+        public override void Flush() { }
+        public override int Read(byte[] buffer, int offset, int count) { }
+        public override int ReadByte() { }
+        public override long Seek(long offset, System.IO.SeekOrigin origin) { }
+        public override void SetLength(long value) { }
+        public override void Write(byte[] buffer, int offset, int count) { }
+    }
+}
+namespace EasyNetQ.Serialization.NewtonsoftJson
+{
+    public sealed class NewtonsoftJsonSerializer : EasyNetQ.ISerializer
+    {
+        public NewtonsoftJsonSerializer() { }
+        public NewtonsoftJsonSerializer(Newtonsoft.Json.JsonSerializerSettings settings) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
+    }
+}
+namespace EasyNetQ
+{
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister EnableNewtonsoftJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableNewtonsoftJson(this EasyNetQ.DI.IServiceRegister serviceRegister, Newtonsoft.Json.JsonSerializerSettings settings) { }
+    }
+}

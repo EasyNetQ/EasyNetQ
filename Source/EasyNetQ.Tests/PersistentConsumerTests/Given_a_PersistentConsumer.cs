@@ -6,6 +6,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Tests.PersistentConsumerTests
 {
@@ -20,11 +21,10 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
 
         protected Given_a_PersistentConsumer()
         {
-            eventBus = new EventBus();
+            eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
             internalConsumers = new List<IInternalConsumer>();
 
-            Queue queue = new Queue(queueName, false);
-            MessageHandler handler = (_, _, _, _) => Task.FromResult(AckStrategies.Ack);
+            var queue = new Queue(queueName, false);
 
             internalConsumerFactory = Substitute.For<IInternalConsumerFactory>();
             internalConsumerFactory.CreateConsumer(Arg.Any<ConsumerConfiguration>()).Returns(_ =>
@@ -36,11 +36,17 @@ namespace EasyNetQ.Tests.PersistentConsumerTests
                 return internalConsumer;
             });
             consumer = new Consumer.Consumer(
+                Substitute.For<ILogger<Consumer.Consumer>>(),
                 new ConsumerConfiguration(
                     0,
                     new Dictionary<Queue, PerQueueConsumerConfiguration>
                     {
-                        {queue, new PerQueueConsumerConfiguration("", false, null, handler)}
+                        {
+                            queue,
+                            new PerQueueConsumerConfiguration(
+                                false, "", false, null, (_, _, _, _) => Task.FromResult(AckStrategies.Ack)
+                            )
+                        }
                     }
                 ),
                 internalConsumerFactory,

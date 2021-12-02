@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        dotnet: ['5.0.x']
+        dotnet: ['6.0.x']
       fail-fast: true
     steps:
     - name: Checkout
@@ -34,7 +34,7 @@ jobs:
     - name: Install & run dotnet-format
       run: |
         dotnet tool install -g dotnet-format
-        dotnet format ./Source/EasyNetQ.sln --check
+        dotnet format ./Source/EasyNetQ.sln --verify-no-changes
 
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln

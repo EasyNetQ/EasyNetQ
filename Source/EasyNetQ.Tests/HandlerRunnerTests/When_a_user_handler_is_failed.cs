@@ -6,6 +6,7 @@ using RabbitMQ.Client;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Logging;
 using Xunit;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests
@@ -17,7 +18,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             CorrelationId = "correlation_id"
         };
         private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 123, false, "exchange", "routingKey", "queue");
-        private readonly byte[] messageBody = new byte[0];
+        private readonly byte[] messageBody = Array.Empty<byte>();
 
         private readonly IConsumerErrorStrategy consumerErrorStrategy;
         private readonly ConsumerExecutionContext context;
@@ -28,7 +29,7 @@ namespace EasyNetQ.Tests.HandlerRunnerTests
             consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
             consumerErrorStrategy.HandleConsumerErrorAsync(default, null).ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
-            var handlerRunner = new HandlerRunner(consumerErrorStrategy);
+            var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);
 
             var consumer = Substitute.For<IBasicConsumer>();
             channel = Substitute.For<IModel>();

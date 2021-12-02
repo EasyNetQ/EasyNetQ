@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
@@ -20,6 +21,7 @@ namespace EasyNetQ.Tests
 
             using var connection = new PersistentConnection(
                 PersistentConnectionType.Producer,
+                Substitute.For<ILogger<IPersistentConnection>>(),
                 new ConnectionConfiguration(),
                 mockBuilder.ConnectionFactory,
                 mockBuilder.EventBus
@@ -37,6 +39,7 @@ namespace EasyNetQ.Tests
             var mockBuilder = new MockBuilder();
             using var connection = new PersistentConnection(
                 PersistentConnectionType.Producer,
+                Substitute.For<ILogger<IPersistentConnection>>(),
                 new ConnectionConfiguration(),
                 mockBuilder.ConnectionFactory,
                 mockBuilder.EventBus
@@ -57,6 +60,7 @@ namespace EasyNetQ.Tests
 
             using var connection = new PersistentConnection(
                 PersistentConnectionType.Producer,
+                Substitute.For<ILogger<IPersistentConnection>>(),
                 new ConnectionConfiguration(),
                 mockBuilder.ConnectionFactory,
                 mockBuilder.EventBus
@@ -74,6 +78,7 @@ namespace EasyNetQ.Tests
             var mockBuilder = new MockBuilder();
             using var connection = new PersistentConnection(
                 PersistentConnectionType.Producer,
+                Substitute.For<ILogger<IPersistentConnection>>(),
                 new ConnectionConfiguration(),
                 mockBuilder.ConnectionFactory,
                 mockBuilder.EventBus

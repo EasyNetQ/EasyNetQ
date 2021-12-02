@@ -1,3 +1,4 @@
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
@@ -17,8 +18,11 @@ namespace EasyNetQ.Producer
         ///     Creates ProducerConnection
         /// </summary>
         public ProducerConnection(
-            ConnectionConfiguration configuration, IConnectionFactory connectionFactory, IEventBus eventBus
-        ) : base(PersistentConnectionType.Producer, configuration, connectionFactory, eventBus)
+            ILogger<ProducerConnection> logger,
+            ConnectionConfiguration configuration,
+            IConnectionFactory connectionFactory,
+            IEventBus eventBus
+        ) : base(PersistentConnectionType.Producer, logger, configuration, connectionFactory, eventBus)
         {
         }
     }

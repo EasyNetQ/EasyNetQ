@@ -58,6 +58,8 @@ namespace EasyNetQ
             var properties = new MessageProperties();
             if (sendConfiguration.Priority != null)
                 properties.Priority = sendConfiguration.Priority.Value;
+            if (sendConfiguration.Headers?.Count > 0)
+                properties.Headers.UnionWith(sendConfiguration.Headers);
             properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
 
             await advancedBus.PublishAsync(

@@ -124,12 +124,10 @@ namespace EasyNetQ.AutoSubscribe
             var r = new StringBuilder();
             var unique = string.Concat(SubscriptionIdPrefix, ":", c.ConcreteType.FullName, ":", c.MessageType.FullName);
 
-            using (var md5 = MD5.Create())
-            {
-                var buff = md5.ComputeHash(Encoding.UTF8.GetBytes(unique));
-                foreach (var b in buff)
-                    r.Append(b.ToString("x2"));
-            }
+            using var md5 = MD5.Create();
+            var buff = md5.ComputeHash(Encoding.UTF8.GetBytes(unique));
+            foreach (var b in buff)
+                r.Append(b.ToString("x2"));
 
             return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
         }
@@ -182,10 +180,7 @@ namespace EasyNetQ.AutoSubscribe
         {
             var topics = GetTopAttributeValues(subscriptionInfo);
 
-            if (topics.Length != 0)
-                return GenerateConfigurationFromTopics(topics);
-
-            return configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
+            return topics.Length != 0 ? GenerateConfigurationFromTopics(topics) : configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
         }
 
         private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(string[] topics)

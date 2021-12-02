@@ -4,6 +4,7 @@ using EasyNetQ.Consumer;
 using NSubstitute;
 using RabbitMQ.Client;
 using System.Threading.Tasks;
+using EasyNetQ.Logging;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests
@@ -63,6 +64,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         )
         {
             var consumerErrorStrategy = new DefaultConsumerErrorStrategy(
+                Substitute.For<ILogger<DefaultConsumerErrorStrategy>>(),
                 connectionMock,
                 Substitute.For<ISerializer>(),
                 Substitute.For<IConventions>(),

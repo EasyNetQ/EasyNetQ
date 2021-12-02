@@ -2,7 +2,7 @@
   <Import Project="../Tests.props" />
 
   <PropertyGroup>
-    <TargetFramework>net5</TargetFramework>
+    <TargetFramework>net6</TargetFramework>
     <RootNamespace>EasyNetQ.Approval.Tests</RootNamespace>
   </PropertyGroup>
 
@@ -18,6 +18,9 @@
     <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Logging.Microsoft\EasyNetQ.Logging.Microsoft.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
   </ItemGroup>
 
 </Project>

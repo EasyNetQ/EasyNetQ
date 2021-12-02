@@ -13,10 +13,10 @@ namespace EasyNetQ.Persistent
     {
         private readonly object mutex = new();
         private readonly PersistentConnectionType type;
+        private readonly ILogger logger;
         private readonly ConnectionConfiguration configuration;
         private readonly IConnectionFactory connectionFactory;
         private readonly IEventBus eventBus;
-        private readonly ILog logger = LogProvider.For<PersistentConnection>();
         private volatile IAutorecoveringConnection initializedConnection;
         private volatile bool disposed;
 
@@ -25,16 +25,19 @@ namespace EasyNetQ.Persistent
         /// </summary>
         public PersistentConnection(
             PersistentConnectionType type,
+            ILogger<IPersistentConnection> logger,
             ConnectionConfiguration configuration,
             IConnectionFactory connectionFactory,
             IEventBus eventBus
         )
         {
+            Preconditions.CheckNotNull(logger, nameof(logger));
             Preconditions.CheckNotNull(configuration, nameof(configuration));
             Preconditions.CheckNotNull(connectionFactory, nameof(connectionFactory));
             Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
             this.type = type;
+            this.logger = logger;
             this.configuration = configuration;
             this.connectionFactory = connectionFactory;
             this.eventBus = eventBus;

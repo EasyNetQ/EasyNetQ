@@ -1,0 +1,19 @@
+namespace EasyNetQ.Logging.Microsoft
+{
+    public class MicrosoftLoggerAdapter : EasyNetQ.Logging.ILogger
+    {
+        public MicrosoftLoggerAdapter(Microsoft.Extensions.Logging.ILogger logger) { }
+        public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string> messageFunc, System.Exception exception = null, params object[] formatParameters) { }
+    }
+    public class MicrosoftLoggerAdapter<TCategory> : EasyNetQ.Logging.Microsoft.MicrosoftLoggerAdapter, EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategory>
+    {
+        public MicrosoftLoggerAdapter(Microsoft.Extensions.Logging.ILogger<TCategory> logger) { }
+    }
+}
+namespace EasyNetQ
+{
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister EnableMicrosoftLogging(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+    }
+}

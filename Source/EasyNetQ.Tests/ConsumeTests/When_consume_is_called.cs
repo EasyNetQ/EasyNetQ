@@ -32,7 +32,7 @@ namespace EasyNetQ.Tests.ConsumeTests
         {
             MockBuilder.Channels[0].Received().BasicConsume(
                Arg.Is("my_queue"),
-               Arg.Is(false), // NoAck
+               Arg.Is(false),
                Arg.Is(ConsumerTag),
                Arg.Is(true),
                Arg.Is(false),

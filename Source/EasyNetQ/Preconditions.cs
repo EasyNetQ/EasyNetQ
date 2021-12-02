@@ -232,7 +232,7 @@ namespace EasyNetQ
 
         public static void CheckTypeMatches(Type expectedType, object value, string name, string message)
         {
-            bool assignable = expectedType.IsAssignableFrom(value.GetType());
+            var assignable = expectedType.IsAssignableFrom(value.GetType());
             if (!assignable)
             {
                 CheckNotBlank(name, nameof(name), "name must not be blank");

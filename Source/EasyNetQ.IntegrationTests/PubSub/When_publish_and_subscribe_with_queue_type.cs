@@ -11,11 +11,8 @@ namespace EasyNetQ.IntegrationTests.PubSub
     [Collection("RabbitMQ")]
     public class When_publish_and_subscribe_with_queue_type : IDisposable
     {
-        private readonly RabbitMQFixture rmqFixture;
-
         public When_publish_and_subscribe_with_queue_type(RabbitMQFixture rmqFixture)
         {
-            this.rmqFixture = rmqFixture;
             bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
         }
 
@@ -49,7 +46,7 @@ namespace EasyNetQ.IntegrationTests.PubSub
         private static List<QuorumQueueMessage> CreateMessages(int count)
         {
             var result = new List<QuorumQueueMessage>();
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
                 result.Add(new QuorumQueueMessage(i));
             return result;
         }
