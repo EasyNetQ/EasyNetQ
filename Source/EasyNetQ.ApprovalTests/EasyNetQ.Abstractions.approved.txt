@@ -2,6 +2,7 @@ namespace EasyNetQ.DI
 {
     public interface IServiceRegister
     {
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1);
         EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
             where TService :  class;
         EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
