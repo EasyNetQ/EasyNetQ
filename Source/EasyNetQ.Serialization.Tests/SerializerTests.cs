@@ -56,7 +56,8 @@ public class SerializerTests
             }
         };
 
-        var messageBasicProperties = new MessageProperties(originalProperties);
+        var messageBasicProperties = new MessageProperties();
+        messageBasicProperties.CopyFrom(originalProperties);
         using var serializedMessage = serializer.MessageToBytes(typeof(MessageProperties), messageBasicProperties);
         var deserializedMessageBasicProperties = (MessageProperties)serializer.BytesToMessage(
             typeof(MessageProperties), serializedMessage.Memory

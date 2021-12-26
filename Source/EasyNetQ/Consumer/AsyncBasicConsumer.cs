@@ -86,9 +86,9 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
             var messageReceivedInfo = new MessageReceivedInfo(
                 consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
             );
-            var messageProperties = new MessageProperties(properties);
+            var messageProperties = new MessageProperties();
+            messageProperties.CopyFrom(properties);
             eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
-
             var context = new ConsumerExecutionContext(
                 messageHandler, messageReceivedInfo, messageProperties, messageBody
             );

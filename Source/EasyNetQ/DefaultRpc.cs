@@ -261,7 +261,7 @@ public class DefaultRpc : IRpc
         };
 
         if (expiration != Timeout.InfiniteTimeSpan)
-            properties.Expiration = expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+            properties.Expiration = expiration;
         if (priority != null)
             properties.Priority = priority.Value;
         if (headers?.Count > 0)

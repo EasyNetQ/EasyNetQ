@@ -346,18 +346,17 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             return PullResult.NotAvailable;
 
         var messagesCount = basicGetResult.MessageCount;
-        var message = new ConsumedMessage(
-            new MessageReceivedInfo(
-                "",
-                basicGetResult.DeliveryTag,
-                basicGetResult.Redelivered,
-                basicGetResult.Exchange,
-                basicGetResult.RoutingKey,
-                queue.Name
-            ),
-            new MessageProperties(basicGetResult.BasicProperties),
-            basicGetResult.Body
+        var messageProperties = new MessageProperties();
+        messageProperties.CopyFrom(basicGetResult.BasicProperties);
+        var messageReceivedInfo = new MessageReceivedInfo(
+            "",
+            basicGetResult.DeliveryTag,
+            basicGetResult.Redelivered,
+            basicGetResult.Exchange,
+            basicGetResult.RoutingKey,
+            queue.Name
         );
+        var message = new ConsumedMessage(messageReceivedInfo, messageProperties, basicGetResult.Body);
         var interceptedMessage = interceptor.OnConsume(message);
         return PullResult.Available(
             messagesCount,

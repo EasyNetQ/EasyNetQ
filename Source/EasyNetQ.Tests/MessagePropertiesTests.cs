@@ -1,4 +1,6 @@
 // ReSharper disable InconsistentNaming
+
+using System;
 using FluentAssertions;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +85,7 @@ public class MessagePropertiesTests
             ContentType = "content_type",
             //CorrelationId = "correlation_id",
             DeliveryMode = 10,
-            Expiration = "expiration",
+            Expiration = TimeSpan.FromMilliseconds(1),
             Headers = headers,
             MessageId = "message_id",
             Priority = 3,

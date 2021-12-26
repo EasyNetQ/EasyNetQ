@@ -158,13 +158,16 @@ public class PersistentChannel : IPersistentChannel
 
     private void OnReturn(object sender, BasicReturnEventArgs args)
     {
-        var returnedMessageEvent = new ReturnedMessageEvent(
+        var messageProperties = new MessageProperties();
+        messageProperties.CopyFrom(args.BasicProperties);
+        var messageReturnedInfo = new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText);
+        var @event = new ReturnedMessageEvent(
             (IModel)sender,
             args.Body,
-            new MessageProperties(args.BasicProperties),
-            new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText)
+            messageProperties,
+            messageReturnedInfo
         );
-        eventBus.Publish(returnedMessageEvent);
+        eventBus.Publish(@event);
     }
 
     private void OnAck(object sender, BasicAckEventArgs args)
