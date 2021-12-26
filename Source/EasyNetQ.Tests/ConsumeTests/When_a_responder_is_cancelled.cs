@@ -6,93 +6,92 @@ using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using Xunit;
 
-namespace EasyNetQ.Tests.ConsumeTests
+namespace EasyNetQ.Tests.ConsumeTests;
+
+public class When_a_responder_is_cancelled : IDisposable
 {
-    public class When_a_responder_is_cancelled : IDisposable
+    private readonly MockBuilder mockBuilder;
+    private PublishedMessageEvent publishedMessage;
+    private AckEvent ackEvent;
+
+    private readonly IConventions conventions;
+    private readonly ITypeNameSerializer typeNameSerializer;
+    private readonly ISerializer serializer;
+
+    public When_a_responder_is_cancelled()
     {
-        private readonly MockBuilder mockBuilder;
-        private PublishedMessageEvent publishedMessage;
-        private AckEvent ackEvent;
+        mockBuilder = new MockBuilder();
 
-        private readonly IConventions conventions;
-        private readonly ITypeNameSerializer typeNameSerializer;
-        private readonly ISerializer serializer;
+        conventions = mockBuilder.Bus.Advanced.Conventions;
+        typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
+        serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
 
-        public When_a_responder_is_cancelled()
+        mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(_ =>
         {
-            mockBuilder = new MockBuilder();
+            var tcs = new TaskCompletionSource<RpcResponse>();
+            tcs.SetCanceled();
+            return tcs.Task;
+        });
 
-            conventions = mockBuilder.Bus.Advanced.Conventions;
-            typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
-            serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
+        DeliverMessage(new RpcRequest { Value = 42 });
+    }
 
-            mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(_ =>
-            {
-                var tcs = new TaskCompletionSource<RpcResponse>();
-                tcs.SetCanceled();
-                return tcs.Task;
-            });
+    public void Dispose()
+    {
+        mockBuilder.Dispose();
+    }
 
-            DeliverMessage(new RpcRequest { Value = 42 });
-        }
+    [Fact]
+    public void Should_ACK_with_faulted_response()
+    {
+        Assert.True((bool)publishedMessage.Properties.Headers["IsFaulted"]);
+        Assert.Equal("A task was canceled.", publishedMessage.Properties.Headers["ExceptionMessage"]);
+        Assert.Equal(AckResult.Nack, ackEvent.AckResult);
+    }
 
-        public void Dispose()
+    private void DeliverMessage(RpcRequest request)
+    {
+        var properties = new BasicProperties
         {
-            mockBuilder.Dispose();
-        }
+            Type = typeNameSerializer.Serialize(typeof(RpcRequest)),
+            CorrelationId = "the_correlation_id",
+            ReplyTo = conventions.RpcReturnQueueNamingConvention(typeof(RpcResponse))
+        };
 
-        [Fact]
-        public void Should_ACK_with_faulted_response()
+        var serializedMessage = serializer.MessageToBytes(typeof(RpcRequest), request);
+
+        var waiter = new CountdownEvent(2);
+        mockBuilder.EventBus.Subscribe((in PublishedMessageEvent x) =>
         {
-            Assert.True((bool)publishedMessage.Properties.Headers["IsFaulted"]);
-            Assert.Equal("A task was canceled.", publishedMessage.Properties.Headers["ExceptionMessage"]);
-            Assert.Equal(AckResult.Nack, ackEvent.AckResult);
-        }
-
-        private void DeliverMessage(RpcRequest request)
+            publishedMessage = x;
+            waiter.Signal();
+        });
+        mockBuilder.EventBus.Subscribe((in AckEvent x) =>
         {
-            var properties = new BasicProperties
-            {
-                Type = typeNameSerializer.Serialize(typeof(RpcRequest)),
-                CorrelationId = "the_correlation_id",
-                ReplyTo = conventions.RpcReturnQueueNamingConvention(typeof(RpcResponse))
-            };
+            ackEvent = x;
+            waiter.Signal();
+        });
 
-            var serializedMessage = serializer.MessageToBytes(typeof(RpcRequest), request);
+        mockBuilder.Consumers[0].HandleBasicDeliver(
+            "consumer tag",
+            0,
+            false,
+            "the_exchange",
+            "the_routing_key",
+            properties,
+            serializedMessage.Memory
+        );
 
-            var waiter = new CountdownEvent(2);
-            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent x) =>
-            {
-                publishedMessage = x;
-                waiter.Signal();
-            });
-            mockBuilder.EventBus.Subscribe((in AckEvent x) =>
-            {
-                ackEvent = x;
-                waiter.Signal();
-            });
+        if (!waiter.Wait(5000))
+            throw new TimeoutException();
+    }
 
-            mockBuilder.Consumers[0].HandleBasicDeliver(
-                "consumer tag",
-                0,
-                false,
-                "the_exchange",
-                "the_routing_key",
-                properties,
-                serializedMessage.Memory
-            );
+    private class RpcRequest
+    {
+        public int Value { get; set; }
+    }
 
-            if (!waiter.Wait(5000))
-                throw new TimeoutException();
-        }
-
-        private class RpcRequest
-        {
-            public int Value { get; set; }
-        }
-
-        private class RpcResponse
-        {
-        }
+    private class RpcResponse
+    {
     }
 }

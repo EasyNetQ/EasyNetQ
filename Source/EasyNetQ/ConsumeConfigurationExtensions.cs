@@ -6,176 +6,175 @@ using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+///     Various extensions for <see cref="IPerQueueConsumeConfiguration"/>
+/// </summary>
+public static class PerQueueConsumeConfigurationExtensions
 {
     /// <summary>
-    ///     Various extensions for <see cref="IPerQueueConsumeConfiguration"/>
+    ///     Sets priority
     /// </summary>
-    public static class PerQueueConsumeConfigurationExtensions
+    /// <param name="configuration">The configuration instance</param>
+    /// <param name="priority">The priority to set</param>
+    /// <returns>IPerQueueConsumeConfiguration</returns>
+    public static IPerQueueConsumeConfiguration WithPriority(this IPerQueueConsumeConfiguration configuration, int priority)
     {
-        /// <summary>
-        ///     Sets priority
-        /// </summary>
-        /// <param name="configuration">The configuration instance</param>
-        /// <param name="priority">The priority to set</param>
-        /// <returns>IPerQueueConsumeConfiguration</returns>
-        public static IPerQueueConsumeConfiguration WithPriority(this IPerQueueConsumeConfiguration configuration, int priority)
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            configuration.WithArgument("x-priority", priority);
-            return configuration;
-        }
-
-        /// <summary>
-        ///     Adds arguments
-        /// </summary>
-        /// <param name="configuration">The configuration instance</param>
-        /// <param name="arguments">The arguments to add</param>
-        /// <returns>IPerQueueConsumeConfiguration</returns>
-        public static IPerQueueConsumeConfiguration WithArguments(
-            this IPerQueueConsumeConfiguration configuration, IDictionary<string, object> arguments
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            Preconditions.CheckNotNull(arguments, nameof(arguments));
-
-            return arguments.Aggregate(configuration, (c, kvp) => c.WithArgument(kvp.Key, kvp.Value));
-        }
-
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        configuration.WithArgument("x-priority", priority);
+        return configuration;
     }
 
     /// <summary>
-    ///     Various extensions for <see cref="IConsumeConfiguration"/>
+    ///     Adds arguments
     /// </summary>
-    public static class ConsumeConfigurationExtensions
+    /// <param name="configuration">The configuration instance</param>
+    /// <param name="arguments">The arguments to add</param>
+    /// <returns>IPerQueueConsumeConfiguration</returns>
+    public static IPerQueueConsumeConfiguration WithArguments(
+        this IPerQueueConsumeConfiguration configuration, IDictionary<string, object> arguments
+    )
     {
-        public static IConsumeConfiguration ForQueue(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            MessageHandler handler
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            return configuration.ForQueue(queue, handler, _ => { });
-        }
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        Preconditions.CheckNotNull(arguments, nameof(arguments));
 
-        public static IConsumeConfiguration ForQueue(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            return configuration.ForQueue(queue, handler, _ => { });
-        }
-
-        public static IConsumeConfiguration ForQueue(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
-            Action<IPerQueueConsumeConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            return configuration.ForQueue(
-                queue,
-                async (body, properties, receivedInfo, cancellationToken) =>
-                {
-                    await handler(body, properties, receivedInfo, cancellationToken).ConfigureAwait(false);
-                    return AckStrategies.Ack;
-                },
-                configure
-            );
-        }
-
-        public static IConsumeConfiguration ForQueue<T>(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            IMessageHandler<T> handler
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-            return configuration.ForQueue(queue, handler, _ => { });
-        }
-
-        public static IConsumeConfiguration ForQueue<T>(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            IMessageHandler<T> handler,
-            Action<IPerQueueConsumeConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-            return configuration.ForQueue(queue, x => x.Add(handler), configure);
-        }
-
-        public static IConsumeConfiguration ForQueue<T>(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-            return configuration.ForQueue(queue, handler, _ => { });
-        }
-
-        public static IConsumeConfiguration ForQueue<T>(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler,
-            Action<IPerQueueConsumeConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-            return configuration.ForQueue(queue, x => x.Add(handler), configure);
-        }
-
-        public static IConsumeConfiguration ForQueue<T>(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            Action<IMessage<T>, MessageReceivedInfo> handler
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-            return configuration.ForQueue(queue, handler, _ => { });
-        }
-
-        public static IConsumeConfiguration ForQueue<T>(
-            this IConsumeConfiguration configuration,
-            in Queue queue,
-            Action<IMessage<T>, MessageReceivedInfo> handler,
-            Action<IPerQueueConsumeConfiguration> configure
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-            return configuration.ForQueue(queue, x => x.Add(handler), configure);
-        }
+        return arguments.Aggregate(configuration, (c, kvp) => c.WithArgument(kvp.Key, kvp.Value));
     }
 
-    /// <summary>
-    ///     Various extensions for <see cref="ISimpleConsumeConfiguration"/>
-    /// </summary>
-    public static class SimpleConsumeConfigurationExtensions
+}
+
+/// <summary>
+///     Various extensions for <see cref="IConsumeConfiguration"/>
+/// </summary>
+public static class ConsumeConfigurationExtensions
+{
+    public static IConsumeConfiguration ForQueue(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        MessageHandler handler
+    )
     {
-        /// <summary>
-        ///     Sets priority
-        /// </summary>
-        /// <param name="configuration">The configuration instance</param>
-        /// <param name="priority">The priority to set</param>
-        /// <returns>The same <paramref name="configuration"/></returns>
-        public static ISimpleConsumeConfiguration WithPriority(
-            this ISimpleConsumeConfiguration configuration, int priority
-        )
-        {
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-            configuration.WithArgument("x-priority", priority);
-            return configuration;
-        }
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        return configuration.ForQueue(queue, handler, _ => { });
+    }
+
+    public static IConsumeConfiguration ForQueue(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        return configuration.ForQueue(queue, handler, _ => { });
+    }
+
+    public static IConsumeConfiguration ForQueue(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
+        Action<IPerQueueConsumeConfiguration> configure
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        return configuration.ForQueue(
+            queue,
+            async (body, properties, receivedInfo, cancellationToken) =>
+            {
+                await handler(body, properties, receivedInfo, cancellationToken).ConfigureAwait(false);
+                return AckStrategies.Ack;
+            },
+            configure
+        );
+    }
+
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        IMessageHandler<T> handler
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.ForQueue(queue, handler, _ => { });
+    }
+
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        IMessageHandler<T> handler,
+        Action<IPerQueueConsumeConfiguration> configure
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.ForQueue(queue, x => x.Add(handler), configure);
+    }
+
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.ForQueue(queue, handler, _ => { });
+    }
+
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler,
+        Action<IPerQueueConsumeConfiguration> configure
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.ForQueue(queue, x => x.Add(handler), configure);
+    }
+
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        Action<IMessage<T>, MessageReceivedInfo> handler
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.ForQueue(queue, handler, _ => { });
+    }
+
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        Action<IMessage<T>, MessageReceivedInfo> handler,
+        Action<IPerQueueConsumeConfiguration> configure
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.ForQueue(queue, x => x.Add(handler), configure);
+    }
+}
+
+/// <summary>
+///     Various extensions for <see cref="ISimpleConsumeConfiguration"/>
+/// </summary>
+public static class SimpleConsumeConfigurationExtensions
+{
+    /// <summary>
+    ///     Sets priority
+    /// </summary>
+    /// <param name="configuration">The configuration instance</param>
+    /// <param name="priority">The priority to set</param>
+    /// <returns>The same <paramref name="configuration"/></returns>
+    public static ISimpleConsumeConfiguration WithPriority(
+        this ISimpleConsumeConfiguration configuration, int priority
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        configuration.WithArgument("x-priority", priority);
+        return configuration;
     }
 }

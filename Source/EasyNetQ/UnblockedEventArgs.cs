@@ -1,24 +1,23 @@
 using System;
 using EasyNetQ.Persistent;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+///     The arguments of Unblocked event
+/// </summary>
+public class UnblockedEventArgs : EventArgs
 {
     /// <summary>
-    ///     The arguments of Unblocked event
+    ///     Creates BlockedEventArgs
     /// </summary>
-    public class UnblockedEventArgs : EventArgs
+    public UnblockedEventArgs(PersistentConnectionType type)
     {
-        /// <summary>
-        ///     Creates BlockedEventArgs
-        /// </summary>
-        public UnblockedEventArgs(PersistentConnectionType type)
-        {
-            Type = type;
-        }
-
-        /// <summary>
-        ///     The type of the associated connection
-        /// </summary>
-        public PersistentConnectionType Type { get; }
+        Type = type;
     }
+
+    /// <summary>
+    ///     The type of the associated connection
+    /// </summary>
+    public PersistentConnectionType Type { get; }
 }

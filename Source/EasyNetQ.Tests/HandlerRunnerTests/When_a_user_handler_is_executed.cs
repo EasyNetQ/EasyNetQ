@@ -9,84 +9,83 @@ using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
 
-namespace EasyNetQ.Tests.HandlerRunnerTests
+namespace EasyNetQ.Tests.HandlerRunnerTests;
+
+public class When_a_user_handler_is_executed
 {
-    public class When_a_user_handler_is_executed
+    public When_a_user_handler_is_executed()
     {
-        public When_a_user_handler_is_executed()
-        {
-            var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+        var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
 
-            var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);
+        var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);
 
-            var consumer = Substitute.For<IBasicConsumer>();
-            channel = Substitute.For<IModel, IRecoverable>();
-            consumer.Model.Returns(channel);
+        var consumer = Substitute.For<IBasicConsumer>();
+        channel = Substitute.For<IModel, IRecoverable>();
+        consumer.Model.Returns(channel);
 
-            var context = new ConsumerExecutionContext(
-                (body, properties, info, _) =>
-                {
-                    deliveredBody = body;
-                    deliveredProperties = properties;
-                    deliveredInfo = info;
-                    return Task.FromResult(AckStrategies.Ack);
-                },
-                messageInfo,
-                messageProperties,
-                messageBody
-            );
-
-            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
-                .ContinueWith(async x =>
-                {
-                    var ackStrategy = await x;
-                    return ackStrategy(channel, 42);
-                }, TaskContinuationOptions.ExecuteSynchronously)
-                .Unwrap();
-
-            if (!handlerTask.Wait(5000))
+        var context = new ConsumerExecutionContext(
+            (body, properties, info, _) =>
             {
-                throw new TimeoutException();
-            }
-        }
+                deliveredBody = body;
+                deliveredProperties = properties;
+                deliveredInfo = info;
+                return Task.FromResult(AckStrategies.Ack);
+            },
+            messageInfo,
+            messageProperties,
+            messageBody
+        );
 
-        private ReadOnlyMemory<byte> deliveredBody;
-        private MessageProperties deliveredProperties;
-        private MessageReceivedInfo deliveredInfo;
+        var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
+            .ContinueWith(async x =>
+            {
+                var ackStrategy = await x;
+                return ackStrategy(channel, 42);
+            }, TaskContinuationOptions.ExecuteSynchronously)
+            .Unwrap();
 
-        private readonly MessageProperties messageProperties = new()
+        if (!handlerTask.Wait(5000))
         {
-            CorrelationId = "correlation_id"
-        };
-
-        private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 42, false, "exchange", "routingKey", "queue");
-        private readonly byte[] messageBody = new byte[0];
-
-        private readonly IModel channel;
-
-        [Fact]
-        public void Should_ACK()
-        {
-            channel.Received().BasicAck(42, false);
+            throw new TimeoutException();
         }
+    }
 
-        [Fact]
-        public void Should_deliver_body()
-        {
-            deliveredBody.ToArray().Should().BeEquivalentTo(messageBody);
-        }
+    private ReadOnlyMemory<byte> deliveredBody;
+    private MessageProperties deliveredProperties;
+    private MessageReceivedInfo deliveredInfo;
 
-        [Fact]
-        public void Should_deliver_info()
-        {
-            deliveredInfo.Should().BeSameAs(messageInfo);
-        }
+    private readonly MessageProperties messageProperties = new()
+    {
+        CorrelationId = "correlation_id"
+    };
 
-        [Fact]
-        public void Should_deliver_properties()
-        {
-            deliveredProperties.Should().BeSameAs(messageProperties);
-        }
+    private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 42, false, "exchange", "routingKey", "queue");
+    private readonly byte[] messageBody = new byte[0];
+
+    private readonly IModel channel;
+
+    [Fact]
+    public void Should_ACK()
+    {
+        channel.Received().BasicAck(42, false);
+    }
+
+    [Fact]
+    public void Should_deliver_body()
+    {
+        deliveredBody.ToArray().Should().BeEquivalentTo(messageBody);
+    }
+
+    [Fact]
+    public void Should_deliver_info()
+    {
+        deliveredInfo.Should().BeSameAs(messageInfo);
+    }
+
+    [Fact]
+    public void Should_deliver_properties()
+    {
+        deliveredProperties.Should().BeSameAs(messageProperties);
     }
 }
 

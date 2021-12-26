@@ -1,31 +1,30 @@
 using System;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+///     Represents a publishing message
+/// </summary>
+public readonly struct ProducedMessage
 {
     /// <summary>
-    ///     Represents a publishing message
+    ///    Creates ProducedMessage
     /// </summary>
-    public readonly struct ProducedMessage
+    /// <param name="properties">The properties</param>
+    /// <param name="body">The body</param>
+    public ProducedMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
-        /// <summary>
-        ///    Creates ProducedMessage
-        /// </summary>
-        /// <param name="properties">The properties</param>
-        /// <param name="body">The body</param>
-        public ProducedMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
-        {
-            Properties = properties;
-            Body = body;
-        }
-
-        /// <summary>
-        ///     Various message properties
-        /// </summary>
-        public MessageProperties Properties { get; }
-
-        /// <summary>
-        ///     Message body
-        /// </summary>
-        public ReadOnlyMemory<byte> Body { get; }
+        Properties = properties;
+        Body = body;
     }
+
+    /// <summary>
+    ///     Various message properties
+    /// </summary>
+    public MessageProperties Properties { get; }
+
+    /// <summary>
+    ///     Message body
+    /// </summary>
+    public ReadOnlyMemory<byte> Body { get; }
 }
