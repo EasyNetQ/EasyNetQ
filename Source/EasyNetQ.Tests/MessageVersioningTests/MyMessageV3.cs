@@ -1,9 +1,8 @@
 using EasyNetQ.MessageVersioning;
 
-namespace EasyNetQ.Tests.MessageVersioningTests
+namespace EasyNetQ.Tests.MessageVersioningTests;
+
+public class MyMessageV3 : MyMessageV2, ISupersede<MyMessageV2>
 {
-    public class MyMessageV3 : MyMessageV2, ISupersede<MyMessageV2>
-    {
-        public int NumberInV3 { get; set; }
-    }
+    public int NumberInV3 { get; set; }
 }

@@ -1,13 +1,12 @@
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer;
+
+public class HandlerCollectionFactory : IHandlerCollectionFactory
 {
-    public class HandlerCollectionFactory : IHandlerCollectionFactory
+    /// <inheritdoc />
+    public IHandlerCollection CreateHandlerCollection(in Queue queue)
     {
-        /// <inheritdoc />
-        public IHandlerCollection CreateHandlerCollection(in Queue queue)
-        {
-            return new HandlerCollection();
-        }
+        return new HandlerCollection();
     }
 }

@@ -8,71 +8,70 @@ using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
 
-namespace EasyNetQ.Tests.ProducerTests
+namespace EasyNetQ.Tests.ProducerTests;
+
+public class When_a_polymorphic_message_is_sent : IDisposable
 {
-    public class When_a_polymorphic_message_is_sent : IDisposable
+    private readonly MockBuilder mockBuilder;
+    private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
+    private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
+
+    public When_a_polymorphic_message_is_sent()
     {
-        private readonly MockBuilder mockBuilder;
-        private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
-        private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
+        mockBuilder = new MockBuilder();
 
-        public When_a_polymorphic_message_is_sent()
+        var message = new MyImplementation
         {
-            mockBuilder = new MockBuilder();
+            Text = "Hello Polymorphs!",
+            NotInInterface = "Hi"
+        };
 
-            var message = new MyImplementation
-            {
-                Text = "Hello Polymorphs!",
-                NotInInterface = "Hi"
-            };
-
-            mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
-        }
-
-        public void Dispose()
-        {
-            mockBuilder.Dispose();
-        }
-
-        [Fact]
-        public void Should_name_exchange_after_interface()
-        {
-            mockBuilder.Channels[0].Received().ExchangeDeclare(
-                Arg.Is(interfaceTypeName),
-                Arg.Is("topic"),
-                Arg.Is(true),
-                Arg.Is(false),
-                Arg.Any<IDictionary<string, object>>()
-            );
-        }
-
-        [Fact]
-        public void Should_publish_to_correct_exchange()
-        {
-            mockBuilder.Channels[1].Received().BasicPublish(
-                    Arg.Is(interfaceTypeName),
-                    Arg.Is(""),
-                    Arg.Is(false),
-                    Arg.Is<IBasicProperties>(x => x.Type == implementationTypeName),
-                    Arg.Is<ReadOnlyMemory<byte>>(
-                        x => x.ToArray().SequenceEqual(
-                            Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
-                        )
-                    )
-                );
-        }
+        mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
     }
 
-    public interface IMyMessageInterface
+    public void Dispose()
     {
-        string Text { get; set; }
+        mockBuilder.Dispose();
     }
 
-    public class MyImplementation : IMyMessageInterface
+    [Fact]
+    public void Should_name_exchange_after_interface()
     {
-        public string Text { get; set; }
-        public string NotInInterface { get; set; }
+        mockBuilder.Channels[0].Received().ExchangeDeclare(
+            Arg.Is(interfaceTypeName),
+            Arg.Is("topic"),
+            Arg.Is(true),
+            Arg.Is(false),
+            Arg.Any<IDictionary<string, object>>()
+        );
     }
+
+    [Fact]
+    public void Should_publish_to_correct_exchange()
+    {
+        mockBuilder.Channels[1].Received().BasicPublish(
+            Arg.Is(interfaceTypeName),
+            Arg.Is(""),
+            Arg.Is(false),
+            Arg.Is<IBasicProperties>(x => x.Type == implementationTypeName),
+            Arg.Is<ReadOnlyMemory<byte>>(
+                x => x.ToArray().SequenceEqual(
+                    Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
+                )
+            )
+        );
+    }
+}
+
+public interface IMyMessageInterface
+{
+    string Text { get; set; }
+}
+
+public class MyImplementation : IMyMessageInterface
+{
+    public string Text { get; set; }
+    public string NotInInterface { get; set; }
 }
 
 // ReSharper restore InconsistentNaming

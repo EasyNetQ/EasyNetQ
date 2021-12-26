@@ -1,62 +1,61 @@
 using System;
 using System.Collections.Generic;
 
-namespace EasyNetQ.Sprache
+namespace EasyNetQ.Sprache;
+
+internal class Input
 {
-    internal class Input
+    private readonly string _source;
+
+    internal IDictionary<object, object> Memos = new Dictionary<object, object>();
+
+    public Input(string source)
+        : this(source, 0)
     {
-        private readonly string _source;
+    }
 
-        internal IDictionary<object, object> Memos = new Dictionary<object, object>();
+    internal Input(string source, int position, int line = 1, int column = 1)
+    {
+        Source = source;
 
-        public Input(string source)
-            : this(source, 0)
-        {
-        }
+        _source = source;
+        Position = position;
+        Line = line;
+        Column = column;
+    }
 
-        internal Input(string source, int position, int line = 1, int column = 1)
-        {
-            Source = source;
+    public string Source { get; set; }
 
-            _source = source;
-            Position = position;
-            Line = line;
-            Column = column;
-        }
+    public char Current => _source[Position];
 
-        public string Source { get; set; }
+    public bool AtEnd => Position == _source.Length;
 
-        public char Current => _source[Position];
+    public int Position { get; private set; }
 
-        public bool AtEnd => Position == _source.Length;
+    public int Line { get; private set; }
 
-        public int Position { get; private set; }
+    public int Column { get; private set; }
 
-        public int Line { get; private set; }
+    public Input Advance()
+    {
+        if (AtEnd)
+            throw new InvalidOperationException("The input is already at the end of the source.");
 
-        public int Column { get; private set; }
+        return new Input(_source, Position + 1, Current == '\n' ? Line + 1 : Line, Current == '\n' ? 1 : Column + 1);
+    }
 
-        public Input Advance()
-        {
-            if (AtEnd)
-                throw new InvalidOperationException("The input is already at the end of the source.");
+    public override string ToString()
+    {
+        return string.Format("Line {0}, Column {1}", Line, Column);
+    }
 
-            return new Input(_source, Position + 1, Current == '\n' ? Line + 1 : Line, Current == '\n' ? 1 : Column + 1);
-        }
+    public override bool Equals(object obj)
+    {
+        return obj is Input i && i._source == _source && i.Position == Position;
+    }
 
-        public override string ToString()
-        {
-            return string.Format("Line {0}, Column {1}", Line, Column);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Input i && i._source == _source && i.Position == Position;
-        }
-
-        public override int GetHashCode()
-        {
-            return _source.GetHashCode() ^ Position.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return _source.GetHashCode() ^ Position.GetHashCode();
     }
 }

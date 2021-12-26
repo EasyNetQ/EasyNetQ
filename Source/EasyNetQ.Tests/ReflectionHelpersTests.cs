@@ -3,45 +3,44 @@ using System.Linq;
 using Xunit;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class ReflectionHelpersTests
 {
-    public class ReflectionHelpersTests
+    [Fact]
+    public void ShouldGetAttributes()
     {
-        [Fact]
-        public void ShouldGetAttributes()
-        {
-            Assert.True(typeof(TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
-            Assert.True(typeof(TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
-        }
-
-        [Fact]
-        public void ShouldGetAttribute()
-        {
-            Assert.NotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
-            Assert.NotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
-        }
+        Assert.True(typeof(TestAttributedClass).GetAttributes<OneTestAttribute>().Any());
+        Assert.True(typeof(TestAttributedClass).GetAttributes<AnotherTestAttribute>().Any());
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public class OneTestAttribute : Attribute
+    [Fact]
+    public void ShouldGetAttribute()
     {
-        public int Value
-        {
-            get { return 1; }
-        }
+        Assert.NotNull(typeof(TestAttributedClass).GetAttribute<OneTestAttribute>());
+        Assert.NotNull(typeof(TestAttributedClass).GetAttribute<AnotherTestAttribute>());
     }
+}
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public class AnotherTestAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class)]
+public class OneTestAttribute : Attribute
+{
+    public int Value
     {
-        public int Value
-        {
-            get { return 1; }
-        }
+        get { return 1; }
     }
+}
 
-    [OneTest, AnotherTest]
-    public class TestAttributedClass
+[AttributeUsage(AttributeTargets.Class)]
+public class AnotherTestAttribute : Attribute
+{
+    public int Value
     {
+        get { return 1; }
     }
+}
+
+[OneTest, AnotherTest]
+public class TestAttributedClass
+{
 }

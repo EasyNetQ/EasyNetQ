@@ -5,60 +5,59 @@ using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.MultipleExchange
+namespace EasyNetQ.MultipleExchange;
+
+/// <inheritdoc />
+public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy
 {
-    /// <inheritdoc />
-    public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy
+    private readonly IAdvancedBus advancedBus;
+    private readonly IConventions conventions;
+    private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
+
+    public MultipleExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
-        private readonly IAdvancedBus advancedBus;
-        private readonly IConventions conventions;
-        private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
+        Preconditions.CheckNotNull(conventions, nameof(conventions));
+        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
 
-        public MultipleExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
+        this.conventions = conventions;
+        this.advancedBus = advancedBus;
+
+        declaredExchanges = new AsyncCache<ExchangeKey, Exchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
+    }
+
+    /// <inheritdoc />
+    public async Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
+    {
+        var sourceExchangeName = conventions.ExchangeNamingConvention(messageType);
+        var sourceExchange = await DeclareExchangeAsync(sourceExchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
+        var interfaces = messageType.GetInterfaces();
+
+        foreach (var @interface in interfaces)
         {
-            Preconditions.CheckNotNull(conventions, nameof(conventions));
-            Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-
-            this.conventions = conventions;
-            this.advancedBus = advancedBus;
-
-            declaredExchanges = new AsyncCache<ExchangeKey, Exchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
+            var destinationExchangeName = conventions.ExchangeNamingConvention(@interface);
+            var destinationExchange = await DeclareExchangeAsync(destinationExchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
+            await advancedBus.BindAsync(sourceExchange, destinationExchange, "#", cancellationToken).ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
-        public async Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
+        return sourceExchange;
+    }
+
+    /// <inheritdoc />
+    public Task<Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
+    {
+        return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
+    }
+
+    private readonly struct ExchangeKey
+    {
+        public ExchangeKey(string name, string type)
         {
-            var sourceExchangeName = conventions.ExchangeNamingConvention(messageType);
-            var sourceExchange = await DeclareExchangeAsync(sourceExchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
-            var interfaces = messageType.GetInterfaces();
-
-            foreach (var @interface in interfaces)
-            {
-                var destinationExchangeName = conventions.ExchangeNamingConvention(@interface);
-                var destinationExchange = await DeclareExchangeAsync(destinationExchangeName, exchangeType, cancellationToken).ConfigureAwait(false);
-                await advancedBus.BindAsync(sourceExchange, destinationExchange, "#", cancellationToken).ConfigureAwait(false);
-            }
-
-            return sourceExchange;
+            Name = name;
+            Type = type;
         }
 
-        /// <inheritdoc />
-        public Task<Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
-        {
-            return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
-        }
+        public string Name { get; }
 
-        private readonly struct ExchangeKey
-        {
-            public ExchangeKey(string name, string type)
-            {
-                Name = name;
-                Type = type;
-            }
-
-            public string Name { get; }
-
-            public string Type { get; }
-        }
+        public string Type { get; }
     }
 }

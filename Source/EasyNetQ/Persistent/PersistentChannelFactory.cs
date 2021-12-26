@@ -1,26 +1,25 @@
-namespace EasyNetQ.Persistent
+namespace EasyNetQ.Persistent;
+
+/// <inheritdoc />
+public class PersistentChannelFactory : IPersistentChannelFactory
 {
-    /// <inheritdoc />
-    public class PersistentChannelFactory : IPersistentChannelFactory
+    private readonly IEventBus eventBus;
+
+    /// <summary>
+    ///    Creates PersistentChannelFactory
+    /// </summary>
+    public PersistentChannelFactory(IEventBus eventBus)
     {
-        private readonly IEventBus eventBus;
+        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
-        /// <summary>
-        ///    Creates PersistentChannelFactory
-        /// </summary>
-        public PersistentChannelFactory(IEventBus eventBus)
-        {
-            Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+        this.eventBus = eventBus;
+    }
 
-            this.eventBus = eventBus;
-        }
-
-        /// <inheritdoc />
-        public IPersistentChannel CreatePersistentChannel(
-            IPersistentConnection connection, PersistentChannelOptions options
-        )
-        {
-            return new PersistentChannel(options, connection, eventBus);
-        }
+    /// <inheritdoc />
+    public IPersistentChannel CreatePersistentChannel(
+        IPersistentConnection connection, PersistentChannelOptions options
+    )
+    {
+        return new PersistentChannel(options, connection, eventBus);
     }
 }

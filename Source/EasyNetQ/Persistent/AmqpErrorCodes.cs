@@ -1,12 +1,11 @@
-namespace EasyNetQ.Persistent
+namespace EasyNetQ.Persistent;
+
+internal static class AmqpErrorCodes
 {
-    internal static class AmqpErrorCodes
-    {
-        public const ushort ConnectionClosed = 320;
-        public const ushort AccessRefused = 403;
-        public const ushort NotFound = 404;
-        public const ushort ResourceLocked = 405;
-        public const ushort PreconditionFailed = 406;
-        public const ushort InternalErrors = 541;
-    }
+    public const ushort ConnectionClosed = 320;
+    public const ushort AccessRefused = 403;
+    public const ushort NotFound = 404;
+    public const ushort ResourceLocked = 405;
+    public const ushort PreconditionFailed = 406;
+    public const ushort InternalErrors = 541;
 }

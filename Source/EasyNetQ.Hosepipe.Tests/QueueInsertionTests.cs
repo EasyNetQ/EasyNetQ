@@ -3,38 +3,37 @@
 using EasyNetQ.Consumer;
 using Xunit;
 
-namespace EasyNetQ.Hosepipe.Tests
+namespace EasyNetQ.Hosepipe.Tests;
+
+public class QueueInsertionTests
 {
-    public class QueueInsertionTests
+    private readonly IQueueInsertion queueInsertion;
+
+    public QueueInsertionTests()
     {
-        private readonly IQueueInsertion queueInsertion;
+        queueInsertion = new QueueInsertion(new DefaultErrorMessageSerializer());
+    }
 
-        public QueueInsertionTests()
+    /// <summary>
+    /// Create a RabbitMQ queue 'Hosepipe_test_queue' before attempting this test.
+    /// </summary>
+    [Fact]
+    [Traits.Explicit("Needs a RabbitMQ server on localhost")]
+    public void Should_be_able_to_inset_messages_onto_a_queue()
+    {
+        var messages = new[]
         {
-            queueInsertion = new QueueInsertion(new DefaultErrorMessageSerializer());
-        }
+            new HosepipeMessage("{\"Text\":\"I am message one\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo()),
+            new HosepipeMessage("{\"Text\":\"I am message two\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo())
+        };
 
-        /// <summary>
-        /// Create a RabbitMQ queue 'Hosepipe_test_queue' before attempting this test.
-        /// </summary>
-        [Fact]
-        [Traits.Explicit("Needs a RabbitMQ server on localhost")]
-        public void Should_be_able_to_inset_messages_onto_a_queue()
+        var parameters = new QueueParameters
         {
-            var messages = new[]
-            {
-                new HosepipeMessage("{\"Text\":\"I am message one\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo()),
-                new HosepipeMessage("{\"Text\":\"I am message two\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo())
-            };
+            HostName = "localhost",
+            QueueName = "Hosepipe_test_queue"
+        };
 
-            var parameters = new QueueParameters
-            {
-                HostName = "localhost",
-                QueueName = "Hosepipe_test_queue"
-            };
-
-            queueInsertion.PublishMessagesToQueue(messages, parameters);
-        }
+        queueInsertion.PublishMessagesToQueue(messages, parameters);
     }
 }
 

@@ -4,33 +4,32 @@ using System.Threading.Tasks;
 using EasyNetQ.Topology;
 using Xunit;
 
-namespace EasyNetQ.IntegrationTests.Advanced
+namespace EasyNetQ.IntegrationTests.Advanced;
+
+[Collection("RabbitMQ")]
+public class When_connected_event_raised : IDisposable
 {
-    [Collection("RabbitMQ")]
-    public class When_connected_event_raised : IDisposable
+    public When_connected_event_raised(RabbitMQFixture rmqFixture)
     {
-        public When_connected_event_raised(RabbitMQFixture rmqFixture)
-        {
-            bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
-        }
+        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+    }
 
-        public void Dispose() => bus.Dispose();
+    public void Dispose() => bus.Dispose();
 
-        private readonly IBus bus;
+    private readonly IBus bus;
 
-        [Fact]
-        public async Task Test()
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+    [Fact]
+    public async Task Test()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            var mre = new ManualResetEventSlim(false);
-            bus.Advanced.Connected += (_, _) => mre.Set();
+        var mre = new ManualResetEventSlim(false);
+        bus.Advanced.Connected += (_, _) => mre.Set();
 
-            await bus.Advanced.ExchangeDeclareAsync(
-                Guid.NewGuid().ToString("N"), c => c.WithType(ExchangeType.Topic), cts.Token
-            );
+        await bus.Advanced.ExchangeDeclareAsync(
+            Guid.NewGuid().ToString("N"), c => c.WithType(ExchangeType.Topic), cts.Token
+        );
 
-            mre.Wait(cts.Token);
-        }
+        mre.Wait(cts.Token);
     }
 }

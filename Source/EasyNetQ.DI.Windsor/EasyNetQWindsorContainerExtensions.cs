@@ -5,50 +5,49 @@ using EasyNetQ.DI;
 using EasyNetQ.DI.Windsor;
 
 // ReSharper disable once CheckNamespace
-namespace Castle.Windsor
+namespace Castle.Windsor;
+
+public static class EasyNetQWindsorContainerExtensions
 {
-    public static class EasyNetQWindsorContainerExtensions
+    public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
     {
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        if (container == null)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
-            var serviceRegister = new WindsorAdapter(container);
-            RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
-            return container;
+            throw new ArgumentNullException(nameof(container));
         }
 
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
-        {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
+        var serviceRegister = new WindsorAdapter(container);
+        RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
+        return container;
+    }
 
-            return container.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
+    public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
+    {
+        if (container == null)
+        {
+            throw new ArgumentNullException(nameof(container));
         }
 
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString, Action<IServiceRegister> registerServices)
-        {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
+        return container.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
+    }
 
-            return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
+    public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString, Action<IServiceRegister> registerServices)
+    {
+        if (container == null)
+        {
+            throw new ArgumentNullException(nameof(container));
         }
 
-        public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString)
-        {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
+        return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
+    }
 
-            return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
+    public static IWindsorContainer RegisterEasyNetQ(this IWindsorContainer container, string connectionString)
+    {
+        if (container == null)
+        {
+            throw new ArgumentNullException(nameof(container));
         }
+
+        return container.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
     }
 }

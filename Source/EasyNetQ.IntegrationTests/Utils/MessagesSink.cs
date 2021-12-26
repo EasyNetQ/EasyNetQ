@@ -4,58 +4,57 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EasyNetQ.IntegrationTests.Utils
+namespace EasyNetQ.IntegrationTests.Utils;
+
+public class MessagesSink
 {
-    public class MessagesSink
+    private readonly TaskCompletionSource<object> allMessagedReceived = new();
+    private readonly object locker = new();
+    private readonly int maxCount;
+    private readonly List<Message> receivedMessages = new();
+
+    public MessagesSink(int maxCount)
     {
-        private readonly TaskCompletionSource<object> allMessagedReceived = new();
-        private readonly object locker = new();
-        private readonly int maxCount;
-        private readonly List<Message> receivedMessages = new();
+        this.maxCount = maxCount;
+        if (maxCount == 0)
+            allMessagedReceived.TrySetResult(null);
+    }
 
-        public MessagesSink(int maxCount)
-        {
-            this.maxCount = maxCount;
-            if (maxCount == 0)
-                allMessagedReceived.TrySetResult(null);
-        }
-
-        public IReadOnlyList<Message> ReceivedMessages
-        {
-            get
-            {
-                lock (locker)
-                {
-                    return receivedMessages.ToList();
-                }
-            }
-        }
-
-        public async Task WaitAllReceivedAsync(CancellationToken cancellationToken = default)
-        {
-            await using (
-                cancellationToken.Register(
-                    x => ((TaskCompletionSource<object>)x)?.TrySetCanceled(),
-                    allMessagedReceived,
-                    false
-                )
-            )
-            {
-                await allMessagedReceived.Task;
-            }
-        }
-
-        public void Receive(Message message)
+    public IReadOnlyList<Message> ReceivedMessages
+    {
+        get
         {
             lock (locker)
             {
-                if (receivedMessages.Count >= maxCount)
-                    throw new InvalidOperationException();
-
-                receivedMessages.Add(message);
-                if (receivedMessages.Count == maxCount)
-                    allMessagedReceived.TrySetResult(null);
+                return receivedMessages.ToList();
             }
+        }
+    }
+
+    public async Task WaitAllReceivedAsync(CancellationToken cancellationToken = default)
+    {
+        await using (
+            cancellationToken.Register(
+                x => ((TaskCompletionSource<object>)x)?.TrySetCanceled(),
+                allMessagedReceived,
+                false
+            )
+        )
+        {
+            await allMessagedReceived.Task;
+        }
+    }
+
+    public void Receive(Message message)
+    {
+        lock (locker)
+        {
+            if (receivedMessages.Count >= maxCount)
+                throw new InvalidOperationException();
+
+            receivedMessages.Add(message);
+            if (receivedMessages.Count == maxCount)
+                allMessagedReceived.TrySetResult(null);
         }
     }
 }

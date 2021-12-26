@@ -1,9 +1,8 @@
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer;
+
+public interface IHandlerCollectionFactory
 {
-    public interface IHandlerCollectionFactory
-    {
-        IHandlerCollection CreateHandlerCollection(in Queue queue);
-    }
+    IHandlerCollection CreateHandlerCollection(in Queue queue);
 }

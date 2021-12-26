@@ -8,107 +8,106 @@ using FluentAssertions;
 using NSubstitute;
 using Xunit;
 
-namespace EasyNetQ.Tests.AutoSubscriberTests
+namespace EasyNetQ.Tests.AutoSubscriberTests;
+
+public class When_autosubscribing_async : IDisposable
 {
-    public class When_autosubscribing_async : IDisposable
+    private readonly MockBuilder mockBuilder;
+
+    private const string expectedQueueName1 =
+        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageA, EasyNetQ.Tests_my_app:9a0467719db423b16b7e5c35d25b877c";
+
+    private const string expectedQueueName2 =
+        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageB, EasyNetQ.Tests_MyExplicitId";
+
+    private const string expectedQueueName3 =
+        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageC, EasyNetQ.Tests_my_app:63691066ce7a3fb38d685ce30873d12e";
+
+    public When_autosubscribing_async()
     {
-        private readonly MockBuilder mockBuilder;
+        //mockBuilder = new MockBuilder();
+        mockBuilder = new MockBuilder();
 
-        private const string expectedQueueName1 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageA, EasyNetQ.Tests_my_app:9a0467719db423b16b7e5c35d25b877c";
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
+        autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
+    }
 
-        private const string expectedQueueName2 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageB, EasyNetQ.Tests_MyExplicitId";
+    public void Dispose()
+    {
+        mockBuilder.Dispose();
+    }
 
-        private const string expectedQueueName3 =
-            "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageC, EasyNetQ.Tests_my_app:63691066ce7a3fb38d685ce30873d12e";
+    [Fact]
+    public void Should_have_declared_the_queues()
+    {
+        void VerifyQueueDeclared(string queueName) =>
+            mockBuilder.Channels[1].Received().QueueDeclare(
+                Arg.Is(queueName),
+                Arg.Is(true),
+                Arg.Is(false),
+                Arg.Is(false),
+                Arg.Is((IDictionary<string, object>)null)
+            );
 
-        public When_autosubscribing_async()
+        VerifyQueueDeclared(expectedQueueName1);
+        VerifyQueueDeclared(expectedQueueName2);
+        VerifyQueueDeclared(expectedQueueName3);
+    }
+
+    [Fact]
+    public void Should_have_bound_to_queues()
+    {
+        void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
+            mockBuilder.Channels[1].Received().QueueBind(
+                Arg.Is(queueName),
+                Arg.Any<string>(),
+                Arg.Is(topicName),
+                Arg.Is((IDictionary<string, object>)null)
+            );
+
+        ConsumerStarted(1, expectedQueueName1, "#");
+        ConsumerStarted(2, expectedQueueName2, "#");
+        ConsumerStarted(3, expectedQueueName3, "Important");
+    }
+
+    [Fact]
+    public void Should_have_started_consuming_from_the_correct_queues()
+    {
+        mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).Should().BeTrue();
+        mockBuilder.ConsumerQueueNames.Contains(expectedQueueName2).Should().BeTrue();
+        mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).Should().BeTrue();
+    }
+
+    //Discovered by reflection over test assembly, do not remove.
+    private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
+    {
+        public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
         {
-            //mockBuilder = new MockBuilder();
-            mockBuilder = new MockBuilder();
-
-            var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
-            autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
+            throw new NotImplementedException();
         }
 
-        public void Dispose()
+        [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
+        public Task ConsumeAsync(MessageB message, CancellationToken cancellationToken)
         {
-            mockBuilder.Dispose();
+            throw new NotImplementedException();
         }
 
-        [Fact]
-        public void Should_have_declared_the_queues()
+        [ForTopic("Important")]
+        public Task ConsumeAsync(MessageC message, CancellationToken cancellationToken)
         {
-            void VerifyQueueDeclared(string queueName) =>
-                mockBuilder.Channels[1].Received().QueueDeclare(
-                    Arg.Is(queueName),
-                    Arg.Is(true),
-                    Arg.Is(false),
-                    Arg.Is(false),
-                    Arg.Is((IDictionary<string, object>)null)
-                );
-
-            VerifyQueueDeclared(expectedQueueName1);
-            VerifyQueueDeclared(expectedQueueName2);
-            VerifyQueueDeclared(expectedQueueName3);
+            throw new NotImplementedException();
         }
+    }
 
-        [Fact]
-        public void Should_have_bound_to_queues()
-        {
-            void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
-                mockBuilder.Channels[1].Received().QueueBind(
-                    Arg.Is(queueName),
-                    Arg.Any<string>(),
-                    Arg.Is(topicName),
-                    Arg.Is((IDictionary<string, object>)null)
-                );
+    private class MessageA
+    {
+    }
 
-            ConsumerStarted(1, expectedQueueName1, "#");
-            ConsumerStarted(2, expectedQueueName2, "#");
-            ConsumerStarted(3, expectedQueueName3, "Important");
-        }
+    private class MessageB
+    {
+    }
 
-        [Fact]
-        public void Should_have_started_consuming_from_the_correct_queues()
-        {
-            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName1).Should().BeTrue();
-            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName2).Should().BeTrue();
-            mockBuilder.ConsumerQueueNames.Contains(expectedQueueName3).Should().BeTrue();
-        }
-
-        //Discovered by reflection over test assembly, do not remove.
-        private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
-        {
-            public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            [AutoSubscriberConsumer(SubscriptionId = "MyExplicitId")]
-            public Task ConsumeAsync(MessageB message, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            [ForTopic("Important")]
-            public Task ConsumeAsync(MessageC message, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class MessageA
-        {
-        }
-
-        private class MessageB
-        {
-        }
-
-        private class MessageC
-        {
-        }
+    private class MessageC
+    {
     }
 }
