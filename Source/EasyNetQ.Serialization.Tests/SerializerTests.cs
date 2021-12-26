@@ -42,7 +42,7 @@ public class SerializerTests
             //ContentType = "content type",
             CorrelationId = "correlation id",
             DeliveryMode = 4,
-            Expiration = "expiration",
+            Expiration = "1",
             MessageId = "message id",
             Priority = 1,
             ReplyTo = "abc",
