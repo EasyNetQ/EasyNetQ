@@ -76,7 +76,7 @@ namespace EasyNetQ.DI
 
             public TService Resolve<TService>() where TService : class
             {
-                return (TService) serviceFactory.GetInstance(typeof(TService));
+                return (TService)serviceFactory.GetInstance(typeof(TService));
             }
 
             public IServiceResolverScope CreateScope()
