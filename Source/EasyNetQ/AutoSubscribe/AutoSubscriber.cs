@@ -8,242 +8,241 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EasyNetQ.AutoSubscribe
+namespace EasyNetQ.AutoSubscribe;
+
+/// <summary>
+/// Lets you scan assemblies for implementations of <see cref="IConsume{T}"/> so that
+/// these will get registered as subscribers in the bus.
+/// </summary>
+public class AutoSubscriber
 {
+    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+
+    protected readonly IBus Bus;
+
     /// <summary>
-    /// Lets you scan assemblies for implementations of <see cref="IConsume{T}"/> so that
-    /// these will get registered as subscribers in the bus.
+    /// Used when generating the unique SubscriptionId checksum.
     /// </summary>
-    public class AutoSubscriber
+    public string SubscriptionIdPrefix { get; }
+
+    /// <summary>
+    /// Used when no topic is set.
+    /// By default topic uses broadcast sign
+    /// </summary>
+    public static string DefaultTopicName { get; set; } = "#";
+
+    /// <summary>
+    /// Responsible for consuming a message with the relevant message consumer.
+    /// </summary>
+    public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; }
+
+    /// <summary>
+    /// Responsible for generating SubscriptionIds, when you use
+    /// <see cref="IConsume{T}"/>, since it does not let you specify
+    /// specific SubscriptionIds.
+    /// Message type and SubscriptionId is the key; which if two
+    /// equal keys exists, you will get round robin consumption of
+    /// messages.
+    /// </summary>
+    public Func<AutoSubscriberConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
+
+    /// <summary>
+    /// Responsible for setting subscription configuration for all
+    /// auto subscribed consumers <see cref="IConsume{T}"/>.
+    /// the values may be overriden for particular consumer
+    /// methods by using an <see cref="SubscriptionConfigurationAttribute"/>.
+    /// </summary>
+    public Action<ISubscriptionConfiguration> ConfigureSubscriptionConfiguration { protected get; set; }
+
+    public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
     {
-        private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
-        private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+        Preconditions.CheckNotNull(bus, nameof(bus));
+        Preconditions.CheckNotBlank(subscriptionIdPrefix, "subscriptionIdPrefix", "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
 
-        protected readonly IBus Bus;
+        Bus = bus;
+        SubscriptionIdPrefix = subscriptionIdPrefix;
+        AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
+        GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
+        ConfigureSubscriptionConfiguration = _ => { };
+    }
 
-        /// <summary>
-        /// Used when generating the unique SubscriptionId checksum.
-        /// </summary>
-        public string SubscriptionIdPrefix { get; }
+    /// <summary>
+    /// Registers all async consumers in passed assembly. The actual Subscriber instances is
+    /// created using <seealso cref="AutoSubscriberMessageDispatcher"/>. The SubscriptionId per consumer
+    /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
+    /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
+    /// </summary>
+    /// <param name="consumerTypes">The types to register as consumers.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    public virtual async Task<IDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
+    {
+        var subscriptions = new List<IDisposable>();
 
-        /// <summary>
-        /// Used when no topic is set.
-        /// By default topic uses broadcast sign
-        /// </summary>
-        public static string DefaultTopicName { get; set; } = "#";
-
-        /// <summary>
-        /// Responsible for consuming a message with the relevant message consumer.
-        /// </summary>
-        public IAutoSubscriberMessageDispatcher AutoSubscriberMessageDispatcher { get; set; }
-
-        /// <summary>
-        /// Responsible for generating SubscriptionIds, when you use
-        /// <see cref="IConsume{T}"/>, since it does not let you specify
-        /// specific SubscriptionIds.
-        /// Message type and SubscriptionId is the key; which if two
-        /// equal keys exists, you will get round robin consumption of
-        /// messages.
-        /// </summary>
-        public Func<AutoSubscriberConsumerInfo, string> GenerateSubscriptionId { protected get; set; }
-
-        /// <summary>
-        /// Responsible for setting subscription configuration for all
-        /// auto subscribed consumers <see cref="IConsume{T}"/>.
-        /// the values may be overriden for particular consumer
-        /// methods by using an <see cref="SubscriptionConfigurationAttribute"/>.
-        /// </summary>
-        public Action<ISubscriptionConfiguration> ConfigureSubscriptionConfiguration { protected get; set; }
-
-        public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
+        foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
         {
-            Preconditions.CheckNotNull(bus, nameof(bus));
-            Preconditions.CheckNotBlank(subscriptionIdPrefix, "subscriptionIdPrefix", "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
+            var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
+                .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
+                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
-            Bus = bus;
-            SubscriptionIdPrefix = subscriptionIdPrefix;
-            AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
-            GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
-            ConfigureSubscriptionConfiguration = _ => { };
+            subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
 
-        /// <summary>
-        /// Registers all async consumers in passed assembly. The actual Subscriber instances is
-        /// created using <seealso cref="AutoSubscriberMessageDispatcher"/>. The SubscriptionId per consumer
-        /// method is determined by <seealso cref="GenerateSubscriptionId"/> or if the method
-        /// is marked with <see cref="AutoSubscriberConsumerAttribute"/> with a custom SubscriptionId.
-        /// </summary>
-        /// <param name="consumerTypes">The types to register as consumers.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        public virtual async Task<IDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
+        foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
         {
-            var subscriptions = new List<IDisposable>();
+            var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
+                .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
+                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
 
-            foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
-            {
-                var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
-                    .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                    .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
-
-                subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
-            }
-
-            foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
-            {
-                var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
-                    .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                    .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
-
-                subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
-            }
-
-            subscriptions.Reverse();
-            return new AutoSubscribeDisposable(subscriptions);
+            subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
 
-        private sealed class AutoSubscribeDisposable : IDisposable
+        subscriptions.Reverse();
+        return new AutoSubscribeDisposable(subscriptions);
+    }
+
+    private sealed class AutoSubscribeDisposable : IDisposable
+    {
+        private readonly List<IDisposable> subscriptions;
+
+        public AutoSubscribeDisposable(List<IDisposable> subscriptions)
         {
-            private readonly List<IDisposable> subscriptions;
+            this.subscriptions = subscriptions;
+        }
 
-            public AutoSubscribeDisposable(List<IDisposable> subscriptions)
+        public void Dispose()
+        {
+            foreach (var subscription in subscriptions)
             {
-                this.subscriptions = subscriptions;
-            }
-
-            public void Dispose()
-            {
-                foreach (var subscription in subscriptions)
-                {
-                    subscription.Dispose();
-                }
+                subscription.Dispose();
             }
         }
+    }
 
-        protected virtual string DefaultSubscriptionIdGenerator(AutoSubscriberConsumerInfo c)
+    protected virtual string DefaultSubscriptionIdGenerator(AutoSubscriberConsumerInfo c)
+    {
+        var r = new StringBuilder();
+        var unique = string.Concat(SubscriptionIdPrefix, ":", c.ConcreteType.FullName, ":", c.MessageType.FullName);
+
+        using var md5 = MD5.Create();
+        var buff = md5.ComputeHash(Encoding.UTF8.GetBytes(unique));
+        foreach (var b in buff)
+            r.Append(b.ToString("x2"));
+
+        return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
+    }
+
+    private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+        where TMessage : class
+        where TConsumerAsync : class, IConsumeAsync<TMessage>
+    {
+        var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
+
+        return Bus.PubSub.SubscribeAsync<TMessage>(
+            subscriptionId,
+            (m, c) => AutoSubscriberMessageDispatcher.DispatchAsync<TMessage, TConsumerAsync>(m, c),
+            configureSubscriptionAction,
+            cancellationToken
+        );
+    }
+
+    private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+        where TMessage : class
+        where TConsumer : class, IConsume<TMessage>
+    {
+        var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
+
+        var asyncDispatcher = TaskHelpers.FromAction<TMessage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMessage, TConsumer>(m, c));
+
+        return Bus.PubSub.SubscribeAsync(
+            subscriptionId,
+            asyncDispatcher,
+            configureSubscriptionAction,
+            cancellationToken
+        );
+    }
+
+    private Action<ISubscriptionConfiguration> GenerateConfigurationAction(AutoSubscriberConsumerInfo subscriptionInfo)
+    {
+        return sc =>
         {
-            var r = new StringBuilder();
-            var unique = string.Concat(SubscriptionIdPrefix, ":", c.ConcreteType.FullName, ":", c.MessageType.FullName);
+            ConfigureSubscriptionConfiguration(sc);
+            TopicAttributeInfo(subscriptionInfo)(sc);
+            AutoSubscriberConsumerInfo(subscriptionInfo)(sc);
+        };
+    }
 
-            using var md5 = MD5.Create();
-            var buff = md5.ComputeHash(Encoding.UTF8.GetBytes(unique));
-            foreach (var b in buff)
-                r.Append(b.ToString("x2"));
+    private static Action<ISubscriptionConfiguration> TopicAttributeInfo(AutoSubscriberConsumerInfo subscriptionInfo)
+    {
+        var topics = GetTopAttributeValues(subscriptionInfo);
 
-            return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
-        }
+        return topics.Length != 0 ? GenerateConfigurationFromTopics(topics) : configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
+    }
 
-        private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
-            where TMessage : class
-            where TConsumerAsync : class, IConsumeAsync<TMessage>
+    private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(string[] topics)
+    {
+        return configuration =>
         {
-            var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-            var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
-            var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
-
-            return Bus.PubSub.SubscribeAsync<TMessage>(
-                subscriptionId,
-                (m, c) => AutoSubscriberMessageDispatcher.DispatchAsync<TMessage, TConsumerAsync>(m, c),
-                configureSubscriptionAction,
-                cancellationToken
-            );
-        }
-
-        private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
-            where TMessage : class
-            where TConsumer : class, IConsume<TMessage>
-        {
-            var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-            var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
-            var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
-
-            var asyncDispatcher = TaskHelpers.FromAction<TMessage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMessage, TConsumer>(m, c));
-
-            return Bus.PubSub.SubscribeAsync(
-                subscriptionId,
-                asyncDispatcher,
-                configureSubscriptionAction,
-                cancellationToken
-            );
-        }
-
-        private Action<ISubscriptionConfiguration> GenerateConfigurationAction(AutoSubscriberConsumerInfo subscriptionInfo)
-        {
-            return sc =>
-                {
-                    ConfigureSubscriptionConfiguration(sc);
-                    TopicAttributeInfo(subscriptionInfo)(sc);
-                    AutoSubscriberConsumerInfo(subscriptionInfo)(sc);
-                };
-        }
-
-        private static Action<ISubscriptionConfiguration> TopicAttributeInfo(AutoSubscriberConsumerInfo subscriptionInfo)
-        {
-            var topics = GetTopAttributeValues(subscriptionInfo);
-
-            return topics.Length != 0 ? GenerateConfigurationFromTopics(topics) : configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
-        }
-
-        private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(string[] topics)
-        {
-            return configuration =>
-                {
-                    foreach (var topic in topics)
-                    {
-                        configuration.WithTopic(topic);
-                    }
-                };
-        }
-
-        private static string[] GetTopAttributeValues(AutoSubscriberConsumerInfo subscriptionInfo)
-        {
-            var consumeMethod = subscriptionInfo.ConsumeMethod;
-            return consumeMethod.GetCustomAttributes(typeof(ForTopicAttribute), true)
-                             .OfType<ForTopicAttribute>()
-                             .Select(a => a.Topic)
-                             .ToArray();
-        }
-
-        private static Action<ISubscriptionConfiguration> AutoSubscriberConsumerInfo(AutoSubscriberConsumerInfo subscriptionInfo)
-        {
-            var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
-            if (configSettings == null)
+            foreach (var topic in topics)
             {
-                return _ => { };
+                configuration.WithTopic(topic);
             }
-            return configuration =>
-                {
-                    if (configSettings.PrefetchCount > 0)
-                        configuration.WithPrefetchCount(configSettings.PrefetchCount);
+        };
+    }
 
-                    if (configSettings.Expires > 0)
-                        configuration.WithExpires(configSettings.Expires);
+    private static string[] GetTopAttributeValues(AutoSubscriberConsumerInfo subscriptionInfo)
+    {
+        var consumeMethod = subscriptionInfo.ConsumeMethod;
+        return consumeMethod.GetCustomAttributes(typeof(ForTopicAttribute), true)
+            .OfType<ForTopicAttribute>()
+            .Select(a => a.Topic)
+            .ToArray();
+    }
 
-                    configuration
-                        .WithAutoDelete(configSettings.AutoDelete)
-                        .WithPriority(configSettings.Priority);
-                };
-        }
-
-        private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    private static Action<ISubscriptionConfiguration> AutoSubscriberConsumerInfo(AutoSubscriberConsumerInfo subscriptionInfo)
+    {
+        var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
+        if (configSettings == null)
         {
-            var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
-            return customAttributes
-                             .OfType<SubscriptionConfigurationAttribute>()
-                             .FirstOrDefault();
+            return _ => { };
         }
-
-        protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+        return configuration =>
         {
-            return consumerInfo.ConsumeMethod
-                .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)
-                .SingleOrDefault() as AutoSubscriberConsumerAttribute;
-        }
+            if (configSettings.PrefetchCount > 0)
+                configuration.WithPrefetchCount(configSettings.PrefetchCount);
 
-        protected virtual IEnumerable<AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(IEnumerable<Type> types, Type interfaceType)
-        {
-            return types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract)
-                        .SelectMany(t => t.GetInterfaces().Where(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == interfaceType && !i.GetGenericArguments()[0].IsGenericParameter)
-                        .Select(i => new AutoSubscriberConsumerInfo(t, i, i.GetGenericArguments()[0])));
-        }
+            if (configSettings.Expires > 0)
+                configuration.WithExpires(configSettings.Expires);
+
+            configuration
+                .WithAutoDelete(configSettings.AutoDelete)
+                .WithPriority(configSettings.Priority);
+        };
+    }
+
+    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    {
+        var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
+        return customAttributes
+            .OfType<SubscriptionConfigurationAttribute>()
+            .FirstOrDefault();
+    }
+
+    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+    {
+        return consumerInfo.ConsumeMethod
+            .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)
+            .SingleOrDefault() as AutoSubscriberConsumerAttribute;
+    }
+
+    protected virtual IEnumerable<AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(IEnumerable<Type> types, Type interfaceType)
+    {
+        return types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract)
+            .SelectMany(t => t.GetInterfaces().Where(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == interfaceType && !i.GetGenericArguments()[0].IsGenericParameter)
+                .Select(i => new AutoSubscriberConsumerInfo(t, i, i.GetGenericArguments()[0])));
     }
 }

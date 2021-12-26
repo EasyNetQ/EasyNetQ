@@ -5,95 +5,94 @@ using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The
 using FluentAssertions;
 using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class LegacyTypeNameSerializerTests
 {
-    public class LegacyTypeNameSerializerTests
+    private readonly ITypeNameSerializer typeNameSerializer;
+
+    public LegacyTypeNameSerializerTests()
     {
-        private readonly ITypeNameSerializer typeNameSerializer;
+        typeNameSerializer = new LegacyTypeNameSerializer();
+    }
 
-        public LegacyTypeNameSerializerTests()
-        {
-            typeNameSerializer = new LegacyTypeNameSerializer();
-        }
+    [Fact]
+    public void Should_serialize_hashset_of_string_type()
+    {
+        var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
+        typeName.Should().Be("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
+    }
 
-        [Fact]
-        public void Should_serialize_hashset_of_string_type()
-        {
-            var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
-            typeName.Should().Be("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
-        }
+    [Fact]
+    public void Should_serialize_string_type()
+    {
+        var typeName = typeNameSerializer.Serialize(typeof(string));
+        typeName.Should().Be("System.String:System.Private.CoreLib");
+    }
 
-        [Fact]
-        public void Should_serialize_string_type()
-        {
-            var typeName = typeNameSerializer.Serialize(typeof(string));
-            typeName.Should().Be("System.String:System.Private.CoreLib");
-        }
+    [Fact]
+    public void Should_serialize_some_random_class_type()
+    {
+        var typeName = typeNameSerializer.Serialize(typeof(SomeRandomClass));
+        typeName.Should().Be("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
+    }
 
-        [Fact]
-        public void Should_serialize_some_random_class_type()
-        {
-            var typeName = typeNameSerializer.Serialize(typeof(SomeRandomClass));
-            typeName.Should().Be("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
-        }
+    [Fact]
+    public void Should_deserialize_net45_string_type_name()
+    {
+        var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
+        type.Should().Be(typeof(string));
+    }
 
-        [Fact]
-        public void Should_deserialize_net45_string_type_name()
-        {
-            var type = typeNameSerializer.DeSerialize("System.String:mscorlib");
-            type.Should().Be(typeof(string));
-        }
+    [Fact]
+    public void Should_deserialize_netcore_string_type_name()
+    {
+        var type = typeNameSerializer.DeSerialize("System.String:System.Private.CoreLib");
+        type.Should().Be(typeof(string));
+    }
 
-        [Fact]
-        public void Should_deserialize_netcore_string_type_name()
-        {
-            var type = typeNameSerializer.DeSerialize("System.String:System.Private.CoreLib");
-            type.Should().Be(typeof(string));
-        }
+    [Fact]
+    public void Should_deserialize_hashset_of_string_type()
+    {
+        var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
+        type.Should().Be(typeof(HashSet<string>));
+    }
 
-        [Fact]
-        public void Should_deserialize_hashset_of_string_type()
-        {
-            var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
-            type.Should().Be(typeof(HashSet<string>));
-        }
+    [Fact]
+    public void Should_deserialize_some_random_class_type_name()
+    {
+        var type = typeNameSerializer.DeSerialize("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
+        type.Should().Be(typeof(SomeRandomClass));
+    }
 
-        [Fact]
-        public void Should_deserialize_some_random_class_type_name()
+    [Fact]
+    public void Should_throw_exception_when_type_name_is_not_recognised()
+    {
+        Assert.Throws<EasyNetQException>(() =>
         {
-            var type = typeNameSerializer.DeSerialize("EasyNetQ.Tests.SomeRandomClass:EasyNetQ.Tests");
-            type.Should().Be(typeof(SomeRandomClass));
-        }
+            typeNameSerializer.DeSerialize("EasyNetQ.TypeNameSerializer.None:EasyNetQ");
+        });
+    }
 
-        [Fact]
-        public void Should_throw_exception_when_type_name_is_not_recognised()
+    [Fact]
+    public void Should_throw_if_type_name_is_too_long()
+    {
+        Assert.Throws<EasyNetQException>(() =>
         {
-            Assert.Throws<EasyNetQException>(() =>
-            {
-                typeNameSerializer.DeSerialize("EasyNetQ.TypeNameSerializer.None:EasyNetQ");
-            });
-        }
-
-        [Fact]
-        public void Should_throw_if_type_name_is_too_long()
-        {
-            Assert.Throws<EasyNetQException>(() =>
-            {
-                typeNameSerializer.Serialize(
+            typeNameSerializer.Serialize(
                 typeof(
                     MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes
-                    ));
-            });
-        }
+                ));
+        });
+    }
 
-        [Fact]
-        public void Should_throw_exception_if_type_name_is_null()
+    [Fact]
+    public void Should_throw_exception_if_type_name_is_null()
+    {
+        Assert.Throws<ArgumentException>(() =>
         {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                typeNameSerializer.DeSerialize(null);
-            });
-        }
+            typeNameSerializer.DeSerialize(null);
+        });
     }
 }
 // ReSharper restore InconsistentNaming

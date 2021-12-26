@@ -1,12 +1,11 @@
 using System;
 
-namespace EasyNetQ.Sprache
+namespace EasyNetQ.Sprache;
+
+internal class ParseException : Exception
 {
-    internal class ParseException : Exception
+    public ParseException(string message)
+        : base(message)
     {
-        public ParseException(string message)
-            : base(message)
-        {
-        }
     }
 }

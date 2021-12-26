@@ -8,55 +8,54 @@ using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using RabbitMQ.Client;
 
-namespace EasyNetQ.ChannelDispatcher
+namespace EasyNetQ.ChannelDispatcher;
+
+/// <summary>
+///     Invokes client commands using single channel
+/// </summary>
+public sealed class SingleChannelDispatcher : IChannelDispatcher
 {
+    private readonly ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel> channelPerOptions;
+    private readonly Func<ChannelDispatchOptions, IPersistentChannel> createChannelFactory;
+
     /// <summary>
-    ///     Invokes client commands using single channel
+    /// Creates a dispatcher
     /// </summary>
-    public sealed class SingleChannelDispatcher : IChannelDispatcher
+    public SingleChannelDispatcher(IProducerConnection producerConnection, IConsumerConnection consumerConnection, IPersistentChannelFactory channelFactory)
     {
-        private readonly ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel> channelPerOptions;
-        private readonly Func<ChannelDispatchOptions, IPersistentChannel> createChannelFactory;
+        Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
+        Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
+        Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
 
-        /// <summary>
-        /// Creates a dispatcher
-        /// </summary>
-        public SingleChannelDispatcher(IProducerConnection producerConnection, IConsumerConnection consumerConnection, IPersistentChannelFactory channelFactory)
+        channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
+        createChannelFactory = o =>
         {
-            Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
-            Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
-            Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
-
-            channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
-            createChannelFactory = o =>
+            var options = new PersistentChannelOptions(o.PublisherConfirms);
+            return o.ConnectionType switch
             {
-                var options = new PersistentChannelOptions(o.PublisherConfirms);
-                return o.ConnectionType switch
-                {
-                    PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
-                        producerConnection, options
-                    ),
-                    PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
-                        consumerConnection, options
-                    ),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
+                    producerConnection, options
+                ),
+                PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
+                    consumerConnection, options
+                ),
+                _ => throw new ArgumentOutOfRangeException()
             };
-        }
-
-        /// <inheritdoc />
-        public Task<T> InvokeAsync<T>(
-            Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken
-        )
-        {
-            Preconditions.CheckNotNull(channelAction, nameof(channelAction));
-
-            // TODO createChannelFactory could be called multiple time, fix it
-            var channel = channelPerOptions.GetOrAdd(channelOptions, createChannelFactory);
-            return channel.InvokeChannelActionAsync(channelAction, cancellationToken);
-        }
-
-        /// <inheritdoc />
-        public void Dispose() => channelPerOptions.ClearAndDispose();
+        };
     }
+
+    /// <inheritdoc />
+    public Task<T> InvokeAsync<T>(
+        Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken
+    )
+    {
+        Preconditions.CheckNotNull(channelAction, nameof(channelAction));
+
+        // TODO createChannelFactory could be called multiple time, fix it
+        var channel = channelPerOptions.GetOrAdd(channelOptions, createChannelFactory);
+        return channel.InvokeChannelActionAsync(channelAction, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public void Dispose() => channelPerOptions.ClearAndDispose();
 }

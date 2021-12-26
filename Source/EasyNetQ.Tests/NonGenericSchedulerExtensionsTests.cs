@@ -4,73 +4,72 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class NonGenericSchedulerExtensionsTests
 {
-    public class NonGenericSchedulerExtensionsTests
+    private readonly Action<IFuturePublishConfiguration> configure = _ => { };
+    private readonly TimeSpan delay = TimeSpan.FromSeconds(42);
+    private readonly IScheduler scheduler;
+
+    public NonGenericSchedulerExtensionsTests()
     {
-        private readonly Action<IFuturePublishConfiguration> configure = _ => { };
-        private readonly TimeSpan delay = TimeSpan.FromSeconds(42);
-        private readonly IScheduler scheduler;
+        scheduler = Substitute.For<IScheduler>();
+    }
 
-        public NonGenericSchedulerExtensionsTests()
-        {
-            scheduler = Substitute.For<IScheduler>();
-        }
-
-        [Fact]
-        public async Task Should_be_able_to_future_publish_struct()
-        {
-            var message = DateTime.UtcNow;
-            var messageType = typeof(DateTime);
-            await scheduler.FuturePublishAsync(message, messageType, delay, configure);
+    [Fact]
+    public async Task Should_be_able_to_future_publish_struct()
+    {
+        var message = DateTime.UtcNow;
+        var messageType = typeof(DateTime);
+        await scheduler.FuturePublishAsync(message, messageType, delay, configure);
 
 #pragma warning disable 4014
-            scheduler.Received()
-                .FuturePublishAsync(
-                    Arg.Is(message),
-                    Arg.Is(delay),
-                    Arg.Is(configure),
-                    Arg.Any<CancellationToken>()
-                );
+        scheduler.Received()
+            .FuturePublishAsync(
+                Arg.Is(message),
+                Arg.Is(delay),
+                Arg.Is(configure),
+                Arg.Any<CancellationToken>()
+            );
 #pragma warning restore 4014
-        }
+    }
 
-        [Fact]
-        public async Task Should_be_able_to_future_publish()
-        {
-            var message = new Dog();
-            var messageType = typeof(Dog);
+    [Fact]
+    public async Task Should_be_able_to_future_publish()
+    {
+        var message = new Dog();
+        var messageType = typeof(Dog);
 
-            await scheduler.FuturePublishAsync(message, messageType, delay, configure);
+        await scheduler.FuturePublishAsync(message, messageType, delay, configure);
 
 #pragma warning disable 4014
-            scheduler.Received()
-                .FuturePublishAsync(
-                    Arg.Is(message),
-                    Arg.Is(delay),
-                    Arg.Is(configure),
-                    Arg.Any<CancellationToken>()
-                );
+        scheduler.Received()
+            .FuturePublishAsync(
+                Arg.Is(message),
+                Arg.Is(delay),
+                Arg.Is(configure),
+                Arg.Any<CancellationToken>()
+            );
 #pragma warning restore 4014
-        }
+    }
 
-        [Fact]
-        public async Task Should_be_able_to_future_publish_polymorphic()
-        {
-            var message = (IAnimal)new Dog();
-            var messageType = typeof(IAnimal);
+    [Fact]
+    public async Task Should_be_able_to_future_publish_polymorphic()
+    {
+        var message = (IAnimal)new Dog();
+        var messageType = typeof(IAnimal);
 
-            await scheduler.FuturePublishAsync(message, messageType, delay, configure);
+        await scheduler.FuturePublishAsync(message, messageType, delay, configure);
 
 #pragma warning disable 4014
-            scheduler.Received()
-                .FuturePublishAsync(
-                    Arg.Is(message),
-                    Arg.Is(delay),
-                    Arg.Is(configure),
-                    Arg.Any<CancellationToken>()
-                );
+        scheduler.Received()
+            .FuturePublishAsync(
+                Arg.Is(message),
+                Arg.Is(delay),
+                Arg.Is(configure),
+                Arg.Any<CancellationToken>()
+            );
 #pragma warning restore 4014
-        }
     }
 }

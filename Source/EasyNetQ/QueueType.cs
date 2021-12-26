@@ -1,18 +1,17 @@
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+///     Represents a queue type
+/// </summary>
+public static class QueueType
 {
     /// <summary>
-    ///     Represents a queue type
+    ///     Vanilla queue type
     /// </summary>
-    public static class QueueType
-    {
-        /// <summary>
-        ///     Vanilla queue type
-        /// </summary>
-        public const string Classic = "classic";
+    public const string Classic = "classic";
 
-        /// <summary>
-        ///     Quorum queue, which is durable, replicated FIFO queue based on the Raft
-        /// </summary>
-        public const string Quorum = "quorum";
-    }
+    /// <summary>
+    ///     Quorum queue, which is durable, replicated FIFO queue based on the Raft
+    /// </summary>
+    public const string Quorum = "quorum";
 }

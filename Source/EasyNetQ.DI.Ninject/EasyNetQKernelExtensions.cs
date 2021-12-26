@@ -5,50 +5,49 @@ using EasyNetQ.DI;
 using EasyNetQ.DI.Ninject;
 
 // ReSharper disable once CheckNamespace
-namespace Ninject
+namespace Ninject;
+
+public static class EasyNetQKernelExtensions
 {
-    public static class EasyNetQKernelExtensions
+    public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
     {
-        public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+        if (kernel == null)
         {
-            if (kernel == null)
-            {
-                throw new ArgumentNullException(nameof(kernel));
-            }
-
-            var serviceRegister = new NinjectAdapter(kernel);
-            RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
-            return kernel;
+            throw new ArgumentNullException(nameof(kernel));
         }
 
-        public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
-        {
-            if (kernel == null)
-            {
-                throw new ArgumentNullException(nameof(kernel));
-            }
+        var serviceRegister = new NinjectAdapter(kernel);
+        RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
+        return kernel;
+    }
 
-            return kernel.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
+    public static IKernel RegisterEasyNetQ(this IKernel kernel, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
+    {
+        if (kernel == null)
+        {
+            throw new ArgumentNullException(nameof(kernel));
         }
 
-        public static IKernel RegisterEasyNetQ(this IKernel kernel, string connectionString, Action<IServiceRegister> registerServices)
-        {
-            if (kernel == null)
-            {
-                throw new ArgumentNullException(nameof(kernel));
-            }
+        return kernel.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
+    }
 
-            return kernel.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
+    public static IKernel RegisterEasyNetQ(this IKernel kernel, string connectionString, Action<IServiceRegister> registerServices)
+    {
+        if (kernel == null)
+        {
+            throw new ArgumentNullException(nameof(kernel));
         }
 
-        public static IKernel RegisterEasyNetQ(this IKernel kernel, string connectionString)
-        {
-            if (kernel == null)
-            {
-                throw new ArgumentNullException(nameof(kernel));
-            }
+        return kernel.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
+    }
 
-            return kernel.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
+    public static IKernel RegisterEasyNetQ(this IKernel kernel, string connectionString)
+    {
+        if (kernel == null)
+        {
+            throw new ArgumentNullException(nameof(kernel));
         }
+
+        return kernel.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
     }
 }

@@ -1,8 +1,7 @@
-namespace EasyNetQ
+namespace EasyNetQ;
+
+public static class MessageDeliveryMode
 {
-    public static class MessageDeliveryMode
-    {
-        public const byte NonPersistent = 1;
-        public const byte Persistent = 2;
-    }
+    public const byte NonPersistent = 1;
+    public const byte Persistent = 2;
 }

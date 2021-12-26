@@ -1,36 +1,35 @@
 using System;
 using EasyNetQ.Internals;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+public interface IMessageDeliveryModeStrategy
 {
-    public interface IMessageDeliveryModeStrategy
+    byte GetDeliveryMode(Type messageType);
+}
+
+public class MessageDeliveryModeStrategy : IMessageDeliveryModeStrategy
+{
+    private readonly ConnectionConfiguration connectionConfiguration;
+
+    public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration)
     {
-        byte GetDeliveryMode(Type messageType);
+        Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
+        this.connectionConfiguration = connectionConfiguration;
     }
 
-    public class MessageDeliveryModeStrategy : IMessageDeliveryModeStrategy
+    /// <inheritdoc />
+    public byte GetDeliveryMode(Type messageType)
     {
-        private readonly ConnectionConfiguration connectionConfiguration;
+        Preconditions.CheckNotNull(messageType, nameof(messageType));
+        var deliveryModeAttribute = messageType.GetAttribute<DeliveryModeAttribute>();
+        if (deliveryModeAttribute == null)
+            return GetDeliveryModeInternal(connectionConfiguration.PersistentMessages);
+        return GetDeliveryModeInternal(deliveryModeAttribute.IsPersistent);
+    }
 
-        public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration)
-        {
-            Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
-            this.connectionConfiguration = connectionConfiguration;
-        }
-
-        /// <inheritdoc />
-        public byte GetDeliveryMode(Type messageType)
-        {
-            Preconditions.CheckNotNull(messageType, nameof(messageType));
-            var deliveryModeAttribute = messageType.GetAttribute<DeliveryModeAttribute>();
-            if (deliveryModeAttribute == null)
-                return GetDeliveryModeInternal(connectionConfiguration.PersistentMessages);
-            return GetDeliveryModeInternal(deliveryModeAttribute.IsPersistent);
-        }
-
-        private static byte GetDeliveryModeInternal(bool isPersistent)
-        {
-            return isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent;
-        }
+    private static byte GetDeliveryModeInternal(bool isPersistent)
+    {
+        return isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent;
     }
 }

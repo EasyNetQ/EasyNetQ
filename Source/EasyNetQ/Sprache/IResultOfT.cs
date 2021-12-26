@@ -1,6 +1,5 @@
-namespace EasyNetQ.Sprache
+namespace EasyNetQ.Sprache;
+
+internal interface IResult<out T>
 {
-    internal interface IResult<out T>
-    {
-    }
 }

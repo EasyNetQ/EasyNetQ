@@ -7,69 +7,69 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace EasyNetQ.Hosepipe.Tests
+namespace EasyNetQ.Hosepipe.Tests;
+
+public class ErrorMessageRepublishSpike
 {
-    public class ErrorMessageRepublishSpike
+    private readonly ITestOutputHelper testOutputHelper;
+    private readonly ISerializer serializer = new JsonSerializer();
+
+    public ErrorMessageRepublishSpike(ITestOutputHelper testOutputHelper)
     {
-        private readonly ITestOutputHelper testOutputHelper;
-        private readonly ISerializer serializer = new JsonSerializer();
+        this.testOutputHelper = testOutputHelper;
+    }
 
-        public ErrorMessageRepublishSpike(ITestOutputHelper testOutputHelper)
+    [Fact]
+    public void Should_deserialize_error_message_correctly()
+    {
+        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
+
+        error.RoutingKey.ShouldEqual("originalRoutingKey");
+        error.Message.ShouldEqual("{ Text:\"Hello World\"}");
+    }
+
+    [Fact]
+    public void Should_fail_to_deserialize_some_other_random_message()
+    {
+        const string randomMessage = "{\"Text\":\"Hello World\"}";
+        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(randomMessage));
+        error.Message.ShouldBeNull();
+    }
+
+    [Fact]
+    [Traits.Explicit("Requires a localhost instance of RabbitMQ to run")]
+    public void Should_be_able_to_republish_message()
+    {
+        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
+
+        var connectionFactory = new ConnectionFactory
         {
-            this.testOutputHelper = testOutputHelper;
-        }
+            HostName = "localhost",
+            UserName = "guest",
+            Password = "guest"
+        };
 
-        [Fact]
-        public void Should_deserialize_error_message_correctly()
+        using var connection = connectionFactory.CreateConnection();
+        using var model = connection.CreateModel();
+        try
         {
-            var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
+            model.ExchangeDeclarePassive(error.Exchange);
 
-            error.RoutingKey.ShouldEqual("originalRoutingKey");
-            error.Message.ShouldEqual("{ Text:\"Hello World\"}");
+            var properties = model.CreateBasicProperties();
+            error.BasicProperties.CopyTo(properties);
+
+            var body = Encoding.UTF8.GetBytes(error.Message);
+
+            model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
         }
-
-        [Fact]
-        public void Should_fail_to_deserialize_some_other_random_message()
+        catch (OperationInterruptedException)
         {
-            const string randomMessage = "{\"Text\":\"Hello World\"}";
-            var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(randomMessage));
-            error.Message.ShouldBeNull();
+            testOutputHelper.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'", error.Exchange, connectionFactory.HostName, connectionFactory.VirtualHost);
         }
+    }
 
-        [Fact]
-        [Traits.Explicit("Requires a localhost instance of RabbitMQ to run")]
-        public void Should_be_able_to_republish_message()
-        {
-            var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
-
-            var connectionFactory = new ConnectionFactory
-            {
-                HostName = "localhost",
-                UserName = "guest",
-                Password = "guest"
-            };
-
-            using var connection = connectionFactory.CreateConnection();
-            using var model = connection.CreateModel();
-            try
-            {
-                model.ExchangeDeclarePassive(error.Exchange);
-
-                var properties = model.CreateBasicProperties();
-                error.BasicProperties.CopyTo(properties);
-
-                var body = Encoding.UTF8.GetBytes(error.Message);
-
-                model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
-            }
-            catch (OperationInterruptedException)
-            {
-                testOutputHelper.WriteLine("The exchange, '{0}', described in the error message does not exist on '{1}', '{2}'", error.Exchange, connectionFactory.HostName, connectionFactory.VirtualHost);
-            }
-        }
-
-        private const string errorMessage =
-@"{
+    private const string errorMessage =
+        @"{
     ""RoutingKey"":""originalRoutingKey"",
     ""Exchange"":""orginalExchange"",
     ""Exception"":""System.Exception: I just threw!"",
@@ -104,7 +104,6 @@ namespace EasyNetQ.Hosepipe.Tests
         ""UserId"":null,
         ""AppId"":""456"",
         ""ClusterId"":null}}";
-    }
 }
 
 // ReSharper restore InconsistentNaming

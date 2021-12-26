@@ -1,16 +1,15 @@
 using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class ConnectionConfigurationExtensionsTests
 {
-    public class ConnectionConfigurationExtensionsTests
+    [Fact]
+    public void Should_fail_if_host_is_not_present()
     {
-        [Fact]
-        public void Should_fail_if_host_is_not_present()
+        Assert.Throws<EasyNetQException>(() =>
         {
-            Assert.Throws<EasyNetQException>(() =>
-            {
-                new ConnectionConfiguration().SetDefaultProperties();
-            });
-        }
+            new ConnectionConfiguration().SetDefaultProperties();
+        });
     }
 }

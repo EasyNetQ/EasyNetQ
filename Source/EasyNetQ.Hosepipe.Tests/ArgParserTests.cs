@@ -2,88 +2,87 @@
 
 using Xunit;
 
-namespace EasyNetQ.Hosepipe.Tests
+namespace EasyNetQ.Hosepipe.Tests;
+
+public class ArgParserTests
 {
-    public class ArgParserTests
+    private readonly ArgParser argParser;
+
+    public ArgParserTests()
     {
-        private readonly ArgParser argParser;
+        argParser = new ArgParser();
+    }
 
-        public ArgParserTests()
+    [Fact]
+    public void Should_be_able_to_retrieve_args_by_position()
+    {
+        var args = new[]
         {
-            argParser = new ArgParser();
-        }
+            "one",
+            "two",
+            "three"
+        };
 
-        [Fact]
-        public void Should_be_able_to_retrieve_args_by_position()
+        var arguments = argParser.Parse(args);
+
+        var one = "";
+        var two = "";
+        var three = "";
+        var threeFailed = false;
+
+        arguments.At(0, a => one = a.Value).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.At(1, a => two = a.Value).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.At(2, a => three = a.Value).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.At(3, _ => Assert.True(false, "Should not be an arg at 3")).FailWith(() => threeFailed = true);
+
+        one.ShouldEqual(args[0]);
+        two.ShouldEqual(args[1]);
+        three.ShouldEqual(args[2]);
+        threeFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_be_able_to_retrieve_args_by_key()
+    {
+        var args = new string[]
         {
-            var args = new[]
-            {
-                "one",
-                "two",
-                "three"
-            };
+            "x:one",
+            "y:two",
+            "z:three",
+            "f"
+        };
 
-            var arguments = argParser.Parse(args);
+        var arguments = argParser.Parse(args);
+        var fNotFound = false;
 
-            var one = "";
-            var two = "";
-            var three = "";
-            var threeFailed = false;
+        arguments.WithKey("z", a => a.Value.ShouldEqual("three")).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.WithKey("x", a => a.Value.ShouldEqual("one")).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.WithKey("y", a => a.Value.ShouldEqual("two")).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.WithKey("f", _ => Assert.True(false)).FailWith(() => fNotFound = true);
 
-            arguments.At(0, a => one = a.Value).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.At(1, a => two = a.Value).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.At(2, a => three = a.Value).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.At(3, _ => Assert.True(false, "Should not be an arg at 3")).FailWith(() => threeFailed = true);
+        fNotFound.ShouldBeTrue();
+    }
 
-            one.ShouldEqual(args[0]);
-            two.ShouldEqual(args[1]);
-            three.ShouldEqual(args[2]);
-            threeFailed.ShouldBeTrue();
-        }
-
-        [Fact]
-        public void Should_be_able_to_retrieve_args_by_key()
+    [Fact]
+    public void Should_be_able_to_retrieve_args_by_position_and_key()
+    {
+        var args = new string[]
         {
-            var args = new string[]
-            {
-                "x:one",
-                "y:two",
-                "z:three",
-                "f"
-            };
+            "command",
+            "abc"
+        };
 
-            var arguments = argParser.Parse(args);
-            var fNotFound = false;
+        var arguments = argParser.Parse(args);
+        var commandDetected = false;
+        var abcDetected = false;
 
-            arguments.WithKey("z", a => a.Value.ShouldEqual("three")).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.WithKey("x", a => a.Value.ShouldEqual("one")).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.WithKey("y", a => a.Value.ShouldEqual("two")).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.WithKey("f", _ => Assert.True(false)).FailWith(() => fNotFound = true);
+        arguments.At(0, "command", () => commandDetected = true).FailWith(() => Assert.True(false, "should succeed"));
+        arguments.At(0, "notCommand", () => Assert.True(false, "should not succeed"));
+        arguments.At(1, "command", () => Assert.True(false, "should not succeed"));
+        arguments.At(1, "abc", () => abcDetected = true).FailWith(() => Assert.True(false, "should succeed"));
 
-            fNotFound.ShouldBeTrue();
-        }
-
-        [Fact]
-        public void Should_be_able_to_retrieve_args_by_position_and_key()
-        {
-            var args = new string[]
-            {
-                "command",
-                "abc"
-            };
-
-            var arguments = argParser.Parse(args);
-            var commandDetected = false;
-            var abcDetected = false;
-
-            arguments.At(0, "command", () => commandDetected = true).FailWith(() => Assert.True(false, "should succeed"));
-            arguments.At(0, "notCommand", () => Assert.True(false, "should not succeed"));
-            arguments.At(1, "command", () => Assert.True(false, "should not succeed"));
-            arguments.At(1, "abc", () => abcDetected = true).FailWith(() => Assert.True(false, "should succeed"));
-
-            commandDetected.ShouldBeTrue();
-            abcDetected.ShouldBeTrue();
-        }
+        commandDetected.ShouldBeTrue();
+        abcDetected.ShouldBeTrue();
     }
 }
 

@@ -1,46 +1,45 @@
 using Xunit;
 
-namespace EasyNetQ.Tests.FluentConfiguration
+namespace EasyNetQ.Tests.FluentConfiguration;
+
+public class SubscriptionConfigurationTests
 {
-    public class SubscriptionConfigurationTests
+    [Fact]
+    public void Defaults_are_correct()
     {
-        [Fact]
-        public void Defaults_are_correct()
-        {
-            var configuration = new SubscriptionConfiguration(99);
-            Assert.Equal(0, configuration.Topics.Count);
-            Assert.False(configuration.AutoDelete);
-            Assert.Equal(0, configuration.Priority);
-            Assert.Equal(99, configuration.PrefetchCount);
-            Assert.False(configuration.IsExclusive);
-            Assert.True(configuration.Durable);
-            Assert.Null(configuration.QueueName);
-            Assert.Null(configuration.MaxLength);
-            Assert.Null(configuration.MaxLengthBytes);
-            Assert.Null(configuration.QueueMode);
-            Assert.Null(configuration.QueueType);
-        }
+        var configuration = new SubscriptionConfiguration(99);
+        Assert.Equal(0, configuration.Topics.Count);
+        Assert.False(configuration.AutoDelete);
+        Assert.Equal(0, configuration.Priority);
+        Assert.Equal(99, configuration.PrefetchCount);
+        Assert.False(configuration.IsExclusive);
+        Assert.True(configuration.Durable);
+        Assert.Null(configuration.QueueName);
+        Assert.Null(configuration.MaxLength);
+        Assert.Null(configuration.MaxLengthBytes);
+        Assert.Null(configuration.QueueMode);
+        Assert.Null(configuration.QueueType);
+    }
 
-        [Fact]
-        public void WithQueueType_default_is_classic()
-        {
-            var configuration = new SubscriptionConfiguration(99);
+    [Fact]
+    public void WithQueueType_default_is_classic()
+    {
+        var configuration = new SubscriptionConfiguration(99);
 
-            configuration.WithQueueType();
+        configuration.WithQueueType();
 
-            Assert.Equal(QueueType.Classic, configuration.QueueType);
-        }
+        Assert.Equal(QueueType.Classic, configuration.QueueType);
+    }
 
-        [Theory]
-        [InlineData(QueueType.Classic)]
-        [InlineData(QueueType.Quorum)]
-        public void WithQueueType_sets_correct_queueType(string queueType)
-        {
-            var configuration = new SubscriptionConfiguration(99);
+    [Theory]
+    [InlineData(QueueType.Classic)]
+    [InlineData(QueueType.Quorum)]
+    public void WithQueueType_sets_correct_queueType(string queueType)
+    {
+        var configuration = new SubscriptionConfiguration(99);
 
-            configuration.WithQueueType(queueType);
+        configuration.WithQueueType(queueType);
 
-            Assert.Equal(queueType, configuration.QueueType);
-        }
+        Assert.Equal(queueType, configuration.QueueType);
     }
 }

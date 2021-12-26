@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 
-namespace EasyNetQ.Hosepipe
+namespace EasyNetQ.Hosepipe;
+
+public interface IErrorRetry
 {
-    public interface IErrorRetry
-    {
-        void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters);
-    }
+    void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters);
 }

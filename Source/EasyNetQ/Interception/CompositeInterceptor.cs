@@ -1,35 +1,34 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EasyNetQ.Interception
+namespace EasyNetQ.Interception;
+
+/// <inheritdoc />
+public class CompositeInterceptor : IProduceConsumeInterceptor
 {
+    private readonly List<IProduceConsumeInterceptor> interceptors = new();
+
     /// <inheritdoc />
-    public class CompositeInterceptor : IProduceConsumeInterceptor
+    public ProducedMessage OnProduce(in ProducedMessage message)
     {
-        private readonly List<IProduceConsumeInterceptor> interceptors = new();
+        return interceptors.AsEnumerable()
+            .Aggregate(message, (x, y) => y.OnProduce(x));
+    }
 
-        /// <inheritdoc />
-        public ProducedMessage OnProduce(in ProducedMessage message)
-        {
-            return interceptors.AsEnumerable()
-                               .Aggregate(message, (x, y) => y.OnProduce(x));
-        }
+    /// <inheritdoc />
+    public ConsumedMessage OnConsume(in ConsumedMessage message)
+    {
+        return interceptors.AsEnumerable()
+            .Reverse()
+            .Aggregate(message, (x, y) => y.OnConsume(x));
+    }
 
-        /// <inheritdoc />
-        public ConsumedMessage OnConsume(in ConsumedMessage message)
-        {
-            return interceptors.AsEnumerable()
-                               .Reverse()
-                               .Aggregate(message, (x, y) => y.OnConsume(x));
-        }
-
-        /// <summary>
-        ///     Add the interceptor to pipeline
-        /// </summary>
-        /// <param name="interceptor"></param>
-        public void Add(IProduceConsumeInterceptor interceptor)
-        {
-            interceptors.Add(interceptor);
-        }
+    /// <summary>
+    ///     Add the interceptor to pipeline
+    /// </summary>
+    /// <param name="interceptor"></param>
+    public void Add(IProduceConsumeInterceptor interceptor)
+    {
+        interceptors.Add(interceptor);
     }
 }

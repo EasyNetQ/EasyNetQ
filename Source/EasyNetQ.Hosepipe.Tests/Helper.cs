@@ -1,17 +1,16 @@
-namespace EasyNetQ.Hosepipe.Tests
+namespace EasyNetQ.Hosepipe.Tests;
+
+public static class Helper
 {
-    public static class Helper
+    public static MessageReceivedInfo CreateMessageReceivedInfo()
     {
-        public static MessageReceivedInfo CreateMessageReceivedInfo()
-        {
-            return new MessageReceivedInfo(
-                "consumer_tag",
-                0,
-                false,
-                "exchange_name",
-                "routing_key",
-                "queue_name"
-            );
-        }
+        return new MessageReceivedInfo(
+            "consumer_tag",
+            0,
+            false,
+            "exchange_name",
+            "routing_key",
+            "queue_name"
+        );
     }
 }

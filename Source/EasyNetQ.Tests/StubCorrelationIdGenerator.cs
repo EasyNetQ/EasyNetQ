@@ -1,16 +1,15 @@
-namespace EasyNetQ.Tests
-{
-    internal class StaticCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
-    {
-        private readonly string correlationId;
+namespace EasyNetQ.Tests;
 
-        public StaticCorrelationIdGenerationStrategy(string correlationId)
-        {
-            this.correlationId = correlationId;
-        }
-        public string GetCorrelationId()
-        {
-            return correlationId;
-        }
+internal class StaticCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
+{
+    private readonly string correlationId;
+
+    public StaticCorrelationIdGenerationStrategy(string correlationId)
+    {
+        this.correlationId = correlationId;
+    }
+    public string GetCorrelationId()
+    {
+        return correlationId;
     }
 }
