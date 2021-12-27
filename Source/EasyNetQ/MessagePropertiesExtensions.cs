@@ -63,7 +63,10 @@ internal static class MessagePropertiesExtensions
         if (source.PriorityPresent) basicProperties.Priority = source.Priority;
         if (source.CorrelationIdPresent) basicProperties.CorrelationId = source.CorrelationId;
         if (source.ReplyToPresent) basicProperties.ReplyTo = source.ReplyTo;
-        if (source.ExpirationPresent) basicProperties.Expiration = ((int)source.Expiration.TotalMilliseconds).ToString(CultureInfo.InvariantCulture);
+        if (source.ExpirationPresent)
+            basicProperties.Expiration = source.Expiration == null
+                ? null
+                : ((int)source.Expiration.Value.TotalMilliseconds).ToString(CultureInfo.InvariantCulture);
         if (source.MessageIdPresent) basicProperties.MessageId = source.MessageId;
         if (source.TimestampPresent) basicProperties.Timestamp = new AmqpTimestamp(source.Timestamp);
         if (source.TypePresent) basicProperties.Type = source.Type;

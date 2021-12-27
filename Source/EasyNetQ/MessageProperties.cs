@@ -1,4 +1,3 @@
-using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,12 +126,12 @@ public class MessageProperties : ICloneable
         set { replyTo = CheckShortString(value, nameof(ReplyTo)); replyToPresent = true; }
     }
 
-    private TimeSpan expiration;
+    private TimeSpan? expiration;
 
     /// <summary>
     ///     Message expiration specification
     /// </summary>
-    public TimeSpan Expiration
+    public TimeSpan? Expiration
     {
         get => expiration;
         set { expiration = value; expirationPresent = true; }
