@@ -539,7 +539,7 @@ namespace EasyNetQ
         public bool CorrelationIdPresent { get; }
         public byte DeliveryMode { get; set; }
         public bool DeliveryModePresent { get; }
-        public System.TimeSpan Expiration { get; set; }
+        public System.TimeSpan? Expiration { get; set; }
         public bool ExpirationPresent { get; }
         public System.Collections.Generic.IDictionary<string, object> Headers { get; set; }
         public bool HeadersPresent { get; }
