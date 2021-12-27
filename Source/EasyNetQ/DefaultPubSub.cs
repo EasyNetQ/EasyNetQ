@@ -62,7 +62,7 @@ public class DefaultPubSub : IPubSub
         if (publishConfiguration.Priority != null)
             advancedMessageProperties.Priority = publishConfiguration.Priority.Value;
         if (publishConfiguration.Expires != null)
-            advancedMessageProperties.Expiration = publishConfiguration.Expires.ToString();
+            advancedMessageProperties.Expiration = publishConfiguration.Expires.Value;
         if (publishConfiguration.Headers?.Count > 0)
             advancedMessageProperties.Headers.UnionWith(publishConfiguration.Headers);
         advancedMessageProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType);

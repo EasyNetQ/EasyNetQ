@@ -1,4 +1,3 @@
-using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,74 +11,6 @@ namespace EasyNetQ;
 /// </summary>
 public class MessageProperties : ICloneable
 {
-    /// <summary>
-    ///     Creates empty <see cref="MessageProperties"/>
-    /// </summary>
-    public MessageProperties()
-    {
-    }
-
-    /// <summary>
-    ///     Creates <see cref="MessageProperties"/> from <see cref="IBasicProperties"/>
-    /// </summary>
-    public MessageProperties(IBasicProperties basicProperties)
-        : this()
-    {
-        CopyFrom(basicProperties);
-    }
-
-    /// <summary>
-    ///     Copies <see cref="IBasicProperties"/> to <see cref="MessageProperties"/>
-    /// </summary>
-    public void CopyFrom(IBasicProperties basicProperties)
-    {
-        Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
-
-        if (basicProperties.IsContentTypePresent()) ContentType = basicProperties.ContentType;
-        if (basicProperties.IsContentEncodingPresent()) ContentEncoding = basicProperties.ContentEncoding;
-        if (basicProperties.IsDeliveryModePresent()) DeliveryMode = basicProperties.DeliveryMode;
-        if (basicProperties.IsPriorityPresent()) Priority = basicProperties.Priority;
-        if (basicProperties.IsCorrelationIdPresent()) CorrelationId = basicProperties.CorrelationId;
-        if (basicProperties.IsReplyToPresent()) ReplyTo = basicProperties.ReplyTo;
-        if (basicProperties.IsExpirationPresent()) Expiration = basicProperties.Expiration;
-        if (basicProperties.IsMessageIdPresent()) MessageId = basicProperties.MessageId;
-        if (basicProperties.IsTimestampPresent()) Timestamp = basicProperties.Timestamp.UnixTime;
-        if (basicProperties.IsTypePresent()) Type = basicProperties.Type;
-        if (basicProperties.IsUserIdPresent()) UserId = basicProperties.UserId;
-        if (basicProperties.IsAppIdPresent()) AppId = basicProperties.AppId;
-        if (basicProperties.IsClusterIdPresent()) ClusterId = basicProperties.ClusterId;
-
-        if (basicProperties.IsHeadersPresent())
-            Headers = basicProperties.Headers?.Count > 0
-                ? new Dictionary<string, object>(basicProperties.Headers)
-                : null;
-    }
-
-    /// <summary>
-    ///     Copies <see cref="MessageProperties"/> to <see cref="IBasicProperties"/>
-    /// </summary>
-    public void CopyTo(IBasicProperties basicProperties)
-    {
-        Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
-
-        if (contentTypePresent) basicProperties.ContentType = contentType;
-        if (contentEncodingPresent) basicProperties.ContentEncoding = contentEncoding;
-        if (deliveryModePresent) basicProperties.DeliveryMode = deliveryMode;
-        if (priorityPresent) basicProperties.Priority = priority;
-        if (correlationIdPresent) basicProperties.CorrelationId = correlationId;
-        if (replyToPresent) basicProperties.ReplyTo = replyTo;
-        if (expirationPresent) basicProperties.Expiration = expiration;
-        if (messageIdPresent) basicProperties.MessageId = messageId;
-        if (timestampPresent) basicProperties.Timestamp = new AmqpTimestamp(timestamp);
-        if (typePresent) basicProperties.Type = type;
-        if (userIdPresent) basicProperties.UserId = userId;
-        if (appIdPresent) basicProperties.AppId = appId;
-        if (clusterIdPresent) basicProperties.ClusterId = clusterId;
-
-        if (headers?.Count > 0)
-            basicProperties.Headers = new Dictionary<string, object>(headers);
-    }
-
     /// <inheritdoc />
     public object Clone()
     {
@@ -195,15 +126,15 @@ public class MessageProperties : ICloneable
         set { replyTo = CheckShortString(value, nameof(ReplyTo)); replyToPresent = true; }
     }
 
-    private string expiration;
+    private TimeSpan? expiration;
 
     /// <summary>
     ///     Message expiration specification
     /// </summary>
-    public string Expiration
+    public TimeSpan? Expiration
     {
         get => expiration;
-        set { expiration = CheckShortString(value, nameof(Expiration)); expirationPresent = true; }
+        set { expiration = value; expirationPresent = true; }
     }
 
     private string messageId;

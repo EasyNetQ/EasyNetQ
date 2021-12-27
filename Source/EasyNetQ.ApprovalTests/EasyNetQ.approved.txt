@@ -375,7 +375,7 @@ namespace EasyNetQ
     }
     public interface IPublishConfiguration
     {
-        EasyNetQ.IPublishConfiguration WithExpires(int expires);
+        EasyNetQ.IPublishConfiguration WithExpires(System.TimeSpan expires);
         EasyNetQ.IPublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
         EasyNetQ.IPublishConfiguration WithPriority(byte priority);
         EasyNetQ.IPublishConfiguration WithTopic(string topic);
@@ -527,7 +527,6 @@ namespace EasyNetQ
     public class MessageProperties : System.ICloneable
     {
         public MessageProperties() { }
-        public MessageProperties(RabbitMQ.Client.IBasicProperties basicProperties) { }
         public string AppId { get; set; }
         public bool AppIdPresent { get; }
         public string ClusterId { get; set; }
@@ -540,7 +539,7 @@ namespace EasyNetQ
         public bool CorrelationIdPresent { get; }
         public byte DeliveryMode { get; set; }
         public bool DeliveryModePresent { get; }
-        public string Expiration { get; set; }
+        public System.TimeSpan? Expiration { get; set; }
         public bool ExpirationPresent { get; }
         public System.Collections.Generic.IDictionary<string, object> Headers { get; set; }
         public bool HeadersPresent { get; }
@@ -557,8 +556,6 @@ namespace EasyNetQ
         public string UserId { get; set; }
         public bool UserIdPresent { get; }
         public object Clone() { }
-        public void CopyFrom(RabbitMQ.Client.IBasicProperties basicProperties) { }
-        public void CopyTo(RabbitMQ.Client.IBasicProperties basicProperties) { }
         public override string ToString() { }
     }
     public class MessageReceivedInfo
