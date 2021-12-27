@@ -42,7 +42,7 @@ public class SerializerTests
             //ContentType = "content type",
             CorrelationId = "correlation id",
             DeliveryMode = 4,
-            Expiration = "expiration",
+            Expiration = "1",
             MessageId = "message id",
             Priority = 1,
             ReplyTo = "abc",
@@ -56,7 +56,8 @@ public class SerializerTests
             }
         };
 
-        var messageBasicProperties = new MessageProperties(originalProperties);
+        var messageBasicProperties = new MessageProperties();
+        messageBasicProperties.CopyFrom(originalProperties);
         using var serializedMessage = serializer.MessageToBytes(typeof(MessageProperties), messageBasicProperties);
         var deserializedMessageBasicProperties = (MessageProperties)serializer.BytesToMessage(
             typeof(MessageProperties), serializedMessage.Memory

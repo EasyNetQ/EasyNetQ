@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace EasyNetQ;
@@ -29,7 +30,7 @@ public interface IPublishConfiguration
     /// </summary>
     /// <param name="expires">The TTL to set in milliseconds</param>
     /// <returns>Returns a reference to itself</returns>
-    IPublishConfiguration WithExpires(int expires);
+    IPublishConfiguration WithExpires(TimeSpan expires);
 
     /// <summary>
     /// Sets headers
@@ -62,7 +63,7 @@ internal class PublishConfiguration : IPublishConfiguration
         return this;
     }
 
-    public IPublishConfiguration WithExpires(int expires)
+    public IPublishConfiguration WithExpires(TimeSpan expires)
     {
         Expires = expires;
         return this;
@@ -76,6 +77,6 @@ internal class PublishConfiguration : IPublishConfiguration
 
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
-    public int? Expires { get; private set; }
+    public TimeSpan? Expires { get; private set; }
     public IDictionary<string, object> Headers { get; private set; }
 }

@@ -1,4 +1,6 @@
 // ReSharper disable InconsistentNaming
+
+using System;
 using FluentAssertions;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,7 +68,7 @@ public class MessagePropertiesTests
         const string expectedDebugProperties =
             "ContentType=content_type, ContentEncoding=content_encoding, " +
             "Headers=[key1=value1, key2=value2], DeliveryMode=10, Priority=3, CorrelationId=NULL, " +
-            "ReplyTo=reply_to, Expiration=expiration, MessageId=message_id, Timestamp=123456, Type=type, " +
+            "ReplyTo=reply_to, Expiration=00:00:00.0010000, MessageId=message_id, Timestamp=123456, Type=type, " +
             "UserId=userid, AppId=app_id, ClusterId=cluster_id";
 
         var headers = new Dictionary<string, object>
@@ -83,7 +85,7 @@ public class MessagePropertiesTests
             ContentType = "content_type",
             //CorrelationId = "correlation_id",
             DeliveryMode = 10,
-            Expiration = "expiration",
+            Expiration = TimeSpan.FromMilliseconds(1),
             Headers = headers,
             MessageId = "message_id",
             Priority = 3,

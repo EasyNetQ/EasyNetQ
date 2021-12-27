@@ -40,7 +40,8 @@ public class QueueRetrieval : IQueueRetrieval
             var basicGetResult = channel.BasicGet(parameters.QueueName, parameters.Purge);
             if (basicGetResult == null) break; // no more messages on the queue
 
-            var properties = new MessageProperties(basicGetResult.BasicProperties);
+            var properties = new MessageProperties();
+            properties.CopyFrom(basicGetResult.BasicProperties);
             var info = new MessageReceivedInfo(
                 "hosepipe",
                 basicGetResult.DeliveryTag,
