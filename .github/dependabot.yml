@@ -22,6 +22,10 @@ updates:
     versions:
     - ">= 5.a"
     - "< 6"
+  - dependency-name: Serilog
+    versions:
+    - ">= 2.8"
+    - "< 3"
   - dependency-name: SimpleInjector
     versions:
     - ">= 5.a"
