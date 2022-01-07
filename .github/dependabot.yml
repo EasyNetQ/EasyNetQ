@@ -22,6 +22,10 @@ updates:
     versions:
     - ">= 5.a"
     - "< 7"
+  - dependency-name: Microsoft.Extensions.DependencyInjection
+    versions:
+    - ">= 5.a"
+    - "< 7"
   - dependency-name: Microsoft.Extensions.Logging.Abstractions
     versions:
     - ">= 5.a"
