@@ -83,7 +83,9 @@ public interface IInternalConsumer : IDisposable
 /// <inheritdoc />
 public class InternalConsumer : IInternalConsumer
 {
-    private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
+    private readonly Dictionary<string, AsyncBasicConsumer> startedConsumers = new();
+    private readonly HashSet<string> cancelledConsumers = new();
+
     private readonly AsyncLock mutex = new();
 
     private readonly ConsumerConfiguration configuration;
@@ -145,12 +147,13 @@ public class InternalConsumer : IInternalConsumer
         {
             logger.Warn("Model is closed with reason {reason} and will be recreated", model.CloseReason);
 
-            foreach (var consumer in consumers.Values)
+            foreach (var consumer in startedConsumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
             }
-            consumers.Clear();
+
+            startedConsumers.Clear();
             model.Dispose();
 
             try
@@ -165,8 +168,8 @@ public class InternalConsumer : IInternalConsumer
             }
         }
 
-        var activeQueues = new HashSet<Queue>();
-        var failedQueues = new HashSet<Queue>();
+        var succeed = new HashSet<Queue>();
+        var failed = new HashSet<Queue>();
 
         foreach (var kvp in configuration.PerQueueConfigurations)
         {
@@ -179,8 +182,14 @@ public class InternalConsumer : IInternalConsumer
                 continue;
             }
 
-            if (consumers.ContainsKey(queue.Name))
+            if (cancelledConsumers.Contains(queue.Name))
                 continue;
+
+            if (startedConsumers.ContainsKey(queue.Name))
+            {
+                succeed.Add(queue);
+                continue;
+            }
 
             try
             {
@@ -203,7 +212,7 @@ public class InternalConsumer : IInternalConsumer
                     perQueueConfiguration.Arguments, // arguments
                     consumer // consumer
                 );
-                consumers.Add(queue.Name, consumer);
+                startedConsumers.Add(queue.Name, consumer);
 
                 logger.InfoFormat(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
@@ -212,7 +221,7 @@ public class InternalConsumer : IInternalConsumer
                     configuration
                 );
 
-                activeQueues.Add(queue);
+                succeed.Add(queue);
             }
             catch (Exception exception)
             {
@@ -223,11 +232,11 @@ public class InternalConsumer : IInternalConsumer
                     perQueueConfiguration.ConsumerTag
                 );
 
-                failedQueues.Add(queue);
+                failed.Add(queue);
             }
         }
 
-        return new InternalConsumerStatus(activeQueues, failedQueues);
+        return new InternalConsumerStatus(succeed, failed);
     }
 
     /// <inheritdoc />
@@ -238,7 +247,7 @@ public class InternalConsumer : IInternalConsumer
 
         using var _ = mutex.Acquire();
 
-        foreach (var consumer in consumers.Values)
+        foreach (var consumer in startedConsumers.Values)
         {
             consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
             foreach (var consumerTag in consumer.ConsumerTags)
@@ -254,7 +263,7 @@ public class InternalConsumer : IInternalConsumer
             consumer.Dispose();
         }
 
-        consumers.Clear();
+        startedConsumers.Clear();
     }
 
     /// <inheritdoc />
@@ -269,7 +278,7 @@ public class InternalConsumer : IInternalConsumer
 
         using var _ = mutex.Acquire();
 
-        foreach (var consumer in consumers.Values)
+        foreach (var consumer in startedConsumers.Values)
         {
             consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
             foreach (var consumerTag in consumer.ConsumerTags)
@@ -285,7 +294,8 @@ public class InternalConsumer : IInternalConsumer
             consumer.Dispose();
         }
 
-        consumers.Clear();
+        startedConsumers.Clear();
+        cancelledConsumers.Clear();
         model?.Dispose();
     }
 
@@ -295,12 +305,13 @@ public class InternalConsumer : IInternalConsumer
         IReadOnlyCollection<Queue> active;
         using (await mutex.AcquireAsync().ConfigureAwait(false))
         {
-            if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue.Name))
+            if (sender is AsyncBasicConsumer consumer && startedConsumers.Remove(consumer.Queue.Name))
             {
+                cancelledConsumers.Add(consumer.Queue.Name);
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
                 cancelled = consumer.Queue;
-                active = consumers.Select(x => x.Value.Queue).ToList();
+                active = startedConsumers.Select(x => x.Value.Queue).ToList();
             }
             else
             {
