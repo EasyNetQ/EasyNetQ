@@ -141,6 +141,29 @@ public class InternalConsumer : IInternalConsumer
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
+        else if (model.IsClosed)
+        {
+            logger.Warn("Model is closed with reason {reason} and will be recreated", model.CloseReason);
+
+            foreach (var consumer in consumers.Values)
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                consumer.Dispose();
+            }
+            consumers.Clear();
+            model.Dispose();
+
+            try
+            {
+                model = connection.CreateModel();
+                model.BasicQos(0, configuration.PrefetchCount, false);
+            }
+            catch (Exception exception)
+            {
+                logger.Error(exception, "Failed to recreate model");
+                return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>());
+            }
+        }
 
         var activeQueues = new HashSet<Queue>();
         var failedQueues = new HashSet<Queue>();
