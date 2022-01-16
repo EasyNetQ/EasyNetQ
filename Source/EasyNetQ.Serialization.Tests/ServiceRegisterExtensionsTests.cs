@@ -12,7 +12,7 @@ public class ServiceRegisterExtensionsTests
     public void Should_register_serializer(Action<IServiceRegister> register)
     {
         var serviceRegister = new ServiceRegisterStub();
-        serviceRegister.EnableNewtonsoftJson();
+        register(serviceRegister);
         serviceRegister.AssertServiceRegistered<ISerializer>();
     }
 
