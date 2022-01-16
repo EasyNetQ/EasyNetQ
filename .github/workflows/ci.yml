@@ -66,7 +66,7 @@ jobs:
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.IntegrationTests
         dotnet test --configuration Release --no-build
-            
+
     - name: Approval Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.ApprovalTests
@@ -85,7 +85,7 @@ jobs:
       - name: Setup .NET Core ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x'
+          dotnet-version: '6.0.x'
       - name: Install dependencies
         run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
       - name: Build
