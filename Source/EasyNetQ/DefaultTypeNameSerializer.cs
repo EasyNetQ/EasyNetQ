@@ -13,11 +13,19 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     private readonly ConcurrentDictionary<Type, string> serializedTypes = new();
     private readonly ConcurrentDictionary<string, Type> deSerializedTypes = new();
 
+
+
+    public DefaultTypeNameSerializer()
+    {
+        RegisterReplacementType("System.String, System.Private.CoreLib", typeof(string));
+        RegisterReplacementType("System.Boolean, System.Private.CoreLib", typeof(bool));
+    }
+
     /// <inheritdoc />
     public string Serialize(Type type)
     {
         Preconditions.CheckNotNull(type, nameof(type));
-
+        
         return serializedTypes.GetOrAdd(type, t =>
         {
             var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
@@ -219,6 +227,10 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         }
 
         return null;
+    }
+
+    public void RegisterReplacementType(string typeName, Type type) {
+        deSerializedTypes.AddOrUpdate(typeName, type, (key, oldValue) => type);
     }
 
     private readonly struct TypeNameKey
