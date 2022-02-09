@@ -25,7 +25,6 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     public string Serialize(Type type)
     {
         Preconditions.CheckNotNull(type, nameof(type));
-        
         return serializedTypes.GetOrAdd(type, t =>
         {
             var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
