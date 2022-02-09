@@ -5,7 +5,7 @@
     <DefineConstants>$(DefineConstants);LIBLOG_PUBLIC;LIBLOG_PORTABLE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LightInject.Source" Version="6.4.0">
+    <PackageReference Include="LightInject.Source" Version="6.4.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
