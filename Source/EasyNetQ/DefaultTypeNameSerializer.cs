@@ -19,6 +19,18 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     {
         RegisterReplacementType("System.String, System.Private.CoreLib", typeof(string));
         RegisterReplacementType("System.Boolean, System.Private.CoreLib", typeof(bool));
+        RegisterReplacementType("System.Char, System.Private.CoreLib", typeof(char));
+        RegisterReplacementType("System.Single, System.Private.CoreLib", typeof(float));
+        RegisterReplacementType("System.Double, System.Private.CoreLib", typeof(double));
+        RegisterReplacementType("System.Decimal, System.Private.CoreLib", typeof(decimal));
+        RegisterReplacementType("System.SByte, System.Private.CoreLib", typeof(sbyte));
+        RegisterReplacementType("System.Byte, System.Private.CoreLib", typeof(byte));
+        RegisterReplacementType("System.Int16, System.Private.CoreLib", typeof(short));
+        RegisterReplacementType("System.UInt16, System.Private.CoreLib", typeof(ushort));
+        RegisterReplacementType("System.Int32, System.Private.CoreLib", typeof(int));
+        RegisterReplacementType("System.UInt32, System.Private.CoreLib", typeof(uint));
+        RegisterReplacementType("System.Int64, System.Private.CoreLib", typeof(long));
+        RegisterReplacementType("System.UInt64, System.Private.CoreLib", typeof(ulong));
     }
 
     /// <inheritdoc />
