@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EasyNetQ.Consumer;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Hosepipe;
@@ -37,8 +38,22 @@ public class QueueRetrieval : IQueueRetrieval
         var count = 0;
         while (count++ < parameters.NumberOfMessagesToRetrieve)
         {
-            var basicGetResult = channel.BasicGet(parameters.QueueName, parameters.Purge);
-            if (basicGetResult == null) break; // no more messages on the queue
+            BasicGetResult basicGetResult;
+            try
+            {
+                basicGetResult = channel.BasicGet(parameters.QueueName, false);
+                if (basicGetResult == null) break; // no more messages on the queue
+
+                if (parameters.Purge)
+                {
+                    channel.BasicAck(basicGetResult.DeliveryTag, false);
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                throw;
+            }
 
             var properties = new MessageProperties();
             properties.CopyFrom(basicGetResult.BasicProperties);
