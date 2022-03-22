@@ -110,6 +110,8 @@ public class DefaultSendReceive : ISendReceive
                     c.WithMaxLengthBytes(receiveConfiguration.MaxLengthBytes.Value);
                 if (!string.IsNullOrEmpty(receiveConfiguration.QueueMode))
                     c.WithQueueMode(receiveConfiguration.QueueMode);
+                if (!string.IsNullOrEmpty(receiveConfiguration.QueueType))
+                    c.WithQueueType(receiveConfiguration.QueueType);
                 if (receiveConfiguration.SingleActiveConsumer)
                     c.WithSingleActiveConsumer();
             },
