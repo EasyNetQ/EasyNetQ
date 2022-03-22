@@ -87,6 +87,13 @@ public interface IReceiveConfiguration
     IReceiveConfiguration WithQueueMode(string queueMode = QueueMode.Default);
 
     /// <summary>
+    /// Sets the queue type. Valid types are "classic" and "quorum". Works with RabbitMQ version 3.8+.
+    /// </summary>
+    /// <param name="queueType">Desired queue type.</param>
+    /// <returns>Returns a reference to itself</returns>
+    IReceiveConfiguration WithQueueType(string queueType = QueueType.Classic);
+
+    /// <summary>
     /// Configure the queue as single active consumer. Single active consumer allows to have only one consumer at a time consuming from a queue and to fail over to another registered consumer in case the active one is cancelled or dies.
     /// </summary>
     /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
@@ -106,6 +113,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public int? MaxLength { get; private set; }
     public int? MaxLengthBytes { get; private set; }
     public string QueueMode { get; private set; }
+    public string QueueType { get; private set; }
     public bool SingleActiveConsumer { get; private set; }
 
     public ReceiveConfiguration(ushort defaultPrefetchCount)
@@ -176,6 +184,12 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public IReceiveConfiguration WithQueueMode(string queueMode)
     {
         QueueMode = queueMode;
+        return this;
+    }
+
+    public IReceiveConfiguration WithQueueType(string queueType)
+    {
+        QueueType = queueType;
         return this;
     }
 
