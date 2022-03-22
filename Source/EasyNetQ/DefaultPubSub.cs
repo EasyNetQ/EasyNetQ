@@ -138,6 +138,8 @@ public class DefaultPubSub : IPubSub
                     c.WithQueueMode(subscriptionConfiguration.QueueMode);
                 if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueType))
                     c.WithQueueType(subscriptionConfiguration.QueueType);
+                if (subscriptionConfiguration.SingleActiveConsumer)
+                    c.WithSingleActiveConsumer();
             },
             cts.Token
         ).ConfigureAwait(false);
