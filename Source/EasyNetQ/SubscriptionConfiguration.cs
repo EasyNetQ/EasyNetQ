@@ -122,6 +122,13 @@ public interface ISubscriptionConfiguration
     /// <param name="alternateExchange">The alternate exchange to set</param>
     /// <returns>Returns a reference to itself</returns>
     ISubscriptionConfiguration WithAlternateExchange(string alternateExchange);
+
+    /// <summary>
+    /// Configure the queue as single active consumer. Single active consumer allows to have only one consumer at a time consuming from a queue and to fail over to another registered consumer in case the active one is cancelled or dies.
+    /// </summary>
+    /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
+    /// <returns>Returns a reference to itself</returns>
+    ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
 }
 
 internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -141,6 +148,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public string QueueType { get; private set; }
     public string ExchangeType { get; private set; } = Topology.ExchangeType.Topic;
     public string AlternateExchange { get; private set; }
+    public bool SingleActiveConsumer { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount)
     {
@@ -150,6 +158,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
+        SingleActiveConsumer = false;
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)
@@ -241,6 +250,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public ISubscriptionConfiguration WithAlternateExchange(string alternateExchange)
     {
         AlternateExchange = alternateExchange;
+        return this;
+    }
+
+    public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
+    {
+        SingleActiveConsumer = singleActiveConsumer;
         return this;
     }
 }
