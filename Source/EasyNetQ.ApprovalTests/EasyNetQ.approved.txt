@@ -417,6 +417,7 @@ namespace EasyNetQ
         EasyNetQ.IReceiveConfiguration WithPrefetchCount(ushort prefetchCount);
         EasyNetQ.IReceiveConfiguration WithPriority(int priority);
         EasyNetQ.IReceiveConfiguration WithQueueMode(string queueMode = "default");
+        EasyNetQ.IReceiveConfiguration WithQueueType(string queueType = "classic");
         EasyNetQ.IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
     }
     public interface IReceiveRegistration
@@ -486,6 +487,7 @@ namespace EasyNetQ
         EasyNetQ.ISubscriptionConfiguration WithQueueMode(string queueMode = "default");
         EasyNetQ.ISubscriptionConfiguration WithQueueName(string queueName);
         EasyNetQ.ISubscriptionConfiguration WithQueueType(string queueType = "classic");
+        EasyNetQ.ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
         EasyNetQ.ISubscriptionConfiguration WithTopic(string topic);
     }
     public interface ITypeNameSerializer

@@ -187,7 +187,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
         return this;
     }
 
-    public IReceiveConfiguration WithQueueType(string queueType)
+    public IReceiveConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
         QueueType = queueType;
         return this;
