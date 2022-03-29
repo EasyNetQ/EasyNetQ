@@ -445,18 +445,24 @@ public class RabbitAdvancedBus : IAdvancedBus
     public virtual async Task QueueDeleteAsync(
         Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default
     )
+        => await QueueDeleteAsync(queue.Name, ifUnused, ifEmpty, cancellationToken);
+
+    /// <inheritdoc />
+    public virtual async Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
     {
+        Preconditions.CheckNotNull(name, nameof(name));
+
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await channelDispatcher.InvokeAsync(
-            x => x.QueueDelete(queue.Name, ifUnused, ifEmpty),
+            x => x.QueueDelete(name, ifUnused, ifEmpty),
             ChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Deleted queue {queue}", queue.Name);
+            logger.DebugFormat("Deleted queue {queue}", name);
         }
     }
 
