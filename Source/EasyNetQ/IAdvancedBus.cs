@@ -162,6 +162,15 @@ public interface IAdvancedBus : IDisposable
     );
 
     /// <summary>
+    /// Delete a queue using queue name
+    /// </summary>
+    /// <param name="name">The name of the queue to delete</param>
+    /// <param name="ifUnused">Only delete if unused</param>
+    /// <param name="ifEmpty">Only delete if empty</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Purges a queue
     /// </summary>
     /// <param name="queue">The queue to purge</param>
