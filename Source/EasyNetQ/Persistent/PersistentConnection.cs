@@ -156,8 +156,9 @@ public class PersistentConnection : IPersistentConnection
     private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
     {
         var connection = (IConnection)sender;
-        logger.InfoFormat(
+        logger.InfoException(
             "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+            e.Cause as Exception,
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port,
