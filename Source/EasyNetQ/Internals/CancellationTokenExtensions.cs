@@ -17,14 +17,57 @@ public static class CancellationTokenExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <param name="timeout">The timeout</param>
     /// <returns>
-    ///     CancellationTokenSource associated with <paramref name="cancellationToken"/>
+    ///     ValueCancellationTokenSource associated with <paramref name="cancellationToken"/>
     ///     and with <paramref name="timeout"/>
     /// </returns>
-    public static CancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout)
+    public static ValueCancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout)
     {
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
-        if (timeout != Timeout.InfiniteTimeSpan)
-            cts.CancelAfter(timeout);
-        return cts;
+        return new ValueCancellationTokenSource(cancellationToken, timeout);
+    }
+
+    /// <summary>
+    /// Struct that holds a cancellation token.
+    /// The idea is the same as with ValueTask vs Task - not allocate when we can.
+    /// </summary>
+    public readonly struct ValueCancellationTokenSource : IDisposable
+    {
+        private readonly CancellationTokenSource _cts = null;
+        private readonly CancellationToken _token;
+
+        /// <summary>
+        /// Attaches a timeout to a cancellation token
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="timeout">The timeout.</param>
+        public ValueCancellationTokenSource(CancellationToken cancellationToken, TimeSpan timeout)
+        {
+            _token = cancellationToken;
+
+            if (timeout != Timeout.InfiniteTimeSpan)
+            {
+                if (cancellationToken == default)
+                {
+                    _cts = new CancellationTokenSource(timeout);
+                }
+                else
+                {
+                    // use 'default' as second argument just because only that overload except 'params' one is available for netstandard2.0
+                    _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
+                    _cts.CancelAfter(timeout);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets cancellation token associated with this <see cref="ValueCancellationTokenSource"/>.
+        /// </summary>
+        public CancellationToken Token => _cts == null ? _token : _cts.Token;
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (_cts != null)
+                _cts.Dispose();
+        }
     }
 }

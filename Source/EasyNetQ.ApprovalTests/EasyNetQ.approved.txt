@@ -1497,7 +1497,13 @@ namespace EasyNetQ.Internals
     }
     public static class CancellationTokenExtensions
     {
-        public static System.Threading.CancellationTokenSource WithTimeout(this System.Threading.CancellationToken cancellationToken, System.TimeSpan timeout) { }
+        public static EasyNetQ.Internals.CancellationTokenExtensions.ValueCancellationTokenSource WithTimeout(this System.Threading.CancellationToken cancellationToken, System.TimeSpan timeout) { }
+        public readonly struct ValueCancellationTokenSource : System.IDisposable
+        {
+            public ValueCancellationTokenSource(System.Threading.CancellationToken cancellationToken, System.TimeSpan timeout) { }
+            public System.Threading.CancellationToken Token { get; }
+            public void Dispose() { }
+        }
     }
     public static class ConcurrentDictionaryExtensions
     {
