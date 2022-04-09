@@ -3,7 +3,7 @@ using System;
 namespace EasyNetQ.DI;
 
 /// <inheritdoc cref="EasyNetQ.DI.IServiceRegister" />
-public class DefaultServiceContainer : IServiceRegister, IDisposable
+public class DefaultServiceContainer : IServiceRegister, ICollectionServiceRegister, IDisposable
 {
     private readonly LightInject.ServiceContainer container = new(c => c.EnablePropertyInjection = false);
 
@@ -22,6 +22,12 @@ public class DefaultServiceContainer : IServiceRegister, IDisposable
         return this;
     }
 
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+    {
+        container.Register<TService, TImplementation>(typeof(TImplementation).Name, ToLifetime(lifetime));
+        return this;
+    }
+
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
@@ -29,10 +35,22 @@ public class DefaultServiceContainer : IServiceRegister, IDisposable
         return this;
     }
 
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+    {
+        container.RegisterInstance(instance, instance.GetType().Name);
+        return this;
+    }
+
     /// <inheritdoc />
     public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
     {
         container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), ToLifetime(lifetime));
+        return this;
+    }
+
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+    {
+        container.Register(x => factory((IServiceResolver)x.GetInstance(typeof(IServiceResolver))), typeof(TService).Name + "_RegisterFunc", ToLifetime(lifetime));
         return this;
     }
 

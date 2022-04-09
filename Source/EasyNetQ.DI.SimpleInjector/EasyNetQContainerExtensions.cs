@@ -16,6 +16,16 @@ public static class EasyNetQContainerExtensions
             throw new ArgumentNullException(nameof(container));
         }
 
+        return container.RegisterEasyNetQ(connectionConfigurationFactory, (r, _) => registerServices(r));
+    }
+
+    public static Container RegisterEasyNetQ(this Container container, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
+    {
+        if (container == null)
+        {
+            throw new ArgumentNullException(nameof(container));
+        }
+
         var serviceRegister = new SimpleInjectorAdapter(container);
         RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
         return container;
@@ -32,6 +42,16 @@ public static class EasyNetQContainerExtensions
     }
 
     public static Container RegisterEasyNetQ(this Container container, string connectionString, Action<IServiceRegister> registerServices)
+    {
+        if (container == null)
+        {
+            throw new ArgumentNullException(nameof(container));
+        }
+
+        return container.RegisterEasyNetQ(connectionString, (r, _) => registerServices(r));
+    }
+
+    public static Container RegisterEasyNetQ(this Container container, string connectionString, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
     {
         if (container == null)
         {

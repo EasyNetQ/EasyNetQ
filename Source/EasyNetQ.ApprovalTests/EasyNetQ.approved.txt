@@ -840,10 +840,15 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IBus CreateBus(string connectionString) { }
         public static EasyNetQ.IBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.IBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static EasyNetQ.IBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.IBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static EasyNetQ.IBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.IBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static EasyNetQ.IBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.IBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static void RegisterBus(EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static void RegisterBus(EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
     }
     public static class ReceiveRegistrationExtensions
     {
@@ -1240,7 +1245,7 @@ namespace EasyNetQ.DI
         public DefaultConsumeScopeProvider(EasyNetQ.DI.IServiceResolver resolver) { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
     }
-    public class DefaultServiceContainer : EasyNetQ.DI.IServiceRegister, System.IDisposable
+    public class DefaultServiceContainer : EasyNetQ.DI.ICollectionServiceRegister, EasyNetQ.DI.IServiceRegister, System.IDisposable
     {
         public DefaultServiceContainer() { }
         public void Dispose() { }
@@ -1253,6 +1258,16 @@ namespace EasyNetQ.DI
             where TService :  class
             where TImplementation :  class, TService { }
         public TService Resolve<TService>() { }
+    }
+    public interface ICollectionServiceRegister
+    {
+        EasyNetQ.DI.ICollectionServiceRegister Register<TService>(TService instance)
+            where TService :  class;
+        EasyNetQ.DI.ICollectionServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class;
+        EasyNetQ.DI.ICollectionServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService;
     }
     public interface IConsumeScopeProvider
     {

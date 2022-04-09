@@ -4,7 +4,7 @@ using LightInject;
 namespace EasyNetQ.DI.LightInject;
 
 /// <inheritdoc />
-public class LightInjectAdapter : IServiceRegister
+public class LightInjectAdapter : IServiceRegister, ICollectionServiceRegister
 {
     private readonly IServiceRegistry serviceRegistry;
 
@@ -27,6 +27,12 @@ public class LightInjectAdapter : IServiceRegister
         return this;
     }
 
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+    {
+        serviceRegistry.Register<TService, TImplementation>(typeof(TImplementation).Name, ToLifetime(lifetime));
+        return this;
+    }
+
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
@@ -34,10 +40,22 @@ public class LightInjectAdapter : IServiceRegister
         return this;
     }
 
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+    {
+        serviceRegistry.RegisterInstance(instance, instance.GetType().Name);
+        return this;
+    }
+
     /// <inheritdoc />
     public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
     {
         serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), ToLifetime(lifetime));
+        return this;
+    }
+
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+    {
+        serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), typeof(TService).Name + "_RegisterFunc", ToLifetime(lifetime));
         return this;
     }
 

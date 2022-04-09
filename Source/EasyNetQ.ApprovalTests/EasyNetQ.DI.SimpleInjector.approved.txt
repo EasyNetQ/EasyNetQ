@@ -1,6 +1,6 @@
 namespace EasyNetQ.DI.SimpleInjector
 {
-    public class SimpleInjectorAdapter : EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.IServiceResolver
+    public class SimpleInjectorAdapter : EasyNetQ.DI.ICollectionServiceRegister, EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.IServiceResolver
     {
         public SimpleInjectorAdapter(SimpleInjector.Container container) { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
@@ -23,6 +23,8 @@ namespace SimpleInjector
         public static SimpleInjector.Container RegisterEasyNetQ(this SimpleInjector.Container container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static SimpleInjector.Container RegisterEasyNetQ(this SimpleInjector.Container container, string connectionString) { }
         public static SimpleInjector.Container RegisterEasyNetQ(this SimpleInjector.Container container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static SimpleInjector.Container RegisterEasyNetQ(this SimpleInjector.Container container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static SimpleInjector.Container RegisterEasyNetQ(this SimpleInjector.Container container, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static SimpleInjector.Container RegisterEasyNetQ(this SimpleInjector.Container container, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
     }
 }

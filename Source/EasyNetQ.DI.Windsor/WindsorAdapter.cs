@@ -7,7 +7,7 @@ using Castle.Windsor;
 namespace EasyNetQ.DI.Windsor;
 
 /// <inheritdoc />
-public class WindsorAdapter : IServiceRegister
+public class WindsorAdapter : IServiceRegister, ICollectionServiceRegister
 {
     private readonly IWindsorContainer container;
 
@@ -35,6 +35,16 @@ public class WindsorAdapter : IServiceRegister
         return this;
     }
 
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+    {
+        var registration = Component.For<TService>()
+                                   .ImplementedBy<TImplementation>()
+                                   .LifeStyle.Is(GetLifestyleType(lifetime))
+                                   .IsDefault();
+        container.Register(registration);
+        return this;
+    }
+
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
@@ -47,6 +57,16 @@ public class WindsorAdapter : IServiceRegister
         return this;
     }
 
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+    {
+        var registration = Component.For<TService>()
+                                    .Instance(instance)
+                                    .LifestyleSingleton()
+                                    .IsDefault();
+        container.Register(registration);
+        return this;
+    }
+
     /// <inheritdoc />
     public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
     {
@@ -55,6 +75,16 @@ public class WindsorAdapter : IServiceRegister
             .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
             .LifeStyle.Is(GetLifestyleType(lifetime))
             .IsDefault();
+        container.Register(registration);
+        return this;
+    }
+
+    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+    {
+        var registration = Component.For<TService>()
+                                   .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
+                                   .LifeStyle.Is(GetLifestyleType(lifetime))
+                                   .IsDefault();
         container.Register(registration);
         return this;
     }
