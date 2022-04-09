@@ -1,6 +1,6 @@
 namespace EasyNetQ.DI.LightInject
 {
-    public class LightInjectAdapter : EasyNetQ.DI.IServiceRegister
+    public class LightInjectAdapter : EasyNetQ.DI.ICollectionServiceRegister, EasyNetQ.DI.IServiceRegister
     {
         public LightInjectAdapter(LightInject.IServiceRegistry serviceRegistry) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
@@ -20,6 +20,8 @@ namespace LightInject
         public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, string connectionString) { }
         public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
     }
 }

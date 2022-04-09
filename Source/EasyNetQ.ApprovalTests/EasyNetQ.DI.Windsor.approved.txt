@@ -5,12 +5,14 @@ namespace Castle.Windsor
         public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, string connectionString) { }
         public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static Castle.Windsor.IWindsorContainer RegisterEasyNetQ(this Castle.Windsor.IWindsorContainer container, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
     }
 }
 namespace EasyNetQ.DI.Windsor
 {
-    public class WindsorAdapter : EasyNetQ.DI.IServiceRegister
+    public class WindsorAdapter : EasyNetQ.DI.ICollectionServiceRegister, EasyNetQ.DI.IServiceRegister
     {
         public WindsorAdapter(Castle.Windsor.IWindsorContainer container) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
