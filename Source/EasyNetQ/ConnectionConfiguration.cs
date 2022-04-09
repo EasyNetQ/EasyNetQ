@@ -79,7 +79,9 @@ public class ConnectionConfiguration
     public ushort PrefetchCount { get; set; }
 
     /// <summary>
-    ///     Client properties to be sent to the broker
+    /// Dictionary of client properties to be sent to the broker.
+    /// You can browse these properties when selecting connection in RabbitMQ Management Plugin.
+    /// All properties with <c>null</c> values will be displayed as 'undefined'.
     /// </summary>
     public IDictionary<string, object> ClientProperties { get; }
 
