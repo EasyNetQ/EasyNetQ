@@ -2,31 +2,39 @@ using EasyNetQ.DI;
 
 namespace EasyNetQ.Interception;
 
+/// <summary>
+///     Helper interface that allows to register interceptors in DI
+/// </summary>
 public interface IInterceptorRegistrator
 {
+    /// <summary>
+    /// Registers an instance of <see cref="IProduceConsumeInterceptor"/> interceptor
+    /// </summary>
     void Add(IProduceConsumeInterceptor interceptor);
+
+    /// <summary>
+    /// Registers an interceptor of the specified type <typeparamref name="TInterceptor"/>
+    /// </summary>
+    void Add<TInterceptor>() where TInterceptor : class, IProduceConsumeInterceptor;
 }
 
-public class InterceptorRegistrator : IInterceptorRegistrator
+internal sealed class InterceptorRegistrator : IInterceptorRegistrator
 {
-    private readonly CompositeInterceptor compositeInterceptor;
     private readonly IServiceRegister serviceRegister;
 
     public InterceptorRegistrator(IServiceRegister serviceRegister)
     {
         this.serviceRegister = serviceRegister;
-        compositeInterceptor = new CompositeInterceptor();
     }
 
-    public IServiceRegister Register()
+    public void Add(IProduceConsumeInterceptor interceptor)
     {
-        serviceRegister.Register<IProduceConsumeInterceptor>(compositeInterceptor);
-        return serviceRegister;
+        serviceRegister.Register(interceptor); // TODO: change to collection register
     }
 
     /// <inheritdoc />
-    public void Add(IProduceConsumeInterceptor interceptor)
+    public void Add<TInterceptor>() where TInterceptor : class, IProduceConsumeInterceptor
     {
-        compositeInterceptor.Add(interceptor);
+        serviceRegister.Register<IProduceConsumeInterceptor, TInterceptor>(); // TODO: change to collection register
     }
 }
