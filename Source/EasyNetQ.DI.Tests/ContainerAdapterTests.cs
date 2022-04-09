@@ -23,6 +23,8 @@ using System.Linq;
 
 namespace EasyNetQ.DI.Tests;
 
+#pragma warning disable xUnit1026
+
 public class ContainerAdapterTests
 {
     public delegate IServiceResolver ResolverFactory(Action<IServiceRegister, ICollectionServiceRegister> configure);
