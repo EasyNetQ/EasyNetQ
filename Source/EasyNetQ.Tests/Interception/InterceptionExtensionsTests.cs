@@ -10,14 +10,6 @@ namespace EasyNetQ.Tests.Interception;
 public partial class InterceptionExtensionsTests
 {
     [Fact]
-    public void When_using_EnableInterception_extension_method_required_services_are_registered()
-    {
-        var serviceRegister = Substitute.For<IServiceRegister>();
-        serviceRegister.EnableInterception(_ => { });
-        serviceRegister.Received().Register(Arg.Any<CompositeInterceptor>());
-    }
-
-    [Fact]
     public void When_using_EnableGZipCompression_extension_method_required_interceptor_is_added()
     {
         var interceptorRegistrator = Substitute.For<IInterceptorRegistrator>();

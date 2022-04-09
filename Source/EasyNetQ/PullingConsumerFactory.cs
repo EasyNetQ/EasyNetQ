@@ -2,6 +2,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
+using System.Collections.Generic;
 
 namespace EasyNetQ;
 
@@ -41,13 +42,13 @@ public class PullingConsumerFactory : IPullingConsumerFactory
     public PullingConsumerFactory(
         IConsumerConnection connection,
         IPersistentChannelFactory channelFactory,
-        IProduceConsumeInterceptor produceConsumeInterceptor,
+        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
         IMessageSerializationStrategy messageSerializationStrategy
     )
     {
         this.connection = connection;
         this.channelFactory = channelFactory;
-        this.produceConsumeInterceptor = produceConsumeInterceptor;
+        this.produceConsumeInterceptor = new CompositeInterceptor(produceConsumeInterceptors);
         this.messageSerializationStrategy = messageSerializationStrategy;
     }
 

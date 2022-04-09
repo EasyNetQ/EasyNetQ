@@ -1,7 +1,7 @@
 namespace EasyNetQ.Interception;
 
 /// <summary>
-///     Allow to execute arbitrary code before publish or consume
+///     Allows to execute arbitrary code before publish or consume
 /// </summary>
 public interface IProduceConsumeInterceptor
 {

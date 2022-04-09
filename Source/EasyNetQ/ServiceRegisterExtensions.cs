@@ -41,7 +41,6 @@ public static class ServiceRegisterExtensions
             .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
             .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
             .Register(new AdvancedBusEventHandlers())
-            .Register<IProduceConsumeInterceptor, DefaultInterceptor>()
             .Register<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
             .Register<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
             .Register<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
@@ -157,7 +156,7 @@ public static class ServiceRegisterExtensions
     {
         var registrator = new InterceptorRegistrator(serviceRegister);
         configure(registrator);
-        return registrator.Register();
+        return serviceRegister;
     }
 
     /// <summary>
