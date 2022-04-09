@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace EasyNetQ;
 
@@ -19,8 +21,6 @@ internal static class ConnectionConfigurationExtensions
         foreach (var hostConfiguration in configuration.Hosts)
             if (hostConfiguration.Port == 0)
                 hostConfiguration.Port = configuration.Port;
-
-        var version = typeof(ConnectionConfigurationExtensions).GetTypeInfo().Assembly.GetName().Version.ToString();
 
         var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
@@ -41,34 +41,51 @@ internal static class ConnectionConfigurationExtensions
             {
             }
 
-        var hostname = Environment.MachineName;
-
-        var netVersion = Environment.Version.ToString();
-        configuration.Product ??= applicationName;
-        configuration.Platform ??= hostname;
-        configuration.Name ??= applicationName;
-
         AddValueIfNotExists(configuration.ClientProperties, "client_api", "EasyNetQ");
-        AddValueIfNotExists(configuration.ClientProperties, "product", configuration.Product);
-        AddValueIfNotExists(configuration.ClientProperties, "platform", configuration.Platform);
-        AddValueIfNotExists(configuration.ClientProperties, "net_version", netVersion);
-        AddValueIfNotExists(configuration.ClientProperties, "version", version);
-        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", version);
+        AddValueIfNotExists(configuration.ClientProperties, "product", configuration.Product ?? applicationName);
+        AddValueIfNotExists(configuration.ClientProperties, "platform", configuration.Platform ?? GetPlatform());
+        AddValueIfNotExists(configuration.ClientProperties, "os", Environment.OSVersion.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "version", GetApplicationVersion());
+        AddValueIfNotExists(configuration.ClientProperties, "connection_name", configuration.Name ?? applicationName);
+        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version.ToString());
         AddValueIfNotExists(configuration.ClientProperties, "application", applicationName);
         AddValueIfNotExists(configuration.ClientProperties, "application_location", applicationPath);
-        AddValueIfNotExists(configuration.ClientProperties, "machine_name", hostname);
+        AddValueIfNotExists(configuration.ClientProperties, "machine_name", Environment.MachineName);
+        AddValueIfNotExists(configuration.ClientProperties, "user", configuration.UserName);
+        AddValueIfNotExists(configuration.ClientProperties, "connected", DateTime.UtcNow.ToString("u")); // UniversalSortableDateTimePattern: yyyy'-'MM'-'dd HH':'mm':'ss'Z'
+        AddValueIfNotExists(configuration.ClientProperties, "requested_heartbeat", configuration.RequestedHeartbeat.ToString());
         AddValueIfNotExists(configuration.ClientProperties, "timeout", configuration.Timeout.ToString());
-        AddValueIfNotExists(
-            configuration.ClientProperties, "publisher_confirms", configuration.PublisherConfirms.ToString()
-        );
-        AddValueIfNotExists(
-            configuration.ClientProperties, "persistent_messages", configuration.PersistentMessages.ToString()
-        );
+        AddValueIfNotExists(configuration.ClientProperties, "publisher_confirms", configuration.PublisherConfirms.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "persistent_messages", configuration.PersistentMessages.ToString());
     }
 
     private static void AddValueIfNotExists(IDictionary<string, object> clientProperties, string name, string value)
     {
+        // allows to set nulls, null values will be displayed in RabbitMQ Management Plugin UI as 'undefined'
         if (!clientProperties.ContainsKey(name))
             clientProperties.Add(name, value);
+    }
+
+    private static string GetApplicationVersion()
+    {
+        try
+        {
+            return Assembly.GetEntryAssembly()?.GetName().Version.ToString();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string GetPlatform()
+    {
+        string platform = RuntimeInformation.FrameworkDescription;
+        string frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        if (frameworkName != null)
+            platform = platform + " [" + frameworkName + "]";
+
+        // example: .NET Core 4.6.27317.07 [.NETCoreApp,Version=v2.0]
+        return platform;
     }
 }
