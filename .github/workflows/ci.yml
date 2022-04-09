@@ -31,13 +31,11 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet }}
 
-    - name: Install & run dotnet-format
-      run: |
-        dotnet tool install -g dotnet-format
-        dotnet format ./Source/EasyNetQ.sln --verify-no-changes
-
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+
+    - name: Check formatting
+      run: dotnet format --no-restore --verify-no-changes --severity warn ./Source/EasyNetQ.sln || (echo "Run 'dotnet format' to fix issues" && exit 1)
 
     - name: Build
       run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
