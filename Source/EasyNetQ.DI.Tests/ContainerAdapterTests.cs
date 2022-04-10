@@ -24,7 +24,7 @@ using EasyNetQ.LightInject;
 
 namespace EasyNetQ.DI.Tests;
 
-#pragma warning disable xUnit1026
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters
 
 public class ContainerAdapterTests
 {
