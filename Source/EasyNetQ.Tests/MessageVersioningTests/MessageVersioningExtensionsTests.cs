@@ -32,23 +32,32 @@ public class MessageVersioningExtensionsTests
             Assert.Equal(typeof(TImplementation), services[typeof(TService)]); // "Implementation registered for service type {0} is not the expected type {1}", typeof(TService).Name, typeof(TImplementation).Name
         }
 
-        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
-        {
-            services.Add(typeof(TService), typeof(TImplementation));
-            return this;
-        }
-
-        public IServiceRegister Register<TService>(TService instance) where TService : class
+        public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
         {
             throw new NotImplementedException();
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
         {
             throw new NotImplementedException();
         }
 
-        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
         {
             throw new NotImplementedException();
         }

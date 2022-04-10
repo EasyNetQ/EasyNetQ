@@ -3,8 +3,8 @@
 
   <PropertyGroup>
     <TargetFramework>net6</TargetFramework>
-    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj" />
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
@@ -15,16 +15,9 @@
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="LightInject" Version="5.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSubstitute" Version="4.2.2" />
-    <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.3.0)" />
-    <PackageReference Include="SimpleInjector" Version="4.6.2" />
-    <PackageReference Include="Autofac" Version="4.9.3" />
-    <PackageReference Include="Castle.Core" Version="4.4.0" />
-    <PackageReference Include="Castle.Windsor" Version="5.0.0" />
-    <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
   </ItemGroup>
+
 </Project>

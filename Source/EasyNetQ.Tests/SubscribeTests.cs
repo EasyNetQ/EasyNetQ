@@ -1,14 +1,15 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 

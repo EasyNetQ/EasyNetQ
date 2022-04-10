@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace EasyNetQ.DI.Microsoft;
 
 /// <inheritdoc />
-public class ServiceCollectionAdapter : IServiceRegister, ICollectionServiceRegister
+public class ServiceCollectionAdapter : IServiceRegister
 {
     private readonly IServiceCollection serviceCollection;
 
@@ -16,104 +16,130 @@ public class ServiceCollectionAdapter : IServiceRegister, ICollectionServiceRegi
     {
         this.serviceCollection = serviceCollection;
 
-        this.serviceCollection.AddSingleton<IServiceResolver, ServiceProviderAdapter>();
+        this.serviceCollection.TryAddSingleton<IServiceResolver, ServiceProviderAdapter>();
+    }
+
+    private static ServiceLifetime TranslateLifetime(Lifetime lifetime)
+          => lifetime switch
+          {
+              Lifetime.Singleton => ServiceLifetime.Singleton,
+              //Lifetime.Scoped => MSServiceLifetime.Scoped,
+              Lifetime.Transient => ServiceLifetime.Transient,
+              _ => throw new ArgumentOutOfRangeException(nameof(lifetime))
+          };
+
+    /// <inheritdoc />
+    public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime, bool replace = true)
+    {
+        if (serviceType == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        if (implementationType == null)
+            throw new ArgumentNullException(nameof(implementationType));
+
+        if (replace)
+        {
+            serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationType, TranslateLifetime(lifetime)));
+        }
+        else
+        {
+            serviceCollection.Add(new ServiceDescriptor(serviceType, implementationType, TranslateLifetime(lifetime)));
+        }
+        return this;
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
+    public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        switch (lifetime)
+        if (implementationFactory == null)
+            throw new ArgumentNullException(nameof(implementationFactory));
+
+        if (replace)
         {
-            case Lifetime.Transient:
-                serviceCollection.Replace(ServiceDescriptor.Transient<TService, TImplementation>());
-                break;
-            case Lifetime.Singleton:
-                serviceCollection.Replace(ServiceDescriptor.Singleton<TService, TImplementation>());
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            serviceCollection.Replace(new ServiceDescriptor(serviceType, x => implementationFactory(x.GetRequiredService<IServiceResolver>()), TranslateLifetime(lifetime)));
+        }
+        else
+        {
+            serviceCollection.Add(new ServiceDescriptor(serviceType, x => implementationFactory(x.GetRequiredService<IServiceResolver>()), TranslateLifetime(lifetime)));
         }
 
         return this;
     }
 
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
+    /// <inheritdoc />
+    public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
     {
-        switch (lifetime)
+        if (serviceType == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        if (implementationInstance == null)
+            throw new ArgumentNullException(nameof(implementationInstance));
+
+        if (replace)
         {
-            case Lifetime.Transient:
-                serviceCollection.AddTransient<TService, TImplementation>();
-                return this;
-            case Lifetime.Singleton:
-                serviceCollection.AddSingleton<TService, TImplementation>();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationInstance));
         }
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(TService instance) where TService : class
-    {
-        serviceCollection.Replace(ServiceDescriptor.Singleton(instance));
-        return this;
-    }
-
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
-    {
-        serviceCollection.AddSingleton(instance);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
-    {
-        switch (lifetime)
+        else
         {
-            case Lifetime.Transient:
-                serviceCollection.Replace(ServiceDescriptor.Transient(x => factory(x.GetService<IServiceResolver>())));
-                break;
-            case Lifetime.Singleton:
-                serviceCollection.Replace(ServiceDescriptor.Singleton(x => factory(x.GetService<IServiceResolver>())));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            serviceCollection.Add(new ServiceDescriptor(serviceType, implementationInstance));
         }
 
         return this;
     }
 
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
+    /// <inheritdoc />
+    public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                serviceCollection.AddTransient(x => factory(x.GetService<IServiceResolver>()));
-                return this;
-            case Lifetime.Singleton:
-                serviceCollection.AddSingleton(x => factory(x.GetService<IServiceResolver>()));
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        if (serviceType == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        if (implementationType == null)
+            throw new ArgumentNullException(nameof(implementationType));
+
+        var descriptor = new ServiceDescriptor(serviceType, implementationType, TranslateLifetime(lifetime));
+        if (mode == RegistrationCompareMode.ServiceType)
+            serviceCollection.TryAdd(descriptor);
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+            serviceCollection.TryAddEnumerable(descriptor);
+        else
+            throw new ArgumentOutOfRangeException(nameof(mode));
+
+        return this;
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register(
-        Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
-    )
+    public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                serviceCollection.AddTransient(serviceType, implementingType);
-                return this;
-            case Lifetime.Singleton:
-                serviceCollection.AddSingleton(serviceType, implementingType);
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        if (serviceType == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        if (implementationFactory == null)
+            throw new ArgumentNullException(nameof(implementationFactory));
+
+        var descriptor = new ServiceDescriptor(serviceType, x => implementationFactory(x.GetRequiredService<IServiceResolver>()), TranslateLifetime(lifetime));
+        if (mode == RegistrationCompareMode.ServiceType)
+            serviceCollection.TryAdd(descriptor);
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+            serviceCollection.TryAddEnumerable(descriptor);
+        else
+            throw new ArgumentOutOfRangeException(nameof(mode));
+
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        if (serviceType == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        if (implementationInstance == null)
+            throw new ArgumentNullException(nameof(implementationInstance));
+
+        var descriptor = new ServiceDescriptor(serviceType, implementationInstance);
+        if (mode == RegistrationCompareMode.ServiceType)
+            serviceCollection.TryAdd(descriptor);
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+            serviceCollection.TryAddEnumerable(descriptor);
+        else
+            throw new ArgumentOutOfRangeException(nameof(mode));
+
+        return this;
     }
 
     private class ServiceProviderAdapter : IServiceResolver

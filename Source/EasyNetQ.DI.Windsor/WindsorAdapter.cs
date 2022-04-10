@@ -7,7 +7,7 @@ using Castle.Windsor;
 namespace EasyNetQ.DI.Windsor;
 
 /// <inheritdoc />
-public class WindsorAdapter : IServiceRegister, ICollectionServiceRegister
+public class WindsorAdapter : IServiceRegister
 {
     private readonly IWindsorContainer container;
 
@@ -23,6 +23,37 @@ public class WindsorAdapter : IServiceRegister, ICollectionServiceRegister
             .LifestyleTransient());
     }
 
+    public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    /*
     /// <inheritdoc />
     public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
     {
@@ -101,7 +132,7 @@ public class WindsorAdapter : IServiceRegister, ICollectionServiceRegister
             .IsDefault();
         container.Register(registration);
         return this;
-    }
+    }*/
 
     private class WindsorResolver : IServiceResolver
     {

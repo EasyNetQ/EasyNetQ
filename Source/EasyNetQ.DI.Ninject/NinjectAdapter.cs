@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Ninject;
+using Ninject.Planning.Bindings;
 
 namespace EasyNetQ.DI.Ninject;
 
 /// <inheritdoc />
-public class NinjectAdapter : IServiceRegister, ICollectionServiceRegister
+public class NinjectAdapter : IServiceRegister
 {
     private readonly IKernel kernel;
+    private long counter;
 
     /// <summary>
     ///     Creates an adapter on top of IKernel
@@ -15,100 +20,150 @@ public class NinjectAdapter : IServiceRegister, ICollectionServiceRegister
     {
         this.kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
 
-        this.kernel.Rebind<IServiceResolver>().ToMethod(x => new NinjectResolver(x.Kernel)).InTransientScope();
+        if (!this.kernel.GetBindings(typeof(IServiceResolver)).Any())
+            this.kernel.Rebind<IServiceResolver>().ToMethod(x => new NinjectResolver(x.Kernel)).InTransientScope().WithMetadata("type", typeof(NinjectResolver));
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
+    public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
         switch (lifetime)
         {
             case Lifetime.Transient:
-                kernel.Rebind<TService>().To<TImplementation>().InTransientScope();
+                if (replace)
+                    kernel.Rebind(serviceType).To(implementationType).InTransientScope().WithMetadata("type", implementationType);
+                else
+                    kernel.Bind(serviceType).To(implementationType).InTransientScope().Named(GetBindingName()).WithMetadata("type", implementationType);
                 return this;
-            case Lifetime.Singleton:
-                kernel.Rebind<TService>().To<TImplementation>().InSingletonScope();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
-    }
 
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
-    {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                kernel.Bind<TService>().To<TImplementation>().InTransientScope();
-                return this;
             case Lifetime.Singleton:
-                kernel.Bind<TService>().To<TImplementation>().InSingletonScope();
+                if (replace)
+                    kernel.Rebind(serviceType).To(implementationType).InSingletonScope().WithMetadata("type", implementationType);
+                else
+                    kernel.Bind(serviceType).To(implementationType).InSingletonScope().Named(GetBindingName()).WithMetadata("type", implementationType);
                 return this;
+
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
         }
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register<TService>(TService instance) where TService : class
+    public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        kernel.Rebind<TService>().ToConstant(instance);
+        Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
+
+        if (typeArguments.Length != 2)
+            throw new InvalidOperationException("implementationFactory should have 2 generic type arguments");
+
+        switch (lifetime)
+        {
+            case Lifetime.Transient:
+                if (replace)
+                    kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InTransientScope().WithMetadata("type", typeArguments[1]);
+                else
+                    kernel.Bind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InTransientScope().Named(GetBindingName()).WithMetadata("type", typeArguments[1]);
+                return this;
+
+            case Lifetime.Singleton:
+                if (replace)
+                    kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InSingletonScope().WithMetadata("type", typeArguments[1]);
+                else
+                    kernel.Bind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InSingletonScope().Named(GetBindingName()).WithMetadata("type", typeArguments[1]);
+                return this;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+        }
+    }
+
+    /// <inheritdoc />
+    public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
+    {
+        if (replace)
+            kernel.Rebind(serviceType).ToConstant(implementationInstance).WithMetadata("type", implementationInstance.GetType());
+        else
+            kernel.Bind(serviceType).ToConstant(implementationInstance).Named(GetBindingName()).WithMetadata("type", implementationInstance.GetType());
+
         return this;
     }
 
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+    /// <inheritdoc />
+    public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        kernel.Bind<TService>().ToConstant(instance);
+        if (mode == RegistrationCompareMode.ServiceType)
+        {
+            if (!kernel.GetBindings(serviceType).Any())
+                Register(serviceType, implementationType, lifetime);
+        }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            if (!kernel.GetBindings(serviceType).Any(b => GetImplementationType(b) == implementationType))
+                Register(serviceType, implementationType, lifetime);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
         return this;
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+    public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        switch (lifetime)
+        if (mode == RegistrationCompareMode.ServiceType)
         {
-            case Lifetime.Transient:
-                kernel.Rebind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InTransientScope();
-                return this;
-            case Lifetime.Singleton:
-                kernel.Rebind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InSingletonScope();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            if (!kernel.GetBindings(serviceType).Any())
+                Register(serviceType, implementationFactory, lifetime);
         }
-    }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
+            if (typeArguments.Length != 2)
+                throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
+            var implementationType = typeArguments[1];
+            if (!kernel.GetBindings(serviceType).Any(b => GetImplementationType(b) == implementationType))
+                Register(serviceType, implementationFactory, lifetime);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
 
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
-    {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                kernel.Bind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InTransientScope();
-                return this;
-            case Lifetime.Singleton:
-                kernel.Bind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InSingletonScope();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        return this;
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register(
-        Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
-    )
+    public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        switch (lifetime)
+        if (mode == RegistrationCompareMode.ServiceType)
         {
-            case Lifetime.Transient:
-                kernel.Rebind(serviceType).To(implementingType).InTransientScope();
-                return this;
-            case Lifetime.Singleton:
-                kernel.Rebind(serviceType).To(implementingType).InSingletonScope();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            if (!kernel.GetBindings(serviceType).Any())
+                Register(serviceType, implementationInstance);
         }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            var implementationType = implementationInstance.GetType();
+            if (!kernel.GetBindings(serviceType).Any(b => GetImplementationType(b) == implementationType))
+                Register(serviceType, implementationInstance);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        return this;
+    }
+
+    private static Type GetImplementationType(IBinding binding)
+    {
+        return binding.Metadata.Get<Type>("type");
+    }
+
+    private string GetBindingName()
+    {
+        return "ENQ_" + Interlocked.Increment(ref counter);
     }
 
     private class NinjectResolver : IServiceResolver
@@ -122,12 +177,39 @@ public class NinjectAdapter : IServiceRegister, ICollectionServiceRegister
 
         public TService Resolve<TService>() where TService : class
         {
-            return kernel.Get<TService>();
+            try
+            {
+                return kernel.Get<TService>();
+            }
+            catch (ActivationException e) when (e.Message.Contains("More than one matching bindings are available."))
+            {
+                // fallback to resolve the last registration from all available for this service if there is no default one
+                var t = kernel.GetBindings(typeof(TService)).ToArray();
+                var binding = kernel.GetBindings(typeof(TService))
+                     .Where(b => b.Metadata.Name.StartsWith("ENQ_"))
+                     .OrderByDescending(r => r.Metadata.Name, RegistrationsComparer.Instance)
+                     .FirstOrDefault();
+
+                if (binding == null)
+                    throw;
+
+                return kernel.Get<TService>(binding.Metadata.Name);
+            }
         }
 
         public IServiceResolverScope CreateScope()
         {
             return new ServiceResolverScope(this);
+        }
+
+        private sealed class RegistrationsComparer : IComparer<string>
+        {
+            public static readonly RegistrationsComparer Instance = new();
+
+            public int Compare(string x, string y)
+            {
+                return long.Parse(x.Substring(4)).CompareTo(long.Parse(y.Substring(4)));
+            }
         }
     }
 }

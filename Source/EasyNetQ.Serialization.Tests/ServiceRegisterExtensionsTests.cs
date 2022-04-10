@@ -32,27 +32,40 @@ public class ServiceRegisterExtensionsTests
             Assert.True(services.Contains(typeof(TService)), $"No service of type {typeof(TService).Name} registered");
         }
 
-        public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
+        public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
         {
-            services.Add(typeof(TService));
+            services.Add(serviceType);
             return this;
         }
 
-        public IServiceRegister Register<TService>(TService instance) where TService : class
+        public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
         {
-            services.Add(typeof(TService));
+            services.Add(serviceType);
             return this;
         }
 
-        public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+        public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
         {
-            services.Add(typeof(TService));
+            services.Add(serviceType);
             return this;
         }
 
-        public IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton)
+        public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
         {
-            throw new NotImplementedException();
+            services.Add(serviceType);
+            return this;
+        }
+
+        public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+        {
+            services.Add(serviceType);
+            return this;
+        }
+
+        public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+        {
+            services.Add(serviceType);
+            return this;
         }
     }
 }

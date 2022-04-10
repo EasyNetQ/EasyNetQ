@@ -11,11 +11,6 @@ public static class EasyNetQRegistryExtensions
 {
     public static IRegistry RegisterEasyNetQ(this IRegistry registry, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
     {
-        return registry.RegisterEasyNetQ(connectionConfigurationFactory, (r, _) => registerServices(r));
-    }
-
-    public static IRegistry RegisterEasyNetQ(this IRegistry registry, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
-    {
         if (registry == null)
         {
             throw new ArgumentNullException(nameof(registry));
@@ -37,16 +32,6 @@ public static class EasyNetQRegistryExtensions
     }
 
     public static IRegistry RegisterEasyNetQ(this IRegistry registry, string connectionString, Action<IServiceRegister> registerServices)
-    {
-        if (registry == null)
-        {
-            throw new ArgumentNullException(nameof(registry));
-        }
-
-        return registry.RegisterEasyNetQ(connectionString, (r, _) => registerServices(r));
-    }
-
-    public static IRegistry RegisterEasyNetQ(this IRegistry registry, string connectionString, Action<IServiceRegister, ICollectionServiceRegister> registerServices)
     {
         if (registry == null)
         {
