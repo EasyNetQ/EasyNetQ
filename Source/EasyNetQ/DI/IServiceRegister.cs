@@ -1,85 +1,52 @@
 using System;
+using System.Collections.Generic;
 
 namespace EasyNetQ.DI;
 
 /// <summary>
-/// Register services
+/// An interface for registering services with the dependency injection provider.
 /// </summary>
 public interface IServiceRegister
 {
     /// <summary>
-    /// Register a service. Note that the last registration wins.
+    /// Registers the service of type <paramref name="serviceType"/> with the <paramref name="implementationType"/>
+    /// with the dependency injection provider. Optionally removes any existing implementation of the same service type.
+    /// When not replacing existing registrations, requesting the service type should return the most recent registration,
+    /// and requesting an <see cref="IEnumerable{T}"/> of the service type should return all of the registrations.
     /// </summary>
-    /// <typeparam name="TService">The type of the service to be registered</typeparam>
-    /// <typeparam name="TImplementation">The implementation type</typeparam>
+    /// <param name="serviceType">The type of the service to be registered</param>
+    /// <param name="implementationType">The implementation type</param>
     /// <param name="lifetime">A lifetime of a container registration</param>
+    /// <param name="replace">Whether to remove any existing implementation of the same service type</param>
     /// <returns>itself for nice fluent composition</returns>
-    IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton)
-        where TService : class
-        where TImplementation : class, TService;
+    IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true);
+
+    /// <inheritdoc cref="Register(Type, Type, Lifetime, bool)"/>
+    IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true);
+
+    /// <inheritdoc cref="Register(Type, Type, Lifetime, bool)"/>
+    IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true);
 
     /// <summary>
-    /// Register a service. Note that the last registration wins.
+    /// Registers the service of type <paramref name="serviceType"/> with the dependency
+    /// injection provider if a service of the same type (and of the same implementation type
+    /// in case of <see cref="RegistrationCompareMode.ServiceTypeAndImplementationType"/>)
+    /// has not already been registered.
     /// </summary>
-    /// <typeparam name="TService">The type of the service to be registered</typeparam>
-    /// <param name="instance">The instance of the service</param>
-    /// <returns>itself for nice fluent composition</returns>
-    IServiceRegister Register<TService>(TService instance) where TService : class;
+    IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType);
 
     /// <summary>
-    /// Register a service. Note that the last registration wins.
+    /// Registers the service of type <paramref name="serviceType"/> with the dependency
+    /// injection provider if a service of the same type (and of the same implementation type
+    /// in case of <see cref="RegistrationCompareMode.ServiceTypeAndImplementationType"/>)
+    /// has not already been registered.
+    /// <br/><br/>
+    /// With <see cref="RegistrationCompareMode.ServiceTypeAndImplementationType"/>, it is required
+    /// that <paramref name="implementationFactory"/> is a strongly typed delegate with a return type
+    /// of a specific implementation type.
     /// </summary>
-    /// <typeparam name="TService">The type of the service to be registered</typeparam>
-    /// <param name="factory">The instance factory of the service</param>
-    /// <param name="lifetime">A lifetime of a container registration</param>
-    /// <returns>itself for nice fluent composition</returns>
-    IServiceRegister Register<TService>(
-        Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton
-    ) where TService : class;
+    IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType);
 
-    /// <summary>
-    /// Registers the <paramref name="serviceType"/> with the <paramref name="implementingType"/>.
-    /// Note that the first registration wins. All subsequent registrations will be ignored.
-    /// </summary>
-    /// <param name="serviceType">The service type to register.</param>
-    /// <param name="implementingType">The implementing type.</param>
-    /// <param name="lifetime">A lifetime of a container registration</param>
-    /// <returns>itself for nice fluent composition</returns>
-    IServiceRegister Register(Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton);
-}
-
-/// <summary>
-/// Register collection services
-/// </summary>
-public interface ICollectionServiceRegister
-{
-    /// <summary>
-    /// Register a service.
-    /// </summary>
-    /// <typeparam name="TService">The type of the service to be registered</typeparam>
-    /// <typeparam name="TImplementation">The implementation type</typeparam>
-    /// <param name="lifetime">A lifetime of a container registration</param>
-    /// <returns>itself for nice fluent composition</returns>
-    ICollectionServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton)
-        where TService : class
-        where TImplementation : class, TService;
-
-    /// <summary>
-    /// Register a service.
-    /// </summary>
-    /// <typeparam name="TService">The type of the service to be registered</typeparam>
-    /// <param name="instance">The instance of the service</param>
-    /// <returns>itself for nice fluent composition</returns>
-    ICollectionServiceRegister Register<TService>(TService instance)
-        where TService : class;
-
-    /// <summary>
-    /// Register a service.
-    /// </summary>
-    /// <typeparam name="TService">The type of the service to be registered</typeparam>
-    /// <param name="factory">The instance factory of the service</param>
-    /// <param name="lifetime">A lifetime of a container registration</param>
-    /// <returns>itself for nice fluent composition</returns>
-    ICollectionServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton)
-        where TService : class;
+    /// <inheritdoc cref="TryRegister(Type, Type, Lifetime, RegistrationCompareMode)"/>
+    IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType);
 }

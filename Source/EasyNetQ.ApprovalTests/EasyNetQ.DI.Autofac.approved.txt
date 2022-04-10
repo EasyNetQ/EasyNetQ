@@ -5,23 +5,19 @@ namespace Autofac
         public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, string connectionString) { }
         public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static Autofac.ContainerBuilder RegisterEasyNetQ(this Autofac.ContainerBuilder containerBuilder, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
     }
 }
 namespace EasyNetQ.DI.Autofac
 {
-    public class AutofacAdapter : EasyNetQ.DI.ICollectionServiceRegister, EasyNetQ.DI.IServiceRegister
+    public class AutofacAdapter : EasyNetQ.DI.IServiceRegister
     {
         public AutofacAdapter(Autofac.ContainerBuilder containerBuilder) { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance, bool replace = true) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance, EasyNetQ.DI.RegistrationCompareMode mode = 0) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0) { }
     }
 }

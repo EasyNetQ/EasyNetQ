@@ -840,15 +840,10 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IBus CreateBus(string connectionString) { }
         public static EasyNetQ.IBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static EasyNetQ.IBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static EasyNetQ.IBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static EasyNetQ.IBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
         public static void RegisterBus(EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static void RegisterBus(EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.ICollectionServiceRegister> registerServices) { }
     }
     public static class ReceiveRegistrationExtensions
     {
@@ -1245,44 +1240,18 @@ namespace EasyNetQ.DI
         public DefaultConsumeScopeProvider(EasyNetQ.DI.IServiceResolver resolver) { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
     }
-    public class DefaultServiceContainer : EasyNetQ.DI.ICollectionServiceRegister, EasyNetQ.DI.IServiceRegister, System.IDisposable
-    {
-        public DefaultServiceContainer() { }
-        public void Dispose() { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
-        public TService Resolve<TService>() { }
-    }
-    public interface ICollectionServiceRegister
-    {
-        EasyNetQ.DI.ICollectionServiceRegister Register<TService>(TService instance)
-            where TService :  class;
-        EasyNetQ.DI.ICollectionServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class;
-        EasyNetQ.DI.ICollectionServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService;
-    }
     public interface IConsumeScopeProvider
     {
         EasyNetQ.DI.IServiceResolverScope CreateScope();
     }
     public interface IServiceRegister
     {
-        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1);
-        EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class;
-        EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class;
-        EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService;
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance, bool replace = true);
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true);
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true);
+        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance, EasyNetQ.DI.RegistrationCompareMode mode = 0);
+        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0);
+        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0);
     }
     public interface IServiceResolver
     {
@@ -1300,6 +1269,35 @@ namespace EasyNetQ.DI
     {
         public NoopConsumeScopeProvider() { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
+    }
+    public enum RegistrationCompareMode
+    {
+        ServiceType = 0,
+        ServiceTypeAndImplementationType = 1,
+    }
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, TService implementationInstance, bool replace = true)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true)
+            where TService :  class
+            where TImplementation :  class, TService { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, TService implementationInstance, EasyNetQ.DI.RegistrationCompareMode mode = 0)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0)
+            where TService :  class
+            where TImplementation :  class, TService { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TImplementation> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0)
+            where TService :  class
+            where TImplementation :  class, TService { }
     }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {

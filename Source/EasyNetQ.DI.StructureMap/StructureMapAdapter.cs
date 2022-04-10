@@ -5,7 +5,7 @@ using StructureMap.Pipeline;
 namespace EasyNetQ.DI.StructureMap;
 
 /// <inheritdoc />
-public class StructureMapAdapter : IServiceRegister, ICollectionServiceRegister
+public class StructureMapAdapter : IServiceRegister
 {
     private readonly IRegistry registry;
 
@@ -19,6 +19,37 @@ public class StructureMapAdapter : IServiceRegister, ICollectionServiceRegister
         this.registry.For<IServiceResolver>(Lifecycles.Container).Use<StructureMapResolver>();
     }
 
+    public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    /*
     /// <inheritdoc />
     public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
     {
@@ -110,7 +141,7 @@ public class StructureMapAdapter : IServiceRegister, ICollectionServiceRegister
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
         }
-    }
+    }*/
 
     private class StructureMapResolver : IServiceResolver
     {
