@@ -170,13 +170,14 @@ public static class RabbitHutch
         Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
         Preconditions.CheckNotNull(registerServices, nameof(registerServices));
 
-        ((IServiceRegister)serviceRegister).Register(c =>
+        serviceRegister.Register(c =>
         {
             var configuration = connectionConfigurationFactory(c);
             configuration.SetDefaultProperties();
             return configuration;
         });
 
+        //TODO: swap these lines and change RegisterDefaultServices impl to TryRegister semantic
         serviceRegister.RegisterDefaultServices();
         registerServices(serviceRegister);
     }
