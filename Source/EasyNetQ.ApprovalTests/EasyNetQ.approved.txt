@@ -49,6 +49,7 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(this EasyNetQ.IAdvancedBus bus, string name, bool durable, bool exclusive, bool autoDelete, System.Threading.CancellationToken cancellationToken = default) { }
         public static void QueueDeclarePassive(this EasyNetQ.IAdvancedBus bus, string name, System.Threading.CancellationToken cancellationToken = default) { }
         public static void QueueDelete(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
+        public static void QueueDelete(this EasyNetQ.IAdvancedBus bus, string name, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
         public static void QueuePurge(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Unbind(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> binding, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Unbind(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue> binding, System.Threading.CancellationToken cancellationToken = default) { }
@@ -286,6 +287,7 @@ namespace EasyNetQ
         System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(string name, System.Action<EasyNetQ.IQueueDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task QueueDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task QueueDeleteAsync(EasyNetQ.Topology.Queue queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task QueuePurgeAsync(EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> binding, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue> binding, System.Threading.CancellationToken cancellationToken = default);
@@ -712,7 +714,7 @@ namespace EasyNetQ
     }
     public class PullingConsumerFactory : EasyNetQ.IPullingConsumerFactory
     {
-        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
+        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
     }
@@ -790,7 +792,7 @@ namespace EasyNetQ
                     EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory,
                     EasyNetQ.DI.IServiceResolver container,
                     EasyNetQ.ConnectionConfiguration configuration,
-                    EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor,
+                    System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors,
                     EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy,
                     EasyNetQ.IConventions conventions,
                     EasyNetQ.IPullingConsumerFactory pullingConsumerFactory,
@@ -822,6 +824,7 @@ namespace EasyNetQ
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(string name, System.Action<EasyNetQ.IQueueDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task QueueDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task QueueDeleteAsync(EasyNetQ.Topology.Queue queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
+        public virtual System.Threading.Tasks.Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task QueuePurgeAsync(EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> binding, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue> binding, System.Threading.CancellationToken cancellationToken) { }
@@ -1421,19 +1424,6 @@ namespace EasyNetQ.Events
 }
 namespace EasyNetQ.Interception
 {
-    public class CompositeInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
-    {
-        public CompositeInterceptor() { }
-        public void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
-    }
-    public class DefaultInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
-    {
-        public DefaultInterceptor() { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
-    }
     public class GZipInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
         public GZipInterceptor() { }
@@ -1443,17 +1433,13 @@ namespace EasyNetQ.Interception
     public interface IInterceptorRegistrator
     {
         void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor);
+        void Add<TInterceptor>()
+            where TInterceptor :  class, EasyNetQ.Interception.IProduceConsumeInterceptor;
     }
     public interface IProduceConsumeInterceptor
     {
         EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message);
         EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message);
-    }
-    public class InterceptorRegistrator : EasyNetQ.Interception.IInterceptorRegistrator
-    {
-        public InterceptorRegistrator(EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
-        public EasyNetQ.DI.IServiceRegister Register() { }
     }
     public class TripleDESInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {

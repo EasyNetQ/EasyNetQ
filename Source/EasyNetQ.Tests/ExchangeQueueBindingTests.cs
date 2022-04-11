@@ -187,6 +187,29 @@ public class When_a_queue_is_deleted : IDisposable
     }
 }
 
+public class When_a_queue_is_deleted_with_name : IDisposable
+{
+    public When_a_queue_is_deleted_with_name()
+    {
+        mockBuilder = new MockBuilder();
+
+        mockBuilder.Bus.Advanced.QueueDelete("my_queue");
+    }
+
+    public void Dispose()
+    {
+        mockBuilder.Dispose();
+    }
+
+    private readonly MockBuilder mockBuilder;
+
+    [Fact]
+    public void Should_delete_the_queue()
+    {
+        mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
+    }
+}
+
 public class When_an_exchange_is_declared : IDisposable
 {
     public When_an_exchange_is_declared()

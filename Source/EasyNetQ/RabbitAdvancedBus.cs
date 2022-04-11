@@ -50,7 +50,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         IHandlerCollectionFactory handlerCollectionFactory,
         IServiceResolver container,
         ConnectionConfiguration configuration,
-        IProduceConsumeInterceptor produceConsumeInterceptor,
+        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
         IMessageSerializationStrategy messageSerializationStrategy,
         IConventions conventions,
         IPullingConsumerFactory pullingConsumerFactory,
@@ -66,7 +66,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         Preconditions.CheckNotNull(container, nameof(container));
         Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
         Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(produceConsumeInterceptor, nameof(produceConsumeInterceptor));
+        Preconditions.CheckNotNull(produceConsumeInterceptors, nameof(produceConsumeInterceptors));
         Preconditions.CheckNotNull(conventions, nameof(conventions));
         Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
         Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
@@ -81,7 +81,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.Container = container;
         this.configuration = configuration;
-        this.produceConsumeInterceptor = produceConsumeInterceptor;
+        this.produceConsumeInterceptor = new CompositeInterceptor(produceConsumeInterceptors);
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
@@ -445,18 +445,24 @@ public class RabbitAdvancedBus : IAdvancedBus
     public virtual async Task QueueDeleteAsync(
         Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default
     )
+        => await QueueDeleteAsync(queue.Name, ifUnused, ifEmpty, cancellationToken);
+
+    /// <inheritdoc />
+    public virtual async Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
     {
+        Preconditions.CheckNotNull(name, nameof(name));
+
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await channelDispatcher.InvokeAsync(
-            x => x.QueueDelete(queue.Name, ifUnused, ifEmpty),
+            x => x.QueueDelete(name, ifUnused, ifEmpty),
             ChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Deleted queue {queue}", queue.Name);
+            logger.DebugFormat("Deleted queue {queue}", name);
         }
     }
 

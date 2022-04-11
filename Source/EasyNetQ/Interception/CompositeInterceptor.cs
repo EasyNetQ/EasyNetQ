@@ -3,10 +3,16 @@ using System.Linq;
 
 namespace EasyNetQ.Interception;
 
-/// <inheritdoc />
-public class CompositeInterceptor : IProduceConsumeInterceptor
+internal sealed class CompositeInterceptor : IProduceConsumeInterceptor
 {
     private readonly List<IProduceConsumeInterceptor> interceptors = new();
+
+    public CompositeInterceptor() { }
+
+    public CompositeInterceptor(IEnumerable<IProduceConsumeInterceptor> interceptors)
+    {
+        this.interceptors.AddRange(interceptors);
+    }
 
     /// <inheritdoc />
     public ProducedMessage OnProduce(in ProducedMessage message)
@@ -27,7 +33,7 @@ public class CompositeInterceptor : IProduceConsumeInterceptor
     ///     Add the interceptor to pipeline
     /// </summary>
     /// <param name="interceptor"></param>
-    public void Add(IProduceConsumeInterceptor interceptor)
+    public void Add(IProduceConsumeInterceptor interceptor) // TODO: method may be removed, for test purposes only
     {
         interceptors.Add(interceptor);
     }
