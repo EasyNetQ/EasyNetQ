@@ -4,13 +4,13 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyNetQ.DI.Microsoft;
 
-/// <inheritdoc />
+/// <see cref="IServiceRegister"/> implementation for Microsoft.Extensions.DependencyInjection DI container.
 public class ServiceCollectionAdapter : IServiceRegister
 {
     private readonly IServiceCollection serviceCollection;
 
     /// <summary>
-    ///     Creates an adapter on top of IServiceCollection
+    /// Creates an adapter on top of <see cref="IServiceCollection"/>.
     /// </summary>
     public ServiceCollectionAdapter(IServiceCollection serviceCollection)
     {

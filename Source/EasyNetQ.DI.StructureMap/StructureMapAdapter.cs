@@ -4,13 +4,13 @@ using StructureMap.Pipeline;
 
 namespace EasyNetQ.DI.StructureMap;
 
-/// <inheritdoc />
+/// <see cref="IServiceRegister"/> implementation for StructureMap DI container.
 public class StructureMapAdapter : IServiceRegister
 {
     private readonly IRegistry registry;
 
     /// <summary>
-    ///     Creates an adapter on top of IRegistry
+    /// Creates an adapter on top of <see cref="IRegistry"/>.
     /// </summary>
     public StructureMapAdapter(IRegistry registry)
     {
@@ -19,129 +19,126 @@ public class StructureMapAdapter : IServiceRegister
         this.registry.For<IServiceResolver>(Lifecycles.Container).Use<StructureMapResolver>();
     }
 
+    /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        throw new NotImplementedException();
+        if (replace)
+            registry.For(serviceType, ToLifetime(lifetime)).ClearAll().Use(implementationType);
+        else
+            registry.For(serviceType, ToLifetime(lifetime)).Use(implementationType);
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        throw new NotImplementedException();
+        if (replace)
+            registry.For(serviceType, ToLifetime(lifetime)).ClearAll().Use(y => implementationFactory(y.GetInstance<IServiceResolver>()));
+        else
+            registry.For(serviceType, ToLifetime(lifetime)).Use(y => implementationFactory(y.GetInstance<IServiceResolver>()));
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
     {
-        throw new NotImplementedException();
+        if (replace)
+            registry.For(serviceType, Lifecycles.Singleton).ClearAll().Use(implementationInstance);
+        else
+            registry.For(serviceType, Lifecycles.Singleton).Use(implementationInstance);
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        throw new NotImplementedException();
+        //TODO: Figure out how to get current registrations from StructureMap
+        //var producer = container.GetRegistration(serviceType, throwOnFailure: false);
+
+        if (mode == RegistrationCompareMode.ServiceType)
+        {
+            //if (producer == null)
+                Register(serviceType, implementationType, lifetime);
+        }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            //if (producer == null || producer.Registration.ImplementationType != implementationType)
+                Register(serviceType, implementationType, lifetime);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        throw new NotImplementedException();
+        //TODO: Figure out how to get current registrations from StructureMap
+        //var producer = container.GetRegistration(serviceType, throwOnFailure: false);
+
+        if (mode == RegistrationCompareMode.ServiceType)
+        {
+            //if (producer == null)
+                Register(serviceType, implementationFactory, lifetime);
+        }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
+            if (typeArguments.Length != 2)
+                throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
+            var implementationType = typeArguments[1];
+            //if (producer == null || producer.Registration.ImplementationType != implementationType)
+                Register(serviceType, implementationFactory, lifetime);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        throw new NotImplementedException();
-    }
+        //TODO: Figure out how to get current registrations from StructureMap
+        //var producer = container.GetRegistration(serviceType, throwOnFailure: false);
 
-    /*
-    /// <inheritdoc />
-    public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
-    {
-        switch (lifetime)
+        if (mode == RegistrationCompareMode.ServiceType)
         {
-            case Lifetime.Transient:
-                registry.For<TService>(Lifecycles.Transient).ClearAll().Use<TImplementation>();
-                return this;
-            case Lifetime.Singleton:
-                registry.For<TService>(Lifecycles.Singleton).ClearAll().Use<TImplementation>();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            //if (producer == null)
+                Register(serviceType, implementationInstance);
         }
-    }
-
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
-    {
-        switch (lifetime)
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
-            case Lifetime.Transient:
-                registry.For<TService>(Lifecycles.Transient).Use<TImplementation>();
-                return this;
-            case Lifetime.Singleton:
-                registry.For<TService>(Lifecycles.Singleton).Use<TImplementation>();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            var implementationType = implementationInstance.GetType();
+            //if (producer == null || producer.Registration.ImplementationType != implementationType)
+                Register(serviceType, implementationInstance);
         }
-    }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
 
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(TService instance) where TService : class
-    {
-        registry.For<TService>(Lifecycles.Singleton).ClearAll().Use(instance);
         return this;
     }
 
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
+    private static ILifecycle ToLifetime(Lifetime lifetime)
     {
-        registry.For<TService>(Lifecycles.Singleton).Use(instance);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
-    {
-        switch (lifetime)
+        return lifetime switch
         {
-            case Lifetime.Transient:
-                registry.For<TService>(Lifecycles.Transient).ClearAll().Use(y => factory(y.GetInstance<IServiceResolver>()));
-                return this;
-            case Lifetime.Singleton:
-                registry.For<TService>(Lifecycles.Singleton).ClearAll().Use(y => factory(y.GetInstance<IServiceResolver>()));
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+            Lifetime.Singleton => Lifecycles.Singleton,
+            //Lifetime.Scoped => Lifecycles.Singleton, //TODO,
+            Lifetime.Transient => Lifecycles.Transient,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
+        };
     }
-
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
-    {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                registry.For<TService>(Lifecycles.Transient).Use(y => factory(y.GetInstance<IServiceResolver>()));
-                return this;
-            case Lifetime.Singleton:
-                registry.For<TService>(Lifecycles.Singleton).Use(y => factory(y.GetInstance<IServiceResolver>()));
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register(
-        Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
-    )
-    {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                registry.For(serviceType, Lifecycles.Transient).Use(implementingType);
-                return this;
-            case Lifetime.Singleton:
-                registry.For(serviceType, Lifecycles.Singleton).Use(implementingType);
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
-    }*/
 
     private class StructureMapResolver : IServiceResolver
     {

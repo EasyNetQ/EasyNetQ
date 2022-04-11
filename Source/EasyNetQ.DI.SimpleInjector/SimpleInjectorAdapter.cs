@@ -3,19 +3,29 @@ using System;
 
 namespace EasyNetQ.DI.SimpleInjector;
 
-// https://simpleinjector.readthedocs.io/en/latest/using.html
-/// <inheritdoc cref="IServiceRegister" />
+/// <see cref="IServiceRegister"/> implementation for SimpleInjector DI container.
 public class SimpleInjectorAdapter : IServiceRegister, IServiceResolver
 {
     private readonly Container container;
 
     /// <summary>
-    ///     Creates an adapter on top of Container
+    /// Creates an adapter on top of <see cref="Container"/>.
     /// </summary>
     public SimpleInjectorAdapter(Container container)
     {
         this.container = container ?? throw new ArgumentNullException(nameof(container));
+
+        ConfigureContainer(container);
+
         this.container.RegisterInstance<IServiceResolver>(this);
+    }
+
+    /// <summary>
+    /// Configures features necessary for overriding registrations.
+    /// </summary>
+    protected virtual void ConfigureContainer(Container container)
+    {
+        container.Options.AllowOverridingRegistrations = true;
     }
 
     /// <inheritdoc />

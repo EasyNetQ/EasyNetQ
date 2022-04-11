@@ -6,133 +6,166 @@ using Castle.Windsor;
 
 namespace EasyNetQ.DI.Windsor;
 
-/// <inheritdoc />
+/// <see cref="IServiceRegister"/> implementation for Castle.Windsor DI container.
 public class WindsorAdapter : IServiceRegister
 {
     private readonly IWindsorContainer container;
 
     /// <summary>
-    ///     Creates an adapter on top of IWindsorContainer
+    /// Creates an adapter on top of <see cref="IWindsorContainer"/>.
     /// </summary>
     public WindsorAdapter(IWindsorContainer container)
     {
         this.container = container ?? throw new ArgumentNullException(nameof(container));
+
+        ConfigureContainer(container);
 
         this.container.Register(Component.For<IServiceResolver>()
             .UsingFactoryMethod(c => new WindsorResolver(c))
             .LifestyleTransient());
     }
 
+    /// <summary>
+    /// Configures features necessary for collection registrations and overriding registrations.
+    /// </summary>
+    protected virtual void ConfigureContainer(IWindsorContainer container)
+    {
+        container.Kernel.Resolver.AddSubResolver(new Castle.MicroKernel.Resolvers.SpecializedResolvers.CollectionResolver(container.Kernel));
+    }
+
+    /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        throw new NotImplementedException();
+        if (replace)
+            container.RemoveHandler(serviceType);
+
+        var registration = replace
+            ? Component.For(serviceType)
+                .Named(serviceType.FullName)
+                .ImplementedBy(implementationType)
+                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .IsDefault()
+            : Component.For(serviceType)
+                .Named(Guid.NewGuid().ToString())
+                .ImplementedBy(implementationType)
+                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .IsDefault();
+
+        container.Register(registration);
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        throw new NotImplementedException();
+        if (replace)
+            container.RemoveHandler(serviceType);
+
+        var registration = replace
+            ? Component.For(serviceType)
+                .Named(serviceType.FullName)
+                .UsingFactoryMethod(x => implementationFactory(x.Resolve<IServiceResolver>()))
+                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .IsDefault()
+            : Component.For(serviceType)
+                .Named(Guid.NewGuid().ToString())
+                .UsingFactoryMethod(x => implementationFactory(x.Resolve<IServiceResolver>()))
+                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .IsDefault();
+
+        container.Register(registration);
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
     {
-        throw new NotImplementedException();
+        if (replace)
+            container.RemoveHandler(serviceType);
+
+        var registration = replace
+            ? Component.For(serviceType)
+                .Named(serviceType.FullName)
+                .Instance(implementationInstance)
+                .LifestyleSingleton()
+                .IsDefault()
+            : Component.For(serviceType)
+                .Named(Guid.NewGuid().ToString())
+                .Instance(implementationInstance)
+                .LifestyleSingleton()
+                .IsDefault();
+
+        container.Register(registration);
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        throw new NotImplementedException();
+        if (mode == RegistrationCompareMode.ServiceType)
+        {
+            if (!container.Kernel.HasComponent(serviceType))
+                Register(serviceType, implementationType, lifetime);
+        }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            if (!container.HasComponentWithImplementation(serviceType, implementationType))
+                Register(serviceType, implementationType, lifetime);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        throw new NotImplementedException();
+        if (mode == RegistrationCompareMode.ServiceType)
+        {
+            if (!container.Kernel.HasComponent(serviceType))
+                Register(serviceType, implementationFactory, lifetime);
+        }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
+            if (typeArguments.Length != 2)
+                throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
+            var implementationType = typeArguments[1];
+            if (!container.HasComponentWithImplementation(serviceType, implementationType))
+                Register(serviceType, implementationFactory, lifetime);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        return this;
     }
 
+    /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        throw new NotImplementedException();
-    }
+        if (mode == RegistrationCompareMode.ServiceType)
+        {
+            if (!container.Kernel.HasComponent(serviceType))
+                Register(serviceType, implementationInstance);
+        }
+        else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
+        {
+            var implementationType = implementationInstance.GetType();
+            if (!container.HasComponentWithImplementation(serviceType, implementationType))
+                Register(serviceType, implementationInstance);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
 
-    /*
-    /// <inheritdoc />
-    public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
-    {
-        var registration = Component.For<TService>()
-            .Named(Guid.NewGuid().ToString())
-            .ImplementedBy<TImplementation>()
-            .LifeStyle.Is(GetLifestyleType(lifetime))
-            .IsDefault();
-        container.Register(registration);
         return this;
     }
-
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService, TImplementation>(Lifetime lifetime)
-    {
-        var registration = Component.For<TService>()
-                                   .ImplementedBy<TImplementation>()
-                                   .LifeStyle.Is(GetLifestyleType(lifetime))
-                                   .IsDefault();
-        container.Register(registration);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(TService instance) where TService : class
-    {
-        var registration = Component.For<TService>()
-            .Named(Guid.NewGuid().ToString())
-            .Instance(instance)
-            .LifestyleSingleton()
-            .IsDefault();
-        container.Register(registration);
-        return this;
-    }
-
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(TService instance)
-    {
-        var registration = Component.For<TService>()
-                                    .Instance(instance)
-                                    .LifestyleSingleton()
-                                    .IsDefault();
-        container.Register(registration);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
-    {
-        var registration = Component.For<TService>()
-            .Named(Guid.NewGuid().ToString())
-            .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
-            .LifeStyle.Is(GetLifestyleType(lifetime))
-            .IsDefault();
-        container.Register(registration);
-        return this;
-    }
-
-    ICollectionServiceRegister ICollectionServiceRegister.Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime)
-    {
-        var registration = Component.For<TService>()
-                                   .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
-                                   .LifeStyle.Is(GetLifestyleType(lifetime))
-                                   .IsDefault();
-        container.Register(registration);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register(
-        Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
-    )
-    {
-        var registration = Component.For(serviceType)
-            .Named(Guid.NewGuid().ToString())
-            .ImplementedBy(implementingType)
-            .LifeStyle.Is(GetLifestyleType(lifetime))
-            .IsDefault();
-        container.Register(registration);
-        return this;
-    }*/
 
     private class WindsorResolver : IServiceResolver
     {

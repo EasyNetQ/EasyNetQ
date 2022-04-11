@@ -4,7 +4,6 @@ using LightInject;
 using EasyNetQ.LightInject;
 #endif
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,7 +14,7 @@ namespace EasyNetQ.DI.LightInject;
 namespace EasyNetQ.DI;
 #endif
 
-/// <inheritdoc cref="IServiceRegister" />
+/// <see cref="IServiceRegister"/> implementation for LightInject DI container.
 #if LIGHT_INJECT_PACKAGE
 public
 #else
@@ -27,7 +26,7 @@ class LightInjectAdapter : IServiceRegister
     private long counter;
 
     /// <summary>
-    ///     Creates LightInjectAdapter
+    /// Creates an adapter on top of <see cref="IServiceRegistry"/>.
     /// </summary>
     public LightInjectAdapter(IServiceRegistry serviceRegistry)
     {
