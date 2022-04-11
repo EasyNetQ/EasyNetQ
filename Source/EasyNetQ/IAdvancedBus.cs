@@ -150,32 +150,22 @@ public interface IAdvancedBus : IDisposable
     /// <summary>
     /// Delete a queue
     /// </summary>
-    /// <param name="queue">The queue to delete</param>
-    /// <param name="ifUnused">Only delete if unused</param>
-    /// <param name="ifEmpty">Only delete if empty</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    Task QueueDeleteAsync(
-        Queue queue,
-        bool ifUnused = false,
-        bool ifEmpty = false,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Delete a queue using queue name
-    /// </summary>
     /// <param name="name">The name of the queue to delete</param>
     /// <param name="ifUnused">Only delete if unused</param>
     /// <param name="ifEmpty">Only delete if empty</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default);
+    Task QueueDeleteAsync(
+        string name,
+        bool ifUnused = false,
+        bool ifEmpty = false,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Purges a queue
     /// </summary>
-    /// <param name="queue">The queue to purge</param>
+    /// <param name="name">The name of the queue to purge</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task QueuePurgeAsync(Queue queue, CancellationToken cancellationToken = default);
+    Task QueuePurgeAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
@@ -260,10 +250,10 @@ public interface IAdvancedBus : IDisposable
     /// <summary>
     /// Gets stats for the given queue
     /// </summary>
-    /// <param name="queue">The queue</param>
+    /// <param name="name">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The stats of the queue</returns>
-    Task<QueueStats> GetQueueStatsAsync(Queue queue, CancellationToken cancellationToken = default);
+    Task<QueueStats> GetQueueStatsAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates a new pulling consumer

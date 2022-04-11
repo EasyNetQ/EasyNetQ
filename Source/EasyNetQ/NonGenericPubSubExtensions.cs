@@ -207,7 +207,7 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, "pubSub");
+        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
         var subscribeDelegate = SubscribeDelegates.GetOrAdd(messageType, t =>
         {
@@ -292,7 +292,7 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, "pubSub");
+        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
         return pubSub.SubscribeAsync(subscriptionId, messageType, onMessage, configure, cancellationToken)
             .GetAwaiter()
