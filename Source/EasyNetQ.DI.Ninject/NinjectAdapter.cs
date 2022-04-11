@@ -7,14 +7,14 @@ using Ninject.Planning.Bindings;
 
 namespace EasyNetQ.DI.Ninject;
 
-/// <inheritdoc />
+/// <see cref="IServiceRegister"/> implementation for Ninject DI container.
 public class NinjectAdapter : IServiceRegister
 {
     private readonly IKernel kernel;
     private long counter;
 
     /// <summary>
-    ///     Creates an adapter on top of IKernel
+    /// Creates an adapter on top of <see cref="IKernel"/>.
     /// </summary>
     public NinjectAdapter(IKernel kernel)
     {
