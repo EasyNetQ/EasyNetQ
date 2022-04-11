@@ -5,9 +5,9 @@
 *.[Cc]ache
 *.bak
 *.ncb
-*.log 
+*.log
 *.DS_Store
-[Tt]humbs.db 
+[Tt]humbs.db
 _ReSharper.*
 *.orig
 *.dll
@@ -198,7 +198,7 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings
+# Comment the next line if you want to checkin your web deploy settings
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj

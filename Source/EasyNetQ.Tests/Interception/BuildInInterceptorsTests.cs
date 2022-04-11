@@ -42,9 +42,7 @@ public class BuildInInterceptorsTests
         first.OnProduce(sourceMessage).Returns(firstMessage);
         second.OnProduce(firstMessage).Returns(secondMessage);
 
-        var compositeInterceptor = new CompositeInterceptor();
-        compositeInterceptor.Add(first);
-        compositeInterceptor.Add(second);
+        var compositeInterceptor = new CompositeInterceptor(new[] { first, second });
         Assert.Equal(secondMessage, compositeInterceptor.OnProduce(sourceMessage));
     }
 
@@ -60,9 +58,7 @@ public class BuildInInterceptorsTests
         first.OnConsume(secondMessage).Returns(firstMessage);
         second.OnConsume(sourceMessage).Returns(secondMessage);
 
-        var compositeInterceptor = new CompositeInterceptor();
-        compositeInterceptor.Add(first);
-        compositeInterceptor.Add(second);
+        var compositeInterceptor = new CompositeInterceptor(new[] { first, second });
         Assert.Equal(firstMessage, compositeInterceptor.OnConsume(sourceMessage));
     }
 }
