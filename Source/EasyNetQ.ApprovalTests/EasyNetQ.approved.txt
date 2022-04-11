@@ -38,7 +38,7 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(this EasyNetQ.IAdvancedBus bus, string name, string type, bool durable = true, bool autoDelete = false, System.Threading.CancellationToken cancellationToken = default) { }
         public static void ExchangeDeclarePassive(this EasyNetQ.IAdvancedBus bus, string name, System.Threading.CancellationToken cancellationToken = default) { }
         public static void ExchangeDelete(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.QueueStats GetQueueStats(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken = default) { }
+        public static EasyNetQ.QueueStats GetQueueStats(this EasyNetQ.IAdvancedBus bus, string name, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Publish(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.MessageProperties messageProperties, System.ReadOnlyMemory<byte> body, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Publish<T>(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.IMessage<T> message, System.Threading.CancellationToken cancellationToken = default) { }
         public static EasyNetQ.Topology.Queue QueueDeclare(this EasyNetQ.IAdvancedBus bus, System.Threading.CancellationToken cancellationToken = default) { }
@@ -48,9 +48,8 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(this EasyNetQ.IAdvancedBus bus, string name, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(this EasyNetQ.IAdvancedBus bus, string name, bool durable, bool exclusive, bool autoDelete, System.Threading.CancellationToken cancellationToken = default) { }
         public static void QueueDeclarePassive(this EasyNetQ.IAdvancedBus bus, string name, System.Threading.CancellationToken cancellationToken = default) { }
-        public static void QueueDelete(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
         public static void QueueDelete(this EasyNetQ.IAdvancedBus bus, string name, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
-        public static void QueuePurge(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken = default) { }
+        public static void QueuePurge(this EasyNetQ.IAdvancedBus bus, string name, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Unbind(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> binding, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Unbind(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue> binding, System.Threading.CancellationToken cancellationToken = default) { }
     }
@@ -279,16 +278,15 @@ namespace EasyNetQ
         System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(string name, System.Action<EasyNetQ.IExchangeDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeDeleteAsync(EasyNetQ.Topology.Exchange exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default);
-        System.Threading.Tasks.Task<EasyNetQ.QueueStats> GetQueueStatsAsync(EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<EasyNetQ.QueueStats> GetQueueStatsAsync(string name, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task PublishAsync(EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.IMessage message, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task PublishAsync(EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.MessageProperties messageProperties, System.ReadOnlyMemory<byte> body, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task PublishAsync<T>(EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.IMessage<T> message, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(string name, System.Action<EasyNetQ.IQueueDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task QueueDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default);
-        System.Threading.Tasks.Task QueueDeleteAsync(EasyNetQ.Topology.Queue queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default);
-        System.Threading.Tasks.Task QueuePurgeAsync(EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task QueuePurgeAsync(string name, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> binding, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue> binding, System.Threading.CancellationToken cancellationToken = default);
     }
@@ -816,16 +814,15 @@ namespace EasyNetQ
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(string name, System.Action<EasyNetQ.IExchangeDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task ExchangeDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task ExchangeDeleteAsync(EasyNetQ.Topology.Exchange exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default) { }
-        public System.Threading.Tasks.Task<EasyNetQ.QueueStats> GetQueueStatsAsync(EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task<EasyNetQ.QueueStats> GetQueueStatsAsync(string name, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task PublishAsync(EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.IMessage message, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task PublishAsync(EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.MessageProperties messageProperties, System.ReadOnlyMemory<byte> body, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task PublishAsync<T>(EasyNetQ.Topology.Exchange exchange, string routingKey, bool mandatory, EasyNetQ.IMessage<T> message, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Queue> QueueDeclareAsync(string name, System.Action<EasyNetQ.IQueueDeclareConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task QueueDeclarePassiveAsync(string name, System.Threading.CancellationToken cancellationToken = default) { }
-        public virtual System.Threading.Tasks.Task QueueDeleteAsync(EasyNetQ.Topology.Queue queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default) { }
-        public virtual System.Threading.Tasks.Task QueuePurgeAsync(EasyNetQ.Topology.Queue queue, System.Threading.CancellationToken cancellationToken) { }
+        public virtual System.Threading.Tasks.Task QueuePurgeAsync(string name, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> binding, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task UnbindAsync(EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue> binding, System.Threading.CancellationToken cancellationToken) { }
     }

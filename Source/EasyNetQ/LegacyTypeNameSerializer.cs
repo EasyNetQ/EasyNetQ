@@ -12,7 +12,7 @@ public class LegacyTypeNameSerializer : ITypeNameSerializer
     /// <inheritdoc />
     public Type DeSerialize(string typeName)
     {
-        Preconditions.CheckNotBlank(typeName, "typeName");
+        Preconditions.CheckNotBlank(typeName, nameof(typeName));
 
         return deserializedTypes.GetOrAdd(typeName, t =>
         {

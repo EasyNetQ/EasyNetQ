@@ -182,12 +182,14 @@ public class RabbitAdvancedBus : IAdvancedBus
     #endregion
 
     /// <inheritdoc />
-    public async Task<QueueStats> GetQueueStatsAsync(Queue queue, CancellationToken cancellationToken)
+    public async Task<QueueStats> GetQueueStatsAsync(string name, CancellationToken cancellationToken)
     {
+        Preconditions.CheckNotBlank(name, nameof(name));
+
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var declareResult = await channelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(queue.Name), ChannelDispatchOptions.ConsumerTopology, cts.Token
+            x => x.QueueDeclarePassive(name), ChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
@@ -196,7 +198,7 @@ public class RabbitAdvancedBus : IAdvancedBus
                 "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
                 declareResult.MessageCount,
                 declareResult.ConsumerCount,
-                queue.Name
+                name
             );
         }
 
@@ -443,14 +445,9 @@ public class RabbitAdvancedBus : IAdvancedBus
 
     /// <inheritdoc />
     public virtual async Task QueueDeleteAsync(
-        Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default
-    )
-        => await QueueDeleteAsync(queue.Name, ifUnused, ifEmpty, cancellationToken);
-
-    /// <inheritdoc />
-    public virtual async Task QueueDeleteAsync(string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
+        string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(name, nameof(name));
+        Preconditions.CheckNotBlank(name, nameof(name));
 
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -467,19 +464,21 @@ public class RabbitAdvancedBus : IAdvancedBus
     }
 
     /// <inheritdoc />
-    public virtual async Task QueuePurgeAsync(Queue queue, CancellationToken cancellationToken)
+    public virtual async Task QueuePurgeAsync(string name, CancellationToken cancellationToken)
     {
+        Preconditions.CheckNotBlank(name, nameof(name));
+
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await channelDispatcher.InvokeAsync(
-            x => x.QueuePurge(queue.Name),
+            x => x.QueuePurge(name),
             ChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Purged queue {queue}", queue.Name);
+            logger.DebugFormat("Purged queue {queue}", name);
         }
     }
 

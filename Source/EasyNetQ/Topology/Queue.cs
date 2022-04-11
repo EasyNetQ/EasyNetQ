@@ -18,7 +18,7 @@ public readonly struct Queue : IBindable
         IDictionary<string, object> arguments = null
     )
     {
-        Preconditions.CheckNotBlank(name, "name");
+        Preconditions.CheckNotBlank(name, nameof(name));
 
         Name = name;
         IsDurable = isDurable;

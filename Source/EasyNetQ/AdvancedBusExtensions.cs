@@ -505,16 +505,16 @@ public static class AdvancedBusExtensions
     /// Gets stats for the given queue
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="queue">The queue</param>
+    /// <param name="name">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The stats of the queue</returns>
     public static QueueStats GetQueueStats(
-        this IAdvancedBus bus, Queue queue, CancellationToken cancellationToken = default
+        this IAdvancedBus bus, string name, CancellationToken cancellationToken = default
     )
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 
-        return bus.GetQueueStatsAsync(queue, cancellationToken)
+        return bus.GetQueueStatsAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -938,30 +938,13 @@ public static class AdvancedBusExtensions
     /// Delete a queue
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="queue">The queue to delete</param>
-    /// <param name="ifUnused">Only delete if unused</param>
-    /// <param name="ifEmpty">Only delete if empty</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void QueueDelete(this IAdvancedBus bus, Queue queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
-        bus.QueueDeleteAsync(queue, ifUnused, ifEmpty, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
-    /// <summary>
-    /// Delete a queue using queue name
-    /// </summary>
-    /// <param name="bus">The bus instance</param>
     /// <param name="name">The name of the queue to delete</param>
     /// <param name="ifUnused">Only delete if unused</param>
     /// <param name="ifEmpty">Only delete if empty</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void QueueDelete(this IAdvancedBus bus, string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, "bus");
+        Preconditions.CheckNotNull(bus, nameof(bus));
 
         bus.QueueDeleteAsync(name, ifUnused, ifEmpty, cancellationToken)
             .GetAwaiter()
@@ -972,13 +955,13 @@ public static class AdvancedBusExtensions
     /// Purges a queue
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="queue">The queue to purge</param>
+    /// <param name="name">The name of the queue to purge</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static void QueuePurge(this IAdvancedBus bus, Queue queue, CancellationToken cancellationToken = default)
+    public static void QueuePurge(this IAdvancedBus bus, string name, CancellationToken cancellationToken = default)
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 
-        bus.QueuePurgeAsync(queue, cancellationToken)
+        bus.QueuePurgeAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }

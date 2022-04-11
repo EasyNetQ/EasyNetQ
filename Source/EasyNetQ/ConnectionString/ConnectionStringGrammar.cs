@@ -92,12 +92,12 @@ internal static class ConnectionStringGrammar
 
         var memberEx = getter.Body as MemberExpression;
 
-        Preconditions.CheckNotNull(memberEx, "getter", "Body is not a member-expression.");
+        Preconditions.CheckNotNull(memberEx, nameof(getter), "Body is not a member-expression.");
 
         var property = memberEx.Member as PropertyInfo;
 
-        Preconditions.CheckNotNull(property, "getter", "Member is not a property.");
-        Preconditions.CheckTrue(property.CanWrite, "getter", "Member is not a writeable property.");
+        Preconditions.CheckNotNull(property, nameof(getter), "Member is not a property.");
+        Preconditions.CheckTrue(property.CanWrite, nameof(getter), "Member is not a writeable property.");
 
         return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
     }

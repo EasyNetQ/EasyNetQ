@@ -169,8 +169,7 @@ public class When_a_queue_is_deleted : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        var queue = new Queue("my_queue", false);
-        mockBuilder.Bus.Advanced.QueueDelete(queue);
+        mockBuilder.Bus.Advanced.QueueDelete("my_queue");
     }
 
     public void Dispose()
