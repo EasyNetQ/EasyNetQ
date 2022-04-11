@@ -36,7 +36,7 @@ public class When_consumer_with_auto_ack : IDisposable
             allMessagesReceived.Increment();
         }
 
-        var initialStats = await bus.Advanced.GetQueueStatsAsync(queue, cts.Token);
+        var initialStats = await bus.Advanced.GetQueueStatsAsync(queue.Name, cts.Token);
         initialStats.MessagesCount.Should().Be(10);
 
         using (
@@ -54,7 +54,7 @@ public class When_consumer_with_auto_ack : IDisposable
             allMessagesReceived.Wait();
         }
 
-        var finalStats = await bus.Advanced.GetQueueStatsAsync(queue, cts.Token);
+        var finalStats = await bus.Advanced.GetQueueStatsAsync(queue.Name, cts.Token);
         finalStats.MessagesCount.Should().Be(0);
     }
 
