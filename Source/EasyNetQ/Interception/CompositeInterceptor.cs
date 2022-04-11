@@ -28,13 +28,4 @@ internal sealed class CompositeInterceptor : IProduceConsumeInterceptor
             .Reverse()
             .Aggregate(message, (x, y) => y.OnConsume(x));
     }
-
-    /// <summary>
-    ///     Add the interceptor to pipeline
-    /// </summary>
-    /// <param name="interceptor"></param>
-    public void Add(IProduceConsumeInterceptor interceptor) // TODO: method may be removed, for test purposes only
-    {
-        interceptors.Add(interceptor);
-    }
 }

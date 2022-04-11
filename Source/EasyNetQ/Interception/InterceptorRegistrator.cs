@@ -29,12 +29,12 @@ internal sealed class InterceptorRegistrator : IInterceptorRegistrator
 
     public void Add(IProduceConsumeInterceptor interceptor)
     {
-        serviceRegister.Register(interceptor); // TODO: change to collection register
+        serviceRegister.Register(interceptor, replace: false);
     }
 
     /// <inheritdoc />
     public void Add<TInterceptor>() where TInterceptor : class, IProduceConsumeInterceptor
     {
-        serviceRegister.Register<IProduceConsumeInterceptor, TInterceptor>(); // TODO: change to collection register
+        serviceRegister.Register<IProduceConsumeInterceptor, TInterceptor>(replace: false);
     }
 }
