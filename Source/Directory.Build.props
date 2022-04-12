@@ -17,6 +17,7 @@
     <AssemblyOriginatorKeyFile>..\..\Assets\EasyNetQ.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <NoWarn>$(NoWarn);1591</NoWarn> <!--temporary-->
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
