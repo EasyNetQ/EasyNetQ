@@ -3,6 +3,7 @@ namespace EasyNetQ.DI.SimpleInjector
     public class SimpleInjectorAdapter : EasyNetQ.DI.IServiceRegister, EasyNetQ.DI.IServiceResolver
     {
         public SimpleInjectorAdapter(SimpleInjector.Container container) { }
+        protected virtual void ConfigureContainer(SimpleInjector.Container container) { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance, bool replace = true) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true) { }
