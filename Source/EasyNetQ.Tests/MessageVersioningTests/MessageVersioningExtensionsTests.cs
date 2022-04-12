@@ -34,7 +34,8 @@ public class MessageVersioningExtensionsTests
 
         public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
         {
-            throw new NotImplementedException();
+            services.Add(serviceType, implementationType);
+            return this;
         }
 
         public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
