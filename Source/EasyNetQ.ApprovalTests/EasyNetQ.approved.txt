@@ -1286,6 +1286,9 @@ namespace EasyNetQ.DI
         public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true)
             where TService :  class
             where TImplementation :  class, TService { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TImplementation> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true)
+            where TService :  class
+            where TImplementation :  class, TService { }
         public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
             where TService :  class { }
         public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
