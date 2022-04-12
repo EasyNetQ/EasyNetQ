@@ -1,5 +1,6 @@
 using System;
 using EasyNetQ.DI.StructureMap;
+using Shouldly;
 using StructureMap;
 using Xunit;
 
@@ -16,7 +17,7 @@ public class StructureMapDependencyScopeTests
 
         var service = ResolveFromScope(resolver);
 
-        Assert.Equal(shouldBeDisposed, service.Disposed);
+        service.Disposed.ShouldBe(shouldBeDisposed);
     }
 
     [Fact]
@@ -32,7 +33,7 @@ public class StructureMapDependencyScopeTests
             service2 = scope.Resolve<IService>();
         }
 
-        Assert.Same(service1, service2);
+        service2.ShouldBe(service1);
     }
 
     [Fact]
@@ -43,7 +44,7 @@ public class StructureMapDependencyScopeTests
         var service1 = ResolveFromScope(resolver);
         var service2 = ResolveFromScope(resolver);
 
-        Assert.NotSame(service1, service2);
+        service2.ShouldNotBe(service1);
     }
 
     private static IService ResolveFromScope(IServiceResolver resolver)

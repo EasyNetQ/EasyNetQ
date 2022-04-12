@@ -1,18 +1,5 @@
-using Autofac;
-using Castle.Windsor;
-using EasyNetQ.DI.Autofac;
-using EasyNetQ.DI.Microsoft;
-using EasyNetQ.DI.Ninject;
-using EasyNetQ.DI.SimpleInjector;
-using EasyNetQ.DI.StructureMap;
-using EasyNetQ.DI.Windsor;
-using EasyNetQ.LightInject;
 using EasyNetQ.Logging;
-using LightInject;
-using Microsoft.Extensions.DependencyInjection;
-using Ninject;
 using Shouldly;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -24,10 +11,8 @@ namespace EasyNetQ.DI.Tests;
 
 public class ContainerAdapterTests
 {
-    public delegate IServiceResolver ResolverFactory(Action<IServiceRegister> configure);
-
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_instance(string name, ResolverFactory resolverFactory)
     {
         var first = new Service();
@@ -43,7 +28,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_type(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c =>
@@ -56,7 +41,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_factory(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c =>
@@ -69,7 +54,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_first_registration_win_instance(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -89,7 +74,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_first_registration_win_type(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -106,7 +91,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_first_registration_win_factory(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -123,7 +108,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_allow_multiple_try_register_instance(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -152,7 +137,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_allow_multiple_try_register_type(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -180,7 +165,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_allow_multiple_try_register_factory(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -205,7 +190,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_with_impl_type_instance(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -229,7 +214,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_with_impl_type_type(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -250,7 +235,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_with_impl_type_factory(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -271,7 +256,7 @@ public class ContainerAdapterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_single_registration(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
@@ -288,11 +273,11 @@ public class ContainerAdapterTests
         });
 
         var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        Assert.Single(serviceWithCollection.Services);
+        serviceWithCollection.Services.Length.ShouldBe(1);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_multiple_registrations(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c =>
@@ -306,11 +291,11 @@ public class ContainerAdapterTests
         });
 
         var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        Assert.Equal(3, serviceWithCollection.Services.Length);
+        serviceWithCollection.Services.Length.ShouldBe(3);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_multiple_registrations_with_try_register(string name, ResolverFactory resolverFactory)
     {
         //TODO: System.InvalidOperationException : The container can't be changed after the first call to GetInstance, GetAllInstances, Verify, and some calls of GetRegistration. Please see https://simpleinjector.org/locked to understand why the container is locked.
@@ -338,11 +323,11 @@ public class ContainerAdapterTests
         });
 
         var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        Assert.Equal(3, serviceWithCollection.Services.Length);
+        serviceWithCollection.Services.Length.ShouldBe(3);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_singleton_created_once(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register<IService, Service>());
@@ -350,11 +335,11 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        Assert.Same(first, second);
+        second.ShouldBe(first);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_transient_created_every_time(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register<IService, Service>(Lifetime.Transient));
@@ -362,20 +347,20 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        Assert.NotSame(first, second);
+        second.ShouldNotBe(first);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_service_resolver(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(_ => { });
 
-        Assert.NotNull(resolver.Resolve<IServiceResolver>());
+        resolver.Resolve<IServiceResolver>().ShouldNotBeNull();
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_singleton_factory_called_once(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register<IService>(_ => new Service()));
@@ -383,11 +368,11 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        Assert.Same(first, second);
+        second.ShouldBe(first);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_transient_factory_call_every_time(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register<IService>(_ => new Service(), Lifetime.Transient));
@@ -395,11 +380,11 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        Assert.NotSame(first, second);
+        second.ShouldNotBe(first);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_override_dependency_with_factory(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c =>
@@ -408,26 +393,26 @@ public class ContainerAdapterTests
             .Register<IService, Service>()
             .Register(_ => (IService)new DummyService());
         });
-        Assert.IsType<DummyService>(resolver.Resolve<IService>());
+        resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_singleton_generic(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register(typeof(ILogger<>), typeof(NoopLogger<>)));
         var intLogger = resolver.Resolve<ILogger<int>>();
         var floatLogger = resolver.Resolve<ILogger<float>>();
 
-        Assert.IsType<NoopLogger<int>>(intLogger);
-        Assert.IsType<NoopLogger<float>>(floatLogger);
+        intLogger.ShouldBeOfType<NoopLogger<int>>();
+        floatLogger.ShouldBeOfType<NoopLogger<float>>();
 
-        Assert.Same(intLogger, resolver.Resolve<ILogger<int>>());
-        Assert.Same(floatLogger, resolver.Resolve<ILogger<float>>());
+        resolver.Resolve<ILogger<int>>().ShouldBe(intLogger);
+        resolver.Resolve<ILogger<float>>().ShouldBe(floatLogger);
     }
 
     [Theory]
-    [MemberData(nameof(GetContainerAdapters))]
+    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_transient_generic(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(
@@ -437,116 +422,11 @@ public class ContainerAdapterTests
         var intLogger = resolver.Resolve<ILogger<int>>();
         var floatLogger = resolver.Resolve<ILogger<float>>();
 
-        Assert.IsType<NoopLogger<int>>(intLogger);
-        Assert.IsType<NoopLogger<float>>(floatLogger);
+        intLogger.ShouldBeOfType<NoopLogger<int>>();
+        floatLogger.ShouldBeOfType<NoopLogger<float>>();
 
-        Assert.NotSame(intLogger, resolver.Resolve<ILogger<int>>());
-        Assert.NotSame(floatLogger, resolver.Resolve<ILogger<float>>());
-    }
-
-    public static IEnumerable<object[]> GetContainerAdapters()
-    {
-        yield return new object[]
-        {
-            "Default",
-            (ResolverFactory)(c =>
-            {
-                var container = new EasyNetQ.LightInject.ServiceContainer(c => c.EnablePropertyInjection = false);
-                var adapter = new LightInjectAdapter(container);
-                c(adapter);
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "LightInject",
-            (ResolverFactory)(c =>
-            {
-                var container = new global::LightInject.ServiceContainer(c => c.EnablePropertyInjection = false);
-                var adapter = new LightInject.LightInjectAdapter(container);
-                c(adapter);
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "SimpleInjector",
-            (ResolverFactory)(c =>
-            {
-                var container = new global::SimpleInjector.Container();
-                var adapter = new SimpleInjectorAdapter(container);
-                c(adapter);
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "StructureMap",
-            (ResolverFactory)(c =>
-            {
-                var registry = new global::StructureMap.Registry();
-                var adapter = new StructureMapAdapter(registry);
-                c(adapter);
-                var container = new global::StructureMap.Container(registry);
-
-                var trace = container.WhatDoIHave(); // for debug purposes
-
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-             "Autofac",
-            (ResolverFactory)(c =>
-            {
-                var containerBuilder = new ContainerBuilder();
-                var adapter = new AutofacAdapter(containerBuilder);
-                c(adapter);
-                var container = containerBuilder.Build();
-                return container.Resolve<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "Windsor",
-            (ResolverFactory)(c =>
-            {
-                var container = new WindsorContainer();
-                var adapter = new WindsorAdapter(container);
-                c(adapter);
-                return container.Resolve<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "Ninject",
-            (ResolverFactory)(c =>
-            {
-                var container = new StandardKernel();
-                var adapter = new NinjectAdapter(container);
-                c(adapter);
-                return container.Get<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "ServiceCollection",
-            (ResolverFactory)(c =>
-            {
-                var serviceCollection = new ServiceCollection();
-                var adapter = new ServiceCollectionAdapter(serviceCollection);
-                c(adapter);
-                var serviceProvider = serviceCollection.BuildServiceProvider(true); //validate scopes
-                return serviceProvider.GetService<IServiceResolver>();
-            })
-        };
+        resolver.Resolve<ILogger<int>>().ShouldNotBe(intLogger);
+        resolver.Resolve<ILogger<float>>().ShouldNotBe(floatLogger);
     }
 
     public interface IService
