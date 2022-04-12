@@ -43,12 +43,12 @@ public class WindsorAdapter : IServiceRegister
             ? Component.For(serviceType)
                 .Named(serviceType.FullName)
                 .ImplementedBy(implementationType)
-                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .LifeStyle.Is(ToLifestyleType(lifetime))
                 .IsDefault()
             : Component.For(serviceType)
                 .Named(Guid.NewGuid().ToString())
                 .ImplementedBy(implementationType)
-                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .LifeStyle.Is(ToLifestyleType(lifetime))
                 .IsDefault();
 
         container.Register(registration);
@@ -65,12 +65,12 @@ public class WindsorAdapter : IServiceRegister
             ? Component.For(serviceType)
                 .Named(serviceType.FullName)
                 .UsingFactoryMethod(x => implementationFactory(x.Resolve<IServiceResolver>()))
-                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .LifeStyle.Is(ToLifestyleType(lifetime))
                 .IsDefault()
             : Component.For(serviceType)
                 .Named(Guid.NewGuid().ToString())
                 .UsingFactoryMethod(x => implementationFactory(x.Resolve<IServiceResolver>()))
-                .LifeStyle.Is(GetLifestyleType(lifetime))
+                .LifeStyle.Is(ToLifestyleType(lifetime))
                 .IsDefault();
 
         container.Register(registration);
@@ -167,6 +167,16 @@ public class WindsorAdapter : IServiceRegister
         return this;
     }
 
+    private LifestyleType ToLifestyleType(Lifetime lifetime)
+    {
+        return lifetime switch
+        {
+            Lifetime.Transient => LifestyleType.Transient,
+            Lifetime.Singleton => LifestyleType.Singleton,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
+        };
+    }
+
     private class WindsorResolver : IServiceResolver
     {
         private readonly IKernel kernel;
@@ -185,15 +195,5 @@ public class WindsorAdapter : IServiceRegister
         {
             return new ServiceResolverScope(this);
         }
-    }
-
-    private LifestyleType GetLifestyleType(Lifetime lifetime)
-    {
-        return lifetime switch
-        {
-            Lifetime.Transient => LifestyleType.Transient,
-            Lifetime.Singleton => LifestyleType.Singleton,
-            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
-        };
     }
 }

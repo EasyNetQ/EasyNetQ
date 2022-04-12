@@ -31,6 +31,15 @@ public static class ServiceRegisterExtensions
         => services.Register(typeof(TService), implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory)), lifetime, replace);
 
     /// <summary>
+    /// Registers the service of type <typeparamref name="TService"/> with the dependency injection provider.
+    /// Optionally removes any existing implementation of the same service type.
+    /// </summary>
+    public static IServiceRegister Register<TService, TImplementation>(this IServiceRegister services, Func<IServiceResolver, TImplementation> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
+        where TService : class
+        where TImplementation : class, TService
+        => services.Register(typeof(TService), implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory)), lifetime, replace);
+
+    /// <summary>
     /// Registers <paramref name="implementationInstance"/> as type <typeparamref name="TService"/> with the dependency injection provider.
     /// Optionally removes any existing implementation of the same service type.
     /// </summary>

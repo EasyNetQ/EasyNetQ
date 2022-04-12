@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using StructureMap;
 using StructureMap.Pipeline;
 
@@ -23,9 +24,9 @@ public class StructureMapAdapter : IServiceRegister
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
         if (replace)
-            registry.For(serviceType, ToLifetime(lifetime)).ClearAll().Use(implementationType);
+            registry.For(serviceType, ToLifecycle(lifetime)).ClearAll().Use(implementationType);
         else
-            registry.For(serviceType, ToLifetime(lifetime)).Use(implementationType);
+            registry.For(serviceType, ToLifecycle(lifetime)).Use(implementationType);
 
         return this;
     }
@@ -34,9 +35,9 @@ public class StructureMapAdapter : IServiceRegister
     public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
         if (replace)
-            registry.For(serviceType, ToLifetime(lifetime)).ClearAll().Use(y => implementationFactory(y.GetInstance<IServiceResolver>()));
+            registry.For(serviceType, ToLifecycle(lifetime)).ClearAll().Use(y => implementationFactory(y.GetInstance<IServiceResolver>()));
         else
-            registry.For(serviceType, ToLifetime(lifetime)).Use(y => implementationFactory(y.GetInstance<IServiceResolver>()));
+            registry.For(serviceType, ToLifecycle(lifetime)).Use(y => implementationFactory(y.GetInstance<IServiceResolver>()));
 
         return this;
     }
@@ -55,18 +56,16 @@ public class StructureMapAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        //TODO: Figure out how to get current registrations from StructureMap
-        //var producer = container.GetRegistration(serviceType, throwOnFailure: false);
-
-        if (mode == RegistrationCompareMode.ServiceType)
+        if (mode == RegistrationCompareMode.ServiceType || mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
-            //if (producer == null)
-                Register(serviceType, implementationType, lifetime);
+            // StructureMap has only generic API for UseIfNone, so there is a bit reflection here
+            // registry.For<serviceType>(ToLifecycle(lifetime)).UseIfNone<implementationType>();
+            var createPluginFamilyExpression = typeof(IProfileRegistry).GetMethod("For", new[] { typeof(ILifecycle) }).MakeGenericMethod(serviceType).Invoke(registry, new[] { ToLifecycle(lifetime) });
+            createPluginFamilyExpression.GetType().GetMethod("UseIfNone", Type.EmptyTypes).MakeGenericMethod(implementationType).Invoke(createPluginFamilyExpression, Array.Empty<object>());
         }
         else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
-            //if (producer == null || producer.Registration.ImplementationType != implementationType)
-                Register(serviceType, implementationType, lifetime);
+            //TODO: UseIfNone for collections
         }
         else
         {
@@ -79,22 +78,35 @@ public class StructureMapAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        //TODO: Figure out how to get current registrations from StructureMap
-        //var producer = container.GetRegistration(serviceType, throwOnFailure: false);
+        Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
+        if (typeArguments.Length != 2)
+            throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
+        var implementationType = typeArguments[1];
 
-        if (mode == RegistrationCompareMode.ServiceType)
+        if (mode == RegistrationCompareMode.ServiceType || mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
-            //if (producer == null)
-                Register(serviceType, implementationFactory, lifetime);
+            // StructureMap has only generic API for UseIfNone, so there is a bit reflection here
+            // registry.For<serviceType>(ToLifecycle(lifetime)).UseIfNone<implementationType>("", c => implementationFactory(c.GetInstance<IServiceResolver>()));
+            var createPluginFamilyExpression = typeof(IProfileRegistry).GetMethod("For", new[] { typeof(ILifecycle) }).MakeGenericMethod(serviceType).Invoke(registry, new[] { ToLifecycle(lifetime) });
+            var useIfNone = createPluginFamilyExpression.GetType()
+                .GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
+                .Where(m => m.Name == "UseIfNone" && m.ToString().Contains("(System.String, System.Func`2[StructureMap.IContext,T])"))
+                .Single();
+
+            var implementationFactoryAdapterType = typeof(ImplementationFactoryAdapter<>).MakeGenericType(implementationType);
+
+            useIfNone.MakeGenericMethod(implementationType).Invoke(createPluginFamilyExpression, new object[]
+            {
+                string.Empty,
+                Delegate.CreateDelegate(
+                    typeof(Func<,>).MakeGenericType(typeof(IContext), implementationType),
+                    Activator.CreateInstance(implementationFactoryAdapterType, implementationFactory),
+                    implementationFactoryAdapterType.GetMethod("Resolve"))
+            });
         }
         else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
-            Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
-            if (typeArguments.Length != 2)
-                throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
-            var implementationType = typeArguments[1];
-            //if (producer == null || producer.Registration.ImplementationType != implementationType)
-                Register(serviceType, implementationFactory, lifetime);
+            //TODO: UseIfNone for collections
         }
         else
         {
@@ -107,19 +119,17 @@ public class StructureMapAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType)
     {
-        //TODO: Figure out how to get current registrations from StructureMap
-        //var producer = container.GetRegistration(serviceType, throwOnFailure: false);
-
-        if (mode == RegistrationCompareMode.ServiceType)
+        if (mode == RegistrationCompareMode.ServiceType || mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
-            //if (producer == null)
-                Register(serviceType, implementationInstance);
+            // StructureMap has only generic API for UseIfNone, so there is a bit reflection here
+            // registry.For<serviceType>().UseIfNone(implementationInstance);
+            var createPluginFamilyExpression = typeof(IProfileRegistry).GetMethod("For", new[] { typeof(ILifecycle) }).MakeGenericMethod(serviceType).Invoke(registry, new object[] { null });
+            createPluginFamilyExpression.GetType().GetMethod("UseIfNone", new[] { serviceType }).Invoke(createPluginFamilyExpression, new[] { implementationInstance });
         }
         else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
         {
             var implementationType = implementationInstance.GetType();
-            //if (producer == null || producer.Registration.ImplementationType != implementationType)
-                Register(serviceType, implementationInstance);
+            //TODO: UseIfNone for collections
         }
         else
         {
@@ -129,7 +139,7 @@ public class StructureMapAdapter : IServiceRegister
         return this;
     }
 
-    private static ILifecycle ToLifetime(Lifetime lifetime)
+    private static ILifecycle ToLifecycle(Lifetime lifetime)
     {
         return lifetime switch
         {
@@ -170,5 +180,17 @@ public class StructureMapAdapter : IServiceRegister
         {
             Container.Dispose();
         }
+    }
+
+    private class ImplementationFactoryAdapter<T>
+    {
+        private readonly Func<IServiceResolver, object> _implementationFactory;
+
+        public ImplementationFactoryAdapter(Func<IServiceResolver, object> implementationFactory)
+        {
+            _implementationFactory = implementationFactory;
+        }
+
+        public T Resolve(IContext context) => (T)_implementationFactory(context.GetInstance<IServiceResolver>());
     }
 }
