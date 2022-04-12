@@ -18,50 +18,53 @@ namespace EasyNetQ;
 public static class ServiceRegisterExtensions
 {
     /// <summary>
-    ///     Registers the default EasyNetQ components
+    /// Registers the default EasyNetQ components if needed services have not yet been registered.
     /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static void RegisterDefaultServices(this IServiceRegister serviceRegister)
+    public static void RegisterDefaultServices(this IServiceRegister serviceRegister, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
     {
         Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
 
-        // Note: IConnectionConfiguration gets registered when RabbitHutch.CreateBus(..) is run.
-        // default service registration
         serviceRegister
-            .Register<ILogger, NoopLogger>()
-            .Register(typeof(ILogger<>), typeof(NoopLogger<>))
-            .Register<IConnectionStringParser>(
+            .TryRegister(resolver =>
+            {
+                var configuration = connectionConfigurationFactory(resolver);
+                configuration.SetDefaultProperties();
+                return configuration;
+            })
+            .TryRegister<ILogger, NoopLogger>()
+            .TryRegister(typeof(ILogger<>), typeof(NoopLogger<>))
+            .TryRegister<IConnectionStringParser>(
                 _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
             )
-            .Register<ISerializer>(_ => new JsonSerializer())
-            .Register<IConventions, Conventions>()
-            .Register<IEventBus, EventBus>()
-            .Register<ITypeNameSerializer, DefaultTypeNameSerializer>()
-            .Register<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
-            .Register<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
-            .Register<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
-            .Register(new AdvancedBusEventHandlers())
-            .Register<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
-            .Register<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
-            .Register<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
-            .Register<IHandlerRunner, HandlerRunner>()
-            .Register<IInternalConsumerFactory, InternalConsumerFactory>()
-            .Register<IConsumerFactory, ConsumerFactory>()
-            .Register(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
-            .Register<IChannelDispatcher, SingleChannelDispatcher>()
-            .Register<IProducerConnection, ProducerConnection>()
-            .Register<IConsumerConnection, ConsumerConnection>()
-            .Register<IPersistentChannelFactory, PersistentChannelFactory>()
-            .Register<IPublishConfirmationListener, PublishConfirmationListener>()
-            .Register<IHandlerCollectionFactory, HandlerCollectionFactory>()
-            .Register<IPullingConsumerFactory, PullingConsumerFactory>()
-            .Register<IAdvancedBus, RabbitAdvancedBus>()
-            .Register<IPubSub, DefaultPubSub>()
-            .Register<IRpc, DefaultRpc>()
-            .Register<ISendReceive, DefaultSendReceive>()
-            .Register<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-            .Register<IConsumeScopeProvider, NoopConsumeScopeProvider>()
-            .Register<IBus, RabbitBus>();
+            .TryRegister<ISerializer>(_ => new JsonSerializer())
+            .TryRegister<IConventions, Conventions>()
+            .TryRegister<IEventBus, EventBus>()
+            .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
+            .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
+            .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
+            .TryRegister<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
+            .TryRegister(new AdvancedBusEventHandlers())
+            .TryRegister<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
+            .TryRegister<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
+            .TryRegister<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
+            .TryRegister<IHandlerRunner, HandlerRunner>()
+            .TryRegister<IInternalConsumerFactory, InternalConsumerFactory>()
+            .TryRegister<IConsumerFactory, ConsumerFactory>()
+            .TryRegister(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
+            .TryRegister<IChannelDispatcher, SingleChannelDispatcher>()
+            .TryRegister<IProducerConnection, ProducerConnection>()
+            .TryRegister<IConsumerConnection, ConsumerConnection>()
+            .TryRegister<IPersistentChannelFactory, PersistentChannelFactory>()
+            .TryRegister<IPublishConfirmationListener, PublishConfirmationListener>()
+            .TryRegister<IHandlerCollectionFactory, HandlerCollectionFactory>()
+            .TryRegister<IPullingConsumerFactory, PullingConsumerFactory>()
+            .TryRegister<IAdvancedBus, RabbitAdvancedBus>()
+            .TryRegister<IPubSub, DefaultPubSub>()
+            .TryRegister<IRpc, DefaultRpc>()
+            .TryRegister<ISendReceive, DefaultSendReceive>()
+            .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
+            .TryRegister<IConsumeScopeProvider, NoopConsumeScopeProvider>()
+            .TryRegister<IBus, RabbitBus>();
     }
 
     /// <summary>

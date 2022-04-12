@@ -908,7 +908,7 @@ namespace EasyNetQ
         public static EasyNetQ.DI.IServiceRegister EnableMessageVersioning(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableMultiChannelClientCommandDispatcher(this EasyNetQ.DI.IServiceRegister serviceRegister, int channelsCount) { }
         public static EasyNetQ.Interception.IInterceptorRegistrator EnableTripleDESEncryption(this EasyNetQ.Interception.IInterceptorRegistrator registrator, byte[] key, byte[] iv) { }
-        public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
     }
     public static class SimpleConsumeConfigurationExtensions
     {
