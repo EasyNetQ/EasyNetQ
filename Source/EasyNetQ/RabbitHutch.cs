@@ -170,16 +170,11 @@ public static class RabbitHutch
         Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
         Preconditions.CheckNotNull(registerServices, nameof(registerServices));
 
-        serviceRegister.Register(c =>
-        {
-            var configuration = connectionConfigurationFactory(c);
-            configuration.SetDefaultProperties();
-            return configuration;
-        });
-
-        //TODO: swap these lines and change RegisterDefaultServices impl to TryRegister semantic
-        serviceRegister.RegisterDefaultServices();
+        // first call delegate to register user-supplied services
         registerServices(serviceRegister);
+
+        // then register default services
+        serviceRegister.RegisterDefaultServices(connectionConfigurationFactory);
     }
 
     private sealed class BusWithCustomDisposer : IBus
