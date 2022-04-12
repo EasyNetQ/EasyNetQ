@@ -19,15 +19,6 @@ public class ServiceCollectionAdapter : IServiceRegister
         this.serviceCollection.TryAddSingleton<IServiceResolver, ServiceProviderAdapter>();
     }
 
-    private static ServiceLifetime TranslateLifetime(Lifetime lifetime)
-          => lifetime switch
-          {
-              Lifetime.Singleton => ServiceLifetime.Singleton,
-              //Lifetime.Scoped => MSServiceLifetime.Scoped,
-              Lifetime.Transient => ServiceLifetime.Transient,
-              _ => throw new ArgumentOutOfRangeException(nameof(lifetime))
-          };
-
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime, bool replace = true)
     {
@@ -38,11 +29,11 @@ public class ServiceCollectionAdapter : IServiceRegister
 
         if (replace)
         {
-            serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationType, TranslateLifetime(lifetime)));
+            serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
         }
         else
         {
-            serviceCollection.Add(new ServiceDescriptor(serviceType, implementationType, TranslateLifetime(lifetime)));
+            serviceCollection.Add(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
         }
         return this;
     }
@@ -55,11 +46,11 @@ public class ServiceCollectionAdapter : IServiceRegister
 
         if (replace)
         {
-            serviceCollection.Replace(new ServiceDescriptor(serviceType, x => implementationFactory(x.GetRequiredService<IServiceResolver>()), TranslateLifetime(lifetime)));
+            serviceCollection.Replace(new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime)));
         }
         else
         {
-            serviceCollection.Add(new ServiceDescriptor(serviceType, x => implementationFactory(x.GetRequiredService<IServiceResolver>()), TranslateLifetime(lifetime)));
+            serviceCollection.Add(new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime)));
         }
 
         return this;
@@ -93,7 +84,7 @@ public class ServiceCollectionAdapter : IServiceRegister
         if (implementationType == null)
             throw new ArgumentNullException(nameof(implementationType));
 
-        var descriptor = new ServiceDescriptor(serviceType, implementationType, TranslateLifetime(lifetime));
+        var descriptor = new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime));
         if (mode == RegistrationCompareMode.ServiceType)
             serviceCollection.TryAdd(descriptor);
         else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
@@ -112,7 +103,7 @@ public class ServiceCollectionAdapter : IServiceRegister
         if (implementationFactory == null)
             throw new ArgumentNullException(nameof(implementationFactory));
 
-        var descriptor = new ServiceDescriptor(serviceType, x => implementationFactory(x.GetRequiredService<IServiceResolver>()), TranslateLifetime(lifetime));
+        var descriptor = new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime));
         if (mode == RegistrationCompareMode.ServiceType)
             serviceCollection.TryAdd(descriptor);
         else if (mode == RegistrationCompareMode.ServiceTypeAndImplementationType)
@@ -140,6 +131,30 @@ public class ServiceCollectionAdapter : IServiceRegister
             throw new ArgumentOutOfRangeException(nameof(mode));
 
         return this;
+    }
+
+    private static ServiceLifetime ToLifetime(Lifetime lifetime)
+        => lifetime switch
+        {
+            Lifetime.Singleton => ServiceLifetime.Singleton,
+            //Lifetime.Scoped => MSServiceLifetime.Scoped,
+            Lifetime.Transient => ServiceLifetime.Transient,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime))
+        };
+
+    // Without this code, the type of return value will be object
+    private static Func<IServiceProvider, object> PreserveFuncType(Func<IServiceResolver, object> implementationFactory)
+    {
+        Type[] typeArguments = implementationFactory.GetType().GenericTypeArguments;
+        if (typeArguments.Length != 2)
+            throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
+        var implementationType = typeArguments[1];
+
+        var implementationFactoryAdapterType = typeof(ImplementationFactoryAdapter<>).MakeGenericType(implementationType);
+        return (Func<IServiceProvider, object>)Delegate.CreateDelegate(
+                typeof(Func<,>).MakeGenericType(typeof(IServiceProvider), implementationType),
+                Activator.CreateInstance(implementationFactoryAdapterType, implementationFactory),
+                implementationFactoryAdapterType.GetMethod("Resolve"));
     }
 
     private class ServiceProviderAdapter : IServiceResolver
@@ -185,5 +200,17 @@ public class ServiceCollectionAdapter : IServiceRegister
         {
             return serviceScope.ServiceProvider.GetService<TService>();
         }
+    }
+
+    private class ImplementationFactoryAdapter<T>
+    {
+        private readonly Func<IServiceResolver, object> _implementationFactory;
+
+        public ImplementationFactoryAdapter(Func<IServiceResolver, object> implementationFactory)
+        {
+            _implementationFactory = implementationFactory;
+        }
+
+        public T Resolve(IServiceProvider provider) => (T)_implementationFactory(provider.GetService<IServiceResolver>());
     }
 }

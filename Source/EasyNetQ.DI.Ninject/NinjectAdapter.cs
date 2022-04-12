@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Ninject;
+using Ninject.Activation;
+using Ninject.Infrastructure;
 using Ninject.Planning.Bindings;
 
 namespace EasyNetQ.DI.Ninject;
@@ -27,25 +29,12 @@ public class NinjectAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                if (replace)
-                    kernel.Rebind(serviceType).To(implementationType).InTransientScope().WithMetadata("type", implementationType);
-                else
-                    kernel.Bind(serviceType).To(implementationType).InTransientScope().Named(GetBindingName()).WithMetadata("type", implementationType);
-                return this;
+        if (replace)
+            kernel.Rebind(serviceType).To(implementationType).InScope(ToScope(lifetime)).WithMetadata("type", implementationType);
+        else
+            kernel.Bind(serviceType).To(implementationType).InScope(ToScope(lifetime)).Named(GetBindingName()).WithMetadata("type", implementationType);
 
-            case Lifetime.Singleton:
-                if (replace)
-                    kernel.Rebind(serviceType).To(implementationType).InSingletonScope().WithMetadata("type", implementationType);
-                else
-                    kernel.Bind(serviceType).To(implementationType).InSingletonScope().Named(GetBindingName()).WithMetadata("type", implementationType);
-                return this;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        return this;
     }
 
     /// <inheritdoc />
@@ -56,25 +45,12 @@ public class NinjectAdapter : IServiceRegister
         if (typeArguments.Length != 2)
             throw new InvalidOperationException("implementationFactory should have 2 generic type arguments");
 
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                if (replace)
-                    kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InTransientScope().WithMetadata("type", typeArguments[1]);
-                else
-                    kernel.Bind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InTransientScope().Named(GetBindingName()).WithMetadata("type", typeArguments[1]);
-                return this;
+        if (replace)
+            kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InScope(ToScope(lifetime)).WithMetadata("type", typeArguments[1]);
+        else
+            kernel.Bind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InScope(ToScope(lifetime)).Named(GetBindingName()).WithMetadata("type", typeArguments[1]);
 
-            case Lifetime.Singleton:
-                if (replace)
-                    kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InSingletonScope().WithMetadata("type", typeArguments[1]);
-                else
-                    kernel.Bind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InSingletonScope().Named(GetBindingName()).WithMetadata("type", typeArguments[1]);
-                return this;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        return this;
     }
 
     /// <inheritdoc />
@@ -155,6 +131,15 @@ public class NinjectAdapter : IServiceRegister
 
         return this;
     }
+
+    private static Func<IContext, object> ToScope(Lifetime lifetime)
+        => lifetime switch
+        {
+            Lifetime.Singleton => StandardScopeCallbacks.Singleton,
+            //Lifetime.Scoped => MSServiceLifetime.Scoped,
+            Lifetime.Transient => StandardScopeCallbacks.Transient,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
+        };
 
     private static Type GetImplementationType(IBinding binding)
     {

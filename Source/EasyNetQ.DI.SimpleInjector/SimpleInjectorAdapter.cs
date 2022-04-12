@@ -31,35 +31,16 @@ public class SimpleInjectorAdapter : IServiceRegister, IServiceResolver
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true)
     {
-        switch (lifetime)
+        if (replace)
         {
-            case Lifetime.Transient:
-                if (replace)
-                {
-                    container.Register(serviceType, implementationType, Lifestyle.Transient);
-                    container.Collection.Register(serviceType, new[] { serviceType }); // forward resolving in case of collection
-                }
-                else
-                {
-                    container.Collection.Append(serviceType, implementationType, Lifestyle.Transient);
-                }
-                return this;
-
-            case Lifetime.Singleton:
-                if (replace)
-                {
-                    container.Register(serviceType, implementationType, Lifestyle.Singleton);
-                    container.Collection.Register(serviceType, new[] { serviceType }); // forward resolving in case of collection
-                }
-                else
-                {
-                    container.Collection.Append(serviceType, implementationType, Lifestyle.Singleton);
-                }
-                return this;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            container.Register(serviceType, implementationType, ToLifestyle(lifetime));
+            container.Collection.Register(serviceType, new[] { serviceType }); // forwards resolving in case of collection
         }
+        else
+        {
+            container.Collection.Append(serviceType, implementationType, ToLifestyle(lifetime));
+        }
+        return this;
     }
 
     /// <inheritdoc />
@@ -67,31 +48,19 @@ public class SimpleInjectorAdapter : IServiceRegister, IServiceResolver
     {
         //TODO: forward for collection, problem with collection design
         // https://docs.simpleinjector.org/en/latest/using.html#collections
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                if (replace)
-                    container.Register(serviceType, () => implementationFactory(this), Lifestyle.Transient);
-                else
-                    container.Collection.Append(() => implementationFactory(this), Lifestyle.Transient);
-                return this;
+        if (replace)
+            container.Register(serviceType, () => implementationFactory(this), ToLifestyle(lifetime));
+        else
+            container.Collection.Append(() => implementationFactory(this), ToLifestyle(lifetime));
 
-            case Lifetime.Singleton:
-                if (replace)
-                    container.Register(serviceType, () => implementationFactory(this), Lifestyle.Singleton);
-                else
-                    container.Collection.Append(() => implementationFactory(this), Lifestyle.Singleton);
-                return this;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true)
     {
-        //TODO: forward for collection
+        //TODO: forward for collection, problem with collection design
+        // https://docs.simpleinjector.org/en/latest/using.html#collections
         if (replace)
             container.RegisterInstance(serviceType, implementationInstance);
         else
@@ -172,6 +141,16 @@ public class SimpleInjectorAdapter : IServiceRegister, IServiceResolver
         }
 
         return this;
+    }
+
+    private static Lifestyle ToLifestyle(Lifetime lifetime)
+    {
+        return lifetime switch
+        {
+            Lifetime.Transient => Lifestyle.Transient,
+            Lifetime.Singleton => Lifestyle.Singleton,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
+        };
     }
 
     /// <inheritdoc />
