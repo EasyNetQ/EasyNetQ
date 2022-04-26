@@ -11,6 +11,9 @@ on:
       - master
       - develop
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Lint & Test
