@@ -30,7 +30,7 @@ jobs:
         fetch-depth: 0
 
     - name: Setup .NET Core ${{ matrix.dotnet }}
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v2
       with:
         dotnet-version: ${{ matrix.dotnet }}
 
@@ -84,7 +84,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup .NET Core ${{ matrix.dotnet }}
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '6.0.x'
       - name: Install dependencies
