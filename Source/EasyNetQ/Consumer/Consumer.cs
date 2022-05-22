@@ -2,6 +2,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -50,7 +51,7 @@ public class PerQueueConsumerConfiguration
     }
 
     /// <summary>
-    ///     Indicates whether a consumer auto-acks messages    
+    ///     Indicates whether a consumer auto-acks messages
     /// </summary>
     public bool AutoAck { get; }
 
@@ -173,11 +174,13 @@ public class Consumer : IConsumer
 
         disposed = true;
 
+        var consumerToDispose = Interlocked.Exchange(ref consumer, null);
+        if (consumerToDispose == null) return;
+
         foreach (var disposable in disposables)
             disposable.Dispose();
 
-        var consumerToDispose = Interlocked.Exchange(ref consumer, null);
-        consumerToDispose?.Dispose();
+        consumerToDispose.Dispose();
 
         eventBus.Publish(new StoppedConsumingEvent(this));
     }
@@ -190,30 +193,40 @@ public class Consumer : IConsumer
 
     private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
     {
-        if (@event.Type != PersistentConnectionType.Consumer)
-            return;
+        if (@event.Type != PersistentConnectionType.Consumer) return;
 
         consumer?.StopConsuming();
     }
 
     private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
     {
-        if (@event.Type != PersistentConnectionType.Consumer)
-            return;
+        if (@event.Type != PersistentConnectionType.Consumer) return;
 
         var consumerToRestart = consumer;
-        if (consumerToRestart == null)
-            return;
+        if (consumerToRestart == null) return;
 
         var status = consumerToRestart.StartConsuming(false);
         foreach (var queue in status.Succeed)
             eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
         foreach (var queue in status.Failed)
             eventBus.Publish(new StartConsumingFailedEvent(this, queue));
+
+        if (ContainsOnlyFailedExclusiveQueues(status))
+            Dispose();
     }
 
     private void RestartConsumingPeriodically()
     {
-        consumer?.StartConsuming(false);
+        var consumerToRestart = consumer;
+        if (consumerToRestart == null) return;
+
+        var status = consumerToRestart.StartConsuming(false);
+        if (ContainsOnlyFailedExclusiveQueues(status))
+            Dispose();
+    }
+
+    private static bool ContainsOnlyFailedExclusiveQueues(InternalConsumerStatus status)
+    {
+        return status.Succeed.Count == 0 && status.Failed.Count > 0 && status.Failed.All(x => x.IsExclusive);
     }
 }
