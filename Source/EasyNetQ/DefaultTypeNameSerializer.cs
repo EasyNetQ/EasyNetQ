@@ -13,11 +13,30 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     private readonly ConcurrentDictionary<Type, string> serializedTypes = new();
     private readonly ConcurrentDictionary<string, Type> deSerializedTypes = new();
 
+
+
+    public DefaultTypeNameSerializer()
+    {
+        RegisterReplacementType("System.String, System.Private.CoreLib", typeof(string));
+        RegisterReplacementType("System.Boolean, System.Private.CoreLib", typeof(bool));
+        RegisterReplacementType("System.Char, System.Private.CoreLib", typeof(char));
+        RegisterReplacementType("System.Single, System.Private.CoreLib", typeof(float));
+        RegisterReplacementType("System.Double, System.Private.CoreLib", typeof(double));
+        RegisterReplacementType("System.Decimal, System.Private.CoreLib", typeof(decimal));
+        RegisterReplacementType("System.SByte, System.Private.CoreLib", typeof(sbyte));
+        RegisterReplacementType("System.Byte, System.Private.CoreLib", typeof(byte));
+        RegisterReplacementType("System.Int16, System.Private.CoreLib", typeof(short));
+        RegisterReplacementType("System.UInt16, System.Private.CoreLib", typeof(ushort));
+        RegisterReplacementType("System.Int32, System.Private.CoreLib", typeof(int));
+        RegisterReplacementType("System.UInt32, System.Private.CoreLib", typeof(uint));
+        RegisterReplacementType("System.Int64, System.Private.CoreLib", typeof(long));
+        RegisterReplacementType("System.UInt64, System.Private.CoreLib", typeof(ulong));
+    }
+
     /// <inheritdoc />
     public string Serialize(Type type)
     {
         Preconditions.CheckNotNull(type, nameof(type));
-
         return serializedTypes.GetOrAdd(type, t =>
         {
             var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
@@ -219,6 +238,10 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         }
 
         return null;
+    }
+
+    public void RegisterReplacementType(string typeName, Type type) {
+        deSerializedTypes.AddOrUpdate(typeName, type, (key, oldValue) => type);
     }
 
     private readonly struct TypeNameKey
