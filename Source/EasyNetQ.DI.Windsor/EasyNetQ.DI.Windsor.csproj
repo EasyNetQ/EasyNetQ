@@ -8,7 +8,7 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.4.0" />
+    <PackageReference Include="Castle.Core" Version="5.0.0" />
     <PackageReference Include="Castle.Windsor" Version="5.0.0" />
   </ItemGroup>
 </Project>
