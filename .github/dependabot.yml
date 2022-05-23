@@ -14,6 +14,10 @@ updates:
     versions:
     - "> 5.0.0"
     - "< 6"
+  - dependency-name: Castle.Core
+    versions:
+    - "> 4.5.1"
+    - "< 6"
   - dependency-name: LightInject
     versions:
     - ">= 6.a"
