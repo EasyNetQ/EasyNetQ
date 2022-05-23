@@ -205,7 +205,7 @@ namespace EasyNetQ
         public DelayedExchangeScheduler(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
         public System.Threading.Tasks.Task FuturePublishAsync<T>(T message, System.TimeSpan delay, System.Action<EasyNetQ.IFuturePublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface | System.AttributeTargets.All, AllowMultiple=false)]
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface, AllowMultiple=false)]
     public class DeliveryModeAttribute : System.Attribute
     {
         public DeliveryModeAttribute(bool isPersistent) { }
@@ -730,7 +730,7 @@ namespace EasyNetQ
         public System.Threading.Tasks.Task<EasyNetQ.PullResult<T>> PullAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task RejectAsync(ulong deliveryTag, bool multiple, bool requeue, System.Threading.CancellationToken cancellationToken = default) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface | System.AttributeTargets.All, AllowMultiple=false)]
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface, AllowMultiple=false)]
     public class QueueAttribute : System.Attribute
     {
         public QueueAttribute(string queueName) { }
@@ -945,7 +945,7 @@ namespace EasyNetQ.AutoSubscribe
         protected virtual EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute GetSubscriptionAttribute(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo consumerInfo) { }
         public virtual System.Threading.Tasks.Task<System.IDisposable> SubscribeAsync(System.Type[] consumerTypes, System.Threading.CancellationToken cancellationToken = default) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.All)]
+    [System.AttributeUsage(System.AttributeTargets.Method)]
     public class AutoSubscriberConsumerAttribute : System.Attribute
     {
         public AutoSubscriberConsumerAttribute() { }
@@ -975,7 +975,7 @@ namespace EasyNetQ.AutoSubscribe
             where TMessage :  class
             where TAsyncConsumer :  class, EasyNetQ.AutoSubscribe.IConsumeAsync<TMessage> { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.All, AllowMultiple=true)]
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple=true)]
     public class ForTopicAttribute : System.Attribute
     {
         public ForTopicAttribute(string topic) { }
@@ -1000,7 +1000,7 @@ namespace EasyNetQ.AutoSubscribe
     {
         void Consume(T message, System.Threading.CancellationToken cancellationToken = default);
     }
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.All)]
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public class SubscriptionConfigurationAttribute : System.Attribute
     {
         public SubscriptionConfigurationAttribute() { }
