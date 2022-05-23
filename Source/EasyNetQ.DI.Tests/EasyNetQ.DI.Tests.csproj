@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="LightInject" Version="5.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NSubstitute" Version="4.2.2" />
+    <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.4.0)" />
     <PackageReference Include="SimpleInjector" Version="4.6.2" />
     <PackageReference Include="Autofac" Version="4.9.3" />
