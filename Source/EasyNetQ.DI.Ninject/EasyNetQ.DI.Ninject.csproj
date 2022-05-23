@@ -8,6 +8,6 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Ninject" Version="3.3.4" />
+    <PackageReference Include="Ninject" Version="3.3.5" />
   </ItemGroup>
 </Project>
