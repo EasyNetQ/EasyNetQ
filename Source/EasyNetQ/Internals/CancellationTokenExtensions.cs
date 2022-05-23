@@ -31,8 +31,8 @@ public static class CancellationTokenExtensions
     /// </summary>
     public readonly struct ValueCancellationTokenSource : IDisposable
     {
-        private readonly CancellationTokenSource _cts = null;
-        private readonly CancellationToken _token;
+        private readonly CancellationTokenSource cts = null;
+        private readonly CancellationToken cancellationToken;
 
         /// <summary>
         /// Attaches a timeout to a cancellation token
@@ -41,19 +41,18 @@ public static class CancellationTokenExtensions
         /// <param name="timeout">The timeout.</param>
         public ValueCancellationTokenSource(CancellationToken cancellationToken, TimeSpan timeout)
         {
-            _token = cancellationToken;
+            this.cancellationToken = cancellationToken;
 
             if (timeout != Timeout.InfiniteTimeSpan)
             {
-                if (cancellationToken == default)
+                if (cancellationToken.CanBeCanceled)
                 {
-                    _cts = new CancellationTokenSource(timeout);
+                    cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
+                    cts.CancelAfter(timeout);
                 }
                 else
                 {
-                    // use 'default' as second argument just because only that overload except 'params' one is available for netstandard2.0
-                    _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
-                    _cts.CancelAfter(timeout);
+                    cts = new CancellationTokenSource(timeout);
                 }
             }
         }
@@ -61,13 +60,12 @@ public static class CancellationTokenExtensions
         /// <summary>
         /// Gets cancellation token associated with this <see cref="ValueCancellationTokenSource"/>.
         /// </summary>
-        public CancellationToken Token => _cts == null ? _token : _cts.Token;
+        public CancellationToken Token => cts?.Token ?? cancellationToken;
 
         /// <inheritdoc />
         public void Dispose()
         {
-            if (_cts != null)
-                _cts.Dispose();
+            cts?.Dispose();
         }
     }
 }
