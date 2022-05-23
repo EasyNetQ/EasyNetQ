@@ -17,14 +17,55 @@ public static class CancellationTokenExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <param name="timeout">The timeout</param>
     /// <returns>
-    ///     CancellationTokenSource associated with <paramref name="cancellationToken"/>
+    ///     ValueCancellationTokenSource associated with <paramref name="cancellationToken"/>
     ///     and with <paramref name="timeout"/>
     /// </returns>
-    public static CancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout)
+    public static ValueCancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout)
     {
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
-        if (timeout != Timeout.InfiniteTimeSpan)
-            cts.CancelAfter(timeout);
-        return cts;
+        return new ValueCancellationTokenSource(cancellationToken, timeout);
+    }
+
+    /// <summary>
+    /// Struct that holds a cancellation token.
+    /// The idea is the same as with ValueTask vs Task - not allocate when we can.
+    /// </summary>
+    public readonly struct ValueCancellationTokenSource : IDisposable
+    {
+        private readonly CancellationTokenSource cts = null;
+        private readonly CancellationToken cancellationToken;
+
+        /// <summary>
+        /// Attaches a timeout to a cancellation token
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="timeout">The timeout.</param>
+        public ValueCancellationTokenSource(CancellationToken cancellationToken, TimeSpan timeout)
+        {
+            this.cancellationToken = cancellationToken;
+
+            if (timeout != Timeout.InfiniteTimeSpan)
+            {
+                if (cancellationToken.CanBeCanceled)
+                {
+                    cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
+                    cts.CancelAfter(timeout);
+                }
+                else
+                {
+                    cts = new CancellationTokenSource(timeout);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets cancellation token associated with this <see cref="ValueCancellationTokenSource"/>.
+        /// </summary>
+        public CancellationToken Token => cts?.Token ?? cancellationToken;
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            cts?.Dispose();
+        }
     }
 }
