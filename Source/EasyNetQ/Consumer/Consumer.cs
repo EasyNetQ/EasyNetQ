@@ -107,7 +107,7 @@ public class ConsumerConfiguration
 /// <inheritdoc />
 public class Consumer : IConsumer
 {
-    private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(5);
 
     private readonly ConsumerConfiguration configuration;
     private readonly IEventBus eventBus;

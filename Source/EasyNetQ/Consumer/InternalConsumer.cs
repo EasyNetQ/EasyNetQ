@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -91,10 +92,10 @@ public class InternalConsumer : IInternalConsumer
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
     private readonly IHandlerRunner handlerRunner;
+    private readonly ILogger logger;
 
     private volatile bool disposed;
-    private volatile IModel model;
-    private readonly ILogger logger;
+    private IModel model;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -139,6 +140,7 @@ public class InternalConsumer : IInternalConsumer
             }
             consumers.Clear();
 
+            model.Dispose();
             model = null;
         }
 
@@ -291,14 +293,14 @@ public class InternalConsumer : IInternalConsumer
                 consumer.Dispose();
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
+
+                if (IsModelClosedWithSoftError(model)) return;
             }
             else
             {
                 return;
             }
         }
-
-        if (IsModelClosedWithSoftError(model)) return;
 
         Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
     }
