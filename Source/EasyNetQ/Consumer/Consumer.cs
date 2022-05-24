@@ -84,8 +84,10 @@ public class ConsumerConfiguration
     /// <summary>
     ///     Creates ConsumerConfiguration
     /// </summary>
-    public ConsumerConfiguration(ushort prefetchCount,
-        IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations)
+    public ConsumerConfiguration(
+        ushort prefetchCount,
+        IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations
+    )
     {
         PrefetchCount = prefetchCount;
         PerQueueConfigurations = perQueueConfigurations;
@@ -105,7 +107,7 @@ public class ConsumerConfiguration
 /// <inheritdoc />
 public class Consumer : IConsumer
 {
-    private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(5);
 
     private readonly ConsumerConfiguration configuration;
     private readonly IEventBus eventBus;

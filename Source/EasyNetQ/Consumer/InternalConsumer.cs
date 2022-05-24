@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
+using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -90,10 +92,10 @@ public class InternalConsumer : IInternalConsumer
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
     private readonly IHandlerRunner handlerRunner;
+    private readonly ILogger logger;
 
     private volatile bool disposed;
-    private volatile IModel model;
-    private readonly ILogger logger;
+    private IModel model;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -123,10 +125,24 @@ public class InternalConsumer : IInternalConsumer
     /// <inheritdoc />
     public InternalConsumerStatus StartConsuming(bool firstStart)
     {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(InternalConsumer));
+        if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
 
         using var _ = mutex.Acquire();
+
+        if (IsModelClosedWithSoftError(model))
+        {
+            logger.Info("Model has shutdown with soft error and will be recreated");
+
+            foreach (var consumer in consumers.Values)
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                consumer.Dispose();
+            }
+            consumers.Clear();
+
+            model.Dispose();
+            model = null;
+        }
 
         if (model == null)
         {
@@ -210,8 +226,7 @@ public class InternalConsumer : IInternalConsumer
     /// <inheritdoc />
     public void StopConsuming()
     {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(InternalConsumer));
+        if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
 
         using var _ = mutex.Acquire();
 
@@ -278,12 +293,30 @@ public class InternalConsumer : IInternalConsumer
                 consumer.Dispose();
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
+
+                if (IsModelClosedWithSoftError(model)) return;
             }
             else
             {
                 return;
             }
         }
+
         Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
+    }
+
+    private static bool IsModelClosedWithSoftError(IModel model)
+    {
+        var closeReason = model?.CloseReason;
+        if (closeReason == null) return false;
+
+        return closeReason.ReplyCode switch
+        {
+            AmqpErrorCodes.PreconditionFailed => true,
+            AmqpErrorCodes.ResourceLocked => true,
+            AmqpErrorCodes.AccessRefused => true,
+            AmqpErrorCodes.NotFound => true,
+            _ => false
+        };
     }
 }
