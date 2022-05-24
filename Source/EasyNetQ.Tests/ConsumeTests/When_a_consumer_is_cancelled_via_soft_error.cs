@@ -31,7 +31,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
             new ShutdownEventArgs(ShutdownInitiator.Application, AmqpErrorCodes.PreconditionFailed, "Oops")
         );
         mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
-        // Wait for period consumer restart
+        // Wait for a periodic consumer restart
         Task.Delay(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
     }
 
