@@ -8,7 +8,7 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EasyNetQ.Management.Client" Version="1.4.0" />
+    <PackageReference Include="EasyNetQ.Management.Client" Version="1.4.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.4.0)" />
