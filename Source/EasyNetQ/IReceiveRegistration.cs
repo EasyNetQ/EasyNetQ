@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ;
 
 /// <summary>
-///     Allows to add multiple asynchronous message handlers
+///     Allow to add multiple asynchronous message handlers
 /// </summary>
 public interface IReceiveRegistration
 {
