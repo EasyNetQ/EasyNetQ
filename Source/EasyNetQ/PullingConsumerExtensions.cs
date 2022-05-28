@@ -49,7 +49,7 @@ public readonly struct PullBatchResult<TPullResult> : IDisposable where TPullRes
 }
 
 /// <summary>
-///     Various extensions for <see cref="IPullingConsumer"/>
+///     Various extensions for <see cref="IPullingConsumer{TPullResult}"/>
 /// </summary>
 public static class PullingConsumerExtensions
 {
