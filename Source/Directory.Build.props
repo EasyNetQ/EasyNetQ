@@ -1,5 +1,4 @@
 <Project>
-
   <PropertyGroup>
     <Authors>Mike Hadlow;Michael Denny;Yury Pliner;Wiebe Tijsma;Contributors (see GitHub repo)</Authors>
     <PackageProduct>EasyNetQ</PackageProduct>
@@ -23,11 +22,5 @@
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
     <None Include="..\..\licence.txt" Pack="true" PackagePath="" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="4.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
-
 </Project>

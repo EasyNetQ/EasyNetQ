@@ -10,18 +10,6 @@ internal static class MessageFormatter
 {
     private static readonly Regex Pattern = new(@"(?<!{){@?(?<arg>[^ :{}]+)(?<format>:[^}]+)?}", RegexOptions.Compiled);
 
-    /// <summary>
-    ///     Some logging frameworks support structured logging, such as serilog. This will allow you to add names to structured
-    ///     data in a format string:
-    ///     For example: Log("Log message to {user}", user). This only works with serilog, but as the user of LibLog, you don't
-    ///     know if serilog is actually
-    ///     used. So, this class simulates that. it will replace any text in {curly braces} with an index number.
-    ///     "Log {message} to {user}" would turn into => "Log {0} to {1}". Then the format parameters are handled using regular
-    ///     .net string.Format.
-    /// </summary>
-    /// <param name="messageBuilder">The message builder.</param>
-    /// <param name="formatParameters">The format parameters.</param>
-    /// <returns></returns>
     public static Func<string> SimulateStructuredLogging(Func<string> messageBuilder, object[] formatParameters)
     {
         if (formatParameters == null || formatParameters.Length == 0) return messageBuilder;

@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using EasyNetQ.Logging;
-using Shouldly;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.Tests.Logging;
@@ -15,7 +15,7 @@ public class MessageFormatterTests
 
         var formattedMessage = MessageFormatter.SimulateStructuredLogging(MessageBuilder, new object[] { "arg0", "arg1", "arg2" })();
 
-        formattedMessage.ShouldBe("This is an arg0 and this another arg1 and a last one arg2.");
+        formattedMessage.Should().Be("This is an arg0 and this another arg1 and a last one arg2.");
     }
 
     [Fact]
@@ -25,7 +25,7 @@ public class MessageFormatterTests
 
         var formattedMessage = MessageFormatter.SimulateStructuredLogging(MessageBuilder, new object[] { "arg0", "arg1" })();
 
-        formattedMessage.ShouldBe("This is an arg0 and this an {escaped_argument}.");
+        formattedMessage.Should().Be("This is an arg0 and this an {escaped_argument}.");
     }
 
     [Fact]
@@ -36,8 +36,9 @@ public class MessageFormatterTests
 
         var formattedMessage = MessageFormatter.SimulateStructuredLogging(MessageBuilder, new object[] { date, date })();
 
-        formattedMessage.ShouldBe(
-            string.Format(CultureInfo.InvariantCulture, "Formatted {0:yyyy-MM-dd} and not formatted {1}.", date, date));
+        formattedMessage.Should().Be(
+            string.Format(CultureInfo.InvariantCulture, "Formatted {0:yyyy-MM-dd} and not formatted {1}.", date, date)
+        );
     }
 
     [Fact]
@@ -48,7 +49,7 @@ public class MessageFormatterTests
 
         var formattedMessage = MessageFormatter.SimulateStructuredLogging(MessageBuilder, new object[] { date, "arg0" })();
 
-        formattedMessage.ShouldBe(
+        formattedMessage.Should().Be(
             string.Format(CultureInfo.InvariantCulture, "{0:yyyy-MM-dd} {1} {0:yyyy}", date, "arg0")
         );
     }
