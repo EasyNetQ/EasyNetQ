@@ -33,36 +33,32 @@ public class BuildInInterceptorsTests
     [Fact]
     public void ShouldCallAddedInterceptorsOnProduce()
     {
-        var sourceMessage = new ProducedMessage(new MessageProperties(), new byte[0]);
-        var firstMessage = new ProducedMessage(new MessageProperties(), new byte[0]);
-        var secondMessage = new ProducedMessage(new MessageProperties(), new byte[0]);
+        var sourceMessage = new ProducedMessage(new MessageProperties(), Array.Empty<byte>());
+        var firstMessage = new ProducedMessage(new MessageProperties(), Array.Empty<byte>());
+        var secondMessage = new ProducedMessage(new MessageProperties(), Array.Empty<byte>());
 
         var first = Substitute.For<IProduceConsumeInterceptor>();
         var second = Substitute.For<IProduceConsumeInterceptor>();
         first.OnProduce(sourceMessage).Returns(firstMessage);
         second.OnProduce(firstMessage).Returns(secondMessage);
 
-        var compositeInterceptor = new CompositeInterceptor();
-        compositeInterceptor.Add(first);
-        compositeInterceptor.Add(second);
+        var compositeInterceptor = new CompositeInterceptor(new[] { first, second });
         Assert.Equal(secondMessage, compositeInterceptor.OnProduce(sourceMessage));
     }
 
     [Fact]
     public void ShouldCallAddedInterceptorsOnConsume()
     {
-        var sourceMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
-        var firstMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
-        var secondMessage = new ConsumedMessage(null, new MessageProperties(), new byte[0]);
+        var sourceMessage = new ConsumedMessage(null, new MessageProperties(), Array.Empty<byte>());
+        var firstMessage = new ConsumedMessage(null, new MessageProperties(), Array.Empty<byte>());
+        var secondMessage = new ConsumedMessage(null, new MessageProperties(), Array.Empty<byte>());
 
         var first = Substitute.For<IProduceConsumeInterceptor>();
         var second = Substitute.For<IProduceConsumeInterceptor>();
         first.OnConsume(secondMessage).Returns(firstMessage);
         second.OnConsume(sourceMessage).Returns(secondMessage);
 
-        var compositeInterceptor = new CompositeInterceptor();
-        compositeInterceptor.Add(first);
-        compositeInterceptor.Add(second);
+        var compositeInterceptor = new CompositeInterceptor(new[] { first, second });
         Assert.Equal(firstMessage, compositeInterceptor.OnConsume(sourceMessage));
     }
 }

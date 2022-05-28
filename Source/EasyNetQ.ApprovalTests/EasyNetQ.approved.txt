@@ -900,14 +900,12 @@ namespace EasyNetQ
         public static EasyNetQ.DI.IServiceRegister EnableAdvancedMessagePolymorphism(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableConsoleLogger(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableDelayedExchangeScheduler(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.Interception.IInterceptorRegistrator EnableGZipCompression(this EasyNetQ.Interception.IInterceptorRegistrator registrator) { }
-        public static EasyNetQ.DI.IServiceRegister EnableInterception(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Action<EasyNetQ.Interception.IInterceptorRegistrator> configure) { }
+        public static EasyNetQ.DI.IServiceRegister EnableInterception(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, System.Collections.Generic.IReadOnlyList<EasyNetQ.Interception.IProduceConsumeInterceptor>> configure) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyRpcConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyTypeNaming(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableMessageVersioning(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableMultiChannelClientCommandDispatcher(this EasyNetQ.DI.IServiceRegister serviceRegister, int channelsCount) { }
-        public static EasyNetQ.Interception.IInterceptorRegistrator EnableTripleDESEncryption(this EasyNetQ.Interception.IInterceptorRegistrator registrator, byte[] key, byte[] iv) { }
         public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
     }
     public static class SimpleConsumeConfigurationExtensions
@@ -1410,8 +1408,7 @@ namespace EasyNetQ.Interception
 {
     public class CompositeInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
-        public CompositeInterceptor() { }
-        public void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
+        public CompositeInterceptor(System.Collections.Generic.IReadOnlyList<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
         public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
         public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
@@ -1427,20 +1424,10 @@ namespace EasyNetQ.Interception
         public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
         public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
-    public interface IInterceptorRegistrator
-    {
-        void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor);
-    }
     public interface IProduceConsumeInterceptor
     {
         EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message);
         EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message);
-    }
-    public class InterceptorRegistrator : EasyNetQ.Interception.IInterceptorRegistrator
-    {
-        public InterceptorRegistrator(EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
-        public EasyNetQ.DI.IServiceRegister Register() { }
     }
     public class TripleDESInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {

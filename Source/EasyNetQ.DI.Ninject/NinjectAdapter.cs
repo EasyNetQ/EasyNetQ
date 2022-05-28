@@ -21,13 +21,15 @@ public class NinjectAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
     {
+        if (kernel.CanResolve<TService>()) return this;
+
         switch (lifetime)
         {
             case Lifetime.Transient:
-                kernel.Rebind<TService>().To<TImplementation>().InTransientScope();
+                kernel.Bind<TService>().To<TImplementation>().InTransientScope();
                 return this;
             case Lifetime.Singleton:
-                kernel.Rebind<TService>().To<TImplementation>().InSingletonScope();
+                kernel.Bind<TService>().To<TImplementation>().InSingletonScope();
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -37,20 +39,24 @@ public class NinjectAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
-        kernel.Rebind<TService>().ToConstant(instance);
+        if (kernel.CanResolve<TService>()) return this;
+
+        kernel.Bind<TService>().ToConstant(instance);
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
     {
+        if (kernel.CanResolve<TService>()) return this;
+
         switch (lifetime)
         {
             case Lifetime.Transient:
-                kernel.Rebind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InTransientScope();
+                kernel.Bind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InTransientScope();
                 return this;
             case Lifetime.Singleton:
-                kernel.Rebind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InSingletonScope();
+                kernel.Bind<TService>().ToMethod(x => factory(x.Kernel.Get<IServiceResolver>())).InSingletonScope();
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -62,13 +68,15 @@ public class NinjectAdapter : IServiceRegister
         Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
     )
     {
+        if (kernel.CanResolve(serviceType)) return this;
+
         switch (lifetime)
         {
             case Lifetime.Transient:
-                kernel.Rebind(serviceType).To(implementingType).InTransientScope();
+                kernel.Bind(serviceType).To(implementingType).InTransientScope();
                 return this;
             case Lifetime.Singleton:
-                kernel.Rebind(serviceType).To(implementingType).InSingletonScope();
+                kernel.Bind(serviceType).To(implementingType).InSingletonScope();
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -79,19 +87,10 @@ public class NinjectAdapter : IServiceRegister
     {
         private readonly IKernel kernel;
 
-        public NinjectResolver(IKernel kernel)
-        {
-            this.kernel = kernel;
-        }
+        public NinjectResolver(IKernel kernel) => this.kernel = kernel;
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return kernel.Get<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => kernel.Get<TService>();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new ServiceResolverScope(this);
-        }
+        public IServiceResolverScope CreateScope() => new ServiceResolverScope(this);
     }
 }

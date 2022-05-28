@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using LightInject;
 
 namespace EasyNetQ.DI.LightInject;
@@ -23,21 +24,24 @@ public class LightInjectAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
     {
-        serviceRegistry.Register<TService, TImplementation>(ToLifetime(lifetime));
+        if (serviceRegistry.AvailableServices.All(x => x.ServiceType != typeof(TService)))
+            serviceRegistry.Register<TService, TImplementation>(ToLifetime(lifetime));
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
-        serviceRegistry.RegisterInstance(instance);
+        if (serviceRegistry.AvailableServices.All(x => x.ServiceType != typeof(TService)))
+            serviceRegistry.RegisterInstance(instance);
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
     {
-        serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), ToLifetime(lifetime));
+        if (serviceRegistry.AvailableServices.All(x => x.ServiceType != typeof(TService)))
+            serviceRegistry.Register(x => factory(x.GetInstance<IServiceResolver>()), ToLifetime(lifetime));
         return this;
     }
 
@@ -46,7 +50,8 @@ public class LightInjectAdapter : IServiceRegister
         Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
     )
     {
-        serviceRegistry.Register(serviceType, implementingType, ToLifetime(lifetime));
+        if (serviceRegistry.AvailableServices.All(x => x.ServiceType != serviceType))
+            serviceRegistry.Register(serviceType, implementingType, ToLifetime(lifetime));
         return this;
     }
 
@@ -64,19 +69,10 @@ public class LightInjectAdapter : IServiceRegister
     {
         private readonly IServiceFactory serviceFactory;
 
-        public LightInjectResolver(IServiceFactory serviceFactory)
-        {
-            this.serviceFactory = serviceFactory;
-        }
+        public LightInjectResolver(IServiceFactory serviceFactory) => this.serviceFactory = serviceFactory;
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return serviceFactory.GetInstance<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => serviceFactory.GetInstance<TService>();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new ServiceResolverScope(this);
-        }
+        public IServiceResolverScope CreateScope() => new ServiceResolverScope(this);
     }
 }

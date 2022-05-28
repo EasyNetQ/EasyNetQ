@@ -160,9 +160,11 @@ public static class RabbitHutch
     /// Override default services. For example, to override the default <see cref="ISerializer"/>:
     /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
     /// </param>
-    public static void RegisterBus(IServiceRegister serviceRegister,
+    public static void RegisterBus(
+        IServiceRegister serviceRegister,
         Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
-        Action<IServiceRegister> registerServices)
+        Action<IServiceRegister> registerServices
+    )
     {
         Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
         Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
@@ -174,9 +176,8 @@ public static class RabbitHutch
             configuration.SetDefaultProperties();
             return configuration;
         });
-
-        serviceRegister.RegisterDefaultServices();
         registerServices(serviceRegister);
+        serviceRegister.RegisterDefaultServices();
     }
 
     private sealed class BusWithCustomDisposer : IBus

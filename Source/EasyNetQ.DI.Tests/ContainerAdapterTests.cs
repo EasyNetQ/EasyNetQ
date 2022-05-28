@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Autofac;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
 using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.LightInject;
@@ -24,10 +25,41 @@ public class ContainerAdapterTests
 
     [Theory]
     [MemberData(nameof(GetContainerAdapters))]
-    public void Should_last_registration_win(ResolverFactory resolverFactory)
+    public void Should_first_type_registration_win(ResolverFactory resolverFactory)
     {
-        var first = new Service();
-        var last = new Service();
+        var resolver = resolverFactory(c =>
+        {
+            c.Register<IService, NewService>();
+            c.Register<IService, DefaultService>();
+        });
+
+        Assert.IsType<NewService>(resolver.Resolve<IService>());
+
+        // To ensure that container doesn't know any other implementations
+        Assert.Single(resolver.Resolve<IEnumerable<IService>>(), x => x is NewService);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetContainerAdapters))]
+    public void Should_be_able_to_register_enumerable(ResolverFactory resolverFactory)
+    {
+        var resolver = resolverFactory(c =>
+        {
+            c.Register<IService, NewService>();
+        });
+
+        Assert.IsType<NewService>(resolver.Resolve<IService>());
+
+        // To ensure that container doesn't know any other implementations
+        Assert.Single(resolver.Resolve<IEnumerable<IService>>(), x => x is NewService);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetContainerAdapters))]
+    public void Should_first_instance_registration_win(ResolverFactory resolverFactory)
+    {
+        var first = new NewService();
+        var last = new NewService();
 
         var resolver = resolverFactory(c =>
         {
@@ -35,14 +67,18 @@ public class ContainerAdapterTests
             c.Register<IService>(last);
         });
 
-        Assert.Equal(last, resolver.Resolve<IService>());
+        Assert.Equal(first, resolver.Resolve<IService>());
+
+        // To ensure that container doesn't know any other implementations
+        Assert.Single(resolver.Resolve<IEnumerable<IService>>(), x => x == first);
     }
+
 
     [Theory]
     [MemberData(nameof(GetContainerAdapters))]
     public void Should_singleton_created_once(ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register<IService, Service>());
+        var resolver = resolverFactory(c => c.Register<IService, NewService>());
 
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
@@ -54,7 +90,7 @@ public class ContainerAdapterTests
     [MemberData(nameof(GetContainerAdapters))]
     public void Should_transient_created_every_time(ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register<IService, Service>(Lifetime.Transient));
+        var resolver = resolverFactory(c => c.Register<IService, NewService>(Lifetime.Transient));
 
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
@@ -75,7 +111,7 @@ public class ContainerAdapterTests
     [MemberData(nameof(GetContainerAdapters))]
     public void Should_singleton_factory_called_once(ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register<IService>(_ => new Service()));
+        var resolver = resolverFactory(c => c.Register<IService>(_ => new NewService()));
 
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
@@ -87,7 +123,7 @@ public class ContainerAdapterTests
     [MemberData(nameof(GetContainerAdapters))]
     public void Should_transient_factory_call_every_time(ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register<IService>(_ => new Service(), Lifetime.Transient));
+        var resolver = resolverFactory(c => c.Register<IService>(_ => new NewService(), Lifetime.Transient));
 
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
@@ -99,8 +135,11 @@ public class ContainerAdapterTests
     [MemberData(nameof(GetContainerAdapters))]
     public void Should_override_dependency_with_factory(ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register<IService, Service>().Register(_ => (IService)new DummyService()));
-        Assert.IsType<DummyService>(resolver.Resolve<IService>());
+        var resolver = resolverFactory(c => c.Register(_ => (IService)new NewService()).Register<IService, DefaultService>());
+
+        Assert.IsType<NewService>(resolver.Resolve<IService>());
+
+        Assert.Single(resolver.Resolve<IEnumerable<IService>>(), x => x is NewService);
     }
 
     [Theory]
@@ -108,6 +147,7 @@ public class ContainerAdapterTests
     public void Should_resolve_singleton_generic(ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register(typeof(ILogger<>), typeof(NoopLogger<>)));
+
         var intLogger = resolver.Resolve<ILogger<int>>();
         var floatLogger = resolver.Resolve<ILogger<float>>();
 
@@ -174,6 +214,8 @@ public class ContainerAdapterTests
             (ResolverFactory)(c =>
             {
                 var container = new WindsorContainer();
+                container.Kernel.Resolver.AddSubResolver(new CollectionResolver(container.Kernel, true));
+
                 c(new WindsorAdapter(container));
                 return container.Resolve<IServiceResolver>();
             })
@@ -205,24 +247,18 @@ public class ContainerAdapterTests
     {
     }
 
-    public class DummyService : IService
+    public class DefaultService : IService
     {
     }
 
-    public class Service : IService
+    public class NewService : IService
     {
         private static volatile int sequenceNumber;
 
         private readonly int number;
 
-        public Service()
-        {
-            number = Interlocked.Increment(ref sequenceNumber);
-        }
+        public NewService() => number = Interlocked.Increment(ref sequenceNumber);
 
-        public override string ToString()
-        {
-            return number.ToString();
-        }
+        public override string ToString() => number.ToString();
     }
 }

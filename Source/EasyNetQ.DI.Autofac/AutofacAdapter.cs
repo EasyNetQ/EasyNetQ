@@ -28,11 +28,13 @@ public class AutofacAdapter : IServiceRegister
             case Lifetime.Transient:
                 containerBuilder.RegisterType<TImplementation>()
                     .As<TService>()
+                    .IfNotRegistered(typeof(TService))
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton:
                 containerBuilder.RegisterType<TImplementation>()
                     .As<TService>()
+                    .IfNotRegistered(typeof(TService))
                     .SingleInstance();
                 return this;
             default:
@@ -43,7 +45,7 @@ public class AutofacAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
-        containerBuilder.RegisterInstance(instance);
+        containerBuilder.RegisterInstance(instance).IfNotRegistered(typeof(TService));
         return this;
     }
 
@@ -55,11 +57,13 @@ public class AutofacAdapter : IServiceRegister
             case Lifetime.Transient:
                 containerBuilder.Register(c => factory(c.Resolve<IServiceResolver>()))
                     .As<TService>()
+                    .IfNotRegistered(typeof(TService))
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton:
                 containerBuilder.Register(c => factory(c.Resolve<IServiceResolver>()))
                     .As<TService>()
+                    .IfNotRegistered(typeof(TService))
                     .SingleInstance();
                 return this;
             default:
@@ -77,11 +81,13 @@ public class AutofacAdapter : IServiceRegister
             case Lifetime.Transient:
                 containerBuilder.RegisterGeneric(implementingType)
                     .As(serviceType)
+                    .IfNotRegistered(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton:
                 containerBuilder.RegisterGeneric(implementingType)
                     .As(serviceType)
+                    .IfNotRegistered(serviceType)
                     .SingleInstance();
                 return this;
             default:
@@ -93,20 +99,11 @@ public class AutofacAdapter : IServiceRegister
     {
         protected readonly ILifetimeScope Lifetime;
 
-        public AutofacResolver(ILifetimeScope lifetime)
-        {
-            Lifetime = lifetime;
-        }
+        public AutofacResolver(ILifetimeScope lifetime) => Lifetime = lifetime;
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return Lifetime.Resolve<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => Lifetime.Resolve<TService>();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new AutofacResolverScope(Lifetime.BeginLifetimeScope());
-        }
+        public IServiceResolverScope CreateScope() => new AutofacResolverScope(Lifetime.BeginLifetimeScope());
     }
 
     private class AutofacResolverScope : AutofacResolver, IServiceResolverScope
@@ -115,9 +112,6 @@ public class AutofacAdapter : IServiceRegister
         {
         }
 
-        public void Dispose()
-        {
-            Lifetime.Dispose();
-        }
+        public void Dispose() => Lifetime.Dispose();
     }
 }

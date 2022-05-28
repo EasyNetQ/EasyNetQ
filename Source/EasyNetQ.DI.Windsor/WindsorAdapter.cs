@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Castle.Core;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
@@ -26,11 +27,11 @@ public class WindsorAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
     {
+        if (container.Kernel.HasComponent(typeof(TService))) return this;
+
         var registration = Component.For<TService>()
-            .Named(Guid.NewGuid().ToString())
             .ImplementedBy<TImplementation>()
-            .LifeStyle.Is(GetLifestyleType(lifetime))
-            .IsDefault();
+            .LifeStyle.Is(GetLifestyleType(lifetime));
         container.Register(registration);
         return this;
     }
@@ -38,11 +39,11 @@ public class WindsorAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
+        if (container.Kernel.HasComponent(typeof(TService))) return this;
+
         var registration = Component.For<TService>()
-            .Named(Guid.NewGuid().ToString())
             .Instance(instance)
-            .LifestyleSingleton()
-            .IsDefault();
+            .LifestyleSingleton();
         container.Register(registration);
         return this;
     }
@@ -50,11 +51,11 @@ public class WindsorAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
     {
+        if (container.Kernel.HasComponent(typeof(TService))) return this;
+
         var registration = Component.For<TService>()
-            .Named(Guid.NewGuid().ToString())
             .UsingFactoryMethod(x => factory(x.Resolve<IServiceResolver>()))
-            .LifeStyle.Is(GetLifestyleType(lifetime))
-            .IsDefault();
+            .LifeStyle.Is(GetLifestyleType(lifetime));
         container.Register(registration);
         return this;
     }
@@ -64,11 +65,11 @@ public class WindsorAdapter : IServiceRegister
         Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
     )
     {
+        if (container.Kernel.HasComponent(serviceType)) return this;
+
         var registration = Component.For(serviceType)
-            .Named(Guid.NewGuid().ToString())
             .ImplementedBy(implementingType)
-            .LifeStyle.Is(GetLifestyleType(lifetime))
-            .IsDefault();
+            .LifeStyle.Is(GetLifestyleType(lifetime));
         container.Register(registration);
         return this;
     }
@@ -84,6 +85,10 @@ public class WindsorAdapter : IServiceRegister
 
         public TService Resolve<TService>() where TService : class
         {
+            var type = typeof(TService);
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                return kernel.ResolveAll(type.GenericTypeArguments[0]) as TService;
+
             return kernel.Resolve<TService>();
         }
 
@@ -93,7 +98,7 @@ public class WindsorAdapter : IServiceRegister
         }
     }
 
-    private LifestyleType GetLifestyleType(Lifetime lifetime)
+    private static LifestyleType GetLifestyleType(Lifetime lifetime)
     {
         return lifetime switch
         {

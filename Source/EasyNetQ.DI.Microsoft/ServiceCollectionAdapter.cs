@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyNetQ.DI.Microsoft;
 
@@ -15,7 +16,7 @@ public class ServiceCollectionAdapter : IServiceRegister
     {
         this.serviceCollection = serviceCollection;
 
-        this.serviceCollection.AddSingleton<IServiceResolver, ServiceProviderAdapter>();
+        this.serviceCollection.TryAddSingleton<IServiceResolver, ServiceProviderAdapter>();
     }
 
     /// <inheritdoc />
@@ -24,10 +25,10 @@ public class ServiceCollectionAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient:
-                serviceCollection.AddTransient<TService, TImplementation>();
+                serviceCollection.TryAddTransient<TService, TImplementation>();
                 return this;
             case Lifetime.Singleton:
-                serviceCollection.AddSingleton<TService, TImplementation>();
+                serviceCollection.TryAddSingleton<TService, TImplementation>();
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -37,7 +38,7 @@ public class ServiceCollectionAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register<TService>(TService instance) where TService : class
     {
-        serviceCollection.AddSingleton(instance);
+        serviceCollection.TryAddSingleton(instance);
         return this;
     }
 
@@ -47,10 +48,10 @@ public class ServiceCollectionAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient:
-                serviceCollection.AddTransient(x => factory(x.GetService<IServiceResolver>()));
+                serviceCollection.TryAddTransient(x => factory(x.GetService<IServiceResolver>()));
                 return this;
             case Lifetime.Singleton:
-                serviceCollection.AddSingleton(x => factory(x.GetService<IServiceResolver>()));
+                serviceCollection.TryAddSingleton(x => factory(x.GetService<IServiceResolver>()));
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -65,10 +66,10 @@ public class ServiceCollectionAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient:
-                serviceCollection.AddTransient(serviceType, implementingType);
+                serviceCollection.TryAddTransient(serviceType, implementingType);
                 return this;
             case Lifetime.Singleton:
-                serviceCollection.AddSingleton(serviceType, implementingType);
+                serviceCollection.TryAddSingleton(serviceType, implementingType);
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -99,24 +100,12 @@ public class ServiceCollectionAdapter : IServiceRegister
     {
         private readonly IServiceScope serviceScope;
 
-        public MicrosoftServiceResolverScope(IServiceProvider serviceProvider)
-        {
-            serviceScope = serviceProvider.CreateScope();
-        }
+        public MicrosoftServiceResolverScope(IServiceProvider serviceProvider) => serviceScope = serviceProvider.CreateScope();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
-        }
+        public IServiceResolverScope CreateScope() => new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
 
-        public void Dispose()
-        {
-            serviceScope?.Dispose();
-        }
+        public void Dispose() => serviceScope.Dispose();
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return serviceScope.ServiceProvider.GetService<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => serviceScope.ServiceProvider.GetService<TService>();
     }
 }
