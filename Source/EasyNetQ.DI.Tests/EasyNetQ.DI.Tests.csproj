@@ -8,8 +8,6 @@
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj" />
-    <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj" />
-    <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj" />
   </ItemGroup>
@@ -19,7 +17,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.4.0)" />
-    <PackageReference Include="SimpleInjector" Version="4.6.2" />
     <PackageReference Include="Autofac" Version="4.9.3" />
     <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Castle.Windsor" Version="5.0.0" />

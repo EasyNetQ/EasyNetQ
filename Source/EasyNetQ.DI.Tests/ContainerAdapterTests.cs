@@ -112,14 +112,6 @@ public class ContainerAdapterTests
     public void Should_allow_multiple_try_register_instance(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
-        if (name == "StructureMap")
-            return;
-
-        //TODO: failed now
-        if (name == "SimpleInjector")
-            return;
-
-        //TODO: failed now
         if (name == "Autofac")
             return;
 
@@ -141,14 +133,6 @@ public class ContainerAdapterTests
     public void Should_allow_multiple_try_register_type(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
-        if (name == "StructureMap")
-            return;
-
-        //TODO: failed now
-        if (name == "SimpleInjector")
-            return;
-
-        //TODO: failed now
         if (name == "Autofac")
             return;
 
@@ -169,14 +153,6 @@ public class ContainerAdapterTests
     public void Should_allow_multiple_try_register_factory(string name, ResolverFactory resolverFactory)
     {
         //TODO: failed now
-        if (name == "StructureMap")
-            return;
-
-        //TODO: failed now
-        if (name == "SimpleInjector")
-            return;
-
-        //TODO: failed now
         if (name == "Autofac")
             return;
 
@@ -193,14 +169,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_with_impl_type_instance(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "StructureMap")
-            return;
-
-        //TODO: failed now
-        if (name == "SimpleInjector")
-            return;
-
         var first = new Service();
         var last = new DummyService();
 
@@ -217,14 +185,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_with_impl_type_type(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "StructureMap")
-            return;
-
-        //TODO: failed now
-        if (name == "SimpleInjector")
-            return;
-
         var resolver = resolverFactory(c =>
         {
             c.Register<IService, Service>();
@@ -238,14 +198,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_last_registration_win_with_impl_type_factory(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "StructureMap")
-            return;
-
-        //TODO: failed now
-        if (name == "SimpleInjector")
-            return;
-
         var resolver = resolverFactory(c =>
         {
             c.Register<IService, Service>(r => new Service());
@@ -298,11 +250,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_multiple_registrations_with_try_register(string name, ResolverFactory resolverFactory)
     {
-        //TODO: System.InvalidOperationException : The container can't be changed after the first call to GetInstance, GetAllInstances, Verify, and some calls of GetRegistration. Please see https://simpleinjector.org/locked to understand why the container is locked.
-        //TODO: TryRegister calls GetRegistration
-        if (name == "SimpleInjector")
-            return;
-
         //TODO: failed now
         if (name == "Autofac")
             return;

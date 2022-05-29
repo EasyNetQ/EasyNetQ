@@ -3,8 +3,6 @@ using Castle.Windsor;
 using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.Microsoft;
 using EasyNetQ.DI.Ninject;
-using EasyNetQ.DI.SimpleInjector;
-using EasyNetQ.DI.StructureMap;
 using EasyNetQ.DI.Windsor;
 using EasyNetQ.LightInject;
 using LightInject;
@@ -39,34 +37,6 @@ internal class ContainerAdaptersData : IEnumerable<object[]>
                 var container = new global::LightInject.ServiceContainer(c => c.EnablePropertyInjection = false);
                 var adapter = new LightInject.LightInjectAdapter(container);
                 c(adapter);
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "SimpleInjector",
-            (ResolverFactory)(c =>
-            {
-                var container = new global::SimpleInjector.Container();
-                var adapter = new SimpleInjectorAdapter(container);
-                c(adapter);
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "StructureMap",
-            (ResolverFactory)(c =>
-            {
-                var registry = new global::StructureMap.Registry();
-                var adapter = new StructureMapAdapter(registry);
-                c(adapter);
-                var container = new global::StructureMap.Container(registry);
-
-                var trace = container.WhatDoIHave(); // for debug purposes
-
                 return container.GetInstance<IServiceResolver>();
             })
         };
