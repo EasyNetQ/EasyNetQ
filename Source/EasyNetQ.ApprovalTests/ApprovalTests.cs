@@ -13,8 +13,6 @@ public class ApprovalTests
     [InlineData(typeof(DI.LightInject.LightInjectAdapter))]
     [InlineData(typeof(DI.Microsoft.ServiceCollectionAdapter))]
     [InlineData(typeof(DI.Ninject.NinjectAdapter))]
-    [InlineData(typeof(DI.SimpleInjector.SimpleInjectorAdapter))]
-    [InlineData(typeof(DI.StructureMap.StructureMapAdapter))]
     [InlineData(typeof(DI.Windsor.WindsorAdapter))]
     [InlineData(typeof(Logging.Microsoft.MicrosoftLoggerAdapter))]
     [InlineData(typeof(Logging.Serilog.SerilogLoggerAdapter))]
