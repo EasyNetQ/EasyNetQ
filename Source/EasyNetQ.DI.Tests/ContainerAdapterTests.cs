@@ -7,8 +7,6 @@ using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.LightInject;
 using EasyNetQ.DI.Microsoft;
 using EasyNetQ.DI.Ninject;
-using EasyNetQ.DI.SimpleInjector;
-using EasyNetQ.DI.StructureMap;
 using EasyNetQ.DI.Windsor;
 using EasyNetQ.Logging;
 using LightInject;
@@ -16,8 +14,6 @@ using Ninject;
 using Xunit;
 using LightInjectContainer = LightInject.ServiceContainer;
 using NinjectContainer = Ninject.StandardKernel;
-using SimpleInjectorContainer = SimpleInjector.Container;
-using StructureMapContainer = StructureMap.Container;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.DI.Tests;
@@ -158,25 +154,6 @@ public class ContainerAdapterTests
             {
                 var container = new LightInjectContainer();
                 c(new LightInjectAdapter(container));
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            (ResolverFactory)(c =>
-            {
-                var container = new SimpleInjectorContainer { Options = { AllowOverridingRegistrations = true } };
-                c(new SimpleInjectorAdapter(container));
-                return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            (ResolverFactory)(c =>
-            {
-                var container = new StructureMapContainer(r => c(new StructureMapAdapter(r)));
                 return container.GetInstance<IServiceResolver>();
             })
         };
