@@ -1,8 +1,7 @@
 namespace EasyNetQ.Interception;
 
-public static class ProduceConsumeInterceptorExtensions
+internal static class ProduceConsumeInterceptorExtensions
 {
-    /// <inheritdoc />
     public static ProducedMessage OnProduce(this IProduceConsumeInterceptor[] interceptors, in ProducedMessage message)
     {
         var result = message;
@@ -13,7 +12,6 @@ public static class ProduceConsumeInterceptorExtensions
         return result;
     }
 
-    /// <inheritdoc />
     public static ConsumedMessage OnConsume(this IProduceConsumeInterceptor[] interceptors, in ConsumedMessage message)
     {
         var result = message;
