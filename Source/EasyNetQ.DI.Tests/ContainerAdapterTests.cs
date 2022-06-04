@@ -1,8 +1,8 @@
 using EasyNetQ.Logging;
-using Shouldly;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using FluentAssertions;
 using Xunit;
 
 namespace EasyNetQ.DI.Tests;
@@ -24,7 +24,7 @@ public class ContainerAdapterTests
             c.Register<IService>(last);
         });
 
-        resolver.Resolve<IService>().ShouldBe(last);
+        resolver.Resolve<IService>().Should().Be(last);
     }
 
     [Theory]
@@ -37,7 +37,7 @@ public class ContainerAdapterTests
             c.Register<IService, DummyService>();
         });
 
-        resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
+        resolver.Resolve<IService>().Should().BeOfType<DummyService>();
     }
 
     [Theory]
@@ -50,7 +50,7 @@ public class ContainerAdapterTests
             c.Register<IService, DummyService>(_ => new DummyService());
         });
 
-        resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
+        resolver.Resolve<IService>().Should().BeOfType<DummyService>();
     }
 
     [Theory]
@@ -66,7 +66,7 @@ public class ContainerAdapterTests
             c.TryRegister<IService>(last);
         });
 
-        resolver.Resolve<IService>().ShouldBe(first);
+        resolver.Resolve<IService>().Should().Be(first);
     }
 
     [Theory]
@@ -79,7 +79,7 @@ public class ContainerAdapterTests
             c.TryRegister<IService, DummyService>();
         });
 
-        resolver.Resolve<IService>().ShouldBeOfType<Service>();
+        resolver.Resolve<IService>().Should().BeOfType<Service>();
     }
 
     [Theory]
@@ -92,7 +92,7 @@ public class ContainerAdapterTests
             c.TryRegister<IService, DummyService>(r => new DummyService());
         });
 
-        resolver.Resolve<IService>().ShouldBeOfType<Service>();
+        resolver.Resolve<IService>().Should().BeOfType<Service>();
     }
 
     [Theory]
@@ -109,7 +109,7 @@ public class ContainerAdapterTests
             c.TryRegister<IService>(last);
         });
 
-        resolver.Resolve<IService>().ShouldBe(first);
+        resolver.Resolve<IService>().Should().Be(first);
     }
 
     [Theory]
@@ -125,7 +125,7 @@ public class ContainerAdapterTests
             c.TryRegister<IService>(last);
         });
 
-        resolver.Resolve<IService>().ShouldBe(first);
+        resolver.Resolve<IService>().Should().Be(first);
     }
 
     [Theory]
@@ -138,7 +138,7 @@ public class ContainerAdapterTests
             c.TryRegister<IService, DummyService>();
         });
 
-        resolver.Resolve<IService>().ShouldBeOfType<Service>();
+        resolver.Resolve<IService>().Should().BeOfType<Service>();
     }
 
     [Theory]
@@ -156,7 +156,7 @@ public class ContainerAdapterTests
             c.Register<IServiceWithCollection, ServiceWithCollection>();
         });
         var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        serviceWithCollection.Services.Length.ShouldBe(1);
+        serviceWithCollection.Services.Length.Should().Be(1);
     }
 
     [Theory]
@@ -168,7 +168,7 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        second.ShouldBe(first);
+        second.Should().Be(first);
     }
 
     [Theory]
@@ -180,7 +180,7 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        second.ShouldNotBe(first);
+        second.Should().NotBe(first);
     }
 
     [Theory]
@@ -189,7 +189,7 @@ public class ContainerAdapterTests
     {
         var resolver = resolverFactory(_ => { });
 
-        resolver.Resolve<IServiceResolver>().ShouldNotBeNull();
+        resolver.Resolve<IServiceResolver>().Should().NotBeNull();
     }
 
     [Theory]
@@ -201,7 +201,7 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        second.ShouldBe(first);
+        second.Should().Be(first);
     }
 
     [Theory]
@@ -213,7 +213,7 @@ public class ContainerAdapterTests
         var first = resolver.Resolve<IService>();
         var second = resolver.Resolve<IService>();
 
-        second.ShouldNotBe(first);
+        second.Should().NotBe(first);
     }
 
     [Theory]
@@ -226,7 +226,7 @@ public class ContainerAdapterTests
             .Register<IService, Service>()
             .Register(_ => (IService)new DummyService());
         });
-        resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
+        resolver.Resolve<IService>().Should().BeOfType<DummyService>();
     }
 
     [Theory]
@@ -237,11 +237,11 @@ public class ContainerAdapterTests
         var intLogger = resolver.Resolve<ILogger<int>>();
         var floatLogger = resolver.Resolve<ILogger<float>>();
 
-        intLogger.ShouldBeOfType<NoopLogger<int>>();
-        floatLogger.ShouldBeOfType<NoopLogger<float>>();
+        intLogger.Should().BeOfType<NoopLogger<int>>();
+        floatLogger.Should().BeOfType<NoopLogger<float>>();
 
-        resolver.Resolve<ILogger<int>>().ShouldBe(intLogger);
-        resolver.Resolve<ILogger<float>>().ShouldBe(floatLogger);
+        resolver.Resolve<ILogger<int>>().Should().Be(intLogger);
+        resolver.Resolve<ILogger<float>>().Should().Be(floatLogger);
     }
 
     [Theory]
@@ -255,11 +255,11 @@ public class ContainerAdapterTests
         var intLogger = resolver.Resolve<ILogger<int>>();
         var floatLogger = resolver.Resolve<ILogger<float>>();
 
-        intLogger.ShouldBeOfType<NoopLogger<int>>();
-        floatLogger.ShouldBeOfType<NoopLogger<float>>();
+        intLogger.Should().BeOfType<NoopLogger<int>>();
+        floatLogger.Should().BeOfType<NoopLogger<float>>();
 
-        resolver.Resolve<ILogger<int>>().ShouldNotBe(intLogger);
-        resolver.Resolve<ILogger<float>>().ShouldNotBe(floatLogger);
+        resolver.Resolve<ILogger<int>>().Should().NotBe(intLogger);
+        resolver.Resolve<ILogger<float>>().Should().NotBe(floatLogger);
     }
 
     public interface IService
