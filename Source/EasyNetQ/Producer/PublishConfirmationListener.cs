@@ -5,10 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using RabbitMQ.Client;
 
-namespace EasyNetQ.Persistent;
+namespace EasyNetQ.Producer;
 
 using UnconfirmedRequests = ConcurrentDictionary<ulong, TaskCompletionSource<object>>;
 
