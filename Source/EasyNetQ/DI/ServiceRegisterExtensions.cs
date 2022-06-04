@@ -7,7 +7,7 @@ namespace EasyNetQ.DI;
 /// </summary>
 public static class ServiceRegisterExtensions
 {
-    /// <inheritdoc cref="Register{TService}(IServiceRegister, Func{IServiceResolver, TService}, Lifetime, bool)"/>
+    /// <inheritdoc cref="Register{TService}(IServiceRegister, Func{IServiceResolver, TService}, Lifetime)"/>
     public static IServiceRegister Register<TService>(
         this IServiceRegister services, Lifetime lifetime = Lifetime.Singleton
     ) where TService : class
