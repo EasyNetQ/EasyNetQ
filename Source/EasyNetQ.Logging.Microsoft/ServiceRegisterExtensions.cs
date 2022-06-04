@@ -7,12 +7,13 @@ using MS = Microsoft.Extensions.Logging;
 namespace EasyNetQ;
 
 /// <summary>
-///     Register loggers based of Microsoft.Extensions.Logging
+/// Registers loggers based on Microsoft.Extensions.Logging
 /// </summary>
 public static class ServiceRegisterExtensions
 {
     /// <summary>
-    ///     Enables microsoft logging support for EasyNetQ. It should be already registered in DI.
+    /// Enables microsoft logging support for EasyNetQ.
+    /// It is assumed that a caller has already registered Microsoft.Extensions.Logging types.
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableMicrosoftLogging(this IServiceRegister serviceRegister)
