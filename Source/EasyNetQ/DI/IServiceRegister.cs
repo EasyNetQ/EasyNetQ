@@ -17,15 +17,14 @@ public interface IServiceRegister
     /// <param name="serviceType">The type of the service to be registered</param>
     /// <param name="implementationType">The implementation type</param>
     /// <param name="lifetime">A lifetime of a container registration</param>
-    /// <param name="replace">Whether to remove any existing implementation of the same service type</param>
     /// <returns>itself for nice fluent composition</returns>
-    IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, bool replace = true);
+    IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton);
 
     /// <inheritdoc cref="Register(Type, Type, Lifetime, bool)"/>
-    IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, bool replace = true);
+    IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton);
 
     /// <inheritdoc cref="Register(Type, Type, Lifetime, bool)"/>
-    IServiceRegister Register(Type serviceType, object implementationInstance, bool replace = true);
+    IServiceRegister Register(Type serviceType, object implementationInstance);
 
     /// <summary>
     /// Registers the service of type <paramref name="serviceType"/> with the dependency
@@ -33,7 +32,7 @@ public interface IServiceRegister
     /// in case of <see cref="RegistrationCompareMode.ServiceTypeAndImplementationType"/>)
     /// has not already been registered.
     /// </summary>
-    IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType);
+    IServiceRegister TryRegister(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton);
 
     /// <summary>
     /// Registers the service of type <paramref name="serviceType"/> with the dependency
@@ -45,8 +44,8 @@ public interface IServiceRegister
     /// that <paramref name="implementationFactory"/> is a strongly typed delegate with a return type
     /// of a specific implementation type.
     /// </summary>
-    IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType);
+    IServiceRegister TryRegister(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton);
 
     /// <inheritdoc cref="TryRegister(Type, Type, Lifetime, RegistrationCompareMode)"/>
-    IServiceRegister TryRegister(Type serviceType, object implementationInstance, RegistrationCompareMode mode = RegistrationCompareMode.ServiceType);
+    IServiceRegister TryRegister(Type serviceType, object implementationInstance);
 }

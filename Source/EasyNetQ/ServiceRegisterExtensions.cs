@@ -148,45 +148,6 @@ public static class ServiceRegisterExtensions
     }
 
     /// <summary>
-    ///     Enables interception of messages
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    /// <param name="configure">The action to add interceptors</param>
-    public static IServiceRegister EnableInterception(
-        this IServiceRegister serviceRegister,
-        Action<IInterceptorRegistrator> configure
-    )
-    {
-        var registrator = new InterceptorRegistrator(serviceRegister);
-        configure(registrator);
-        return serviceRegister;
-    }
-
-    /// <summary>
-    ///     Enables gzip compression interceptor
-    /// </summary>
-    /// <param name="registrator">The registrator</param>
-    public static IInterceptorRegistrator EnableGZipCompression(this IInterceptorRegistrator registrator)
-    {
-        registrator.Add(new GZipInterceptor());
-        return registrator;
-    }
-
-    /// <summary>
-    ///     Enables triple DES interceptor
-    /// </summary>
-    /// <param name="registrator">The registrator</param>
-    /// <param name="key">the secret key for the TripleDES algorithm</param>
-    /// <param name="iv">The initialization vector (IV) for the symmetric algorithm</param>
-    public static IInterceptorRegistrator EnableTripleDESEncryption(
-        this IInterceptorRegistrator registrator, byte[] key, byte[] iv
-    )
-    {
-        registrator.Add(new TripleDESInterceptor(key, iv));
-        return registrator;
-    }
-
-    /// <summary>
     ///     Enables console logger
     /// </summary>
     /// <param name="serviceRegister">The register</param>

@@ -309,7 +309,7 @@ public readonly struct PullingConsumerOptions
 public class PullingConsumer : IPullingConsumer<PullResult>
 {
     private readonly IPersistentChannel channel;
-    private readonly IProduceConsumeInterceptor interceptor;
+    private readonly IProduceConsumeInterceptor[] interceptors;
     private readonly PullingConsumerOptions options;
     private readonly Queue queue;
 
@@ -319,18 +319,18 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     /// <param name="options">The options</param>
     /// <param name="queue">The queue</param>
     /// <param name="channel">The channel</param>
-    /// <param name="interceptor">The produce-consumer interceptor</param>
+    /// <param name="interceptors">The produce-consumer interceptors</param>
     public PullingConsumer(
         in PullingConsumerOptions options,
         in Queue queue,
         IPersistentChannel channel,
-        IProduceConsumeInterceptor interceptor
+        IProduceConsumeInterceptor[] interceptors
     )
     {
         this.queue = queue;
         this.options = options;
         this.channel = channel;
-        this.interceptor = interceptor;
+        this.interceptors = interceptors;
     }
 
     /// <inheritdoc />
@@ -357,7 +357,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             queue.Name
         );
         var message = new ConsumedMessage(messageReceivedInfo, messageProperties, basicGetResult.Body);
-        var interceptedMessage = interceptor.OnConsume(message);
+        var interceptedMessage = interceptors.OnConsume(message);
         return PullResult.Available(
             messagesCount,
             interceptedMessage.ReceivedInfo,

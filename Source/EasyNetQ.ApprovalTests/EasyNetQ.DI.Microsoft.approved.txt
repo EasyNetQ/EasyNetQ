@@ -3,12 +3,12 @@ namespace EasyNetQ.DI.Microsoft
     public class ServiceCollectionAdapter : EasyNetQ.DI.IServiceRegister
     {
         public ServiceCollectionAdapter(Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection) { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance, bool replace = true) { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, bool replace = true) { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime, bool replace = true) { }
-        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance, EasyNetQ.DI.RegistrationCompareMode mode = 0) { }
-        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0) { }
-        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1, EasyNetQ.DI.RegistrationCompareMode mode = 0) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1) { }
     }
 }
 namespace Microsoft.Extensions.DependencyInjection

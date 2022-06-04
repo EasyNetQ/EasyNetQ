@@ -46,8 +46,8 @@ public class ContainerAdapterTests
     {
         var resolver = resolverFactory(c =>
         {
-            c.Register<IService, Service>(c => new Service());
-            c.Register<IService, DummyService>(c => new DummyService());
+            c.Register<IService, Service>(_ => new Service());
+            c.Register<IService, DummyService>(_ => new DummyService());
         });
 
         resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
@@ -57,10 +57,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_first_registration_win_instance(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
         var first = new Service();
         var last = new Service();
 
@@ -77,10 +73,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_first_registration_win_type(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
         var resolver = resolverFactory(c =>
         {
             c.Register<IService, Service>();
@@ -94,10 +86,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_first_registration_win_factory(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
         var resolver = resolverFactory(c =>
         {
             c.Register<IService, Service>(resolver => new Service());
@@ -111,10 +99,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_allow_multiple_try_register_instance(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
         var first = new Service();
         var last = new Service();
 
@@ -132,10 +116,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_allow_multiple_try_register_type(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
         var first = new Service();
         var last = new Service();
 
@@ -152,10 +132,6 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_allow_multiple_try_register_factory(string name, ResolverFactory resolverFactory)
     {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
         var resolver = resolverFactory(c =>
         {
             c.TryRegister<IService, Service>();
@@ -167,110 +143,20 @@ public class ContainerAdapterTests
 
     [Theory]
     [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_last_registration_win_with_impl_type_instance(string name, ResolverFactory resolverFactory)
+    public void Should_resolve_single_registration(string name, ResolverFactory resolverFactory)
     {
-        var first = new Service();
-        var last = new DummyService();
+        if (name == "Autofac")
+            return; // Autofac doesn't support replace mechanics, only full recreation of a container builder
 
-        var resolver = resolverFactory(c =>
-        {
-            c.Register<IService>(first);
-            c.TryRegister<IService>(last, mode: RegistrationCompareMode.ServiceTypeAndImplementationType);
-        });
-
-        resolver.Resolve<IService>().ShouldBe(last);
-    }
-
-    [Theory]
-    [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_last_registration_win_with_impl_type_type(string name, ResolverFactory resolverFactory)
-    {
         var resolver = resolverFactory(c =>
         {
             c.Register<IService, Service>();
-            c.TryRegister<IService, DummyService>(mode: RegistrationCompareMode.ServiceTypeAndImplementationType);
-        });
-
-        resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
-    }
-
-    [Theory]
-    [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_last_registration_win_with_impl_type_factory(string name, ResolverFactory resolverFactory)
-    {
-        var resolver = resolverFactory(c =>
-        {
-            c.Register<IService, Service>(r => new Service());
-            c.TryRegister<IService, DummyService>(r => new DummyService(), mode: RegistrationCompareMode.ServiceTypeAndImplementationType);
-        });
-
-        resolver.Resolve<IService>().ShouldBeOfType<DummyService>();
-    }
-
-    [Theory]
-    [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_resolve_single_registration(string name, ResolverFactory resolverFactory)
-    {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
-        var resolver = resolverFactory(c =>
-        {
-            // override registrations
-            c.Register<IService, Service>(replace: true);
-            c.Register<IService, Service2>(replace: true);
-            c.Register<IService, Service3>(replace: true);
+            c.Register<IService, Service2>();
+            c.Register<IService, Service3>();
             c.Register<IServiceWithCollection, ServiceWithCollection>();
         });
-
         var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
         serviceWithCollection.Services.Length.ShouldBe(1);
-    }
-
-    [Theory]
-    [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_resolve_multiple_registrations(string name, ResolverFactory resolverFactory)
-    {
-        var resolver = resolverFactory(c =>
-        {
-            // append registrations
-            c.Register<IService, Service>(replace: false);
-            c.Register<IService, Service2>(replace: false);
-            c.Register<IService, Service3>(replace: false);
-
-            c.Register<IServiceWithCollection, ServiceWithCollection>();
-        });
-
-        var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        serviceWithCollection.Services.Length.ShouldBe(3);
-    }
-
-    [Theory]
-    [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_resolve_multiple_registrations_with_try_register(string name, ResolverFactory resolverFactory)
-    {
-        //TODO: failed now
-        if (name == "Autofac")
-            return;
-
-        var resolver = resolverFactory(c =>
-        {
-            // append registrations
-            c.Register<IService, Service>(replace: false);
-            c.Register<IService, Service2>(replace: false);
-            c.Register<IService, Service3>(replace: false);
-
-            // these registrations should be ignored
-            c.TryRegister<IService, Service>(mode: RegistrationCompareMode.ServiceTypeAndImplementationType);
-            c.TryRegister<IService, Service2>(mode: RegistrationCompareMode.ServiceTypeAndImplementationType);
-            c.TryRegister<IService, Service3>(mode: RegistrationCompareMode.ServiceTypeAndImplementationType);
-
-            c.Register<IServiceWithCollection, ServiceWithCollection>();
-        });
-
-        var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        serviceWithCollection.Services.Length.ShouldBe(3);
     }
 
     [Theory]
@@ -401,19 +287,29 @@ public class ContainerAdapterTests
         }
     }
 
+
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once MemberCanBePrivate.Global
     public class Service2 : IService
     {
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once MemberCanBePrivate.Global
     public class Service3 : IService
     {
     }
 
+
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once MemberCanBePrivate.Global
     public interface IServiceWithCollection
     {
         IService[] Services { get; }
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once MemberCanBePrivate.Global
     public class ServiceWithCollection : IServiceWithCollection
     {
         public ServiceWithCollection(IEnumerable<IService> services)

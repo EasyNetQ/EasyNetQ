@@ -1,31 +1,24 @@
-using System.Collections.Generic;
-using System.Linq;
-
 namespace EasyNetQ.Interception;
 
-internal sealed class CompositeInterceptor : IProduceConsumeInterceptor
+public static class ProduceConsumeInterceptorExtensions
 {
-    private readonly List<IProduceConsumeInterceptor> interceptors = new();
-
-    public CompositeInterceptor() { }
-
-    public CompositeInterceptor(IEnumerable<IProduceConsumeInterceptor> interceptors)
+    /// <inheritdoc />
+    public static ProducedMessage OnProduce(this IProduceConsumeInterceptor[] interceptors, in ProducedMessage message)
     {
-        this.interceptors.AddRange(interceptors);
+        var result = message;
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var index = 0; index < interceptors.Length; index++)
+            result = interceptors[index].OnProduce(result);
+        return result;
     }
 
     /// <inheritdoc />
-    public ProducedMessage OnProduce(in ProducedMessage message)
+    public static ConsumedMessage OnConsume(this IProduceConsumeInterceptor[] interceptors, in ConsumedMessage message)
     {
-        return interceptors.AsEnumerable()
-            .Aggregate(message, (x, y) => y.OnProduce(x));
-    }
-
-    /// <inheritdoc />
-    public ConsumedMessage OnConsume(in ConsumedMessage message)
-    {
-        return interceptors.AsEnumerable()
-            .Reverse()
-            .Aggregate(message, (x, y) => y.OnConsume(x));
+        var result = message;
+        for (var index = interceptors.Length - 1; index >= 0; index--)
+            result = interceptors[index].OnConsume(result);
+        return result;
     }
 }
