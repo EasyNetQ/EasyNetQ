@@ -56,6 +56,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Logging.Microsoft"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Logging.Serilog", "EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj", "{8A743708-92DE-4199-B3C9-A52D7F521C8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Examples.DlxRetry", "EasyNetQ.Examples.DlxRetry\EasyNetQ.Examples.DlxRetry.csproj", "{334FC79A-41F7-4506-B887-8FD4ADCC28E4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C24EB2CE-59ED-4348-903F-2DF7E868E7BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -126,6 +130,10 @@ Global
 		{8A743708-92DE-4199-B3C9-A52D7F521C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A743708-92DE-4199-B3C9-A52D7F521C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A743708-92DE-4199-B3C9-A52D7F521C8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{334FC79A-41F7-4506-B887-8FD4ADCC28E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{334FC79A-41F7-4506-B887-8FD4ADCC28E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{334FC79A-41F7-4506-B887-8FD4ADCC28E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{334FC79A-41F7-4506-B887-8FD4ADCC28E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +153,7 @@ Global
 		{7A2CA6A8-FB25-46AB-B1F9-716C719AE016} = {01EFEA5D-6086-4951-A606-57F1E685D836}
 		{1CAE3C49-52AB-45D4-B0DD-784E7C870118} = {83745BDD-49A0-4247-A5AC-89428D7D0B7D}
 		{8A743708-92DE-4199-B3C9-A52D7F521C8D} = {83745BDD-49A0-4247-A5AC-89428D7D0B7D}
+		{334FC79A-41F7-4506-B887-8FD4ADCC28E4} = {C24EB2CE-59ED-4348-903F-2DF7E868E7BD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3DE3E7F-B61C-4398-AA54-A0DDE3BD850E}
