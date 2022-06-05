@@ -20,7 +20,10 @@ public static class ServiceRegisterExtensions
     /// <summary>
     /// Registers the default EasyNetQ components if needed services have not yet been registered.
     /// </summary>
-    public static void RegisterDefaultServices(this IServiceRegister serviceRegister, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
+    public static void RegisterDefaultServices(
+        this IServiceRegister serviceRegister,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory
+    )
     {
         Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
 
@@ -154,8 +157,35 @@ public static class ServiceRegisterExtensions
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
     {
-        serviceRegister.Register(typeof(ILogger), typeof(ConsoleLogger));
-        serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
-        return serviceRegister;
+        return serviceRegister
+            .Register(typeof(ILogger), typeof(ConsoleLogger))
+            .Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
+    }
+
+    /// <summary>
+    ///     Enables a consumer error strategy which acks failed messages
+    /// </summary>
+    /// <param name="serviceRegister">The register</param>
+    public static IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this IServiceRegister serviceRegister)
+    {
+        return serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.Ack);
+    }
+
+    /// <summary>
+    ///     Enables a consumer error strategy which nacks failed messages with requeue
+    /// </summary>
+    /// <param name="serviceRegister">The register</param>
+    public static IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
+    {
+        return serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithRequeue);
+    }
+
+    /// <summary>
+    ///     Enables a consumer error strategy which nacks failed messages without requeue
+    /// </summary>
+    /// <param name="serviceRegister">The register</param>
+    public static IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
+    {
+        return serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithoutRequeue);
     }
 }

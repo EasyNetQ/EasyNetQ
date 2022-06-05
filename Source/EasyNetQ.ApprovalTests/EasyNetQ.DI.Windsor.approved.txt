@@ -13,7 +13,6 @@ namespace EasyNetQ.DI.Windsor
     public class RemovableNamingSubSystem : Castle.MicroKernel.SubSystems.Naming.DefaultNamingSubSystem
     {
         public RemovableNamingSubSystem(Castle.MicroKernel.SubSystems.Naming.INamingSubSystem namingSubSystem) { }
-        public bool HasComponentWithImplementation(System.Type serviceType, System.Type implementationType) { }
         public void RemoveHandler(System.Type serviceType) { }
     }
     public class WindsorAdapter : EasyNetQ.DI.IServiceRegister
@@ -29,7 +28,6 @@ namespace EasyNetQ.DI.Windsor
     }
     public static class WindsorContainerExtensions
     {
-        public static bool HasComponentWithImplementation(this Castle.Windsor.IWindsorContainer container, System.Type serviceType, System.Type implementationType) { }
         public static Castle.Windsor.IWindsorContainer RemoveHandler(this Castle.Windsor.IWindsorContainer container, System.Type serviceType) { }
     }
 }

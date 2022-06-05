@@ -17,11 +17,6 @@ public static class WindsorContainerExtensions
         return container;
     }
 
-    public static bool HasComponentWithImplementation(this IWindsorContainer container, Type serviceType, Type implementationType)
-    {
-        return container.EnsureRemovableNamingSubSystem().HasComponentWithImplementation(serviceType, implementationType);
-    }
-
     private static RemovableNamingSubSystem EnsureRemovableNamingSubSystem(this IWindsorContainer container)
     {
         if (container.Kernel.GetSubSystem(SubSystemConstants.NamingKey) is not INamingSubSystem naming)
