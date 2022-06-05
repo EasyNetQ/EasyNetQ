@@ -4,6 +4,9 @@ using Autofac;
 namespace EasyNetQ.DI.Autofac;
 
 /// <inheritdoc />
+/// Autofac doesn't support registrations with replace mechanics.
+/// The only way is to create a new ContainerBuilder and copy needed registrations.
+/// https://stackoverflow.com/questions/5091101/is-it-possible-to-remove-an-existing-registration-from-autofac-container-builder
 public class AutofacAdapter : IServiceRegister
 {
     private readonly ContainerBuilder containerBuilder;
