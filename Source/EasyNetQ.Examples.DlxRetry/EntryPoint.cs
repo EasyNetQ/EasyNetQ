@@ -25,7 +25,7 @@ await bus.Advanced.QueueDeclareAsync(
         .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
 
-var hareQueue = await bus.Advanced.QueueDeclareAsync(
+var eventQueue = await bus.Advanced.QueueDeclareAsync(
     "Events",
     c => c.WithQueueType(QueueType.Quorum)
         .WithDeadLetterExchange(Exchange.Default)
@@ -34,7 +34,7 @@ var hareQueue = await bus.Advanced.QueueDeclareAsync(
         .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
 
-using var hareConsumer = bus.Advanced.Consume(hareQueue, (_, _, _) => throw new Exception("Oops"));
+using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => throw new Exception("Oops"));
 
 await bus.Advanced.PublishAsync(Exchange.Default, "Events", true, new MessageProperties(), ReadOnlyMemory<byte>.Empty);
 
