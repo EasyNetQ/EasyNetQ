@@ -24,7 +24,7 @@ public interface IServiceRegister
     IServiceRegister Register(Type serviceType, object implementationInstance);
 
     /// <summary>
-    /// Tries to register(if it is not registered) the service of type <paramref name="serviceType"/> with the <paramref name="implementationType"/>
+    /// Tries to register (if it is not registered) the service of type <paramref name="serviceType"/> with the <paramref name="implementationType"/>
     /// with the dependency injection provider
     /// </summary>
     /// <param name="serviceType">The type of the service to be registered</param>
