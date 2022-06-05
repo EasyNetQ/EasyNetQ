@@ -64,6 +64,7 @@ public static class ServiceRegisterExtensions
             .TryRegister<ISendReceive, DefaultSendReceive>()
             .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
             .TryRegister<IConsumeScopeProvider, NoopConsumeScopeProvider>()
+            .TryRegister<IProduceConsumeInterceptor, NoopProduceConsumeInterceptor>()
             .TryRegister<IBus, RabbitBus>();
     }
 

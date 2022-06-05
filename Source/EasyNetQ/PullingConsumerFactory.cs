@@ -35,7 +35,7 @@ public class PullingConsumerFactory : IPullingConsumerFactory
     private readonly IConsumerConnection connection;
     private readonly IPersistentChannelFactory channelFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
-    private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
+    private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
 
     /// <summary>
     ///     Creates PullingConsumerFactory
@@ -43,13 +43,13 @@ public class PullingConsumerFactory : IPullingConsumerFactory
     public PullingConsumerFactory(
         IConsumerConnection connection,
         IPersistentChannelFactory channelFactory,
-        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
+        IProduceConsumeInterceptor produceConsumeInterceptor,
         IMessageSerializationStrategy messageSerializationStrategy
     )
     {
         this.connection = connection;
         this.channelFactory = channelFactory;
-        this.produceConsumeInterceptors = produceConsumeInterceptors.ToArray();
+        this.produceConsumeInterceptor = produceConsumeInterceptor;
         this.messageSerializationStrategy = messageSerializationStrategy;
     }
 
@@ -57,7 +57,7 @@ public class PullingConsumerFactory : IPullingConsumerFactory
     public IPullingConsumer<PullResult> CreateConsumer(in Queue queue, in PullingConsumerOptions options)
     {
         var channel = channelFactory.CreatePersistentChannel(connection, new PersistentChannelOptions());
-        return new PullingConsumer(options, queue, channel, produceConsumeInterceptors);
+        return new PullingConsumer(options, queue, channel, produceConsumeInterceptor);
     }
 
     /// <inheritdoc />

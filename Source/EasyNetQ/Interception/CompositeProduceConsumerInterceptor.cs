@@ -1,8 +1,18 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace EasyNetQ.Interception;
 
-internal static class ProduceConsumeInterceptorExtensions
+public class CompositeProduceConsumerInterceptor : IProduceConsumeInterceptor
 {
-    public static ProducedMessage OnProduce(this IProduceConsumeInterceptor[] interceptors, in ProducedMessage message)
+    private readonly IProduceConsumeInterceptor[] interceptors;
+
+    public CompositeProduceConsumerInterceptor(IEnumerable<IProduceConsumeInterceptor> interceptors)
+    {
+        this.interceptors = interceptors.ToArray();
+    }
+
+    public ProducedMessage OnProduce(in ProducedMessage message)
     {
         var result = message;
         // ReSharper disable once LoopCanBeConvertedToQuery
@@ -12,7 +22,7 @@ internal static class ProduceConsumeInterceptorExtensions
         return result;
     }
 
-    public static ConsumedMessage OnConsume(this IProduceConsumeInterceptor[] interceptors, in ConsumedMessage message)
+    public ConsumedMessage OnConsume(in ConsumedMessage message)
     {
         var result = message;
         for (var index = interceptors.Length - 1; index >= 0; index--)

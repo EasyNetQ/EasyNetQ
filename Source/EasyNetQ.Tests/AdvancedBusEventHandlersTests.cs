@@ -56,7 +56,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
             Substitute.For<IHandlerCollectionFactory>(),
             Substitute.For<IServiceResolver>(),
             Substitute.For<ConnectionConfiguration>(),
-            Substitute.For<IEnumerable<IProduceConsumeInterceptor>>(),
+            Substitute.For<IProduceConsumeInterceptor>(),
             Substitute.For<IMessageSerializationStrategy>(),
             Substitute.For<IConventions>(),
             Substitute.For<IPullingConsumerFactory>(),

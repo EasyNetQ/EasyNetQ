@@ -691,7 +691,7 @@ namespace EasyNetQ
     }
     public class PullingConsumer : EasyNetQ.IPullingConsumer<EasyNetQ.PullResult>, System.IDisposable
     {
-        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Persistent.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor[] interceptors) { }
+        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Persistent.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor) { }
         public System.Threading.Tasks.Task AckAsync(ulong deliveryTag, bool multiple, System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<EasyNetQ.PullResult> PullAsync(System.Threading.CancellationToken cancellationToken = default) { }
@@ -712,7 +712,7 @@ namespace EasyNetQ
     }
     public class PullingConsumerFactory : EasyNetQ.IPullingConsumerFactory
     {
-        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
+        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
     }
@@ -790,7 +790,7 @@ namespace EasyNetQ
                     EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory,
                     EasyNetQ.DI.IServiceResolver container,
                     EasyNetQ.ConnectionConfiguration configuration,
-                    System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors,
+                    EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor,
                     EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy,
                     EasyNetQ.IConventions conventions,
                     EasyNetQ.IPullingConsumerFactory pullingConsumerFactory,
@@ -1413,6 +1413,12 @@ namespace EasyNetQ.Events
 }
 namespace EasyNetQ.Interception
 {
+    public class CompositeProduceConsumerInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    {
+        public CompositeProduceConsumerInterceptor(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+    }
     public class GZipInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
         public GZipInterceptor() { }
@@ -1424,10 +1430,11 @@ namespace EasyNetQ.Interception
         EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message);
         EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message);
     }
-    public static class ProduceConsumeInterceptorExtensions
+    public class NoopProduceConsumeInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
-        public static EasyNetQ.ConsumedMessage OnConsume(this EasyNetQ.Interception.IProduceConsumeInterceptor[] interceptors, in EasyNetQ.ConsumedMessage message) { }
-        public static EasyNetQ.ProducedMessage OnProduce(this EasyNetQ.Interception.IProduceConsumeInterceptor[] interceptors, in EasyNetQ.ProducedMessage message) { }
+        public NoopProduceConsumeInterceptor() { }
+        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
     public class TripleDESInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
@@ -1534,10 +1541,6 @@ namespace EasyNetQ.Internals
     {
         public static System.Collections.Generic.IEnumerable<T> Intersperse<T>(this System.Collections.Generic.IEnumerable<T> items, T separator) { }
         public static System.Collections.Generic.IEnumerable<T> SurroundWith<T>(this System.Collections.Generic.IEnumerable<T> items, T first, T last) { }
-    }
-    public static class ListExtensions
-    {
-        public static System.Collections.Generic.List<T> Reverse<T>(this System.Collections.Generic.List<T> source) { }
     }
     public sealed class ReadOnlyMemoryStream : System.IO.Stream
     {

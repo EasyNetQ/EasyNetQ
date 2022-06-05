@@ -4,7 +4,6 @@ using EasyNetQ.DI;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
 using System;
-using System.Collections.Generic;
 using NSubstitute;
 using Xunit;
 
@@ -16,6 +15,7 @@ public class MessageVersioningExtensionsTests
     public void When_using_EnableMessageVersioning_extension_method_required_services_are_registered()
     {
         var serviceRegister = Substitute.For<IServiceRegister>();
+        serviceRegister.Register(Arg.Any<Type>(), Arg.Any<Type>(), Arg.Any<Lifetime>()).Returns(serviceRegister);
 
         serviceRegister.EnableMessageVersioning();
 
@@ -24,5 +24,4 @@ public class MessageVersioningExtensionsTests
         serviceRegister.Received()
             .Register(typeof(IMessageSerializationStrategy), typeof(VersionedMessageSerializationStrategy));
     }
-
 }

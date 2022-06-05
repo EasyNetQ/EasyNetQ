@@ -29,7 +29,7 @@ public class RabbitAdvancedBus : IAdvancedBus
     private readonly IDisposable[] eventSubscriptions;
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
-    private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
+    private readonly IProduceConsumeInterceptor produceConsumeInterceptor;
     private readonly IPullingConsumerFactory pullingConsumerFactory;
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
     private readonly IConsumeScopeProvider consumeScopeProvider;
@@ -50,7 +50,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         IHandlerCollectionFactory handlerCollectionFactory,
         IServiceResolver container,
         ConnectionConfiguration configuration,
-        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
+        IProduceConsumeInterceptor produceConsumeInterceptor,
         IMessageSerializationStrategy messageSerializationStrategy,
         IConventions conventions,
         IPullingConsumerFactory pullingConsumerFactory,
@@ -64,6 +64,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         Preconditions.CheckNotNull(eventBus, nameof(eventBus));
         Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
         Preconditions.CheckNotNull(container, nameof(container));
+        Preconditions.CheckNotNull(produceConsumeInterceptor, nameof(produceConsumeInterceptor));
         Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
         Preconditions.CheckNotNull(configuration, nameof(configuration));
         Preconditions.CheckNotNull(conventions, nameof(conventions));
@@ -80,7 +81,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.Container = container;
         this.configuration = configuration;
-        this.produceConsumeInterceptors = produceConsumeInterceptors.ToArray();
+        this.produceConsumeInterceptor = produceConsumeInterceptor;
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
@@ -139,7 +140,7 @@ public class RabbitAdvancedBus : IAdvancedBus
                     x.Item3.Arguments,
                     async (body, properties, receivedInfo, cancellationToken) =>
                     {
-                        var rawMessage = produceConsumeInterceptors.OnConsume(
+                        var rawMessage = produceConsumeInterceptor.OnConsume(
                             new ConsumedMessage(receivedInfo, properties, body)
                         );
                         using var scope = consumeScopeProvider.CreateScope();
@@ -158,7 +159,7 @@ public class RabbitAdvancedBus : IAdvancedBus
                         x.Item3.Arguments,
                         async (body, properties, receivedInfo, cancellationToken) =>
                         {
-                            var rawMessage = produceConsumeInterceptors.OnConsume(
+                            var rawMessage = produceConsumeInterceptor.OnConsume(
                                 new ConsumedMessage(receivedInfo, properties, body)
                             );
                             var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
@@ -311,7 +312,7 @@ public class RabbitAdvancedBus : IAdvancedBus
 
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var rawMessage = produceConsumeInterceptors.OnProduce(new ProducedMessage(messageProperties, body));
+        var rawMessage = produceConsumeInterceptor.OnProduce(new ProducedMessage(messageProperties, body));
 
         if (configuration.PublisherConfirms)
         {

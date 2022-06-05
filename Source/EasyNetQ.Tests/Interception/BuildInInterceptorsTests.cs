@@ -41,8 +41,8 @@ public class BuildInInterceptorsTests
         var second = Substitute.For<IProduceConsumeInterceptor>();
         first.OnProduce(sourceMessage).Returns(firstMessage);
         second.OnProduce(firstMessage).Returns(secondMessage);
-
-        Assert.Equal(secondMessage, new[] { first, second }.OnProduce(sourceMessage));
+        var composite = new CompositeProduceConsumerInterceptor(new[] { first, second });
+        Assert.Equal(secondMessage, composite.OnProduce(sourceMessage));
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class BuildInInterceptorsTests
         var second = Substitute.For<IProduceConsumeInterceptor>();
         first.OnConsume(secondMessage).Returns(firstMessage);
         second.OnConsume(sourceMessage).Returns(secondMessage);
-
-        Assert.Equal(firstMessage, new[] { first, second }.OnConsume(sourceMessage));
+        var composite = new CompositeProduceConsumerInterceptor(new[] { first, second });
+        Assert.Equal(firstMessage, composite.OnConsume(sourceMessage));
     }
 }
