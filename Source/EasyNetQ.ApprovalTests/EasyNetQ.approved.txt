@@ -1752,12 +1752,6 @@ namespace EasyNetQ.Persistent
         Producer = 0,
         Consumer = 1,
     }
-    public class PublishConfirmationListener : EasyNetQ.Producer.IPublishConfirmationListener, System.IDisposable
-    {
-        public PublishConfirmationListener(EasyNetQ.IEventBus eventBus) { }
-        public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IModel model) { }
-        public void Dispose() { }
-    }
 }
 namespace EasyNetQ.Producer
 {
@@ -1786,6 +1780,12 @@ namespace EasyNetQ.Producer
     public class ProducerConnection : EasyNetQ.Persistent.PersistentConnection, EasyNetQ.Persistent.IPersistentConnection, EasyNetQ.Producer.IProducerConnection, System.IDisposable
     {
         public ProducerConnection(EasyNetQ.Logging.ILogger<EasyNetQ.Producer.ProducerConnection> logger, EasyNetQ.ConnectionConfiguration configuration, RabbitMQ.Client.IConnectionFactory connectionFactory, EasyNetQ.IEventBus eventBus) { }
+    }
+    public class PublishConfirmationListener : EasyNetQ.Producer.IPublishConfirmationListener, System.IDisposable
+    {
+        public PublishConfirmationListener(EasyNetQ.IEventBus eventBus) { }
+        public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IModel model) { }
+        public void Dispose() { }
     }
     [System.Serializable]
     public class PublishInterruptedException : System.Exception
