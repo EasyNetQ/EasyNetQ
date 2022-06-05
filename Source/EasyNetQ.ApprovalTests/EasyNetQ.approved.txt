@@ -1229,6 +1229,15 @@ namespace EasyNetQ.Consumer
         public EasyNetQ.Consumer.MessageHandler Handler { get; }
         public bool IsExclusive { get; }
     }
+    public class SimpleConsumerErrorStrategy : EasyNetQ.Consumer.IConsumerErrorStrategy, System.IDisposable
+    {
+        public static readonly EasyNetQ.Consumer.SimpleConsumerErrorStrategy Ack;
+        public static readonly EasyNetQ.Consumer.SimpleConsumerErrorStrategy NackWithRequeue;
+        public static readonly EasyNetQ.Consumer.SimpleConsumerErrorStrategy NackWithoutRequeue;
+        public void Dispose() { }
+        public System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerCancelledAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerErrorAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
+    }
 }
 namespace EasyNetQ.DI
 {
