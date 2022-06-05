@@ -8,7 +8,7 @@ namespace EasyNetQ.DI;
 public interface IServiceRegister
 {
     /// <summary>
-    /// Registers(or replaces) the service of type <paramref name="serviceType"/> with the <paramref name="implementationType"/>
+    /// Registers (or replaces if already registered) the service of type <paramref name="serviceType"/> with the <paramref name="implementationType"/>
     /// with the dependency injection provider
     /// </summary>
     /// <param name="serviceType">The type of the service to be registered</param>
