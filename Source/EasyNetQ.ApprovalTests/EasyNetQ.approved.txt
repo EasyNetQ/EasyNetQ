@@ -904,6 +904,9 @@ namespace EasyNetQ
     public static class ServiceRegisterExtensions
     {
         public static EasyNetQ.DI.IServiceRegister EnableAdvancedMessagePolymorphism(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableConsoleLogger(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableDelayedExchangeScheduler(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }

@@ -12,7 +12,7 @@ using var bus = RabbitHutch.CreateBus(
     "host=localhost",
     x => x.EnableConsoleLogger()
         .EnableNewtonsoftJson()
-        .Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithoutRequeue)
+        .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
 );
 
 await bus.Advanced.QueueDeclareAsync(
