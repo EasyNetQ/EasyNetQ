@@ -20,8 +20,10 @@ public static class ServiceRegisterExtensions
     /// <summary>
     /// Registers the default EasyNetQ components if needed services have not yet been registered.
     /// </summary>
-    public static void RegisterDefaultServices(this IServiceRegister serviceRegister,
-        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
+    public static void RegisterDefaultServices(
+        this IServiceRegister serviceRegister,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory
+    )
     {
         Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
 
