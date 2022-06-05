@@ -1,13 +1,14 @@
-using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using NSubstitute;
 using RabbitMQ.Client;
+using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

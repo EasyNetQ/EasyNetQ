@@ -3,14 +3,12 @@ namespace EasyNetQ.DI.Microsoft
     public class ServiceCollectionAdapter : EasyNetQ.DI.IServiceRegister
     {
         public ServiceCollectionAdapter(Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection) { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1) { }
     }
 }
 namespace Microsoft.Extensions.DependencyInjection

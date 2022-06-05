@@ -1,5 +1,6 @@
 using System;
 using EasyNetQ.DI.Microsoft;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -16,7 +17,7 @@ public class MicrosoftDependencyScopeTests
 
         var service = ResolveFromScope(resolver);
 
-        Assert.Equal(shouldBeDisposed, service.Disposed);
+        service.Disposed.Should().Be(shouldBeDisposed);
     }
 
     private static IService ResolveFromScope(IServiceResolver resolver)
@@ -58,6 +59,6 @@ public class MicrosoftDependencyScopeTests
         var service1 = ResolveFromScope(resolver);
         var service2 = ResolveFromScope(resolver);
 
-        Assert.NotSame(service1, service2);
+        service2.Should().NotBe(service1);
     }
 }

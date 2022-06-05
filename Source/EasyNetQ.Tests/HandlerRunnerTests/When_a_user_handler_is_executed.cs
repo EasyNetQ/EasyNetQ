@@ -60,7 +60,7 @@ public class When_a_user_handler_is_executed
     };
 
     private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 42, false, "exchange", "routingKey", "queue");
-    private readonly byte[] messageBody = new byte[0];
+    private readonly byte[] messageBody = Array.Empty<byte>();
 
     private readonly IModel channel;
 

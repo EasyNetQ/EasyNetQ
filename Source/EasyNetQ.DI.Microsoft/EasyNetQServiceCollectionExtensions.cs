@@ -4,7 +4,6 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
 using EasyNetQ.DI.Microsoft;
 
-
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 

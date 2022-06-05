@@ -50,7 +50,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         IHandlerCollectionFactory handlerCollectionFactory,
         IServiceResolver container,
         ConnectionConfiguration configuration,
-        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
+        IProduceConsumeInterceptor produceConsumeInterceptor,
         IMessageSerializationStrategy messageSerializationStrategy,
         IConventions conventions,
         IPullingConsumerFactory pullingConsumerFactory,
@@ -64,9 +64,9 @@ public class RabbitAdvancedBus : IAdvancedBus
         Preconditions.CheckNotNull(eventBus, nameof(eventBus));
         Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
         Preconditions.CheckNotNull(container, nameof(container));
+        Preconditions.CheckNotNull(produceConsumeInterceptor, nameof(produceConsumeInterceptor));
         Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
         Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(produceConsumeInterceptors, nameof(produceConsumeInterceptors));
         Preconditions.CheckNotNull(conventions, nameof(conventions));
         Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
         Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
@@ -81,7 +81,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.Container = container;
         this.configuration = configuration;
-        this.produceConsumeInterceptor = new CompositeInterceptor(produceConsumeInterceptors);
+        this.produceConsumeInterceptor = produceConsumeInterceptor;
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;

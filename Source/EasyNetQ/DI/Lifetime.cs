@@ -1,7 +1,7 @@
 namespace EasyNetQ.DI;
 
 /// <summary>
-/// Represents the lifetime of a container registration
+/// Represents the lifetime of a service within DI container.
 /// </summary>
 public enum Lifetime
 {

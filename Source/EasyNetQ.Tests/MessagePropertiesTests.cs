@@ -110,7 +110,7 @@ public class MessagePropertiesTests
             var threw = false;
             try
             {
-                propertyInfo.SetValue(properties, longInput, new object[0]);
+                propertyInfo.SetValue(properties, longInput, Array.Empty<object>());
             }
             catch (TargetInvocationException exception)
             {

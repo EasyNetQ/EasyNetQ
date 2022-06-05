@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
+using EasyNetQ.LightInject;
 
 namespace EasyNetQ;
 
@@ -144,9 +145,10 @@ public static class RabbitHutch
     /// </returns>
     public static IBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
     {
-        var container = new DefaultServiceContainer();
-        RegisterBus(container, connectionConfigurationFactory, registerServices);
-        return new BusWithCustomDisposer(container.Resolve<IBus>(), container.Dispose);
+        var container = new ServiceContainer(c => c.EnablePropertyInjection = false);
+        var adapter = new LightInjectAdapter(container);
+        RegisterBus(adapter, connectionConfigurationFactory, registerServices);
+        return new BusWithCustomDisposer(container.GetInstance<IBus>(), container.Dispose);
     }
 
     /// <summary>
@@ -168,15 +170,11 @@ public static class RabbitHutch
         Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
         Preconditions.CheckNotNull(registerServices, nameof(registerServices));
 
-        serviceRegister.Register(c =>
-        {
-            var configuration = connectionConfigurationFactory(c);
-            configuration.SetDefaultProperties();
-            return configuration;
-        });
-
-        serviceRegister.RegisterDefaultServices();
+        // first call delegate to register user-supplied services
         registerServices(serviceRegister);
+
+        // then register default services
+        serviceRegister.RegisterDefaultServices(connectionConfigurationFactory);
     }
 
     private sealed class BusWithCustomDisposer : IBus

@@ -1,122 +1,130 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyNetQ.DI.Microsoft;
 
-/// <inheritdoc />
+/// <see cref="IServiceRegister"/> implementation for Microsoft.Extensions.DependencyInjection DI container.
 public class ServiceCollectionAdapter : IServiceRegister
 {
     private readonly IServiceCollection serviceCollection;
 
     /// <summary>
-    ///     Creates an adapter on top of IServiceCollection
+    /// Creates an adapter on top of <see cref="IServiceCollection"/>.
     /// </summary>
     public ServiceCollectionAdapter(IServiceCollection serviceCollection)
     {
         this.serviceCollection = serviceCollection;
 
-        this.serviceCollection.AddSingleton<IServiceResolver, ServiceProviderAdapter>();
+        this.serviceCollection.TryAddSingleton<IServiceResolver, ServiceProviderAdapter>();
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register<TService, TImplementation>(Lifetime lifetime = Lifetime.Singleton) where TService : class where TImplementation : class, TService
+    public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime)
     {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                serviceCollection.AddTransient<TService, TImplementation>();
-                return this;
-            case Lifetime.Singleton:
-                serviceCollection.AddSingleton<TService, TImplementation>();
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
-    }
-
-    /// <inheritdoc />
-    public IServiceRegister Register<TService>(TService instance) where TService : class
-    {
-        serviceCollection.AddSingleton(instance);
+        serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
         return this;
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register<TService>(Func<IServiceResolver, TService> factory, Lifetime lifetime = Lifetime.Singleton) where TService : class
+    public IServiceRegister Register(
+        Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton
+    )
     {
-        switch (lifetime)
-        {
-            case Lifetime.Transient:
-                serviceCollection.AddTransient(x => factory(x.GetService<IServiceResolver>()));
-                return this;
-            case Lifetime.Singleton:
-                serviceCollection.AddSingleton(x => factory(x.GetService<IServiceResolver>()));
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+        serviceCollection.Replace(new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime)));
+        return this;
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register(
-        Type serviceType, Type implementingType, Lifetime lifetime = Lifetime.Singleton
+    public IServiceRegister Register(Type serviceType, object implementationInstance)
+    {
+        serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationInstance));
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IServiceRegister TryRegister(
+        Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton
     )
     {
-        switch (lifetime)
+        serviceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IServiceRegister TryRegister(
+        Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton
+    )
+    {
+        var descriptor = new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime));
+        serviceCollection.TryAdd(descriptor);
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IServiceRegister TryRegister(Type serviceType, object implementationInstance)
+    {
+        serviceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationInstance));
+        return this;
+    }
+
+    private static ServiceLifetime ToLifetime(Lifetime lifetime) =>
+        lifetime switch
         {
-            case Lifetime.Transient:
-                serviceCollection.AddTransient(serviceType, implementingType);
-                return this;
-            case Lifetime.Singleton:
-                serviceCollection.AddSingleton(serviceType, implementingType);
-                return this;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
-        }
+            Lifetime.Singleton => ServiceLifetime.Singleton,
+            Lifetime.Transient => ServiceLifetime.Transient,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime))
+        };
+
+    // Without this code, the type of return value will be object
+    private static Func<IServiceProvider, object> PreserveFuncType(Func<IServiceResolver, object> implementationFactory)
+    {
+        if (implementationFactory == null) throw new ArgumentNullException(nameof(implementationFactory));
+
+        var typeArguments = implementationFactory.GetType().GenericTypeArguments;
+        if (typeArguments.Length != 2) throw new InvalidOperationException("implementationFactory should be of type Func<IServiceResolver, T>");
+
+        var implementationType = typeArguments[1];
+        var implementationFactoryAdapterType = typeof(ImplementationFactoryAdapter<>).MakeGenericType(implementationType);
+        var resolveMethodInfo = implementationFactoryAdapterType.GetMethod("Resolve") ?? throw new MissingMethodException();
+        return (Func<IServiceProvider, object>)Delegate.CreateDelegate(
+            typeof(Func<,>).MakeGenericType(typeof(IServiceProvider), implementationType),
+            Activator.CreateInstance(implementationFactoryAdapterType, implementationFactory),
+            resolveMethodInfo
+        );
     }
 
     private class ServiceProviderAdapter : IServiceResolver
     {
         private readonly IServiceProvider serviceProvider;
 
-        public ServiceProviderAdapter(IServiceProvider serviceProvider)
-        {
-            this.serviceProvider = serviceProvider;
-        }
+        public ServiceProviderAdapter(IServiceProvider serviceProvider) => this.serviceProvider = serviceProvider;
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return serviceProvider.GetService<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => serviceProvider.GetService<TService>();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new MicrosoftServiceResolverScope(serviceProvider);
-        }
+        public IServiceResolverScope CreateScope() => new MicrosoftServiceResolverScope(serviceProvider);
     }
 
     private class MicrosoftServiceResolverScope : IServiceResolverScope
     {
         private readonly IServiceScope serviceScope;
 
-        public MicrosoftServiceResolverScope(IServiceProvider serviceProvider)
-        {
-            serviceScope = serviceProvider.CreateScope();
-        }
+        public MicrosoftServiceResolverScope(IServiceProvider serviceProvider) => serviceScope = serviceProvider.CreateScope();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
-        }
+        public IServiceResolverScope CreateScope() => new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
 
-        public void Dispose()
-        {
-            serviceScope?.Dispose();
-        }
+        public void Dispose() => serviceScope?.Dispose();
 
-        public TService Resolve<TService>() where TService : class
-        {
-            return serviceScope.ServiceProvider.GetService<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => serviceScope.ServiceProvider.GetService<TService>();
+    }
+
+    private class ImplementationFactoryAdapter<T>
+    {
+        private readonly Func<IServiceResolver, object> implementationFactory;
+
+        public ImplementationFactoryAdapter(Func<IServiceResolver, object> implementationFactory) => this.implementationFactory = implementationFactory;
+
+        // ReSharper disable once UnusedMember.Local
+        public T Resolve(IServiceProvider provider) => (T)implementationFactory(provider.GetService<IServiceResolver>());
     }
 }

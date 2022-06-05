@@ -691,7 +691,7 @@ namespace EasyNetQ
     }
     public class PullingConsumer : EasyNetQ.IPullingConsumer<EasyNetQ.PullResult>, System.IDisposable
     {
-        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Persistent.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor interceptor) { }
+        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Persistent.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor) { }
         public System.Threading.Tasks.Task AckAsync(ulong deliveryTag, bool multiple, System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<EasyNetQ.PullResult> PullAsync(System.Threading.CancellationToken cancellationToken = default) { }
@@ -712,7 +712,7 @@ namespace EasyNetQ
     }
     public class PullingConsumerFactory : EasyNetQ.IPullingConsumerFactory
     {
-        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
+        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
     }
@@ -790,7 +790,7 @@ namespace EasyNetQ
                     EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory,
                     EasyNetQ.DI.IServiceResolver container,
                     EasyNetQ.ConnectionConfiguration configuration,
-                    System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors,
+                    EasyNetQ.Interception.IProduceConsumeInterceptor produceConsumeInterceptor,
                     EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy,
                     EasyNetQ.IConventions conventions,
                     EasyNetQ.IPullingConsumerFactory pullingConsumerFactory,
@@ -900,15 +900,12 @@ namespace EasyNetQ
         public static EasyNetQ.DI.IServiceRegister EnableAdvancedMessagePolymorphism(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableConsoleLogger(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableDelayedExchangeScheduler(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.Interception.IInterceptorRegistrator EnableGZipCompression(this EasyNetQ.Interception.IInterceptorRegistrator registrator) { }
-        public static EasyNetQ.DI.IServiceRegister EnableInterception(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Action<EasyNetQ.Interception.IInterceptorRegistrator> configure) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyRpcConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableLegacyTypeNaming(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableMessageVersioning(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableMultiChannelClientCommandDispatcher(this EasyNetQ.DI.IServiceRegister serviceRegister, int channelsCount) { }
-        public static EasyNetQ.Interception.IInterceptorRegistrator EnableTripleDESEncryption(this EasyNetQ.Interception.IInterceptorRegistrator registrator, byte[] key, byte[] iv) { }
-        public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
     }
     public static class SimpleConsumeConfigurationExtensions
     {
@@ -1240,34 +1237,18 @@ namespace EasyNetQ.DI
         public DefaultConsumeScopeProvider(EasyNetQ.DI.IServiceResolver resolver) { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
     }
-    public class DefaultServiceContainer : EasyNetQ.DI.IServiceRegister, System.IDisposable
-    {
-        public DefaultServiceContainer() { }
-        public void Dispose() { }
-        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1) { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
-        public TService Resolve<TService>() { }
-    }
     public interface IConsumeScopeProvider
     {
         EasyNetQ.DI.IServiceResolverScope CreateScope();
     }
     public interface IServiceRegister
     {
-        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementingType, EasyNetQ.DI.Lifetime lifetime = 1);
-        EasyNetQ.DI.IServiceRegister Register<TService>(TService instance)
-            where TService :  class;
-        EasyNetQ.DI.IServiceRegister Register<TService>(System.Func<EasyNetQ.DI.IServiceResolver, TService> factory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class;
-        EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService;
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance);
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1);
+        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1);
+        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance);
+        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1);
+        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1);
     }
     public interface IServiceResolver
     {
@@ -1285,6 +1266,30 @@ namespace EasyNetQ.DI
     {
         public NoopConsumeScopeProvider() { }
         public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
+    }
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, TService implementationInstance)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+        public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TImplementation> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, TService implementationInstance)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class { }
+        public static EasyNetQ.DI.IServiceRegister TryRegister<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TImplementation> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
+            where TService :  class
+            where TImplementation :  class, TService { }
     }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {
@@ -1408,22 +1413,28 @@ namespace EasyNetQ.Events
 }
 namespace EasyNetQ.Interception
 {
+    public class CompositeProduceConsumerInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    {
+        public CompositeProduceConsumerInterceptor(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+    }
     public class GZipInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
         public GZipInterceptor() { }
         public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
         public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
-    public interface IInterceptorRegistrator
-    {
-        void Add(EasyNetQ.Interception.IProduceConsumeInterceptor interceptor);
-        void Add<TInterceptor>()
-            where TInterceptor :  class, EasyNetQ.Interception.IProduceConsumeInterceptor;
-    }
     public interface IProduceConsumeInterceptor
     {
         EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message);
         EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message);
+    }
+    public class NoopProduceConsumeInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    {
+        public NoopProduceConsumeInterceptor() { }
+        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
+        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
     }
     public class TripleDESInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
     {
