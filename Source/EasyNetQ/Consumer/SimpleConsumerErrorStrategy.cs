@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ.Consumer;
 
 /// <summary>
-///     ConsumerErrorStrategy based on AckStrategies
+///     A simple strategy which does nothing, only applies AckStrategies
 /// </summary>
 public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy
 {
