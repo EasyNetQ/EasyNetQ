@@ -131,6 +131,11 @@ namespace EasyNetQ
         public DeadLetterExchangeAndMessageTtlScheduler(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy) { }
         public System.Threading.Tasks.Task FuturePublishAsync<T>(T message, System.TimeSpan delay, System.Action<EasyNetQ.IFuturePublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    public static class DeadLetterStrategy
+    {
+        public const string AtLeastOnce = "at-least-once";
+        public const string AtMostOnce = "at-most-once";
+    }
     public class DefaultCorrelationIdGenerationStrategy : EasyNetQ.ICorrelationIdGenerationStrategy
     {
         public DefaultCorrelationIdGenerationStrategy() { }
@@ -630,7 +635,7 @@ namespace EasyNetQ
     }
     public static class OverflowType
     {
-        public const string Default = "drop-head";
+        public const string DropHead = "drop-head";
         public const string RejectPublish = "reject-publish";
         public const string RejectPublishDlx = "reject-publish-dlx";
     }
@@ -742,6 +747,7 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterExchange(this EasyNetQ.IQueueDeclareConfiguration configuration, EasyNetQ.Topology.Exchange deadLetterExchange) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterRoutingKey(this EasyNetQ.IQueueDeclareConfiguration configuration, string deadLetterRoutingKey) { }
+        public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterStrategy(this EasyNetQ.IQueueDeclareConfiguration configuration, string deadLetterStrategy) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithExpires(this EasyNetQ.IQueueDeclareConfiguration configuration, System.TimeSpan expires) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLength(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLength) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLengthBytes(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLengthBytes) { }
