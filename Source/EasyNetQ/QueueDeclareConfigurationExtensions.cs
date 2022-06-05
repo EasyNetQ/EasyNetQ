@@ -58,7 +58,7 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="overflowType">The overflow type to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithOverflowType(this IQueueDeclareConfiguration configuration, string overflowType = OverflowType.Default)
+    public static IQueueDeclareConfiguration WithOverflowType(this IQueueDeclareConfiguration configuration, string overflowType = OverflowType.DropHead)
     {
         Preconditions.CheckNotNull(configuration, nameof(configuration));
 
@@ -177,4 +177,19 @@ public static class QueueDeclareConfigurationExtensions
 
         return configuration.WithArgument("x-queue-master-locator", queueMasterLocator);
     }
+
+    /// <summary>
+    ///     Sets dead letter strategy.
+    ///     Valid types are at-least-once and at-most-once, see <see cref="DeadLetterStrategy"/>.
+    /// </summary>
+    /// <param name="configuration">The configuration instance</param>
+    /// <param name="deadLetterStrategy">The dead letter strategy to set</param>
+    /// <returns>The same <paramref name="configuration"/></returns>
+    public static IQueueDeclareConfiguration WithDeadLetterStrategy(this IQueueDeclareConfiguration configuration, string deadLetterStrategy)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-dead-letter-strategy", deadLetterStrategy);
+    }
+
 }
