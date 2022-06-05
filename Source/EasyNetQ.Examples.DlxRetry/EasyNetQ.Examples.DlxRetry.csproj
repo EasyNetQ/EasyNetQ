@@ -5,7 +5,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>EasyNetQ.Example.DlxRetry</RootNamespace>
+        <RootNamespace>EasyNetQ.Examples.DlxRetry</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

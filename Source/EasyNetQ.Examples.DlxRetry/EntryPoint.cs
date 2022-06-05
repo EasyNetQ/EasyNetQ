@@ -1,4 +1,4 @@
-﻿using EasyNetQ;
+using EasyNetQ;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 using EasyNetQ.DI;

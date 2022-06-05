@@ -56,7 +56,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Logging.Microsoft"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Logging.Serilog", "EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj", "{8A743708-92DE-4199-B3C9-A52D7F521C8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Example.DlxRetry", "EasyNetQ.Example.DlxRetry\EasyNetQ.Example.DlxRetry.csproj", "{334FC79A-41F7-4506-B887-8FD4ADCC28E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Examples.DlxRetry", "EasyNetQ.Examples.DlxRetry\EasyNetQ.Examples.DlxRetry.csproj", "{334FC79A-41F7-4506-B887-8FD4ADCC28E4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C24EB2CE-59ED-4348-903F-2DF7E868E7BD}"
 EndProject
