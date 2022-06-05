@@ -8,7 +8,7 @@ public static class OverflowType
     /// <summary>
     ///     Default queue overflow mode, the oldest messages will be deleted.
     /// </summary>
-    public const string Default = "drop-head";
+    public const string DropHead = "drop-head";
 
     /// <summary>
     ///     New messages will be rejected.
