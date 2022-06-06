@@ -26,6 +26,10 @@ internal static class ConnectionFactoryFactory
             ConsumerDispatchConcurrency = configuration.PrefetchCount,
             RequestedChannelMax = configuration.RequestedChannelMax
         };
+
+        if (configuration.Hosts.Count > 0)
+            connectionFactory.HostName = configuration.Hosts[0].Host;
+
         return connectionFactory;
     }
 }
