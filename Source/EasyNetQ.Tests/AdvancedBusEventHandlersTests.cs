@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;

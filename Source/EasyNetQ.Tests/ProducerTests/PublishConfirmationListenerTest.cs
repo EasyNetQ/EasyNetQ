@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
-using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client;

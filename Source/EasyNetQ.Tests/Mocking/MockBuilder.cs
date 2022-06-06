@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
-using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client;

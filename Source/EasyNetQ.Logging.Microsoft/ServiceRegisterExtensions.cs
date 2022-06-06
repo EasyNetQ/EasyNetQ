@@ -1,7 +1,6 @@
 using EasyNetQ.DI;
 using EasyNetQ.Logging;
 using EasyNetQ.Logging.Microsoft;
-using MS = Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace EasyNetQ;

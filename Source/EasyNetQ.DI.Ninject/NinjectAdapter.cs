@@ -1,32 +1,29 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Ninject;
 using Ninject.Activation;
 using Ninject.Infrastructure;
-using Ninject.Planning.Bindings;
 
 namespace EasyNetQ.DI.Ninject;
 
 /// <see cref="IServiceRegister"/> implementation for Ninject DI container.
 public class NinjectAdapter : IServiceRegister
 {
-    private readonly IKernel kernel;
-
     /// <summary>
     /// Creates an adapter on top of <see cref="IKernel"/>.
     /// </summary>
     public NinjectAdapter(IKernel kernel)
     {
-        this.kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-        this.kernel.Rebind<IServiceResolver>().ToMethod(x => new NinjectResolver(x.Kernel)).InTransientScope();
+        Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+        Kernel.Rebind<IServiceResolver>().ToMethod(x => new NinjectResolver(x.Kernel)).InTransientScope();
     }
+
+    public IKernel Kernel { get; set; }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton)
     {
-        kernel.Rebind(serviceType).To(implementationType).InScope(ToScope(lifetime));
+        Kernel.Rebind(serviceType).To(implementationType).InScope(ToScope(lifetime));
         return this;
     }
 
@@ -37,14 +34,14 @@ public class NinjectAdapter : IServiceRegister
         if (typeArguments.Length != 2)
             throw new InvalidOperationException("implementationFactory should have 2 generic type arguments");
 
-        kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InScope(ToScope(lifetime));
+        Kernel.Rebind(serviceType).ToMethod(x => implementationFactory(x.Kernel.Get<IServiceResolver>())).InScope(ToScope(lifetime));
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance)
     {
-        kernel.Rebind(serviceType).ToConstant(implementationInstance);
+        Kernel.Rebind(serviceType).ToConstant(implementationInstance);
         return this;
     }
 
@@ -62,7 +59,7 @@ public class NinjectAdapter : IServiceRegister
     public IServiceRegister TryRegister(Type serviceType, object implementationInstance)
         => IsServiceRegistered(serviceType) ? this : Register(serviceType, implementationInstance);
 
-    private bool IsServiceRegistered(Type serviceType) => kernel.GetBindings(serviceType).Any();
+    private bool IsServiceRegistered(Type serviceType) => Kernel.GetBindings(serviceType).Any();
 
     private static Func<IContext, object> ToScope(Lifetime lifetime) =>
         lifetime switch

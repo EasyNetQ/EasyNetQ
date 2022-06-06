@@ -9,21 +9,21 @@ namespace EasyNetQ.DI.Windsor;
 /// <see cref="IServiceRegister"/> implementation for Castle.Windsor DI container.
 public class WindsorAdapter : IServiceRegister
 {
-    private readonly IWindsorContainer container;
-
     /// <summary>
     /// Creates an adapter on top of <see cref="IWindsorContainer"/>.
     /// </summary>
     public WindsorAdapter(IWindsorContainer container)
     {
-        this.container = container ?? throw new ArgumentNullException(nameof(container));
+        Container = container ?? throw new ArgumentNullException(nameof(container));
 
-        ConfigureContainer(container);
+        ConfigureContainer(Container);
 
-        this.container.Register(Component.For<IServiceResolver>()
+        Container.Register(Component.For<IServiceResolver>()
             .UsingFactoryMethod(c => new WindsorResolver(c))
             .LifestyleTransient());
     }
+
+    public IWindsorContainer Container { get; }
 
     /// <summary>
     /// Configures features necessary for collection registrations and overriding registrations.
@@ -36,39 +36,39 @@ public class WindsorAdapter : IServiceRegister
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton)
     {
-        container.RemoveHandler(serviceType);
+        Container.RemoveHandler(serviceType);
         var registration = Component.For(serviceType)
             .Named(serviceType.FullName)
             .ImplementedBy(implementationType)
             .LifeStyle.Is(ToLifestyleType(lifetime))
             .IsDefault();
-        container.Register(registration);
+        Container.Register(registration);
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton)
     {
-        container.RemoveHandler(serviceType);
+        Container.RemoveHandler(serviceType);
         var registration = Component.For(serviceType)
             .Named(serviceType.FullName)
             .UsingFactoryMethod(x => implementationFactory(x.Resolve<IServiceResolver>()))
             .LifeStyle.Is(ToLifestyleType(lifetime))
             .IsDefault();
-        container.Register(registration);
+        Container.Register(registration);
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance)
     {
-        container.RemoveHandler(serviceType);
+        Container.RemoveHandler(serviceType);
         var registration = Component.For(serviceType)
             .Named(serviceType.FullName)
             .Instance(implementationInstance)
             .LifestyleSingleton()
             .IsDefault();
-        container.Register(registration);
+        Container.Register(registration);
         return this;
     }
 
@@ -86,7 +86,7 @@ public class WindsorAdapter : IServiceRegister
     public IServiceRegister TryRegister(Type serviceType, object implementationInstance) =>
         IsServiceRegistered(serviceType) ? this : Register(serviceType, implementationInstance);
 
-    private bool IsServiceRegistered(Type serviceType) => container.Kernel.HasComponent(serviceType);
+    private bool IsServiceRegistered(Type serviceType) => Container.Kernel.HasComponent(serviceType);
 
     private static LifestyleType ToLifestyleType(Lifetime lifetime) =>
         lifetime switch
