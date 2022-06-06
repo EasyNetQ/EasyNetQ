@@ -20,22 +20,22 @@ internal
 #endif
     class LightInjectAdapter : IServiceRegister
 {
-    private readonly IServiceRegistry serviceRegistry;
-
     /// <summary>
     /// Creates an adapter on top of <see cref="IServiceRegistry"/>.
     /// </summary>
     public LightInjectAdapter(IServiceRegistry serviceRegistry)
     {
-        this.serviceRegistry = serviceRegistry ?? throw new ArgumentNullException(nameof(serviceRegistry));
+        ServiceRegistry = serviceRegistry ?? throw new ArgumentNullException(nameof(serviceRegistry));
 
-        serviceRegistry.Register<IServiceResolver>(x => new LightInjectResolver(x), new PerRequestLifeTime());
+        ServiceRegistry.Register<IServiceResolver>(x => new LightInjectResolver(x), new PerRequestLifeTime());
     }
+
+    public IServiceRegistry ServiceRegistry { get; }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton)
     {
-        serviceRegistry.Register(serviceType, implementationType, ToLifetime(lifetime));
+        ServiceRegistry.Register(serviceType, implementationType, ToLifetime(lifetime));
         return this;
     }
 
@@ -48,14 +48,14 @@ internal
             FactoryExpression = (Func<IServiceFactory, object>)(x => implementationFactory((IServiceResolver)x.GetInstance(typeof(IServiceResolver)))),
             Lifetime = ToLifetime(lifetime),
         };
-        serviceRegistry.Register(serviceRegistration);
+        ServiceRegistry.Register(serviceRegistration);
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance)
     {
-        serviceRegistry.RegisterInstance(serviceType, implementationInstance);
+        ServiceRegistry.RegisterInstance(serviceType, implementationInstance);
         return this;
     }
 
@@ -83,7 +83,7 @@ internal
         };
 
     private bool IsServiceRegistered(Type serviceType) =>
-        serviceRegistry.AvailableServices.Any(r => r.ServiceType == serviceType);
+        ServiceRegistry.AvailableServices.Any(r => r.ServiceType == serviceType);
 
     private class LightInjectResolver : IServiceResolver
     {

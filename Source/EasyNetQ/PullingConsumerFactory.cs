@@ -2,8 +2,6 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EasyNetQ;
 

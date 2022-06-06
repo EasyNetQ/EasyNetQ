@@ -7,22 +7,22 @@ namespace EasyNetQ.DI.Microsoft;
 /// <see cref="IServiceRegister"/> implementation for Microsoft.Extensions.DependencyInjection DI container.
 public class ServiceCollectionAdapter : IServiceRegister
 {
-    private readonly IServiceCollection serviceCollection;
-
     /// <summary>
     /// Creates an adapter on top of <see cref="IServiceCollection"/>.
     /// </summary>
     public ServiceCollectionAdapter(IServiceCollection serviceCollection)
     {
-        this.serviceCollection = serviceCollection;
+        ServiceCollection = serviceCollection;
 
-        this.serviceCollection.TryAddSingleton<IServiceResolver, ServiceProviderAdapter>();
+        ServiceCollection.TryAddSingleton<IServiceResolver, ServiceProviderAdapter>();
     }
+
+    public IServiceCollection ServiceCollection { get; }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime)
     {
-        serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
+        ServiceCollection.Replace(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
         return this;
     }
 
@@ -31,14 +31,14 @@ public class ServiceCollectionAdapter : IServiceRegister
         Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton
     )
     {
-        serviceCollection.Replace(new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime)));
+        ServiceCollection.Replace(new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime)));
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, object implementationInstance)
     {
-        serviceCollection.Replace(new ServiceDescriptor(serviceType, implementationInstance));
+        ServiceCollection.Replace(new ServiceDescriptor(serviceType, implementationInstance));
         return this;
     }
 
@@ -47,7 +47,7 @@ public class ServiceCollectionAdapter : IServiceRegister
         Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton
     )
     {
-        serviceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
+        ServiceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationType, ToLifetime(lifetime)));
         return this;
     }
 
@@ -57,14 +57,14 @@ public class ServiceCollectionAdapter : IServiceRegister
     )
     {
         var descriptor = new ServiceDescriptor(serviceType, PreserveFuncType(implementationFactory), ToLifetime(lifetime));
-        serviceCollection.TryAdd(descriptor);
+        ServiceCollection.TryAdd(descriptor);
         return this;
     }
 
     /// <inheritdoc />
     public IServiceRegister TryRegister(Type serviceType, object implementationInstance)
     {
-        serviceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationInstance));
+        ServiceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationInstance));
         return this;
     }
 

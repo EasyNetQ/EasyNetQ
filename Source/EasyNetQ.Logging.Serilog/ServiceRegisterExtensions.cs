@@ -1,7 +1,6 @@
 using EasyNetQ.DI;
 using EasyNetQ.Logging;
 using EasyNetQ.Logging.Serilog;
-using S = Serilog;
 
 // ReSharper disable once CheckNamespace
 namespace EasyNetQ;

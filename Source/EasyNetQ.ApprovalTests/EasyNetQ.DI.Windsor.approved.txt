@@ -18,6 +18,7 @@ namespace EasyNetQ.DI.Windsor
     public class WindsorAdapter : EasyNetQ.DI.IServiceRegister
     {
         public WindsorAdapter(Castle.Windsor.IWindsorContainer container) { }
+        public Castle.Windsor.IWindsorContainer Container { get; }
         protected virtual void ConfigureContainer(Castle.Windsor.IWindsorContainer container) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }

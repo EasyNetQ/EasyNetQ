@@ -9,19 +9,19 @@ namespace EasyNetQ.DI.Autofac;
 /// https://stackoverflow.com/questions/5091101/is-it-possible-to-remove-an-existing-registration-from-autofac-container-builder
 public class AutofacAdapter : IServiceRegister
 {
-    private readonly ContainerBuilder containerBuilder;
-
     /// <summary>
     ///     Creates an adapter on top of ContainerBuilder
     /// </summary>
     public AutofacAdapter(ContainerBuilder containerBuilder)
     {
-        this.containerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
+        ContainerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
 
-        this.containerBuilder.RegisterType<AutofacResolver>()
+        ContainerBuilder.RegisterType<AutofacResolver>()
             .As<IServiceResolver>()
             .InstancePerLifetimeScope();
     }
+
+    public ContainerBuilder ContainerBuilder { get; }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton)
@@ -29,22 +29,22 @@ public class AutofacAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient when serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterGeneric(implementationType)
+                ContainerBuilder.RegisterGeneric(implementationType)
                     .As(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton when serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterGeneric(implementationType)
+                ContainerBuilder.RegisterGeneric(implementationType)
                     .As(serviceType)
                     .SingleInstance();
                 return this;
             case Lifetime.Transient when !serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterType(implementationType)
+                ContainerBuilder.RegisterType(implementationType)
                     .As(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton when !serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterType(implementationType)
+                ContainerBuilder.RegisterType(implementationType)
                     .As(serviceType)
                     .SingleInstance();
 
@@ -60,12 +60,12 @@ public class AutofacAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient:
-                containerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
+                ContainerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
                     .As(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton:
-                containerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
+                ContainerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
                     .As(serviceType)
                     .SingleInstance();
                 return this;
@@ -80,7 +80,7 @@ public class AutofacAdapter : IServiceRegister
         // Autofac has only generic API to register service instance, so there is a bit reflection here
         // containerBuilder.RegisterInstance<TService>(implementationInstance);
         var methodInfo = typeof(RegistrationExtensions).GetMethod("RegisterInstance") ?? throw new MissingMethodException("RegisterInstance is not found");
-        methodInfo.MakeGenericMethod(serviceType).Invoke(null, new[] { containerBuilder, implementationInstance });
+        methodInfo.MakeGenericMethod(serviceType).Invoke(null, new[] { ContainerBuilder, implementationInstance });
         return this;
     }
 
@@ -90,25 +90,25 @@ public class AutofacAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient when serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterGeneric(implementationType)
+                ContainerBuilder.RegisterGeneric(implementationType)
                     .As(serviceType)
                     .IfNotRegistered(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton when serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterGeneric(implementationType)
+                ContainerBuilder.RegisterGeneric(implementationType)
                     .As(serviceType)
                     .IfNotRegistered(serviceType)
                     .SingleInstance();
                 return this;
             case Lifetime.Transient when !serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterType(implementationType)
+                ContainerBuilder.RegisterType(implementationType)
                     .As(serviceType)
                     .IfNotRegistered(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton when !serviceType.IsGenericTypeDefinition:
-                containerBuilder.RegisterType(implementationType)
+                ContainerBuilder.RegisterType(implementationType)
                     .As(serviceType)
                     .IfNotRegistered(serviceType)
                     .SingleInstance();
@@ -124,13 +124,13 @@ public class AutofacAdapter : IServiceRegister
         switch (lifetime)
         {
             case Lifetime.Transient:
-                containerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
+                ContainerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
                     .As(serviceType)
                     .IfNotRegistered(serviceType)
                     .InstancePerDependency();
                 return this;
             case Lifetime.Singleton:
-                containerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
+                ContainerBuilder.Register(c => implementationFactory(c.Resolve<IServiceResolver>()))
                     .As(serviceType)
                     .IfNotRegistered(serviceType)
                     .SingleInstance();
@@ -147,7 +147,7 @@ public class AutofacAdapter : IServiceRegister
         // containerBuilder.RegisterInstance<TService>(implementationInstance).IfNotRegistered();
         var registerInstanceMethodInfo = typeof(RegistrationExtensions).GetMethod("RegisterInstance") ?? throw new MissingMethodException("RegisterInstance is not found");
         var ifNotRegisteredMethodInfo = typeof(RegistrationExtensions).GetMethod("IfNotRegistered") ?? throw new MissingMethodException("IfNotRegistered is not found");
-        var registration = registerInstanceMethodInfo.MakeGenericMethod(serviceType).Invoke(null, new[] { containerBuilder, implementationInstance });
+        var registration = registerInstanceMethodInfo.MakeGenericMethod(serviceType).Invoke(null, new[] { ContainerBuilder, implementationInstance });
         var genericTypeArguments = registration.GetType().GenericTypeArguments;
         ifNotRegisteredMethodInfo.MakeGenericMethod(genericTypeArguments).Invoke(null, new[] { registration, serviceType });
         return this;
