@@ -747,7 +747,7 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterExchange(this EasyNetQ.IQueueDeclareConfiguration configuration, EasyNetQ.Topology.Exchange deadLetterExchange) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterRoutingKey(this EasyNetQ.IQueueDeclareConfiguration configuration, string deadLetterRoutingKey) { }
-        public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterStrategy(this EasyNetQ.IQueueDeclareConfiguration configuration, string deadLetterStrategy) { }
+        public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterStrategy(this EasyNetQ.IQueueDeclareConfiguration configuration, string deadLetterStrategy = "at-most-once") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithExpires(this EasyNetQ.IQueueDeclareConfiguration configuration, System.TimeSpan expires) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLength(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLength) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLengthBytes(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLengthBytes) { }

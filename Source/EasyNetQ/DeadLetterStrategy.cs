@@ -1,7 +1,7 @@
 namespace EasyNetQ;
 
 /// <summary>
-/// Represent dead letter strategies of a queue
+/// Represents dead letter strategies of a queue
 /// </summary>
 public static class DeadLetterStrategy
 {
