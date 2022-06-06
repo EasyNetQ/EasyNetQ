@@ -1,7 +1,5 @@
 using EasyNetQ;
-using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
-using EasyNetQ.DI;
 
 // https://www.rabbitmq.com/quorum-queues.html#dead-lettering
 
