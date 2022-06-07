@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
@@ -55,7 +56,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
             Substitute.For<IHandlerCollectionFactory>(),
             Substitute.For<IServiceResolver>(),
             Substitute.For<ConnectionConfiguration>(),
-            Substitute.For<IProduceConsumeInterceptor>(),
+            Substitute.For<IEnumerable<IProduceConsumeInterceptor>>(),
             Substitute.For<IMessageSerializationStrategy>(),
             Substitute.For<IConventions>(),
             Substitute.For<IPullingConsumerFactory>(),
