@@ -156,9 +156,7 @@ public static class ServiceRegisterExtensions
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
     {
-        return serviceRegister
-            .Register(typeof(ILogger), typeof(ConsoleLogger))
-            .Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
+        return serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
     }
 
     /// <summary>

@@ -17,8 +17,6 @@ public static class ServiceRegisterExtensions
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableMicrosoftLogging(this IServiceRegister serviceRegister)
     {
-        return serviceRegister
-            .Register(typeof(ILogger), typeof(MicrosoftLoggerAdapter))
-            .Register(typeof(ILogger<>), typeof(MicrosoftLoggerAdapter<>));
+        return serviceRegister.Register(typeof(ILogger<>), typeof(MicrosoftLoggerAdapter<>));
     }
 }

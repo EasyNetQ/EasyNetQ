@@ -16,8 +16,6 @@ public static class ServiceRegisterExtensions
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableSerilogLogging(this IServiceRegister serviceRegister)
     {
-        return serviceRegister
-            .Register(typeof(ILogger), typeof(SerilogLoggerAdapter))
-            .Register(typeof(ILogger<>), typeof(SerilogLoggerAdapter<>));
+        return serviceRegister.Register(typeof(ILogger<>), typeof(SerilogLoggerAdapter<>));
     }
 }
