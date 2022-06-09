@@ -964,7 +964,7 @@ public static class AdvancedBusExtensions
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 
-        bus.QueueUnbindAsync(destinationExchange, sourceExchange, routingKey, arguments, cancellationToken)
+        bus.ExchangeUnbindAsync(destinationExchange, sourceExchange, routingKey, arguments, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
