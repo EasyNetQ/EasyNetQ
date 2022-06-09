@@ -15,7 +15,7 @@ namespace EasyNetQ;
 public interface IAdvancedBus : IDisposable
 {
     /// <summary>
-    /// True if a connection of the given type is established. 
+    /// True if a connection of the given type is established.
     /// </summary>
     bool IsConnected { get; }
 
@@ -234,18 +234,26 @@ public interface IAdvancedBus : IDisposable
     );
 
     /// <summary>
-    /// Delete a binding
+    /// Unbind a queue from an exchange.
     /// </summary>
-    /// <param name="binding">the binding to delete</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    Task UnbindAsync(Binding<Queue> binding, CancellationToken cancellationToken = default);
+    Task QueueUnbindAsync(
+        string queue,
+        string exchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
-    /// Delete a binding
+    /// Unbind an exchange from an exchange.
     /// </summary>
-    /// <param name="binding">the binding to delete</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    Task UnbindAsync(Binding<Exchange> binding, CancellationToken cancellationToken = default);
+    Task ExchangeUnbindAsync(
+        string destinationExchange,
+        string sourceExchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Gets stats for the given queue

@@ -734,7 +734,8 @@ public static class AdvancedBusExtensions
     /// <param name="routingKey">The routing key</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>A binding</returns>
-    public static Binding<Exchange> Bind(this IAdvancedBus bus, Exchange source, Exchange destination, string routingKey, CancellationToken cancellationToken = default)
+    public static Binding<Exchange> Bind(this IAdvancedBus bus, Exchange source, Exchange destination, string routingKey,
+        CancellationToken cancellationToken = default)
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 
@@ -910,6 +911,70 @@ public static class AdvancedBusExtensions
     /// <param name="bus">The bus instance</param>
     /// <param name="binding">the binding to delete</param>
     /// <param name="cancellationToken">The cancellation token</param>
+    public static Task UnbindAsync(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
+    {
+        Preconditions.CheckNotNull(bus, nameof(bus));
+
+        return bus.QueueUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
+    }
+
+    /// <summary>
+    /// Delete a binding
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="binding">the binding to delete</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    public static Task UnbindAsync(this IAdvancedBus bus, Binding<Exchange> binding, CancellationToken cancellationToken = default)
+    {
+        Preconditions.CheckNotNull(bus, nameof(bus));
+
+        return bus.ExchangeUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
+    }
+
+    /// <summary>
+    /// Unbind a queue from an exchange.
+    /// </summary>
+    public static void QueueUnbindAsync(
+        this IAdvancedBus bus,
+        string queue,
+        string exchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken = default
+    )
+    {
+        Preconditions.CheckNotNull(bus, nameof(bus));
+
+        bus.QueueUnbindAsync(queue, exchange, routingKey, arguments, cancellationToken)
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    /// <summary>
+    /// Unbind an exchange from an exchange.
+    /// </summary>
+    public static void ExchangeUnbindAsync(
+        this IAdvancedBus bus,
+        string destinationExchange,
+        string sourceExchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken = default
+    )
+    {
+        Preconditions.CheckNotNull(bus, nameof(bus));
+
+        bus.QueueUnbindAsync(destinationExchange, sourceExchange, routingKey, arguments, cancellationToken)
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    /// <summary>
+    /// Delete a binding
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="binding">the binding to delete</param>
+    /// <param name="cancellationToken">The cancellation token</param>
     public static void Unbind(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
@@ -942,7 +1007,8 @@ public static class AdvancedBusExtensions
     /// <param name="ifUnused">Only delete if unused</param>
     /// <param name="ifEmpty">Only delete if empty</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static void QueueDelete(this IAdvancedBus bus, string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
+    public static void QueueDelete(this IAdvancedBus bus, string name, bool ifUnused = false, bool ifEmpty = false,
+        CancellationToken cancellationToken = default)
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 

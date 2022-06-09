@@ -622,14 +622,18 @@ public class RabbitAdvancedBus : IAdvancedBus
     }
 
     /// <inheritdoc />
-    public virtual async Task UnbindAsync(Binding<Queue> binding, CancellationToken cancellationToken)
+    public virtual async Task QueueUnbindAsync(
+        string queue,
+        string exchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
+    )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await channelDispatcher.InvokeAsync(
-            x => x.QueueUnbind(
-                binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
-            ),
+            x => x.QueueUnbind(queue, exchange, routingKey, arguments),
             ChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -637,23 +641,28 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Unbound queue {queue} from exchange {exchange} with routing key {routingKey}",
-                binding.Destination.Name,
-                binding.Source.Name,
-                binding.RoutingKey
+                "Unbound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                queue,
+                exchange,
+                routingKey,
+                arguments?.Stringify()
             );
         }
     }
 
     /// <inheritdoc />
-    public virtual async Task UnbindAsync(Binding<Exchange> binding, CancellationToken cancellationToken)
+    public virtual async Task ExchangeUnbindAsync(
+        string destinationExchange,
+        string sourceExchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
+    )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await channelDispatcher.InvokeAsync(
-            x => x.ExchangeUnbind(
-                binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments
-            ),
+            x => x.ExchangeUnbind(destinationExchange, sourceExchange, routingKey, arguments),
             ChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -661,10 +670,11 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey}",
-                binding.Destination.Name,
-                binding.Source.Name,
-                binding.RoutingKey
+                $"Unbound destination exchange {{destinationExchange}} from source exchange {{sourceExchange}} with routing key {{routingKey}} and arguments {arguments}",
+                destinationExchange,
+                sourceExchange,
+                routingKey,
+                arguments?.Stringify()
             );
         }
     }
