@@ -10,7 +10,7 @@ namespace EasyNetQ;
 ///     queue leader replicas and thus handling most of the load, queue leaders should be
 ///     reasonably evenly distributed across cluster nodes.
 /// </summary>
-public static class QueueMasterLocatorType
+public static class QueueMasterLocator
 {
     /// <summary>
     ///     Pick the node hosting the minimum number of leaders

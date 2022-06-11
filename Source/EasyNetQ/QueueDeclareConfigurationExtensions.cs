@@ -166,12 +166,12 @@ public static class QueueDeclareConfigurationExtensions
 
     /// <summary>
     ///     Sets queue master locator.
-    ///     Valid types are min-masters, client-local and random, see <see cref="QueueMasterLocatorType"/>.
+    ///     Valid types are min-masters, client-local and random, see <see cref="QueueMasterLocator"/>.
     /// </summary>
     /// <param name="configuration">The configuration instance</param>
     /// <param name="queueMasterLocator">The queue master locator to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithQueueMasterLocator(this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocatorType.MinMasters)
+    public static IQueueDeclareConfiguration WithQueueMasterLocator(this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocator.MinMasters)
     {
         Preconditions.CheckNotNull(configuration, nameof(configuration));
 
