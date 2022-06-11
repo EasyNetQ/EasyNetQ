@@ -767,7 +767,7 @@ namespace EasyNetQ
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueType(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueType = "classic") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithSingleActiveConsumer(this EasyNetQ.IQueueDeclareConfiguration configuration) { }
     }
-    public static class QueueMasterLocatorType
+    public static class QueueMasterLocator
     {
         public const string ClientLocal = "client-local";
         public const string MinMasters = "min-masters";
