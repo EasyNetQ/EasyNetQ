@@ -37,7 +37,7 @@ public readonly struct SerializedMessage : IDisposable
     public SerializedMessage(MessageProperties properties, IMemoryOwner<byte> body)
     {
         Properties = properties;
-        Body = body.Memory;
+        Body = body?.Memory ?? ReadOnlyMemory<byte>.Empty;
         owner = body;
     }
 
