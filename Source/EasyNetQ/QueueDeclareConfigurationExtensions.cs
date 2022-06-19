@@ -156,12 +156,15 @@ public static class QueueDeclareConfigurationExtensions
     ///     over to another registered consumer in case the active one is cancelled or dies.
     /// </summary>
     /// <param name="configuration">The configuration instance</param>
+    /// <param name="singleActiveConsumer">True if a queue has a single active consumer</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithSingleActiveConsumer(this IQueueDeclareConfiguration configuration)
+    public static IQueueDeclareConfiguration WithSingleActiveConsumer(
+        this IQueueDeclareConfiguration configuration, bool singleActiveConsumer = true
+    )
     {
         Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-        return configuration.WithArgument("x-single-active-consumer", true);
+        return configuration.WithArgument("x-single-active-consumer", singleActiveConsumer);
     }
 
     /// <summary>
@@ -171,7 +174,9 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="queueMasterLocator">The queue master locator to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithQueueMasterLocator(this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocator.MinMasters)
+    public static IQueueDeclareConfiguration WithQueueMasterLocator(
+        this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocator.MinMasters
+    )
     {
         Preconditions.CheckNotNull(configuration, nameof(configuration));
 
@@ -185,7 +190,9 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="deadLetterStrategy">The dead letter strategy to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithDeadLetterStrategy(this IQueueDeclareConfiguration configuration, string deadLetterStrategy = DeadLetterStrategy.AtMostOnce)
+    public static IQueueDeclareConfiguration WithDeadLetterStrategy(
+        this IQueueDeclareConfiguration configuration, string deadLetterStrategy = DeadLetterStrategy.AtMostOnce
+    )
     {
         Preconditions.CheckNotNull(configuration, nameof(configuration));
 
