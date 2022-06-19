@@ -604,10 +604,6 @@ namespace EasyNetQ
         public EasyNetQ.MessageProperties Properties { get; }
         public object GetBody() { }
     }
-    public static class MoveMessagesExtensions
-    {
-        public static System.Threading.Tasks.Task MoveMessagesAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue source, EasyNetQ.Topology.Queue destination, System.Threading.CancellationToken cancellationToken) { }
-    }
     public static class NonGenericPubSubExtensions
     {
         public static void Publish(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, System.Threading.CancellationToken cancellationToken = default) { }
