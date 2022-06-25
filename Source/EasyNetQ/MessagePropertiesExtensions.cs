@@ -74,7 +74,7 @@ internal static class MessagePropertiesExtensions
         if (source.AppIdPresent) basicProperties.AppId = source.AppId;
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
-        if (source.Headers?.Count > 0)
+        if (source.HeadersPresent)
             basicProperties.Headers = new Dictionary<string, object>(source.Headers);
     }
 }
