@@ -158,7 +158,8 @@ public interface IAdvancedBus : IDisposable
         string name,
         bool ifUnused = false,
         bool ifEmpty = false,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Purges a queue
