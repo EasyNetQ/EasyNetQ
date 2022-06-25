@@ -3,7 +3,6 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
-using EasyNetQ.Interception;
 using EasyNetQ.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;

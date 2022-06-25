@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
@@ -6,6 +7,7 @@ using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer;
 
@@ -98,7 +100,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
 
             if (!autoAck)
             {
-                var ackResult = ackStrategy(Model, deliveryTag);
+                var ackResult = Ack(ackStrategy, messageReceivedInfo);
                 eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
             }
         }
@@ -120,5 +122,39 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         cts.Dispose();
         onTheFlyMessages.Dispose();
         eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
+    }
+
+    private AckResult Ack(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo)
+    {
+        try
+        {
+            return ackStrategy(Model, receivedInfo.DeliveryTag);
+        }
+        catch (AlreadyClosedException alreadyClosedException)
+        {
+            logger.Info(
+                alreadyClosedException,
+                "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
+                receivedInfo
+            );
+        }
+        catch (IOException ioException)
+        {
+            logger.Info(
+                ioException,
+                "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
+                receivedInfo
+            );
+        }
+        catch (Exception exception)
+        {
+            logger.Error(
+                exception,
+                "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
+                receivedInfo
+            );
+        }
+
+        return AckResult.Exception;
     }
 }
