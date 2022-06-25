@@ -53,7 +53,7 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
-    ) where TChannelAction : IPersistentChannelAction<TResult>
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         // TODO createChannelFactory could be called multiple time, fix it
         var channel = channelPerOptions.GetOrAdd(options, createChannelFactory);

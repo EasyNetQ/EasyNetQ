@@ -45,10 +45,8 @@ public class PersistentChannel : IPersistentChannel
     /// <inheritdoc />
     public async Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
-    ) where TChannelAction : IPersistentChannelAction<TResult>
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        Preconditions.CheckNotNull(channelAction, nameof(channelAction));
-
         if (disposed)
             throw new ObjectDisposedException(nameof(PersistentChannel));
 

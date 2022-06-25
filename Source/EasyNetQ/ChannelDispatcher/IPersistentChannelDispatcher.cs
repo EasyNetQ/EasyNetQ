@@ -23,5 +23,5 @@ public interface IPersistentChannelDispatcher : IDisposable
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
-    ) where TChannelAction : IPersistentChannelAction<TResult>;
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>;
 }

@@ -67,7 +67,7 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
-    ) where TChannelAction : IPersistentChannelAction<TResult>
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);
         var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
