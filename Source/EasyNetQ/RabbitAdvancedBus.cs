@@ -308,7 +308,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     {
         Preconditions.CheckShortString(routingKey, nameof(routingKey));
         Preconditions.CheckNotNull(messageProperties, nameof(messageProperties));
-        Preconditions.CheckNotNull(body, nameof(body));
 
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
