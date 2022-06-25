@@ -1,3 +1,4 @@
+using System;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.ChannelDispatcher;
@@ -5,7 +6,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 /// A dispatch options of channel
 /// </summary>
-public readonly struct PersistentChannelDispatchOptions
+public class PersistentChannelDispatchOptions
 {
     /// <summary>
     ///     Options for topology operations on producer side
@@ -60,4 +61,28 @@ public readonly struct PersistentChannelDispatchOptions
     ///     True if publisher confirms are enabled
     /// </summary>
     public bool PublisherConfirms { get; }
+
+    protected bool Equals(PersistentChannelDispatchOptions other)
+    {
+        return string.Equals(Name, other.Name, StringComparison.InvariantCulture) && ConnectionType == other.ConnectionType && PublisherConfirms == other.PublisherConfirms;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((PersistentChannelDispatchOptions)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = StringComparer.InvariantCulture.GetHashCode(Name);
+            hashCode = (hashCode * 397) ^ (int)ConnectionType;
+            hashCode = (hashCode * 397) ^ PublisherConfirms.GetHashCode();
+            return hashCode;
+        }
+    }
 }
