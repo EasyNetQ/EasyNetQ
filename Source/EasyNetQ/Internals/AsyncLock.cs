@@ -39,7 +39,7 @@ public sealed class AsyncLock : IDisposable
         var acquireAsync = semaphore.WaitAsync(cancellationToken);
         return acquireAsync.Status == TaskStatus.RanToCompletion
             ? releaserTask
-            : WaitForAcquire(acquireAsync);
+            : WaitForAcquireAsync(acquireAsync);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public sealed class AsyncLock : IDisposable
     public void Dispose() => semaphore.Dispose();
 
 
-    private async Task<IDisposable> WaitForAcquire(Task acquireAsync)
+    private async Task<IDisposable> WaitForAcquireAsync(Task acquireAsync)
     {
         await acquireAsync.ConfigureAwait(false);
         return releaser;
