@@ -113,7 +113,7 @@ public interface IAdvancedBus : IDisposable
         Exchange exchange,
         string routingKey,
         bool mandatory,
-        MessageProperties messageProperties,
+        MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
     );

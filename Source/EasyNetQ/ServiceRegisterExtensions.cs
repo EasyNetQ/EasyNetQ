@@ -53,7 +53,7 @@ public static class ServiceRegisterExtensions
             .TryRegister<IInternalConsumerFactory, InternalConsumerFactory>()
             .TryRegister<IConsumerFactory, ConsumerFactory>()
             .TryRegister(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
-            .TryRegister<IChannelDispatcher, SingleChannelDispatcher>()
+            .TryRegister<IPersistentChannelDispatcher, SinglePersistentChannelDispatcher>()
             .TryRegister<IProducerConnection, ProducerConnection>()
             .TryRegister<IConsumerConnection, ConsumerConnection>()
             .TryRegister<IPersistentChannelFactory, PersistentChannelFactory>()
@@ -78,8 +78,8 @@ public static class ServiceRegisterExtensions
         this IServiceRegister serviceRegister, int channelsCount
     )
     {
-        return serviceRegister.Register<IChannelDispatcher>(
-            x => new MultiChannelDispatcher(
+        return serviceRegister.Register<IPersistentChannelDispatcher>(
+            x => new MultiPersistentChannelDispatcher(
                 channelsCount,
                 x.Resolve<IProducerConnection>(),
                 x.Resolve<IConsumerConnection>(),

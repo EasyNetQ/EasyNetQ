@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
@@ -16,20 +17,21 @@ internal static class PersistentChannelExtensions
             .GetResult();
     }
 
-
     public static Task InvokeChannelActionAsync(
         this IPersistentChannel source, Action<IModel> channelAction, CancellationToken cancellationToken = default
     )
     {
-        return source.InvokeChannelActionAsync<NoContentStruct>(model =>
-        {
-            channelAction(model);
-            return default;
-        }, cancellationToken);
+        return source.InvokeChannelActionAsync<NoResult, ActionBasedPersistentChannelAction>(
+            new ActionBasedPersistentChannelAction(channelAction), cancellationToken
+        );
     }
 
-
-    private readonly struct NoContentStruct
+    public static Task<TResult> InvokeChannelActionAsync<TResult>(
+        this IPersistentChannel source, Func<IModel, TResult> channelAction, CancellationToken cancellationToken = default
+    )
     {
+        return source.InvokeChannelActionAsync<TResult, FuncBasedPersistentChannelAction<TResult>>(
+            new FuncBasedPersistentChannelAction<TResult>(channelAction), cancellationToken
+        );
     }
 }
