@@ -22,22 +22,18 @@ public static class TaskHelpers
     {
         return (x, c) =>
         {
-            var tcs = new TaskCompletionSource<T2>();
             try
             {
-                var result = func(x, c);
-                tcs.SetResult(result);
+                return Task.FromResult(func(x, c));
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException oce)
             {
-                tcs.SetCanceled();
+                return Task.FromCanceled<T2>(oce.CancellationToken);
             }
             catch (Exception exception)
             {
-                tcs.SetException(exception);
+                return Task.FromException<T2>(exception);
             }
-
-            return tcs.Task;
         };
     }
 
@@ -53,22 +49,19 @@ public static class TaskHelpers
     {
         return (x, y, z, c) =>
         {
-            var tcs = new TaskCompletionSource<object>();
             try
             {
                 action(x, y, z, c);
-                tcs.SetResult(null);
+                return Task.CompletedTask;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException oce)
             {
-                tcs.SetCanceled();
+                return Task.FromCanceled(oce.CancellationToken);
             }
             catch (Exception exception)
             {
-                tcs.SetException(exception);
+                return Task.FromException(exception);
             }
-
-            return tcs.Task;
         };
     }
 
@@ -82,22 +75,19 @@ public static class TaskHelpers
     {
         return (x, y, c) =>
         {
-            var tcs = new TaskCompletionSource<object>();
             try
             {
                 action(x, y, c);
-                tcs.SetResult(null);
+                return Task.CompletedTask;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException oce)
             {
-                tcs.SetCanceled();
+                return Task.FromCanceled(oce.CancellationToken);
             }
             catch (Exception exception)
             {
-                tcs.SetException(exception);
+                return Task.FromException(exception);
             }
-
-            return tcs.Task;
         };
     }
 
@@ -111,22 +101,19 @@ public static class TaskHelpers
     {
         return (x, c) =>
         {
-            var tcs = new TaskCompletionSource<object>();
             try
             {
                 action(x, c);
-                tcs.SetResult(null);
+                return Task.CompletedTask;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException oce)
             {
-                tcs.SetCanceled();
+                return Task.FromCanceled(oce.CancellationToken);
             }
             catch (Exception exception)
             {
-                tcs.SetException(exception);
+                return Task.FromException(exception);
             }
-
-            return tcs.Task;
         };
     }
 
