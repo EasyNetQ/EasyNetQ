@@ -1491,12 +1491,17 @@ namespace EasyNetQ.Internals
         public void Increment() { }
         public void Wait() { }
     }
-    public sealed class AsyncLock : System.IDisposable
+    public readonly struct AsyncLock : System.IDisposable
     {
         public AsyncLock() { }
-        public System.IDisposable Acquire(System.Threading.CancellationToken cancellationToken = default) { }
-        public System.Threading.Tasks.Task<System.IDisposable> AcquireAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        public EasyNetQ.Internals.AsyncLock.Releaser Acquire(System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task<EasyNetQ.Internals.AsyncLock.Releaser> AcquireAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
+        public readonly struct Releaser : System.IDisposable
+        {
+            public Releaser(System.Threading.SemaphoreSlim semaphore) { }
+            public void Dispose() { }
+        }
     }
     public sealed class AsyncQueue<T> : System.IDisposable
     {

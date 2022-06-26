@@ -10,11 +10,11 @@ namespace EasyNetQ.Internals;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new EasyNetQ release.
 /// </summary>
-public sealed class AsyncLock : IDisposable
+public readonly struct AsyncLock : IDisposable
 {
     private readonly SemaphoreSlim semaphore;
-    private readonly IDisposable releaser;
-    private readonly Task<IDisposable> releaserTask;
+    private readonly Releaser releaser;
+    private readonly Task<Releaser> releaserTask;
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -34,7 +34,7 @@ public sealed class AsyncLock : IDisposable
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Releaser, which should be disposed to release a lock</returns>
-    public Task<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
+    public Task<Releaser> AcquireAsync(CancellationToken cancellationToken = default)
     {
         var acquireAsync = semaphore.WaitAsync(cancellationToken);
         return acquireAsync.Status == TaskStatus.RanToCompletion
@@ -47,13 +47,13 @@ public sealed class AsyncLock : IDisposable
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Releaser, which should be disposed to release a lock</returns>
-    public IDisposable Acquire(CancellationToken cancellationToken = default)
+    public Releaser Acquire(CancellationToken cancellationToken = default)
     {
         semaphore.Wait(cancellationToken);
         return releaser;
     }
 
-    private sealed class Releaser : IDisposable
+    public readonly struct Releaser : IDisposable
     {
         private readonly SemaphoreSlim semaphore;
 
@@ -65,8 +65,7 @@ public sealed class AsyncLock : IDisposable
     /// <inheritdoc />
     public void Dispose() => semaphore.Dispose();
 
-
-    private async Task<IDisposable> WaitForAcquireAsync(Task acquireAsync)
+    private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
     {
         await acquireAsync.ConfigureAwait(false);
         return releaser;
