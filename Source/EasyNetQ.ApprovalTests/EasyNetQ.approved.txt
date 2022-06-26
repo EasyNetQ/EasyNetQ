@@ -1025,16 +1025,16 @@ namespace EasyNetQ.ChannelDispatcher
     public interface IPersistentChannelDispatcher : System.IDisposable
     {
         System.Threading.Tasks.Task<TResult> InvokeAsync<TResult, TChannelAction>(TChannelAction channelAction, EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions options, System.Threading.CancellationToken cancellationToken = default)
-            where TChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<TResult>;
+            where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult>;
     }
     public sealed class MultiPersistentChannelDispatcher : EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher, System.IDisposable
     {
         public MultiPersistentChannelDispatcher(int channelsCount, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<TResult> InvokeAsync<TResult, TChannelAction>(TChannelAction channelAction, EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions options, System.Threading.CancellationToken cancellationToken = default)
-            where TChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
+            where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
     }
-    public readonly struct PersistentChannelDispatchOptions
+    public class PersistentChannelDispatchOptions
     {
         public static readonly EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions ConsumerTopology;
         public static readonly EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions ProducerPublish;
@@ -1043,13 +1043,16 @@ namespace EasyNetQ.ChannelDispatcher
         public EasyNetQ.Persistent.PersistentConnectionType ConnectionType { get; }
         public string Name { get; }
         public bool PublisherConfirms { get; }
+        protected bool Equals(EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions other) { }
+        public override bool Equals(object obj) { }
+        public override int GetHashCode() { }
     }
     public sealed class SinglePersistentChannelDispatcher : EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher, System.IDisposable
     {
         public SinglePersistentChannelDispatcher(EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<TResult> InvokeAsync<TResult, TChannelAction>(TChannelAction channelAction, EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions options, System.Threading.CancellationToken cancellationToken = default)
-            where TChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
+            where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
     }
 }
 namespace EasyNetQ.ConnectionString
@@ -1751,7 +1754,7 @@ namespace EasyNetQ.Persistent
     public interface IPersistentChannel : System.IDisposable
     {
         System.Threading.Tasks.Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(TChannelAction channelAction, System.Threading.CancellationToken cancellationToken = default)
-            where TChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<TResult>;
+            where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult>;
     }
     public interface IPersistentChannelAction<out TResult>
     {
@@ -1772,7 +1775,7 @@ namespace EasyNetQ.Persistent
         public PersistentChannel(in EasyNetQ.Persistent.PersistentChannelOptions options, EasyNetQ.Persistent.IPersistentConnection connection, EasyNetQ.IEventBus eventBus) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(TChannelAction channelAction, System.Threading.CancellationToken cancellationToken = default)
-            where TChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
+            where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
     }
     public class PersistentChannelFactory : EasyNetQ.Persistent.IPersistentChannelFactory
     {
