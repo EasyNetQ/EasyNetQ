@@ -4,7 +4,7 @@ public static class Helper
 {
     public static MessageReceivedInfo CreateMessageReceivedInfo()
     {
-        return new MessageReceivedInfo(
+        return new(
             "consumer_tag",
             0,
             false,
