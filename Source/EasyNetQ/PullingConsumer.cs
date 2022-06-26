@@ -5,6 +5,7 @@ using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
+using RabbitMQ.Client;
 
 namespace EasyNetQ;
 
@@ -338,8 +339,8 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     {
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        var basicGetResult = await channel.InvokeChannelActionAsync(
-            x => x.BasicGet(queue.Name, options.AutoAck), cts.Token
+        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult, BasicGet>(
+            new BasicGet(queue, options.AutoAck), cts.Token
         ).ConfigureAwait(false);
 
         if (basicGetResult == null)
@@ -375,8 +376,8 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        await channel.InvokeChannelActionAsync(
-            x => x.BasicAck(deliveryTag, multiple), cts.Token
+        await channel.InvokeChannelActionAsync<NoResult, BasicAck>(
+            new BasicAck(deliveryTag, multiple), cts.Token
         ).ConfigureAwait(false);
     }
 
@@ -390,8 +391,8 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        await channel.InvokeChannelActionAsync(
-            x => x.BasicNack(deliveryTag, multiple, requeue), cts.Token
+        await channel.InvokeChannelActionAsync<NoResult, BasicNack>(
+            new BasicNack(deliveryTag, multiple, requeue), cts.Token
         ).ConfigureAwait(false);
     }
 
@@ -399,6 +400,58 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     public void Dispose()
     {
         channel.Dispose();
+    }
+
+    private readonly struct BasicGet : IPersistentChannelAction<BasicGetResult>
+    {
+        private readonly Queue queue;
+        private readonly bool autoAck;
+
+        public BasicGet(in Queue queue, bool autoAck)
+        {
+            this.queue = queue;
+            this.autoAck = autoAck;
+        }
+
+        public BasicGetResult Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
+    }
+
+    private readonly struct BasicAck : IPersistentChannelAction<NoResult>
+    {
+        private readonly ulong deliveryTag;
+        private readonly bool multiple;
+
+        public BasicAck(ulong deliveryTag, bool multiple)
+        {
+            this.deliveryTag = deliveryTag;
+            this.multiple = multiple;
+        }
+
+        public NoResult Invoke(IModel model)
+        {
+            model.BasicAck(deliveryTag, multiple);
+            return NoResult.Instance;
+        }
+    }
+
+    private readonly struct BasicNack : IPersistentChannelAction<NoResult>
+    {
+        private readonly ulong deliveryTag;
+        private readonly bool multiple;
+        private readonly bool requeue;
+
+        public BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        {
+            this.deliveryTag = deliveryTag;
+            this.multiple = multiple;
+            this.requeue = requeue;
+        }
+
+        public NoResult Invoke(IModel model)
+        {
+            model.BasicNack(deliveryTag, multiple, requeue);
+            return NoResult.Instance;
+        }
     }
 }
 
