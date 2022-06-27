@@ -5,8 +5,14 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
 
+/// <summary>
+/// An abstract action to run on top of the channel
+/// </summary>
 public interface IPersistentChannelAction<out TResult>
 {
+    /// <summary>
+    /// Runs an abstract action
+    /// </summary>
     TResult Invoke(IModel model);
 }
 
