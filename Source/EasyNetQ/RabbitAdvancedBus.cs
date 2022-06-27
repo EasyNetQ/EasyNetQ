@@ -319,8 +319,8 @@ public class RabbitAdvancedBus : IAdvancedBus
         {
             while (true)
             {
-                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, PublishWithConfirms>(
-                    new PublishWithConfirms(confirmationListener, exchange, routingKey, mandatory, rawMessage),
+                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, BasicPublishWithConfirmsAction>(
+                    new BasicPublishWithConfirmsAction(confirmationListener, exchange, routingKey, mandatory, rawMessage),
                     PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
                     cts.Token
                 ).ConfigureAwait(false);
@@ -337,8 +337,8 @@ public class RabbitAdvancedBus : IAdvancedBus
         }
         else
         {
-            await persistentChannelDispatcher.InvokeAsync<NoResult, PublishWithoutConfirms>(
-                new PublishWithoutConfirms(exchange, routingKey, mandatory, rawMessage),
+            await persistentChannelDispatcher.InvokeAsync<NoResult, BasicPublishAction>(
+                new BasicPublishAction(exchange, routingKey, mandatory, rawMessage),
                 PersistentChannelDispatchOptions.ProducerPublish,
                 cts.Token
             ).ConfigureAwait(false);
@@ -708,14 +708,14 @@ public class RabbitAdvancedBus : IAdvancedBus
         MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
     }
 
-    private readonly struct PublishWithoutConfirms : IPersistentChannelAction<NoResult>
+    private readonly struct BasicPublishAction : IPersistentChannelAction<NoResult>
     {
         private readonly Exchange exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
         private readonly ProducedMessage message;
 
-        public PublishWithoutConfirms(in Exchange exchange, string routingKey, bool mandatory, in ProducedMessage message)
+        public BasicPublishAction(in Exchange exchange, string routingKey, bool mandatory, in ProducedMessage message)
         {
             this.exchange = exchange;
             this.routingKey = routingKey;
@@ -732,7 +732,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         }
     }
 
-    private readonly struct PublishWithConfirms : IPersistentChannelAction<IPublishPendingConfirmation>
+    private readonly struct BasicPublishWithConfirmsAction : IPersistentChannelAction<IPublishPendingConfirmation>
     {
         private readonly IPublishConfirmationListener confirmationListener;
         private readonly Exchange exchange;
@@ -740,7 +740,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         private readonly bool mandatory;
         private readonly ProducedMessage message;
 
-        public PublishWithConfirms(
+        public BasicPublishWithConfirmsAction(
             IPublishConfirmationListener confirmationListener,
             in Exchange exchange,
             string routingKey,
