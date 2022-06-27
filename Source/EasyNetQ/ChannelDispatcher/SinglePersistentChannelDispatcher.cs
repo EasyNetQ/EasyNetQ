@@ -13,21 +13,25 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Invokes client commands using single channel
 /// </summary>
-public sealed class SingleChannelDispatcher : IChannelDispatcher
+public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher
 {
-    private readonly ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel> channelPerOptions;
-    private readonly Func<ChannelDispatchOptions, IPersistentChannel> createChannelFactory;
+    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions;
+    private readonly Func<PersistentChannelDispatchOptions, IPersistentChannel> createChannelFactory;
 
     /// <summary>
     /// Creates a dispatcher
     /// </summary>
-    public SingleChannelDispatcher(IProducerConnection producerConnection, IConsumerConnection consumerConnection, IPersistentChannelFactory channelFactory)
+    public SinglePersistentChannelDispatcher(
+        IProducerConnection producerConnection,
+        IConsumerConnection consumerConnection,
+        IPersistentChannelFactory channelFactory
+    )
     {
         Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
         Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
         Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
 
-        channelPerOptions = new ConcurrentDictionary<ChannelDispatchOptions, IPersistentChannel>();
+        channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
         createChannelFactory = o =>
         {
             var options = new PersistentChannelOptions(o.PublisherConfirms);
@@ -45,15 +49,15 @@ public sealed class SingleChannelDispatcher : IChannelDispatcher
     }
 
     /// <inheritdoc />
-    public Task<T> InvokeAsync<T>(
-        Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken
-    )
+    public Task<TResult> InvokeAsync<TResult, TChannelAction>(
+        TChannelAction channelAction,
+        PersistentChannelDispatchOptions options,
+        CancellationToken cancellationToken = default
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        Preconditions.CheckNotNull(channelAction, nameof(channelAction));
-
         // TODO createChannelFactory could be called multiple time, fix it
-        var channel = channelPerOptions.GetOrAdd(channelOptions, createChannelFactory);
-        return channel.InvokeChannelActionAsync(channelAction, cancellationToken);
+        var channel = channelPerOptions.GetOrAdd(options, createChannelFactory);
+        return channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken);
     }
 
     /// <inheritdoc />

@@ -106,14 +106,14 @@ public interface IAdvancedBus : IDisposable
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="messageProperties">The message properties</param>
+    /// <param name="properties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
         Exchange exchange,
         string routingKey,
         bool mandatory,
-        MessageProperties messageProperties,
+        MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
     );
@@ -158,7 +158,8 @@ public interface IAdvancedBus : IDisposable
         string name,
         bool ifUnused = false,
         bool ifEmpty = false,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Purges a queue

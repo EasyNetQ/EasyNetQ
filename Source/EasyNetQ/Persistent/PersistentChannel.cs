@@ -43,12 +43,10 @@ public class PersistentChannel : IPersistentChannel
     }
 
     /// <inheritdoc />
-    public async Task<T> InvokeChannelActionAsync<T>(
-        Func<IModel, T> channelAction, CancellationToken cancellationToken
-    )
+    public async Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+        TChannelAction channelAction, CancellationToken cancellationToken = default
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        Preconditions.CheckNotNull(channelAction, nameof(channelAction));
-
         if (disposed)
             throw new ObjectDisposedException(nameof(PersistentChannel));
 
@@ -64,7 +62,7 @@ public class PersistentChannel : IPersistentChannel
             try
             {
                 var channel = initializedChannel ??= CreateChannel();
-                return channelAction(channel);
+                return channelAction.Invoke(channel);
             }
             catch (Exception exception)
             {

@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
 public class When_an_action_is_invoked_using_multi_channel : IDisposable
 {
-    private readonly IChannelDispatcher dispatcher;
+    private readonly IPersistentChannelDispatcher dispatcher;
     private readonly IPersistentChannelFactory channelFactory;
     private readonly int actionResult;
     private readonly IProducerConnection producerConnection;
@@ -29,8 +29,8 @@ public class When_an_action_is_invoked_using_multi_channel : IDisposable
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
         channel.InvokeChannelActionAsync(action).Returns(42);
 
-        dispatcher = new MultiChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
-        actionResult = dispatcher.InvokeAsync(action, ChannelDispatchOptions.ProducerTopology)
+        dispatcher = new MultiPersistentChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
+        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology)
             .GetAwaiter()
             .GetResult();
     }

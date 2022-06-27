@@ -50,7 +50,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
             Substitute.For<IProducerConnection>(),
             Substitute.For<IConsumerConnection>(),
             Substitute.For<IConsumerFactory>(),
-            Substitute.For<IChannelDispatcher>(),
+            Substitute.For<IPersistentChannelDispatcher>(),
             Substitute.For<IPublishConfirmationListener>(),
             eventBus,
             Substitute.For<IHandlerCollectionFactory>(),
