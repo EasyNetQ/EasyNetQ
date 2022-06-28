@@ -8,9 +8,9 @@ using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
 
-namespace EasyNetQ.Tests.PersistentConsumerTests;
+namespace EasyNetQ.Tests.ConsumerTests;
 
-public class When_the_connection_is_broken : Given_a_PersistentConsumer
+public class When_the_connection_is_broken : Given_a_сonsumer
 {
     public When_the_connection_is_broken()
     {

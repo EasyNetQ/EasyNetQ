@@ -3,9 +3,9 @@
 using NSubstitute;
 using Xunit;
 
-namespace EasyNetQ.Tests.PersistentConsumerTests;
+namespace EasyNetQ.Tests.ConsumerTests;
 
-public class When_disposed : Given_a_PersistentConsumer
+public class When_disposed : Given_a_сonsumer
 {
     public When_disposed()
     {

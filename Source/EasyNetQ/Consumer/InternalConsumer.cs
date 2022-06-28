@@ -20,19 +20,25 @@ public readonly struct InternalConsumerStatus
     /// <summary>
     ///     Creates InternalConsumerStatus
     /// </summary>
-    public InternalConsumerStatus(IReadOnlyCollection<Queue> succeed, IReadOnlyCollection<Queue> failed)
+    public InternalConsumerStatus(IReadOnlyCollection<Queue> started, IReadOnlyCollection<Queue> active, IReadOnlyCollection<Queue> failed)
     {
-        Succeed = succeed;
+        Started = started;
+        Active = active;
         Failed = failed;
     }
 
     /// <summary>
-    ///     Queues which for which consume is succeed
+    ///     Queues with active consumers
     /// </summary>
-    public IReadOnlyCollection<Queue> Succeed { get; }
+    public IReadOnlyCollection<Queue> Active { get; }
 
     /// <summary>
-    ///     Queues which for which consume is failed
+    ///     Queues with newly started consumers
+    /// </summary>
+    public IReadOnlyCollection<Queue> Started { get; }
+
+    /// <summary>
+    ///     Queues with failed consumers
     /// </summary>
     public IReadOnlyCollection<Queue> Failed { get; }
 }
@@ -137,6 +143,7 @@ public class InternalConsumer : IInternalConsumer
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 consumer.Dispose();
             }
+
             consumers.Clear();
 
             model.Dispose();
@@ -153,10 +160,11 @@ public class InternalConsumer : IInternalConsumer
             catch (Exception exception)
             {
                 logger.Error(exception, "Failed to create model");
-                return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>());
+                return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
 
+        var startedQueues = new HashSet<Queue>();
         var activeQueues = new HashSet<Queue>();
         var failedQueues = new HashSet<Queue>();
 
@@ -165,14 +173,20 @@ public class InternalConsumer : IInternalConsumer
             var queue = kvp.Key;
             var perQueueConfiguration = kvp.Value;
 
+            if (
+                consumers.TryGetValue(queue.Name, out var alreadyStartedConsumer)
+                && (!queue.IsExclusive || alreadyStartedConsumer.IsRunning)
+            )
+            {
+                activeQueues.Add(queue);
+                continue;
+            }
+
             if (queue.IsExclusive && !firstStart)
             {
                 failedQueues.Add(queue);
                 continue;
             }
-
-            if (consumers.ContainsKey(queue.Name))
-                continue;
 
             try
             {
@@ -204,6 +218,7 @@ public class InternalConsumer : IInternalConsumer
                     configuration
                 );
 
+                startedQueues.Add(queue);
                 activeQueues.Add(queue);
             }
             catch (Exception exception)
@@ -219,7 +234,7 @@ public class InternalConsumer : IInternalConsumer
             }
         }
 
-        return new InternalConsumerStatus(activeQueues, failedQueues);
+        return new InternalConsumerStatus(startedQueues, activeQueues, failedQueues);
     }
 
     /// <inheritdoc />
@@ -242,6 +257,7 @@ public class InternalConsumer : IInternalConsumer
                 {
                 }
             }
+
             consumer.Dispose();
         }
 
@@ -273,6 +289,7 @@ public class InternalConsumer : IInternalConsumer
                 {
                 }
             }
+
             consumer.Dispose();
         }
 

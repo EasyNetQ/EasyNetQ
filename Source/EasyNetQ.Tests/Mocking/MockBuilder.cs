@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Producer;
 using NSubstitute;
@@ -99,6 +100,7 @@ public class MockBuilder : IDisposable
     public IEventBus EventBus => ServiceProvider.Resolve<IEventBus>();
 
     public IProducerConnection ProducerConnection => ServiceProvider.Resolve<IProducerConnection>();
+    public IConsumerConnection ConsumerConnection => ServiceProvider.Resolve<IConsumerConnection>();
 
     public List<string> ConsumerQueueNames => consumerQueueNames;
 

@@ -1,8 +1,6 @@
 using EasyNetQ;
 using EasyNetQ.Topology;
 
-// https://www.rabbitmq.com/quorum-queues.html#dead-lettering
-
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
@@ -10,6 +8,7 @@ using var bus = RabbitHutch.CreateBus(
     "host=localhost;publisherConfirms=True",
     x => x.EnableNewtonsoftJson()
         .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
+        .EnableConsoleLogger()
 );
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
@@ -23,12 +22,23 @@ using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => { });
 
 while (!cts.IsCancellationRequested)
 {
-    await bus.Advanced.PublishAsync(
-        Exchange.Default,
-        "Events",
-        true,
-        new MessageProperties(),
-        ReadOnlyMemory<byte>.Empty,
-        cts.Token
-    );
+    try
+    {
+        await bus.Advanced.PublishAsync(
+            Exchange.Default,
+            "Events",
+            true,
+            new MessageProperties(),
+            ReadOnlyMemory<byte>.Empty,
+            cts.Token
+        );
+    }
+    catch (OperationCanceledException) when (cts.IsCancellationRequested)
+    {
+        throw;
+    }
+    catch (Exception)
+    {
+        await Task.Delay(5000, cts.Token);
+    }
 }
