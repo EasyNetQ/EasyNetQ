@@ -162,7 +162,7 @@ public class Consumer : IConsumer
             consumer.Cancelled += InternalConsumerOnCancelled;
 
             var status = consumer.StartConsuming();
-            foreach (var queue in status.Succeed)
+            foreach (var queue in status.Started)
                 eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
             foreach (var queue in status.Failed)
                 eventBus.Publish(new StartConsumingFailedEvent(this, queue));
@@ -208,7 +208,8 @@ public class Consumer : IConsumer
         if (consumerToRestart == null) return;
 
         var status = consumerToRestart.StartConsuming(false);
-        foreach (var queue in status.Succeed)
+
+        foreach (var queue in status.Started)
             eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
         foreach (var queue in status.Failed)
             eventBus.Publish(new StartConsumingFailedEvent(this, queue));
@@ -223,12 +224,18 @@ public class Consumer : IConsumer
         if (consumerToRestart == null) return;
 
         var status = consumerToRestart.StartConsuming(false);
+
+        foreach (var queue in status.Started)
+            eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
+        foreach (var queue in status.Failed)
+            eventBus.Publish(new StartConsumingFailedEvent(this, queue));
+
         if (ContainsOnlyFailedExclusiveQueues(status))
             Dispose();
     }
 
     private static bool ContainsOnlyFailedExclusiveQueues(InternalConsumerStatus status)
     {
-        return status.Succeed.Count == 0 && status.Failed.Count > 0 && status.Failed.All(x => x.IsExclusive);
+        return status.Active.Count == 0 && status.Failed.Count > 0 && status.Failed.All(x => x.IsExclusive);
     }
 }

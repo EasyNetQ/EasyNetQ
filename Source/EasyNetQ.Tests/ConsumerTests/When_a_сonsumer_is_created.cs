@@ -4,11 +4,11 @@ using EasyNetQ.Consumer;
 using NSubstitute;
 using Xunit;
 
-namespace EasyNetQ.Tests.PersistentConsumerTests;
+namespace EasyNetQ.Tests.ConsumerTests;
 
-public class When_a_Persistent_consumer_starts_consuming : Given_a_PersistentConsumer
+public class WhenAСonsumerStartsConsuming : Given_a_сonsumer
 {
-    public When_a_Persistent_consumer_starts_consuming()
+    public WhenAСonsumerStartsConsuming()
     {
         consumer.StartConsuming();
     }

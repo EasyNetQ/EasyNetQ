@@ -1234,9 +1234,10 @@ namespace EasyNetQ.Consumer
     }
     public readonly struct InternalConsumerStatus
     {
-        public InternalConsumerStatus(System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> succeed, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> failed) { }
+        public InternalConsumerStatus(System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> started, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> active, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> failed) { }
+        public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Active { get; }
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Failed { get; }
-        public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Succeed { get; }
+        public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Started { get; }
     }
     public delegate System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> MessageHandler(System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
     public class PerQueueConsumerConfiguration

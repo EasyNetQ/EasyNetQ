@@ -1,16 +1,16 @@
 // ReSharper disable InconsistentNaming
 
-using EasyNetQ.Consumer;
-using EasyNetQ.Topology;
-using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EasyNetQ.Consumer;
 using EasyNetQ.Logging;
+using EasyNetQ.Topology;
+using NSubstitute;
 
-namespace EasyNetQ.Tests.PersistentConsumerTests;
+namespace EasyNetQ.Tests.ConsumerTests;
 
-public abstract class Given_a_PersistentConsumer
+public abstract class Given_a_сonsumer
 {
     private const string queueName = "my_queue";
 
@@ -19,7 +19,7 @@ public abstract class Given_a_PersistentConsumer
     protected readonly IInternalConsumerFactory internalConsumerFactory;
     protected readonly List<IInternalConsumer> internalConsumers;
 
-    protected Given_a_PersistentConsumer()
+    protected Given_a_сonsumer()
     {
         eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
         internalConsumers = new List<IInternalConsumer>();
@@ -32,7 +32,7 @@ public abstract class Given_a_PersistentConsumer
             var internalConsumer = Substitute.For<IInternalConsumer>();
             internalConsumers.Add(internalConsumer);
             internalConsumer.StartConsuming(Arg.Any<bool>())
-                .Returns(new InternalConsumerStatus(new[] { queue }, Array.Empty<Queue>()));
+                .Returns(new InternalConsumerStatus(new[] { queue }, new[] { queue }, Array.Empty<Queue>()));
             return internalConsumer;
         });
         consumer = new Consumer.Consumer(
