@@ -165,7 +165,7 @@ namespace EasyNetQ
         protected readonly EasyNetQ.IConventions conventions;
         protected readonly EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy;
         protected readonly EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        public DefaultRpc(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IEventBus eventBus, EasyNetQ.IConventions conventions, EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy) { }
+        public DefaultRpc(EasyNetQ.Logging.ILogger<EasyNetQ.DefaultRpc> logger, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IEventBus eventBus, EasyNetQ.IConventions conventions, EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy) { }
         protected void DeRegisterResponseActions(string correlationId) { }
         public void Dispose() { }
         protected void RegisterResponseActions<TResponse>(string correlationId, System.Threading.Tasks.TaskCompletionSource<TResponse> tcs) { }
