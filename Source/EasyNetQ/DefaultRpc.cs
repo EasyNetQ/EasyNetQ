@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -20,6 +21,7 @@ public class DefaultRpc : IRpc
     protected const string IsFaultedKey = "IsFaulted";
     protected const string ExceptionMessageKey = "ExceptionMessage";
     protected readonly IAdvancedBus advancedBus;
+    private readonly ILogger<DefaultRpc> logger;
     private readonly ConnectionConfiguration configuration;
     protected readonly IConventions conventions;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
@@ -36,6 +38,7 @@ public class DefaultRpc : IRpc
     private readonly ITypeNameSerializer typeNameSerializer;
 
     public DefaultRpc(
+        ILogger<DefaultRpc> logger,
         ConnectionConfiguration configuration,
         IAdvancedBus advancedBus,
         IEventBus eventBus,
@@ -46,6 +49,7 @@ public class DefaultRpc : IRpc
         ICorrelationIdGenerationStrategy correlationIdGenerationStrategy
     )
     {
+        Preconditions.CheckNotNull(logger, nameof(logger));
         Preconditions.CheckNotNull(configuration, nameof(configuration));
         Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
         Preconditions.CheckNotNull(eventBus, nameof(eventBus));
@@ -55,6 +59,7 @@ public class DefaultRpc : IRpc
         Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
         Preconditions.CheckNotNull(correlationIdGenerationStrategy, nameof(correlationIdGenerationStrategy));
 
+        this.logger = logger;
         this.configuration = configuration;
         this.advancedBus = advancedBus;
         this.conventions = conventions;
@@ -197,40 +202,41 @@ public class DefaultRpc : IRpc
         if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
             return responseSubscription.QueueName;
 
-        using (await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false))
+        logger.Debug("Subscribing for {requestType}/{responseType}", requestType, responseType);
+
+        using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
+
+        if (responseSubscriptions.TryGetValue(rpcKey, out responseSubscription))
+            return responseSubscription.QueueName;
+
+        var queue = await advancedBus.QueueDeclareAsync(
+            conventions.RpcReturnQueueNamingConvention(responseType),
+            c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
+            cancellationToken
+        ).ConfigureAwait(false);
+
+        var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
+        if (exchangeName != Exchange.Default.Name)
         {
-            if (responseSubscriptions.TryGetValue(rpcKey, out responseSubscription))
-                return responseSubscription.QueueName;
-
-            var queue = await advancedBus.QueueDeclareAsync(
-                conventions.RpcReturnQueueNamingConvention(responseType),
-                c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
-                cancellationToken
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
+                exchangeName, ExchangeType.Direct, cancellationToken
             ).ConfigureAwait(false);
-
-            var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
-            if (exchangeName != Exchange.Default.Name)
-            {
-                var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
-                    exchangeName,
-                    ExchangeType.Direct,
-                    cancellationToken
-                ).ConfigureAwait(false);
-                await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
-            }
-
-            var subscription = advancedBus.Consume<TResponse>(
-                queue,
-                (message, _) =>
-                {
-                    if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
-                        responseAction.OnSuccess(message);
-                }
-            );
-
-            responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
-            return queue.Name;
+            await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
         }
+
+        var subscription = advancedBus.Consume<TResponse>(
+            queue,
+            (message, _) =>
+            {
+                if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
+                    responseAction.OnSuccess(message);
+            }
+        );
+        responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
+
+        logger.Debug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
+
+        return queue.Name;
     }
 
     protected virtual async Task RequestPublishAsync<TRequest>(

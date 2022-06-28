@@ -165,14 +165,17 @@ public class InternalConsumer : IInternalConsumer
             var queue = kvp.Key;
             var perQueueConfiguration = kvp.Value;
 
+            if (
+                consumers.TryGetValue(queue.Name, out var alreadyStartedConsumer)
+                && (!queue.IsExclusive || alreadyStartedConsumer.IsRunning)
+            )
+                continue;
+
             if (queue.IsExclusive && !firstStart)
             {
                 failedQueues.Add(queue);
                 continue;
             }
-
-            if (consumers.ContainsKey(queue.Name))
-                continue;
 
             try
             {
