@@ -42,7 +42,7 @@ public class When_request_and_respond_with_default_options : IDisposable
         }
     }
 
-    [Fact(Skip = "Broken test")]
+    [Fact]
     public async Task Should_receive_response()
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
