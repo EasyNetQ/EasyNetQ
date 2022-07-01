@@ -561,7 +561,7 @@ namespace EasyNetQ
             else if (binding.Bindable is IExchange destination)
             {
                 await clientCommandDispatcher.InvokeAsync(
-                    x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, null),
+                    x => x.ExchangeUnbind(destination.Name, binding.Exchange.Name, binding.RoutingKey, binding.Arguments),
                     cts.Token
                 ).ConfigureAwait(false);
 
