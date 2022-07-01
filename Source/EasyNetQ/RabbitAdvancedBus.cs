@@ -544,7 +544,7 @@ namespace EasyNetQ
             if (binding.Bindable is IQueue queue)
             {
                 await clientCommandDispatcher.InvokeAsync(
-                    x => x.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, null),
+                    x => x.QueueUnbind(queue.Name, binding.Exchange.Name, binding.RoutingKey, binding.Arguments),
                     cts.Token
                 ).ConfigureAwait(false);
 
